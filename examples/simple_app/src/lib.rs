@@ -8,7 +8,7 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub struct Client {
-    _dom_updater: DomUpdater,
+    dom_updater: DomUpdater,
 }
 
 /// Build using
@@ -34,8 +34,8 @@ impl Client {
         );
         sauron::log("hello from here!");
         let body = sauron::body();
-        let _dom_updater = DomUpdater::new_append_to_mount(html, &body);
-        Client { _dom_updater }
+        let dom_updater = DomUpdater::new_append_to_mount(html, &body);
+        Client { dom_updater }
     }
 }
 
