@@ -9,7 +9,6 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-#sauron_vdom = { path = "../../crates/sauron_vdom" }
 sauron = { path = "../../" }
 wasm-bindgen = "0.2.40"
 
