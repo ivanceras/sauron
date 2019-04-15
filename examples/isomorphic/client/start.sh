@@ -1,5 +1,3 @@
-#!/bin/bash
-
 set -v
 
 if ! type wasm-pack > /dev/null; then
@@ -14,4 +12,4 @@ fi
 
 wasm-pack build --target no-modules
 
-basic-http-server ./ -a 0.0.0.0:5000
+basic-http-server ./ -a 0.0.0.0:4004

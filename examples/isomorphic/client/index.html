@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/static/app.css"/>
+    <title>Rust Web App</title>
+</head>
+<body style='margin: 0; padding: 0; width: 100%; height: 100%;'>
+  <div id="isomorphic-rust-web-app" style='width: 100%; height: 100%;'>
+      #HTML_INSERTED_HERE_BY_SERVER#
+  </div>
+
+  <script src='./pkg/isomorphic.js'></script>
+  <script>
+    window.wasm_bindgen('pkg/isomorphic_bg.wasm').then(main)
+
+    let client
+    let updateScheduled = false
+
+    window.GlobalJS = function () {}
+    window.GlobalJS.prototype.update = function () {
+      if (!updateScheduled) {
+        requestAnimationFrame(() => {
+          client.render()
+          updateScheduled = false
+        })
+      }
+      updateScheduled = true
+    }
+
+    window.global_js = new GlobalJS()
+    function main () {
+      const { Client } = window.wasm_bindgen
+      client = new Client(window.initialState)
+    }
+  </script>
+  <script>
+      window.initialState = '#INITIAL_STATE_JSON#'
+  </script>
+</body>
+</html>
