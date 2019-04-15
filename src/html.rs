@@ -1,6 +1,6 @@
 use crate::Node;
-use std::convert::AsRef;
 use sauron_vdom::builder::*;
+use std::convert::AsRef;
 
 pub use sauron_vdom::builder::{attr, on, text};
 #[macro_use]

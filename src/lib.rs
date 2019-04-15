@@ -10,9 +10,9 @@ pub mod svg;
 mod util;
 
 pub use dom::DomUpdater;
-pub use util::*;
 pub use sauron_vdom::builder::Attribute;
 pub use sauron_vdom::Event;
+pub use util::*;
 
 pub type Node = sauron_vdom::Node<&'static str>;
 pub type Element = sauron_vdom::Element<&'static str>;

@@ -1,6 +1,6 @@
-use std::ops::Deref;
 use sauron_vdom::Callback;
 use sauron_vdom::{self, diff};
+use std::ops::Deref;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::{self, Element, EventTarget, Node, Text};
@@ -129,13 +129,15 @@ impl<T> CreatedNode<T> {
                                     ));
                                 }
                             } else if let Some(key_event) = key_event {
-                                callback_clone.emit(sauron_vdom::Event::KeyEvent(sauron_vdom::KeyEvent {
-                                    key: key_event.key(),
-                                    ctrl: key_event.ctrl_key(),
-                                    alt: key_event.alt_key(),
-                                    shift: key_event.shift_key(),
-                                    meta: key_event.meta_key(),
-                                }));
+                                callback_clone.emit(sauron_vdom::Event::KeyEvent(
+                                    sauron_vdom::KeyEvent {
+                                        key: key_event.key(),
+                                        ctrl: key_event.ctrl_key(),
+                                        alt: key_event.alt_key(),
+                                        shift: key_event.shift_key(),
+                                        meta: key_event.meta_key(),
+                                    },
+                                ));
                             } else if let Some(target) = target {
                                 let input: Option<&HtmlInputElement> = target.dyn_ref();
                                 let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
