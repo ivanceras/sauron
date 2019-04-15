@@ -12,7 +12,7 @@ edition = "2018"
 
 [dependencies]
 js-sys = "0.3"
-sauron_vdom = { path = "crates/sauron_vdom" }
+sauron_vdom = "0.1.0"
 maplit = "1.0.1"
 wasm-bindgen = "0.2.40"
 lazy_static = "1.0"
