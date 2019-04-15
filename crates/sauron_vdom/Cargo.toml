@@ -1,7 +1,14 @@
 [package]
 name = "sauron_vdom"
-edition = "2018"
 version = "0.1.0"
+authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
+license = "MIT"
+description = "A library for diffing virtual dom tree and generate patches"
+repository = "https://github.com/ivanceras/sauron"
+documentation = "https://docs.rs/sauron_vdom"
+readme = "README.md"
+keywords = ["virtual", "dom", "node", "element"]
+edition = "2018"
 
 [dependencies]
 maplit = "1.0.1"

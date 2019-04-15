@@ -1,4 +1,5 @@
 ## Sauron 
 
-A ui library for building client side web apps
+An html library for building client side web apps.
+They are everywhere
 
