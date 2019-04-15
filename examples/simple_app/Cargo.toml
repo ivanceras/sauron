@@ -1,0 +1,36 @@
+
+[package]
+name = "simple_app"
+version = "0.1.0"
+authors = ["lee"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+vdom = { path = "../../../sauron_vdom" }
+browser = { path = "../../../sauron" }
+wasm-bindgen = "0.2.40"
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+    "Comment",
+    "console",
+    "Document",
+    "Element",
+    "Event",
+    "HtmlElement",
+    "EventTarget",
+    "KeyboardEvent",
+    "HtmlCollection",
+    "HtmlInputElement",
+    "HtmlTextAreaElement",
+    "MouseEvent",
+    "Node",
+    "NodeList",
+    "Text",
+    "CharacterData",
+    "Window",
+]

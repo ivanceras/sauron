@@ -1,0 +1,7 @@
+[package]
+name = "sauron_vdom"
+edition = "2018"
+version = "0.1.0"
+
+[dependencies]
+maplit = "1.0.1"
