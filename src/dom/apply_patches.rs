@@ -17,7 +17,7 @@ use web_sys::{Element, Event, Node, Text};
 /// This is usually used after diffing two virtual nodes.
 pub fn patch<N: Into<Node>>(
     root_node: N,
-    old_closures: &ActiveClosure,
+    old_closures: &mut ActiveClosure,
     patches: &[Patch],
 ) -> Result<ActiveClosure, JsValue> {
     let root_node: Node = root_node.into();
@@ -48,7 +48,7 @@ pub fn patch<N: Into<Node>>(
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = element_nodes_to_patch.get(&patch_node_idx) {
-            let new_closures = apply_element_patch(&element, &old_closures, &patch)?;
+            let new_closures = apply_element_patch(&element, old_closures, &patch)?;
             active_closures.extend(new_closures);
             continue;
         }
@@ -131,7 +131,7 @@ fn find_nodes(
 
 fn apply_element_patch(
     node: &Element,
-    old_closures: &ActiveClosure,
+    old_closures: &mut ActiveClosure,
     patch: &Patch,
 ) -> Result<ActiveClosure, JsValue> {
     let mut active_closures = HashMap::new();
@@ -166,7 +166,7 @@ fn apply_element_patch(
 
             Ok(active_closures)
         }
-        Patch::RemoveEventListener(node_idx, events) => {
+        Patch::RemoveEventListener(_node_idx, events) => {
             // TODO: there should be a better way to get the node-id back
             // without having to read from the actual dom node element
             if let Some(vdom_id_str) = node.get_attribute("data-sauron_vdom-id") {
@@ -179,13 +179,13 @@ fn apply_element_patch(
                             }
                         }
                     }
+
+                    // remove closure active_closure in dom_updater to free up memory
+                    old_closures
+                        .remove(&vdom_id)
+                        .expect("Unable to remove old closure");
                 }
             }
-
-            // remove from the closure;
-            let node_id = *node_idx as u32;
-            active_closures.remove(&node_id);
-            
 
             Ok(active_closures)
         }

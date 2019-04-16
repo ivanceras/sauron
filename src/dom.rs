@@ -263,7 +263,7 @@ impl DomUpdater {
     pub fn update(&mut self, new_vdom: crate::Node) {
         let patches = diff(&self.current_vdom, &new_vdom);
         let active_closures =
-            patch(self.root_node.clone(), &self.active_closures, &patches).unwrap();
+            patch(self.root_node.clone(), &mut self.active_closures, &patches).unwrap();
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
     }
