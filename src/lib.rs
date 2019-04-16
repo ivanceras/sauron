@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 #![deny(clippy::all)]
 #![feature(type_alias_enum_variants)]
 
@@ -12,7 +12,7 @@ mod util;
 pub use dom::DomUpdater;
 pub use sauron_vdom::builder::Attribute;
 pub use sauron_vdom::Event;
-pub use util::{body, document, log, window};
+pub use util::{body, document, log, window, request_animation_frame};
 
 pub type Node = sauron_vdom::Node<&'static str>;
 pub type Element = sauron_vdom::Element<&'static str>;

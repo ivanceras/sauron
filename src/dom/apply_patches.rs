@@ -182,7 +182,7 @@ fn apply_element_patch(
                 }
             }
 
-            /// remove from the closure;
+            // remove from the closure;
             let node_id = *node_idx as u32;
             active_closures.remove(&node_id);
             
