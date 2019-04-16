@@ -182,6 +182,11 @@ fn apply_element_patch(
                 }
             }
 
+            /// remove from the closure;
+            let node_id = *node_idx as u32;
+            active_closures.remove(&node_id);
+            
+
             Ok(active_closures)
         }
         Patch::Replace(_node_idx, new_node) => {
