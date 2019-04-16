@@ -1,7 +1,6 @@
 # sauron
 
 
-## Sauron
  Sauron is an html web framework for building web-apps.
  It is heavily inspired by elm.
 
