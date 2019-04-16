@@ -58,7 +58,9 @@ features = [
 [workspace]
 members = [
     "crates/sauron_vdom",
-    "examples/simple_app"
+    "examples/simple_app",
+    "examples/interactive",
+    "examples/isomorphic/client",
 ]
 
 [replace]
