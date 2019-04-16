@@ -16,6 +16,7 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub struct Client {
+    #[allow(unused)]
     dom_updater: DomUpdater,
 }
 
@@ -24,7 +25,10 @@ pub struct Client {
 /// $ wasm-pack build --target no-modules
 /// ```
 ///
+#[wasm_bindgen]
 impl Client {
+
+    #[wasm_bindgen(constructor)]
     pub fn new() -> Client {
         let html = div(
             [class("some-class"), id("some-id"), attr("data-id", 1)],
@@ -47,11 +51,6 @@ impl Client {
     }
 }
 
-#[wasm_bindgen]
-pub fn initialize() -> Client {
-    let client = Client::new();
-    client
-}
 ```
 
 
