@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 #![feature(proc_macro_hygiene)]
 
 extern crate wasm_bindgen_test;
