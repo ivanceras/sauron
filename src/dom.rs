@@ -22,6 +22,8 @@ lazy_static! {
     static ref ELEM_UNIQUE_ID: Mutex<u32> = Mutex::new(0);
 }
 
+pub type ActiveClosure = HashMap<u32, Vec<Closure<Fn(Event)>>>;
+
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
 pub struct CreatedNode<T> {
@@ -44,8 +46,6 @@ pub struct DomUpdater {
     /// a good strategy for when to do this.
     pub active_closures: ActiveClosure,
 }
-
-pub type ActiveClosure = HashMap<u32, Vec<Closure<FnMut(Event)>>>;
 
 impl<T> CreatedNode<T> {
     pub fn without_closures<N: Into<T>>(node: N) -> Self {
@@ -109,55 +109,7 @@ impl<T> CreatedNode<T> {
                 |(event_str, callback): (&String, &Callback<sauron_vdom::Event>)| {
                     let current_elem: &EventTarget = element.dyn_ref().unwrap();
 
-                    let callback_clone = callback.clone();
-                    let event_name_str = event_str.to_string();
-
-                    let closure_wrap: Closure<FnMut(Event)> =
-                        Closure::wrap(Box::new(move |event: Event| {
-                            let mouse_event: Option<&MouseEvent> = event.dyn_ref();
-                            let key_event: Option<&KeyboardEvent> = event.dyn_ref();
-                            let target: Option<EventTarget> = event.target();
-
-                            if let Some(mouse_event) = mouse_event {
-                                if event_name_str == "click" {
-                                    callback_clone.emit(sauron_vdom::Event::MouseEvent(
-                                        sauron_vdom::MouseEvent::Press(
-                                            sauron_vdom::MouseButton::Left,
-                                            mouse_event.x() as u16,
-                                            mouse_event.y() as u16,
-                                        ),
-                                    ));
-                                }
-                            } else if let Some(key_event) = key_event {
-                                callback_clone.emit(sauron_vdom::Event::KeyEvent(
-                                    sauron_vdom::KeyEvent {
-                                        key: key_event.key(),
-                                        ctrl: key_event.ctrl_key(),
-                                        alt: key_event.alt_key(),
-                                        shift: key_event.shift_key(),
-                                        meta: key_event.meta_key(),
-                                    },
-                                ));
-                            } else if let Some(target) = target {
-                                let input: Option<&HtmlInputElement> = target.dyn_ref();
-                                let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
-                                if let Some(input) = input {
-                                    callback_clone.emit(sauron_vdom::Event::InputEvent(
-                                        sauron_vdom::InputEvent {
-                                            value: input.value(),
-                                        },
-                                    ));
-                                } else if let Some(textarea) = textarea {
-                                    callback_clone.emit(sauron_vdom::Event::InputEvent(
-                                        sauron_vdom::InputEvent {
-                                            value: textarea.value(),
-                                        },
-                                    ));
-                                } else {
-                                    callback_clone.emit(sauron_vdom::Event::Generic(event.type_()));
-                                }
-                            }
-                        }));
+                    let closure_wrap: Closure<Fn(Event)> = create_closure_wrap(&callback);
 
                     current_elem
                         .add_event_listener_with_callback(
@@ -216,6 +168,49 @@ impl<T> CreatedNode<T> {
     }
 }
 
+fn create_closure_wrap(callback: &Callback<sauron_vdom::Event>) -> Closure<Fn(Event)> {
+    let callback_clone = callback.clone();
+    Closure::wrap(Box::new(move |event: Event| {
+        let mouse_event: Option<&MouseEvent> = event.dyn_ref();
+        let key_event: Option<&KeyboardEvent> = event.dyn_ref();
+        let target: Option<EventTarget> = event.target();
+
+        if let Some(mouse_event) = mouse_event {
+            if event.type_() == "click" {
+                callback_clone.emit(sauron_vdom::Event::MouseEvent(
+                    sauron_vdom::MouseEvent::Press(
+                        sauron_vdom::MouseButton::Left,
+                        mouse_event.x() as u16,
+                        mouse_event.y() as u16,
+                    ),
+                ));
+            }
+        } else if let Some(key_event) = key_event {
+            callback_clone.emit(sauron_vdom::Event::KeyEvent(sauron_vdom::KeyEvent {
+                key: key_event.key(),
+                ctrl: key_event.ctrl_key(),
+                alt: key_event.alt_key(),
+                shift: key_event.shift_key(),
+                meta: key_event.meta_key(),
+            }));
+        } else if let Some(target) = target {
+            let input: Option<&HtmlInputElement> = target.dyn_ref();
+            let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
+            if let Some(input) = input {
+                callback_clone.emit(sauron_vdom::Event::InputEvent(sauron_vdom::InputEvent {
+                    value: input.value(),
+                }));
+            } else if let Some(textarea) = textarea {
+                callback_clone.emit(sauron_vdom::Event::InputEvent(sauron_vdom::InputEvent {
+                    value: textarea.value(),
+                }));
+            } else {
+                callback_clone.emit(sauron_vdom::Event::Generic(event.type_()));
+            }
+        }
+    }))
+}
+
 impl DomUpdater {
     /// Create a new `DomUpdater`.
     ///
@@ -267,7 +262,8 @@ impl DomUpdater {
     /// seeing the latest state of the application.
     pub fn update(&mut self, new_vdom: crate::Node) {
         let patches = diff(&self.current_vdom, &new_vdom);
-        let active_closures = patch(self.root_node.clone(), &patches).unwrap();
+        let active_closures =
+            patch(self.root_node.clone(), &self.active_closures, &patches).unwrap();
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
     }

@@ -1,4 +1,4 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 #![feature(proc_macro_hygiene)]
 
 extern crate wasm_bindgen_test;
@@ -54,4 +54,107 @@ fn on_input() {
         .unwrap();
 
     assert_eq!(&*text.borrow(), "End Text");
+}
+
+#[wasm_bindgen_test]
+fn added_event() {
+    let text = Rc::new(RefCell::new("Start Text".to_string()));
+    let text_clone = Rc::clone(&text);
+
+    let elem_id = "input-add-event-test";
+
+    let old = input(
+        [
+            // On input we'll set our Rc<RefCell<String>> value to the input elements value
+            id(elem_id),
+            value("End Text"),
+        ],
+        [],
+    );
+
+    let new = input(
+        [
+            // On input we'll set our Rc<RefCell<String>> value to the input elements value
+            id(elem_id),
+            value("End Text"),
+            oninput(move |event: sauron_vdom::Event| match event {
+                sauron_vdom::Event::InputEvent(input) => {
+                    *text_clone.borrow_mut() = input.value;
+                }
+                _ => unimplemented!(),
+            }),
+        ],
+        [],
+    );
+
+    let input_event = InputEvent::new("input").unwrap();
+
+    let body = sauron::body();
+    let mut dom_updater = DomUpdater::new_append_to_mount(old, &body);
+    // update to new dom with no event attached
+    dom_updater.update(new);
+
+    let input_element = document().get_element_by_id(&elem_id).unwrap();
+
+    assert_eq!(&*text.borrow(), "Start Text");
+
+    // Dispatching the event, after the dom is updated
+    web_sys::EventTarget::from(input_element)
+        .dispatch_event(&input_event)
+        .unwrap();
+
+    //Should change the text
+    assert_eq!(&*text.borrow(), "End Text");
+}
+
+#[wasm_bindgen_test]
+fn remove_event() {
+    let text = Rc::new(RefCell::new("Start Text".to_string()));
+    let text_clone = Rc::clone(&text);
+
+    let elem_id = "input-remove-event-test";
+
+    let old = input(
+        [
+            // On input we'll set our Rc<RefCell<String>> value to the input elements value
+            id(elem_id),
+            value("End Text"),
+            oninput(move |event: sauron_vdom::Event| match event {
+                sauron_vdom::Event::InputEvent(input) => {
+                    *text_clone.borrow_mut() = input.value;
+                }
+                _ => unimplemented!(),
+            }),
+        ],
+        [],
+    );
+
+    let new = input(
+        [
+            // On input we'll set our Rc<RefCell<String>> value to the input elements value
+            id(elem_id),
+            value("End Text"),
+        ],
+        [],
+    );
+
+    let input_event = InputEvent::new("input").unwrap();
+
+    let body = sauron::body();
+    let mut dom_updater = DomUpdater::new_append_to_mount(old, &body);
+    // update to new dom with no event attached
+    dom_updater.update(new);
+
+    let input_element = document().get_element_by_id(&elem_id).unwrap();
+
+    assert_eq!(&*text.borrow(), "Start Text");
+
+    // Dispatching the event, after the dom is updated
+    web_sys::EventTarget::from(input_element)
+        .dispatch_event(&input_event)
+        .unwrap();
+
+    //Should never change the text, since it is removed with the dom_updater.update is called with
+    //the `new` vdom which has no attached event
+    assert_eq!(&*text.borrow(), "Start Text");
 }

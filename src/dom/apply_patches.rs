@@ -5,14 +5,21 @@ use std::collections::HashSet;
 
 use super::ActiveClosure;
 use super::CreatedNode;
+use crate::dom;
+use js_sys::Function;
+use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
-use web_sys::{Element, Node, Text};
+use web_sys::{Element, Event, Node, Text};
 
 /// Apply all of the patches to our old root node in order to create the new root node
 /// that we desire.
 /// This is usually used after diffing two virtual nodes.
-pub fn patch<N: Into<Node>>(root_node: N, patches: &[Patch]) -> Result<ActiveClosure, JsValue> {
+pub fn patch<N: Into<Node>>(
+    root_node: N,
+    old_closures: &ActiveClosure,
+    patches: &[Patch],
+) -> Result<ActiveClosure, JsValue> {
     let root_node: Node = root_node.into();
 
     let mut cur_node_idx = 0;
@@ -41,7 +48,7 @@ pub fn patch<N: Into<Node>>(root_node: N, patches: &[Patch]) -> Result<ActiveClo
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = element_nodes_to_patch.get(&patch_node_idx) {
-            let new_closures = apply_element_patch(&element, &patch)?;
+            let new_closures = apply_element_patch(&element, &old_closures, &patch)?;
             active_closures.extend(new_closures);
             continue;
         }
@@ -122,8 +129,12 @@ fn find_nodes(
     }
 }
 
-fn apply_element_patch(node: &Element, patch: &Patch) -> Result<ActiveClosure, JsValue> {
-    let active_closures = HashMap::new();
+fn apply_element_patch(
+    node: &Element,
+    old_closures: &ActiveClosure,
+    patch: &Patch,
+) -> Result<ActiveClosure, JsValue> {
+    let mut active_closures = HashMap::new();
     match patch {
         Patch::AddAttributes(_node_idx, attributes) => {
             for (attrib_name, attrib_val) in attributes.iter() {
@@ -140,16 +151,35 @@ fn apply_element_patch(node: &Element, patch: &Patch) -> Result<ActiveClosure, J
             Ok(active_closures)
         }
 
-        Patch::AddEventListener(_node_idx, events) => {
-            for (event, _callback) in events.iter() {
-                println!("TODO: add event: {}", event);
+        Patch::AddEventListener(node_idx, events) => {
+            for (event, callback) in events.iter() {
+                let closure_wrap: Closure<Fn(Event)> = dom::create_closure_wrap(callback);
+                let func: &Function = closure_wrap.as_ref().unchecked_ref();
+                node.add_event_listener_with_callback(event, func)?;
+                let node_id = *node_idx as u32;
+                if let Some(closure) = active_closures.get_mut(&node_id) {
+                    closure.push(closure_wrap);
+                } else {
+                    active_closures.insert(node_id, vec![closure_wrap]);
+                }
             }
 
             Ok(active_closures)
         }
-        Patch::RemoveEventListener(_node_idx, events) => {
-            for event in events.iter() {
-                println!("TODO: remove event: {}", event);
+        Patch::RemoveEventListener(node_idx, events) => {
+            // TODO: there should be a better way to get the node-id back
+            // without having to read from the actual dom node element
+            if let Some(vdom_id_str) = node.get_attribute("data-sauron_vdom-id") {
+                if let Ok(vdom_id) = vdom_id_str.parse::<u32>() {
+                    if let Some(old_closure) = old_closures.get(&vdom_id) {
+                        for event in events.iter() {
+                            for oc in old_closure.iter() {
+                                let func: &Function = oc.as_ref().unchecked_ref();
+                                node.remove_event_listener_with_callback(event, func)?;
+                            }
+                        }
+                    }
+                }
             }
 
             Ok(active_closures)
