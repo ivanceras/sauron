@@ -5,7 +5,7 @@ use sauron_vdom::Event;
 use sauron_vdom::Node;
 
 fn main() {
-    let old: Node<&'static str, Callback<Event>> = element(
+    let old: Node<&'static str, Callback<Event, ()>> = element(
         "div",
         [
             attr("class", "some-class"),

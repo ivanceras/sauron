@@ -13,7 +13,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 fn replace_node() {
-    let old = div([], []);
+    let old: Node<()> = div([], []);
     let new = span([], []);
     assert_eq!(
         diff(&old, &new),
@@ -21,7 +21,7 @@ fn replace_node() {
         "Replace the root if the tag changed"
     );
 
-    let old = div([], [b([], [])]);
+    let old: Node<()> = div([], [b([], [])]);
     let new = div([], [strong([], [])]);
     assert_eq!(
         diff(&old, &new),
@@ -29,7 +29,7 @@ fn replace_node() {
         "Replace a child node"
     );
 
-    let old = div([], [b([], [text("1")]), b([], [])]);
+    let old: Node<()> = div([], [b([], [text("1")]), b([], [])]);
     let new = div([], [i([], [text("1")]), i([], [])]);
     assert_eq!(
         diff(&old, &new),
@@ -43,7 +43,7 @@ fn replace_node() {
 
 #[wasm_bindgen_test]
 fn add_children() {
-    let old = div([], [b([], [])]); //{ <div> <b></b> </div> },
+    let old: Node<()> = div([], [b([], [])]); //{ <div> <b></b> </div> },
     let new = div([], [b([], []), html_element("new", [], [])]); //{ <div> <b></b> <new></new> </div> },
     assert_eq!(
         diff(&old, &new),
@@ -54,7 +54,7 @@ fn add_children() {
 
 #[wasm_bindgen_test]
 fn remove_nodes() {
-    let old = div([], [b([], []), span([], [])]); //{ <div> <b></b> <span></span> </div> },
+    let old: Node<()> = div([], [b([], []), span([], [])]); //{ <div> <b></b> <span></span> </div> },
     let new = div([], []); //{ <div> </div> },
 
     assert_eq!(
@@ -63,7 +63,7 @@ fn remove_nodes() {
         "Remove all child nodes at and after child sibling index 1",
     );
 
-    let old = div(
+    let old: Node<()> = div(
         [],
         [
             span(
@@ -79,7 +79,7 @@ fn remove_nodes() {
         ],
     );
 
-    let new = div([], [span([], [b([], [])])]);
+    let new: Node<()> = div([], [span([], [b([], [])])]);
 
     assert_eq!(
         diff(&old, &new),
@@ -87,7 +87,7 @@ fn remove_nodes() {
         "Remove a child and a grandchild node",
     );
 
-    let old = div([], [b([], [i([], []), i([], [])]), b([], [])]); //{ <div> <b> <i></i> <i></i> </b> <b></b> </div> },
+    let old: Node<()> = div([], [b([], [i([], []), i([], [])]), b([], [])]); //{ <div> <b> <i></i> <i></i> </b> <b></b> </div> },
     let new = div([], [b([], [i([], [])]), i([], [])]); //{ <div> <b> <i></i> </b> <i></i> </div>},
     assert_eq!(
         diff(&old, &new),
@@ -103,7 +103,7 @@ fn add_attributes() {
     "id" => &hello,
     };
 
-    let old = div([], []); //{ <div> </div> },
+    let old: Node<()> = div([], []); //{ <div> </div> },
     let new = div([id("hello")], []); //{ <div id="hello"> </div> },
     assert_eq!(
         diff(&old, &new),
@@ -111,7 +111,7 @@ fn add_attributes() {
         "Add attributes",
     );
 
-    let old = div([id("foobar")], []); //{ <div id="foobar"> </div> },
+    let old: Node<()> = div([id("foobar")], []); //{ <div id="foobar"> </div> },
     let new = div([id("hello")], []); //{ <div id="hello"> </div> },
 
     assert_eq!(
@@ -126,12 +126,12 @@ fn add_events() {
     let func = |_| {
         println!("hello");
     };
-    let hello: Callback<Event> = func.into();
+    let hello: Callback<Event, ()> = func.into();
     let events = btreemap! {
     "click" => &hello,
     };
 
-    let old = div([], []);
+    let old: Node<()> = div([], []);
     let new = div([onclick(hello.clone())], []);
     assert_eq!(
         diff(&old, &new),
@@ -139,11 +139,11 @@ fn add_events() {
         "Add event listener",
     );
 
-    let hello2: Callback<Event> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
+    let hello2: Callback<Event, ()> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
     let events2 = btreemap! {
     "click" => &hello2,
     };
-    let old = div([onclick(hello.clone())], []);
+    let old: Node<()> = div([onclick(hello.clone())], []);
     let new = div([onclick(hello2.clone())], []);
 
     assert_eq!(
@@ -155,7 +155,7 @@ fn add_events() {
 
 #[wasm_bindgen_test]
 fn remove_attributes() {
-    let old = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
+    let old: Node<()> = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
     let new = div([], []); //{ <div> </div> },
     assert_eq!(
         diff(&old, &new),
@@ -166,7 +166,7 @@ fn remove_attributes() {
 
 #[wasm_bindgen_test]
 fn remove_events() {
-    let old = div([onclick(|_| println!("hi"))], []);
+    let old: Node<()> = div([onclick(|_| println!("hi"))], []);
     let new = div([], []);
     assert_eq!(
         diff(&old, &new),
@@ -182,7 +182,7 @@ fn change_attribute() {
     "id" => &changed,
     };
 
-    let old = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
+    let old: Node<()> = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
     let new = div([id("changed")], []); //{ <div id="changed"> </div> },
 
     assert_eq!(
@@ -194,8 +194,8 @@ fn change_attribute() {
 
 #[wasm_bindgen_test]
 fn replace_text_node() {
-    let old: Node = text("Old"); //{ Old },
-    let new: Node = text("New"); //{ New },
+    let old: Node<()> = text("Old"); //{ Old },
+    let new: Node<()> = text("New"); //{ New },
 
     assert_eq!(
         diff(&old, &new),
@@ -209,7 +209,7 @@ fn replace_text_node() {
 // for that we can just give them different keys to force a replace.
 #[wasm_bindgen_test]
 fn replace_if_different_keys() {
-    let old = div([key(1)], []); //{ <div key="1"> </div> },
+    let old: Node<()> = div([key(1)], []); //{ <div key="1"> </div> },
     let new = div([key(2)], []); //{ <div key="2"> </div> },
     assert_eq!(
         diff(&old, &new),

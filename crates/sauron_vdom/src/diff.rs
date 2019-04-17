@@ -337,8 +337,8 @@ mod tests {
     #[test]
     fn no_change_event() {
         let func = |_| println!("Clicked!");
-        let cb: Callback<Event> = func.into();
-        let old = Node::Element::<&'static str, Callback<Event>>(Element {
+        let cb: Callback<Event, ()> = func.into();
+        let old: Node<&'static str, Callback<Event, ()>> = Node::Element(Element {
             tag: "div".into(),
             events: btreemap! {
                 "click".into() => cb.clone(),
@@ -348,7 +348,7 @@ mod tests {
             namespace: None,
         });
 
-        let new = Node::Element::<&'static str, Callback<Event>>(Element {
+        let new = Node::Element(Element {
             tag: "div".into(),
             events: btreemap! {
                 "click".into() => cb,
@@ -365,9 +365,9 @@ mod tests {
     #[test]
     fn add_event() {
         let func = |_| println!("Clicked!");
-        let cb: Callback<Event> = func.into();
+        let cb: Callback<Event, ()> = func.into();
 
-        let old = Node::Element::<&'static str, Callback<Event>>(Element {
+        let old: Node<&'static str, Callback<Event, ()>> = Node::Element(Element {
             tag: "div".into(),
             attrs: BTreeMap::new(),
             events: BTreeMap::new(),
@@ -375,7 +375,7 @@ mod tests {
             namespace: None,
         });
 
-        let new = Node::Element::<&'static str, Callback<Event>>(Element {
+        let new = Node::Element(Element {
             tag: "div".into(),
             events: btreemap! {
                 "click".into() => cb.clone(),

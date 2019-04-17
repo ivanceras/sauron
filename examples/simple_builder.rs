@@ -6,7 +6,7 @@ use sauron::Node;
 use sauron_vdom::diff;
 
 fn main() {
-    let old: Node = div(
+    let old: Node<()> = div(
         [
             class("some-class"),
             id("some-id"),

@@ -1,6 +1,6 @@
 use js_sys::Date;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Msg {
     Click,
     Clock,
@@ -21,9 +21,11 @@ impl Store {
         }
     }
 
+    /*
     pub fn subscribe(&mut self, callback: Box<Fn()>) {
         self.listeners.push(callback)
     }
+    */
 
     pub fn msg(&mut self, msg: &Msg) {
         match msg {

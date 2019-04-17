@@ -9,7 +9,7 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 pub struct Client {
     #[allow(unused)]
-    dom_updater: DomUpdater,
+    dom_updater: DomUpdater<()>,
 }
 
 /// Build using

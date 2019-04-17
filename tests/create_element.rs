@@ -19,7 +19,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 fn nested_divs() {
-    let vdiv: Node = div([], [div([], [div([], [])])]); // <div> <div> <div></div> </div> </div>
+    let vdiv: Node<()> = div([], [div([], [div([], [])])]); // <div> <div> <div></div> </div> </div>
     let div: Element = CreatedNode::<Element>::create_dom_node(&vdiv)
         .node
         .unchecked_into();
@@ -29,7 +29,7 @@ fn nested_divs() {
 
 #[wasm_bindgen_test]
 fn svg_element() {
-    let vdiv = div(
+    let vdiv: Node<()> = div(
         [],
         [svg(
             [xmlns("http://www.w3.org/2000/svg")],
@@ -48,7 +48,7 @@ fn svg_element() {
 
 #[wasm_bindgen_test]
 fn div_with_attributes() {
-    let vdiv = div([id("id-here"), class("two classes")], []);
+    let vdiv: Node<()> = div([id("id-here"), class("two classes")], []);
     let div: Element = CreatedNode::<Element>::create_dom_node(&vdiv)
         .node
         .unchecked_into();
@@ -78,7 +78,7 @@ fn click_event() {
     let clicked_clone = Rc::clone(&clicked);
 
     let elem_id = "click-on-div";
-    let vdiv = div(
+    let vdiv: Node<()> = div(
         [
             id(elem_id),
             onclick(move |_ev: sauron_vdom::Event| {

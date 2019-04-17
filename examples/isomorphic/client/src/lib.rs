@@ -1,9 +1,6 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 #![deny(clippy::all)]
 use console_error_panic_hook;
-use sauron::Component;
-use sauron::View;
-use sauron::Widget;
 use sauron::*;
 use wasm_bindgen;
 use wasm_bindgen::prelude::*;
@@ -11,6 +8,7 @@ use web_sys;
 use web_sys::console;
 
 use app::App;
+use app::Msg;
 
 mod app;
 
@@ -23,7 +21,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 pub struct Client {
     app: App,
-    dom_updater: DomUpdater,
+    dom_updater: DomUpdater<Msg>,
 }
 
 // Expose globals from JS for things such as request animation frame
@@ -56,23 +54,6 @@ impl Client {
 
         let dom_updater = DomUpdater::new_replace_mount(app.view(), root_node);
         let mut client = Client { app, dom_updater };
-        client.init_subscription();
         client
-    }
-
-    /// set up the app.store
-    /// whenever there is a changes to the store
-    /// the app.update function will be called
-    pub fn init_subscription(&mut self) {
-        self.app.subscribe(Box::new(|| {
-            global_js.update();
-        }));
-    }
-
-    pub fn render(&mut self) {
-        console::log_1(&"in render function".into());
-        self.app.update();
-        let vdom = self.app.view();
-        self.dom_updater.update(vdom);
     }
 }

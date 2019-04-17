@@ -18,7 +18,7 @@
 //! #[wasm_bindgen]
 //! pub struct Client {
 //!     #[allow(unused)]
-//!     dom_updater: DomUpdater,
+//!     dom_updater: DomUpdater<()>,
 //! }
 //!
 //! /// Build using
@@ -66,21 +66,15 @@ use sauron_vdom::Callback;
 pub use sauron_vdom::Event;
 pub use util::{body, document, log, request_animation_frame, window};
 
-pub type Node = sauron_vdom::Node<&'static str, Callback<Event>>;
-pub type Element = sauron_vdom::Element<&'static str, Callback<Event>>;
-pub type Patch<'a> = sauron_vdom::Patch<'a, &'static str, Callback<Event>>;
-pub type Attribute<'a> = sauron_vdom::builder::Attribute<'a, Callback<Event>>;
+pub type Node<MSG> = sauron_vdom::Node<&'static str, Callback<Event, MSG>>;
+pub type Element<MSG> = sauron_vdom::Element<&'static str, Callback<Event, MSG>>;
+pub type Patch<'a, MSG> = sauron_vdom::Patch<'a, &'static str, Callback<Event, MSG>>;
+pub type Attribute<'a, MSG> = sauron_vdom::builder::Attribute<'a, Callback<Event, MSG>>;
 pub use sauron_vdom::diff;
 pub use sauron_vdom::Text;
 
-pub trait Component: Widget {
-    fn subscribe(&mut self, callback: Box<Fn()>);
-}
+pub trait Component<MSG> {
+    fn update(&mut self, msg: &MSG);
 
-pub trait Widget: View {
-    fn update(&mut self);
-}
-
-pub trait View {
-    fn view(&self) -> Node;
+    fn view(&self) -> Node<MSG>;
 }

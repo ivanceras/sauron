@@ -15,11 +15,15 @@ use web_sys::{Element, Event, Node, Text};
 /// Apply all of the patches to our old root node in order to create the new root node
 /// that we desire.
 /// This is usually used after diffing two virtual nodes.
-pub fn patch<N: Into<Node>>(
+pub fn patch<N, MSG>(
     root_node: N,
     old_closures: &mut ActiveClosure,
-    patches: &[Patch],
-) -> Result<ActiveClosure, JsValue> {
+    patches: &[Patch<MSG>],
+) -> Result<ActiveClosure, JsValue>
+where
+    N: Into<Node>,
+    MSG: Clone + 'static,
+{
     let root_node: Node = root_node.into();
 
     let mut cur_node_idx = 0;
@@ -129,11 +133,14 @@ fn find_nodes(
     }
 }
 
-fn apply_element_patch(
+fn apply_element_patch<MSG>(
     node: &Element,
     old_closures: &mut ActiveClosure,
-    patch: &Patch,
-) -> Result<ActiveClosure, JsValue> {
+    patch: &Patch<MSG>,
+) -> Result<ActiveClosure, JsValue>
+where
+    MSG: Clone + 'static,
+{
     let mut active_closures = HashMap::new();
     match patch {
         Patch::AddAttributes(_node_idx, attributes) => {
@@ -244,7 +251,10 @@ fn apply_element_patch(
     }
 }
 
-fn apply_text_patch(node: &Text, patch: &Patch) -> Result<(), JsValue> {
+fn apply_text_patch<MSG>(node: &Text, patch: &Patch<MSG>) -> Result<(), JsValue>
+where
+    MSG: Clone + 'static,
+{
     match patch {
         Patch::ChangeText(_node_idx, new_node) => {
             node.set_node_value(Some(&new_node.text));

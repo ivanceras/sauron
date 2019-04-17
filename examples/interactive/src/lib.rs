@@ -3,18 +3,18 @@ use app::App;
 use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
-use sauron::Component;
 use sauron::DomUpdater;
-use sauron::View;
-use sauron::Widget;
 use wasm_bindgen::prelude::*;
+
+use crate::app::Msg;
+use sauron::Component;
 
 mod app;
 
 #[wasm_bindgen]
 pub struct Client {
     app: App,
-    dom_updater: DomUpdater,
+    dom_updater: DomUpdater<Msg>,
 }
 
 /// Build using
@@ -30,18 +30,22 @@ impl Client {
         let mut app = App::new();
         let body = sauron::body();
         let dom_updater = DomUpdater::new_append_to_mount(app.view(), &body);
+        /*
         app.subscribe(Box::new(|| {
             global_js.update();
         }));
+        */
 
         Client { app, dom_updater }
     }
 
+    /*
     #[wasm_bindgen]
     pub fn render(&mut self) {
         self.app.update();
         self.dom_updater.update(self.app.view());
     }
+    */
 }
 
 #[wasm_bindgen]

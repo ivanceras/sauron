@@ -21,7 +21,7 @@ fn patches_dom() {
 
     let document = web_sys::window().unwrap().document().unwrap();
 
-    let sauron_vdom = div([], []);
+    let sauron_vdom: Node<()> = div([], []);
 
     let mut dom_updater = DomUpdater::new(sauron_vdom);
 

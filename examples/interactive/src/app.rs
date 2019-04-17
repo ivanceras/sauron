@@ -1,14 +1,12 @@
 use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
-use sauron::Component;
 use sauron::Node;
-use sauron::View;
-use sauron::Widget;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use store::Msg;
+use sauron::Component;
+pub use store::Msg;
 use store::Store;
 
 mod store;
@@ -25,8 +23,8 @@ impl App {
     }
 }
 
-impl View for App {
-    fn view(&self) -> Node {
+impl Component<Msg> for App {
+    fn view(&self) -> Node<Msg> {
         let click_count = self.store.borrow().click_count();
         let store = self.store.clone();
         div(
@@ -40,6 +38,7 @@ impl View for App {
                         onclick(move |_| {
                             sauron::log("Button is clicked");
                             store.borrow_mut().msg(&Msg::Click);
+                            Msg::Click
                         }),
                     ],
                     [],
@@ -48,14 +47,12 @@ impl View for App {
             ],
         )
     }
-}
 
-impl Widget for App {
-    fn update(&mut self) {}
-}
+    fn update(&mut self, msg: &Msg) {}
 
-impl Component for App {
+    /*
     fn subscribe(&mut self, callback: Box<Fn()>) {
         self.store.borrow_mut().subscribe(callback);
     }
+    */
 }

@@ -120,7 +120,7 @@ impl<T, CB> Element<T, CB> {
 /// use sauron_vdom::Callback;
 /// use sauron_vdom::Event;
 /// fn main(){
-///    let old:Node<&'static str, Callback<Event>> = element(
+///    let old:Node<&'static str, Callback<Event,()>> = element(
 ///        "div",
 ///        [
 ///            attr("class", "some-class"),

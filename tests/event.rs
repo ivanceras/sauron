@@ -24,7 +24,7 @@ fn on_input() {
 
     let elem_id = "input-element-1";
 
-    let input: Node = input(
+    let input: Node<()> = input(
         [
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
@@ -63,7 +63,7 @@ fn added_event() {
 
     let elem_id = "input-add-event-test";
 
-    let old: Node = input(
+    let old: Node<()> = input(
         [
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
@@ -114,7 +114,7 @@ fn remove_event() {
 
     let elem_id = "input-remove-event-test";
 
-    let old: Node = input(
+    let old: Node<()> = input(
         [
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),

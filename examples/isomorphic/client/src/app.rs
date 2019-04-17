@@ -9,11 +9,8 @@ use wasm_bindgen;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-use sauron::Component;
 use sauron::Node;
-use sauron::View;
-use sauron::Widget;
-use store::{Msg, Store};
+pub use store::{Msg, Store};
 
 mod store;
 
@@ -43,22 +40,15 @@ impl App {
     }
 }
 
-impl Component for App {
-    /// Whatever changes in the store the callback
-    /// will be called
-    fn subscribe(&mut self, callback: Box<Fn()>) {
-        self.store.borrow_mut().subscribe(callback);
+impl Component<Msg> for App {
+    fn update(&mut self, msg: &Msg) {
+        match msg {
+            Msg::Click => crate::log("increment something"),
+            Msg::Clock => crate::log("tick tok"),
+        }
     }
-}
 
-impl Widget for App {
-    fn update(&mut self) {
-        // nothing to update
-    }
-}
-
-impl View for App {
-    fn view(&self) -> Node {
+    fn view(&self) -> Node<Msg> {
         let store_clone = Rc::clone(&self.store);
         let count: u32 = self.store.borrow().click_count();
         let current_time = self
@@ -77,6 +67,7 @@ impl View for App {
                         [onclick(move |v: Event| {
                             sauron::log(format!("I've been clicked and the value is: {:#?}", v));
                             store_clone.borrow_mut().msg(&Msg::Click);
+                            Msg::Click
                         })],
                         [text("Click me!")],
                     )],
@@ -90,6 +81,7 @@ impl View for App {
                                 r#type("text"),
                                 oninput(|v: Event| {
                                     sauron::log(format!("input has input: {:#?}", v));
+                                    Msg::Click
                                 }),
                                 placeholder("Type here..."),
                             ],
@@ -105,6 +97,7 @@ impl View for App {
                             [
                                 oninput(|v: Event| {
                                     sauron::log(format!("textarea has changed: {:#?}", v));
+                                    Msg::Click
                                 }),
                                 placeholder("Description here..."),
                             ],
@@ -121,6 +114,7 @@ impl View for App {
                                 r#type("text"),
                                 onchange(|v: Event| {
                                     sauron::log(format!("input has changed: {:#?}", v));
+                                    Msg::Click
                                 }),
                                 placeholder("Description here..."),
                             ],

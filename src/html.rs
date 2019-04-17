@@ -9,19 +9,26 @@ pub mod attributes;
 pub mod events;
 
 #[inline]
-pub fn html_element<'a, A, C>(tag: &'static str, attrs: A, children: C) -> Node
+pub fn html_element<'a, A, C, MSG>(tag: &'static str, attrs: A, children: C) -> Node<MSG>
 where
-    C: AsRef<[Node]>,
-    A: AsRef<[Attribute<'a>]>,
+    C: AsRef<[Node<MSG>]>,
+    A: AsRef<[Attribute<'a, MSG>]>,
+    MSG: Clone,
 {
     sauron_vdom::builder::element(tag, attrs, children)
 }
 
 #[inline]
-pub fn html_element_ns<'a, A, C>(tag: &'static str, namespace: &str, attrs: A, children: C) -> Node
+pub fn html_element_ns<'a, A, C, MSG>(
+    tag: &'static str,
+    namespace: &str,
+    attrs: A,
+    children: C,
+) -> Node<MSG>
 where
-    C: AsRef<[Node]>,
-    A: AsRef<[Attribute<'a>]>,
+    C: AsRef<[Node<MSG>]>,
+    A: AsRef<[Attribute<'a, MSG>]>,
+    MSG: Clone,
 {
     sauron_vdom::builder::element_ns(tag, namespace, attrs, children)
 }
@@ -35,9 +42,10 @@ macro_rules! builder_constructors {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<'a, A, C>(attrs: A, children: C) -> $crate::Node
-                where C: AsRef<[$crate::Node]>,
-                      A: AsRef<[$crate::Attribute<'a>]>,
+            pub fn $name<'a, A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
+                where C: AsRef<[$crate::Node<MSG>]>,
+                      A: AsRef<[$crate::Attribute<'a,MSG>]>,
+                      MSG: Clone,
                 {
                     $crate::html::html_element(stringify!($name), attrs, children)
                 }
@@ -52,9 +60,10 @@ macro_rules! builder_constructors {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<'a, A, C>(attrs: A, children: C) -> $crate::Node
-                where C: AsRef<[$crate::Node]>,
-                      A: AsRef<[$crate::Attribute<'a>]>,
+            pub fn $name<'a, A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
+                where C: AsRef<[$crate::Node<MSG>]>,
+                      A: AsRef<[$crate::Attribute<'a,MSG>]>,
+                      MSG: Clone,
                 {
                     $crate::html::html_element_ns(stringify!($name), $namespace, attrs, children)
                 }
@@ -582,7 +591,7 @@ mod tests {
 
     #[test]
     fn simple_builder() {
-        let div = Element::new("div").add_attributes([attr("class", "some-class")]);
+        let div: Element<()> = Element::new("div").add_attributes([attr("class", "some-class")]);
 
         assert_eq!(
             div,
@@ -603,7 +612,7 @@ mod tests {
         let cb = |x: Event| {
             println!("hello! {:?}", x);
         };
-        let callback: Callback<Event> = cb.into();
+        let callback: Callback<Event, ()> = cb.into();
         let div = Element::new("div").add_event_listener("click", callback.clone());
 
         assert_eq!(
@@ -623,7 +632,7 @@ mod tests {
 
     #[test]
     fn builder_with_children() {
-        let div = Element::new("div")
+        let div: Element<()> = Element::new("div")
             .add_attributes([attr("class", "some-class")])
             .add_children(vec![Node::Text(Text {
                 text: "Hello".to_string(),
@@ -650,8 +659,8 @@ mod tests {
         let clicked = |_| {
             println!("clicked");
         };
-        let cb: Callback<Event> = clicked.into();
-        let div: Node = div(
+        let cb: Callback<Event, ()> = clicked.into();
+        let div = div(
             [class("some-class"), r#type("submit"), onclick(cb.clone())],
             [div([class("some-class")], [text("Hello world!")])],
         );
@@ -698,7 +707,7 @@ mod diff_tests_using_html_syntax {
 
     #[test]
     fn replace_node() {
-        let old = div([], []);
+        let old: Node<()> = div([], []);
         let new = span([], []);
         assert_eq!(
             diff(&old, &new),
@@ -706,7 +715,7 @@ mod diff_tests_using_html_syntax {
             "Replace the root if the tag changed"
         );
 
-        let old = div([], [b([], [])]);
+        let old: Node<()> = div([], [b([], [])]);
         let new = div([], [strong([], [])]);
         assert_eq!(
             diff(&old, &new),
@@ -714,7 +723,7 @@ mod diff_tests_using_html_syntax {
             "Replace a child node"
         );
 
-        let old = div([], [b([], [text("1")]), b([], [])]);
+        let old: Node<()> = div([], [b([], [text("1")]), b([], [])]);
         let new = div([], [i([], [text("1")]), i([], [])]);
         assert_eq!(
             diff(&old, &new),
@@ -728,7 +737,7 @@ mod diff_tests_using_html_syntax {
 
     #[test]
     fn add_children() {
-        let old = div([], [b([], [])]); //{ <div> <b></b> </div> },
+        let old: Node<()> = div([], [b([], [])]); //{ <div> <b></b> </div> },
         let new = div([], [b([], []), html_element("new", [], [])]); //{ <div> <b></b> <new></new> </div> },
         assert_eq!(
             diff(&old, &new),
@@ -739,7 +748,7 @@ mod diff_tests_using_html_syntax {
 
     #[test]
     fn remove_nodes() {
-        let old = div([], [b([], []), span([], [])]); //{ <div> <b></b> <span></span> </div> },
+        let old: Node<()> = div([], [b([], []), span([], [])]); //{ <div> <b></b> <span></span> </div> },
         let new = div([], []); //{ <div> </div> },
 
         assert_eq!(
@@ -748,7 +757,7 @@ mod diff_tests_using_html_syntax {
             "Remove all child nodes at and after child sibling index 1",
         );
 
-        let old = div(
+        let old: Node<()> = div(
             [],
             [
                 span(
@@ -772,7 +781,7 @@ mod diff_tests_using_html_syntax {
             "Remove a child and a grandchild node",
         );
 
-        let old = div([], [b([], [i([], []), i([], [])]), b([], [])]); //{ <div> <b> <i></i> <i></i> </b> <b></b> </div> },
+        let old: Node<()> = div([], [b([], [i([], []), i([], [])]), b([], [])]); //{ <div> <b> <i></i> <i></i> </b> <b></b> </div> },
         let new = div([], [b([], [i([], [])]), i([], [])]); //{ <div> <b> <i></i> </b> <i></i> </div>},
         assert_eq!(
             diff(&old, &new),
@@ -788,7 +797,7 @@ mod diff_tests_using_html_syntax {
         "id" => &hello,
         };
 
-        let old = div([], []); //{ <div> </div> },
+        let old: Node<()> = div([], []); //{ <div> </div> },
         let new = div([id("hello")], []); //{ <div id="hello"> </div> },
         assert_eq!(
             diff(&old, &new),
@@ -796,7 +805,7 @@ mod diff_tests_using_html_syntax {
             "Add attributes",
         );
 
-        let old = div([id("foobar")], []); //{ <div id="foobar"> </div> },
+        let old: Node<()> = div([id("foobar")], []); //{ <div id="foobar"> </div> },
         let new = div([id("hello")], []); //{ <div id="hello"> </div> },
 
         assert_eq!(
@@ -811,7 +820,7 @@ mod diff_tests_using_html_syntax {
         let func = |_| {
             println!("hello");
         };
-        let hello: Callback<Event> = func.into();
+        let hello: Callback<Event, ()> = func.into();
         let events = btreemap! {
         "click" => &hello,
         };
@@ -824,7 +833,7 @@ mod diff_tests_using_html_syntax {
             "Add event listener",
         );
 
-        let hello2: Callback<Event> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
+        let hello2: Callback<Event, ()> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
         let events2 = btreemap! {
         "click" => &hello2,
         };
@@ -840,7 +849,7 @@ mod diff_tests_using_html_syntax {
 
     #[test]
     fn remove_attributes() {
-        let old = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
+        let old: Node<()> = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
         let new = div([], []); //{ <div> </div> },
         assert_eq!(
             diff(&old, &new),
@@ -851,7 +860,7 @@ mod diff_tests_using_html_syntax {
 
     #[test]
     fn remove_events() {
-        let old = div([onclick(|_| println!("hi"))], []);
+        let old: Node<()> = div([onclick(|_| println!("hi"))], []);
         let new = div([], []);
         assert_eq!(
             diff(&old, &new),
@@ -867,7 +876,7 @@ mod diff_tests_using_html_syntax {
         "id" => &changed,
         };
 
-        let old = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
+        let old: Node<()> = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
         let new = div([id("changed")], []); //{ <div id="changed"> </div> },
 
         assert_eq!(
@@ -879,8 +888,8 @@ mod diff_tests_using_html_syntax {
 
     #[test]
     fn replace_text_node() {
-        let old: crate::Node = text("Old"); //{ Old },
-        let new: crate::Node = text("New"); //{ New },
+        let old: Node<()> = text("Old"); //{ Old },
+        let new = text("New"); //{ New },
 
         assert_eq!(
             diff(&old, &new),
@@ -894,7 +903,7 @@ mod diff_tests_using_html_syntax {
     // for that we can just give them different keys to force a replace.
     #[test]
     fn replace_if_different_keys() {
-        let old = div([key(1)], []); //{ <div key="1"> </div> },
+        let old: Node<()> = div([key(1)], []); //{ <div key="1"> </div> },
         let new = div([key(2)], []); //{ <div key="2"> </div> },
         assert_eq!(
             diff(&old, &new),
