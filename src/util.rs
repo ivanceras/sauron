@@ -25,3 +25,8 @@ pub fn body() -> web_sys::HtmlElement {
 pub fn log<S: Into<String>>(s: S) {
     web_sys::console::log_1(&s.into().into());
 }
+
+#[macro_export]
+macro_rules! log {
+    ($($t:tt)*) => ($crate::util::log(format!($($t)*)))
+}

@@ -8,13 +8,14 @@ use wasm_bindgen::prelude::*;
 
 use crate::app::Msg;
 use sauron::Component;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 mod app;
 
 #[wasm_bindgen]
 pub struct Client {
-    app: App,
-    dom_updater: DomUpdater<Msg>,
+    dom_updater: DomUpdater<App, Msg>,
 }
 
 /// Build using
@@ -29,14 +30,15 @@ impl Client {
         sauron::log("I see you!");
         let mut app = App::new();
         let body = sauron::body();
-        let dom_updater = DomUpdater::new_append_to_mount(app.view(), &body);
+        let view = app.view();
+        let dom_updater = DomUpdater::new_append_to_mount(Rc::new(RefCell::new(app)), view, &body);
         /*
         app.subscribe(Box::new(|| {
             global_js.update();
         }));
         */
 
-        Client { app, dom_updater }
+        Client { dom_updater }
     }
 
     /*

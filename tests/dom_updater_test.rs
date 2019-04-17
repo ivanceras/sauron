@@ -2,6 +2,7 @@
 use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
+use sauron::test_fixtures::simple_component;
 use sauron::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -23,7 +24,7 @@ fn patches_dom() {
 
     let sauron_vdom: Node<()> = div([], []);
 
-    let mut dom_updater = DomUpdater::new(sauron_vdom);
+    let mut dom_updater = DomUpdater::new(simple_component(), sauron_vdom);
 
     let new_vdom = div([id("patched")], []); //html! { <div id="patched"></div> };
     dom_updater.update(new_vdom);
@@ -47,7 +48,7 @@ fn updates_active_closure_on_replace() {
     let body = sauron::body();
 
     let old = div([], []);
-    let mut dom_updater = DomUpdater::new_append_to_mount(old, &body);
+    let mut dom_updater = DomUpdater::new_append_to_mount(simple_component(), old, &body);
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -96,7 +97,7 @@ fn updates_active_closures_on_append() {
     let body = sauron::body();
 
     let old = div([], []);
-    let mut dom_updater = DomUpdater::new_append_to_mount(old, &body);
+    let mut dom_updater = DomUpdater::new_append_to_mount(simple_component(), old, &body);
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);

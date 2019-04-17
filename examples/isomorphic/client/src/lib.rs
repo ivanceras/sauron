@@ -2,6 +2,8 @@
 #![deny(clippy::all)]
 use console_error_panic_hook;
 use sauron::*;
+use std::cell::RefCell;
+use std::rc::Rc;
 use wasm_bindgen;
 use wasm_bindgen::prelude::*;
 use web_sys;
@@ -20,8 +22,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub struct Client {
-    app: App,
-    dom_updater: DomUpdater<Msg>,
+    dom_updater: DomUpdater<App, Msg>,
 }
 
 // Expose globals from JS for things such as request animation frame
@@ -51,9 +52,10 @@ impl Client {
             .unwrap();
 
         let app = App::new(1);
-
-        let dom_updater = DomUpdater::new_replace_mount(app.view(), root_node);
-        let mut client = Client { app, dom_updater };
+        let view = app.view();
+        let dom_updater =
+            DomUpdater::new_replace_mount(Rc::new(RefCell::new(app)), view, root_node);
+        let mut client = Client { dom_updater };
         client
     }
 }

@@ -6,53 +6,6 @@
 //!  Sauron is an html web framework for building web-apps.
 //!  It is heavily inspired by elm.
 //!
-//! # Example
-//! ```
-//! use sauron::html::attributes::*;
-//! use sauron::html::events::*;
-//! use sauron::html::*;
-//! use sauron::DomUpdater;
-//!
-//! use wasm_bindgen::prelude::*;
-//!
-//! #[wasm_bindgen]
-//! pub struct Client {
-//!     #[allow(unused)]
-//!     dom_updater: DomUpdater<()>,
-//! }
-//!
-//! /// Build using
-//! /// ```sh
-//! /// $ wasm-pack build --target no-modules
-//! /// ```
-//! ///
-//! #[wasm_bindgen]
-//! impl Client {
-//!
-//!     #[wasm_bindgen(constructor)]
-//!     pub fn new() -> Client {
-//!         let html = div(
-//!             [class("some-class"), id("some-id"), attr("data-id", 1)],
-//!             [input(
-//!                 [
-//!                     class("client"),
-//!                     r#type("button"),
-//!                     value("Click me!"),
-//!                     onclick(|_| {
-//!                         sauron::log("i've been clicked");
-//!                     }),
-//!                 ],
-//!                 [],
-//!             )],
-//!         );
-//!         sauron::log("hello from here!");
-//!         let body = sauron::body();
-//!         let dom_updater = DomUpdater::new_append_to_mount(html, &body);
-//!         Client { dom_updater }
-//!     }
-//! }
-//!
-//! ```
 //!
 pub mod dom;
 #[macro_use]
@@ -77,4 +30,29 @@ pub trait Component<MSG> {
     fn update(&mut self, msg: &MSG);
 
     fn view(&self) -> Node<MSG>;
+}
+
+pub mod test_fixtures {
+    use crate::html::div;
+    use crate::Component;
+    use crate::Node;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    #[derive(Clone)]
+    pub struct SimpleComponent;
+
+    impl Component<()> for SimpleComponent {
+        fn update(&mut self, _msg: &()) {
+            crate::log("updating in SimpleComponent");
+        }
+        fn view(&self) -> Node<()> {
+            div([], [])
+        }
+    }
+
+    pub fn simple_component() -> Rc<RefCell<SimpleComponent>> {
+        Rc::new(RefCell::new(SimpleComponent))
+    }
+
 }
