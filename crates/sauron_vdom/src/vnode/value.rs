@@ -166,10 +166,12 @@ impl_from!([T; 12]);
 mod tests {
     use crate::builder::attr;
     use crate::builder::element;
+    use crate::Node;
 
     #[test]
     fn tuple_value() {
-        let line = element("line", [attr("stroke-dasharray", (10, 20))], []);
+        let line: Node<&'static str, ()> =
+            element("line", [attr("stroke-dasharray", (10, 20))], []);
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(
             format!("{}", line),
@@ -177,7 +179,8 @@ mod tests {
             "The value in tuple should be flatten to string"
         );
 
-        let line = element("line", [attr("transition", ("opacity", 1))], []);
+        let line: Node<&'static str, ()> =
+            element("line", [attr("transition", ("opacity", 1))], []);
         let expected = "<line transition=\"opacity 1\"></line>";
         assert_eq!(
             format!("{}", line),
@@ -185,7 +188,8 @@ mod tests {
             "The value in tuple should be flatten to string"
         );
 
-        let line = element("line", [attr("transition", ("opacity", 1, "linear"))], []);
+        let line: Node<&'static str, ()> =
+            element("line", [attr("transition", ("opacity", 1, "linear"))], []);
         let expected = "<line transition=\"opacity 1 linear\"></line>";
         assert_eq!(
             format!("{}", line),
@@ -193,7 +197,7 @@ mod tests {
             "The value in tuple should be flatten to string"
         );
 
-        let line = element(
+        let line: Node<&'static str, ()> = element(
             "line",
             [attr("transition", ("opacity", 1, "linear", true))],
             [],
@@ -208,7 +212,8 @@ mod tests {
 
     #[test]
     fn array_value() {
-        let line = element("line", [attr("stroke-dasharray", [10, 20])], []);
+        let line: Node<&'static str, ()> =
+            element("line", [attr("stroke-dasharray", [10, 20])], []);
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(
             format!("{}", line),
@@ -216,7 +221,8 @@ mod tests {
             "The value in array should be flatten to string"
         );
 
-        let line = element("line", [attr("stroke-dasharray", [10, 20, 30, 40])], []);
+        let line: Node<&'static str, ()> =
+            element("line", [attr("stroke-dasharray", [10, 20, 30, 40])], []);
         let expected = "<line stroke-dasharray=\"10 20 30 40\"></line>";
         assert_eq!(
             format!("{}", line),

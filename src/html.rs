@@ -1,11 +1,30 @@
-use crate::Node;
-use sauron_vdom::builder::*;
 use std::convert::AsRef;
 
+use crate::Attribute;
+use crate::Node;
 pub use sauron_vdom::builder::{attr, on, text};
+
 #[macro_use]
 pub mod attributes;
 pub mod events;
+
+#[inline]
+pub fn html_element<'a, A, C>(tag: &'static str, attrs: A, children: C) -> Node
+where
+    C: AsRef<[Node]>,
+    A: AsRef<[Attribute<'a>]>,
+{
+    sauron_vdom::builder::element(tag, attrs, children)
+}
+
+#[inline]
+pub fn html_element_ns<'a, A, C>(tag: &'static str, namespace: &str, attrs: A, children: C) -> Node
+where
+    C: AsRef<[Node]>,
+    A: AsRef<[Attribute<'a>]>,
+{
+    sauron_vdom::builder::element_ns(tag, namespace, attrs, children)
+}
 
 macro_rules! builder_constructors {
     ( $(
@@ -16,11 +35,11 @@ macro_rules! builder_constructors {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<'a, A, C>(attrs: A, children: C) -> Node
-                where C: AsRef<[Node]>,
-                      A: AsRef<[Attribute<'a>]>,
+            pub fn $name<'a, A, C>(attrs: A, children: C) -> $crate::Node
+                where C: AsRef<[$crate::Node]>,
+                      A: AsRef<[$crate::Attribute<'a>]>,
                 {
-                    element(stringify!($name), attrs, children)
+                    $crate::html::html_element(stringify!($name), attrs, children)
                 }
          )*
     };
@@ -33,11 +52,11 @@ macro_rules! builder_constructors {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<'a, A, C>(attrs: A, children: C) -> crate::Node
-                where C: AsRef<[crate::Node]>,
-                      A: AsRef<[Attribute<'a>]>,
+            pub fn $name<'a, A, C>(attrs: A, children: C) -> $crate::Node
+                where C: AsRef<[$crate::Node]>,
+                      A: AsRef<[$crate::Attribute<'a>]>,
                 {
-                    element_ns(stringify!($name), $namespace, attrs, children)
+                    $crate::html::html_element_ns(stringify!($name), $namespace, attrs, children)
                 }
         )*
     }
@@ -549,12 +568,17 @@ builder_constructors! {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::Element;
-    use attributes::*;
-    use events::*;
+    use crate::Node;
     use maplit::btreemap;
+    //TODO: HashMap makes more sense, rewrite this to hashamp
+    use crate::html::attributes::*;
+    use crate::html::events::*;
+    use crate::html::*;
+    use sauron_vdom::builder::attr;
+    use sauron_vdom::builder::text;
     use sauron_vdom::{Callback, Event, Text};
+    use std::collections::BTreeMap;
 
     #[test]
     fn simple_builder() {
@@ -567,7 +591,9 @@ mod tests {
                 attrs: btreemap! {
                     "class".into() => "some-class".into(),
                 },
-                ..Default::default()
+                events: BTreeMap::new(),
+                children: vec![],
+                namespace: None,
             }
         );
     }
@@ -587,7 +613,9 @@ mod tests {
                 events: btreemap! {
                     "click".to_string() => callback.clone(),
                 },
-                ..Default::default()
+                attrs: BTreeMap::new(),
+                children: vec![],
+                namespace: None,
             },
             "Cloning a callback should only clone the reference"
         );
@@ -611,7 +639,8 @@ mod tests {
                 children: vec![Node::Text(Text {
                     text: "Hello".to_string()
                 })],
-                ..Default::default()
+                events: BTreeMap::new(),
+                namespace: None,
             }
         );
     }
@@ -622,7 +651,7 @@ mod tests {
             println!("clicked");
         };
         let cb: Callback<Event> = clicked.into();
-        let div = div(
+        let div: Node = div(
             [class("some-class"), r#type("submit"), onclick(cb.clone())],
             [div([class("some-class")], [text("Hello world!")])],
         );
@@ -638,6 +667,7 @@ mod tests {
                 events: btreemap! {
                     "click".into() => cb.clone(),
                 },
+                namespace: None,
                 children: vec![Node::Element(Element {
                     tag: "div".into(),
                     attrs: btreemap! {
@@ -646,9 +676,9 @@ mod tests {
                     children: vec![Node::Text(Text {
                         text: "Hello world!".into()
                     })],
-                    ..Default::default()
+                    events: BTreeMap::new(),
+                    namespace: None,
                 })],
-                ..Default::default()
             })
         )
     }
@@ -699,10 +729,10 @@ mod diff_tests_using_html_syntax {
     #[test]
     fn add_children() {
         let old = div([], [b([], [])]); //{ <div> <b></b> </div> },
-        let new = div([], [b([], []), element("new", [], [])]); //{ <div> <b></b> <new></new> </div> },
+        let new = div([], [b([], []), html_element("new", [], [])]); //{ <div> <b></b> <new></new> </div> },
         assert_eq!(
             diff(&old, &new),
-            vec![Patch::AppendChildren(0, vec![&element("new", [], [])])],
+            vec![Patch::AppendChildren(0, vec![&html_element("new", [], [])])],
             "Added a new node to the root node",
         )
     }

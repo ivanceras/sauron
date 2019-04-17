@@ -10,7 +10,7 @@ use sauron::dom::DomUpdater;
 use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
-use sauron::*;
+use sauron::Node;
 use std::cell::RefCell;
 use web_sys::*;
 
@@ -24,7 +24,7 @@ fn on_input() {
 
     let elem_id = "input-element-1";
 
-    let input = input(
+    let input: Node = input(
         [
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
@@ -44,7 +44,7 @@ fn on_input() {
     let body = sauron::body();
     let _dom_updater = DomUpdater::new_append_to_mount(input, &body);
 
-    let input_element = document().get_element_by_id(&elem_id).unwrap();
+    let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 
@@ -63,7 +63,7 @@ fn added_event() {
 
     let elem_id = "input-add-event-test";
 
-    let old = input(
+    let old: Node = input(
         [
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
@@ -94,7 +94,7 @@ fn added_event() {
     // update to new dom with no event attached
     dom_updater.update(new);
 
-    let input_element = document().get_element_by_id(&elem_id).unwrap();
+    let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 
@@ -114,7 +114,7 @@ fn remove_event() {
 
     let elem_id = "input-remove-event-test";
 
-    let old = input(
+    let old: Node = input(
         [
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
@@ -145,7 +145,7 @@ fn remove_event() {
     // update to new dom with no event attached
     dom_updater.update(new);
 
-    let input_element = document().get_element_by_id(&elem_id).unwrap();
+    let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 

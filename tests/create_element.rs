@@ -12,13 +12,14 @@ use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 
+use sauron::Node;
 use web_sys::{console, Element, Event, EventTarget};
 
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 fn nested_divs() {
-    let vdiv = div([], [div([], [div([], [])])]); // <div> <div> <div></div> </div> </div>
+    let vdiv: Node = div([], [div([], [div([], [])])]); // <div> <div> <div></div> </div> </div>
     let div: Element = CreatedNode::<Element>::create_dom_node(&vdiv)
         .node
         .unchecked_into();

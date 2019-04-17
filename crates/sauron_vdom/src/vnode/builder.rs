@@ -1,34 +1,37 @@
-use crate::Callback;
-use crate::{Element, Event, Node, Text, Value};
+use crate::{Element, Node, Text, Value};
 use std::convert::AsRef;
 
-pub struct Attribute<'a> {
+pub struct Attribute<'a, CB>
+where
+    CB: Clone,
+{
     name: &'a str,
-    value: AttribValue,
+    value: AttribValue<CB>,
 }
 
-pub enum AttribValue {
+pub enum AttribValue<CB>
+where
+    CB: Clone,
+{
     Value(Value),
-    Callback(Callback<Event>),
+    Callback(CB),
 }
 
-impl<V: Into<Value>> From<V> for AttribValue {
-    fn from(v: V) -> Self {
-        AttribValue::Value(v.into())
+impl<CB> From<CB> for AttribValue<CB>
+where
+    CB: Clone,
+{
+    fn from(cb: CB) -> Self {
+        AttribValue::Callback(cb)
     }
 }
 
-impl From<Callback<Event>> for AttribValue {
-    fn from(c: Callback<Event>) -> Self {
-        AttribValue::Callback(c)
-    }
-}
-
-impl<T> Node<T>
+impl<T, CB> Node<T, CB>
 where
     T: Clone,
+    CB: Clone,
 {
-    pub fn as_element(&mut self) -> Option<&mut Element<T>> {
+    pub fn as_element(&mut self) -> Option<&mut Element<T, CB>> {
         match *self {
             Node::Element(ref mut element) => Some(element),
             Node::Text(_) => None,
@@ -38,7 +41,8 @@ where
     /// Append children to this element
     pub fn children<C>(mut self, children: C) -> Self
     where
-        C: AsRef<[Node<T>]>,
+        C: AsRef<[Node<T, CB>]>,
+        CB: Clone,
     {
         if let Some(element) = self.as_element() {
             for child in children.as_ref() {
@@ -51,7 +55,7 @@ where
     /// add attributes to the node
     pub fn attributes<'a, A>(mut self, attributes: A) -> Self
     where
-        A: AsRef<[Attribute<'a>]>,
+        A: AsRef<[Attribute<'a, CB>]>,
     {
         if let Some(elm) = self.as_element() {
             elm.add_attributes_ref(attributes.as_ref());
@@ -60,10 +64,11 @@ where
     }
 }
 
-impl<T> Element<T> {
+impl<T, CB> Element<T, CB> {
     pub fn add_attributes<'a, A>(mut self, attrs: A) -> Self
     where
-        A: AsRef<[Attribute<'a>]>,
+        A: AsRef<[Attribute<'a, CB>]>,
+        CB: Clone,
     {
         self.add_attributes_ref(attrs);
         self
@@ -73,7 +78,8 @@ impl<T> Element<T> {
     /// into this element
     pub fn add_attributes_ref<'a, A>(&mut self, attrs: A) -> &mut Self
     where
-        A: AsRef<[Attribute<'a>]>,
+        A: AsRef<[Attribute<'a, CB>]>,
+        CB: Clone,
     {
         for a in attrs.as_ref() {
             match a.value {
@@ -90,8 +96,9 @@ impl<T> Element<T> {
 
     pub fn add_children<C>(mut self, children: C) -> Self
     where
-        C: AsRef<[Node<T>]>,
+        C: AsRef<[Node<T, CB>]>,
         T: Clone,
+        CB: Clone,
     {
         for c in children.as_ref() {
             self.children.push(c.clone());
@@ -99,7 +106,7 @@ impl<T> Element<T> {
         self
     }
 
-    pub fn add_event_listener(mut self, event: &str, cb: Callback<Event>) -> Self {
+    pub fn add_event_listener(mut self, event: &str, cb: CB) -> Self {
         self.events.insert(event.to_string(), cb);
         self
     }
@@ -109,8 +116,11 @@ impl<T> Element<T> {
 ///
 ///```
 /// use sauron_vdom::builder::*;
+/// use sauron_vdom::Node;
+/// use sauron_vdom::Callback;
+/// use sauron_vdom::Event;
 /// fn main(){
-///    let old = element(
+///    let old:Node<&'static str, Callback<Event>> = element(
 ///        "div",
 ///        [
 ///            attr("class", "some-class"),
@@ -128,11 +138,12 @@ impl<T> Element<T> {
 /// }
 ///```
 #[inline]
-pub fn element<'a, A, C, T>(tag: T, attrs: A, children: C) -> Node<T>
+pub fn element<'a, A, C, T, CB>(tag: T, attrs: A, children: C) -> Node<T, CB>
 where
-    C: AsRef<[Node<T>]>,
-    A: AsRef<[Attribute<'a>]>,
+    C: AsRef<[Node<T, CB>]>,
+    A: AsRef<[Attribute<'a, CB>]>,
     T: Clone,
+    CB: Clone,
 {
     Node::Element(
         Element::new(tag)
@@ -141,11 +152,12 @@ where
     )
 }
 #[inline]
-pub fn element_ns<'a, A, C, T>(tag: T, namespace: &str, attrs: A, children: C) -> Node<T>
+pub fn element_ns<'a, A, C, T, CB>(tag: T, namespace: &str, attrs: A, children: C) -> Node<T, CB>
 where
-    C: AsRef<[Node<T>]>,
-    A: AsRef<[Attribute<'a>]>,
+    C: AsRef<[Node<T, CB>]>,
+    A: AsRef<[Attribute<'a, CB>]>,
     T: Clone,
+    CB: Clone,
 {
     Node::Element(
         Element::new(tag)
@@ -157,33 +169,36 @@ where
 
 /// Create a textnode element
 #[inline]
-pub fn text<V, T>(v: V) -> Node<T>
+pub fn text<V, T, CB>(v: V) -> Node<T, CB>
 where
     V: Into<String>,
+    CB: Clone,
 {
     Node::Text(Text { text: v.into() })
 }
 
 /// Create an attribute
 #[inline]
-pub fn attr<V>(name: &str, v: V) -> Attribute
+pub fn attr<V, CB>(name: &str, v: V) -> Attribute<CB>
 where
     V: Into<Value>,
+    CB: Clone,
 {
     Attribute {
         name,
-        value: v.into().into(),
+        value: AttribValue::Value(v.into()),
     }
 }
 
 /// Attach a callback to an event
 #[inline]
-pub fn on<C>(name: &str, c: C) -> Attribute
+pub fn on<C, CB>(name: &str, c: C) -> Attribute<CB>
 where
-    C: Into<Callback<Event>>,
+    C: Into<CB>,
+    CB: Clone,
 {
     Attribute {
         name,
-        value: c.into().into(),
+        value: AttribValue::Callback(c.into()),
     }
 }

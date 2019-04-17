@@ -2,10 +2,11 @@
 use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
+use sauron::Node;
 use sauron_vdom::diff;
 
 fn main() {
-    let old = div(
+    let old: Node = div(
         [
             class("some-class"),
             id("some-id"),

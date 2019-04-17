@@ -1,8 +1,11 @@
 use sauron_vdom::builder::*;
 use sauron_vdom::diff;
+use sauron_vdom::Callback;
+use sauron_vdom::Event;
+use sauron_vdom::Node;
 
 fn main() {
-    let old = element(
+    let old: Node<&'static str, Callback<Event>> = element(
         "div",
         [
             attr("class", "some-class"),

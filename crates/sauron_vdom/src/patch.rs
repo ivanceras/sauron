@@ -2,7 +2,7 @@
 //! The Percy Book.
 
 use crate::Value;
-use crate::{Callback, Event, Node, Text};
+use crate::{Node, Text};
 use std::collections::BTreeMap;
 
 /// A Patch encodes an operation that modifies a real DOM element.
@@ -39,20 +39,20 @@ use std::collections::BTreeMap;
 ///
 /// The patching process is tested in a real browser in crates/virtual-dom-rs/tests/diff_patch.rs
 #[derive(Debug, PartialEq)]
-pub enum Patch<'a, T> {
+pub enum Patch<'a, T, CB> {
     /// Append a vector of child nodes to a parent node id.
-    AppendChildren(NodeIdx, Vec<&'a Node<T>>),
+    AppendChildren(NodeIdx, Vec<&'a Node<T, CB>>),
     /// For a `node_i32`, remove all children besides the first `len`
     TruncateChildren(NodeIdx, usize),
     /// Replace a node with another node. This typically happens when a node's tag changes.
     /// ex: <div> becomes <span>
-    Replace(NodeIdx, &'a Node<T>),
+    Replace(NodeIdx, &'a Node<T, CB>),
     /// Add attributes that the new node has that the old node does not
     AddAttributes(NodeIdx, BTreeMap<&'a str, &'a Value>),
     /// Remove attributes that the old node had that the new node doesn't
     RemoveAttributes(NodeIdx, Vec<&'a str>),
     /// Add attributes that the new node has that the old node does not
-    AddEventListener(NodeIdx, BTreeMap<&'a str, &'a Callback<Event>>),
+    AddEventListener(NodeIdx, BTreeMap<&'a str, &'a CB>),
     /// Remove attributes that the old node had that the new node doesn't
     RemoveEventListener(NodeIdx, Vec<&'a str>),
     /// Change the text of a Text node.
@@ -61,7 +61,7 @@ pub enum Patch<'a, T> {
 
 type NodeIdx = usize;
 
-impl<'a, T> Patch<'a, T> {
+impl<'a, T, CB> Patch<'a, T, CB> {
     /// Every Patch is meant to be applied to a specific node within the DOM. Get the
     /// index of the DOM node that this patch should apply to. DOM nodes are indexed
     /// depth first with the root node in the tree having index 0.

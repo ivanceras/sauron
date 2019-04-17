@@ -1,8 +1,6 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
-use crate::Callback;
-
 pub mod builder;
 mod event;
 mod value;
@@ -26,17 +24,17 @@ pub use value::Value;
 /// TODO: Create a builder to create instances of VirtualNode::Element with
 /// attrs and children without having to explicitly create a Element
 #[derive(Debug, PartialEq, Clone)]
-pub enum Node<T> {
-    Element(Element<T>),
+pub enum Node<T, CB> {
+    Element(Element<T, CB>),
     Text(Text),
 }
 
 #[derive(Debug, PartialEq, Clone, Default)]
-pub struct Element<T> {
+pub struct Element<T, CB> {
     pub tag: T,
     pub attrs: BTreeMap<String, Value>,
-    pub events: BTreeMap<String, Callback<Event>>,
-    pub children: Vec<Node<T>>,
+    pub events: BTreeMap<String, CB>,
+    pub children: Vec<Node<T, CB>>,
     pub namespace: Option<String>,
 }
 
@@ -45,7 +43,7 @@ pub struct Text {
     pub text: String,
 }
 
-impl<T> Element<T> {
+impl<T, CB> Element<T, CB> {
     /// Create a Element using the supplied tag name
     pub fn new(tag: T) -> Self {
         Element {
@@ -64,7 +62,7 @@ impl<T> Element<T> {
     }
 }
 
-impl<T> fmt::Display for Element<T>
+impl<T, CB> fmt::Display for Element<T, CB>
 where
     T: ToString,
 {
@@ -102,7 +100,7 @@ impl fmt::Display for Text {
 }
 
 // Turn a Node into an HTML string (delegate impl to variants)
-impl<T> fmt::Display for Node<T>
+impl<T, CB> fmt::Display for Node<T, CB>
 where
     T: ToString,
 {
@@ -114,8 +112,8 @@ where
     }
 }
 
-impl<T> From<Element<T>> for Node<T> {
-    fn from(v: Element<T>) -> Self {
+impl<T, CB> From<Element<T, CB>> for Node<T, CB> {
+    fn from(v: Element<T, CB>) -> Self {
         Node::Element(v)
     }
 }

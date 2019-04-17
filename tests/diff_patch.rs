@@ -3,7 +3,6 @@ use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
 use sauron::Node;
-use sauron_vdom::builder::*;
 use sauron_vdom::diff;
 use sauron_vdom::{Callback, Event, Patch, Text, Value};
 
@@ -45,10 +44,10 @@ fn replace_node() {
 #[wasm_bindgen_test]
 fn add_children() {
     let old = div([], [b([], [])]); //{ <div> <b></b> </div> },
-    let new = div([], [b([], []), element("new", [], [])]); //{ <div> <b></b> <new></new> </div> },
+    let new = div([], [b([], []), html_element("new", [], [])]); //{ <div> <b></b> <new></new> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AppendChildren(0, vec![&element("new", [], [])])],
+        vec![Patch::AppendChildren(0, vec![&html_element("new", [], [])])],
         "Added a new node to the root node",
     )
 }

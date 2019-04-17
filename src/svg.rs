@@ -1,4 +1,3 @@
-use sauron_vdom::builder::Attribute;
 pub use sauron_vdom::builder::{attr, element, element_ns};
 
 pub mod attributes;

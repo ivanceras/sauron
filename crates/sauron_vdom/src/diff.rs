@@ -1,26 +1,28 @@
 use crate::Patch;
 use crate::Value;
-use crate::{Callback, Element, Event, Node};
+use crate::{Element, Node};
 use std::cmp::min;
 use std::collections::BTreeMap;
 use std::mem;
 
 /// Given two Node's generate Patch's that would turn the old virtual node's
 /// real DOM node equivalent into the new Node's real DOM node equivalent.
-pub fn diff<'a, T>(old: &'a Node<T>, new: &'a Node<T>) -> Vec<Patch<'a, T>>
+pub fn diff<'a, T, CB>(old: &'a Node<T, CB>, new: &'a Node<T, CB>) -> Vec<Patch<'a, T, CB>>
 where
     T: PartialEq,
+    CB: PartialEq,
 {
     diff_recursive(&old, &new, &mut 0)
 }
 
-fn diff_recursive<'a, 'b, T>(
-    old: &'a Node<T>,
-    new: &'a Node<T>,
+fn diff_recursive<'a, 'b, T, CB>(
+    old: &'a Node<T, CB>,
+    new: &'a Node<T, CB>,
     cur_node_idx: &'b mut usize,
-) -> Vec<Patch<'a, T>>
+) -> Vec<Patch<'a, T, CB>>
 where
     T: PartialEq,
+    CB: PartialEq,
 {
     let mut patches = vec![];
     // Different enum variants, replace!
@@ -77,7 +79,7 @@ where
             let new_child_count = new_element.children.len();
 
             if new_child_count > old_child_count {
-                let append_patch: Vec<&'a Node<T>> =
+                let append_patch: Vec<&'a Node<T, CB>> =
                     new_element.children[old_child_count..].iter().collect();
                 patches.push(Patch::AppendChildren(*cur_node_idx, append_patch))
             }
@@ -108,11 +110,14 @@ where
 }
 
 // diff the attributes of old element to the new element at this cur_node_idx
-fn diff_attributes<'a, 'b, T>(
-    old_element: &'a Element<T>,
-    new_element: &'a Element<T>,
+fn diff_attributes<'a, 'b, T, CB>(
+    old_element: &'a Element<T, CB>,
+    new_element: &'a Element<T, CB>,
     cur_node_idx: &'b mut usize,
-) -> Vec<Patch<'a, T>> {
+) -> Vec<Patch<'a, T, CB>>
+where
+    CB: PartialEq,
+{
     let mut patches = vec![];
     let mut add_attributes: BTreeMap<&str, &Value> = BTreeMap::new();
     let mut remove_attributes: Vec<&str> = vec![];
@@ -159,13 +164,16 @@ fn diff_attributes<'a, 'b, T>(
 }
 
 // diff the events of the old element compared to the new element at this cur_node_idx
-fn diff_event_listener<'a, 'b, T>(
-    old_element: &'a Element<T>,
-    new_element: &'a Element<T>,
+fn diff_event_listener<'a, 'b, T, CB>(
+    old_element: &'a Element<T, CB>,
+    new_element: &'a Element<T, CB>,
     cur_node_idx: &'b mut usize,
-) -> Vec<Patch<'a, T>> {
+) -> Vec<Patch<'a, T, CB>>
+where
+    CB: PartialEq,
+{
     let mut patches = vec![];
-    let mut add_event_listener: BTreeMap<&str, &Callback<Event>> = BTreeMap::new();
+    let mut add_event_listener: BTreeMap<&str, &CB> = BTreeMap::new();
     let mut remove_event_listener: Vec<&str> = vec![];
 
     // TODO: -> split out into func
@@ -212,7 +220,7 @@ fn diff_event_listener<'a, 'b, T>(
     patches
 }
 
-fn increment_node_idx_for_children<T>(old: &Node<T>, cur_node_idx: &mut usize) {
+fn increment_node_idx_for_children<T, CB>(old: &Node<T, CB>, cur_node_idx: &mut usize) {
     *cur_node_idx += 1;
     if let Node::Element(element_node) = old {
         for child in element_node.children.iter() {
@@ -230,11 +238,11 @@ mod tests {
 
     #[test]
     fn test_replace_node() {
-        let old = Node::Element::<&'static str>(Element {
+        let old = Node::Element::<&'static str, ()>(Element {
             tag: "div".into(),
             ..Default::default()
         });
-        let new = Node::Element::<&'static str>(Element {
+        let new = Node::Element::<&'static str, ()>(Element {
             tag: "span".into(),
             ..Default::default()
         });
@@ -249,7 +257,7 @@ mod tests {
 
     #[test]
     fn test_simple_diff() {
-        let old = Node::Element::<&'static str>(Element {
+        let old = Node::Element::<&'static str, ()>(Element {
             tag: "div".into(),
             attrs: btreemap! {
                 "id".into() => "some-id".into(),
@@ -258,7 +266,7 @@ mod tests {
             ..Default::default()
         });
 
-        let new = Node::Element::<&'static str>(Element {
+        let new = Node::Element::<&'static str, ()>(Element {
             tag: "div".into(),
             attrs: btreemap! {
                 "id".into() => "some-id".into(),
@@ -273,7 +281,7 @@ mod tests {
 
     #[test]
     fn test_class_changed() {
-        let old = Node::Element::<&'static str>(Element {
+        let old = Node::Element::<&'static str, ()>(Element {
             tag: "div".into(),
             attrs: btreemap! {
                 "id".into() => "some-id".into(),
@@ -282,7 +290,7 @@ mod tests {
             ..Default::default()
         });
 
-        let new = Node::Element::<&'static str>(Element {
+        let new = Node::Element::<&'static str, ()>(Element {
             tag: "div".into(),
             attrs: btreemap! {
                 "id".into() => "some-id".into(),
@@ -305,7 +313,7 @@ mod tests {
 
     #[test]
     fn test_class_removed() {
-        let old = Node::Element::<&'static str>(Element {
+        let old = Node::Element::<&'static str, ()>(Element {
             tag: "div".into(),
             attrs: btreemap! {
                 "id".into() => "some-id".into(),
@@ -314,7 +322,7 @@ mod tests {
             ..Default::default()
         });
 
-        let new = Node::Element::<&'static str>(Element {
+        let new = Node::Element::<&'static str, ()>(Element {
             tag: "div".into(),
             attrs: btreemap! {
                 "id".into() => "some-id".into(),
@@ -330,20 +338,24 @@ mod tests {
     fn no_change_event() {
         let func = |_| println!("Clicked!");
         let cb: Callback<Event> = func.into();
-        let old = Node::Element::<&'static str>(Element {
+        let old = Node::Element::<&'static str, Callback<Event>>(Element {
             tag: "div".into(),
             events: btreemap! {
                 "click".into() => cb.clone(),
             },
-            ..Default::default()
+            attrs: BTreeMap::new(),
+            children: vec![],
+            namespace: None,
         });
 
-        let new = Node::Element::<&'static str>(Element {
+        let new = Node::Element::<&'static str, Callback<Event>>(Element {
             tag: "div".into(),
             events: btreemap! {
                 "click".into() => cb,
             },
-            ..Default::default()
+            attrs: BTreeMap::new(),
+            children: vec![],
+            namespace: None,
         });
 
         let diff = diff(&old, &new);
@@ -355,17 +367,22 @@ mod tests {
         let func = |_| println!("Clicked!");
         let cb: Callback<Event> = func.into();
 
-        let old = Node::Element::<&'static str>(Element {
+        let old = Node::Element::<&'static str, Callback<Event>>(Element {
             tag: "div".into(),
-            ..Default::default()
+            attrs: BTreeMap::new(),
+            events: BTreeMap::new(),
+            children: vec![],
+            namespace: None,
         });
 
-        let new = Node::Element::<&'static str>(Element {
+        let new = Node::Element::<&'static str, Callback<Event>>(Element {
             tag: "div".into(),
             events: btreemap! {
                 "click".into() => cb.clone(),
             },
-            ..Default::default()
+            attrs: BTreeMap::new(),
+            children: vec![],
+            namespace: None,
         });
 
         let diff = diff(&old, &new);

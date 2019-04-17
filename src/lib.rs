@@ -62,13 +62,14 @@ pub mod svg;
 mod util;
 
 pub use dom::DomUpdater;
-pub use sauron_vdom::builder::Attribute;
+use sauron_vdom::Callback;
 pub use sauron_vdom::Event;
 pub use util::{body, document, log, request_animation_frame, window};
 
-pub type Node = sauron_vdom::Node<&'static str>;
-pub type Element = sauron_vdom::Element<&'static str>;
-pub type Patch<'a> = sauron_vdom::Patch<'a, &'static str>;
+pub type Node = sauron_vdom::Node<&'static str, Callback<Event>>;
+pub type Element = sauron_vdom::Element<&'static str, Callback<Event>>;
+pub type Patch<'a> = sauron_vdom::Patch<'a, &'static str, Callback<Event>>;
+pub type Attribute<'a> = sauron_vdom::builder::Attribute<'a, Callback<Event>>;
 pub use sauron_vdom::diff;
 pub use sauron_vdom::Text;
 

@@ -13,8 +13,9 @@ macro_rules! declare_attributes {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<'a, V>(v: V) -> Attribute<'a>
-                where V: Into<Value>
+            pub fn $name<'a, V,CB>(v: V) -> Attribute<'a,CB>
+                where V: Into<Value>,
+                    CB: Clone,
                 {
                     attr(stringify!($name), v)
                 }
@@ -28,8 +29,9 @@ macro_rules! declare_attributes {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<'a, V>(v: V) -> Attribute<'a>
-                where V: Into<Value>
+            pub fn $name<'a, V,CB>(v: V) -> Attribute<'a,CB>
+                where V: Into<Value>,
+                    CB: Clone,
                 {
                     attr($attribute, v)
                 }
