@@ -4,29 +4,31 @@ use sauron::html::*;
 use sauron::Node;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::rc::Weak;
 
 use sauron::Component;
 pub use store::Msg;
 use store::Store;
+use sauron::DomUpdater;
 
 mod store;
 
 pub struct App {
-    store: Rc<RefCell<Store>>,
+    pub dom_updater: Option<Weak<RefCell<DomUpdater<Self,Msg>>>>,
+    click_count: u32,
 }
 
 impl App {
     pub fn new() -> Self {
         App {
-            store: Rc::new(RefCell::new(Store::default())),
+            dom_updater: None,
+            click_count: 0,
         }
     }
 }
 
 impl Component<Msg> for App {
     fn view(&self) -> Node<Msg> {
-        let click_count = self.store.borrow().click_count();
-        let store = self.store.clone();
         div(
             [class("some-class"), id("some-id"), attr("data-id", 1)],
             [
@@ -36,23 +38,23 @@ impl Component<Msg> for App {
                         r#type("button"),
                         value("Click me!"),
                         onclick(move |_| {
-                            sauron::log("Button is clicked");
-                            store.borrow_mut().msg(&Msg::Click);
                             Msg::Click
                         }),
                     ],
                     [],
                 ),
-                text(format!("Clicked: {}", click_count)),
+                text(format!("Clicked: {}", self.click_count)),
             ],
         )
     }
 
-    fn update(&mut self, msg: &Msg) {}
-
-    /*
-    fn subscribe(&mut self, callback: Box<Fn()>) {
-        self.store.borrow_mut().subscribe(callback);
+    fn update(&mut self, msg: &Msg) {
+        sauron::log!("This is the update in App with msg: {:?}", msg);
+        match msg{
+            Msg::Click => self.click_count += 1,
+        }
+        sauron::log!("click_count is now: {}", self.click_count);
     }
-    */
+
+
 }
