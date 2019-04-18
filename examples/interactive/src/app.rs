@@ -48,7 +48,9 @@ impl Component<Msg> for App {
         )
     }
 
-    fn update(&mut self, msg: &Msg) {}
+    fn update(&mut self, msg: &Msg) {
+        sauron::log!("App is updating from msg: {:?}", msg);
+    }
 
     /*
     fn subscribe(&mut self, callback: Box<Fn()>) {
