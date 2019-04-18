@@ -241,13 +241,12 @@ where
             sauron_vdom::Event::Generic(event.type_())
         };
         let msg = callback_clone.emit(cb_event);
-        // FIXME: dispatch msg here
-        crate::log!("dispatch msg here.. {:#?}", msg);
         app_clone.borrow_mut().update(&msg);
         let view = app_clone.borrow().view();
         //That's why Program needs to be wrapped with Rc, so we can pass it dom_updater.update
         //function
         //using a clone
+        // FIXME: This cause a runtime error message in the browser
         dom_updater_clone.borrow_mut().update(&program_clone, view);
     }))
 }
