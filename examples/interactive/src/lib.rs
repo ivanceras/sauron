@@ -7,7 +7,7 @@ use sauron::DomUpdater;
 use wasm_bindgen::prelude::*;
 
 use crate::app::Msg;
-use sauron::dom::Renderer;
+use sauron::Program;
 use sauron::Component;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -16,7 +16,7 @@ mod app;
 
 #[wasm_bindgen]
 pub struct Client {
-    renderer: Rc<Renderer<App, Msg>>,
+    program: Rc<Program<App, Msg>>,
 }
 
 /// Build using
@@ -35,16 +35,16 @@ impl Client {
         let rc_app = Rc::new(RefCell::new(app));
         let mut dom_updater = DomUpdater::new(view, body.as_ref());
 
-        let renderer = Renderer {
+        let program = Program {
             app: rc_app,
             dom_updater: Rc::new(RefCell::new(dom_updater)),
         };
 
-        let rc_renderer = Rc::new(renderer);
-        rc_renderer.dom_updater.borrow_mut().mount(&rc_renderer);
+        let rc_program = Rc::new(program);
+        rc_program.dom_updater.borrow_mut().mount(&rc_program);
 
         Client {
-            renderer: rc_renderer,
+            program: rc_program,
         }
     }
 

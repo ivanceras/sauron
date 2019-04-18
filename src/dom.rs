@@ -14,6 +14,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{self, Element, EventTarget, Node, Text};
 use web_sys::{Event, KeyboardEvent, MouseEvent};
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
+use crate::Program;
 
 mod apply_patches;
 
@@ -36,18 +37,6 @@ pub struct CreatedNode<T> {
     closures: ActiveClosure,
 }
 
-#[allow(unused)]
-pub struct Renderer<APP, MSG> {
-    pub dom_updater: Rc<RefCell<DomUpdater<APP, MSG>>>,
-    pub app: Rc<RefCell<APP>>,
-}
-
-impl<APP, MSG> Renderer<APP, MSG>
-where
-    MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
-{
-}
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
@@ -81,7 +70,7 @@ impl<T> CreatedNode<T> {
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
     pub fn create_dom_node<APP, MSG>(
-        renderer: &Rc<Renderer<APP, MSG>>,
+        program: &Rc<Program<APP, MSG>>,
         vnode: &crate::Node<MSG>,
     ) -> CreatedNode<Node>
     where
@@ -94,7 +83,7 @@ impl<T> CreatedNode<T> {
             }
             crate::Node::Element(element_node) => {
                 let created_element: CreatedNode<Node> =
-                    Self::create_element_node(renderer, element_node).into();
+                    Self::create_element_node(program, element_node).into();
                 created_element
             }
         }
@@ -103,7 +92,7 @@ impl<T> CreatedNode<T> {
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
     pub fn create_element_node<APP, MSG>(
-        renderer: &Rc<Renderer<APP, MSG>>,
+        program: &Rc<Program<APP, MSG>>,
         velem: &crate::Element<MSG>,
     ) -> CreatedNode<Element>
     where
@@ -142,7 +131,7 @@ impl<T> CreatedNode<T> {
                     let current_elem: &EventTarget = element.dyn_ref().unwrap();
 
                     let closure_wrap: Closure<Fn(Event)> =
-                        create_closure_wrap(renderer.clone(), &callback);
+                        create_closure_wrap(program.clone(), &callback);
 
                     current_elem
                         .add_event_listener_with_callback(
@@ -184,7 +173,7 @@ impl<T> CreatedNode<T> {
                 crate::Node::Element(element_node) => {
                     previous_node_was_text = false;
 
-                    let child = Self::create_element_node(renderer, element_node);
+                    let child = Self::create_element_node(program, element_node);
                     let child_elem: Element = child.node;
                     closures.extend(child.closures);
 
@@ -201,7 +190,7 @@ impl<T> CreatedNode<T> {
 }
 
 fn create_closure_wrap<APP, MSG>(
-    renderer: Rc<Renderer<APP, MSG>>,
+    program: Rc<Program<APP, MSG>>,
     callback: &Callback<sauron_vdom::Event, MSG>,
 ) -> Closure<Fn(Event)>
 where
@@ -209,9 +198,9 @@ where
     APP: Component<MSG> + 'static,
 {
     let callback_clone = callback.clone();
-    let renderer_clone = Rc::clone(&renderer);
-    let app_clone: Rc<RefCell<APP>> = Rc::clone(&renderer.app);
-    let dom_updater_clone: Rc<RefCell<DomUpdater<APP, MSG>>> = Rc::clone(&renderer.dom_updater);
+    let renderer_clone = Rc::clone(&program);
+    let app_clone: Rc<RefCell<APP>> = Rc::clone(&program.app);
+    let dom_updater_clone: Rc<RefCell<DomUpdater<APP, MSG>>> = Rc::clone(&program.dom_updater);
 
     Closure::wrap(Box::new(move |event: Event| {
         let mouse_event: Option<&MouseEvent> = event.dyn_ref();
@@ -276,9 +265,9 @@ where
         }
     }
 
-    pub fn mount(&mut self, renderer: &Rc<Renderer<APP, MSG>>) {
+    pub fn mount(&mut self, program: &Rc<Program<APP, MSG>>) {
         let created_node: CreatedNode<Node> =
-            CreatedNode::<Node>::create_dom_node(renderer, &self.current_vdom);
+            CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         self.root_node
             .append_child(&created_node.node)
             .expect("Could not append child to mount");
@@ -289,8 +278,8 @@ where
     /// Create a new `DomUpdater`.
     ///
     /// A root `Node` will be created but not added to your DOM.
-    pub fn new(renderer: &Rc<Renderer<APP,MSG>>, current_vdom: crate::Node<MSG>) -> DomUpdater<APP, MSG> {
-        let created_node = CreatedNode::<Node>::create_dom_node(renderer, &current_vdom);
+    pub fn new(program: &Rc<Program<APP,MSG>>, current_vdom: crate::Node<MSG>) -> DomUpdater<APP, MSG> {
+        let created_node = CreatedNode::<Node>::create_dom_node(program, &current_vdom);
         DomUpdater {
             current_vdom,
             root_node: created_node.node,
@@ -305,12 +294,12 @@ where
     /// A root `Node` will be created and appended (as a child) to your passed
     /// in mount element.
     pub fn new_append_to_mount(
-        renderer: &Rc<Renderer<APP, MSG>>,
+        program: &Rc<Program<APP, MSG>>,
         current_vdom: crate::Node<MSG>,
         mount: &Element,
     ) -> DomUpdater<APP, MSG> {
         let created_node: CreatedNode<Node> =
-            CreatedNode::<Node>::create_dom_node(renderer, &current_vdom);
+            CreatedNode::<Node>::create_dom_node(program, &current_vdom);
         mount
             .append_child(&created_node.node)
             .expect("Could not append child to mount");
@@ -327,11 +316,11 @@ where
     /// A root `Node` will be created and it will replace your passed in mount
     /// element.
     pub fn new_replace_mount(
-        renderer: &Rc<Renderer<APP, MSG>>,
+        program: &Rc<Program<APP, MSG>>,
         current_vdom: crate::Node<MSG>,
         mount: Element,
     ) -> DomUpdater<APP, MSG> {
-        let created_node = CreatedNode::<Node>::create_dom_node(renderer, &current_vdom);
+        let created_node = CreatedNode::<Node>::create_dom_node(program, &current_vdom);
         mount
             .replace_with_with_node_1(&created_node.node)
             .expect("Could not replace mount element");
@@ -347,10 +336,10 @@ where
     ///
     /// Then use that diff to patch the real DOM in the user's browser so that they are
     /// seeing the latest state of the application.
-    pub fn update(&mut self, renderer: &Rc<Renderer<APP, MSG>>, new_vdom: crate::Node<MSG>) {
+    pub fn update(&mut self, program: &Rc<Program<APP, MSG>>, new_vdom: crate::Node<MSG>) {
         let patches = diff(&self.current_vdom, &new_vdom);
         let active_closures = patch(
-            renderer,
+            program,
             self.root_node.clone(),
             &mut self.active_closures,
             &patches,
