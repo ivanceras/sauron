@@ -2,7 +2,7 @@
 use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
-use sauron::test_fixtures::simple_component;
+use sauron::test_fixtures::simple_program;
 use sauron::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -23,17 +23,12 @@ fn patches_dom() {
     let document = web_sys::window().unwrap().document().unwrap();
 
     let sauron_vdom: Node<()> = div([], []);
-
-    let mut dom_updater = DomUpdater::new(simple_component(), sauron_vdom);
+    let simple_program = &simple_program();
+    let mut dom_updater =
+        DomUpdater::new_append_to_mount(simple_program, sauron_vdom, &sauron::body());
 
     let new_vdom = div([id("patched")], []); //html! { <div id="patched"></div> };
-    dom_updater.update(new_vdom);
-
-    document
-        .body()
-        .unwrap()
-        .append_child(&dom_updater.root_node())
-        .unwrap();
+    dom_updater.update(simple_program, new_vdom);
 
     assert_eq!(document.query_selector("#patched").unwrap().is_some(), true);
 }
@@ -47,8 +42,9 @@ fn updates_active_closure_on_replace() {
 
     let body = sauron::body();
 
+    let simple_program = &simple_program();
     let old = div([], []);
-    let mut dom_updater = DomUpdater::new_append_to_mount(simple_component(), old, &body);
+    let mut dom_updater = DomUpdater::new_append_to_mount(simple_program, old, &body);
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -72,7 +68,7 @@ fn updates_active_closure_on_replace() {
     // New node replaces old node.
     // We are testing that we've stored this new node's closures even though `new` will be dropped
     // at the end of this block.
-    dom_updater.update(replace_node);
+    dom_updater.update(simple_program, replace_node);
 
     let input_event = InputEvent::new("input").unwrap();
 
@@ -97,7 +93,8 @@ fn updates_active_closures_on_append() {
     let body = sauron::body();
 
     let old = div([], []);
-    let mut dom_updater = DomUpdater::new_append_to_mount(simple_component(), old, &body);
+    let simple_program = &simple_program();
+    let mut dom_updater = DomUpdater::new_append_to_mount(simple_program, old, &body);
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -125,7 +122,7 @@ fn updates_active_closures_on_append() {
         // New node gets appended into the DOM.
         // We are testing that we've stored this new node's closures even though `new` will be dropped
         // at the end of this block.
-        dom_updater.update(append_node);
+        dom_updater.update(simple_program, append_node);
     }
 
     let input_event = InputEvent::new("input").unwrap();

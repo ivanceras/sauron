@@ -10,7 +10,7 @@ use sauron::dom::DomUpdater;
 use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
-use sauron::test_fixtures::simple_component;
+use sauron::test_fixtures::simple_program;
 use sauron::Node;
 use std::cell::RefCell;
 use web_sys::*;
@@ -43,7 +43,7 @@ fn on_input() {
     let input_event = InputEvent::new("input").unwrap();
 
     let body = sauron::body();
-    let _dom_updater = DomUpdater::new_append_to_mount(simple_component(), input, &body);
+    let _dom_updater = DomUpdater::new_append_to_mount(&simple_program(), input, &body);
 
     let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 
@@ -91,9 +91,10 @@ fn added_event() {
     let input_event = InputEvent::new("input").unwrap();
 
     let body = sauron::body();
-    let mut dom_updater = DomUpdater::new_append_to_mount(simple_component(), old, &body);
+    let simple_program = &simple_program();
+    let mut dom_updater = DomUpdater::new_append_to_mount(simple_program, old, &body);
     // update to new dom with no event attached
-    dom_updater.update(new);
+    dom_updater.update(simple_program, new);
 
     let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 
@@ -142,9 +143,10 @@ fn remove_event() {
     let input_event = InputEvent::new("input").unwrap();
 
     let body = sauron::body();
-    let mut dom_updater = DomUpdater::new_append_to_mount(simple_component(), old, &body);
+    let simple_program = &simple_program();
+    let mut dom_updater = DomUpdater::new_append_to_mount(simple_program, old, &body);
     // update to new dom with no event attached
-    dom_updater.update(new);
+    dom_updater.update(simple_program, new);
 
     let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 

@@ -36,27 +36,4 @@ pub trait Component<MSG> {
     fn view(&self) -> Node<MSG>;
 }
 
-pub mod test_fixtures {
-    use crate::html::div;
-    use crate::Component;
-    use crate::Node;
-    use std::cell::RefCell;
-    use std::rc::Rc;
-
-    #[derive(Clone)]
-    pub struct SimpleComponent;
-
-    impl Component<()> for SimpleComponent {
-        fn update(&mut self, _msg: &()) {
-            crate::log("updating in SimpleComponent");
-        }
-        fn view(&self) -> Node<()> {
-            div([], [])
-        }
-    }
-
-    pub fn simple_component() -> Rc<RefCell<SimpleComponent>> {
-        Rc::new(RefCell::new(SimpleComponent))
-    }
-
-}
+pub mod test_fixtures;

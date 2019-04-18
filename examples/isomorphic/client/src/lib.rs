@@ -22,22 +22,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub struct Client {
-    dom_updater: DomUpdater<App, Msg>,
-}
-
-// Expose globals from JS for things such as request animation frame
-// that web sys doesn't seem to have yet
-//
-// TODO: Remove this and use RAF from Rust
-// https://rustwasm.github.io/wasm-bindgen/api/web_sys/struct.Window.html#method.request_animation_frame
-#[wasm_bindgen]
-extern "C" {
-    pub type GlobalJS;
-
-    pub static global_js: GlobalJS;
-
-    #[wasm_bindgen(method)]
-    pub fn update(this: &GlobalJS);
+    program: Rc<Program<App, Msg>>,
 }
 
 #[wasm_bindgen]
@@ -45,17 +30,14 @@ impl Client {
     #[wasm_bindgen(constructor)]
     pub fn new(initial_state: &str) -> Client {
         console_error_panic_hook::set_once();
-        console::log_1(&format!("What to do with this initial state: {}", initial_state).into());
+        sauron::log!("Do something with the initial state: {}", initial_state);
 
         let root_node = document()
             .get_element_by_id("isomorphic-rust-web-app")
             .unwrap();
 
         let app = App::new(1);
-        let view = app.view();
-        let dom_updater =
-            DomUpdater::new_replace_mount(Rc::new(RefCell::new(app)), view, root_node);
-        let mut client = Client { dom_updater };
-        client
+        let program = Program::new_replace_mount(app, &root_node);
+        Client { program }
     }
 }

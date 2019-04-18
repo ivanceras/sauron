@@ -31,7 +31,7 @@ impl Client {
         sauron::log("I see you!");
         let mut app = App::new();
         let body = sauron::body();
-        let program = Program::new(app, &body);
+        let program = Program::new_append_mount(app, &body);
 
         Client { program }
     }
