@@ -1,9 +1,8 @@
-
-use std::cell::RefCell;
-use std::rc::Rc;
 use crate::Component;
-use std::fmt::Debug;
 use crate::DomUpdater;
+use std::cell::RefCell;
+use std::fmt::Debug;
+use std::rc::Rc;
 
 #[allow(unused)]
 pub struct Program<APP, MSG> {

@@ -7,8 +7,8 @@ use sauron::DomUpdater;
 use wasm_bindgen::prelude::*;
 
 use crate::app::Msg;
-use sauron::Program;
 use sauron::Component;
+use sauron::Program;
 use std::cell::RefCell;
 use std::rc::Rc;
 

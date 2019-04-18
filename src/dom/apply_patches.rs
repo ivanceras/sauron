@@ -1,9 +1,9 @@
 use super::ActiveClosure;
 use super::CreatedNode;
-use crate::Program;
 use crate::dom;
 use crate::Component;
 use crate::Patch;
+use crate::Program;
 use js_sys::Function;
 use std::cmp::min;
 use std::collections::HashMap;
@@ -167,8 +167,7 @@ where
 
         Patch::AddEventListener(node_idx, events) => {
             for (event, callback) in events.iter() {
-                let closure_wrap: Closure<Fn(Event)> =
-                    dom::create_closure_wrap(program.clone(), callback);
+                let closure_wrap: Closure<Fn(Event)> = dom::create_closure_wrap(program, callback);
                 let func: &Function = closure_wrap.as_ref().unchecked_ref();
                 node.add_event_listener_with_callback(event, func)?;
                 let node_id = *node_idx as u32;

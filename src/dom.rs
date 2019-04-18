@@ -1,4 +1,5 @@
 use crate::Component;
+use crate::Program;
 use apply_patches::patch;
 use sauron_vdom::Callback;
 use sauron_vdom::{self, diff};
@@ -14,7 +15,6 @@ use wasm_bindgen::JsCast;
 use web_sys::{self, Element, EventTarget, Node, Text};
 use web_sys::{Event, KeyboardEvent, MouseEvent};
 use web_sys::{HtmlInputElement, HtmlTextAreaElement};
-use crate::Program;
 
 mod apply_patches;
 
@@ -36,7 +36,6 @@ pub struct CreatedNode<T> {
     pub node: T,
     closures: ActiveClosure,
 }
-
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
@@ -130,8 +129,7 @@ impl<T> CreatedNode<T> {
                 |(event_str, callback): (&String, &Callback<sauron_vdom::Event, MSG>)| {
                     let current_elem: &EventTarget = element.dyn_ref().unwrap();
 
-                    let closure_wrap: Closure<Fn(Event)> =
-                        create_closure_wrap(program.clone(), &callback);
+                    let closure_wrap: Closure<Fn(Event)> = create_closure_wrap(program, &callback);
 
                     current_elem
                         .add_event_listener_with_callback(
@@ -190,7 +188,7 @@ impl<T> CreatedNode<T> {
 }
 
 fn create_closure_wrap<APP, MSG>(
-    program: Rc<Program<APP, MSG>>,
+    program: &Rc<Program<APP, MSG>>,
     callback: &Callback<sauron_vdom::Event, MSG>,
 ) -> Closure<Fn(Event)>
 where
@@ -198,7 +196,7 @@ where
     APP: Component<MSG> + 'static,
 {
     let callback_clone = callback.clone();
-    let renderer_clone = Rc::clone(&program);
+    let program_clone = Rc::clone(&program);
     let app_clone: Rc<RefCell<APP>> = Rc::clone(&program.app);
     let dom_updater_clone: Rc<RefCell<DomUpdater<APP, MSG>>> = Rc::clone(&program.dom_updater);
 
@@ -247,7 +245,10 @@ where
         crate::log!("dispatch msg here.. {:#?}", msg);
         app_clone.borrow_mut().update(&msg);
         let view = app_clone.borrow().view();
-        dom_updater_clone.borrow_mut().update(&renderer_clone, view);
+        //That's why Program needs to be wrapped with Rc, so we can pass it dom_updater.update
+        //function
+        //using a clone
+        dom_updater_clone.borrow_mut().update(&program_clone, view);
     }))
 }
 
