@@ -275,20 +275,6 @@ where
         self.root_node = created_node.node;
         self.active_closures = created_node.closures;
     }
-    /*
-    /// Create a new `DomUpdater`.
-    ///
-    /// A root `Node` will be created but not added to your DOM.
-    pub fn new(program: &Rc<Program<APP,MSG>>, current_vdom: crate::Node<MSG>) -> DomUpdater<APP, MSG> {
-        let created_node = CreatedNode::<Node>::create_dom_node(program, &current_vdom);
-        DomUpdater {
-            current_vdom,
-            root_node: created_node.node,
-            active_closures: created_node.closures,
-            _phantom_data: PhantomData,
-        }
-    }
-    */
 
     /// Create a new `DomUpdater`.
     ///

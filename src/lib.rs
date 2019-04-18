@@ -1,6 +1,7 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
 #![feature(type_alias_enum_variants)]
+#![feature(arbitrary_self_types)]
 
 //!
 //!  Sauron is an html web framework for building web-apps.

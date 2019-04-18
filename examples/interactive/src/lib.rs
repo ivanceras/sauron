@@ -31,38 +31,10 @@ impl Client {
         sauron::log("I see you!");
         let mut app = App::new();
         let body = sauron::body();
-        let view = app.view();
-        let rc_app = Rc::new(RefCell::new(app));
-        let mut dom_updater = DomUpdater::new(view, body.as_ref());
+        let program = Program::new(app, &body);
 
-        let program = Program {
-            app: rc_app,
-            dom_updater: Rc::new(RefCell::new(dom_updater)),
-        };
-
-        let rc_program = Rc::new(program);
-        rc_program.dom_updater.borrow_mut().mount(&rc_program);
-
-        Client {
-            program: rc_program,
-        }
+        Client { program }
     }
-
-    /*
-    #[wasm_bindgen]
-    pub fn render(&mut self) {
-        self.app.update();
-        self.dom_updater.update(self.app.view());
-    }
-    */
-}
-
-#[wasm_bindgen]
-extern "C" {
-    pub type GlobalJS;
-    pub static global_js: GlobalJS;
-    #[wasm_bindgen(method)]
-    pub fn update(this: &GlobalJS);
 }
 
 #[wasm_bindgen]
