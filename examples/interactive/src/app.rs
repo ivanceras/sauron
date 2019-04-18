@@ -7,23 +7,19 @@ use std::rc::Rc;
 use std::rc::Weak;
 
 use sauron::Component;
+use sauron::DomUpdater;
 pub use store::Msg;
 use store::Store;
-use sauron::DomUpdater;
 
 mod store;
 
 pub struct App {
-    pub dom_updater: Option<Weak<RefCell<DomUpdater<Self,Msg>>>>,
     click_count: u32,
 }
 
 impl App {
     pub fn new() -> Self {
-        App {
-            dom_updater: None,
-            click_count: 0,
-        }
+        App { click_count: 0 }
     }
 }
 
@@ -37,9 +33,7 @@ impl Component<Msg> for App {
                         class("client"),
                         r#type("button"),
                         value("Click me!"),
-                        onclick(move |_| {
-                            Msg::Click
-                        }),
+                        onclick(move |_| Msg::Click),
                     ],
                     [],
                 ),
@@ -50,11 +44,9 @@ impl Component<Msg> for App {
 
     fn update(&mut self, msg: &Msg) {
         sauron::log!("This is the update in App with msg: {:?}", msg);
-        match msg{
+        match msg {
             Msg::Click => self.click_count += 1,
         }
         sauron::log!("click_count is now: {}", self.click_count);
     }
-
-
 }

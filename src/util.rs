@@ -28,5 +28,5 @@ pub fn log<S: Into<String>>(s: S) {
 
 #[macro_export]
 macro_rules! log {
-    ($($t:tt)*) => ($crate::util::log(format!($($t)*)))
+    ($($t:tt)*) => ($crate::log(format!($($t)*)))
 }

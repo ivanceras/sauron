@@ -1,15 +1,12 @@
 use super::ActiveClosure;
 use super::CreatedNode;
 use crate::dom;
-use crate::Component;
 use crate::Patch;
 use js_sys::Function;
-use std::cell::RefCell;
 use std::cmp::min;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fmt::Debug;
-use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
@@ -18,8 +15,7 @@ use web_sys::{Element, Event, Node, Text};
 /// Apply all of the patches to our old root node in order to create the new root node
 /// that we desire.
 /// This is usually used after diffing two virtual nodes.
-pub fn patch<N, APP, MSG>(
-    app: &Rc<RefCell<APP>>,
+pub fn patch<N, MSG>(
     root_node: N,
     old_closures: &mut ActiveClosure,
     patches: &[Patch<MSG>],
@@ -27,7 +23,6 @@ pub fn patch<N, APP, MSG>(
 where
     N: Into<Node>,
     MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
 {
     let root_node: Node = root_node.into();
 
@@ -57,13 +52,13 @@ where
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = element_nodes_to_patch.get(&patch_node_idx) {
-            let new_closures = apply_element_patch(app, &element, old_closures, &patch)?;
+            let new_closures = apply_element_patch(&element, old_closures, &patch)?;
             active_closures.extend(new_closures);
             continue;
         }
 
         if let Some(text_node) = text_nodes_to_patch.get(&patch_node_idx) {
-            apply_text_patch(app, &text_node, &patch)?;
+            apply_text_patch(&text_node, &patch)?;
             continue;
         }
 
@@ -138,15 +133,13 @@ fn find_nodes(
     }
 }
 
-fn apply_element_patch<APP, MSG>(
-    app: &Rc<RefCell<APP>>,
+fn apply_element_patch<MSG>(
     node: &Element,
     old_closures: &mut ActiveClosure,
     patch: &Patch<MSG>,
 ) -> Result<ActiveClosure, JsValue>
 where
     MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
 {
     let mut active_closures = HashMap::new();
     match patch {
@@ -167,8 +160,7 @@ where
 
         Patch::AddEventListener(node_idx, events) => {
             for (event, callback) in events.iter() {
-                let closure_wrap: Closure<Fn(Event)> =
-                    dom::create_closure_wrap(app.clone(), callback);
+                let closure_wrap: Closure<Fn(Event)> = dom::create_closure_wrap(callback);
                 let func: &Function = closure_wrap.as_ref().unchecked_ref();
                 node.add_event_listener_with_callback(event, func)?;
                 let node_id = *node_idx as u32;
@@ -205,7 +197,7 @@ where
             Ok(active_closures)
         }
         Patch::Replace(_node_idx, new_node) => {
-            let created_node = CreatedNode::<Node>::create_dom_node::<APP, MSG>(app, new_node);
+            let created_node = CreatedNode::<Node>::create_dom_node::<MSG>(new_node);
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
         }
@@ -246,7 +238,7 @@ where
             let parent = &node;
             let mut active_closures = HashMap::new();
             for new_node in new_nodes {
-                let created_node = CreatedNode::<Node>::create_dom_node::<APP, MSG>(app, &new_node);
+                let created_node = CreatedNode::<Node>::create_dom_node::<MSG>(&new_node);
                 parent.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }
@@ -259,21 +251,16 @@ where
     }
 }
 
-fn apply_text_patch<APP, MSG>(
-    app: &Rc<RefCell<APP>>,
-    node: &Text,
-    patch: &Patch<MSG>,
-) -> Result<(), JsValue>
+fn apply_text_patch<MSG>(node: &Text, patch: &Patch<MSG>) -> Result<(), JsValue>
 where
     MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
 {
     match patch {
         Patch::ChangeText(_node_idx, new_node) => {
             node.set_node_value(Some(&new_node.text));
         }
         Patch::Replace(_node_idx, new_node) => {
-            let created_node = CreatedNode::<Node>::create_dom_node::<APP, MSG>(app, new_node);
+            let created_node = CreatedNode::<Node>::create_dom_node::<MSG>(new_node);
             node.replace_with_with_node_1(&created_node.node)?;
         }
         other => unreachable!(

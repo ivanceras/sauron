@@ -15,7 +15,7 @@ mod app;
 
 #[wasm_bindgen]
 pub struct Client {
-    dom_updater: Rc<RefCell<DomUpdater<App, Msg>>>,
+    dom_updater: DomUpdater<Msg>,
 }
 
 /// Build using
@@ -31,11 +31,10 @@ impl Client {
         let mut app = App::new();
         let body = sauron::body();
         let view = app.view();
-        let dom_updater = DomUpdater::new_append_to_mount(Rc::new(RefCell::new(app)), view, &body);
+        let dom_updater = DomUpdater::new_append_to_mount(view, &body);
 
         Client { dom_updater }
     }
-
 }
 
 #[wasm_bindgen]

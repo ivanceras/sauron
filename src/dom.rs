@@ -1,12 +1,9 @@
-use crate::Component;
 use apply_patches::patch;
 use sauron_vdom::Callback;
 use sauron_vdom::{self, diff};
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::ops::Deref;
-use std::rc::Rc;
 use std::sync::Mutex;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
@@ -37,8 +34,7 @@ pub struct CreatedNode<T> {
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
-pub struct DomUpdater<APP, MSG> {
-    app: Rc<RefCell<APP>>,
+pub struct DomUpdater<MSG> {
     current_vdom: crate::Node<MSG>,
     root_node: Node,
 
@@ -66,13 +62,9 @@ impl<T> CreatedNode<T> {
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
-    pub fn create_dom_node<APP, MSG>(
-        app: &Rc<RefCell<APP>>,
-        vnode: &crate::Node<MSG>,
-    ) -> CreatedNode<Node>
+    pub fn create_dom_node<MSG>(vnode: &crate::Node<MSG>) -> CreatedNode<Node>
     where
         MSG: Clone + Debug + 'static,
-        APP: Component<MSG> + 'static,
     {
         match vnode {
             crate::Node::Text(text_node) => {
@@ -80,7 +72,7 @@ impl<T> CreatedNode<T> {
             }
             crate::Node::Element(element_node) => {
                 let created_element: CreatedNode<Node> =
-                    Self::create_element_node(app, element_node).into();
+                    Self::create_element_node(element_node).into();
                 created_element
             }
         }
@@ -88,13 +80,9 @@ impl<T> CreatedNode<T> {
 
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
-    pub fn create_element_node<APP, MSG>(
-        app: &Rc<RefCell<APP>>,
-        velem: &crate::Element<MSG>,
-    ) -> CreatedNode<Element>
+    pub fn create_element_node<MSG>(velem: &crate::Element<MSG>) -> CreatedNode<Element>
     where
         MSG: Clone + Debug + 'static,
-        APP: Component<MSG> + 'static,
     {
         let document = web_sys::window().unwrap().document().unwrap();
 
@@ -127,8 +115,7 @@ impl<T> CreatedNode<T> {
                 |(event_str, callback): (&String, &Callback<sauron_vdom::Event, MSG>)| {
                     let current_elem: &EventTarget = element.dyn_ref().unwrap();
 
-                    let closure_wrap: Closure<Fn(Event)> =
-                        create_closure_wrap(app.clone(), &callback);
+                    let closure_wrap: Closure<Fn(Event)> = create_closure_wrap(&callback);
 
                     current_elem
                         .add_event_listener_with_callback(
@@ -171,7 +158,7 @@ impl<T> CreatedNode<T> {
                 crate::Node::Element(element_node) => {
                     previous_node_was_text = false;
 
-                    let child = Self::create_element_node(app, element_node);
+                    let child = Self::create_element_node(element_node);
                     let child_elem: Element = child.node;
                     closures.extend(child.closures);
 
@@ -187,16 +174,11 @@ impl<T> CreatedNode<T> {
     }
 }
 
-fn create_closure_wrap<APP, MSG>(
-    app: Rc<RefCell<APP>>,
-    callback: &Callback<sauron_vdom::Event, MSG>,
-) -> Closure<Fn(Event)>
+fn create_closure_wrap<MSG>(callback: &Callback<sauron_vdom::Event, MSG>) -> Closure<Fn(Event)>
 where
     MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
 {
     let callback_clone = callback.clone();
-    //let app_clone:Rc<RefCell<APP>> = Rc::clone(&app);
     Closure::wrap(Box::new(move |event: Event| {
         let mouse_event: Option<&MouseEvent> = event.dyn_ref();
         let key_event: Option<&KeyboardEvent> = event.dyn_ref();
@@ -240,22 +222,19 @@ where
         let msg = callback_clone.emit(cb_event);
         // FIXME: dispatch msg here
         crate::log!("dispatch msg here.. {:#?}", msg);
-        app.borrow_mut().update(&msg);
     }))
 }
 
-impl<APP, MSG> DomUpdater<APP, MSG>
+impl<MSG> DomUpdater<MSG>
 where
     MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
 {
     /// Create a new `DomUpdater`.
     ///
     /// A root `Node` will be created but not added to your DOM.
-    pub fn new(app: Rc<RefCell<APP>>, current_vdom: crate::Node<MSG>) -> DomUpdater<APP, MSG> {
-        let created_node = CreatedNode::<Node>::create_dom_node(&app, &current_vdom);
+    pub fn new(current_vdom: crate::Node<MSG>) -> DomUpdater<MSG> {
+        let created_node = CreatedNode::<Node>::create_dom_node(&current_vdom);
         DomUpdater {
-            app,
             current_vdom,
             root_node: created_node.node,
             active_closures: created_node.closures,
@@ -266,18 +245,12 @@ where
     ///
     /// A root `Node` will be created and appended (as a child) to your passed
     /// in mount element.
-    pub fn new_append_to_mount(
-        app: Rc<RefCell<APP>>,
-        current_vdom: crate::Node<MSG>,
-        mount: &Element,
-    ) -> DomUpdater<APP, MSG> {
-        let created_node: CreatedNode<Node> =
-            CreatedNode::<Node>::create_dom_node(&app, &current_vdom);
+    pub fn new_append_to_mount(current_vdom: crate::Node<MSG>, mount: &Element) -> DomUpdater<MSG> {
+        let created_node: CreatedNode<Node> = CreatedNode::<Node>::create_dom_node(&current_vdom);
         mount
             .append_child(&created_node.node)
             .expect("Could not append child to mount");
         DomUpdater {
-            app,
             current_vdom,
             root_node: created_node.node,
             active_closures: created_node.closures,
@@ -288,17 +261,12 @@ where
     ///
     /// A root `Node` will be created and it will replace your passed in mount
     /// element.
-    pub fn new_replace_mount(
-        app: Rc<RefCell<APP>>,
-        current_vdom: crate::Node<MSG>,
-        mount: Element,
-    ) -> DomUpdater<APP, MSG> {
-        let created_node = CreatedNode::<Node>::create_dom_node(&app, &current_vdom);
+    pub fn new_replace_mount(current_vdom: crate::Node<MSG>, mount: Element) -> DomUpdater<MSG> {
+        let created_node = CreatedNode::<Node>::create_dom_node(&current_vdom);
         mount
             .replace_with_with_node_1(&created_node.node)
             .expect("Could not replace mount element");
         DomUpdater {
-            app,
             current_vdom,
             root_node: created_node.node,
             active_closures: created_node.closures,
@@ -311,13 +279,8 @@ where
     /// seeing the latest state of the application.
     pub fn update(&mut self, new_vdom: crate::Node<MSG>) {
         let patches = diff(&self.current_vdom, &new_vdom);
-        let active_closures = patch(
-            &self.app,
-            self.root_node.clone(),
-            &mut self.active_closures,
-            &patches,
-        )
-        .unwrap();
+        let active_closures =
+            patch(self.root_node.clone(), &mut self.active_closures, &patches).unwrap();
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
     }
