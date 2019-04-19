@@ -237,8 +237,13 @@ where
         } else {
             sauron_vdom::Event::Generic(event.type_())
         };
+        let program_clone = Rc::clone(&program);
         let msg = callback_clone.emit(cb_event);
-        program.dispatch(msg);
+        let closure_raf: Closure<FnMut() + 'static> = Closure::once(move || {
+            program_clone.dispatch(msg);
+        });
+        crate::request_animation_frame(&closure_raf);
+        closure_raf.forget();
     }))
 }
 

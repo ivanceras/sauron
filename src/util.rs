@@ -30,7 +30,7 @@ pub fn performance() -> web_sys::Performance {
 
 #[inline]
 pub fn log<S: Into<String>>(_s: S) {
-    //web_sys::console::log_1(&s.into().into());
+    web_sys::console::log_1(&s.into().into());
 }
 
 #[inline]
