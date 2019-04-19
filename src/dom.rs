@@ -3,7 +3,6 @@ use crate::Program;
 use apply_patches::patch;
 use sauron_vdom::Callback;
 use sauron_vdom::{self, diff};
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -197,8 +196,6 @@ where
 {
     let callback_clone = callback.clone();
     let program_clone = Rc::clone(&program);
-    let app_clone: Rc<RefCell<APP>> = Rc::clone(&program.app);
-    let dom_updater_clone: Rc<RefCell<DomUpdater<APP, MSG>>> = Rc::clone(&program.dom_updater);
 
     Closure::wrap(Box::new(move |event: Event| {
         let mouse_event: Option<&MouseEvent> = event.dyn_ref();
@@ -241,13 +238,7 @@ where
             sauron_vdom::Event::Generic(event.type_())
         };
         let msg = callback_clone.emit(cb_event);
-        app_clone.borrow_mut().update(&msg);
-        let view = app_clone.borrow().view();
-        //That's why Program needs to be wrapped with Rc, so we can pass it dom_updater.update
-        //function
-        //using a clone
-        // FIXME: This cause a runtime error message in the browser
-        dom_updater_clone.borrow_mut().update(&program_clone, view);
+        program_clone.dispatch(msg);
     }))
 }
 

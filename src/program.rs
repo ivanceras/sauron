@@ -42,4 +42,11 @@ where
     fn start_replace_mount(self: &Rc<Self>) {
         self.dom_updater.borrow_mut().replace_mount(&self)
     }
+
+    /// This is called when an event is triggered in the html DOM.
+    pub fn dispatch(self: &Rc<Self>, msg: MSG) {
+        self.app.borrow_mut().update(&msg);
+        let view = self.app.borrow().view();
+        self.dom_updater.borrow_mut().update(self, view);
+    }
 }
