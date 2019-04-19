@@ -98,6 +98,9 @@ declare_attributes! {
     key;
     placeholder;
     display;
+    checked;
+    target;
+    href;
 }
 
 // sizing attribtes

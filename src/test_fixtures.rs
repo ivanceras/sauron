@@ -8,12 +8,16 @@ use std::rc::Rc;
 pub struct SimpleComponent;
 
 impl Component<()> for SimpleComponent {
-    fn update(&mut self, _msg: &()) {
+    fn create() -> Self {
+        SimpleComponent
+    }
+    fn update(&mut self, _msg: ()) {
         crate::log("updating in SimpleComponent");
     }
     fn view(&self) -> crate::Node<()> {
         div([], [])
     }
+    fn subscribe(&self) {}
 }
 
 pub fn simple_component() -> Rc<RefCell<SimpleComponent>> {

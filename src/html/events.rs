@@ -38,6 +38,7 @@ declare_events! {
     onpointerlockerror => pointerlockerror;
     onselect => select;
     onwheel => wheel;
+    ondoubleclick => doubleclick;
 }
 
 // keyboard events

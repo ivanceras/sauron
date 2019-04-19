@@ -5,6 +5,9 @@ use std::fmt::Debug;
 use std::rc::Rc;
 use web_sys::Node;
 
+/// Holds the app and the dom updater
+/// This is passed into the event listener and the dispatch program
+/// will be called after the event is triggered.
 pub struct Program<APP, MSG> {
     pub app: Rc<RefCell<APP>>,
     pub dom_updater: Rc<RefCell<DomUpdater<APP, MSG>>>,
@@ -45,8 +48,12 @@ where
 
     /// This is called when an event is triggered in the html DOM.
     pub fn dispatch(self: &Rc<Self>, msg: MSG) {
-        self.app.borrow_mut().update(&msg);
+        let performance = crate::performance();
+        let t1 = performance.now();
+        self.app.borrow_mut().update(msg);
         let view = self.app.borrow().view();
         self.dom_updater.borrow_mut().update(self, view);
+        let t2 = performance.now();
+        crate::log!("took {} ms to update", t2 - t1);
     }
 }

@@ -22,6 +22,12 @@ pub fn body() -> web_sys::HtmlElement {
     document().body().expect("document should have a body")
 }
 
+pub fn performance() -> web_sys::Performance {
+    window()
+        .performance()
+        .expect("should have performance on window")
+}
+
 pub fn log<S: Into<String>>(s: S) {
     web_sys::console::log_1(&s.into().into());
 }

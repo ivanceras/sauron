@@ -21,7 +21,7 @@ pub use program::Program;
 use sauron_vdom::Callback;
 pub use sauron_vdom::Event;
 
-pub use util::{body, document, log, request_animation_frame, window};
+pub use util::{body, document, log, performance, request_animation_frame, window};
 
 pub type Node<MSG> = sauron_vdom::Node<&'static str, Callback<Event, MSG>>;
 pub type Element<MSG> = sauron_vdom::Element<&'static str, Callback<Event, MSG>>;
@@ -31,9 +31,10 @@ pub use sauron_vdom::diff;
 pub use sauron_vdom::Text;
 
 pub trait Component<MSG> {
-    fn update(&mut self, msg: &MSG);
-
+    fn create() -> Self;
+    fn update(&mut self, msg: MSG);
     fn view(&self) -> Node<MSG>;
+    fn subscribe(&self);
 }
 
 pub mod test_fixtures;
