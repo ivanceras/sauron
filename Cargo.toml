@@ -70,5 +70,6 @@ members = [
 
 
 [profile.release]
-opt-level = 'z'
-lto = 'thin'
+# Warning: Do not use 'z' it removes a lot of things including the closures
+opt-level = 's'
+lto = true 
