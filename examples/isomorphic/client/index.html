@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="/static/app.css"/>
     <title>Rust Web App</title>
 </head>
 <body style='margin: 0; padding: 0; width: 100%; height: 100%;'>
@@ -12,10 +11,14 @@
   </div>
 
   <script src='./pkg/isomorphic.js'></script>
-  <script>
+  <script type="module">
       window.wasm_bindgen('pkg/isomorphic_bg.wasm')
-            .then( m => m.main("Hello") )
+            .then( main )
             .catch(console.error)
+      function main(){
+        const { Client } = window.wasm_bindgen
+        new Client(window.initialState)
+      }
   </script>
   <script>
       window.initialState = '#INITIAL_STATE_JSON#'

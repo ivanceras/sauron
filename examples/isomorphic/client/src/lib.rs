@@ -19,26 +19,36 @@ mod app;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-pub fn main(initial_state: &str) {
-    console_error_panic_hook::set_once();
-    sauron::log!("Do something with the initial state: {}", initial_state);
+pub struct Client {
+    #[allow(unused)]
+    program: Rc<Program<App, Msg>>,
+}
 
-    let root_node = document()
-        .get_element_by_id("isomorphic-rust-web-app")
-        .unwrap();
+#[wasm_bindgen]
+impl Client {
+    #[wasm_bindgen(constructor)]
+    pub fn new(initial_state: &str) -> Client {
+        console_error_panic_hook::set_once();
+        sauron::log!("Do something with the initial state: {}", initial_state);
 
-    let app = App::new(1);
-    let program = Program::new_replace_mount(app, &root_node);
-    let program_clone = Rc::clone(&program);
-    let clock: Closure<Fn()> = Closure::wrap(Box::new(move || {
-        sauron::log("is this triggered?");
-        program_clone.dispatch(Msg::Clock);
-    }));
-    window()
-        .set_interval_with_callback_and_timeout_and_arguments_0(
-            clock.as_ref().unchecked_ref(),
-            1000,
-        )
-        .expect("Unable to start interval");
-    clock.forget();
+        let root_node = document()
+            .get_element_by_id("isomorphic-rust-web-app")
+            .unwrap();
+
+        let app = App::new(1);
+        let program = Program::new_replace_mount(app, &root_node);
+        let program_clone = Rc::clone(&program);
+        let clock: Closure<Fn()> = Closure::wrap(Box::new(move || {
+            sauron::log("is this triggered?");
+            program_clone.dispatch(Msg::Clock);
+        }));
+        window()
+            .set_interval_with_callback_and_timeout_and_arguments_0(
+                clock.as_ref().unchecked_ref(),
+                1000,
+            )
+            .expect("Unable to start interval");
+        clock.forget();
+        Client { program }
+    }
 }
