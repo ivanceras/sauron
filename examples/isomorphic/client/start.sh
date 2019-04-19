@@ -12,4 +12,4 @@ fi
 
 wasm-pack build --target no-modules
 
-basic-http-server ./ -a 0.0.0.0:4001
+basic-http-server ./ -a 0.0.0.0:5001
