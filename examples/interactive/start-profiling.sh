@@ -6,4 +6,4 @@ set -v
 
 wasm-pack build --target no-modules --profiling
 
-basic-http-server ./ -a 0.0.0.0:4002
+basic-http-server ./ -a 0.0.0.0:4001
