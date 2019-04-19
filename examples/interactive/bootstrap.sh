@@ -12,7 +12,3 @@ if ! type basic-http-server > /dev/null; then
     cargo install basic-http-server
 fi
 
-
-wasm-pack build --target no-modules
-
-basic-http-server ./ -a 0.0.0.0:4003

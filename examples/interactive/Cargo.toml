@@ -11,25 +11,7 @@ crate-type = ["cdylib"]
 [dependencies]
 sauron = { path = "../../" }
 wasm-bindgen = "0.2.40"
+console_error_panic_hook = { version = "0.1.1", optional = true }
+wee_alloc = { version = "0.4.3", optional = true }
 
-[dependencies.web-sys]
-version = "0.3"
-features = [
-    "Comment",
-    "console",
-    "Document",
-    "Element",
-    "Event",
-    "HtmlElement",
-    "EventTarget",
-    "KeyboardEvent",
-    "HtmlCollection",
-    "HtmlInputElement",
-    "HtmlTextAreaElement",
-    "MouseEvent",
-    "Node",
-    "NodeList",
-    "Text",
-    "CharacterData",
-    "Window",
-]
+
