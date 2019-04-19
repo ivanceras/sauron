@@ -13,27 +13,9 @@
 
   <script src='./pkg/isomorphic.js'></script>
   <script>
-    window.wasm_bindgen('pkg/isomorphic_bg.wasm').then(main)
-
-    let client
-    let updateScheduled = false
-
-    window.GlobalJS = function () {}
-    window.GlobalJS.prototype.update = function () {
-      if (!updateScheduled) {
-        requestAnimationFrame(() => {
-          client.render()
-          updateScheduled = false
-        })
-      }
-      updateScheduled = true
-    }
-
-    window.global_js = new GlobalJS()
-    function main () {
-      const { Client } = window.wasm_bindgen
-      client = new Client(window.initialState)
-    }
+      window.wasm_bindgen('pkg/isomorphic_bg.wasm')
+            .then( m => m.main("Hello") )
+            .catch(console.error)
   </script>
   <script>
       window.initialState = '#INITIAL_STATE_JSON#'
