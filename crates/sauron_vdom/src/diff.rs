@@ -91,8 +91,8 @@ where
             let min_count = min(old_child_count, new_child_count);
             for index in 0..min_count {
                 *cur_node_idx += 1;
-                let old_child = &old_element.children[index];
-                let new_child = &new_element.children[index];
+                let old_child = &old_element.children.get(index).expect("No old child node");
+                let new_child = &new_element.children.get(index).expect("No new chold node");
                 patches.append(&mut diff_recursive(&old_child, &new_child, cur_node_idx))
             }
             if new_child_count < old_child_count {

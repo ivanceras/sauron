@@ -7,11 +7,76 @@ use sauron_vdom::diff;
 use sauron_vdom::{Callback, Event, Patch, Text, Value};
 
 use maplit::btreemap;
-use wasm_bindgen_test::*;
 
-wasm_bindgen_test_configure!(run_in_browser);
+#[test]
+fn truncate_children() {
+    let old: Node<()> = div(
+        [],
+        [
+            div([class("class1")], []),
+            div([class("class2")], []),
+            div([class("class3")], []),
+            div([class("class4")], []),
+            div([class("class5")], []),
+            div([class("class6")], []),
+            div([class("class7")], []),
+        ],
+    );
 
-#[wasm_bindgen_test]
+    let new = div(
+        [],
+        [
+            div([class("class1")], []),
+            div([class("class2")], []),
+            div([class("class3")], []),
+        ],
+    );
+    assert_eq!(
+        diff(&old, &new),
+        vec![Patch::TruncateChildren(0, 3)],
+        "Should truncate children"
+    );
+}
+
+#[test]
+fn truncate_children_different_attributes() {
+    let old: Node<()> = div(
+        [],
+        [
+            div([class("class1")], []),
+            div([class("class2")], []),
+            div([class("class3")], []),
+            div([class("class4")], []),
+            div([class("class5")], []),
+            div([class("class6")], []),
+            div([class("class7")], []),
+        ],
+    );
+
+    let new = div(
+        [],
+        [
+            div([class("class5")], []),
+            div([class("class6")], []),
+            div([class("class7")], []),
+        ],
+    );
+    let class5 = "class5".into();
+    let class6 = "class6".into();
+    let class7 = "class7".into();
+    assert_eq!(
+        diff(&old, &new),
+        vec![
+            Patch::TruncateChildren(0, 3),
+            Patch::AddAttributes(1, btreemap! { "class" => &class5}),
+            Patch::AddAttributes(2, btreemap! { "class"=> &class6}),
+            Patch::AddAttributes(3, btreemap! { "class"=> &class7}),
+        ],
+        "Should truncate children"
+    );
+}
+
+#[test]
 fn replace_node() {
     let old: Node<()> = div([], []);
     let new = span([], []);
@@ -41,7 +106,7 @@ fn replace_node() {
     )
 }
 
-#[wasm_bindgen_test]
+#[test]
 fn add_children() {
     let old: Node<()> = div([], [b([], [])]); //{ <div> <b></b> </div> },
     let new = div([], [b([], []), html_element("new", [], [])]); //{ <div> <b></b> <new></new> </div> },
@@ -52,7 +117,7 @@ fn add_children() {
     )
 }
 
-#[wasm_bindgen_test]
+#[test]
 fn remove_nodes() {
     let old: Node<()> = div([], [b([], []), span([], [])]); //{ <div> <b></b> <span></span> </div> },
     let new = div([], []); //{ <div> </div> },
@@ -96,7 +161,7 @@ fn remove_nodes() {
     )
 }
 
-#[wasm_bindgen_test]
+#[test]
 fn add_attributes() {
     let hello: Value = "hello".into();
     let attributes = btreemap! {
@@ -121,7 +186,7 @@ fn add_attributes() {
     );
 }
 
-#[wasm_bindgen_test]
+#[test]
 fn add_events() {
     let func = |_| {
         println!("hello");
@@ -153,7 +218,7 @@ fn add_events() {
     );
 }
 
-#[wasm_bindgen_test]
+#[test]
 fn remove_attributes() {
     let old: Node<()> = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
     let new = div([], []); //{ <div> </div> },
@@ -164,7 +229,7 @@ fn remove_attributes() {
     );
 }
 
-#[wasm_bindgen_test]
+#[test]
 fn remove_events() {
     let old: Node<()> = div([onclick(|_| println!("hi"))], []);
     let new = div([], []);
@@ -175,7 +240,7 @@ fn remove_events() {
     );
 }
 
-#[wasm_bindgen_test]
+#[test]
 fn change_attribute() {
     let changed: Value = "changed".into();
     let attributes = btreemap! {
@@ -192,7 +257,7 @@ fn change_attribute() {
     );
 }
 
-#[wasm_bindgen_test]
+#[test]
 fn replace_text_node() {
     let old: Node<()> = text("Old"); //{ Old },
     let new: Node<()> = text("New"); //{ New },
@@ -207,7 +272,7 @@ fn replace_text_node() {
 // Initially motivated by having two elements where all that changed was an event listener
 // because right now we don't patch event listeners. So.. until we have a solution
 // for that we can just give them different keys to force a replace.
-#[wasm_bindgen_test]
+#[test]
 fn replace_if_different_keys() {
     let old: Node<()> = div([key(1)], []); //{ <div key="1"> </div> },
     let new = div([key(2)], []); //{ <div key="2"> </div> },
