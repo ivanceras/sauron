@@ -39,11 +39,15 @@ where
     }
 
     fn start_append_mount(self: &Rc<Self>) {
-        self.dom_updater.borrow_mut().append_mount(self)
+        self.dom_updater
+            .borrow_mut()
+            .append_mount(Rc::downgrade(self))
     }
 
     fn start_replace_mount(self: &Rc<Self>) {
-        self.dom_updater.borrow_mut().replace_mount(self)
+        self.dom_updater
+            .borrow_mut()
+            .replace_mount(Rc::downgrade(self))
     }
 
     /// This is called when an event is triggered in the html DOM.
@@ -52,7 +56,7 @@ where
         let t1 = performance.now();
         self.app.borrow_mut().update(msg);
         let view = self.app.borrow().view();
-        self.dom_updater.borrow_mut().update(self, view);
+        self.dom_updater.borrow_mut().update(Rc::clone(&self), view);
         let t2 = performance.now();
         crate::log!("took {} ms to update", t2 - t1);
     }

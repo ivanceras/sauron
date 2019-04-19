@@ -43,7 +43,9 @@ fn on_input() {
     let input_event = InputEvent::new("input").unwrap();
 
     let body = sauron::body();
-    let _dom_updater = DomUpdater::new_append_to_mount(&simple_program(), input, &body);
+    let simple_program = simple_program();
+    let _dom_updater =
+        DomUpdater::new_append_to_mount(Rc::downgrade(&simple_program), input, &body);
 
     let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 
@@ -91,8 +93,9 @@ fn added_event() {
     let input_event = InputEvent::new("input").unwrap();
 
     let body = sauron::body();
-    let simple_program = &simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(simple_program, old, &body);
+    let simple_program = simple_program();
+    let mut dom_updater =
+        DomUpdater::new_append_to_mount(Rc::downgrade(&simple_program), old, &body);
     // update to new dom with no event attached
     dom_updater.update(simple_program, new);
 
@@ -143,8 +146,9 @@ fn remove_event() {
     let input_event = InputEvent::new("input").unwrap();
 
     let body = sauron::body();
-    let simple_program = &simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(simple_program, old, &body);
+    let simple_program = simple_program();
+    let mut dom_updater =
+        DomUpdater::new_append_to_mount(Rc::downgrade(&simple_program), old, &body);
     // update to new dom with no event attached
     dom_updater.update(simple_program, new);
 
