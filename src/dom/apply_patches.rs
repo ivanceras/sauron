@@ -9,7 +9,7 @@ use std::cmp::min;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fmt::Debug;
-use std::rc::Weak;
+use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
@@ -19,7 +19,7 @@ use web_sys::{Element, Event, Node, Text};
 /// that we desire.
 /// This is usually used after diffing two virtual nodes.
 pub fn patch<N, APP, MSG>(
-    program: Weak<Program<APP, MSG>>,
+    program: Rc<Program<APP, MSG>>,
     root_node: N,
     old_closures: &mut ActiveClosure,
     patches: &[Patch<MSG>],
@@ -140,7 +140,7 @@ fn find_nodes(
 }
 
 fn apply_element_patch<APP, MSG>(
-    program: Weak<Program<APP, MSG>>,
+    program: Rc<Program<APP, MSG>>,
     node: &Element,
     old_closures: &mut ActiveClosure,
     patch: &Patch<MSG>,
@@ -262,7 +262,7 @@ where
 }
 
 fn apply_text_patch<APP, MSG>(
-    program: Weak<Program<APP, MSG>>,
+    program: Rc<Program<APP, MSG>>,
     node: &Text,
     patch: &Patch<MSG>,
 ) -> Result<(), JsValue>

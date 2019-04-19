@@ -69,7 +69,7 @@ impl<T> CreatedNode<T> {
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
     pub fn create_dom_node<APP, MSG>(
-        program: Weak<Program<APP, MSG>>,
+        program: Rc<Program<APP, MSG>>,
         vnode: &crate::Node<MSG>,
     ) -> CreatedNode<Node>
     where
@@ -91,7 +91,7 @@ impl<T> CreatedNode<T> {
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
     pub fn create_element_node<APP, MSG>(
-        program: Weak<Program<APP, MSG>>,
+        program: Rc<Program<APP, MSG>>,
         velem: &crate::Element<MSG>,
     ) -> CreatedNode<Element>
     where
@@ -188,7 +188,7 @@ impl<T> CreatedNode<T> {
 }
 
 fn create_closure_wrap<APP, MSG>(
-    program: Weak<Program<APP, MSG>>,
+    program: Rc<Program<APP, MSG>>,
     callback: &Callback<sauron_vdom::Event, MSG>,
 ) -> Closure<Fn(Event)>
 where
@@ -196,7 +196,6 @@ where
     APP: Component<MSG> + 'static,
 {
     let callback_clone = callback.clone();
-    let program_clone = program.clone();
 
     Closure::wrap(Box::new(move |event: Event| {
         let mouse_event: Option<&MouseEvent> = event.dyn_ref();
@@ -239,10 +238,7 @@ where
             sauron_vdom::Event::Generic(event.type_())
         };
         let msg = callback_clone.emit(cb_event);
-        program_clone
-            .upgrade()
-            .expect("unable to upgrade Rc")
-            .dispatch(msg);
+        program.dispatch(msg);
     }))
 }
 
@@ -260,7 +256,7 @@ where
         }
     }
 
-    pub fn append_mount(&mut self, program: Weak<Program<APP, MSG>>) {
+    pub fn append_mount(&mut self, program: Rc<Program<APP, MSG>>) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         self.root_node
@@ -270,7 +266,7 @@ where
         self.active_closures = created_node.closures;
     }
 
-    pub fn replace_mount(&mut self, program: Weak<Program<APP, MSG>>) {
+    pub fn replace_mount(&mut self, program: Rc<Program<APP, MSG>>) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         let root_element: &Element = self.root_node.unchecked_ref();
@@ -286,7 +282,7 @@ where
     /// A root `Node` will be created and appended (as a child) to your passed
     /// in mount element.
     pub fn new_append_to_mount(
-        program: Weak<Program<APP, MSG>>,
+        program: Rc<Program<APP, MSG>>,
         current_vdom: crate::Node<MSG>,
         mount: &Element,
     ) -> DomUpdater<APP, MSG> {
@@ -308,7 +304,7 @@ where
     /// A root `Node` will be created and it will replace your passed in mount
     /// element.
     pub fn new_replace_mount(
-        program: Weak<Program<APP, MSG>>,
+        program: Rc<Program<APP, MSG>>,
         current_vdom: crate::Node<MSG>,
         mount: Element,
     ) -> DomUpdater<APP, MSG> {
@@ -328,10 +324,10 @@ where
     ///
     /// Then use that diff to patch the real DOM in the user's browser so that they are
     /// seeing the latest state of the application.
-    pub fn update(&mut self, program: Rc<Program<APP, MSG>>, new_vdom: crate::Node<MSG>) {
+    pub fn update(&mut self, program: Weak<Program<APP, MSG>>, new_vdom: crate::Node<MSG>) {
         let patches = diff(&self.current_vdom, &new_vdom);
         let active_closures = patch(
-            Rc::downgrade(&program),
+            program.upgrade().expect("unable to upgrade weak pointer"),
             self.root_node.clone(),
             &mut self.active_closures,
             &patches,
