@@ -27,7 +27,14 @@ impl<IN, OUT> Callback<IN, OUT> {
 }
 
 impl<IN, OUT> PartialEq for Callback<IN, OUT> {
-    fn eq(&self, rhs: &Self) -> bool {
-        Rc::ptr_eq(&self.0, &rhs.0)
+    fn eq(&self, _rhs: &Self) -> bool {
+        //Rc::ptr_eq(&self.0, &rhs.0)
+        // FIXME: by returning true, we say that all the events
+        // on this element has not changed since it was
+        // added as event listener
+        // which means, we can be able to change
+        // the event listener of an element
+        // once it is set.
+        true
     }
 }
