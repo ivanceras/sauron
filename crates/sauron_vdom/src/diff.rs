@@ -180,7 +180,10 @@ where
     for (new_attr_name, new_attr_val) in new_element.events.iter() {
         match old_element.events.get(new_attr_name) {
             Some(ref old_attr_val) => {
+                // FIXME: This always fails, because Callbacks are recreated everytime
+                // instead of comparing them again.
                 if old_attr_val != &new_attr_val {
+                    //TODO remove the event listener as well
                     add_event_listener.insert(new_attr_name, new_attr_val);
                 }
             }

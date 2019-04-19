@@ -326,6 +326,7 @@ where
     /// seeing the latest state of the application.
     pub fn update(&mut self, program: Weak<Program<APP, MSG>>, new_vdom: crate::Node<MSG>) {
         let patches = diff(&self.current_vdom, &new_vdom);
+        crate::log!("applying patches: {:#?}", patches);
         let active_closures = patch(
             program.upgrade().expect("unable to upgrade weak pointer"),
             self.root_node.clone(),

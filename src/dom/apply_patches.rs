@@ -166,6 +166,7 @@ where
             Ok(active_closures)
         }
 
+        // TODO: Shall we also remove the listener first?
         Patch::AddEventListener(node_idx, events) => {
             for (event, callback) in events.iter() {
                 let closure_wrap: Closure<Fn(Event)> =
@@ -185,31 +186,40 @@ where
         Patch::RemoveEventListener(_node_idx, events) => {
             // TODO: there should be a better way to get the node-id back
             // without having to read from the actual dom node element
-            if let Some(vdom_id_str) = node.get_attribute("data-sauron_vdom-id") {
-                if let Ok(vdom_id) = vdom_id_str.parse::<u32>() {
-                    if let Some(old_closure) = old_closures.get(&vdom_id) {
-                        for event in events.iter() {
-                            for oc in old_closure.iter() {
-                                let func: &Function = oc.as_ref().unchecked_ref();
-                                node.remove_event_listener_with_callback(event, func)?;
-                            }
-                        }
-                    }
-
-                    // remove closure active_closure in dom_updater to free up memory
-                    old_closures
-                        .remove(&vdom_id)
-                        .expect("Unable to remove old closure");
+            let vdom_id_str = node
+                .get_attribute("data-sauron_vdom-id")
+                .expect("unable to get sauron_vdom-id");
+            let vdom_id = vdom_id_str
+                .parse::<u32>()
+                .expect("unable to parse sauron_vdom-id");
+            let old_closure = old_closures.get(&vdom_id).expect(&format!(
+                "There is no closure attached to vdom-id: {}",
+                vdom_id
+            ));
+            crate::log!("There are {} events to remove", events.len());
+            crate::log!("There are {} old_closure to remove", old_closure.len());
+            for event in events.iter() {
+                for oc in old_closure.iter() {
+                    let func: &Function = oc.as_ref().unchecked_ref();
+                    node.remove_event_listener_with_callback(event, func)?;
                 }
             }
 
+            // remove closure active_closure in dom_updater to free up memory
+            old_closures
+                .remove(&vdom_id)
+                .expect("Unable to remove old closure");
+
             Ok(active_closures)
         }
+        // TODO: Also remove the closures attached to the node before replacing it.
         Patch::Replace(_node_idx, new_node) => {
             let created_node = CreatedNode::<Node>::create_dom_node::<APP, MSG>(program, new_node);
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
         }
+        //TODO: Also remove the closures attached to each of the elements
+        // before truncating it.
         Patch::TruncateChildren(_node_idx, num_children_remaining) => {
             let children = node.child_nodes();
             let mut child_count = children.length();
