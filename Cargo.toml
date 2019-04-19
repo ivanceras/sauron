@@ -37,6 +37,7 @@ features = [
     "NodeList",
     "Text",
     "CharacterData",
+    "Performance",
     "Window",
 ]
 
@@ -53,6 +54,7 @@ features = [
     "MouseEvent",
     "InputEvent",
     "console",
+    "Performance",
 ]
 
 [workspace]
@@ -60,7 +62,13 @@ members = [
     "crates/sauron_vdom",
     "examples/interactive",
     "examples/isomorphic/client",
+    "examples/todomvc",
 ]
 
 [replace]
 "sauron_vdom:0.1.0" = { path = "crates/sauron_vdom" }
+
+
+[profile.release]
+opt-level = 'z'
+lto = 'thin'
