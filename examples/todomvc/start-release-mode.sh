@@ -6,4 +6,4 @@ set -v
 
 wasm-pack build --target no-modules --release -- --features "wee_alloc"
 
-basic-http-server ./ -a 0.0.0.0:4003
+basic-http-server ./ -a 0.0.0.0:6001
