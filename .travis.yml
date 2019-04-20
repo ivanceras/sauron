@@ -10,7 +10,8 @@ rust:
 
 before_script:
     - sudo apt update
-    - sudo apt install -y firefox-esr
+    - apt search firefox
+    - sudo apt install -y firefox
     - curl --retry 5 -LO https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
     - tar xf geckodriver-v0.24.0-linux64.tar.gz
     - cargo install wasm-pack
