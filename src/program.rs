@@ -3,6 +3,7 @@ use crate::DomUpdater;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
+use wasm_bindgen::closure::Closure;
 use web_sys::Node;
 
 /// Holds the app and the dom updater
@@ -46,8 +47,19 @@ where
         self.dom_updater.borrow_mut().replace_mount(Rc::clone(self))
     }
 
-    /// This is called when an event is triggered in the html DOM.
+    /// Do the dispatch in request animation frame
+    /// to improve performance
     pub fn dispatch(self: &Rc<Self>, msg: MSG) {
+        let program_clone = Rc::clone(self);
+        let closure_raf: Closure<FnMut() + 'static> = Closure::once(move || {
+            program_clone.dispatch_inner(msg);
+        });
+        crate::request_animation_frame(&closure_raf);
+        closure_raf.forget();
+    }
+
+    /// This is called when an event is triggered in the html DOM.
+    fn dispatch_inner(self: &Rc<Self>, msg: MSG) {
         self.app.borrow_mut().update(msg);
         let view = self.app.borrow().view();
         self.dom_updater
