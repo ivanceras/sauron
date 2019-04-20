@@ -60,8 +60,8 @@ features = [
 [workspace]
 members = [
     "crates/sauron_vdom",
-    "examples/interactive",
-    "examples/isomorphic/client",
+    "examples/minimal",
+    "examples/interactive/client",
     "examples/todomvc",
 ]
 

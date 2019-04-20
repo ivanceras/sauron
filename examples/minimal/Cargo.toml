@@ -1,6 +1,6 @@
 
 [package]
-name = "interactive"
+name = "minimal"
 version = "0.1.0"
 authors = ["lee"]
 edition = "2018"

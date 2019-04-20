@@ -50,7 +50,6 @@ impl Component<Msg> for App {
             Msg::Click => self.click_count += 1,
         }
     }
-
 }
 
 #[wasm_bindgen(start)]

@@ -186,8 +186,6 @@ impl Component<Msg> for Model {
             ],
         )
     }
-
-    fn subscribe(&self) {}
 }
 
 impl Model {

@@ -174,7 +174,9 @@ where
     V: ToString,
     CB: Clone,
 {
-    Node::Text(Text { text: v.to_string() })
+    Node::Text(Text {
+        text: v.to_string(),
+    })
 }
 
 /// Create an attribute
