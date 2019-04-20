@@ -6,7 +6,8 @@ addons:
   chrome: stable
 
 rust:
-    - stable
+    # Use nightly for now since wasm-bindgen is still only compiling in nightly
+    #- stable
     - nightly
 
 
