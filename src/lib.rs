@@ -53,7 +53,7 @@
 //!                         class("client"),
 //!                         r#type("button"),
 //!                         value("Click me!"),
-//!                         onclick(move |_| {
+//!                         onclick(|_| {
 //!                             sauron::log("Button is clicked");
 //!                             Msg::Click
 //!                         }),
@@ -72,7 +72,6 @@
 //!         }
 //!     }
 //!
-//!     fn subscribe(&self) {}
 //! }
 //!
 //! #[wasm_bindgen(start)]
