@@ -27,6 +27,17 @@ lazy_static! {
     static ref ELEM_UNIQUE_ID: Mutex<u32> = Mutex::new(0);
 }
 
+/// Closures that we are holding on to to make sure that they don't get invalidated after a
+/// VirtualNode is dropped.
+///
+/// The u32 is a unique identifier that is associated with the DOM element that this closure is
+/// attached to.
+///
+/// TODO: Periodically check if the DOM element is still there, and if not drop the closure.
+///   Maybe whenever a DOM node is replaced or truncated we figure out all of it's
+///   descendants somehow and invalidate those closures..? Need to plan this out..
+///   At it stands now this hashmap will grow anytime a new element with closures is
+///   appended or replaced and we will never free those closures.
 pub type ActiveClosure = HashMap<u32, Vec<(String, Closure<Fn(Event)>)>>;
 
 /// A node along with all of the closures that were created for that
@@ -119,6 +130,8 @@ impl<T> CreatedNode<T> {
         if !velem.events.is_empty() {
             let unique_id = create_unique_identifier();
 
+            // set the data-sauron_vdom-id this will be read later on
+            // when it's time to remove this element and its closures and event listeners
             element
                 .set_attribute("data-sauron_vdom-id", &unique_id.to_string())
                 .expect("Could not set attribute on element");
@@ -187,6 +200,8 @@ impl<T> CreatedNode<T> {
     }
 }
 
+/// This wrap into a closure the function that is dispatched when the event is triggered.
+///
 fn create_closure_wrap<APP, MSG>(
     program: Rc<Program<APP, MSG>>,
     callback: &Callback<sauron_vdom::Event, MSG>,
@@ -247,6 +262,7 @@ where
     MSG: Clone + Debug + 'static,
     APP: Component<MSG> + 'static,
 {
+    /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.
     pub fn new(current_vdom: crate::Node<MSG>, root_node: &Node) -> DomUpdater<APP, MSG> {
         DomUpdater {
             current_vdom,
@@ -265,6 +281,9 @@ where
             .sum()
     }
 
+    /// Mount the current_vdom appending to the actual browser DOM specified in the root_node
+    /// This also gets the closures that was created when mounting the vdom to their
+    /// actual DOM counterparts.
     pub fn append_mount(&mut self, program: Rc<Program<APP, MSG>>) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
@@ -275,6 +294,9 @@ where
         self.active_closures = created_node.closures;
     }
 
+    /// Mount the current_vdom replacing the actual browser DOM specified in the root_node
+    /// This also gets the closures that was created when mounting the vdom to their
+    /// actual DOM counterparts.
     pub fn replace_mount(&mut self, program: Rc<Program<APP, MSG>>) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
@@ -295,17 +317,9 @@ where
         current_vdom: crate::Node<MSG>,
         mount: &Element,
     ) -> DomUpdater<APP, MSG> {
-        let created_node: CreatedNode<Node> =
-            CreatedNode::<Node>::create_dom_node(program, &current_vdom);
-        mount
-            .append_child(&created_node.node)
-            .expect("Could not append child to mount");
-        DomUpdater {
-            current_vdom,
-            root_node: created_node.node,
-            active_closures: created_node.closures,
-            _phantom_data: PhantomData,
-        }
+        let mut dom_updater = Self::new(current_vdom, mount);
+        dom_updater.append_mount(program);
+        dom_updater
     }
 
     /// Create a new `DomUpdater`.
@@ -317,16 +331,9 @@ where
         current_vdom: crate::Node<MSG>,
         mount: Element,
     ) -> DomUpdater<APP, MSG> {
-        let created_node = CreatedNode::<Node>::create_dom_node(program, &current_vdom);
-        mount
-            .replace_with_with_node_1(&created_node.node)
-            .expect("Could not replace mount element");
-        DomUpdater {
-            current_vdom,
-            root_node: created_node.node,
-            active_closures: created_node.closures,
-            _phantom_data: PhantomData,
-        }
+        let mut dom_updater = Self::new(current_vdom, &mount);
+        dom_updater.replace_mount(program);
+        dom_updater
     }
 
     /// Diff the current virtual dom with the new virtual dom that is being passed in.

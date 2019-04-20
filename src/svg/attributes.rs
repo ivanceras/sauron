@@ -47,3 +47,5 @@ declare_attributes! {
     #[allow(non_snake_case)]
     strokeOpacity => "stroke-opacity";
 }
+
+//TODO: add the rest of the attributes that are used in svg elements

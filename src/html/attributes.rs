@@ -123,3 +123,4 @@ declare_attributes! {
     #[allow(non_snake_case)]
     flexDirection => "flex-direction";
 }
+//TODO: add the rest of attributes from the html specs

@@ -147,10 +147,9 @@ fn remove_event_listeners(node: &Element, old_closures: &mut ActiveClosure) -> R
         let vdom_id = vdom_id_str
             .parse::<u32>()
             .expect("unable to parse sauron_vdom-id");
-        let old_closure = old_closures.get(&vdom_id).expect(&format!(
-            "There is no closure attached to vdom-id: {}",
-            vdom_id
-        ));
+        let old_closure = old_closures
+            .get(&vdom_id)
+            .unwrap_or_else(|| panic!("There is no closure attached to vdom-id: {}", vdom_id));
         for (event, oc) in old_closure.iter() {
             let func: &Function = oc.as_ref().unchecked_ref();
             node.remove_event_listener_with_callback(event, func)?;
@@ -213,15 +212,22 @@ where
             remove_event_listeners(node, old_closures)?;
             Ok(active_closures)
         }
-        // TODO: Also remove the closures attached to the node before replacing it.
+        // THis also removes the associated closures and event listeners to the node being replaced
+        // before it is actully replaced in the DOM
+        //
+        // Note and TODO: This doesn't free the closure and event listeners
+        // of the children of this node
         Patch::Replace(_node_idx, new_node) => {
             let created_node = CreatedNode::<Node>::create_dom_node::<APP, MSG>(program, new_node);
             remove_event_listeners(&node, old_closures)?;
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
         }
-        //TODO: Also remove the closures attached to each of the elements
-        // before truncating it.
+        // This also removes the associated closures and event listener to the truncated chilren
+        // before actually removing it from the DOM
+        //
+        // Note and TODO: This doesn't free the closure and event listeners
+        // of the children of this node
         Patch::TruncateChildren(_node_idx, num_children_remaining) => {
             let children = node.child_nodes();
             let mut child_count = children.length();
