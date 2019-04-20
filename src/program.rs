@@ -48,7 +48,6 @@ where
 
     /// This is called when an event is triggered in the html DOM.
     pub fn dispatch(self: &Rc<Self>, msg: MSG) {
-        let t1 = performance.now();
         self.app.borrow_mut().update(msg);
         let view = self.app.borrow().view();
         self.dom_updater
