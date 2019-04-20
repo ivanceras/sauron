@@ -33,9 +33,6 @@
 //! }
 //!
 //! impl Component<Msg> for App {
-//!     fn create() -> App {
-//!         App::new()
-//!     }
 //!
 //!     fn view(&self) -> Node<Msg> {
 //!         div(
@@ -70,7 +67,7 @@
 //!
 //! #[wasm_bindgen(start)]
 //! pub fn main() {
-//!     Program::new_append_mount(App::create(), &sauron::body());
+//!     Program::new_append_mount(App::new(), &sauron::body());
 //! }
 //! ```
 //! Look at the examples code and the build script for the details.
@@ -99,7 +96,6 @@ pub use sauron_vdom::diff;
 pub use sauron_vdom::Text;
 
 pub trait Component<MSG> {
-    fn create() -> Self;
     fn update(&mut self, msg: MSG);
     fn view(&self) -> Node<MSG>;
     fn subscribe(&self);

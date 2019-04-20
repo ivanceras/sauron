@@ -8,9 +8,6 @@ use std::rc::Rc;
 pub struct SimpleComponent;
 
 impl Component<()> for SimpleComponent {
-    fn create() -> Self {
-        SimpleComponent
-    }
     fn update(&mut self, _msg: ()) {
         crate::log("updating in SimpleComponent");
     }

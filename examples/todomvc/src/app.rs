@@ -35,8 +35,8 @@ pub enum Msg {
     Nope,
 }
 
-impl Component<Msg> for Model {
-    fn create() -> Self {
+impl Model {
+    pub fn new() -> Self {
         Model {
             entries: vec![],
             filter: Filter::All,
@@ -44,7 +44,9 @@ impl Component<Msg> for Model {
             edit_value: "".into(),
         }
     }
+}
 
+impl Component<Msg> for Model {
     fn update(&mut self, msg: Msg) {
         match msg {
             Msg::Add => {

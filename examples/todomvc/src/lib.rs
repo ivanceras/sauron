@@ -1,6 +1,5 @@
 #![deny(warnings)]
 use app::Model;
-use sauron::Component;
 use sauron::Program;
 use wasm_bindgen::prelude::*;
 
@@ -17,5 +16,5 @@ pub fn main() {
         console_error_panic_hook::set_once();
     }
     sauron::log("in main!");
-    Program::new_append_mount(Model::create(), &sauron::body());
+    Program::new_append_mount(Model::new(), &sauron::body());
 }

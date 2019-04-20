@@ -29,9 +29,6 @@ impl App {
 }
 
 impl Component<Msg> for App {
-    fn create() -> Self {
-        App::new(0)
-    }
     fn subscribe(&self) {}
 
     fn update(&mut self, msg: Msg) {

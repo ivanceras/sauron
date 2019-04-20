@@ -23,10 +23,6 @@ impl App {
 }
 
 impl Component<Msg> for App {
-    fn create() -> App {
-        App::new()
-    }
-
     fn view(&self) -> Node<Msg> {
         div(
             [class("some-class"), id("some-id"), attr("data-id", 1)],
@@ -60,5 +56,5 @@ impl Component<Msg> for App {
 
 #[wasm_bindgen(start)]
 pub fn main() {
-    Program::new_append_mount(App::create(), &sauron::body());
+    Program::new_append_mount(App::new(), &sauron::body());
 }
