@@ -13,6 +13,7 @@ use sauron::html::*;
 use sauron::test_fixtures::simple_program;
 use sauron::Node;
 use std::cell::RefCell;
+use std::collections::BTreeMap;
 use web_sys::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
@@ -180,8 +181,11 @@ fn remove_event_from_truncated_children() {
 
     let body = sauron::body();
     let simple_program = simple_program();
-    let patch = sauron::diff(&old, &new);
-    sauron::log!("patch: {:#?}", patch);
+    assert_eq!(
+        sauron::diff(&old, &new),
+        vec![sauron_vdom::Patch::TruncateChildren(0, 1)],
+        "Should be a Truncate patch"
+    );
     let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
     assert_eq!(
         dom_updater.active_closure_len(),
@@ -214,8 +218,11 @@ fn remove_event_from_truncated_children_some_with_no_events() {
 
     let body = sauron::body();
     let simple_program = simple_program();
-    let patch = sauron::diff(&old, &new);
-    sauron::log!("patch: {:#?}", patch);
+    assert_eq!(
+        sauron::diff(&old, &new),
+        vec![sauron_vdom::Patch::TruncateChildren(0, 1)],
+        "Should be a Truncate patch"
+    );
     let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
     assert_eq!(
         dom_updater.active_closure_len(),
@@ -228,5 +235,42 @@ fn remove_event_from_truncated_children_some_with_no_events() {
         dom_updater.active_closure_len(),
         1,
         "There should only be 1 left after the truncate"
+    );
+}
+
+#[wasm_bindgen_test]
+fn remove_event_from_replaced_node() {
+    let old: Node<()> = div([onclick(|_| sauron::log("I'm a div"))], []);
+
+    let new: Node<()> = p([], []);
+
+    let body = sauron::body();
+    let simple_program = simple_program();
+    assert_eq!(
+        sauron::diff(&old, &new),
+        vec![sauron_vdom::Patch::Replace(
+            0,
+            &sauron_vdom::Node::Element(sauron_vdom::Element {
+                tag: "p",
+                attrs: BTreeMap::new(),
+                events: BTreeMap::new(),
+                children: vec![],
+                namespace: None
+            })
+        )],
+        "Should be a Replace patch"
+    );
+    let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
+    assert_eq!(
+        dom_updater.active_closure_len(),
+        1,
+        "There should be 1 event attached to the DomUpdater"
+    );
+    dom_updater.update(Rc::downgrade(&simple_program), new);
+
+    assert_eq!(
+        dom_updater.active_closure_len(),
+        0,
+        "There should only be 0 left after replacing it with a different tag"
     );
 }

@@ -218,6 +218,7 @@ where
         // TODO: Also remove the closures attached to the node before replacing it.
         Patch::Replace(_node_idx, new_node) => {
             let created_node = CreatedNode::<Node>::create_dom_node::<APP, MSG>(program, new_node);
+            remove_event_listeners(&node, old_closures)?;
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
         }
