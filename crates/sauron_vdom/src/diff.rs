@@ -176,39 +176,25 @@ where
     let mut add_event_listener: BTreeMap<&str, &CB> = BTreeMap::new();
     let mut remove_event_listener: Vec<&str> = vec![];
 
-    // TODO: -> split out into func
-    for (new_attr_name, new_attr_val) in new_element.events.iter() {
-        match old_element.events.get(new_attr_name) {
-            Some(ref old_attr_val) => {
-                // FIXME: This always fails, because Callbacks are recreated everytime
-                // instead of comparing them again.
-                if old_attr_val != &new_attr_val {
-                    //TODO remove the event listener as well
-                    add_event_listener.insert(new_attr_name, new_attr_val);
-                }
-            }
-            None => {
-                add_event_listener.insert(new_attr_name, new_attr_val);
-            }
-        };
+    for (new_event_name, new_event_cb) in new_element.events.iter() {
+        // Only add the event listener when nothing is set on that
+        // event yet, since there is no way to compare the functions
+        // inside the callback. Comparing the callback is pointless
+        // since they are uniquely created at each instantiation of
+        // each element on the vdom
+        if old_element.events.get(new_event_name).is_none() {
+            add_event_listener.insert(new_event_name, new_event_cb);
+        }
     }
 
-    // TODO: -> split out into func
-    for (old_attr_name, old_attr_val) in old_element.events.iter() {
-        if add_event_listener.get(&old_attr_name[..]).is_some() {
+    for (old_event_name, _old_event_cb) in old_element.events.iter() {
+        if add_event_listener.get(&old_event_name[..]).is_some() {
             continue;
         };
 
-        match new_element.events.get(old_attr_name) {
-            Some(ref new_attr_val) => {
-                if new_attr_val != &old_attr_val {
-                    remove_event_listener.push(old_attr_name);
-                }
-            }
-            None => {
-                remove_event_listener.push(old_attr_name);
-            }
-        };
+        if new_element.events.get(old_event_name).is_none() {
+            remove_event_listener.push(old_event_name);
+        }
     }
 
     if !add_event_listener.is_empty() {
