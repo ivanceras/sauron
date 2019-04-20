@@ -171,10 +171,10 @@ where
 #[inline]
 pub fn text<V, T, CB>(v: V) -> Node<T, CB>
 where
-    V: Into<String>,
+    V: ToString,
     CB: Clone,
 {
-    Node::Text(Text { text: v.into() })
+    Node::Text(Text { text: v.to_string() })
 }
 
 /// Create an attribute

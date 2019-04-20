@@ -18,7 +18,6 @@ impl Component<()> for SimpleComponent {
     fn view(&self) -> crate::Node<()> {
         div([], [])
     }
-    fn subscribe(&self) {}
 }
 
 pub fn simple_component() -> Rc<RefCell<SimpleComponent>> {

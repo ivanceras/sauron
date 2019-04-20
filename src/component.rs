@@ -7,6 +7,4 @@ pub trait Component<MSG> {
     fn update(&mut self, msg: MSG);
     /// Returns a node on how the component is presented.
     fn view(&self) -> Node<MSG>;
-    /// any subscription related
-    fn subscribe(&self);
 }

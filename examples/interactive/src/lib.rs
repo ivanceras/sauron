@@ -32,7 +32,7 @@ impl Component<Msg> for App {
                         class("client"),
                         r#type("button"),
                         value("Click me!"),
-                        onclick(move |_| {
+                        onclick(|_| {
                             sauron::log("Button is clicked");
                             Msg::Click
                         }),
@@ -51,7 +51,6 @@ impl Component<Msg> for App {
         }
     }
 
-    fn subscribe(&self) {}
 }
 
 #[wasm_bindgen(start)]
