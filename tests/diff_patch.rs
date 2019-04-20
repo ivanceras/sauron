@@ -186,11 +186,8 @@ fn add_attributes() {
     );
 }
 
-// TODO: This is allowed to fail for now,
-// since comparison of callbacks always pass
 #[test]
-#[should_panic]
-fn add_events() {
+fn no_replacing_of_events() {
     let func = |_| {
         println!("hello");
     };
@@ -204,20 +201,21 @@ fn add_events() {
     assert_eq!(
         diff(&old, &new),
         vec![Patch::AddEventListener(0, events.clone())],
-        "Add event listener",
+        "Should add event listener",
     );
 
-    let hello2: Callback<Event, ()> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
-    let events2 = btreemap! {
-    "click" => &hello2,
-    };
     let old: Node<()> = div([onclick(hello.clone())], []);
-    let new = div([onclick(hello2.clone())], []);
+    let new = div(
+        [onclick(|_| {
+            sauron::log("Can't be able to replace the first callback")
+        })],
+        [],
+    );
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddEventListener(0, events2.clone())],
-        "Change event listener",
+        vec![],
+        "Should not replace the old callback that was set",
     );
 }
 
