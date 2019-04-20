@@ -27,7 +27,7 @@ lazy_static! {
     static ref ELEM_UNIQUE_ID: Mutex<u32> = Mutex::new(0);
 }
 
-pub type ActiveClosure = HashMap<u32, Vec<Closure<Fn(Event)>>>;
+pub type ActiveClosure = HashMap<u32, Vec<(String, Closure<Fn(Event)>)>>;
 
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
@@ -108,7 +108,7 @@ impl<T> CreatedNode<T> {
             document.create_element(&velem.tag).unwrap()
         };
 
-        let mut closures = HashMap::new();
+        let mut closures = ActiveClosure::new();
 
         velem.attrs.iter().for_each(|(name, value)| {
             element
@@ -139,7 +139,7 @@ impl<T> CreatedNode<T> {
                 closures
                     .get_mut(&unique_id)
                     .expect("Unable to get closure")
-                    .push(closure_wrap);
+                    .push((event_str.to_string(), closure_wrap));
             }
         }
 
@@ -261,6 +261,15 @@ where
         }
     }
 
+    /// count the total active closures
+    /// regardless of which element it attached to.
+    pub fn active_closure_len(&self) -> usize {
+        self.active_closures
+            .iter()
+            .map(|(_elm_id, closures)| closures.len())
+            .sum()
+    }
+
     pub fn append_mount(&mut self, program: Rc<Program<APP, MSG>>) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
@@ -331,7 +340,6 @@ where
     /// seeing the latest state of the application.
     pub fn update(&mut self, program: Weak<Program<APP, MSG>>, new_vdom: crate::Node<MSG>) {
         let patches = diff(&self.current_vdom, &new_vdom);
-        crate::log!("applying patches: {:#?}", patches);
         let active_closures = patch(
             program.upgrade().expect("unable to upgrade weak pointer"),
             self.root_node.clone(),

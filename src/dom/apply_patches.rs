@@ -139,6 +139,33 @@ fn find_nodes(
     }
 }
 
+/// remove all the event listeners for this node
+fn remove_event_listeners(node: &Element, old_closures: &mut ActiveClosure) -> Result<(), JsValue> {
+    // TODO: there should be a better way to get the node-id back
+    // without having to read from the actual dom node element
+    if let Some(vdom_id_str) = node.get_attribute("data-sauron_vdom-id") {
+        let vdom_id = vdom_id_str
+            .parse::<u32>()
+            .expect("unable to parse sauron_vdom-id");
+        let old_closure = old_closures.get(&vdom_id).expect(&format!(
+            "There is no closure attached to vdom-id: {}",
+            vdom_id
+        ));
+        for (event, oc) in old_closure.iter() {
+            let func: &Function = oc.as_ref().unchecked_ref();
+            node.remove_event_listener_with_callback(event, func)?;
+        }
+
+        // remove closure active_closure in dom_updater to free up memory
+        old_closures
+            .remove(&vdom_id)
+            .expect("Unable to remove old closure");
+    } else {
+        crate::log("This element has no events attached");
+    }
+    Ok(())
+}
+
 fn apply_element_patch<APP, MSG>(
     program: Rc<Program<APP, MSG>>,
     node: &Element,
@@ -174,42 +201,18 @@ where
                 let func: &Function = closure_wrap.as_ref().unchecked_ref();
                 node.add_event_listener_with_callback(event, func)?;
                 let node_id = *node_idx as u32;
+                let event_name = event.to_string();
                 if let Some(closure) = active_closures.get_mut(&node_id) {
-                    closure.push(closure_wrap);
+                    closure.push((event_name, closure_wrap));
                 } else {
-                    active_closures.insert(node_id, vec![closure_wrap]);
+                    active_closures.insert(node_id, vec![(event_name, closure_wrap)]);
                 }
             }
 
             Ok(active_closures)
         }
-        Patch::RemoveEventListener(_node_idx, events) => {
-            // TODO: there should be a better way to get the node-id back
-            // without having to read from the actual dom node element
-            let vdom_id_str = node
-                .get_attribute("data-sauron_vdom-id")
-                .expect("unable to get sauron_vdom-id");
-            let vdom_id = vdom_id_str
-                .parse::<u32>()
-                .expect("unable to parse sauron_vdom-id");
-            let old_closure = old_closures.get(&vdom_id).expect(&format!(
-                "There is no closure attached to vdom-id: {}",
-                vdom_id
-            ));
-            crate::log!("There are {} events to remove", events.len());
-            crate::log!("There are {} old_closure to remove", old_closure.len());
-            for event in events.iter() {
-                for oc in old_closure.iter() {
-                    let func: &Function = oc.as_ref().unchecked_ref();
-                    node.remove_event_listener_with_callback(event, func)?;
-                }
-            }
-
-            // remove closure active_closure in dom_updater to free up memory
-            old_closures
-                .remove(&vdom_id)
-                .expect("Unable to remove old closure");
-
+        Patch::RemoveEventListener(_node_idx, _events) => {
+            remove_event_listeners(node, old_closures)?;
             Ok(active_closures)
         }
         // TODO: Also remove the closures attached to the node before replacing it.
@@ -246,8 +249,11 @@ where
                 if non_separator_children_found <= *num_children_remaining as u32 {
                     continue;
                 }
-
+                let child_element: &Element = child.unchecked_ref();
+                remove_event_listeners(child_element, old_closures)?;
                 node.remove_child(&child).expect("Truncated children");
+                // TODO: There should be a better way to loop this, instead of
+                // decrementing the loop limit
                 child_count -= 1;
             }
 

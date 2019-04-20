@@ -162,3 +162,71 @@ fn remove_event() {
     //the `new` vdom which has no attached event
     assert_eq!(&*text.borrow(), "Start Text");
 }
+
+#[wasm_bindgen_test]
+fn remove_event_from_truncated_children() {
+    let old: Node<()> = div(
+        [],
+        [
+            button([onclick(|_| sauron::log("Clicked here"))], []),
+            button([onclick(|_| sauron::log("Clicked here"))], []),
+            button([onclick(|_| sauron::log("Clicked here"))], []),
+            button([onclick(|_| sauron::log("Clicked here"))], []),
+            button([onclick(|_| sauron::log("Clicked here"))], []),
+        ],
+    );
+
+    let new: Node<()> = div([], [button([onclick(|_| sauron::log("Clicked here"))], [])]);
+
+    let body = sauron::body();
+    let simple_program = simple_program();
+    let patch = sauron::diff(&old, &new);
+    sauron::log!("patch: {:#?}", patch);
+    let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
+    assert_eq!(
+        dom_updater.active_closure_len(),
+        5,
+        "There should be 5 events attached to the DomUpdater"
+    );
+    dom_updater.update(Rc::downgrade(&simple_program), new);
+
+    assert_eq!(
+        dom_updater.active_closure_len(),
+        1,
+        "There should only be 1 left after the truncate"
+    );
+}
+
+#[wasm_bindgen_test]
+fn remove_event_from_truncated_children_some_with_no_events() {
+    let old: Node<()> = div(
+        [],
+        [
+            button([onclick(|_| sauron::log("Clicked here"))], []),
+            button([onclick(|_| sauron::log("Clicked here"))], []),
+            button([], []),
+            button([], []),
+            button([onclick(|_| sauron::log("Clicked here"))], []),
+        ],
+    );
+
+    let new: Node<()> = div([], [button([onclick(|_| sauron::log("Clicked here"))], [])]);
+
+    let body = sauron::body();
+    let simple_program = simple_program();
+    let patch = sauron::diff(&old, &new);
+    sauron::log!("patch: {:#?}", patch);
+    let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
+    assert_eq!(
+        dom_updater.active_closure_len(),
+        3,
+        "There should be 3 events attached to the DomUpdater"
+    );
+    dom_updater.update(Rc::downgrade(&simple_program), new);
+
+    assert_eq!(
+        dom_updater.active_closure_len(),
+        1,
+        "There should only be 1 left after the truncate"
+    );
+}
