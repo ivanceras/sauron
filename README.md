@@ -4,6 +4,9 @@
  Sauron is an html web framework for building web-apps.
  It is heavily inspired by elm.
 
+ Sauron doesn't use macro to provide the view, instead it is using rust syntax to construct the
+ html view.
+
 ### Example
 ```rust
 use sauron::html::attributes::*;
@@ -30,9 +33,6 @@ impl App {
 }
 
 impl Component<Msg> for App {
-    fn create() -> App {
-        App::new()
-    }
 
     fn view(&self) -> Node<Msg> {
         div(
@@ -67,10 +67,15 @@ impl Component<Msg> for App {
 
 #[wasm_bindgen(start)]
 pub fn main() {
-    Program::new_append_mount(App::create(), &sauron::body());
+    Program::new_append_mount(App::new(), &sauron::body());
 }
 ```
 Look at the examples code and the build script for the details.
+
+This project is based on the existing projects:
+ - [percy](https://github.com/chinedufn/percy)
+ - [yew](https://github.com/DenisKolodin/yew)
+ - [willow](https://github.com/sindreij/willow)
 
 
 

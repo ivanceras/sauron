@@ -7,6 +7,9 @@
 //!  Sauron is an html web framework for building web-apps.
 //!  It is heavily inspired by elm.
 //!
+//!  Sauron doesn't use macro to provide the view, instead it is using rust syntax to construct the
+//!  html view.
+//!
 //! ## Example
 //! ```rust,no_run
 //! use sauron::html::attributes::*;
@@ -71,6 +74,11 @@
 //! }
 //! ```
 //! Look at the examples code and the build script for the details.
+//!
+//! This project is based on the existing projects:
+//!  - [percy](https://github.com/chinedufn/percy)
+//!  - [yew](https://github.com/DenisKolodin/yew)
+//!  - [willow](https://github.com/sindreij/willow)
 //!
 //!
 pub mod dom;
