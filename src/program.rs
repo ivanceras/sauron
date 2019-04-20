@@ -48,14 +48,11 @@ where
 
     /// This is called when an event is triggered in the html DOM.
     pub fn dispatch(self: &Rc<Self>, msg: MSG) {
-        let performance = crate::performance();
         let t1 = performance.now();
         self.app.borrow_mut().update(msg);
         let view = self.app.borrow().view();
         self.dom_updater
             .borrow_mut()
             .update(Rc::downgrade(&self), view);
-        let t2 = performance.now();
-        crate::log!("took {} ms to update", t2 - t1);
     }
 }

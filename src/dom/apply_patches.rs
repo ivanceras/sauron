@@ -160,8 +160,6 @@ fn remove_event_listeners(node: &Element, old_closures: &mut ActiveClosure) -> R
         old_closures
             .remove(&vdom_id)
             .expect("Unable to remove old closure");
-    } else {
-        crate::log("This element has no events attached");
     }
     Ok(())
 }
