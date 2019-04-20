@@ -2,6 +2,8 @@ use std::convert::Into;
 use std::fmt;
 use std::rc::Rc;
 
+/// A generic sized representation of a function that can be
+/// attached to a Node. The callback will essentially be owned by the element
 #[derive(Clone)]
 pub struct Callback<IN, OUT>(Rc<dyn Fn(IN) -> OUT>);
 
@@ -27,14 +29,13 @@ impl<IN, OUT> Callback<IN, OUT> {
 }
 
 impl<IN, OUT> PartialEq for Callback<IN, OUT> {
-    fn eq(&self, _rhs: &Self) -> bool {
-        //Rc::ptr_eq(&self.0, &rhs.0)
-        // FIXME: by returning true, we say that all the events
-        // on this element has not changed since it was
-        // added as event listener
-        // which means, we can be able to change
-        // the event listener of an element
-        // once it is set.
-        true
+    fn eq(&self, rhs: &Self) -> bool {
+        // Comparing the callback is only applicable
+        // when they are a clone to each other.
+        // This defeats the purpose in logically comparing for the
+        // diffing algorthmn since all callbacks are effectively called with the closure.into()
+        // which are essentially not the same Callback even when they are derived from the same
+        // function.
+        Rc::ptr_eq(&self.0, &rhs.0)
     }
 }
