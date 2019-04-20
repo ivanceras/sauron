@@ -813,11 +813,8 @@ mod diff_tests_using_html_syntax {
         );
     }
 
-    // TODO: This is allowed to fail for now,
-    // since comparison of callbacks always pass
     #[test]
-    #[should_panic]
-    fn add_events() {
+    fn new_different_event_will_replace_what_was_first_set() {
         let func = |_| {
             println!("hello");
         };
@@ -835,16 +832,18 @@ mod diff_tests_using_html_syntax {
         );
 
         let hello2: Callback<Event, ()> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
-        let events2 = btreemap! {
-        "click" => &hello2,
-        };
+        assert_ne!(hello, hello2, "Same function, different Rc::new()");
         let old = div([onclick(hello.clone())], []);
         let new = div([onclick(hello2.clone())], []);
 
         assert_eq!(
             diff(&old, &new),
-            vec![Patch::AddEventListener(0, events2.clone())],
-            "Change event listener",
+            vec![],
+            "Even though a new callback is recated from the same closure
+            It will point to a different Rc, which are not equal.
+            However, since comparing the wrapped Fn is just not possible
+            The diffing algorithmn will just leave what was first set as the event listener
+            ",
         );
     }
 

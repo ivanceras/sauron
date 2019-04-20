@@ -37,7 +37,7 @@ use std::collections::BTreeMap;
 ///                    `─'   `─'   `─'
 /// ```
 ///
-/// The patching process is tested in a real browser in crates/virtual-dom-rs/tests/diff_patch.rs
+/// The patching process is tested in a real browser in tests/diff_patch.rs
 #[derive(Debug, PartialEq)]
 pub enum Patch<'a, T, CB> {
     /// Append a vector of child nodes to a parent node id.

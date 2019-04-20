@@ -190,10 +190,13 @@ where
     }
 }
 
+/// Creates a callback object from the function closure
+/// This will then be attached to the browser and emitted
+/// when that event is triggered.
+///
 /// FIXME: callbacks are recrated eveytime, therefore they are not
 /// equivalent when compared since function contents
 /// can not be compared. Only Rc's are compared.
-/// Attach a callback to an event
 #[inline]
 pub fn on<C, CB>(name: &str, c: C) -> Attribute<CB>
 where

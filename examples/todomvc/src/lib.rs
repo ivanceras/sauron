@@ -15,6 +15,6 @@ pub fn main() {
     {
         console_error_panic_hook::set_once();
     }
-    sauron::log("in main!");
+    sauron::log!("in main!");
     Program::new_append_mount(Model::new(), &sauron::body());
 }

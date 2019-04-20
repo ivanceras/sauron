@@ -8,21 +8,12 @@ mod value;
 pub use event::{Event, InputEvent, KeyEvent, MouseButton, MouseEvent};
 pub use value::Value;
 
-/// When building your views you'll typically use the `html!` macro to generate
-/// `VirtualNode`'s.
-///
-/// `html! { <div> <span></span> </div> }` really generates a `VirtualNode` with
-/// one child (span).
-///
-/// Later, on the client side, you'll use the `diff` and `patch` modules to
-/// update the real DOM with your latest tree of virtual nodes (virtual dom).
-///
-/// Or on the server side you'll just call `.to_string()` on your root virtual node
-/// in order to recursively render the node and all of its children.
-///
-/// TODO: Make all of these fields private and create accessor methods
-/// TODO: Create a builder to create instances of VirtualNode::Element with
-/// attrs and children without having to explicitly create a Element
+/// This is the core data structure of the library.
+/// Any tree can be represented by `Node`.
+/// The `T` is generic instead of just using plain `&'static str`
+/// in order for this library to be used not only in html based widget
+/// but can also be used to represent native GUI widgets
+/// in various platforms.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Node<T, CB> {
     Element(Element<T, CB>),

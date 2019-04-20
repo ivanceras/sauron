@@ -1,3 +1,7 @@
+//! This is useful only for testing
+//! This is a simple component which just barely comply to being a component
+//! use for doing component tests
+//!
 use crate::html::div;
 use crate::Component;
 use crate::Program;
@@ -9,7 +13,7 @@ pub struct SimpleComponent;
 
 impl Component<()> for SimpleComponent {
     fn update(&mut self, _msg: ()) {
-        crate::log("updating in SimpleComponent");
+        crate::log!("updating in SimpleComponent");
     }
     fn view(&self) -> crate::Node<()> {
         div([], [])
