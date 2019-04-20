@@ -95,12 +95,10 @@ builder_constructors! {
     /// element.
     meta;
     // FIXME: conflicts with style attribute when both are imported
-    /*
     /// Build a
     /// [`<style>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style)
     /// element.
     style;
-    */
     /// Build a
     /// [`<title>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title)
     /// element.
