@@ -35,11 +35,10 @@ impl Client {
             .get_element_by_id("isomorphic-rust-web-app")
             .unwrap();
 
-        let app = App::new(1);
+        let app = App::new(0);
         let program = Program::new_replace_mount(app, &root_node);
         let program_clone = Rc::clone(&program);
         let clock: Closure<Fn()> = Closure::wrap(Box::new(move || {
-            sauron::log("is this triggered?");
             program_clone.dispatch(Msg::Clock);
         }));
         window()
