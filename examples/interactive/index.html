@@ -8,7 +8,6 @@
     <script src='pkg/interactive.js'></script>
     <script type=module>
         window.wasm_bindgen('pkg/interactive_bg.wasm')
-            .then( m => m.main())
             .catch(console.error);
     </script>
   </body>

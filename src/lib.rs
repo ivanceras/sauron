@@ -8,13 +8,14 @@
 //!  It is heavily inspired by elm.
 //!
 //! ## Example
-//! ```
+//! ```rust,no_run
 //! use sauron::html::attributes::*;
 //! use sauron::html::events::*;
 //! use sauron::html::*;
-//! use sauron::Node;
-//!
 //! use sauron::Component;
+//! use sauron::Node;
+//! use sauron::Program;
+//! use wasm_bindgen::prelude::*;
 //!
 //! #[derive(Debug, Clone)]
 //! pub enum Msg {
@@ -66,7 +67,14 @@
 //!
 //!     fn subscribe(&self) {}
 //! }
+//!
+//! #[wasm_bindgen(start)]
+//! pub fn main() {
+//!     Program::new_append_mount(App::new(), &sauron::body());
+//! }
 //! ```
+//! Look at the examples code and the build script for the details.
+//!
 //!
 pub mod dom;
 #[macro_use]

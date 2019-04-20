@@ -1,20 +1,64 @@
 #![deny(warnings)]
-use app::App;
+use sauron::html::attributes::*;
+use sauron::html::events::*;
+use sauron::html::*;
+use sauron::Component;
+use sauron::Node;
 use sauron::Program;
 use wasm_bindgen::prelude::*;
 
-mod app;
+#[derive(Debug, Clone)]
+pub enum Msg {
+    Click,
+}
 
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+pub struct App {
+    click_count: u32,
+}
 
-#[wasm_bindgen]
-pub fn main() {
-    #[cfg(feature = "console_error_panic_hook")]
-    {
-        console_error_panic_hook::set_once();
+impl App {
+    pub fn new() -> Self {
+        App { click_count: 0 }
     }
-    sauron::log("in main!");
+}
+
+impl Component<Msg> for App {
+    fn create() -> App {
+        App::new()
+    }
+
+    fn view(&self) -> Node<Msg> {
+        div(
+            [class("some-class"), id("some-id"), attr("data-id", 1)],
+            [
+                input(
+                    [
+                        class("client"),
+                        r#type("button"),
+                        value("Click me!"),
+                        onclick(move |_| {
+                            sauron::log("Button is clicked");
+                            Msg::Click
+                        }),
+                    ],
+                    [],
+                ),
+                text(format!("Clicked: {}", self.click_count)),
+            ],
+        )
+    }
+
+    fn update(&mut self, msg: Msg) {
+        sauron::log!("App is updating from msg: {:?}", msg);
+        match msg {
+            Msg::Click => self.click_count += 1,
+        }
+    }
+
+    fn subscribe(&self) {}
+}
+
+#[wasm_bindgen(start)]
+pub fn main() {
     Program::new_append_mount(App::new(), &sauron::body());
 }
