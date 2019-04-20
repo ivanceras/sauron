@@ -67,7 +67,7 @@ impl Component<Msg> for App {
 
 #[wasm_bindgen(start)]
 pub fn main() {
-    Program::new_append_mount(App::new(), &sauron::body());
+    Program::new_append_mount(App::create(), &sauron::body());
 }
 ```
 Look at the examples code and the build script for the details.
