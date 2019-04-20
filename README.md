@@ -4,52 +4,65 @@
  Sauron is an html web framework for building web-apps.
  It is heavily inspired by elm.
 
-## Example
+### Example
 ```rust
 use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
-use sauron::DomUpdater;
+use sauron::Node;
 
-use wasm_bindgen::prelude::*;
+use sauron::Component;
 
-#[wasm_bindgen]
-pub struct Client {
-    #[allow(unused)]
-    dom_updater: DomUpdater,
+#[derive(Debug, Clone)]
+pub enum Msg {
+    Click,
 }
 
-/// Build using
-/// ```sh
-/// $ wasm-pack build --target no-modules
-/// ```
-///
-#[wasm_bindgen]
-impl Client {
+pub struct App {
+    click_count: u32,
+}
 
-    #[wasm_bindgen(constructor)]
-    pub fn new() -> Client {
-        let html = div(
-            [class("some-class"), id("some-id"), attr("data-id", 1)],
-            [input(
-                [
-                    class("client"),
-                    r#type("button"),
-                    value("Click me!"),
-                    onclick(|_| {
-                        sauron::log("i've been clicked");
-                    }),
-                ],
-                [],
-            )],
-        );
-        sauron::log("hello from here!");
-        let body = sauron::body();
-        let dom_updater = DomUpdater::new_append_to_mount(html, &body);
-        Client { dom_updater }
+impl App {
+    pub fn new() -> Self {
+        App { click_count: 0 }
     }
 }
 
+impl Component<Msg> for App {
+    fn create() -> App {
+        App::new()
+    }
+
+    fn view(&self) -> Node<Msg> {
+        div(
+            [class("some-class"), id("some-id"), attr("data-id", 1)],
+            [
+                input(
+                    [
+                        class("client"),
+                        r#type("button"),
+                        value("Click me!"),
+                        onclick(move |_| {
+                            sauron::log("Button is clicked");
+                            Msg::Click
+                        }),
+                    ],
+                    [],
+                ),
+                text(format!("Clicked: {}", self.click_count)),
+            ],
+        )
+    }
+
+    fn update(&mut self, msg: Msg) {
+        sauron::log!("App is updating from msg: {:?}", msg);
+        match msg {
+            Msg::Click => self.click_count += 1,
+        }
+    }
+
+    fn subscribe(&self) {}
+}
 ```
 
 
