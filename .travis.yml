@@ -1,0 +1,19 @@
+os:
+    - linux
+
+language: rust
+
+rust:
+    - stable
+    - nightly
+
+
+before_script:
+    - apt update
+    - apt install -y firefox-esr
+    - curl --retry 5 -LO https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
+    - tar xf geckodriver-v0.24.0-linux64.tar.gz
+    - cargo install wasm-pack
+
+script:
+    - GECKODRIVER=$(pwd)/geckodriver ./test.sh

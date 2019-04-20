@@ -4,6 +4,13 @@
 #![feature(arbitrary_self_types)]
 
 //!
+//! [![Latest Version](https://img.shields.io/crates/v/sauron.svg)](https://crates.io/crates/sauron)
+//! [![Build Status](https://travis-ci.org/ivanceras/sauron.svg?branch=master)](https://travis-ci.org/ivanceras/sauron)
+//! [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+//!
+//!
+//! ![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.jpg)
+//!
 //!  Sauron is an html web framework for building web-apps.
 //!  It is heavily inspired by elm.
 //!
@@ -84,29 +91,22 @@
 pub mod dom;
 #[macro_use]
 pub mod html;
+mod component;
 mod program;
 pub mod svg;
-
+pub mod test_fixtures;
 mod util;
 
+pub use component::Component;
 pub use dom::DomUpdater;
 pub use program::Program;
+pub use sauron_vdom::diff;
 use sauron_vdom::Callback;
 pub use sauron_vdom::Event;
-
+pub use sauron_vdom::Text;
 pub use util::{body, document, log, performance, request_animation_frame, window};
 
 pub type Node<MSG> = sauron_vdom::Node<&'static str, Callback<Event, MSG>>;
 pub type Element<MSG> = sauron_vdom::Element<&'static str, Callback<Event, MSG>>;
 pub type Patch<'a, MSG> = sauron_vdom::Patch<'a, &'static str, Callback<Event, MSG>>;
 pub type Attribute<'a, MSG> = sauron_vdom::builder::Attribute<'a, Callback<Event, MSG>>;
-pub use sauron_vdom::diff;
-pub use sauron_vdom::Text;
-
-pub trait Component<MSG> {
-    fn update(&mut self, msg: MSG);
-    fn view(&self) -> Node<MSG>;
-    fn subscribe(&self);
-}
-
-pub mod test_fixtures;
