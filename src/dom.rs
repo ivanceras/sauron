@@ -140,8 +140,7 @@ impl<T> CreatedNode<T> {
             for (event_str, callback) in velem.events.iter() {
                 let current_elm: &EventTarget =
                     element.dyn_ref().expect("unable to cast to event targe");
-                let closure_wrap: Closure<Fn(Event)> =
-                    create_closure_wrap(program, &callback);
+                let closure_wrap: Closure<Fn(Event)> = create_closure_wrap(program, &callback);
                 current_elm
                     .add_event_listener_with_callback(
                         event_str,
@@ -284,7 +283,7 @@ where
     /// Mount the current_vdom appending to the actual browser DOM specified in the root_node
     /// This also gets the closures that was created when mounting the vdom to their
     /// actual DOM counterparts.
-    pub fn append_mount(&mut self, program: &Rc<Program<APP, MSG>>) {
+    pub fn append_to_mount(&mut self, program: &Rc<Program<APP, MSG>>) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         self.root_node
@@ -318,7 +317,7 @@ where
         mount: &Element,
     ) -> DomUpdater<APP, MSG> {
         let mut dom_updater = Self::new(current_vdom, mount);
-        dom_updater.append_mount(program);
+        dom_updater.append_to_mount(program);
         dom_updater
     }
 

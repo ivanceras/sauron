@@ -19,6 +19,8 @@ where
     MSG: Clone + Debug + 'static,
     APP: Component<MSG> + 'static,
 {
+    /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
+    /// and root node, but doesn't mount it yet.
     fn new(app: APP, root_node: &Node) -> Rc<Self> {
         let dom_updater: DomUpdater<APP, MSG> = DomUpdater::new(app.view(), root_node);
         let program = Program {
@@ -27,20 +29,22 @@ where
         };
         Rc::new(program)
     }
+    /// Creates an Rc wrapped instance of Program and mount the app view to the
+    /// given root_node
     pub fn new_replace_mount(app: APP, root_node: &Node) -> Rc<Self> {
         let program = Self::new(app, root_node);
         program.start_replace_mount();
         program
     }
 
-    pub fn new_append_mount(app: APP, root_node: &Node) -> Rc<Self> {
+    pub fn new_append_to_mount(app: APP, root_node: &Node) -> Rc<Self> {
         let program = Self::new(app, root_node);
-        program.start_append_mount();
+        program.start_append_to_mount();
         program
     }
 
-    fn start_append_mount(self: &Rc<Self>) {
-        self.dom_updater.borrow_mut().append_mount(self)
+    fn start_append_to_mount(self: &Rc<Self>) {
+        self.dom_updater.borrow_mut().append_to_mount(self)
     }
 
     fn start_replace_mount(self: &Rc<Self>) {
@@ -62,8 +66,6 @@ where
     fn dispatch_inner(self: &Rc<Self>, msg: MSG) {
         self.app.borrow_mut().update(msg);
         let view = self.app.borrow().view();
-        self.dom_updater
-            .borrow_mut()
-            .update(self, view);
+        self.dom_updater.borrow_mut().update(self, view);
     }
 }

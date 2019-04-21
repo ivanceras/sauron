@@ -25,5 +25,5 @@ pub fn simple_component() -> Rc<RefCell<SimpleComponent>> {
 }
 
 pub fn simple_program() -> Rc<Program<SimpleComponent, ()>> {
-    Program::new_append_mount(SimpleComponent, &crate::body())
+    Program::new_append_to_mount(SimpleComponent, &crate::body())
 }

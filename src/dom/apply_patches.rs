@@ -57,8 +57,7 @@ where
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = element_nodes_to_patch.get(&patch_node_idx) {
-            let new_closures =
-                apply_element_patch(program, &element, old_closures, &patch)?;
+            let new_closures = apply_element_patch(program, &element, old_closures, &patch)?;
             active_closures.extend(new_closures);
             continue;
         }
@@ -193,8 +192,7 @@ where
         // TODO: Shall we also remove the listener first?
         Patch::AddEventListener(node_idx, events) => {
             for (event, callback) in events.iter() {
-                let closure_wrap: Closure<Fn(Event)> =
-                    dom::create_closure_wrap(program, callback);
+                let closure_wrap: Closure<Fn(Event)> = dom::create_closure_wrap(program, callback);
                 let func: &Function = closure_wrap.as_ref().unchecked_ref();
                 node.add_event_listener_with_callback(event, func)?;
                 let node_id = *node_idx as u32;
