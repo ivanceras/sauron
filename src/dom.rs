@@ -8,7 +8,6 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::rc::Rc;
-use std::rc::Weak;
 use std::sync::Mutex;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
@@ -80,7 +79,7 @@ impl<T> CreatedNode<T> {
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
     pub fn create_dom_node<APP, MSG>(
-        program: Rc<Program<APP, MSG>>,
+        program: &Rc<Program<APP, MSG>>,
         vnode: &crate::Node<MSG>,
     ) -> CreatedNode<Node>
     where
@@ -102,7 +101,7 @@ impl<T> CreatedNode<T> {
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
     pub fn create_element_node<APP, MSG>(
-        program: Rc<Program<APP, MSG>>,
+        program: &Rc<Program<APP, MSG>>,
         velem: &crate::Element<MSG>,
     ) -> CreatedNode<Element>
     where
@@ -142,7 +141,7 @@ impl<T> CreatedNode<T> {
                 let current_elm: &EventTarget =
                     element.dyn_ref().expect("unable to cast to event targe");
                 let closure_wrap: Closure<Fn(Event)> =
-                    create_closure_wrap(program.clone(), &callback);
+                    create_closure_wrap(program, &callback);
                 current_elm
                     .add_event_listener_with_callback(
                         event_str,
@@ -184,7 +183,7 @@ impl<T> CreatedNode<T> {
                 crate::Node::Element(element_node) => {
                     previous_node_was_text = false;
 
-                    let child = Self::create_element_node(program.clone(), element_node);
+                    let child = Self::create_element_node(program, element_node);
                     let child_elem: Element = child.node;
                     closures.extend(child.closures);
 
@@ -203,7 +202,7 @@ impl<T> CreatedNode<T> {
 /// This wrap into a closure the function that is dispatched when the event is triggered.
 ///
 fn create_closure_wrap<APP, MSG>(
-    program: Rc<Program<APP, MSG>>,
+    program: &Rc<Program<APP, MSG>>,
     callback: &Callback<sauron_vdom::Event, MSG>,
 ) -> Closure<Fn(Event)>
 where
@@ -211,6 +210,7 @@ where
     APP: Component<MSG> + 'static,
 {
     let callback_clone = callback.clone();
+    let program_clone = Rc::clone(&program);
 
     Closure::wrap(Box::new(move |event: Event| {
         let mouse_event: Option<&MouseEvent> = event.dyn_ref();
@@ -253,7 +253,7 @@ where
             sauron_vdom::Event::Generic(event.type_())
         };
         let msg = callback_clone.emit(cb_event);
-        program.dispatch(msg);
+        program_clone.dispatch(msg);
     }))
 }
 
@@ -284,7 +284,7 @@ where
     /// Mount the current_vdom appending to the actual browser DOM specified in the root_node
     /// This also gets the closures that was created when mounting the vdom to their
     /// actual DOM counterparts.
-    pub fn append_mount(&mut self, program: Rc<Program<APP, MSG>>) {
+    pub fn append_mount(&mut self, program: &Rc<Program<APP, MSG>>) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         self.root_node
@@ -297,7 +297,7 @@ where
     /// Mount the current_vdom replacing the actual browser DOM specified in the root_node
     /// This also gets the closures that was created when mounting the vdom to their
     /// actual DOM counterparts.
-    pub fn replace_mount(&mut self, program: Rc<Program<APP, MSG>>) {
+    pub fn replace_mount(&mut self, program: &Rc<Program<APP, MSG>>) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         let root_element: &Element = self.root_node.unchecked_ref();
@@ -313,7 +313,7 @@ where
     /// A root `Node` will be created and appended (as a child) to your passed
     /// in mount element.
     pub fn new_append_to_mount(
-        program: Rc<Program<APP, MSG>>,
+        program: &Rc<Program<APP, MSG>>,
         current_vdom: crate::Node<MSG>,
         mount: &Element,
     ) -> DomUpdater<APP, MSG> {
@@ -327,7 +327,7 @@ where
     /// A root `Node` will be created and it will replace your passed in mount
     /// element.
     pub fn new_replace_mount(
-        program: Rc<Program<APP, MSG>>,
+        program: &Rc<Program<APP, MSG>>,
         current_vdom: crate::Node<MSG>,
         mount: Element,
     ) -> DomUpdater<APP, MSG> {
@@ -340,10 +340,10 @@ where
     ///
     /// Then use that diff to patch the real DOM in the user's browser so that they are
     /// seeing the latest state of the application.
-    pub fn update(&mut self, program: Weak<Program<APP, MSG>>, new_vdom: crate::Node<MSG>) {
+    pub fn update(&mut self, program: &Rc<Program<APP, MSG>>, new_vdom: crate::Node<MSG>) {
         let patches = diff(&self.current_vdom, &new_vdom);
         let active_closures = patch(
-            program.upgrade().expect("unable to upgrade weak pointer"),
+            program,
             self.root_node.clone(),
             &mut self.active_closures,
             &patches,

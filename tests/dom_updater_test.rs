@@ -25,10 +25,10 @@ fn patches_dom() {
     let sauron_vdom: Node<()> = div([], []);
     let simple_program = simple_program();
     let mut dom_updater =
-        DomUpdater::new_append_to_mount(Rc::clone(&simple_program), sauron_vdom, &sauron::body());
+        DomUpdater::new_append_to_mount(&simple_program, sauron_vdom, &sauron::body());
 
     let new_vdom = div([id("patched")], []); //html! { <div id="patched"></div> };
-    dom_updater.update(Rc::downgrade(&simple_program), new_vdom);
+    dom_updater.update(&simple_program, new_vdom);
 
     assert_eq!(document.query_selector("#patched").unwrap().is_some(), true);
 }
@@ -44,7 +44,7 @@ fn updates_active_closure_on_replace() {
 
     let simple_program = simple_program();
     let old = div([], []);
-    let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
+    let mut dom_updater = DomUpdater::new_append_to_mount(&simple_program, old, &body);
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -68,7 +68,7 @@ fn updates_active_closure_on_replace() {
     // New node replaces old node.
     // We are testing that we've stored this new node's closures even though `new` will be dropped
     // at the end of this block.
-    dom_updater.update(Rc::downgrade(&simple_program), replace_node);
+    dom_updater.update(&simple_program, replace_node);
 
     let input_event = InputEvent::new("input").unwrap();
 
@@ -94,7 +94,7 @@ fn updates_active_closures_on_append() {
 
     let old = div([], []);
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
+    let mut dom_updater = DomUpdater::new_append_to_mount(&simple_program, old, &body);
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -122,7 +122,7 @@ fn updates_active_closures_on_append() {
         // New node gets appended into the DOM.
         // We are testing that we've stored this new node's closures even though `new` will be dropped
         // at the end of this block.
-        dom_updater.update(Rc::downgrade(&simple_program), append_node);
+        dom_updater.update(&simple_program, append_node);
     }
 
     let input_event = InputEvent::new("input").unwrap();

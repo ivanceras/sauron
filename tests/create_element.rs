@@ -21,7 +21,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 #[wasm_bindgen_test]
 fn nested_divs() {
     let vdiv: Node<()> = div([], [div([], [div([], [])])]); // <div> <div> <div></div> </div> </div>
-    let div: Element = CreatedNode::<Element>::create_dom_node(simple_program(), &vdiv)
+    let div: Element = CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
         .node
         .unchecked_into();
 
@@ -37,7 +37,7 @@ fn svg_element() {
             [circle([cx("50"), cy("50"), r("50")], [])],
         )],
     );
-    let div: Element = CreatedNode::<Element>::create_dom_node(simple_program(), &vdiv)
+    let div: Element = CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
         .node
         .unchecked_into();
 
@@ -50,7 +50,7 @@ fn svg_element() {
 #[wasm_bindgen_test]
 fn div_with_attributes() {
     let vdiv: Node<()> = div([id("id-here"), class("two classes")], []);
-    let div: Element = CreatedNode::<Element>::create_dom_node(simple_program(), &vdiv)
+    let div: Element = CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
         .node
         .unchecked_into();
 
@@ -90,7 +90,7 @@ fn click_event() {
         [],
     );
 
-    let _dom_updater = DomUpdater::new_append_to_mount(simple_program(), vdiv, &body);
+    let _dom_updater = DomUpdater::new_append_to_mount(&simple_program(), vdiv, &body);
 
     let click_event = Event::new("click").unwrap();
 

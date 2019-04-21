@@ -40,11 +40,11 @@ where
     }
 
     fn start_append_mount(self: &Rc<Self>) {
-        self.dom_updater.borrow_mut().append_mount(Rc::clone(self))
+        self.dom_updater.borrow_mut().append_mount(self)
     }
 
     fn start_replace_mount(self: &Rc<Self>) {
-        self.dom_updater.borrow_mut().replace_mount(Rc::clone(self))
+        self.dom_updater.borrow_mut().replace_mount(self)
     }
 
     /// Do the dispatch in request animation frame
@@ -64,6 +64,6 @@ where
         let view = self.app.borrow().view();
         self.dom_updater
             .borrow_mut()
-            .update(Rc::downgrade(&self), view);
+            .update(self, view);
     }
 }

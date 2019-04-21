@@ -19,7 +19,7 @@ use web_sys::{Element, Event, Node, Text};
 /// that we desire.
 /// This is usually used after diffing two virtual nodes.
 pub fn patch<N, APP, MSG>(
-    program: Rc<Program<APP, MSG>>,
+    program: &Rc<Program<APP, MSG>>,
     root_node: N,
     old_closures: &mut ActiveClosure,
     patches: &[Patch<MSG>],
@@ -58,13 +58,13 @@ where
 
         if let Some(element) = element_nodes_to_patch.get(&patch_node_idx) {
             let new_closures =
-                apply_element_patch(program.clone(), &element, old_closures, &patch)?;
+                apply_element_patch(program, &element, old_closures, &patch)?;
             active_closures.extend(new_closures);
             continue;
         }
 
         if let Some(text_node) = text_nodes_to_patch.get(&patch_node_idx) {
-            apply_text_patch(program.clone(), &text_node, &patch)?;
+            apply_text_patch(program, &text_node, &patch)?;
             continue;
         }
 
@@ -164,7 +164,7 @@ fn remove_event_listeners(node: &Element, old_closures: &mut ActiveClosure) -> R
 }
 
 fn apply_element_patch<APP, MSG>(
-    program: Rc<Program<APP, MSG>>,
+    program: &Rc<Program<APP, MSG>>,
     node: &Element,
     old_closures: &mut ActiveClosure,
     patch: &Patch<MSG>,
@@ -194,7 +194,7 @@ where
         Patch::AddEventListener(node_idx, events) => {
             for (event, callback) in events.iter() {
                 let closure_wrap: Closure<Fn(Event)> =
-                    dom::create_closure_wrap(program.clone(), callback);
+                    dom::create_closure_wrap(program, callback);
                 let func: &Function = closure_wrap.as_ref().unchecked_ref();
                 node.add_event_listener_with_callback(event, func)?;
                 let node_id = *node_idx as u32;
@@ -269,7 +269,7 @@ where
             let mut active_closures = HashMap::new();
             for new_node in new_nodes {
                 let created_node =
-                    CreatedNode::<Node>::create_dom_node::<APP, MSG>(program.clone(), &new_node);
+                    CreatedNode::<Node>::create_dom_node::<APP, MSG>(program, &new_node);
                 parent.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }
@@ -283,7 +283,7 @@ where
 }
 
 fn apply_text_patch<APP, MSG>(
-    program: Rc<Program<APP, MSG>>,
+    program: &Rc<Program<APP, MSG>>,
     node: &Text,
     patch: &Patch<MSG>,
 ) -> Result<(), JsValue>

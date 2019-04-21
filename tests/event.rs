@@ -45,7 +45,7 @@ fn on_input() {
 
     let body = sauron::body();
     let simple_program = simple_program();
-    let _dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), input, &body);
+    let _dom_updater = DomUpdater::new_append_to_mount(&simple_program, input, &body);
 
     let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 
@@ -94,9 +94,9 @@ fn added_event() {
 
     let body = sauron::body();
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
+    let mut dom_updater = DomUpdater::new_append_to_mount(&simple_program, old, &body);
     // update to new dom with no event attached
-    dom_updater.update(Rc::downgrade(&simple_program), new);
+    dom_updater.update(&simple_program, new);
 
     let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 
@@ -146,9 +146,9 @@ fn remove_event() {
 
     let body = sauron::body();
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
+    let mut dom_updater = DomUpdater::new_append_to_mount(&simple_program, old, &body);
     // update to new dom with no event attached
-    dom_updater.update(Rc::downgrade(&simple_program), new);
+    dom_updater.update(&simple_program, new);
 
     let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 
@@ -186,13 +186,13 @@ fn remove_event_from_truncated_children() {
         vec![sauron_vdom::Patch::TruncateChildren(0, 1)],
         "Should be a Truncate patch"
     );
-    let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
+    let mut dom_updater = DomUpdater::new_append_to_mount(&simple_program, old, &body);
     assert_eq!(
         dom_updater.active_closure_len(),
         5,
         "There should be 5 events attached to the DomUpdater"
     );
-    dom_updater.update(Rc::downgrade(&simple_program), new);
+    dom_updater.update(&simple_program, new);
 
     assert_eq!(
         dom_updater.active_closure_len(),
@@ -223,13 +223,13 @@ fn remove_event_from_truncated_children_some_with_no_events() {
         vec![sauron_vdom::Patch::TruncateChildren(0, 1)],
         "Should be a Truncate patch"
     );
-    let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
+    let mut dom_updater = DomUpdater::new_append_to_mount(&simple_program, old, &body);
     assert_eq!(
         dom_updater.active_closure_len(),
         3,
         "There should be 3 events attached to the DomUpdater"
     );
-    dom_updater.update(Rc::downgrade(&simple_program), new);
+    dom_updater.update(&simple_program, new);
 
     assert_eq!(
         dom_updater.active_closure_len(),
@@ -260,13 +260,13 @@ fn remove_event_from_replaced_node() {
         )],
         "Should be a Replace patch"
     );
-    let mut dom_updater = DomUpdater::new_append_to_mount(Rc::clone(&simple_program), old, &body);
+    let mut dom_updater = DomUpdater::new_append_to_mount(&simple_program, old, &body);
     assert_eq!(
         dom_updater.active_closure_len(),
         1,
         "There should be 1 event attached to the DomUpdater"
     );
-    dom_updater.update(Rc::downgrade(&simple_program), new);
+    dom_updater.update(&simple_program, new);
 
     assert_eq!(
         dom_updater.active_closure_len(),
