@@ -11,15 +11,15 @@ keywords = ["html", "dom", "web"]
 edition = "2018"
 
 [dependencies]
-js-sys = "0.3"
+js-sys = "0.3.19"
 sauron_vdom = "0.3.0"
 maplit = "1.0.1"
-wasm-bindgen = "0.2.40"
-lazy_static = "1.0"
+wasm-bindgen = "0.2.42"
+lazy_static = "1.3.0"
 
 
 [dependencies.web-sys]
-version = "0.3"
+version = "0.3.19"
 features = [
     "Comment",
     "console",
@@ -42,11 +42,11 @@ features = [
 ]
 
 [dev-dependencies]
-wasm-bindgen-test = "0.2.33"
-console_error_panic_hook = "0.1.5"
+wasm-bindgen-test = "0.2.42"
+console_error_panic_hook = "0.1.6"
 
 [dev-dependencies.web-sys]
-version = "0.3"
+version = "0.3.19"
 features = [
     "DomTokenList",
     "HtmlInputElement",
