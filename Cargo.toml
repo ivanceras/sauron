@@ -66,7 +66,7 @@ members = [
 ]
 
 [replace]
-"sauron_vdom:0.2.0" = { path = "crates/sauron_vdom" }
+"sauron_vdom:0.3.0" = { path = "crates/sauron_vdom" }
 
 
 [profile.release]
