@@ -43,6 +43,10 @@ where
         program
     }
 
+    pub fn mount_to_body(app: APP) -> Rc<Self> {
+        Self::new_append_to_mount(app, &crate::body())
+    }
+
     fn start_append_to_mount(self: &Rc<Self>) {
         self.dom_updater.borrow_mut().append_to_mount(self)
     }
