@@ -23,29 +23,21 @@ declare_attributes! {
 // attributes that has dash
 declare_attributes! {
 
-    #[allow(non_snake_case)]
-    strokeWidth => "stroke-width";
+    stroke_width => "stroke-width";
 
-    #[allow(non_snake_case)]
-    stopColor => "stop-color";
+    stop_color => "stop-color";
 
-    #[allow(non_snake_case)]
-    stopOpacity => "stop-opacity";
+    stop_opacity => "stop-opacity";
 
-    #[allow(non_snake_case)]
-    strokeLinecap => "stroke-linecap";
+    stroke_linecap => "stroke-linecap";
 
-    #[allow(non_snake_case)]
-    strokeDasharray => "stroke-dasharray";
+    stroke_dasharray => "stroke-dasharray";
 
-    #[allow(non_snake_case)]
-    strokeDashoffset => "stroke-dashoffset";
+    stroke_dashoffset => "stroke-dashoffset";
 
-    #[allow(non_snake_case)]
-    transformOrigin => "transform-origin";
+    transform_origin => "transform-origin";
 
-    #[allow(non_snake_case)]
-    strokeOpacity => "stroke-opacity";
+    stroke_opacity => "stroke-opacity";
 }
 
 //TODO: add the rest of the attributes that are used in svg elements

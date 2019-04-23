@@ -114,13 +114,10 @@ declare_attributes! {
 // attributes with dash
 declare_attributes! {
 
-    #[allow(non_snake_case)]
-    fontFamily => "font-family";
+    font_family => "font-family";
 
-    #[allow(non_snake_case)]
-    fontSize => "font-size";
+    font_size => "font-size";
 
-    #[allow(non_snake_case)]
-    flexDirection => "flex-direction";
+    flex_direction => "flex-direction";
 }
 //TODO: add the rest of attributes from the html specs
