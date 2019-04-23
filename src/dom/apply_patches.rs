@@ -5,7 +5,7 @@ use crate::Component;
 use crate::Patch;
 use crate::Program;
 use js_sys::Function;
-use std::cmp::min;
+//use std::cmp::min;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fmt::Debug;
@@ -228,36 +228,23 @@ where
         // of the children of this node
         Patch::TruncateChildren(_node_idx, num_children_remaining) => {
             let children = node.child_nodes();
-            let mut child_count = children.length();
+            let child_count = children.length();
 
             // We skip over any separators that we placed between two text nodes
             //   -> `<!--ptns-->`
             //  and trim all children that come after our new desired `num_children_remaining`
-            let mut non_separator_children_found = 0;
+            //let mut non_separator_children_found = 0;
 
-            #[allow(clippy::mut_range_bound)]
-            for index in 0 as u32..child_count {
-                let child = children
-                    .get(min(index, child_count - 1))
-                    .expect("Potential child to truncate");
-
-                // If this is a comment node then we know that it is a `<!--ptns-->`
-                // text node separator that was created in virtual_node/mod.rs.
-                if child.node_type() == Node::COMMENT_NODE {
+            let to_be_remove_len = child_count as usize - num_children_remaining;
+            for _index in 0..to_be_remove_len{
+                let last_child = node.last_child().expect("No more last child");
+                let last_element: &Element = last_child.unchecked_ref();
+                remove_event_listeners(last_element, old_closures)?;
+                // Do not remove comment node
+                if last_child.node_type() == Node::COMMENT_NODE{
                     continue;
                 }
-
-                non_separator_children_found += 1;
-
-                if non_separator_children_found <= *num_children_remaining as u32 {
-                    continue;
-                }
-                let child_element: &Element = child.unchecked_ref();
-                remove_event_listeners(child_element, old_closures)?;
-                node.remove_child(&child).expect("Truncated children");
-                // TODO: There should be a better way to loop this, instead of
-                // decrementing the loop limit
-                child_count -= 1;
+                node.remove_child(&last_child).expect("Unable to remove last child");
             }
 
             Ok(active_closures)
