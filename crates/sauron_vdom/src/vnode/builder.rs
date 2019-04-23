@@ -38,6 +38,13 @@ where
         }
     }
 
+    pub fn as_element_ref(&mut self) -> Option<&Element<T, CB>> {
+        match *self {
+            Node::Element(ref element) => Some(element),
+            Node::Text(_) => None,
+        }
+    }
+
     /// Append children to this element
     pub fn children<C>(mut self, children: C) -> Self
     where

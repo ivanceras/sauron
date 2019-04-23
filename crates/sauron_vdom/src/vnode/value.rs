@@ -92,6 +92,12 @@ impl From<&str> for Value {
     }
 }
 
+impl From<&String> for Value {
+    fn from(v: &String) -> Self {
+        Value::String(v.to_string())
+    }
+}
+
 macro_rules! impl_from {
     ($ty:ty => $variant:ident) => {
         impl From<$ty> for Value {
