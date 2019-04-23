@@ -91,6 +91,7 @@ pub mod dom;
 #[macro_use]
 pub mod html;
 mod component;
+pub mod html_extra;
 mod program;
 pub mod svg;
 pub mod test_fixtures;

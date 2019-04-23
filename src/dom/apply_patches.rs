@@ -236,15 +236,16 @@ where
             //let mut non_separator_children_found = 0;
 
             let to_be_remove_len = child_count as usize - num_children_remaining;
-            for _index in 0..to_be_remove_len{
+            for _index in 0..to_be_remove_len {
                 let last_child = node.last_child().expect("No more last child");
                 let last_element: &Element = last_child.unchecked_ref();
                 remove_event_listeners(last_element, old_closures)?;
                 // Do not remove comment node
-                if last_child.node_type() == Node::COMMENT_NODE{
+                if last_child.node_type() == Node::COMMENT_NODE {
                     continue;
                 }
-                node.remove_child(&last_child).expect("Unable to remove last child");
+                node.remove_child(&last_child)
+                    .expect("Unable to remove last child");
             }
 
             Ok(active_closures)
