@@ -78,6 +78,9 @@ pub fn main() {
 ```
 Look at the examples code and the build script for the details.
 
+Warning: You need to use the latest nightly compiler in order for this to work.
+
+
 This project is based on the existing projects:
  - [percy](https://github.com/chinedufn/percy)
  - [yew](https://github.com/DenisKolodin/yew)
