@@ -1,4 +1,5 @@
 use crate::Component;
+use crate::Dispatch;
 use crate::DomUpdater;
 use std::cell::RefCell;
 use std::fmt::Debug;
@@ -11,7 +12,7 @@ use web_sys::Node;
 /// will be called after the event is triggered.
 pub struct Program<APP, MSG> {
     pub app: Rc<RefCell<APP>>,
-    pub dom_updater: Rc<RefCell<DomUpdater<APP, MSG>>>,
+    pub dom_updater: Rc<RefCell<DomUpdater<Self, MSG>>>,
 }
 
 impl<APP, MSG> Program<APP, MSG>
@@ -22,7 +23,7 @@ where
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
     fn new(app: APP, root_node: &Node) -> Rc<Self> {
-        let dom_updater: DomUpdater<APP, MSG> = DomUpdater::new(app.view(), root_node);
+        let dom_updater: DomUpdater<Self, MSG> = DomUpdater::new(app.view(), root_node);
         let program = Program {
             app: Rc::new(RefCell::new(app)),
             dom_updater: Rc::new(RefCell::new(dom_updater)),
@@ -43,6 +44,7 @@ where
         program
     }
 
+    /// Instantiate the app and then append it to the document body
     pub fn mount_to_body(app: APP) -> Rc<Self> {
         Self::new_append_to_mount(app, &crate::body())
     }
@@ -71,5 +73,22 @@ where
         self.app.borrow_mut().update(msg);
         let view = self.app.borrow().view();
         self.dom_updater.borrow_mut().update(self, view);
+    }
+}
+
+/// This will be called when the actual event is triggered.
+/// Defined in the DomUpdater::create_closure_wrap function
+impl<APP, MSG> Dispatch<MSG> for Program<APP, MSG>
+where
+    MSG: Clone + Debug + 'static,
+    APP: Component<MSG> + 'static,
+{
+    fn dispatch(self: &Rc<Self>, msg: MSG) {
+        let program_clone = Rc::clone(self);
+        let closure_raf: Closure<FnMut() + 'static> = Closure::once(move || {
+            program_clone.dispatch_inner(msg);
+        });
+        crate::request_animation_frame(&closure_raf);
+        closure_raf.forget();
     }
 }

@@ -91,6 +91,7 @@ pub mod dom;
 #[macro_use]
 pub mod html;
 mod component;
+mod dispatch;
 pub mod html_extra;
 mod program;
 pub mod svg;
@@ -98,6 +99,7 @@ pub mod test_fixtures;
 mod util;
 
 pub use component::Component;
+pub use dispatch::Dispatch;
 pub use dom::DomUpdater;
 pub use program::Program;
 pub use sauron_vdom::diff;

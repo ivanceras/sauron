@@ -1,5 +1,4 @@
-use crate::Component;
-use crate::Program;
+use crate::Dispatch;
 use apply_patches::patch;
 use sauron_vdom::Callback;
 use sauron_vdom::{self, diff};
@@ -49,7 +48,7 @@ pub struct CreatedNode<T> {
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
-pub struct DomUpdater<APP, MSG> {
+pub struct DomUpdater<DSP, MSG> {
     current_vdom: crate::Node<MSG>,
     root_node: Node,
 
@@ -60,7 +59,7 @@ pub struct DomUpdater<APP, MSG> {
     /// FIXME: Drop them when the element is no longer in the page. Need to figure out
     /// a good strategy for when to do this.
     pub active_closures: ActiveClosure,
-    _phantom_data: PhantomData<APP>,
+    _phantom_dsp: PhantomData<DSP>,
 }
 
 impl<T> CreatedNode<T> {
@@ -78,13 +77,13 @@ impl<T> CreatedNode<T> {
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
-    pub fn create_dom_node<APP, MSG>(
-        program: &Rc<Program<APP, MSG>>,
+    pub fn create_dom_node<DSP, MSG>(
+        program: &Rc<DSP>,
         vnode: &crate::Node<MSG>,
     ) -> CreatedNode<Node>
     where
         MSG: Clone + Debug + 'static,
-        APP: Component<MSG> + 'static,
+        DSP: Dispatch<MSG> + 'static,
     {
         match vnode {
             crate::Node::Text(text_node) => {
@@ -100,13 +99,13 @@ impl<T> CreatedNode<T> {
 
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
-    pub fn create_element_node<APP, MSG>(
-        program: &Rc<Program<APP, MSG>>,
+    pub fn create_element_node<DSP, MSG>(
+        program: &Rc<DSP>,
         velem: &crate::Element<MSG>,
     ) -> CreatedNode<Element>
     where
         MSG: Clone + Debug + 'static,
-        APP: Component<MSG> + 'static,
+        DSP: Dispatch<MSG> + 'static,
     {
         let document = web_sys::window().unwrap().document().unwrap();
 
@@ -200,13 +199,13 @@ impl<T> CreatedNode<T> {
 
 /// This wrap into a closure the function that is dispatched when the event is triggered.
 ///
-fn create_closure_wrap<APP, MSG>(
-    program: &Rc<Program<APP, MSG>>,
+fn create_closure_wrap<DSP, MSG>(
+    program: &Rc<DSP>,
     callback: &Callback<sauron_vdom::Event, MSG>,
 ) -> Closure<Fn(Event)>
 where
     MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
+    DSP: Dispatch<MSG> + 'static + 'static,
 {
     let callback_clone = callback.clone();
     let program_clone = Rc::clone(&program);
@@ -256,18 +255,18 @@ where
     }))
 }
 
-impl<APP, MSG> DomUpdater<APP, MSG>
+impl<DSP, MSG> DomUpdater<DSP, MSG>
 where
     MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
+    DSP: Dispatch<MSG> + 'static,
 {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.
-    pub fn new(current_vdom: crate::Node<MSG>, root_node: &Node) -> DomUpdater<APP, MSG> {
+    pub fn new(current_vdom: crate::Node<MSG>, root_node: &Node) -> DomUpdater<DSP, MSG> {
         DomUpdater {
             current_vdom,
             root_node: root_node.clone(),
             active_closures: ActiveClosure::new(),
-            _phantom_data: PhantomData,
+            _phantom_dsp: PhantomData,
         }
     }
 
@@ -283,7 +282,7 @@ where
     /// Mount the current_vdom appending to the actual browser DOM specified in the root_node
     /// This also gets the closures that was created when mounting the vdom to their
     /// actual DOM counterparts.
-    pub fn append_to_mount(&mut self, program: &Rc<Program<APP, MSG>>) {
+    pub fn append_to_mount(&mut self, program: &Rc<DSP>) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         self.root_node
@@ -296,7 +295,7 @@ where
     /// Mount the current_vdom replacing the actual browser DOM specified in the root_node
     /// This also gets the closures that was created when mounting the vdom to their
     /// actual DOM counterparts.
-    pub fn replace_mount(&mut self, program: &Rc<Program<APP, MSG>>) {
+    pub fn replace_mount(&mut self, program: &Rc<DSP>) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         let root_element: &Element = self.root_node.unchecked_ref();
@@ -312,10 +311,10 @@ where
     /// A root `Node` will be created and appended (as a child) to your passed
     /// in mount element.
     pub fn new_append_to_mount(
-        program: &Rc<Program<APP, MSG>>,
+        program: &Rc<DSP>,
         current_vdom: crate::Node<MSG>,
         mount: &Element,
-    ) -> DomUpdater<APP, MSG> {
+    ) -> DomUpdater<DSP, MSG> {
         let mut dom_updater = Self::new(current_vdom, mount);
         dom_updater.append_to_mount(program);
         dom_updater
@@ -326,10 +325,10 @@ where
     /// A root `Node` will be created and it will replace your passed in mount
     /// element.
     pub fn new_replace_mount(
-        program: &Rc<Program<APP, MSG>>,
+        program: &Rc<DSP>,
         current_vdom: crate::Node<MSG>,
         mount: Element,
-    ) -> DomUpdater<APP, MSG> {
+    ) -> DomUpdater<DSP, MSG> {
         let mut dom_updater = Self::new(current_vdom, &mount);
         dom_updater.replace_mount(program);
         dom_updater
@@ -339,7 +338,7 @@ where
     ///
     /// Then use that diff to patch the real DOM in the user's browser so that they are
     /// seeing the latest state of the application.
-    pub fn update(&mut self, program: &Rc<Program<APP, MSG>>, new_vdom: crate::Node<MSG>) {
+    pub fn update(&mut self, program: &Rc<DSP>, new_vdom: crate::Node<MSG>) {
         let patches = diff(&self.current_vdom, &new_vdom);
         let active_closures = patch(
             program,

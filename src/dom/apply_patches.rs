@@ -1,9 +1,8 @@
 use super::ActiveClosure;
 use super::CreatedNode;
 use crate::dom;
-use crate::Component;
+use crate::Dispatch;
 use crate::Patch;
-use crate::Program;
 use js_sys::Function;
 //use std::cmp::min;
 use std::collections::HashMap;
@@ -18,8 +17,8 @@ use web_sys::{Element, Event, Node, Text};
 /// Apply all of the patches to our old root node in order to create the new root node
 /// that we desire.
 /// This is usually used after diffing two virtual nodes.
-pub fn patch<N, APP, MSG>(
-    program: &Rc<Program<APP, MSG>>,
+pub fn patch<N, DSP, MSG>(
+    program: &Rc<DSP>,
     root_node: N,
     old_closures: &mut ActiveClosure,
     patches: &[Patch<MSG>],
@@ -27,7 +26,7 @@ pub fn patch<N, APP, MSG>(
 where
     N: Into<Node>,
     MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
+    DSP: Dispatch<MSG> + 'static,
 {
     let root_node: Node = root_node.into();
 
@@ -162,15 +161,15 @@ fn remove_event_listeners(node: &Element, old_closures: &mut ActiveClosure) -> R
     Ok(())
 }
 
-fn apply_element_patch<APP, MSG>(
-    program: &Rc<Program<APP, MSG>>,
+fn apply_element_patch<DSP, MSG>(
+    program: &Rc<DSP>,
     node: &Element,
     old_closures: &mut ActiveClosure,
     patch: &Patch<MSG>,
 ) -> Result<ActiveClosure, JsValue>
 where
     MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
+    DSP: Dispatch<MSG> + 'static,
 {
     let mut active_closures = HashMap::new();
     match patch {
@@ -216,7 +215,7 @@ where
         // Note and TODO: This doesn't free the closure and event listeners
         // of the children of this node
         Patch::Replace(_node_idx, new_node) => {
-            let created_node = CreatedNode::<Node>::create_dom_node::<APP, MSG>(program, new_node);
+            let created_node = CreatedNode::<Node>::create_dom_node::<DSP, MSG>(program, new_node);
             remove_event_listeners(&node, old_closures)?;
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
@@ -255,7 +254,7 @@ where
             let mut active_closures = HashMap::new();
             for new_node in new_nodes {
                 let created_node =
-                    CreatedNode::<Node>::create_dom_node::<APP, MSG>(program, &new_node);
+                    CreatedNode::<Node>::create_dom_node::<DSP, MSG>(program, &new_node);
                 parent.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }
@@ -268,21 +267,21 @@ where
     }
 }
 
-fn apply_text_patch<APP, MSG>(
-    program: &Rc<Program<APP, MSG>>,
+fn apply_text_patch<DSP, MSG>(
+    program: &Rc<DSP>,
     node: &Text,
     patch: &Patch<MSG>,
 ) -> Result<(), JsValue>
 where
     MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
+    DSP: Dispatch<MSG> + 'static,
 {
     match patch {
         Patch::ChangeText(_node_idx, new_node) => {
             node.set_node_value(Some(&new_node.text));
         }
         Patch::Replace(_node_idx, new_node) => {
-            let created_node = CreatedNode::<Node>::create_dom_node::<APP, MSG>(program, new_node);
+            let created_node = CreatedNode::<Node>::create_dom_node::<DSP, MSG>(program, new_node);
             node.replace_with_with_node_1(&created_node.node)?;
         }
         other => unreachable!(
