@@ -2,53 +2,153 @@ pub use sauron_vdom::builder::{attr, element, element_ns};
 
 pub mod attributes;
 
-builder_constructors! {
-    // SVG components
+const SVG_NAMESPACE: &'static str = "http://www.w3.org/2000/svg";
 
-    /// Build a
-    /// [`<svg>`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/svg)
-    /// element.
-    svg <> "http://www.w3.org/2000/svg" ;
-    /// Build a
-    /// [`<path>`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path)
-    /// element.
-    path <> "http://www.w3.org/2000/svg";
-    /// Build a
-    /// [`<circle>`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle)
-    /// element.
-    circle <>  "http://www.w3.org/2000/svg";
-    /// Build a
-    /// [`<ellipse>`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/ellipse)
-    /// element.
-    ellipse <> "http://www.w3.org/2000/svg";
-    /// Build a
-    /// [`<line>`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line)
-    /// element.
-    line <> "http://www.w3.org/2000/svg";
-    /// Build a
-    /// [`<polygon>`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/polygon)
-    /// element.
-    polygon <> "http://www.w3.org/2000/svg";
-    /// Build a
-    /// [`<polyline>`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/polyline)
-    /// element.
-    polyline <> "http://www.w3.org/2000/svg";
-    /// Build a
-    /// [`<rect>`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/rect)
-    /// element.
-    rect <> "http://www.w3.org/2000/svg";
+macro_rules! declare_svg_tags{
 
-    /// Build a
-    /// [`<text>`](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text)
-    /// element.
-    text <> "http://www.w3.org/2000/svg";
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+        $(
+            $(#[$attr])*
+            pub fn $name<'a, A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
+                where C: AsRef<[$crate::Node<MSG>]>,
+                      A: AsRef<[$crate::Attribute<'a,MSG>]>,
+                      MSG: Clone,
+                {
+                    $crate::html::html_element_ns(stringify!($name), SVG_NAMESPACE, attrs, children)
+                }
+         )*
+    };
+
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident => $attribute:tt;
+       )*
+     ) => {
+        $(
+            $(#[$attr])*
+            pub fn $name<'a, A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
+                where C: AsRef<[$crate::Node<MSG>]>,
+                      A: AsRef<[$crate::Attribute<'a,MSG>]>,
+                      MSG: Clone,
+                {
+                    $crate::html::html_element_ns($attribute, SVG_NAMESPACE, attrs, children)
+                }
+         )*
+    }
+
 }
 
-builder_constructors! {
-    defs <> "http://www.w3.org/2000/svg";
-    stop <> "http://www.w3.org/2000/svg";
-    g <> "http://www.w3.org/2000/svg";
-    tspan <> "http://www.w3.org/2000/svg";
+declare_svg_tags! {
+    a;
+    animate;
     #[allow(non_snake_case)]
-    radialGradient <> "http://www.w3.org/2000/svg";
+    animateMotion;
+    #[allow(non_snake_case)]
+    animateTransform;
+    circle;
+    #[allow(non_snake_case)]
+    clipPath;
+    defs;
+    desc;
+    discard;
+    ellipse;
+    #[allow(non_snake_case)]
+    feBlend;
+    #[allow(non_snake_case)]
+    feColorMatrix;
+    #[allow(non_snake_case)]
+    feComponentTransfer;
+    #[allow(non_snake_case)]
+    feComposite;
+    #[allow(non_snake_case)]
+    feConvolveMatrix;
+    #[allow(non_snake_case)]
+    feDiffuseLighting;
+    #[allow(non_snake_case)]
+    feDisplacementMap;
+    #[allow(non_snake_case)]
+    feDistantLight;
+    #[allow(non_snake_case)]
+    feDropShadow;
+    #[allow(non_snake_case)]
+    feFlood;
+    #[allow(non_snake_case)]
+    feFuncA;
+    #[allow(non_snake_case)]
+    feFuncB;
+    #[allow(non_snake_case)]
+    feFuncG;
+    #[allow(non_snake_case)]
+    feFuncR;
+    #[allow(non_snake_case)]
+    feGaussianBlur;
+    #[allow(non_snake_case)]
+    feImage;
+    #[allow(non_snake_case)]
+    feMerge;
+    #[allow(non_snake_case)]
+    feMergeNode;
+    #[allow(non_snake_case)]
+    feMorphology;
+    #[allow(non_snake_case)]
+    feOffset;
+    #[allow(non_snake_case)]
+    fePointLight;
+    #[allow(non_snake_case)]
+    feSpecularLighting;
+    #[allow(non_snake_case)]
+    feSpotLight;
+    #[allow(non_snake_case)]
+    feTile;
+    #[allow(non_snake_case)]
+    feTurbulence;
+    filter;
+    #[allow(non_snake_case)]
+    foreignObject;
+    g;
+    hatch;
+    hatchpath;
+    image;
+    line;
+    #[allow(non_snake_case)]
+    linearGradient;
+    marker;
+    mask;
+    mesh;
+    meshgradient;
+    meshpatch;
+    meshrow;
+    metadata;
+    mpath;
+    path;
+    pattern;
+    polygon;
+    polyline;
+    #[allow(non_snake_case)]
+    radialGradient;
+    rect;
+    script;
+    set;
+    solidcolor;
+    stop;
+    style;
+    svg;
+    switch;
+    symbol;
+    text;
+    #[allow(non_snake_case)]
+    textPath;
+    title;
+    tspan;
+    unknown;
+    view;
+}
+
+declare_svg_tags! {
+    color_profile => "color-profile";
+    r#use => "use";
 }

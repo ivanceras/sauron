@@ -2,7 +2,8 @@ pub use sauron_vdom::builder::attr;
 use sauron_vdom::builder::Attribute;
 use sauron_vdom::Value;
 
-// complet svg attributes
+// https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
+// complete list svg attributes
 declare_attributes! {
     accumulate;
     additive;

@@ -33,7 +33,7 @@ where
     sauron_vdom::builder::element_ns(tag, namespace, attrs, children)
 }
 
-macro_rules! builder_constructors {
+macro_rules! declare_tags {
     ( $(
          $(#[$attr:meta])*
          $name:ident;
@@ -75,7 +75,7 @@ macro_rules! builder_constructors {
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element
 //
 // Does not include obsolete elements.
-builder_constructors! {
+declare_tags! {
     // Document metadata
 
     /// Build a
