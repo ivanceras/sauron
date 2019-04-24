@@ -1,6 +1,6 @@
 [package]
 name = "sauron"
-version = "0.3.0"
+version = "0.4.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -66,7 +66,7 @@ members = [
 ]
 
 [replace]
-"sauron_vdom:0.3.0" = { path = "crates/sauron_vdom" }
+"sauron_vdom:0.4.0" = { path = "crates/sauron_vdom" }
 
 
 [profile.release]
