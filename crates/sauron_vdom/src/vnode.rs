@@ -43,6 +43,47 @@ pub struct Element<T, MSG> {
     pub namespace: Option<String>,
 }
 
+impl<T, MSG> Node<T, MSG> {
+    /// map the return of the callback from MSG to MSG2
+    pub fn map<F, MSG2>(self, func: F) -> Node<T, MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + 'static + Clone,
+        MSG: 'static,
+    {
+        match self {
+            Node::Element(element) => Node::Element(element.map(func)),
+            Node::Text(text) => Node::Text(Text::new(text.text)),
+        }
+    }
+}
+
+impl<T, MSG> Element<T, MSG> {
+    /// map the return of the callback from MSG to MSG2
+    pub fn map<F, MSG2>(self, func: F) -> Element<T, MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + 'static + Clone,
+        MSG: 'static,
+    {
+        let mut new_element: Element<T, MSG2> = Element {
+            tag: self.tag,
+            attrs: self.attrs,
+            namespace: self.namespace,
+            children: vec![],
+            events: BTreeMap::new(),
+        };
+        for child in self.children {
+            let new_child = child.map(func.clone());
+            new_element.children.push(new_child);
+        }
+        for (event, cb) in self.events {
+            // map the callback to return something else
+            let new_cb = cb.map(func.clone());
+            new_element.events.insert(event, new_cb);
+        }
+        new_element
+    }
+}
+
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct Text {
     pub text: String,
