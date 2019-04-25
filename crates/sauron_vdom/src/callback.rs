@@ -21,10 +21,39 @@ impl<IN, OUT> fmt::Debug for Callback<IN, OUT> {
     }
 }
 
-impl<IN, OUT> Callback<IN, OUT> {
+impl<IN, OUT> Callback<IN, OUT>
+where
+    IN: 'static,
+    OUT: 'static,
+{
     /// This method calls the actual callback.
     pub fn emit<T: Into<IN>>(&self, value: T) -> OUT {
         (self.0)(value.into())
+    }
+
+    /// Changes input type of the callback to another.
+    /// Works like common `map` method but in an opposite direction.
+    pub fn reform<F, T>(self, func: F) -> Callback<T, OUT>
+    where
+        F: Fn(T) -> IN + 'static,
+    {
+        let func_wrap = move |input| {
+            let output = func(input);
+            self.emit(output)
+        };
+        Callback::from(func_wrap)
+    }
+
+    /// Map the output of this callback to return a different type
+    pub fn map<F, OUT2>(self, func: F) -> Callback<IN, OUT2>
+    where
+        F: Fn(OUT) -> OUT2 + 'static,
+    {
+        let func_wrap = move |input| {
+            let out = self.emit(input);
+            func(out)
+        };
+        Callback::from(func_wrap)
     }
 }
 
