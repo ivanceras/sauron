@@ -2,7 +2,7 @@ pub use sauron_vdom::builder::{attr, element, element_ns};
 
 pub mod attributes;
 
-const SVG_NAMESPACE: &'static str = "http://www.w3.org/2000/svg";
+const SVG_NAMESPACE: &str = "http://www.w3.org/2000/svg";
 
 macro_rules! declare_svg_tags{
 
@@ -13,9 +13,9 @@ macro_rules! declare_svg_tags{
      ) => {
         $(
             $(#[$attr])*
-            pub fn $name<'a, A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
+            pub fn $name<A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
                 where C: AsRef<[$crate::Node<MSG>]>,
-                      A: AsRef<[$crate::Attribute<'a,MSG>]>,
+                      A: AsRef<[$crate::Attribute<MSG>]>,
                       MSG: Clone,
                 {
                     $crate::html::html_element_ns(stringify!($name), SVG_NAMESPACE, attrs, children)
@@ -30,9 +30,9 @@ macro_rules! declare_svg_tags{
      ) => {
         $(
             $(#[$attr])*
-            pub fn $name<'a, A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
+            pub fn $name<A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
                 where C: AsRef<[$crate::Node<MSG>]>,
-                      A: AsRef<[$crate::Attribute<'a,MSG>]>,
+                      A: AsRef<[$crate::Attribute<MSG>]>,
                       MSG: Clone,
                 {
                     $crate::html::html_element_ns($attribute, SVG_NAMESPACE, attrs, children)

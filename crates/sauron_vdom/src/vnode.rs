@@ -37,10 +37,10 @@ pub enum Node<T, MSG> {
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct Element<T, MSG> {
     pub tag: T,
-    pub attrs: BTreeMap<String, Value>,
-    pub events: BTreeMap<String, Callback<Event, MSG>>,
+    pub attrs: BTreeMap<&'static str, Value>,
+    pub events: BTreeMap<&'static str, Callback<Event, MSG>>,
     pub children: Vec<Node<T, MSG>>,
-    pub namespace: Option<String>,
+    pub namespace: Option<&'static str>,
 }
 
 impl<T, MSG> Node<T, MSG> {
@@ -102,8 +102,8 @@ impl<T, MSG> Element<T, MSG> {
     }
 
     /// set the namespace of this element
-    pub fn namespace(mut self, namespace: &str) -> Self {
-        self.namespace = Some(namespace.to_string());
+    pub fn namespace(mut self, namespace: &'static str) -> Self {
+        self.namespace = Some(namespace);
         self
     }
 }
@@ -123,7 +123,7 @@ where
         write!(f, ">")?;
 
         for child in self.children.iter() {
-            write!(f, "{}", child.to_string())?;
+            write!(f, "{}", child)?;
         }
 
         write!(f, "</{}>", self.tag.to_string())?;

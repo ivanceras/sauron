@@ -9,25 +9,25 @@ pub mod attributes;
 pub mod events;
 
 #[inline]
-pub fn html_element<'a, A, C, MSG>(tag: &'static str, attrs: A, children: C) -> Node<MSG>
+pub fn html_element<A, C, MSG>(tag: &'static str, attrs: A, children: C) -> Node<MSG>
 where
     C: AsRef<[Node<MSG>]>,
-    A: AsRef<[Attribute<'a, MSG>]>,
+    A: AsRef<[Attribute<MSG>]>,
     MSG: Clone,
 {
     sauron_vdom::builder::element(tag, attrs, children)
 }
 
 #[inline]
-pub fn html_element_ns<'a, A, C, MSG>(
+pub fn html_element_ns<A, C, MSG>(
     tag: &'static str,
-    namespace: &str,
+    namespace: &'static str,
     attrs: A,
     children: C,
 ) -> Node<MSG>
 where
     C: AsRef<[Node<MSG>]>,
-    A: AsRef<[Attribute<'a, MSG>]>,
+    A: AsRef<[Attribute<MSG>]>,
     MSG: Clone,
 {
     sauron_vdom::builder::element_ns(tag, namespace, attrs, children)
@@ -42,9 +42,9 @@ macro_rules! declare_tags {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<'a, A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
+            pub fn $name<A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
                 where C: AsRef<[$crate::Node<MSG>]>,
-                      A: AsRef<[$crate::Attribute<'a,MSG>]>,
+                      A: AsRef<[$crate::Attribute<MSG>]>,
                       MSG: Clone,
                 {
                     $crate::html::html_element(stringify!($name), attrs, children)
@@ -571,9 +571,9 @@ mod tests {
         assert_eq!(
             div,
             Element {
-                tag: "div".into(),
+                tag: "div",
                 attrs: btreemap! {
-                    "class".into() => "some-class".into(),
+                    "class" => "some-class".into(),
                 },
                 events: BTreeMap::new(),
                 children: vec![],
@@ -593,9 +593,9 @@ mod tests {
         assert_eq!(
             div,
             Element {
-                tag: "div".into(),
+                tag: "div",
                 events: btreemap! {
-                    "click".to_string() => callback.clone(),
+                    "click" => callback.clone(),
                 },
                 attrs: BTreeMap::new(),
                 children: vec![],
@@ -616,9 +616,9 @@ mod tests {
         assert_eq!(
             div,
             Element {
-                tag: "div".into(),
+                tag: "div",
                 attrs: btreemap! {
-                    "class".to_string() => "some-class".into(),
+                    "class" => "some-class".into(),
                 },
                 children: vec![Node::Text(Text {
                     text: "Hello".to_string()
@@ -643,19 +643,19 @@ mod tests {
         assert_eq!(
             div,
             Node::Element(Element {
-                tag: "div".into(),
+                tag: "div",
                 attrs: btreemap! {
-                   "class".into() => "some-class".into(),
-                   "type".into() => "submit".into(),
+                   "class" => "some-class".into(),
+                   "type" => "submit".into(),
                 },
                 events: btreemap! {
-                    "click".into() => cb.clone(),
+                    "click" => cb.clone(),
                 },
                 namespace: None,
                 children: vec![Node::Element(Element {
-                    tag: "div".into(),
+                    tag: "div",
                     attrs: btreemap! {
-                        "class".into() => "some-class".into()
+                        "class" => "some-class".into()
                     },
                     children: vec![Node::Text(Text {
                         text: "Hello world!".into()

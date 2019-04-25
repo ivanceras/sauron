@@ -118,4 +118,4 @@ pub use util::{body, document, log, performance, request_animation_frame, window
 pub type Node<MSG> = sauron_vdom::Node<&'static str, MSG>;
 pub type Element<MSG> = sauron_vdom::Element<&'static str, MSG>;
 pub type Patch<'a, MSG> = sauron_vdom::Patch<'a, &'static str, MSG>;
-pub type Attribute<'a, MSG> = sauron_vdom::builder::Attribute<'a, MSG>;
+pub type Attribute<MSG> = sauron_vdom::builder::Attribute<MSG>;

@@ -13,9 +13,9 @@ macro_rules! declare_events {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<'a, F,CB>(f: F) -> Attribute<'a,CB>
-                where F: Into<Callback<Event,CB>>,
-                    CB: Clone
+            pub fn $name<F, MSG>(f: F) -> Attribute<MSG>
+                where F: Into<Callback<Event, MSG>>,
+                      MSG: Clone
                 {
                     on(stringify!($event), f)
                 }

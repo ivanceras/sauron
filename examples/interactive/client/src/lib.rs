@@ -31,9 +31,7 @@ impl Client {
         console_error_panic_hook::set_once();
         sauron::log!("Do something with the initial state: {}", initial_state);
 
-        let root_node = document()
-            .get_element_by_id("web-app")
-            .unwrap();
+        let root_node = document().get_element_by_id("web-app").unwrap();
 
         let app = App::new(0);
         let program = Program::new_replace_mount(app, &root_node);

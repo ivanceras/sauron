@@ -13,9 +13,9 @@ macro_rules! declare_attributes {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<'a, V,CB>(v: V) -> Attribute<'a,CB>
+            pub fn $name<V,MSG>(v: V) -> Attribute<MSG>
                 where V: Into<Value>,
-                    CB: Clone,
+                    MSG: Clone,
                 {
                     attr(stringify!($name), v)
                 }
@@ -29,9 +29,9 @@ macro_rules! declare_attributes {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<'a, V,CB>(v: V) -> Attribute<'a,CB>
+            pub fn $name<V,MSG>(v: V) -> Attribute<MSG>
                 where V: Into<Value>,
-                    CB: Clone,
+                    MSG: Clone,
                 {
                     attr($attribute, v)
                 }
@@ -192,7 +192,7 @@ declare_attributes! {
 /// ```ignore
 ///div([style("display:flex;flex-direction:row;")],[])
 /// ```
-pub fn styles<'a, V, MSG, P>(pairs: P) -> Attribute<'a, MSG>
+pub fn styles<V, MSG, P>(pairs: P) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
     MSG: Clone,
