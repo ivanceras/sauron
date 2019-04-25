@@ -66,6 +66,7 @@ members = [
 ]
 
 [replace]
+"sauron:0.4.0" = { path = "." }
 "sauron_vdom:0.4.0" = { path = "crates/sauron_vdom" }
 
 

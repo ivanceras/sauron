@@ -1,3 +1,5 @@
+use crate::Callback;
+use crate::Event;
 use crate::Patch;
 use crate::Value;
 use crate::{Element, Node};
@@ -7,22 +9,20 @@ use std::mem;
 
 /// Given two Node's generate Patch's that would turn the old virtual node's
 /// real DOM node equivalent into the new Node's real DOM node equivalent.
-pub fn diff<'a, T, CB>(old: &'a Node<T, CB>, new: &'a Node<T, CB>) -> Vec<Patch<'a, T, CB>>
+pub fn diff<'a, T, MSG>(old: &'a Node<T, MSG>, new: &'a Node<T, MSG>) -> Vec<Patch<'a, T, MSG>>
 where
     T: PartialEq,
-    CB: PartialEq,
 {
     diff_recursive(&old, &new, &mut 0)
 }
 
-fn diff_recursive<'a, 'b, T, CB>(
-    old: &'a Node<T, CB>,
-    new: &'a Node<T, CB>,
+fn diff_recursive<'a, 'b, T, MSG>(
+    old: &'a Node<T, MSG>,
+    new: &'a Node<T, MSG>,
     cur_node_idx: &'b mut usize,
-) -> Vec<Patch<'a, T, CB>>
+) -> Vec<Patch<'a, T, MSG>>
 where
     T: PartialEq,
-    CB: PartialEq,
 {
     let mut patches = vec![];
     // Different enum variants, replace!
@@ -79,7 +79,7 @@ where
             let new_child_count = new_element.children.len();
 
             if new_child_count > old_child_count {
-                let append_patch: Vec<&'a Node<T, CB>> =
+                let append_patch: Vec<&'a Node<T, MSG>> =
                     new_element.children[old_child_count..].iter().collect();
                 patches.push(Patch::AppendChildren(*cur_node_idx, append_patch))
             }
@@ -110,14 +110,11 @@ where
 }
 
 // diff the attributes of old element to the new element at this cur_node_idx
-fn diff_attributes<'a, 'b, T, CB>(
-    old_element: &'a Element<T, CB>,
-    new_element: &'a Element<T, CB>,
+fn diff_attributes<'a, 'b, T, MSG>(
+    old_element: &'a Element<T, MSG>,
+    new_element: &'a Element<T, MSG>,
     cur_node_idx: &'b mut usize,
-) -> Vec<Patch<'a, T, CB>>
-where
-    CB: PartialEq,
-{
+) -> Vec<Patch<'a, T, MSG>> {
     let mut patches = vec![];
     let mut add_attributes: BTreeMap<&str, &Value> = BTreeMap::new();
     let mut remove_attributes: Vec<&str> = vec![];
@@ -164,16 +161,13 @@ where
 }
 
 // diff the events of the old element compared to the new element at this cur_node_idx
-fn diff_event_listener<'a, 'b, T, CB>(
-    old_element: &'a Element<T, CB>,
-    new_element: &'a Element<T, CB>,
+fn diff_event_listener<'a, 'b, T, MSG>(
+    old_element: &'a Element<T, MSG>,
+    new_element: &'a Element<T, MSG>,
     cur_node_idx: &'b mut usize,
-) -> Vec<Patch<'a, T, CB>>
-where
-    CB: PartialEq,
-{
+) -> Vec<Patch<'a, T, MSG>> {
     let mut patches = vec![];
-    let mut add_event_listener: BTreeMap<&str, &CB> = BTreeMap::new();
+    let mut add_event_listener: BTreeMap<&str, &Callback<Event, MSG>> = BTreeMap::new();
     let mut remove_event_listener: Vec<&str> = vec![];
 
     for (new_event_name, new_event_cb) in new_element.events.iter() {
@@ -209,7 +203,7 @@ where
     patches
 }
 
-fn increment_node_idx_for_children<T, CB>(old: &Node<T, CB>, cur_node_idx: &mut usize) {
+fn increment_node_idx_for_children<T, MSG>(old: &Node<T, MSG>, cur_node_idx: &mut usize) {
     *cur_node_idx += 1;
     if let Node::Element(element_node) = old {
         for child in element_node.children.iter() {
@@ -327,7 +321,7 @@ mod tests {
     fn no_change_event() {
         let func = |_| println!("Clicked!");
         let cb: Callback<Event, ()> = func.into();
-        let old: Node<&'static str, Callback<Event, ()>> = Node::Element(Element {
+        let old: Node<&'static str, ()> = Node::Element(Element {
             tag: "div".into(),
             events: btreemap! {
                 "click".into() => cb.clone(),
@@ -356,7 +350,7 @@ mod tests {
         let func = |_| println!("Clicked!");
         let cb: Callback<Event, ()> = func.into();
 
-        let old: Node<&'static str, Callback<Event, ()>> = Node::Element(Element {
+        let old: Node<&'static str, ()> = Node::Element(Element {
             tag: "div".into(),
             attrs: BTreeMap::new(),
             events: BTreeMap::new(),
