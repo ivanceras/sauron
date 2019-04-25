@@ -1,6 +1,8 @@
 //! https://developer.mozilla.org/en-US/docs/Web/Events
 pub use sauron_vdom::builder::on;
 use sauron_vdom::builder::Attribute;
+use sauron_vdom::Callback;
+use sauron_vdom::Event;
 
 macro_rules! declare_events {
     ( $(
@@ -12,7 +14,7 @@ macro_rules! declare_events {
             $(#[$attr])*
             #[inline]
             pub fn $name<'a, F,CB>(f: F) -> Attribute<'a,CB>
-                where F: Into<CB>,
+                where F: Into<Callback<Event,CB>>,
                     CB: Clone
                 {
                     on(stringify!($event), f)

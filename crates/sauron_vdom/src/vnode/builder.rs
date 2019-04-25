@@ -1,44 +1,46 @@
+use crate::Callback;
+use crate::Event;
 use crate::{Element, Node, Text, Value};
 use std::convert::AsRef;
 
-pub struct Attribute<'a, CB>
+pub struct Attribute<'a, MSG>
 where
-    CB: Clone,
+    MSG: Clone,
 {
     name: &'a str,
-    value: AttribValue<CB>,
+    value: AttribValue<MSG>,
 }
 
-pub enum AttribValue<CB>
+pub enum AttribValue<MSG>
 where
-    CB: Clone,
+    MSG: Clone,
 {
     Value(Value),
-    Callback(CB),
+    Callback(Callback<Event, MSG>),
 }
 
-impl<CB> From<CB> for AttribValue<CB>
+impl<MSG> From<Callback<Event, MSG>> for AttribValue<MSG>
 where
-    CB: Clone,
+    MSG: Clone,
 {
-    fn from(cb: CB) -> Self {
+    fn from(cb: Callback<Event, MSG>) -> Self {
         AttribValue::Callback(cb)
     }
 }
 
-impl<T, CB> Node<T, CB>
+impl<T, MSG> Node<T, MSG>
 where
     T: Clone,
-    CB: Clone,
+    MSG: Clone,
 {
-    pub fn as_element(&mut self) -> Option<&mut Element<T, CB>> {
+    pub fn as_element(&mut self) -> Option<&mut Element<T, MSG>> {
         match *self {
             Node::Element(ref mut element) => Some(element),
             Node::Text(_) => None,
         }
     }
 
-    pub fn as_element_ref(&mut self) -> Option<&Element<T, CB>> {
+    pub fn as_element_ref(&mut self) -> Option<&Element<T, MSG>> {
         match *self {
             Node::Element(ref element) => Some(element),
             Node::Text(_) => None,
@@ -48,8 +50,8 @@ where
     /// Append children to this element
     pub fn children<C>(mut self, children: C) -> Self
     where
-        C: AsRef<[Node<T, CB>]>,
-        CB: Clone,
+        C: AsRef<[Node<T, MSG>]>,
+        MSG: Clone,
     {
         if let Some(element) = self.as_element() {
             for child in children.as_ref() {
@@ -62,7 +64,7 @@ where
     /// add attributes to the node
     pub fn attributes<'a, A>(mut self, attributes: A) -> Self
     where
-        A: AsRef<[Attribute<'a, CB>]>,
+        A: AsRef<[Attribute<'a, MSG>]>,
     {
         if let Some(elm) = self.as_element() {
             elm.add_attributes_ref(attributes.as_ref());
@@ -71,11 +73,11 @@ where
     }
 }
 
-impl<T, CB> Element<T, CB> {
+impl<T, MSG> Element<T, MSG> {
     pub fn add_attributes<'a, A>(mut self, attrs: A) -> Self
     where
-        A: AsRef<[Attribute<'a, CB>]>,
-        CB: Clone,
+        A: AsRef<[Attribute<'a, MSG>]>,
+        MSG: Clone,
     {
         self.add_attributes_ref(attrs);
         self
@@ -85,8 +87,8 @@ impl<T, CB> Element<T, CB> {
     /// into this element
     pub fn add_attributes_ref<'a, A>(&mut self, attrs: A) -> &mut Self
     where
-        A: AsRef<[Attribute<'a, CB>]>,
-        CB: Clone,
+        A: AsRef<[Attribute<'a, MSG>]>,
+        MSG: Clone,
     {
         for a in attrs.as_ref() {
             match a.value {
@@ -103,9 +105,9 @@ impl<T, CB> Element<T, CB> {
 
     pub fn add_children<C>(mut self, children: C) -> Self
     where
-        C: AsRef<[Node<T, CB>]>,
+        C: AsRef<[Node<T, MSG>]>,
         T: Clone,
-        CB: Clone,
+        MSG: Clone,
     {
         for c in children.as_ref() {
             self.children.push(c.clone());
@@ -113,7 +115,7 @@ impl<T, CB> Element<T, CB> {
         self
     }
 
-    pub fn add_event_listener(mut self, event: &str, cb: CB) -> Self {
+    pub fn add_event_listener(mut self, event: &str, cb: Callback<Event, MSG>) -> Self {
         self.events.insert(event.to_string(), cb);
         self
     }
@@ -127,7 +129,7 @@ impl<T, CB> Element<T, CB> {
 /// use sauron_vdom::Callback;
 /// use sauron_vdom::Event;
 /// fn main(){
-///    let old:Node<&'static str, Callback<Event,()>> = element(
+///    let old:Node<&'static str, ()> = element(
 ///        "div",
 ///        [
 ///            attr("class", "some-class"),
@@ -145,12 +147,12 @@ impl<T, CB> Element<T, CB> {
 /// }
 ///```
 #[inline]
-pub fn element<'a, A, C, T, CB>(tag: T, attrs: A, children: C) -> Node<T, CB>
+pub fn element<'a, A, C, T, MSG>(tag: T, attrs: A, children: C) -> Node<T, MSG>
 where
-    C: AsRef<[Node<T, CB>]>,
-    A: AsRef<[Attribute<'a, CB>]>,
+    C: AsRef<[Node<T, MSG>]>,
+    A: AsRef<[Attribute<'a, MSG>]>,
     T: Clone,
-    CB: Clone,
+    MSG: Clone,
 {
     Node::Element(
         Element::new(tag)
@@ -159,12 +161,12 @@ where
     )
 }
 #[inline]
-pub fn element_ns<'a, A, C, T, CB>(tag: T, namespace: &str, attrs: A, children: C) -> Node<T, CB>
+pub fn element_ns<'a, A, C, T, MSG>(tag: T, namespace: &str, attrs: A, children: C) -> Node<T, MSG>
 where
-    C: AsRef<[Node<T, CB>]>,
-    A: AsRef<[Attribute<'a, CB>]>,
+    C: AsRef<[Node<T, MSG>]>,
+    A: AsRef<[Attribute<'a, MSG>]>,
     T: Clone,
-    CB: Clone,
+    MSG: Clone,
 {
     Node::Element(
         Element::new(tag)
@@ -176,10 +178,10 @@ where
 
 /// Create a textnode element
 #[inline]
-pub fn text<V, T, CB>(v: V) -> Node<T, CB>
+pub fn text<V, T, MSG>(v: V) -> Node<T, MSG>
 where
     V: ToString,
-    CB: Clone,
+    MSG: Clone,
 {
     Node::Text(Text {
         text: v.to_string(),
@@ -188,10 +190,10 @@ where
 
 /// Create an attribute
 #[inline]
-pub fn attr<V, CB>(name: &str, v: V) -> Attribute<CB>
+pub fn attr<V, MSG>(name: &str, v: V) -> Attribute<MSG>
 where
     V: Into<Value>,
-    CB: Clone,
+    MSG: Clone,
 {
     Attribute {
         name,
@@ -207,10 +209,10 @@ where
 /// equivalent when compared since function contents
 /// can not be compared. Only Rc's are compared.
 #[inline]
-pub fn on<C, CB>(name: &str, c: C) -> Attribute<CB>
+pub fn on<C, MSG>(name: &str, c: C) -> Attribute<MSG>
 where
-    C: Into<CB>,
-    CB: Clone,
+    C: Into<Callback<Event, MSG>>,
+    MSG: Clone,
 {
     Attribute {
         name,

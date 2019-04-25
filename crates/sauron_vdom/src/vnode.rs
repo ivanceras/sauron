@@ -5,6 +5,7 @@ pub mod builder;
 mod event;
 mod value;
 
+use crate::Callback;
 pub use event::{Event, InputEvent, KeyEvent, MouseButton, MouseEvent};
 pub use value::Value;
 
@@ -28,17 +29,17 @@ pub use value::Value;
 /// Cloning is only done once, and happens when constructing the views into a node tree.
 /// Cloning also allows flexibility such as adding more children into an existing node/element.
 #[derive(Debug, PartialEq, Clone)]
-pub enum Node<T, CB> {
-    Element(Element<T, CB>),
+pub enum Node<T, MSG> {
+    Element(Element<T, MSG>),
     Text(Text),
 }
 
 #[derive(Debug, PartialEq, Clone, Default)]
-pub struct Element<T, CB> {
+pub struct Element<T, MSG> {
     pub tag: T,
     pub attrs: BTreeMap<String, Value>,
-    pub events: BTreeMap<String, CB>,
-    pub children: Vec<Node<T, CB>>,
+    pub events: BTreeMap<String, Callback<Event, MSG>>,
+    pub children: Vec<Node<T, MSG>>,
     pub namespace: Option<String>,
 }
 
@@ -47,7 +48,7 @@ pub struct Text {
     pub text: String,
 }
 
-impl<T, CB> Element<T, CB> {
+impl<T, MSG> Element<T, MSG> {
     /// Create a Element using the supplied tag name
     pub fn new(tag: T) -> Self {
         Element {
@@ -66,7 +67,7 @@ impl<T, CB> Element<T, CB> {
     }
 }
 
-impl<T, CB> fmt::Display for Element<T, CB>
+impl<T, MSG> fmt::Display for Element<T, MSG>
 where
     T: ToString,
 {
@@ -104,7 +105,7 @@ impl fmt::Display for Text {
 }
 
 // Turn a Node into an HTML string (delegate impl to variants)
-impl<T, CB> fmt::Display for Node<T, CB>
+impl<T, MSG> fmt::Display for Node<T, MSG>
 where
     T: ToString,
 {
@@ -116,8 +117,8 @@ where
     }
 }
 
-impl<T, CB> From<Element<T, CB>> for Node<T, CB> {
-    fn from(v: Element<T, CB>) -> Self {
+impl<T, MSG> From<Element<T, MSG>> for Node<T, MSG> {
+    fn from(v: Element<T, MSG>) -> Self {
         Node::Element(v)
     }
 }
