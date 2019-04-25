@@ -183,4 +183,40 @@ declare_attributes! {
     r#loop => "loop";
     r#type => "type";
 }
-//TODO: add the rest of attributes from the html specs
+
+/// A helper function which creates a style attribute by assembling the tuples into a string for the style value.
+/// ```ignore
+///  div([styles([("display", "flex"), ("flex-direction", "row")])], [])
+/// ```
+/// is the same way of writing
+/// ```ignore
+///div([style("display:flex;flex-direction:row;")],[])
+/// ```
+pub fn styles<'a, V, MSG, P>(pairs: P) -> Attribute<'a, MSG>
+where
+    V: Into<Value> + Clone,
+    MSG: Clone,
+    P: AsRef<[(&'static str, V)]>,
+{
+    let mut style_str = String::new();
+    for (key, value) in pairs.as_ref() {
+        let value: Value = value.clone().into();
+        style_str.push_str(&format!("{}:{};", key, value.to_string()));
+    }
+    style(style_str)
+}
+
+#[cfg(test)]
+mod test {
+    use crate::html::attributes::*;
+    use crate::html::*;
+    #[test]
+    fn test_styles() {
+        let actual: Node<&'static str> = div(
+            [styles([("display", "flex"), ("flex-direction", "row")])],
+            [],
+        );
+        let expected = div([style("display:flex;flex-direction:row;")], []);
+        assert_eq!(actual, expected);
+    }
+}
