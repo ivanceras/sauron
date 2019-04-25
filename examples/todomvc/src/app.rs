@@ -279,7 +279,7 @@ fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
             [
                 class("edit"),
                 r#type("text"),
-                value(&*entry.description),
+                value(&entry.description),
                 oninput(|e: Event| {
                     if let Event::InputEvent(input) = e {
                         Msg::UpdateEdit(input.value)

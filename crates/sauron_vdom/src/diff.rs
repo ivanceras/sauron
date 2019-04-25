@@ -222,11 +222,11 @@ mod tests {
     #[test]
     fn test_replace_node() {
         let old = Node::Element::<&'static str, ()>(Element {
-            tag: "div".into(),
+            tag: "div",
             ..Default::default()
         });
         let new = Node::Element::<&'static str, ()>(Element {
-            tag: "span".into(),
+            tag: "span",
             ..Default::default()
         });
 
@@ -241,19 +241,19 @@ mod tests {
     #[test]
     fn test_simple_diff() {
         let old = Node::Element::<&'static str, ()>(Element {
-            tag: "div".into(),
+            tag: "div",
             attrs: btreemap! {
-                "id".into() => "some-id".into(),
-                "class".into() => "some-class".into(),
+                "id" => "some-id".into(),
+                "class" => "some-class".into(),
             },
             ..Default::default()
         });
 
         let new = Node::Element::<&'static str, ()>(Element {
-            tag: "div".into(),
+            tag: "div",
             attrs: btreemap! {
-                "id".into() => "some-id".into(),
-                "class".into() => "some-class".into(),
+                "id" => "some-id".into(),
+                "class" => "some-class".into(),
             },
             ..Default::default()
         });
@@ -265,19 +265,19 @@ mod tests {
     #[test]
     fn test_class_changed() {
         let old = Node::Element::<&'static str, ()>(Element {
-            tag: "div".into(),
+            tag: "div",
             attrs: btreemap! {
-                "id".into() => "some-id".into(),
-                "class".into() => "some-class".into(),
+                "id" => "some-id".into(),
+                "class" => "some-class".into(),
             },
             ..Default::default()
         });
 
         let new = Node::Element::<&'static str, ()>(Element {
-            tag: "div".into(),
+            tag: "div",
             attrs: btreemap! {
-                "id".into() => "some-id".into(),
-                "class".into() => "some-class2".into(),
+                "id" => "some-id".into(),
+                "class" => "some-class2".to_string().into(),
             },
             ..Default::default()
         });
@@ -286,29 +286,30 @@ mod tests {
         let class2 = Value::String("some-class2".to_string());
         assert_eq!(
             diff,
-            vec![Patch::AddAttributes(0, {
-                let mut hm = BTreeMap::new();
-                hm.insert("class", &class2);
-                hm
-            })]
+            vec![Patch::AddAttributes(
+                0,
+                btreemap! {
+                "class" => &class2,
+                }
+            )]
         )
     }
 
     #[test]
     fn test_class_removed() {
         let old = Node::Element::<&'static str, ()>(Element {
-            tag: "div".into(),
+            tag: "div",
             attrs: btreemap! {
-                "id".into() => "some-id".into(),
-                "class".into() => "some-class".into(),
+                "id" => "some-id".into(),
+                "class" => "some-class".into(),
             },
             ..Default::default()
         });
 
         let new = Node::Element::<&'static str, ()>(Element {
-            tag: "div".into(),
+            tag: "div",
             attrs: btreemap! {
-                "id".into() => "some-id".into(),
+                "id" => "some-id".into(),
             },
             ..Default::default()
         });
@@ -322,9 +323,9 @@ mod tests {
         let func = |_| println!("Clicked!");
         let cb: Callback<Event, ()> = func.into();
         let old: Node<&'static str, ()> = Node::Element(Element {
-            tag: "div".into(),
+            tag: "div",
             events: btreemap! {
-                "click".into() => cb.clone(),
+                "click" => cb.clone(),
             },
             attrs: BTreeMap::new(),
             children: vec![],
@@ -332,9 +333,9 @@ mod tests {
         });
 
         let new = Node::Element(Element {
-            tag: "div".into(),
+            tag: "div",
             events: btreemap! {
-                "click".into() => cb,
+                "click" => cb,
             },
             attrs: BTreeMap::new(),
             children: vec![],
@@ -351,7 +352,7 @@ mod tests {
         let cb: Callback<Event, ()> = func.into();
 
         let old: Node<&'static str, ()> = Node::Element(Element {
-            tag: "div".into(),
+            tag: "div",
             attrs: BTreeMap::new(),
             events: BTreeMap::new(),
             children: vec![],
@@ -359,9 +360,9 @@ mod tests {
         });
 
         let new = Node::Element(Element {
-            tag: "div".into(),
+            tag: "div",
             events: btreemap! {
-                "click".into() => cb.clone(),
+                "click" => cb.clone(),
             },
             attrs: BTreeMap::new(),
             children: vec![],

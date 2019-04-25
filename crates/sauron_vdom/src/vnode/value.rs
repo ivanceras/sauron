@@ -6,6 +6,7 @@ use std::fmt;
 #[derive(Debug, PartialEq, Clone)]
 pub enum Value {
     Bool(bool),
+    Str(&'static str),
     String(String),
     Vec(Vec<Value>),
     U8(u8),
@@ -28,6 +29,7 @@ impl Value {
     pub fn as_str(&self) -> Option<&str> {
         match self {
             Value::String(ref v) => Some(&v),
+            Value::Str(v) => Some(v),
             _ => None,
         }
     }
@@ -36,6 +38,7 @@ impl Value {
         match self {
             Value::Bool(_) => None,
             Value::String(_v) => None,
+            Value::Str(_v) => None,
             Value::Vec(_v) => None,
             Value::U8(v) => Some(f64::from(*v)),
             Value::U16(v) => Some(f64::from(*v)),
@@ -60,6 +63,7 @@ impl fmt::Display for Value {
         match self {
             Value::Bool(v) => write!(f, "{}", v),
             Value::String(v) => write!(f, "{}", v),
+            Value::Str(v) => write!(f, "{}", v),
             Value::Vec(v) => write!(
                 f,
                 "{}",
@@ -83,12 +87,6 @@ impl fmt::Display for Value {
             Value::F32(v) => write!(f, "{}", v),
             Value::F64(v) => write!(f, "{}", v),
         }
-    }
-}
-
-impl From<&str> for Value {
-    fn from(v: &str) -> Self {
-        Value::String(v.to_string())
     }
 }
 
@@ -135,6 +133,7 @@ macro_rules! impl_from {
 
 impl_from!(bool => Bool);
 impl_from!(String => String);
+impl_from!(&'static str => Str);
 impl_from!(u8 => U8);
 impl_from!(u16 => U16);
 impl_from!(u32 => U32);

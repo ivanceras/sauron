@@ -216,7 +216,9 @@ mod test {
             [styles([("display", "flex"), ("flex-direction", "row")])],
             [],
         );
-        let expected = div([style("display:flex;flex-direction:row;")], []);
-        assert_eq!(actual, expected);
+        let actual_html = format!("{}", actual);
+        let expected: Node<&'static str> = div([style("display:flex;flex-direction:row;")], []);
+        let expected_html = format!("{}", expected);
+        assert_eq!(actual_html, expected_html);
     }
 }
