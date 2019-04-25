@@ -14,6 +14,19 @@ pub use value::Value;
 /// in order for this library to be used not only in html based widget
 /// but can also be used to represent native GUI widgets
 /// in various platforms.
+///
+/// Note: Clone is necessary for the aesthetics in the construction of node through series of function
+/// calls.
+/// Without Clone, the user code would look like these:
+/// ```ignore
+///     div(&[class("some-class"), &[text("Some text")])
+/// ```
+/// as compared to
+/// ```ignore
+///     div([class("some-class"), [text("some text)])
+/// ```
+/// Cloning is only done once, and happens when constructing the views into a node tree.
+/// Cloning also allows flexibility such as adding more children into an existing node/element.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Node<T, CB> {
     Element(Element<T, CB>),
