@@ -57,17 +57,6 @@ where
         self.dom_updater.borrow_mut().replace_mount(self)
     }
 
-    /// Do the dispatch in request animation frame
-    /// to improve performance
-    pub fn dispatch(self: &Rc<Self>, msg: MSG) {
-        let program_clone = Rc::clone(self);
-        let closure_raf: Closure<FnMut() + 'static> = Closure::once(move || {
-            program_clone.dispatch_inner(msg);
-        });
-        crate::request_animation_frame(&closure_raf);
-        closure_raf.forget();
-    }
-
     /// This is called when an event is triggered in the html DOM.
     fn dispatch_inner(self: &Rc<Self>, msg: MSG) {
         self.app.borrow_mut().update(msg);
