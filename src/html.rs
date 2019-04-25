@@ -50,24 +50,6 @@ macro_rules! declare_tags {
                     $crate::html::html_element(stringify!($name), attrs, children)
                 }
          )*
-    };
-    (
-        $(
-            $(#[$attr:meta])*
-            $name:ident <> $namespace:tt;
-        )*
-    ) => {
-        $(
-            $(#[$attr])*
-            #[inline]
-            pub fn $name<'a, A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
-                where C: AsRef<[$crate::Node<MSG>]>,
-                      A: AsRef<[$crate::Attribute<'a,MSG>]>,
-                      MSG: Clone,
-                {
-                    $crate::html::html_element_ns(stringify!($name), $namespace, attrs, children)
-                }
-        )*
     }
 }
 
