@@ -36,7 +36,7 @@ lazy_static! {
 ///   descendants somehow and invalidate those closures..? Need to plan this out..
 ///   At it stands now this hashmap will grow anytime a new element with closures is
 ///   appended or replaced and we will never free those closures.
-pub type ActiveClosure = HashMap<u32, Vec<(String, Closure<Fn(Event)>)>>;
+pub type ActiveClosure = HashMap<u32, Vec<(&'static str, Closure<Fn(Event)>)>>;
 
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
@@ -149,7 +149,7 @@ impl<T> CreatedNode<T> {
                 closures
                     .get_mut(&unique_id)
                     .expect("Unable to get closure")
-                    .push((event_str.to_string(), closure_wrap));
+                    .push((event_str, closure_wrap));
             }
         }
 

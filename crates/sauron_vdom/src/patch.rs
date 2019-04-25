@@ -50,13 +50,13 @@ pub enum Patch<'a, T, MSG> {
     /// ex: <div> becomes <span>
     Replace(NodeIdx, &'a Node<T, MSG>),
     /// Add attributes that the new node has that the old node does not
-    AddAttributes(NodeIdx, BTreeMap<&'a str, &'a Value>),
+    AddAttributes(NodeIdx, BTreeMap<&'static str, &'a Value>),
     /// Remove attributes that the old node had that the new node doesn't
-    RemoveAttributes(NodeIdx, Vec<&'a str>),
+    RemoveAttributes(NodeIdx, Vec<&'static str>),
     /// Add attributes that the new node has that the old node does not
-    AddEventListener(NodeIdx, BTreeMap<&'a str, &'a Callback<Event, MSG>>),
+    AddEventListener(NodeIdx, BTreeMap<&'static str, &'a Callback<Event, MSG>>),
     /// Remove attributes that the old node had that the new node doesn't
-    RemoveEventListener(NodeIdx, Vec<&'a str>),
+    RemoveEventListener(NodeIdx, Vec<&'static str>),
     /// Change the text of a Text node.
     ChangeText(NodeIdx, &'a Text),
 }

@@ -171,7 +171,7 @@ where
     MSG: Clone + Debug + 'static,
     DSP: Dispatch<MSG> + 'static,
 {
-    let mut active_closures = HashMap::new();
+    let mut active_closures = ActiveClosure::new();
     match patch {
         Patch::AddAttributes(_node_idx, attributes) => {
             for (attrib_name, attrib_val) in attributes.iter() {
@@ -195,11 +195,10 @@ where
                 let func: &Function = closure_wrap.as_ref().unchecked_ref();
                 node.add_event_listener_with_callback(event, func)?;
                 let node_id = *node_idx as u32;
-                let event_name = event.to_string();
                 if let Some(closure) = active_closures.get_mut(&node_id) {
-                    closure.push((event_name, closure_wrap));
+                    closure.push((event, closure_wrap));
                 } else {
-                    active_closures.insert(node_id, vec![(event_name, closure_wrap)]);
+                    active_closures.insert(node_id, vec![(event, closure_wrap)]);
                 }
             }
 
