@@ -1,0 +1,44 @@
+
+body {
+    font-family: "Fira Sans", "Courier New", Courier,"Lucida Sans Typewriter","Lucida Typewriter",monospace;
+}
+
+.window{
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #eee;
+    padding: 50px;
+}
+
+.tab{
+}
+
+.row{
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px solid #efefef;
+    padding: 2px 0 2px  0;
+}
+
+.tablink {
+  background-color: #888;
+  outline: none;
+  cursor: pointer;
+  padding: 10px;
+  border-color: #000;
+  border-width: 1px 1px 0 1px;
+  border-radius: 5px 5px 0 0;
+}
+
+.tablink:hover {
+  background-color: #eee;
+}
+
+.tabcontent {
+  padding: 10px;
+}
+
+.field {
+    width: 120px;
+}
+
