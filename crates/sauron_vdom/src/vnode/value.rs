@@ -56,6 +56,19 @@ impl Value {
             Value::F64(v) => Some(*v),
         }
     }
+    /// If this is Value::Vec variant, append the new value
+    /// otherwise, turn this value into Value::Vec(Vec<Value>) variant
+    /// and append the new value.
+    pub fn append(&mut self, new_value: Value) {
+        match self {
+            Value::Vec(values) => {
+                values.push(new_value);
+            }
+            _ => {
+                *self = Value::Vec(vec![self.clone(), new_value]);
+            }
+        }
+    }
 }
 
 impl fmt::Display for Value {

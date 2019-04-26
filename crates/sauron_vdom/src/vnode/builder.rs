@@ -93,7 +93,11 @@ impl<T, MSG> Element<T, MSG> {
         for a in attrs.as_ref() {
             match a.value {
                 AttribValue::Value(ref v) => {
-                    self.attrs.insert(a.name, v.clone());
+                    if let Some(existing) = self.attrs.get_mut(a.name) {
+                        existing.append(v.clone());
+                    } else {
+                        self.attrs.insert(a.name, v.clone());
+                    }
                 }
                 AttribValue::Callback(ref v) => {
                     self.events.insert(a.name, v.clone());
