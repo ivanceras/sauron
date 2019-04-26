@@ -211,11 +211,21 @@ where
     let program_clone = Rc::clone(&program);
 
     Closure::wrap(Box::new(move |event: Event| {
+        let cb_event = convert_event(event);
+        let msg = callback_clone.emit(cb_event);
+        program_clone.dispatch(msg);
+    }))
+}
+
+/// convert the native DOM event into an internal portable representation
+/// TODO: Add support for allowing user pass a function
+/// to convert the events, extracting only specified data they need.
+fn convert_event(event: Event) -> sauron_vdom::Event {
         let mouse_event: Option<&MouseEvent> = event.dyn_ref();
         let key_event: Option<&KeyboardEvent> = event.dyn_ref();
         let target: Option<EventTarget> = event.target();
 
-        let cb_event = if let Some(mouse_event) = mouse_event {
+        if let Some(mouse_event) = mouse_event {
             if event.type_() == "click" {
                 sauron_vdom::Event::MouseEvent(sauron_vdom::MouseEvent::Press(
                     sauron_vdom::MouseButton::Left,
@@ -249,10 +259,7 @@ where
             }
         } else {
             sauron_vdom::Event::Generic(event.type_())
-        };
-        let msg = callback_clone.emit(cb_event);
-        program_clone.dispatch(msg);
-    }))
+        }
 }
 
 impl<DSP, MSG> DomUpdater<DSP, MSG>
