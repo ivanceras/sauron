@@ -55,8 +55,11 @@ impl Component<Msg> for Tab {
         div(
             [
                 class("tab tabcontent"),
-                styles([("display", if self.is_active { "block" } else { "none" })]),
                 styles([("background-color", &self.color)]),
+                styles_flag([
+                    ("display", "block", self.is_active),
+                    ("display", "none", !self.is_active),
+                ]),
             ],
             [
                 button(

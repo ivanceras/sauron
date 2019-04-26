@@ -63,6 +63,7 @@ members = [
     "examples/minimal",
     "examples/interactive/client",
     "examples/todomvc",
+    "examples/window_tab_rows",
 ]
 
 [replace]
