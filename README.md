@@ -5,11 +5,25 @@
 [![Build Status](https://travis-ci.org/ivanceras/sauron.svg?branch=master)](https://travis-ci.org/ivanceras/sauron)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-
 ![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.jpg)
 
- Sauron is an html web framework for building web-apps.
- It is heavily inspired by elm.
+```rust
+   One crate to rule the DOM
+   One crate to find things
+   One crate to bring JSON
+   And in the Rust code bind strings
+
+   This code, no other, is made by code elves
+   Who'd pawn parent process to get it themselves
+   Ruler of net troll and mortal and hacker
+   This code is a lib crate for Patreon backers
+   If trashed or buggy it cannot be remade
+   If found send to Ivan, the bandwidth is prepaid
+```
+
+
+ Sauron is an html web framework for building web-apps with the goal to
+ closely adhere to [The Elm Architecture](https://guide.elm-lang.org/architecture/),
 
  Sauron doesn't use macro to provide the view, instead it is using rust syntax to construct the
  html view.
@@ -76,18 +90,52 @@ pub fn main() {
     Program::new_append_to_mount(App::new(), &sauron::body());
 }
 ```
-Look at the examples code and the build script for the details.
+Index.html
+```html
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <title>Minimal sauron app</title>
+  </head>
+  <body>
+    <script src='pkg/minimal.js'></script>
+    <script type=module>
+        window.wasm_bindgen('pkg/minimal_bg.wasm')
+            .catch(console.error);
+    </script>
+  </body>
+</html>
+```
+Build using
+```sh
+$> wasm-pack build --target no-modules
+```
+Look at the [examples](https://github.com/ivanceras/sauron/tree/master/examples) and the build script for the details.
 
 Warning: You need to use the latest nightly compiler in order for this to work.
 
+### Prerequisite:
+
+```sh
+cargo install wasm-pack
+cargo install basic-http-server
+```
 
 This project is based on the existing projects:
  - [percy](https://github.com/chinedufn/percy)
  - [yew](https://github.com/DenisKolodin/yew)
  - [willow](https://github.com/sindreij/willow)
 
+### Performance: Is not too bad.
+![Benchmark](https://raw.githubusercontent.com/ivanceras/todomvc-perf-comparison/sauron-benchmark/sauron-benchmark.png)
+
 ### Please support this project:
  [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
+
+
+### Personal plug:
+I'm actively looking for a job that has to do with rust.
+Please contact me: ivanceras[at]gmail.com
 
 
 License: MIT
