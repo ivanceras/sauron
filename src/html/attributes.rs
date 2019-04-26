@@ -206,6 +206,22 @@ where
     style(style_str)
 }
 
+pub fn styles_flag<V, MSG, P>(trio: P) -> Attribute<MSG>
+where
+    V: Into<Value> + Clone,
+    MSG: Clone,
+    P: AsRef<[(&'static str, V, bool)]>,
+{
+    let mut style_list = Vec::with_capacity(trio.as_ref().len());
+    for (key, value, flag) in trio.as_ref() {
+        if *flag {
+            let value: Value = value.clone().into();
+            style_list.push(format!("{}:{};", key, value.to_string()));
+        }
+    }
+    style(style_list.join(""))
+}
+
 #[cfg(test)]
 mod test {
     use crate::html::attributes::*;
