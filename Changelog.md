@@ -1,6 +1,7 @@
 # 0.5.0
 - Use &'static str type for Node's attribute name, event name and namespace.
-- Add helper function `styles` which allows users to write style attributes easily.
+- Add helper function `styles` which allows users to write style properties easily.
+- Add helper function `styles_flag` which allows users to write even more granular style properties.
 - Put back `Callback<Event,MSG>` as the value of node.events.
 - Add `map` functionality which lets user embed subcomponents view into the parent component by mapping the callbacks
     with a wrapped MSG variant from the parent.

@@ -206,6 +206,18 @@ where
     style(style_str)
 }
 
+/// A helper function which creates a style attribute by assembling only the parts that passed the
+/// boolean flag
+/// ```ignore
+///    styles_flag([
+///        ("display", "block", self.is_active),
+///        ("display", "none", !self.is_active),
+///    ]),
+/// ```
+/// This could also be written as
+/// ```ignore
+///     styles([("display", if self.is_active { "block" }else{ "none" })])
+/// ```
 pub fn styles_flag<V, MSG, P>(trio: P) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
