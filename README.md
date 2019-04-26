@@ -7,11 +7,11 @@
 
 ![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.jpg)
 
-```rust
+```log,ignore
    One crate to rule the DOM
-   One crate to find things
+   One crate to find the elements
    One crate to bring JSON
-   And in the Rust code bind strings
+   And in the Rust code bind Strings
 
    This code, no other, is made by code elves
    Who'd pawn parent process to get it themselves
@@ -23,10 +23,10 @@
 
 
  Sauron is an html web framework for building web-apps with the goal to
- closely adhere to [The Elm Architecture](https://guide.elm-lang.org/architecture/),
+ closely adhere to [The Elm Architecture](https://guide.elm-lang.org/architecture/), A true
+ king for elegant design.
 
- Sauron doesn't use macro to provide the view, instead it is using rust syntax to construct the
- html view.
+ As with elm, sauron don't use macro to provide the view, instead just uses plain rust function calls to construct the view.
 
 ### Example
 ```rust
