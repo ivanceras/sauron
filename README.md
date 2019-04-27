@@ -90,7 +90,7 @@ pub fn main() {
     Program::new_append_to_mount(App::new(), &sauron::body());
 }
 ```
-Index.html
+index.html
 ```html
 <html>
   <head>
@@ -121,6 +121,10 @@ cargo install wasm-pack
 cargo install basic-http-server
 ```
 
+* TIP: Use `indent_style = "Visual"`in your rustfmt.toml
+This will visually align the view function in your code, which gives it a more pleasant
+semantic look
+
 This project is based on the existing projects:
  - [percy](https://github.com/chinedufn/percy)
  - [yew](https://github.com/DenisKolodin/yew)
@@ -136,6 +140,5 @@ This project is based on the existing projects:
 ### Personal plug:
 I'm actively looking for a job that has to do with rust.
 Please contact me: ivanceras[at]gmail.com
-
 
 License: MIT
