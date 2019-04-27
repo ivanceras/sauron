@@ -17,17 +17,11 @@ pub enum Event {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum MouseEvent {
     /// A mouse button was pressed.
-    ///
-    /// The coordinates are one-based.
-    Press(MouseButton, u16, u16),
+    Press(MouseButton, i32, i32),
     /// A mouse button was released.
-    ///
-    /// The coordinates are one-based.
-    Release(u16, u16),
+    Release(i32, i32),
     /// A mouse button is held over the given coordinates.
-    ///
-    /// The coordinates are one-based.
-    Hold(u16, u16),
+    Hold(i32, i32),
 }
 
 /// A mouse button.

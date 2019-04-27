@@ -1,44 +1,45 @@
 use crate::{Callback,
             Element,
-            Event,
             Node,
             Text,
             Value};
 use std::convert::AsRef;
 
-pub struct Attribute<MSG>
+pub struct Attribute<EVENT, MSG>
     where MSG: Clone
 {
     name: &'static str,
-    value: AttribValue<MSG>,
+    value: AttribValue<EVENT, MSG>,
 }
 
-pub enum AttribValue<MSG>
+pub enum AttribValue<EVENT, MSG>
     where MSG: Clone
 {
     Value(Value),
-    Callback(Callback<Event, MSG>),
+    Callback(Callback<EVENT, MSG>),
 }
 
-impl<MSG> From<Callback<Event, MSG>> for AttribValue<MSG> where MSG: Clone
+impl<EVENT, MSG> From<Callback<EVENT, MSG>> for AttribValue<EVENT, MSG>
+    where MSG: Clone
 {
-    fn from(cb: Callback<Event, MSG>) -> Self {
+    fn from(cb: Callback<EVENT, MSG>) -> Self {
         AttribValue::Callback(cb)
     }
 }
 
-impl<T, MSG> Node<T, MSG>
+impl<T, EVENT, MSG> Node<T, EVENT, MSG>
     where T: Clone,
-          MSG: Clone
+          MSG: Clone,
+          EVENT: Clone
 {
-    pub fn as_element(&mut self) -> Option<&mut Element<T, MSG>> {
+    pub fn as_element(&mut self) -> Option<&mut Element<T, EVENT, MSG>> {
         match *self {
             Node::Element(ref mut element) => Some(element),
             Node::Text(_) => None,
         }
     }
 
-    pub fn as_element_ref(&mut self) -> Option<&Element<T, MSG>> {
+    pub fn as_element_ref(&mut self) -> Option<&Element<T, EVENT, MSG>> {
         match *self {
             Node::Element(ref element) => Some(element),
             Node::Text(_) => None,
@@ -47,8 +48,7 @@ impl<T, MSG> Node<T, MSG>
 
     /// Append children to this element
     pub fn children<C>(mut self, children: C) -> Self
-        where C: AsRef<[Node<T, MSG>]>,
-              MSG: Clone
+        where C: AsRef<[Node<T, EVENT, MSG>]>
     {
         if let Some(element) = self.as_element() {
             for child in children.as_ref() {
@@ -60,7 +60,7 @@ impl<T, MSG> Node<T, MSG>
 
     /// add attributes to the node
     pub fn attributes<A>(mut self, attributes: A) -> Self
-        where A: AsRef<[Attribute<MSG>]>
+        where A: AsRef<[Attribute<EVENT, MSG>]>
     {
         if let Some(elm) = self.as_element() {
             elm.add_attributes_ref(attributes.as_ref());
@@ -69,10 +69,13 @@ impl<T, MSG> Node<T, MSG>
     }
 }
 
-impl<T, MSG> Element<T, MSG> {
+impl<T, EVENT, MSG> Element<T, EVENT, MSG>
+    where T: Clone,
+          MSG: Clone,
+          EVENT: Clone
+{
     pub fn add_attributes<A>(mut self, attrs: A) -> Self
-        where A: AsRef<[Attribute<MSG>]>,
-              MSG: Clone
+        where A: AsRef<[Attribute<EVENT, MSG>]>
     {
         self.add_attributes_ref(attrs);
         self
@@ -81,8 +84,7 @@ impl<T, MSG> Element<T, MSG> {
     /// add the attribute values or events callback
     /// into this element
     pub fn add_attributes_ref<A>(&mut self, attrs: A) -> &mut Self
-        where A: AsRef<[Attribute<MSG>]>,
-              MSG: Clone
+        where A: AsRef<[Attribute<EVENT, MSG>]>
     {
         for a in attrs.as_ref() {
             match a.value {
@@ -102,9 +104,7 @@ impl<T, MSG> Element<T, MSG> {
     }
 
     pub fn add_children<C>(mut self, children: C) -> Self
-        where C: AsRef<[Node<T, MSG>]>,
-              T: Clone,
-              MSG: Clone
+        where C: AsRef<[Node<T, EVENT, MSG>]>
     {
         for c in children.as_ref() {
             self.children.push(c.clone());
@@ -114,7 +114,7 @@ impl<T, MSG> Element<T, MSG> {
 
     pub fn add_event_listener(mut self,
                               event: &'static str,
-                              cb: Callback<Event, MSG>)
+                              cb: Callback<EVENT, MSG>)
                               -> Self {
         self.events.insert(event, cb);
         self
@@ -147,25 +147,30 @@ impl<T, MSG> Element<T, MSG> {
 /// }
 /// ```
 #[inline]
-pub fn element<A, C, T, MSG>(tag: T, attrs: A, children: C) -> Node<T, MSG>
-    where C: AsRef<[Node<T, MSG>]>,
-          A: AsRef<[Attribute<MSG>]>,
+pub fn element<A, C, T, EVENT, MSG>(tag: T,
+                                    attrs: A,
+                                    children: C)
+                                    -> Node<T, EVENT, MSG>
+    where C: AsRef<[Node<T, EVENT, MSG>]>,
+          A: AsRef<[Attribute<EVENT, MSG>]>,
           T: Clone,
-          MSG: Clone
+          MSG: Clone,
+          EVENT: Clone
 {
     Node::Element(Element::new(tag).add_children(children)
                                    .add_attributes(attrs))
 }
 #[inline]
-pub fn element_ns<A, C, T, MSG>(tag: T,
-                                namespace: &'static str,
-                                attrs: A,
-                                children: C)
-                                -> Node<T, MSG>
-    where C: AsRef<[Node<T, MSG>]>,
-          A: AsRef<[Attribute<MSG>]>,
+pub fn element_ns<A, C, T, EVENT, MSG>(tag: T,
+                                       namespace: &'static str,
+                                       attrs: A,
+                                       children: C)
+                                       -> Node<T, EVENT, MSG>
+    where C: AsRef<[Node<T, EVENT, MSG>]>,
+          A: AsRef<[Attribute<EVENT, MSG>]>,
           T: Clone,
-          MSG: Clone
+          MSG: Clone,
+          EVENT: Clone
 {
     Node::Element(Element::new(tag).namespace(namespace)
                                    .add_children(children)
@@ -174,8 +179,9 @@ pub fn element_ns<A, C, T, MSG>(tag: T,
 
 /// Create a textnode element
 #[inline]
-pub fn text<V, T, MSG>(v: V) -> Node<T, MSG>
+pub fn text<V, T, EVENT, MSG>(v: V) -> Node<T, EVENT, MSG>
     where V: ToString,
+          EVENT: Clone,
           MSG: Clone
 {
     Node::Text(Text { text: v.to_string() })
@@ -183,8 +189,9 @@ pub fn text<V, T, MSG>(v: V) -> Node<T, MSG>
 
 /// Create an attribute
 #[inline]
-pub fn attr<V, MSG>(name: &'static str, v: V) -> Attribute<MSG>
+pub fn attr<V, EVENT, MSG>(name: &'static str, v: V) -> Attribute<EVENT, MSG>
     where V: Into<Value>,
+          EVENT: Clone,
           MSG: Clone
 {
     Attribute { name,
@@ -199,10 +206,29 @@ pub fn attr<V, MSG>(name: &'static str, v: V) -> Attribute<MSG>
 /// equivalent when compared since function contents
 /// can not be compared. Only Rc's are compared.
 #[inline]
-pub fn on<C, MSG>(name: &'static str, c: C) -> Attribute<MSG>
-    where C: Into<Callback<Event, MSG>>,
+pub fn on<C, EVENT, MSG>(name: &'static str, c: C) -> Attribute<EVENT, MSG>
+    where C: Into<Callback<EVENT, MSG>>,
+          EVENT: Clone,
           MSG: Clone
 {
     Attribute { name,
                 value: AttribValue::Callback(c.into()) }
+}
+
+/// the func will be used to convert the native browser event and the result will
+/// be fed into the Callback input
+pub fn on_with_mapper<C, F, OUT, EVENT, MSG>(name: &'static str,
+                                             func: F,
+                                             c: C)
+                                             -> Attribute<EVENT, MSG>
+    where C: Into<Callback<OUT, MSG>>,
+          F: Fn(EVENT) -> OUT + 'static,
+          EVENT: Clone,
+          MSG: Clone + 'static,
+          OUT: 'static
+{
+    let cb: Callback<OUT, MSG> = c.into();
+    let cb2: Callback<EVENT, MSG> = cb.reform(func);
+    Attribute { name,
+                value: AttribValue::Callback(cb2) }
 }

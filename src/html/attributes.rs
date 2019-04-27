@@ -1,8 +1,8 @@
 //! https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
 //!
+use crate::Attribute;
 pub use sauron_vdom::builder::attr;
-use sauron_vdom::{builder::Attribute,
-                  Value};
+use sauron_vdom::Value;
 
 macro_rules! declare_attributes {
     ( $(
@@ -13,7 +13,7 @@ macro_rules! declare_attributes {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<V,MSG>(v: V) -> Attribute<MSG>
+            pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
                 where V: Into<Value>,
                     MSG: Clone,
                 {
@@ -29,7 +29,7 @@ macro_rules! declare_attributes {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<V,MSG>(v: V) -> Attribute<MSG>
+            pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
                 where V: Into<Value>,
                     MSG: Clone,
                 {

@@ -33,25 +33,27 @@ pub use value::Value;
 /// Cloning is only done once, and happens when constructing the views into a node tree.
 /// Cloning also allows flexibility such as adding more children into an existing node/element.
 #[derive(Debug, PartialEq, Clone)]
-pub enum Node<T, MSG> {
-    Element(Element<T, MSG>),
+pub enum Node<T, EVENT, MSG> {
+    Element(Element<T, EVENT, MSG>),
     Text(Text),
 }
 
 #[derive(Debug, PartialEq, Clone, Default)]
-pub struct Element<T, MSG> {
+pub struct Element<T, EVENT, MSG> {
     pub tag: T,
     pub attrs: BTreeMap<&'static str, Value>,
-    pub events: BTreeMap<&'static str, Callback<Event, MSG>>,
-    pub children: Vec<Node<T, MSG>>,
+    pub events: BTreeMap<&'static str, Callback<EVENT, MSG>>,
+    pub children: Vec<Node<T, EVENT, MSG>>,
     pub namespace: Option<&'static str>,
 }
 
-impl<T, MSG> Node<T, MSG> {
+impl<T, EVENT, MSG> Node<T, EVENT, MSG>
+    where EVENT: 'static,
+          MSG: 'static
+{
     /// map the return of the callback from MSG to MSG2
-    pub fn map<F, MSG2>(self, func: F) -> Node<T, MSG2>
-        where F: Fn(MSG) -> MSG2 + 'static + Clone,
-              MSG: 'static
+    pub fn map<F, MSG2>(self, func: F) -> Node<T, EVENT, MSG2>
+        where F: Fn(MSG) -> MSG2 + 'static + Clone
     {
         match self {
             Node::Element(element) => Node::Element(element.map(func)),
@@ -60,13 +62,15 @@ impl<T, MSG> Node<T, MSG> {
     }
 }
 
-impl<T, MSG> Element<T, MSG> {
+impl<T, EVENT, MSG> Element<T, EVENT, MSG>
+    where EVENT: 'static,
+          MSG: 'static
+{
     /// map the return of the callback from MSG to MSG2
-    pub fn map<F, MSG2>(self, func: F) -> Element<T, MSG2>
-        where F: Fn(MSG) -> MSG2 + 'static + Clone,
-              MSG: 'static
+    pub fn map<F, MSG2>(self, func: F) -> Element<T, EVENT, MSG2>
+        where F: Fn(MSG) -> MSG2 + 'static + Clone
     {
-        let mut new_element: Element<T, MSG2> =
+        let mut new_element: Element<T, EVENT, MSG2> =
             Element { tag: self.tag,
                       attrs: self.attrs,
                       namespace: self.namespace,
@@ -90,7 +94,7 @@ pub struct Text {
     pub text: String,
 }
 
-impl<T, MSG> Element<T, MSG> {
+impl<T, EVENT, MSG> Element<T, EVENT, MSG> {
     /// Create a Element using the supplied tag name
     pub fn new(tag: T) -> Self {
         Element { tag,
@@ -107,7 +111,7 @@ impl<T, MSG> Element<T, MSG> {
     }
 }
 
-impl<T, MSG> fmt::Display for Element<T, MSG> where T: ToString
+impl<T, EVENT, MSG> fmt::Display for Element<T, EVENT, MSG> where T: ToString
 {
     // Turn a Element and all of it's children (recursively) into an HTML string
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -143,7 +147,7 @@ impl fmt::Display for Text {
 }
 
 // Turn a Node into an HTML string (delegate impl to variants)
-impl<T, MSG> fmt::Display for Node<T, MSG> where T: ToString
+impl<T, EVENT, MSG> fmt::Display for Node<T, EVENT, MSG> where T: ToString
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -153,8 +157,8 @@ impl<T, MSG> fmt::Display for Node<T, MSG> where T: ToString
     }
 }
 
-impl<T, MSG> From<Element<T, MSG>> for Node<T, MSG> {
-    fn from(v: Element<T, MSG>) -> Self {
+impl<T, EVENT, MSG> From<Element<T, EVENT, MSG>> for Node<T, EVENT, MSG> {
+    fn from(v: Element<T, EVENT, MSG>) -> Self {
         Node::Element(v)
     }
 }

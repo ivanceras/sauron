@@ -15,10 +15,6 @@ use web_sys::{self,
               Element,
               Event,
               EventTarget,
-              HtmlInputElement,
-              HtmlTextAreaElement,
-              KeyboardEvent,
-              MouseEvent,
               Node,
               Text};
 
@@ -201,7 +197,7 @@ impl<T> CreatedNode<T> {
 
 /// This wrap into a closure the function that is dispatched when the event is triggered.
 fn create_closure_wrap<DSP, MSG>(program: &Rc<DSP>,
-                                 callback: &Callback<sauron_vdom::Event, MSG>)
+                                 callback: &Callback<Event, MSG>)
                                  -> Closure<Fn(Event)>
     where MSG: Clone + Debug + 'static,
           DSP: Dispatch<MSG> + 'static + 'static
@@ -210,55 +206,9 @@ fn create_closure_wrap<DSP, MSG>(program: &Rc<DSP>,
     let program_clone = Rc::clone(&program);
 
     Closure::wrap(Box::new(move |event: Event| {
-                      let cb_event = convert_event(event);
-                      let msg = callback_clone.emit(cb_event);
+                      let msg = callback_clone.emit(event);
                       program_clone.dispatch(msg);
                   }))
-}
-
-/// convert the native DOM event into an internal portable representation
-/// TODO: Add support for allowing user pass a function
-/// to convert the events, extracting only specified data they need.
-fn convert_event(event: Event) -> sauron_vdom::Event {
-    let mouse_event: Option<&MouseEvent> = event.dyn_ref();
-    let key_event: Option<&KeyboardEvent> = event.dyn_ref();
-    let target: Option<EventTarget> = event.target();
-
-    if let Some(mouse_event) = mouse_event {
-        if event.type_() == "click" {
-            sauron_vdom::Event::MouseEvent(sauron_vdom::MouseEvent::Press(
-                    sauron_vdom::MouseButton::Left,
-                    mouse_event.x() as u16,
-                    mouse_event.y() as u16,
-                ))
-        } else {
-            sauron_vdom::Event::Generic(event.type_())
-        }
-    } else if let Some(key_event) = key_event {
-        sauron_vdom::Event::KeyEvent(sauron_vdom::KeyEvent {
-                key: key_event.key(),
-                ctrl: key_event.ctrl_key(),
-                alt: key_event.alt_key(),
-                shift: key_event.shift_key(),
-                meta: key_event.meta_key(),
-            })
-    } else if let Some(target) = target {
-        let input: Option<&HtmlInputElement> = target.dyn_ref();
-        let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
-        if let Some(input) = input {
-            sauron_vdom::Event::InputEvent(sauron_vdom::InputEvent {
-                    value: input.value(),
-                })
-        } else if let Some(textarea) = textarea {
-            sauron_vdom::Event::InputEvent(sauron_vdom::InputEvent {
-                    value: textarea.value(),
-                })
-        } else {
-            sauron_vdom::Event::Generic(event.type_())
-        }
-    } else {
-        sauron_vdom::Event::Generic(event.type_())
-    }
 }
 
 impl<DSP, MSG> DomUpdater<DSP, MSG>

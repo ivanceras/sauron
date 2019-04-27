@@ -2,7 +2,6 @@ use js_sys::Date;
 use sauron::{html::{attributes::*,
                     events::*,
                     *},
-             Event,
              Node,
              *};
 use wasm_bindgen::{self,
@@ -11,6 +10,7 @@ use wasm_bindgen::{self,
 #[derive(Debug, Clone)]
 pub enum Msg {
     Click,
+    DoubleClick,
     Clock,
     ChangeName(String),
     ChangeBiography(String),
@@ -19,6 +19,7 @@ pub enum Msg {
 
 pub struct App {
     click_count: u32,
+    double_clicks: u32,
     date: Date,
     name: String,
     biography: String,
@@ -28,6 +29,7 @@ pub struct App {
 impl App {
     pub fn new(click_count: u32) -> App {
         App { click_count,
+              double_clicks: 0,
               date: Date::new_0(),
               name: String::new(),
               biography: String::new(),
@@ -40,6 +42,9 @@ impl Component<Msg> for App {
         match msg {
             Msg::Click => {
                 self.click_count += 1;
+            }
+            Msg::DoubleClick => {
+                self.double_clicks += 1;
             }
             Msg::Clock => {
                 self.date = Date::new_0();
@@ -65,111 +70,58 @@ impl Component<Msg> for App {
             self.date
                 .to_locale_string("en-GB", &JsValue::undefined())
                 .into();
-        div(
-            [class("some-class"), id("some-id"), attr("data-id", 1)],
-            [
-            div(
-                [id("current-time")],
-                [text(format!("Today is {}", date_str))],
-            ),
-            div(
-                [],
-                [
-                    text("Your name is: "),
-                    input(
-                        [
-                            r#type("text"),
-                            oninput(|v: Event| {
-                                sauron::log(format!("input has input: {:#?}",
-                                                    v));
-                                if let Event::InputEvent(input) = v {
-                                    Msg::ChangeName(input.value)
-                                } else {
-                                    panic!("This shouldn't happened");
-                                }
-                            }),
-                            placeholder("John Smith"),
-                        ],
-                        [],
-                    ),
-                    button(
-                        [onclick(|v: Event| {
-                            sauron::log(format!(
-                                "I've been clicked and the value is: {:#?}",
-                                v
-                            ));
-                            Msg::Click
-                        })],
-                        [text("Click me!")],
-                    ),
-                ],
-            ),
-            p(
-                [],
-                [
-                    text(format!("Hello {}!", self.name,)),
-                    if self.click_count > 0 {
-                        text(format!(
+        div([class("some-class"), id("some-id"), attr("data-id", 1)],
+            [div([id("current-time")],
+                 [text(format!("Today is {}", date_str))]),
+             div([],
+                 [text("Your name is: "),
+                  input([r#type("text"),
+                         oninput(|v: String| Msg::ChangeName(v)),
+                         placeholder("John Smith")],
+                        []),
+                  button([onclick(|(x, y)| {
+                             sauron::log!("Clicked at ({},{})", x, y);
+                             Msg::Click
+                         })],
+                         [text("Click me!")]),
+                  button([ondblclick(|(x, y)| {
+                             sauron::log!("Double clicked at ({},{})", x, y);
+                             Msg::DoubleClick
+                         })],
+                         [text(format!("DoubleClicks {}",
+                                       self.double_clicks))])]),
+             p([],
+               [text(format!("Hello {}!", self.name,)),
+                if self.click_count > 0 {
+                    text(format!(
                                 ", You've clicked on that button for {} time{}",
                                 self.click_count,
                                 if self.click_count > 1 { "s" } else { "" }
                             ))
-                    } else {
-                        span([], [])
-                    },
-                ],
-            ),
-            div(
-                [],
-                [
-                    p([], [text("Tell us something about yourself:")]),
-                    div(
-                        [],
-                        [textarea(
-                            [
-                                rows(10),
-                                cols(80),
-                                oninput(|v: Event| {
-                                    if let Event::InputEvent(input) = v {
-                                        Msg::ChangeBiography(input.value)
-                                    } else {
-                                        panic!("This shouldn't happened");
-                                    }
-                                }),
-                                placeholder("I'm a..."),
-                            ],
-                            [],
-                        )],
-                    ),
-                    p([], [text(&self.biography)]),
-                ],
-            ),
-            div(
-                [],
-                [
-                    text("What are you thinking right now?"),
-                    input(
-                        [
-                            r#type("text"),
-                            onchange(|v: Event| {
-                                if let Event::InputEvent(input) = v {
-                                    Msg::ChangeThought(input.value)
-                                } else {
-                                    panic!("This shouldn't happened");
-                                }
-                            }),
-                            placeholder("Elephants..."),
-                        ],
-                        [],
-                    ),
-                    if let Some(thought) = &self.thought {
-                        text(format!("Hmmn {}... Interesting.", thought))
-                    } else {
-                        span([], [])
-                    },
-                ],
-            ),
-        ],
-        )
+                } else {
+                    span([], [])
+                }]),
+             div([],
+                 [p([], [text("Tell us something about yourself:")]),
+                  div([],
+                      [textarea([rows(10),
+                                 cols(80),
+                                 oninput(|v: String| {
+                                     Msg::ChangeBiography(v)
+                                 }),
+                                 placeholder("I'm a...")],
+                                [])]),
+                  p([], [text(&self.biography)])]),
+             div([],
+                 [text("What are you thinking right now?"),
+                  input([r#type("text"),
+                         onchange(|v: String| Msg::ChangeThought(v)),
+                         placeholder("Elephants...")],
+                        []),
+                  if let Some(thought) = &self.thought {
+                      text(format!("Hmmn {}... Interesting.", thought))
+                  } else {
+                      span([], [])
+                  }])])
     }
 }
