@@ -79,10 +79,8 @@ declare_attributes! {
     #[allow(non_snake_case)]
     gradientUnits;
     hanging;
-    height;
     href;
     hreflang;
-    id;
     ideographic;
     in2;
     intercept;
@@ -202,7 +200,6 @@ declare_attributes! {
     stitchTiles;
     string;
     stroke;
-    style;
     #[allow(non_snake_case)]
     surfaceScale;
     #[allow(non_snake_case)]
@@ -229,7 +226,6 @@ declare_attributes! {
     #[allow(non_snake_case)]
     viewTarget;
     visibility;
-    width;
     widths;
     x;
     x1;
@@ -266,8 +262,6 @@ declare_attributes! {
     fill_rule => "fill-rule";
     flood_color => "flood-color";
     flood_opacity => "flood-opacity";
-    font_family => "font-family";
-    font_size => "font-size";
     font_size_adjust => "font-size-adjust";
     font_stretch => "font-stretch";
     font_style => "font-style";

@@ -33,6 +33,8 @@ lazy_static! {
     static ref ELEM_UNIQUE_ID: Mutex<u32> = Mutex::new(0);
 }
 
+pub(self) const DATA_SAURON_VDOM_ID: &str = "data-sauron-vdom-id";
+
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
 /// VirtualNode is dropped.
 ///
@@ -131,8 +133,7 @@ impl<T> CreatedNode<T> {
 
             // set the data-sauron_vdom-id this will be read later on
             // when it's time to remove this element and its closures and event listeners
-            element.set_attribute("data-sauron_vdom-id",
-                                  &unique_id.to_string())
+            element.set_attribute(DATA_SAURON_VDOM_ID, &unique_id.to_string())
                    .expect("Could not set attribute on element");
 
             closures.insert(unique_id, vec![]);

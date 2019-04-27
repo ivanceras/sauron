@@ -4,7 +4,7 @@ pub use sauron_vdom::builder::{attr,
 
 pub mod attributes;
 
-const SVG_NAMESPACE: &str = "http://www.w3.org/2000/svg";
+pub(in crate) const SVG_NAMESPACE: &str = "http://www.w3.org/2000/svg";
 
 macro_rules! declare_svg_tags{
 
@@ -137,7 +137,6 @@ declare_svg_tags! {
     set;
     solidcolor;
     stop;
-    style;
     svg;
     switch;
     symbol;

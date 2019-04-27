@@ -150,7 +150,9 @@ mod component;
 mod dispatch;
 pub mod html_extra;
 mod program;
+#[macro_use]
 pub mod svg;
+pub mod svg_extra;
 pub mod test_fixtures;
 mod util;
 

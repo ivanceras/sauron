@@ -155,7 +155,7 @@ fn remove_event_listeners(node: &Element,
                           -> Result<(), JsValue> {
     // TODO: there should be a better way to get the node-id back
     // without having to read from the actual dom node element
-    if let Some(vdom_id_str) = node.get_attribute("data-sauron_vdom-id") {
+    if let Some(vdom_id_str) = node.get_attribute(super::DATA_SAURON_VDOM_ID) {
         let vdom_id = vdom_id_str.parse::<u32>()
                                  .expect("unable to parse sauron_vdom-id");
         let old_closure =
