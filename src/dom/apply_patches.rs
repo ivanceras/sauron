@@ -31,25 +31,9 @@ pub fn patch<N, DSP, MSG>(program: &Rc<DSP>,
 {
     let root_node: Node = root_node.into();
 
-    let mut cur_node_idx = 0;
-
-    let mut nodes_to_find = HashSet::new();
-
-    for patch in patches {
-        nodes_to_find.insert(patch.node_idx());
-    }
-
-    let mut element_nodes_to_patch = HashMap::new();
-    let mut text_nodes_to_patch = HashMap::new();
-
-    // Closure that were added to the DOM during this patch operation.
     let mut active_closures = HashMap::new();
-
-    find_nodes(root_node,
-               &mut cur_node_idx,
-               &mut nodes_to_find,
-               &mut element_nodes_to_patch,
-               &mut text_nodes_to_patch);
+    let (element_nodes_to_patch, text_nodes_to_patch) =
+        find_nodes(root_node, patches);
 
     for patch in patches {
         let patch_node_idx = patch.node_idx();
@@ -72,14 +56,34 @@ pub fn patch<N, DSP, MSG>(program: &Rc<DSP>,
     Ok(active_closures)
 }
 
-fn find_nodes(root_node: Node,
-              cur_node_idx: &mut usize,
-              nodes_to_find: &mut HashSet<usize>,
-              element_nodes_to_patch: &mut HashMap<usize, Element>,
-              text_nodes_to_patch: &mut HashMap<usize, Text>) {
-    if nodes_to_find.is_empty() {
-        return;
+/// find the nodes to be patched
+/// each patch contains a node index, arranged in depth first tree.
+/// TODO: split for elements and text nodes to patch
+fn find_nodes<MSG>(root_node: Node,
+                   patches: &[Patch<MSG>])
+                   -> (HashMap<usize, Element>, HashMap<usize, Text>) {
+    let mut cur_node_idx = 0;
+    let mut nodes_to_find = HashSet::new();
+
+    for patch in patches {
+        nodes_to_find.insert(patch.node_idx());
     }
+
+    // Closure that were added to the DOM during this patch operation.
+
+    find_nodes_recursive(root_node, &mut cur_node_idx, &nodes_to_find)
+}
+
+fn find_nodes_recursive(root_node: Node,
+                        cur_node_idx: &mut usize,
+                        nodes_to_find: &HashSet<usize>)
+                        -> (HashMap<usize, Element>, HashMap<usize, Text>) {
+    if nodes_to_find.is_empty() {
+        return (HashMap::new(), HashMap::new());
+    }
+
+    let mut element_nodes_to_patch = HashMap::new();
+    let mut text_nodes_to_patch = HashMap::new();
 
     // We use child_nodes() instead of children() because children() ignores text nodes
     let children = root_node.child_nodes();
@@ -98,26 +102,26 @@ fn find_nodes(root_node: Node,
             }
             other => unimplemented!("Unsupported root node type: {}", other),
         }
-        nodes_to_find.remove(&cur_node_idx);
     }
 
     *cur_node_idx += 1;
 
     for i in 0..child_node_count {
-        let node = children.item(i).unwrap();
+        let child_node = children.item(i).expect("Expecting a child node");
 
-        match node.node_type() {
+        match child_node.node_type() {
             Node::ELEMENT_NODE => {
-                find_nodes(node,
-                           cur_node_idx,
-                           nodes_to_find,
-                           element_nodes_to_patch,
-                           text_nodes_to_patch);
+                let child_to_patch = find_nodes_recursive(child_node,
+                                                          cur_node_idx,
+                                                          nodes_to_find);
+
+                element_nodes_to_patch.extend(child_to_patch.0);
+                text_nodes_to_patch.extend(child_to_patch.1);
             }
             Node::TEXT_NODE => {
                 if nodes_to_find.get(&cur_node_idx).is_some() {
                     text_nodes_to_patch.insert(*cur_node_idx,
-                                               node.unchecked_into());
+                                               child_node.unchecked_into());
                 }
 
                 *cur_node_idx += 1;
@@ -134,6 +138,8 @@ fn find_nodes(root_node: Node,
             }
         }
     }
+
+    (element_nodes_to_patch, text_nodes_to_patch)
 }
 
 /// remove all the event listeners for this node
