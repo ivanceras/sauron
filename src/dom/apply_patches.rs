@@ -31,7 +31,11 @@ pub fn patch<N, DSP, MSG>(program: &Rc<DSP>,
 {
     let root_node: Node = root_node.into();
 
+    // Closure that were added to the DOM during this patch operation.
     let mut active_closures = HashMap::new();
+
+    // finding the nodes to be patched before hand, instead of calling it
+    // in every patch loop.
     let (element_nodes_to_patch, text_nodes_to_patch) =
         find_nodes(root_node, patches);
 
@@ -59,6 +63,11 @@ pub fn patch<N, DSP, MSG>(program: &Rc<DSP>,
 /// find the nodes to be patched
 /// each patch contains a node index, arranged in depth first tree.
 /// TODO: split for elements and text nodes to patch
+///
+/// This function is needed for optimization purposes.
+/// Instead of finding the nodes each time in the patching process.
+/// We find them before hand so as not to keep calling this function for each and every element to
+/// be patched.
 fn find_nodes<MSG>(root_node: Node,
                    patches: &[Patch<MSG>])
                    -> (HashMap<usize, Element>, HashMap<usize, Text>) {
@@ -68,8 +77,6 @@ fn find_nodes<MSG>(root_node: Node,
     for patch in patches {
         nodes_to_find.insert(patch.node_idx());
     }
-
-    // Closure that were added to the DOM during this patch operation.
 
     find_nodes_recursive(root_node, &mut cur_node_idx, &nodes_to_find)
 }
@@ -151,9 +158,9 @@ fn remove_event_listeners(node: &Element,
     if let Some(vdom_id_str) = node.get_attribute("data-sauron_vdom-id") {
         let vdom_id = vdom_id_str.parse::<u32>()
                                  .expect("unable to parse sauron_vdom-id");
-        let old_closure = old_closures
-            .get(&vdom_id)
-            .unwrap_or_else(|| panic!("There is no closure attached to vdom-id: {}", vdom_id));
+        let old_closure =
+            old_closures.get(&vdom_id)
+                        .expect("There is no marked with that vdom_id");
         for (event, oc) in old_closure.iter() {
             let func: &Function = oc.as_ref().unchecked_ref();
             node.remove_event_listener_with_callback(event, func)?;
