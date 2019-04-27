@@ -111,7 +111,7 @@ impl<T, MSG> fmt::Display for Element<T, MSG> where T: ToString
 {
     // Turn a Element and all of it's children (recursively) into an HTML string
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "<{}", self.tag.to_string()).unwrap();
+        write!(f, "<{}", self.tag.to_string())?;
 
         for (attr, value) in self.attrs.iter() {
             write!(f, r#" {}="{}""#, attr, value)?;

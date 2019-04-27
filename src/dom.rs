@@ -79,8 +79,7 @@ impl<T> CreatedNode<T> {
     }
 
     pub fn create_text_node(text: &sauron_vdom::Text) -> Text {
-        let document = web_sys::window().unwrap().document().unwrap();
-        document.create_text_node(&text.text)
+        crate::document().create_text_node(&text.text)
     }
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
@@ -111,13 +110,14 @@ impl<T> CreatedNode<T> {
         where MSG: Clone + Debug + 'static,
               DSP: Dispatch<MSG> + 'static
     {
-        let document = web_sys::window().unwrap().document().unwrap();
+        let document = crate::document();
 
         let element = if let Some(ref namespace) = velem.namespace {
             document.create_element_ns(Some(namespace), &velem.tag)
-                    .unwrap()
+                    .expect("Unable to create element")
         } else {
-            document.create_element(&velem.tag).unwrap()
+            document.create_element(&velem.tag)
+                    .expect("Unable to create element")
         };
 
         let mut closures = ActiveClosure::new();
@@ -171,12 +171,12 @@ impl<T> CreatedNode<T> {
                         let separator = document.create_comment("ptns");
                         current_node.append_child(separator.as_ref()
                                                   as &web_sys::Node)
-                                    .unwrap();
+                                    .expect("Unable to append child");
                     }
 
                     current_node
                         .append_child(&Self::create_text_node(&text_node))
-                        .unwrap();
+                        .expect("Unable to append text node");
 
                     previous_node_was_text = true;
                 }
@@ -188,7 +188,8 @@ impl<T> CreatedNode<T> {
                     let child_elem: Element = child.node;
                     closures.extend(child.closures);
 
-                    element.append_child(&child_elem).unwrap();
+                    element.append_child(&child_elem)
+                           .expect("Unable to append element node");
                 }
             }
         }
@@ -341,10 +342,11 @@ impl<DSP, MSG> DomUpdater<DSP, MSG>
     /// seeing the latest state of the application.
     pub fn update(&mut self, program: &Rc<DSP>, new_vdom: crate::Node<MSG>) {
         let patches = diff(&self.current_vdom, &new_vdom);
-        let active_closures = patch(program,
-                                    self.root_node.clone(),
-                                    &mut self.active_closures,
-                                    &patches).unwrap();
+        let active_closures =
+            patch(program,
+                  self.root_node.clone(),
+                  &mut self.active_closures,
+                  &patches).expect("Error in patching the dom");
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
     }
@@ -359,7 +361,8 @@ impl<DSP, MSG> DomUpdater<DSP, MSG>
 }
 
 fn create_unique_identifier() -> u32 {
-    let mut elem_unique_id = ELEM_UNIQUE_ID.lock().unwrap();
+    let mut elem_unique_id =
+        ELEM_UNIQUE_ID.lock().expect("Unable to obtain lock");
     *elem_unique_id += 1;
     *elem_unique_id
 }
