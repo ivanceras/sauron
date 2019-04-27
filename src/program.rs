@@ -1,9 +1,9 @@
-use crate::Component;
-use crate::Dispatch;
-use crate::DomUpdater;
-use std::cell::RefCell;
-use std::fmt::Debug;
-use std::rc::Rc;
+use crate::{Component,
+            Dispatch,
+            DomUpdater};
+use std::{cell::RefCell,
+          fmt::Debug,
+          rc::Rc};
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;
 
@@ -16,20 +16,20 @@ pub struct Program<APP, MSG> {
 }
 
 impl<APP, MSG> Program<APP, MSG>
-where
-    MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
+    where MSG: Clone + Debug + 'static,
+          APP: Component<MSG> + 'static
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
     fn new(app: APP, root_node: &Node) -> Rc<Self> {
-        let dom_updater: DomUpdater<Self, MSG> = DomUpdater::new(app.view(), root_node);
-        let program = Program {
-            app: Rc::new(RefCell::new(app)),
-            dom_updater: Rc::new(RefCell::new(dom_updater)),
-        };
+        let dom_updater: DomUpdater<Self, MSG> =
+            DomUpdater::new(app.view(), root_node);
+        let program = Program { app: Rc::new(RefCell::new(app)),
+                                dom_updater:
+                                    Rc::new(RefCell::new(dom_updater)) };
         Rc::new(program)
     }
+
     /// Creates an Rc wrapped instance of Program and mount the app view to the
     /// given root_node
     pub fn new_replace_mount(app: APP, root_node: &Node) -> Rc<Self> {
@@ -68,15 +68,15 @@ where
 /// This will be called when the actual event is triggered.
 /// Defined in the DomUpdater::create_closure_wrap function
 impl<APP, MSG> Dispatch<MSG> for Program<APP, MSG>
-where
-    MSG: Clone + Debug + 'static,
-    APP: Component<MSG> + 'static,
+    where MSG: Clone + Debug + 'static,
+          APP: Component<MSG> + 'static
 {
     fn dispatch(self: &Rc<Self>, msg: MSG) {
         let program_clone = Rc::clone(self);
-        let closure_raf: Closure<FnMut() + 'static> = Closure::once(move || {
-            program_clone.dispatch_inner(msg);
-        });
+        let closure_raf: Closure<FnMut() + 'static> =
+            Closure::once(move || {
+                program_clone.dispatch_inner(msg);
+            });
         crate::request_animation_frame(&closure_raf);
         closure_raf.forget();
     }

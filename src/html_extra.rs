@@ -8,9 +8,9 @@ declare_tags! {
     style;
 }
 pub mod attributes {
-    use sauron_vdom::builder::attr;
-    use sauron_vdom::builder::Attribute;
-    use sauron_vdom::Value;
+    use sauron_vdom::{builder::{attr,
+                                Attribute},
+                      Value};
 
     declare_attributes! {
         span;

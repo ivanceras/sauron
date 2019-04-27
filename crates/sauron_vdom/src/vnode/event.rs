@@ -4,7 +4,6 @@
 /// ie: html events from mouse, keypresses and input changes.
 /// This events should also be recreatable from gtk-rs, libui-rs,
 /// orbtk, ncurses, etc.
-///
 #[derive(Debug, PartialEq, Clone)]
 pub enum Event {
     MouseEvent(MouseEvent),
@@ -60,10 +59,8 @@ pub struct KeyEvent {
 }
 impl KeyEvent {
     pub fn new(ch: char) -> Self {
-        KeyEvent {
-            key: ch.to_string(),
-            ..Default::default()
-        }
+        KeyEvent { key: ch.to_string(),
+                   ..Default::default() }
     }
 }
 

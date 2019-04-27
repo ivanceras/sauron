@@ -1,6 +1,6 @@
 pub use sauron_vdom::builder::attr;
-use sauron_vdom::builder::Attribute;
-use sauron_vdom::Value;
+use sauron_vdom::{builder::Attribute,
+                  Value};
 
 // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
 // complete list svg attributes

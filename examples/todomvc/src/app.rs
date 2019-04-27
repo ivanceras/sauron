@@ -1,9 +1,9 @@
-use sauron::html::attributes::*;
-use sauron::html::events::*;
-use sauron::html::*;
-use sauron::Component;
-use sauron::Event;
-use sauron::Node;
+use sauron::{html::{attributes::*,
+                    events::*,
+                    *},
+             Component,
+             Event,
+             Node};
 
 #[derive(Clone, Debug)]
 pub struct Model {
@@ -37,12 +37,10 @@ pub enum Msg {
 
 impl Model {
     pub fn new() -> Self {
-        Model {
-            entries: vec![],
-            filter: Filter::All,
-            value: "".into(),
-            edit_value: "".into(),
-        }
+        Model { entries: vec![],
+                filter: Filter::All,
+                value: "".into(),
+                edit_value: "".into() }
     }
 }
 
@@ -50,11 +48,9 @@ impl Component<Msg> for Model {
     fn update(&mut self, msg: Msg) {
         match msg {
             Msg::Add => {
-                let entry = Entry {
-                    description: self.value.clone(),
-                    completed: false,
-                    editing: false,
-                };
+                let entry = Entry { description: self.value.clone(),
+                                    completed: false,
+                                    editing: false };
                 self.entries.push(entry);
                 self.value = "".to_string();
             }
@@ -191,50 +187,40 @@ impl Component<Msg> for Model {
 impl Model {
     fn view_filter(&self, filter: Filter) -> Node<Msg> {
         let flt = filter.clone();
-        li(
-            [],
-            [a(
-                [
-                    class(if self.filter == flt {
-                        "selected"
-                    } else {
-                        "not-selected"
-                    }),
-                    href(flt.to_string()),
-                    onclick(move |_| Msg::SetFilter(flt.clone())),
-                ],
-                [text(filter.to_string())],
-            )],
-        )
+        li([],
+           [a([class(if self.filter == flt {
+                         "selected"
+                     } else {
+                         "not-selected"
+                     }),
+               href(flt.to_string()),
+               onclick(move |_| Msg::SetFilter(flt.clone()))],
+              [text(filter.to_string())])])
     }
 
     fn view_input(&self) -> Node<Msg> {
-        input(
-            [
-                class("new-todo"),
-                placeholder("What needs to be done?"),
-                value(self.value.to_string()),
-                oninput(|e: Event| {
-                    if let Event::InputEvent(input) = e {
-                        Msg::Update(input.value)
-                    } else {
-                        Msg::Nope
-                    }
-                }),
-                onkeypress(|e: Event| {
-                    if let Event::KeyEvent(key) = e {
-                        if key.key == "Enter" {
-                            Msg::Add
-                        } else {
-                            Msg::Nope
-                        }
-                    } else {
-                        Msg::Nope
-                    }
-                }),
-            ],
-            [],
-        )
+        input([class("new-todo"),
+               placeholder("What needs to be done?"),
+               value(self.value.to_string()),
+               oninput(|e: Event| {
+                   if let Event::InputEvent(input) = e {
+                       Msg::Update(input.value)
+                   } else {
+                       Msg::Nope
+                   }
+               }),
+               onkeypress(|e: Event| {
+                   if let Event::KeyEvent(key) = e {
+                       if key.key == "Enter" {
+                           Msg::Add
+                       } else {
+                           Msg::Nope
+                       }
+                   } else {
+                       Msg::Nope
+                   }
+               })],
+              [])
     }
 }
 
@@ -246,62 +232,45 @@ fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
     if entry.completed {
         class_name.push_str(" completed");
     }
-    li(
-        [class(class_name)],
-        [
-            div(
-                [class("view")],
-                [
-                    input(
-                        [
-                            class("toggle"),
-                            r#type("checkbox"),
-                            checked(entry.completed),
-                            onclick(move |_| Msg::Toggle(idx)),
-                        ],
-                        [],
-                    ),
-                    label(
-                        [ondoubleclick(move |_| Msg::ToggleEdit(idx))],
-                        [text(format!("{}", entry.description))],
-                    ),
-                    button([class("destroy"), onclick(move |_| Msg::Remove(idx))], []),
-                ],
-            ),
-            { view_entry_edit_input((idx, &entry)) },
-        ],
-    )
+    li([class(class_name)],
+       [div([class("view")],
+            [input([class("toggle"),
+                    r#type("checkbox"),
+                    checked(entry.completed),
+                    onclick(move |_| Msg::Toggle(idx))],
+                   []),
+             label([ondoubleclick(move |_| Msg::ToggleEdit(idx))],
+                   [text(format!("{}", entry.description))]),
+             button([class("destroy"), onclick(move |_| Msg::Remove(idx))],
+                    [])]),
+        { view_entry_edit_input((idx, &entry)) }])
 }
 
 fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
     if entry.editing == true {
-        input(
-            [
-                class("edit"),
-                r#type("text"),
-                value(&entry.description),
-                oninput(|e: Event| {
-                    if let Event::InputEvent(input) = e {
-                        Msg::UpdateEdit(input.value)
-                    } else {
-                        Msg::Nope
-                    }
-                }),
-                onblur(move |_| Msg::Edit(idx)),
-                onkeypress(move |e: Event| {
-                    if let Event::KeyEvent(key) = e {
-                        if key.key == "Enter" {
-                            Msg::Edit(idx)
-                        } else {
-                            Msg::Nope
-                        }
-                    } else {
-                        Msg::Nope
-                    }
-                }),
-            ],
-            [],
-        )
+        input([class("edit"),
+               r#type("text"),
+               value(&entry.description),
+               oninput(|e: Event| {
+                   if let Event::InputEvent(input) = e {
+                       Msg::UpdateEdit(input.value)
+                   } else {
+                       Msg::Nope
+                   }
+               }),
+               onblur(move |_| Msg::Edit(idx)),
+               onkeypress(move |e: Event| {
+                   if let Event::KeyEvent(key) = e {
+                       if key.key == "Enter" {
+                           Msg::Edit(idx)
+                       } else {
+                           Msg::Nope
+                       }
+                   } else {
+                       Msg::Nope
+                   }
+               })],
+              [])
     } else {
         input([r#type("hidden")], [])
     }
@@ -347,11 +316,10 @@ impl Model {
     }
 
     fn is_all_completed(&self) -> bool {
-        let mut filtered_iter = self
-            .entries
-            .iter()
-            .filter(|e| self.filter.fit(e))
-            .peekable();
+        let mut filtered_iter = self.entries
+                                    .iter()
+                                    .filter(|e| self.filter.fit(e))
+                                    .peekable();
 
         if filtered_iter.peek().is_none() {
             return false;
@@ -369,43 +337,39 @@ impl Model {
     }
 
     fn clear_completed(&mut self) {
-        let entries = self
-            .entries
-            .drain(..)
-            .filter(|e| Filter::Active.fit(e))
-            .collect();
+        let entries = self.entries
+                          .drain(..)
+                          .filter(|e| Filter::Active.fit(e))
+                          .collect();
         self.entries = entries;
     }
 
     fn toggle(&mut self, idx: usize) {
         let filter = self.filter.clone();
-        let mut entries = self
-            .entries
-            .iter_mut()
-            .filter(|e| filter.fit(e))
-            .collect::<Vec<_>>();
+        let mut entries = self.entries
+                              .iter_mut()
+                              .filter(|e| filter.fit(e))
+                              .collect::<Vec<_>>();
         let entry = entries.get_mut(idx).unwrap();
         entry.completed = !entry.completed;
     }
 
     fn toggle_edit(&mut self, idx: usize) {
         let filter = self.filter.clone();
-        let mut entries = self
-            .entries
-            .iter_mut()
-            .filter(|e| filter.fit(e))
-            .collect::<Vec<_>>();
+        let mut entries = self.entries
+                              .iter_mut()
+                              .filter(|e| filter.fit(e))
+                              .collect::<Vec<_>>();
         let entry = entries.get_mut(idx).unwrap();
         entry.editing = !entry.editing;
     }
 
     fn complete_edit(&mut self, idx: usize, val: String) {
         let filter = self.filter.clone();
-        let mut entries = self
-            .entries
-            .iter_mut()
-            .filter(|e| filter.fit(e))
-            .collect::<Vec<_>>();
+        let mut entries = self.entries
+                              .iter_mut()
+                              .filter(|e| filter.fit(e))
+                              .collect::<Vec<_>>();
         let entry = entries.get_mut(idx).unwrap();
         entry.description = val;
         entry.editing = !entry.editing;
@@ -414,12 +378,11 @@ impl Model {
     fn remove(&mut self, idx: usize) {
         let idx = {
             let filter = self.filter.clone();
-            let entries = self
-                .entries
-                .iter()
-                .enumerate()
-                .filter(|&(_, e)| filter.fit(e))
-                .collect::<Vec<_>>();
+            let entries = self.entries
+                              .iter()
+                              .enumerate()
+                              .filter(|&(_, e)| filter.fit(e))
+                              .collect::<Vec<_>>();
             let &(idx, _) = entries.get(idx).unwrap();
             idx
         };

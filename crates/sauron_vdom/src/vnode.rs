@@ -1,12 +1,16 @@
-use std::collections::BTreeMap;
-use std::fmt;
+use std::{collections::BTreeMap,
+          fmt};
 
 pub mod builder;
 mod event;
 mod value;
 
 use crate::Callback;
-pub use event::{Event, InputEvent, KeyEvent, MouseButton, MouseEvent};
+pub use event::{Event,
+                InputEvent,
+                KeyEvent,
+                MouseButton,
+                MouseEvent};
 pub use value::Value;
 
 /// This is the core data structure of the library.
@@ -46,9 +50,8 @@ pub struct Element<T, MSG> {
 impl<T, MSG> Node<T, MSG> {
     /// map the return of the callback from MSG to MSG2
     pub fn map<F, MSG2>(self, func: F) -> Node<T, MSG2>
-    where
-        F: Fn(MSG) -> MSG2 + 'static + Clone,
-        MSG: 'static,
+        where F: Fn(MSG) -> MSG2 + 'static + Clone,
+              MSG: 'static
     {
         match self {
             Node::Element(element) => Node::Element(element.map(func)),
@@ -60,17 +63,15 @@ impl<T, MSG> Node<T, MSG> {
 impl<T, MSG> Element<T, MSG> {
     /// map the return of the callback from MSG to MSG2
     pub fn map<F, MSG2>(self, func: F) -> Element<T, MSG2>
-    where
-        F: Fn(MSG) -> MSG2 + 'static + Clone,
-        MSG: 'static,
+        where F: Fn(MSG) -> MSG2 + 'static + Clone,
+              MSG: 'static
     {
-        let mut new_element: Element<T, MSG2> = Element {
-            tag: self.tag,
-            attrs: self.attrs,
-            namespace: self.namespace,
-            children: vec![],
-            events: BTreeMap::new(),
-        };
+        let mut new_element: Element<T, MSG2> =
+            Element { tag: self.tag,
+                      attrs: self.attrs,
+                      namespace: self.namespace,
+                      children: vec![],
+                      events: BTreeMap::new() };
         for child in self.children {
             let new_child = child.map(func.clone());
             new_element.children.push(new_child);
@@ -92,13 +93,11 @@ pub struct Text {
 impl<T, MSG> Element<T, MSG> {
     /// Create a Element using the supplied tag name
     pub fn new(tag: T) -> Self {
-        Element {
-            tag,
-            attrs: BTreeMap::new(),
-            events: BTreeMap::new(),
-            children: vec![],
-            namespace: None,
-        }
+        Element { tag,
+                  attrs: BTreeMap::new(),
+                  events: BTreeMap::new(),
+                  children: vec![],
+                  namespace: None }
     }
 
     /// set the namespace of this element
@@ -108,9 +107,7 @@ impl<T, MSG> Element<T, MSG> {
     }
 }
 
-impl<T, MSG> fmt::Display for Element<T, MSG>
-where
-    T: ToString,
+impl<T, MSG> fmt::Display for Element<T, MSG> where T: ToString
 {
     // Turn a Element and all of it's children (recursively) into an HTML string
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -146,9 +143,7 @@ impl fmt::Display for Text {
 }
 
 // Turn a Node into an HTML string (delegate impl to variants)
-impl<T, MSG> fmt::Display for Node<T, MSG>
-where
-    T: ToString,
+impl<T, MSG> fmt::Display for Node<T, MSG> where T: ToString
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {

@@ -1,8 +1,8 @@
 //! https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
 //!
 pub use sauron_vdom::builder::attr;
-use sauron_vdom::builder::Attribute;
-use sauron_vdom::Value;
+use sauron_vdom::{builder::Attribute,
+                  Value};
 
 macro_rules! declare_attributes {
     ( $(
@@ -190,13 +190,12 @@ declare_attributes! {
 /// ```
 /// is the same way of writing
 /// ```ignore
-///div([style("display:flex;flex-direction:row;")],[])
+/// div([style("display:flex;flex-direction:row;")],[])
 /// ```
 pub fn styles<V, MSG, P>(pairs: P) -> Attribute<MSG>
-where
-    V: Into<Value> + Clone,
-    MSG: Clone,
-    P: AsRef<[(&'static str, V)]>,
+    where V: Into<Value> + Clone,
+          MSG: Clone,
+          P: AsRef<[(&'static str, V)]>
 {
     let mut style_str = String::new();
     for (key, value) in pairs.as_ref() {
@@ -219,10 +218,9 @@ where
 ///     styles([("display", if self.is_active { "block" }else{ "none" })])
 /// ```
 pub fn styles_flag<V, MSG, P>(trio: P) -> Attribute<MSG>
-where
-    V: Into<Value> + Clone,
-    MSG: Clone,
-    P: AsRef<[(&'static str, V, bool)]>,
+    where V: Into<Value> + Clone,
+          MSG: Clone,
+          P: AsRef<[(&'static str, V, bool)]>
 {
     let mut style_list = Vec::with_capacity(trio.as_ref().len());
     for (key, value, flag) in trio.as_ref() {
@@ -236,16 +234,16 @@ where
 
 #[cfg(test)]
 mod test {
-    use crate::html::attributes::*;
-    use crate::html::*;
+    use crate::html::{attributes::*,
+                      *};
     #[test]
     fn test_styles() {
-        let actual: Node<&'static str> = div(
-            [styles([("display", "flex"), ("flex-direction", "row")])],
-            [],
-        );
+        let actual: Node<&'static str> =
+            div([styles([("display", "flex"), ("flex-direction", "row")])],
+                []);
         let actual_html = format!("{}", actual);
-        let expected: Node<&'static str> = div([style("display:flex;flex-direction:row;")], []);
+        let expected: Node<&'static str> =
+            div([style("display:flex;flex-direction:row;")], []);
         let expected_html = format!("{}", expected);
         assert_eq!(actual_html, expected_html);
     }

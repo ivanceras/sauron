@@ -93,7 +93,7 @@
 //!     Program::new_append_to_mount(App::new(), &sauron::body());
 //! }
 //! ```
-//! Index.html
+//! index.html
 //! ```html
 //! <html>
 //!   <head>
@@ -124,6 +124,10 @@
 //! cargo install basic-http-server
 //! ```
 //!
+//! * TIP: Use `indent_style = "Visual"`in your rustfmt.toml
+//! This will visually align the view function in your code, which gives it a more pleasant
+//! semantic look
+//!
 //! This project is based on the existing projects:
 //!  - [percy](https://github.com/chinedufn/percy)
 //!  - [yew](https://github.com/DenisKolodin/yew)
@@ -139,7 +143,6 @@
 //! ## Personal plug:
 //! I'm actively looking for a job that has to do with rust.
 //! Please contact me: ivanceras[at]gmail.com
-//!
 pub mod dom;
 #[macro_use]
 pub mod html;
@@ -155,10 +158,15 @@ pub use component::Component;
 pub use dispatch::Dispatch;
 pub use dom::DomUpdater;
 pub use program::Program;
-pub use sauron_vdom::diff;
-pub use sauron_vdom::Event;
-pub use sauron_vdom::Text;
-pub use util::{body, document, log, performance, request_animation_frame, window};
+pub use sauron_vdom::{diff,
+                      Event,
+                      Text};
+pub use util::{body,
+               document,
+               log,
+               performance,
+               request_animation_frame,
+               window};
 
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users

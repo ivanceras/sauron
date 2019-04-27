@@ -1,34 +1,36 @@
 use std::convert::AsRef;
 
-use crate::Attribute;
-use crate::Node;
-pub use sauron_vdom::builder::{attr, on, text};
+use crate::{Attribute,
+            Node};
+pub use sauron_vdom::builder::{attr,
+                               on,
+                               text};
 
 #[macro_use]
 pub mod attributes;
 pub mod events;
 
 #[inline]
-pub fn html_element<A, C, MSG>(tag: &'static str, attrs: A, children: C) -> Node<MSG>
-where
-    C: AsRef<[Node<MSG>]>,
-    A: AsRef<[Attribute<MSG>]>,
-    MSG: Clone,
+pub fn html_element<A, C, MSG>(tag: &'static str,
+                               attrs: A,
+                               children: C)
+                               -> Node<MSG>
+    where C: AsRef<[Node<MSG>]>,
+          A: AsRef<[Attribute<MSG>]>,
+          MSG: Clone
 {
     sauron_vdom::builder::element(tag, attrs, children)
 }
 
 #[inline]
-pub fn html_element_ns<A, C, MSG>(
-    tag: &'static str,
-    namespace: &'static str,
-    attrs: A,
-    children: C,
-) -> Node<MSG>
-where
-    C: AsRef<[Node<MSG>]>,
-    A: AsRef<[Attribute<MSG>]>,
-    MSG: Clone,
+pub fn html_element_ns<A, C, MSG>(tag: &'static str,
+                                  namespace: &'static str,
+                                  attrs: A,
+                                  children: C)
+                                  -> Node<MSG>
+    where C: AsRef<[Node<MSG>]>,
+          A: AsRef<[Attribute<MSG>]>,
+          MSG: Clone
 {
     sauron_vdom::builder::element_ns(tag, namespace, attrs, children)
 }
@@ -552,34 +554,33 @@ declare_tags! {
 
 #[cfg(test)]
 mod tests {
-    use crate::Element;
-    use crate::Node;
+    use crate::{Element,
+                Node};
     use maplit::btreemap;
     //TODO: HashMap makes more sense, rewrite this to hashamp
-    use crate::html::attributes::*;
-    use crate::html::events::*;
-    use crate::html::*;
-    use sauron_vdom::builder::attr;
-    use sauron_vdom::builder::text;
-    use sauron_vdom::{Callback, Event, Text};
+    use crate::html::{attributes::*,
+                      events::*,
+                      *};
+    use sauron_vdom::{builder::{attr,
+                                text},
+                      Callback,
+                      Event,
+                      Text};
     use std::collections::BTreeMap;
 
     #[test]
     fn simple_builder() {
-        let div: Element<()> = Element::new("div").add_attributes([attr("class", "some-class")]);
+        let div: Element<()> =
+            Element::new("div").add_attributes([attr("class", "some-class")]);
 
-        assert_eq!(
-            div,
-            Element {
-                tag: "div",
-                attrs: btreemap! {
-                    "class" => "some-class".into(),
-                },
-                events: BTreeMap::new(),
-                children: vec![],
-                namespace: None,
-            }
-        );
+        assert_eq!(div,
+                   Element { tag: "div",
+                             attrs: btreemap! {
+                                 "class" => "some-class".into(),
+                             },
+                             events: BTreeMap::new(),
+                             children: vec![],
+                             namespace: None });
     }
 
     #[test]
@@ -588,44 +589,39 @@ mod tests {
             println!("hello! {:?}", x);
         };
         let callback: Callback<Event, ()> = cb.into();
-        let div = Element::new("div").add_event_listener("click", callback.clone());
+        let div =
+            Element::new("div").add_event_listener("click", callback.clone());
 
-        assert_eq!(
-            div,
-            Element {
-                tag: "div",
-                events: btreemap! {
-                    "click" => callback.clone(),
-                },
-                attrs: BTreeMap::new(),
-                children: vec![],
-                namespace: None,
-            },
-            "Cloning a callback should only clone the reference"
-        );
+        assert_eq!(div,
+                   Element { tag: "div",
+                             events: btreemap! {
+                                 "click" => callback.clone(),
+                             },
+                             attrs: BTreeMap::new(),
+                             children: vec![],
+                             namespace: None },
+                   "Cloning a callback should only clone the reference");
     }
 
     #[test]
     fn builder_with_children() {
-        let div: Element<()> = Element::new("div")
-            .add_attributes([attr("class", "some-class")])
-            .add_children(vec![Node::Text(Text {
-                text: "Hello".to_string(),
-            })]);
+        let div: Element<()> =
+            Element::new("div").add_attributes([attr("class", "some-class")])
+                               .add_children(vec![Node::Text(
+                Text { text: "Hello".to_string(), },
+            )]);
 
         assert_eq!(
-            div,
-            Element {
-                tag: "div",
-                attrs: btreemap! {
-                    "class" => "some-class".into(),
-                },
-                children: vec![Node::Text(Text {
-                    text: "Hello".to_string()
-                })],
-                events: BTreeMap::new(),
-                namespace: None,
-            }
+                   div,
+                   Element { tag: "div",
+                             attrs: btreemap! {
+                                 "class" => "some-class".into(),
+                             },
+                             children: vec![Node::Text(
+            Text { text: "Hello".to_string() }
+        )],
+                             events: BTreeMap::new(),
+                             namespace: None, }
         );
     }
 
@@ -635,35 +631,32 @@ mod tests {
             println!("clicked");
         };
         let cb: Callback<Event, ()> = clicked.into();
-        let div = div(
-            [class("some-class"), r#type("submit"), onclick(cb.clone())],
-            [div([class("some-class")], [text("Hello world!")])],
-        );
+        let div =
+            div([class("some-class"), r#type("submit"), onclick(cb.clone())],
+                [div([class("some-class")], [text("Hello world!")])]);
         println!("{:#?}", div);
         assert_eq!(
-            div,
-            Node::Element(Element {
-                tag: "div",
-                attrs: btreemap! {
-                   "class" => "some-class".into(),
-                   "type" => "submit".into(),
-                },
-                events: btreemap! {
-                    "click" => cb.clone(),
-                },
-                namespace: None,
-                children: vec![Node::Element(Element {
-                    tag: "div",
-                    attrs: btreemap! {
-                        "class" => "some-class".into()
-                    },
-                    children: vec![Node::Text(Text {
-                        text: "Hello world!".into()
-                    })],
-                    events: BTreeMap::new(),
-                    namespace: None,
-                })],
-            })
+                   div,
+                   Node::Element(Element { tag: "div",
+                                           attrs: btreemap! {
+                                              "class" => "some-class".into(),
+                                              "type" => "submit".into(),
+                                           },
+                                           events: btreemap! {
+                                               "click" => cb.clone(),
+                                           },
+                                           namespace: None,
+                                           children: vec![Node::Element(
+            Element { tag: "div",
+                      attrs: btreemap! {
+                          "class" => "some-class".into()
+                      },
+                      children: vec![Node::Text(
+                Text { text: "Hello world!".into() }
+            )],
+                      events: BTreeMap::new(),
+                      namespace: None, }
+        )], })
         )
     }
 }
@@ -676,49 +669,45 @@ mod diff_tests_using_html_syntax {
     use attributes::*;
     use events::*;
     use maplit::btreemap;
-    use sauron_vdom::diff;
-    use sauron_vdom::Patch;
-    use sauron_vdom::{Callback, Event, Text, Value};
+    use sauron_vdom::{diff,
+                      Callback,
+                      Event,
+                      Patch,
+                      Text,
+                      Value};
 
     #[test]
     fn replace_node() {
         let old: Node<()> = div([], []);
         let new = span([], []);
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::Replace(0, &span([], []))],
-            "Replace the root if the tag changed"
-        );
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::Replace(0, &span([], []))],
+                   "Replace the root if the tag changed");
 
         let old: Node<()> = div([], [b([], [])]);
         let new = div([], [strong([], [])]);
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::Replace(1, &strong([], []))],
-            "Replace a child node"
-        );
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::Replace(1, &strong([], []))],
+                   "Replace a child node");
 
         let old: Node<()> = div([], [b([], [text("1")]), b([], [])]);
         let new = div([], [i([], [text("1")]), i([], [])]);
-        assert_eq!(
-            diff(&old, &new),
-            vec![
-                Patch::Replace(1, &i([], [text("1")])),
-                Patch::Replace(3, &i([], [])),
-            ],
-            "Replace node with a child",
-        )
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::Replace(1, &i([], [text("1")])),
+                        Patch::Replace(3, &i([], [])),],
+                   "Replace node with a child",)
     }
 
     #[test]
     fn add_children() {
         let old: Node<()> = div([], [b([], [])]); //{ <div> <b></b> </div> },
         let new = div([], [b([], []), html_element("new", [], [])]); //{ <div> <b></b> <new></new> </div> },
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::AppendChildren(0, vec![&html_element("new", [], [])])],
-            "Added a new node to the root node",
-        )
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::AppendChildren(0,
+                                              vec![&html_element("new",
+                                                                 [],
+                                                                 [])])],
+                   "Added a new node to the root node",)
     }
 
     #[test]
@@ -726,43 +715,31 @@ mod diff_tests_using_html_syntax {
         let old: Node<()> = div([], [b([], []), span([], [])]); //{ <div> <b></b> <span></span> </div> },
         let new = div([], []); //{ <div> </div> },
 
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::TruncateChildren(0, 0)],
-            "Remove all child nodes at and after child sibling index 1",
-        );
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::TruncateChildren(0, 0)],
+                   "Remove all child nodes at and after child sibling index 1",);
 
-        let old: Node<()> = div(
-            [],
-            [
-                span(
-                    [],
-                    [
-                        b([], []),
-                        // This `i` tag will get removed
-                        i([], []),
-                    ],
-                ),
-                // This `strong` tag will get removed
-                strong([], []),
-            ],
-        );
+        let old: Node<()> = div([],
+                                [span([],
+                                      [b([], []),
+                                       // This `i` tag will get removed
+                                       i([], [])]),
+                                 // This `strong` tag will get removed
+                                 strong([], [])]);
 
         let new = div([], [span([], [b([], [])])]);
 
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::TruncateChildren(0, 1), Patch::TruncateChildren(1, 1)],
-            "Remove a child and a grandchild node",
-        );
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::TruncateChildren(0, 1),
+                        Patch::TruncateChildren(1, 1)],
+                   "Remove a child and a grandchild node",);
 
         let old: Node<()> = div([], [b([], [i([], []), i([], [])]), b([], [])]); //{ <div> <b> <i></i> <i></i> </b> <b></b> </div> },
         let new = div([], [b([], [i([], [])]), i([], [])]); //{ <div> <b> <i></i> </b> <i></i> </div>},
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::TruncateChildren(1, 1), Patch::Replace(4, &i([], [])),],
-            "Removing child and change next node after parent",
-        )
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::TruncateChildren(1, 1),
+                        Patch::Replace(4, &i([], [])),],
+                   "Removing child and change next node after parent",)
     }
 
     #[test]
@@ -774,20 +751,16 @@ mod diff_tests_using_html_syntax {
 
         let old: Node<()> = div([], []); //{ <div> </div> },
         let new = div([id("hello")], []); //{ <div id="hello"> </div> },
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::AddAttributes(0, attributes.clone())],
-            "Add attributes",
-        );
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::AddAttributes(0, attributes.clone())],
+                   "Add attributes",);
 
         let old: Node<()> = div([id("foobar")], []); //{ <div id="foobar"> </div> },
         let new = div([id("hello")], []); //{ <div id="hello"> </div> },
 
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::AddAttributes(0, attributes)],
-            "Change attribute",
-        );
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::AddAttributes(0, attributes)],
+                   "Change attribute",);
     }
 
     #[test]
@@ -802,11 +775,9 @@ mod diff_tests_using_html_syntax {
 
         let old = div([], []);
         let new = div([onclick(hello.clone())], []);
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::AddEventListener(0, events.clone())],
-            "Add event listener",
-        );
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::AddEventListener(0, events.clone())],
+                   "Add event listener",);
 
         let hello2: Callback<Event, ()> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
         assert_ne!(hello, hello2, "Same function, different Rc::new()");
@@ -828,22 +799,18 @@ mod diff_tests_using_html_syntax {
     fn remove_attributes() {
         let old: Node<()> = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
         let new = div([], []); //{ <div> </div> },
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::RemoveAttributes(0, vec!["id"])],
-            "Remove attributes",
-        );
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::RemoveAttributes(0, vec!["id"])],
+                   "Remove attributes",);
     }
 
     #[test]
     fn remove_events() {
         let old: Node<()> = div([onclick(|_| println!("hi"))], []);
         let new = div([], []);
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::RemoveEventListener(0, vec!["click"])],
-            "Remove events",
-        );
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::RemoveEventListener(0, vec!["click"])],
+                   "Remove events",);
     }
 
     #[test]
@@ -856,11 +823,9 @@ mod diff_tests_using_html_syntax {
         let old: Node<()> = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
         let new = div([id("changed")], []); //{ <div id="changed"> </div> },
 
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::AddAttributes(0, attributes)],
-            "Add attributes",
-        );
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::AddAttributes(0, attributes)],
+                   "Add attributes",);
     }
 
     #[test]
@@ -868,11 +833,9 @@ mod diff_tests_using_html_syntax {
         let old: Node<()> = text("Old"); //{ Old },
         let new = text("New"); //{ New },
 
-        assert_eq!(
-            diff(&old, &new),
-            vec![Patch::ChangeText(0, &Text::new("New"))],
-            "Replace text node",
-        );
+        assert_eq!(diff(&old, &new),
+                   vec![Patch::ChangeText(0, &Text::new("New"))],
+                   "Replace text node",);
     }
 
     // Initially motivated by having two elements where all that changed was an event listener

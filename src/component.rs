@@ -1,7 +1,6 @@
 use crate::Node;
 
 /// The app should implement this trait for it to be handled by the Program
-///
 pub trait Component<MSG> {
     /// Called each time an action is triggered from the view
     fn update(&mut self, msg: MSG);

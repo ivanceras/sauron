@@ -1,15 +1,13 @@
-use std::convert::Into;
-use std::fmt;
-use std::rc::Rc;
+use std::{convert::Into,
+          fmt,
+          rc::Rc};
 
 /// A generic sized representation of a function that can be
 /// attached to a Node. The callback will essentially be owned by the element
 #[derive(Clone)]
 pub struct Callback<IN, OUT>(Rc<dyn Fn(IN) -> OUT>);
 
-impl<IN, F, OUT> From<F> for Callback<IN, OUT>
-where
-    F: Fn(IN) -> OUT + 'static,
+impl<IN, F, OUT> From<F> for Callback<IN, OUT> where F: Fn(IN) -> OUT + 'static
 {
     fn from(func: F) -> Self {
         Callback(Rc::new(func))
@@ -22,9 +20,8 @@ impl<IN, OUT> fmt::Debug for Callback<IN, OUT> {
 }
 
 impl<IN, OUT> Callback<IN, OUT>
-where
-    IN: 'static,
-    OUT: 'static,
+    where IN: 'static,
+          OUT: 'static
 {
     /// This method calls the actual callback.
     pub fn emit<T: Into<IN>>(&self, value: T) -> OUT {
@@ -34,8 +31,7 @@ where
     /// Changes input type of the callback to another.
     /// Works like common `map` method but in an opposite direction.
     pub fn reform<F, T>(self, func: F) -> Callback<T, OUT>
-    where
-        F: Fn(T) -> IN + 'static,
+        where F: Fn(T) -> IN + 'static
     {
         let func_wrap = move |input| {
             let output = func(input);
@@ -46,8 +42,7 @@ where
 
     /// Map the output of this callback to return a different type
     pub fn map<F, OUT2>(self, func: F) -> Callback<IN, OUT2>
-    where
-        F: Fn(OUT) -> OUT2 + 'static,
+        where F: Fn(OUT) -> OUT2 + 'static
     {
         let func_wrap = move |input| {
             let out = self.emit(input);

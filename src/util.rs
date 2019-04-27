@@ -1,5 +1,5 @@
-use wasm_bindgen::closure::Closure;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{closure::Closure,
+                   JsCast};
 use web_sys;
 
 pub fn window() -> web_sys::Window {
@@ -7,15 +7,13 @@ pub fn window() -> web_sys::Window {
 }
 
 pub fn request_animation_frame(f: &Closure<FnMut()>) {
-    window()
-        .request_animation_frame(f.as_ref().unchecked_ref())
-        .expect("should register `requestAnimationFrame` OK");
+    window().request_animation_frame(f.as_ref().unchecked_ref())
+            .expect("should register `requestAnimationFrame` OK");
 }
 
 pub fn document() -> web_sys::Document {
-    window()
-        .document()
-        .expect("should have a document on window")
+    window().document()
+            .expect("should have a document on window")
 }
 
 pub fn body() -> web_sys::HtmlElement {
@@ -23,9 +21,8 @@ pub fn body() -> web_sys::HtmlElement {
 }
 
 pub fn performance() -> web_sys::Performance {
-    window()
-        .performance()
-        .expect("should have performance on window")
+    window().performance()
+            .expect("should have performance on window")
 }
 
 #[inline]

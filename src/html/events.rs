@@ -1,8 +1,8 @@
 //! https://developer.mozilla.org/en-US/docs/Web/Events
 pub use sauron_vdom::builder::on;
-use sauron_vdom::builder::Attribute;
-use sauron_vdom::Callback;
-use sauron_vdom::Event;
+use sauron_vdom::{builder::Attribute,
+                  Callback,
+                  Event};
 
 macro_rules! declare_events {
     ( $(

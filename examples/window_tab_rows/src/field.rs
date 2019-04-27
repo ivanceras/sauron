@@ -1,8 +1,8 @@
-use sauron::html::attributes::*;
-use sauron::html::events::*;
-use sauron::html::*;
-use sauron::Component;
-use sauron::Node;
+use sauron::{html::{attributes::*,
+                    events::*,
+                    *},
+             Component,
+             Node};
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -16,10 +16,8 @@ pub struct Field {
 
 impl Field {
     pub fn new(field_name: String) -> Self {
-        Field {
-            field_clicks: 0,
-            field_name,
-        }
+        Field { field_clicks: 0,
+                field_name }
     }
 }
 
@@ -31,9 +29,7 @@ impl Component<Msg> for Field {
     }
 
     fn view(&self) -> Node<Msg> {
-        button(
-            [class("field"), onclick(|_| Msg::FieldClick)],
-            [text(format!("{} ({})", self.field_name, self.field_clicks))],
-        )
+        button([class("field"), onclick(|_| Msg::FieldClick)],
+               [text(format!("{} ({})", self.field_name, self.field_clicks))])
     }
 }

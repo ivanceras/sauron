@@ -3,12 +3,12 @@
 use console_error_panic_hook;
 use sauron::*;
 use std::rc::Rc;
-use wasm_bindgen;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{self,
+                   prelude::*,
+                   JsCast};
 
-use app::App;
-use app::Msg;
+use app::{App,
+          Msg};
 
 mod app;
 
@@ -37,8 +37,8 @@ impl Client {
         let program = Program::new_replace_mount(app, &root_node);
         let program_clone = Rc::clone(&program);
         let clock: Closure<Fn()> = Closure::wrap(Box::new(move || {
-            program_clone.dispatch(Msg::Clock);
-        }));
+                                                     program_clone.dispatch(Msg::Clock);
+                                                 }));
         window()
             .set_interval_with_callback_and_timeout_and_arguments_0(
                 clock.as_ref().unchecked_ref(),

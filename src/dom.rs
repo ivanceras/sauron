@@ -1,18 +1,26 @@
 use crate::Dispatch;
 use apply_patches::patch;
-use sauron_vdom::Callback;
-use sauron_vdom::{self, diff};
-use std::collections::HashMap;
-use std::fmt::Debug;
-use std::marker::PhantomData;
-use std::ops::Deref;
-use std::rc::Rc;
-use std::sync::Mutex;
-use wasm_bindgen::closure::Closure;
-use wasm_bindgen::JsCast;
-use web_sys::{self, Element, EventTarget, Node, Text};
-use web_sys::{Event, KeyboardEvent, MouseEvent};
-use web_sys::{HtmlInputElement, HtmlTextAreaElement};
+use sauron_vdom::{self,
+                  diff,
+                  Callback};
+use std::{collections::HashMap,
+          fmt::Debug,
+          marker::PhantomData,
+          ops::Deref,
+          rc::Rc,
+          sync::Mutex};
+use wasm_bindgen::{closure::Closure,
+                   JsCast};
+use web_sys::{self,
+              Element,
+              Event,
+              EventTarget,
+              HtmlInputElement,
+              HtmlTextAreaElement,
+              KeyboardEvent,
+              MouseEvent,
+              Node,
+              Text};
 
 mod apply_patches;
 
@@ -64,10 +72,8 @@ pub struct DomUpdater<DSP, MSG> {
 
 impl<T> CreatedNode<T> {
     pub fn without_closures<N: Into<T>>(node: N) -> Self {
-        CreatedNode {
-            node: node.into(),
-            closures: HashMap::with_capacity(0),
-        }
+        CreatedNode { node: node.into(),
+                      closures: HashMap::with_capacity(0) }
     }
 
     pub fn create_text_node(text: &sauron_vdom::Text) -> Text {
@@ -77,13 +83,11 @@ impl<T> CreatedNode<T> {
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
-    pub fn create_dom_node<DSP, MSG>(
-        program: &Rc<DSP>,
-        vnode: &crate::Node<MSG>,
-    ) -> CreatedNode<Node>
-    where
-        MSG: Clone + Debug + 'static,
-        DSP: Dispatch<MSG> + 'static,
+    pub fn create_dom_node<DSP, MSG>(program: &Rc<DSP>,
+                                     vnode: &crate::Node<MSG>)
+                                     -> CreatedNode<Node>
+        where MSG: Clone + Debug + 'static,
+              DSP: Dispatch<MSG> + 'static
     {
         match vnode {
             crate::Node::Text(text_node) => {
@@ -99,20 +103,17 @@ impl<T> CreatedNode<T> {
 
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
-    pub fn create_element_node<DSP, MSG>(
-        program: &Rc<DSP>,
-        velem: &crate::Element<MSG>,
-    ) -> CreatedNode<Element>
-    where
-        MSG: Clone + Debug + 'static,
-        DSP: Dispatch<MSG> + 'static,
+    pub fn create_element_node<DSP, MSG>(program: &Rc<DSP>,
+                                         velem: &crate::Element<MSG>)
+                                         -> CreatedNode<Element>
+        where MSG: Clone + Debug + 'static,
+              DSP: Dispatch<MSG> + 'static
     {
         let document = web_sys::window().unwrap().document().unwrap();
 
         let element = if let Some(ref namespace) = velem.namespace {
-            document
-                .create_element_ns(Some(namespace), &velem.tag)
-                .unwrap()
+            document.create_element_ns(Some(namespace), &velem.tag)
+                    .unwrap()
         } else {
             document.create_element(&velem.tag).unwrap()
         };
@@ -120,36 +121,36 @@ impl<T> CreatedNode<T> {
         let mut closures = ActiveClosure::new();
 
         velem.attrs.iter().for_each(|(name, value)| {
-            element
+                              element
                 .set_attribute(name, &value.to_string())
                 .expect("Set element attribute in create element");
-        });
+                          });
 
         if !velem.events.is_empty() {
             let unique_id = create_unique_identifier();
 
             // set the data-sauron_vdom-id this will be read later on
             // when it's time to remove this element and its closures and event listeners
-            element
-                .set_attribute("data-sauron_vdom-id", &unique_id.to_string())
-                .expect("Could not set attribute on element");
+            element.set_attribute("data-sauron_vdom-id",
+                                  &unique_id.to_string())
+                   .expect("Could not set attribute on element");
 
             closures.insert(unique_id, vec![]);
 
             for (event_str, callback) in velem.events.iter() {
                 let current_elm: &EventTarget =
                     element.dyn_ref().expect("unable to cast to event targe");
-                let closure_wrap: Closure<Fn(Event)> = create_closure_wrap(program, &callback);
+                let closure_wrap: Closure<Fn(Event)> =
+                    create_closure_wrap(program, &callback);
                 current_elm
                     .add_event_listener_with_callback(
                         event_str,
                         closure_wrap.as_ref().unchecked_ref(),
                     )
                     .expect("Unable to attached event listener");
-                closures
-                    .get_mut(&unique_id)
-                    .expect("Unable to get closure")
-                    .push((event_str, closure_wrap));
+                closures.get_mut(&unique_id)
+                        .expect("Unable to get closure")
+                        .push((event_str, closure_wrap));
             }
         }
 
@@ -167,9 +168,9 @@ impl<T> CreatedNode<T> {
                     // `ptns` = Percy text node separator
                     if previous_node_was_text {
                         let separator = document.create_comment("ptns");
-                        current_node
-                            .append_child(separator.as_ref() as &web_sys::Node)
-                            .unwrap();
+                        current_node.append_child(separator.as_ref()
+                                                  as &web_sys::Node)
+                                    .unwrap();
                     }
 
                     current_node
@@ -181,7 +182,8 @@ impl<T> CreatedNode<T> {
                 crate::Node::Element(element_node) => {
                     previous_node_was_text = false;
 
-                    let child = Self::create_element_node(program, element_node);
+                    let child =
+                        Self::create_element_node(program, element_node);
                     let child_elem: Element = child.node;
                     closures.extend(child.closures);
 
@@ -190,91 +192,85 @@ impl<T> CreatedNode<T> {
             }
         }
 
-        CreatedNode {
-            node: element,
-            closures,
-        }
+        CreatedNode { node: element,
+                      closures }
     }
 }
 
 /// This wrap into a closure the function that is dispatched when the event is triggered.
-///
-fn create_closure_wrap<DSP, MSG>(
-    program: &Rc<DSP>,
-    callback: &Callback<sauron_vdom::Event, MSG>,
-) -> Closure<Fn(Event)>
-where
-    MSG: Clone + Debug + 'static,
-    DSP: Dispatch<MSG> + 'static + 'static,
+fn create_closure_wrap<DSP, MSG>(program: &Rc<DSP>,
+                                 callback: &Callback<sauron_vdom::Event, MSG>)
+                                 -> Closure<Fn(Event)>
+    where MSG: Clone + Debug + 'static,
+          DSP: Dispatch<MSG> + 'static + 'static
 {
     let callback_clone = callback.clone();
     let program_clone = Rc::clone(&program);
 
     Closure::wrap(Box::new(move |event: Event| {
-        let cb_event = convert_event(event);
-        let msg = callback_clone.emit(cb_event);
-        program_clone.dispatch(msg);
-    }))
+                      let cb_event = convert_event(event);
+                      let msg = callback_clone.emit(cb_event);
+                      program_clone.dispatch(msg);
+                  }))
 }
 
 /// convert the native DOM event into an internal portable representation
 /// TODO: Add support for allowing user pass a function
 /// to convert the events, extracting only specified data they need.
 fn convert_event(event: Event) -> sauron_vdom::Event {
-        let mouse_event: Option<&MouseEvent> = event.dyn_ref();
-        let key_event: Option<&KeyboardEvent> = event.dyn_ref();
-        let target: Option<EventTarget> = event.target();
+    let mouse_event: Option<&MouseEvent> = event.dyn_ref();
+    let key_event: Option<&KeyboardEvent> = event.dyn_ref();
+    let target: Option<EventTarget> = event.target();
 
-        if let Some(mouse_event) = mouse_event {
-            if event.type_() == "click" {
-                sauron_vdom::Event::MouseEvent(sauron_vdom::MouseEvent::Press(
+    if let Some(mouse_event) = mouse_event {
+        if event.type_() == "click" {
+            sauron_vdom::Event::MouseEvent(sauron_vdom::MouseEvent::Press(
                     sauron_vdom::MouseButton::Left,
                     mouse_event.x() as u16,
                     mouse_event.y() as u16,
                 ))
-            } else {
-                sauron_vdom::Event::Generic(event.type_())
-            }
-        } else if let Some(key_event) = key_event {
-            sauron_vdom::Event::KeyEvent(sauron_vdom::KeyEvent {
+        } else {
+            sauron_vdom::Event::Generic(event.type_())
+        }
+    } else if let Some(key_event) = key_event {
+        sauron_vdom::Event::KeyEvent(sauron_vdom::KeyEvent {
                 key: key_event.key(),
                 ctrl: key_event.ctrl_key(),
                 alt: key_event.alt_key(),
                 shift: key_event.shift_key(),
                 meta: key_event.meta_key(),
             })
-        } else if let Some(target) = target {
-            let input: Option<&HtmlInputElement> = target.dyn_ref();
-            let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
-            if let Some(input) = input {
-                sauron_vdom::Event::InputEvent(sauron_vdom::InputEvent {
+    } else if let Some(target) = target {
+        let input: Option<&HtmlInputElement> = target.dyn_ref();
+        let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
+        if let Some(input) = input {
+            sauron_vdom::Event::InputEvent(sauron_vdom::InputEvent {
                     value: input.value(),
                 })
-            } else if let Some(textarea) = textarea {
-                sauron_vdom::Event::InputEvent(sauron_vdom::InputEvent {
+        } else if let Some(textarea) = textarea {
+            sauron_vdom::Event::InputEvent(sauron_vdom::InputEvent {
                     value: textarea.value(),
                 })
-            } else {
-                sauron_vdom::Event::Generic(event.type_())
-            }
         } else {
             sauron_vdom::Event::Generic(event.type_())
         }
+    } else {
+        sauron_vdom::Event::Generic(event.type_())
+    }
 }
 
 impl<DSP, MSG> DomUpdater<DSP, MSG>
-where
-    MSG: Clone + Debug + 'static,
-    DSP: Dispatch<MSG> + 'static,
+    where MSG: Clone + Debug + 'static,
+          DSP: Dispatch<MSG> + 'static
 {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.
-    pub fn new(current_vdom: crate::Node<MSG>, root_node: &Node) -> DomUpdater<DSP, MSG> {
-        DomUpdater {
-            current_vdom,
-            root_node: root_node.clone(),
-            active_closures: ActiveClosure::new(),
-            _phantom_dsp: PhantomData,
-        }
+    pub fn new(current_vdom: crate::Node<MSG>,
+               root_node: &Node)
+               -> DomUpdater<DSP, MSG> {
+        DomUpdater { current_vdom,
+                     root_node: root_node.clone(),
+                     active_closures: ActiveClosure::new(),
+                     _phantom_dsp: PhantomData }
     }
 
     /// count the total active closures
@@ -306,9 +302,8 @@ where
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         let root_element: &Element = self.root_node.unchecked_ref();
-        root_element
-            .replace_with_with_node_1(&created_node.node)
-            .expect("Could not append child to mount");
+        root_element.replace_with_with_node_1(&created_node.node)
+                    .expect("Could not append child to mount");
         self.root_node = created_node.node;
         self.active_closures = created_node.closures;
     }
@@ -317,11 +312,10 @@ where
     ///
     /// A root `Node` will be created and appended (as a child) to your passed
     /// in mount element.
-    pub fn new_append_to_mount(
-        program: &Rc<DSP>,
-        current_vdom: crate::Node<MSG>,
-        mount: &Element,
-    ) -> DomUpdater<DSP, MSG> {
+    pub fn new_append_to_mount(program: &Rc<DSP>,
+                               current_vdom: crate::Node<MSG>,
+                               mount: &Element)
+                               -> DomUpdater<DSP, MSG> {
         let mut dom_updater = Self::new(current_vdom, mount);
         dom_updater.append_to_mount(program);
         dom_updater
@@ -331,11 +325,10 @@ where
     ///
     /// A root `Node` will be created and it will replace your passed in mount
     /// element.
-    pub fn new_replace_mount(
-        program: &Rc<DSP>,
-        current_vdom: crate::Node<MSG>,
-        mount: Element,
-    ) -> DomUpdater<DSP, MSG> {
+    pub fn new_replace_mount(program: &Rc<DSP>,
+                             current_vdom: crate::Node<MSG>,
+                             mount: Element)
+                             -> DomUpdater<DSP, MSG> {
         let mut dom_updater = Self::new(current_vdom, &mount);
         dom_updater.replace_mount(program);
         dom_updater
@@ -347,13 +340,10 @@ where
     /// seeing the latest state of the application.
     pub fn update(&mut self, program: &Rc<DSP>, new_vdom: crate::Node<MSG>) {
         let patches = diff(&self.current_vdom, &new_vdom);
-        let active_closures = patch(
-            program,
-            self.root_node.clone(),
-            &mut self.active_closures,
-            &patches,
-        )
-        .unwrap();
+        let active_closures = patch(program,
+                                    self.root_node.clone(),
+                                    &mut self.active_closures,
+                                    &patches).unwrap();
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
     }
@@ -375,15 +365,14 @@ fn create_unique_identifier() -> u32 {
 
 impl From<CreatedNode<Element>> for CreatedNode<Node> {
     fn from(other: CreatedNode<Element>) -> CreatedNode<Node> {
-        CreatedNode {
-            node: other.node.into(),
-            closures: other.closures,
-        }
+        CreatedNode { node: other.node.into(),
+                      closures: other.closures }
     }
 }
 
 impl<T> Deref for CreatedNode<T> {
     type Target = T;
+
     fn deref(&self) -> &Self::Target {
         &self.node
     }

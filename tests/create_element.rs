@@ -1,20 +1,27 @@
 #![deny(warnings)]
-use sauron::dom::CreatedNode;
-use sauron::html::attributes::*;
-use sauron::html::events::*;
-use sauron::html::*;
-use sauron::svg::attributes::{cx, cy, r, xmlns};
-use sauron::svg::{circle, svg};
-use sauron::*;
-use std::cell::Cell;
-use std::rc::Rc;
+use sauron::{dom::CreatedNode,
+             html::{attributes::*,
+                    events::*,
+                    *},
+             svg::{attributes::{cx,
+                                cy,
+                                r,
+                                xmlns},
+                   circle,
+                   svg},
+             *};
+use std::{cell::Cell,
+          rc::Rc};
 
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 
-use sauron::test_fixtures::simple_program;
-use sauron::Node;
-use web_sys::{console, Element, Event, EventTarget};
+use sauron::{test_fixtures::simple_program,
+             Node};
+use web_sys::{console,
+              Element,
+              Event,
+              EventTarget};
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -30,13 +37,10 @@ fn nested_divs() {
 
 #[wasm_bindgen_test]
 fn svg_element() {
-    let vdiv: Node<()> = div(
-        [],
-        [svg(
-            [xmlns("http://www.w3.org/2000/svg")],
-            [circle([cx("50"), cy("50"), r("50")], [])],
-        )],
-    );
+    let vdiv: Node<()> = div([],
+                             [svg([xmlns("http://www.w3.org/2000/svg")],
+                                  [circle([cx("50"), cy("50"), r("50")],
+                                          [])])]);
     let div: Element = CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
         .node
         .unchecked_into();
@@ -79,26 +83,22 @@ fn click_event() {
     let clicked_clone = Rc::clone(&clicked);
 
     let elem_id = "click-on-div";
-    let vdiv: Node<()> = div(
-        [
-            id(elem_id),
-            onclick(move |_ev: sauron_vdom::Event| {
-                console::log_1(&"clicked event called".into());
-                clicked_clone.set(true);
-            }),
-        ],
-        [],
-    );
+    let vdiv: Node<()> = div([id(elem_id),
+                              onclick(move |_ev: sauron_vdom::Event| {
+                                  console::log_1(&"clicked event called".into());
+                                  clicked_clone.set(true);
+                              })],
+                             []);
 
-    let _dom_updater = DomUpdater::new_append_to_mount(&simple_program(), vdiv, &body);
+    let _dom_updater =
+        DomUpdater::new_append_to_mount(&simple_program(), vdiv, &body);
 
     let click_event = Event::new("click").unwrap();
 
     let div = document.get_element_by_id(&elem_id).unwrap();
 
-    (EventTarget::from(div))
-        .dispatch_event(&click_event)
-        .unwrap();
+    (EventTarget::from(div)).dispatch_event(&click_event)
+                            .unwrap();
 
     assert_eq!(*clicked, Cell::new(true));
 }
