@@ -204,8 +204,8 @@ impl Model {
                placeholder("What needs to be done?"),
                value(self.value.to_string()),
                oninput(|v: InputEvent| Msg::Update(v.value)),
-               onkeypress(|key: KeyEvent| {
-                   if key.key == "Enter" {
+               onkeypress(|event: KeyEvent| {
+                   if event.key == "Enter" {
                        Msg::Add
                    } else {
                        Msg::Nope

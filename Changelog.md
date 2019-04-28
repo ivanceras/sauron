@@ -1,3 +1,29 @@
+# 0.6.0
+- Refactor sauron_vdom::Event to cater general usecase for mouse, keyboard and input event
+- Events such as onclick, onkeypress, and oninput are now supplied with: MouseEvent, KeyEvent, and InputEvent
+    accordingly, therefore no additional matching/unwrapping code is neccessary on the users code.
+    Before:
+    ```rust
+       onclick(|event: Event| {
+            if let Event::MouseEvent(mouse) = event{
+                sauron::log!("clicked at ({},{})", mouse.x(), mouse.y())
+            }else{
+                panic!("This should not happen")
+            }
+       })
+    ```
+    Now:
+    ```rust
+        onclick(|mouse: MouseEvent| {
+            sauron::log!("clicked at ({},{})", mouse.x(), mouse.y())
+        })
+    ```
+ - Move to svg_extra the following tags and attributes: style, width, height, id, font_size, font_family,
+     since these conflicts with the commonly used tags and attributes in html. Attributes that are defined in html attributes
+     could also be used in svg attributes. What's not possible is using tags declared in html module in svg elements, 
+     since svg elements needs to be created with svg namespace in the DOM.
+
+
 # 0.5.0
 - Use &'static str type for Node's attribute name, event name and namespace.
 - Add helper function `styles` which allows users to write style properties easily.
