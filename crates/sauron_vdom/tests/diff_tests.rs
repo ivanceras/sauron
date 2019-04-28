@@ -1,4 +1,3 @@
-
 #![deny(warnings)]
 use maplit::btreemap;
 use sauron_vdom::*;

@@ -9,7 +9,7 @@ pub enum Event {
 }
 
 /// A mouse event contains the (x,y) coordinates, buttons and modifier keys
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct MouseEvent {
     coordinate: Coordinate,
     modifier: Modifier,
@@ -34,7 +34,7 @@ impl MouseEvent {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct KeyEvent {
     pub key: String,
     pub modifier: Modifier,
@@ -42,18 +42,25 @@ pub struct KeyEvent {
     pub location: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+impl KeyEvent {
+    pub fn new(key: String) -> Self {
+        KeyEvent { key,
+                   ..Default::default() }
+    }
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct InputEvent {
     pub value: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Buttons {
     pub button: i16,
     pub buttons: u16,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Coordinate {
     pub client_x: i32,
     pub client_y: i32,
@@ -77,7 +84,7 @@ impl Coordinate {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Modifier {
     pub alt_key: bool,
     pub ctrl_key: bool,
