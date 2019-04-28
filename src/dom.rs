@@ -228,7 +228,10 @@ fn convert_event(event: web_sys::Event) -> sauron_vdom::Event {
         None
     };
 
-    vdom_event.expect("Expecting to be any of the vdom events")
+    vdom_event.unwrap_or_else(|| {
+        panic!("Expecting to be any of the vdom events, instead got: {}",
+               event.type_())
+    })
 }
 
 fn mouse_event_mapper(event: &web_sys::Event)
@@ -277,12 +280,13 @@ fn input_event_mapper(event: &web_sys::Event)
     if let Some(target) = target {
         let input: Option<&HtmlInputElement> = target.dyn_ref();
         let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
-        if input.is_some(){
+        if input.is_some() {
             input.map(|input| sauron_vdom::InputEvent { value: input.value() })
-        }
-        else if textarea.is_some(){
-            textarea.map(|textarea|sauron_vdom::InputEvent { value: textarea.value() })
-        }else{
+        } else if textarea.is_some() {
+            textarea.map(|textarea| {
+                        sauron_vdom::InputEvent { value: textarea.value() }
+                    })
+        } else {
             None
         }
     } else {

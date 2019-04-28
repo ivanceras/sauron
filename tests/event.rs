@@ -29,13 +29,8 @@ fn on_input() {
     let input: Node<()> =
         input([// On input we'll set our Rc<RefCell<String>> value to the input elements value
                id(elem_id),
-               oninput(move |event: sauron_vdom::Event| {
-                   match event {
-                       sauron_vdom::Event::InputEvent(input) => {
-                           *text_clone.borrow_mut() = input.value;
-                       }
-                       _ => unimplemented!(),
-                   }
+               oninput(move |event: sauron_vdom::InputEvent| {
+                   *text_clone.borrow_mut() = event.value;
                }),
                value("End Text")],
               []);
@@ -73,13 +68,8 @@ fn added_event() {
     let new = input([// On input we'll set our Rc<RefCell<String>> value to the input elements value
                      id(elem_id),
                      value("End Text"),
-                     oninput(move |event: sauron_vdom::Event| {
-                         match event {
-                             sauron_vdom::Event::InputEvent(input) => {
-                                 *text_clone.borrow_mut() = input.value;
-                             }
-                             _ => unimplemented!(),
-                         }
+                     oninput(move |event: sauron_vdom::InputEvent| {
+                         *text_clone.borrow_mut() = event.value;
                      })],
                     []);
 
@@ -111,19 +101,14 @@ fn remove_event() {
 
     let elem_id = "input-remove-event-test";
 
-    let old: Node<()> = input([// On input we'll set our Rc<RefCell<String>> value to the input elements value
-                               id(elem_id),
-                               value("End Text"),
-                               oninput(move |event: sauron_vdom::Event| {
-                                   match event {
-                                       sauron_vdom::Event::InputEvent(input) => {
-                                           *text_clone.borrow_mut() =
-                                               input.value;
-                                       }
-                                       _ => unimplemented!(),
-                                   }
-                               })],
-                              []);
+    let old: Node<()> =
+        input([// On input we'll set our Rc<RefCell<String>> value to the input elements value
+               id(elem_id),
+               value("End Text"),
+               oninput(move |event: sauron_vdom::InputEvent| {
+                   *text_clone.borrow_mut() = event.value;
+               })],
+              []);
 
     let new = input([// On input we'll set our Rc<RefCell<String>> value to the input elements value
                      id(elem_id),

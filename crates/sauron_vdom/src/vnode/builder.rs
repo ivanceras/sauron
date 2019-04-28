@@ -129,7 +129,7 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
 /// use sauron_vdom::Callback;
 /// use sauron_vdom::Event;
 /// fn main(){
-///    let old:Node<&'static str, ()> = element(
+///    let old:Node<&'static str, (), ()> = element(
 ///        "div",
 ///        [
 ///            attr("class", "some-class"),

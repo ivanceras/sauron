@@ -552,7 +552,6 @@ declare_tags! {
     template;
 }
 
-/*
 #[cfg(test)]
 mod tests {
     use crate::{Element,
@@ -565,9 +564,9 @@ mod tests {
     use sauron_vdom::{builder::{attr,
                                 text},
                       Callback,
+                      Event,
                       Text};
     use std::collections::BTreeMap;
-    use web_sys::Event;
 
     #[test]
     fn simple_builder() {
@@ -670,7 +669,6 @@ mod diff_tests_using_html_syntax {
     use maplit::btreemap;
     use sauron_vdom::{diff,
                       Callback,
-                      Event,
                       Patch,
                       Text,
                       Value};
@@ -767,21 +765,21 @@ mod diff_tests_using_html_syntax {
         let func = |_| {
             println!("hello");
         };
-        let hello: Callback<Event, ()> = func.into();
+        let hello: Callback<sauron_vdom::Event, ()> = func.into();
         let events = btreemap! {
         "click" => &hello,
         };
 
-        let old = div([], []);
-        let new = div([onclick(hello.clone())], []);
+        let old: Node<()> = div([], []);
+        let new: Node<()> = div([on("click", hello.clone())], []);
         assert_eq!(diff(&old, &new),
                    vec![Patch::AddEventListener(0, events.clone())],
                    "Add event listener",);
 
-        let hello2: Callback<Event, ()> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
+        let hello2: Callback<sauron_vdom::Event, ()> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
         assert_ne!(hello, hello2, "Same function, different Rc::new()");
-        let old = div([onclick(hello.clone())], []);
-        let new = div([onclick(hello2.clone())], []);
+        let old = div([on("click", hello.clone())], []);
+        let new = div([on("click", hello2.clone())], []);
 
         assert_eq!(
             diff(&old, &new),
@@ -851,4 +849,3 @@ mod diff_tests_using_html_syntax {
         );
     }
 }
-*/

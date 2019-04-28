@@ -20,7 +20,6 @@ use sauron::{test_fixtures::simple_program,
              Node};
 use web_sys::{console,
               Element,
-              Event,
               EventTarget};
 
 wasm_bindgen_test_configure!(run_in_browser);
@@ -66,12 +65,6 @@ fn div_with_attributes() {
     assert_eq!(div.class_list().length(), 2);
 }
 
-//FIXME: this fails because the closure is already dropped
-// when the event is dispatched
-// TODO: This now passed, when `closure_wrap.forget()` is called
-// in `DomUpdater.create_element_node`, but then the closures
-// will be leaking and there is no way to remove that closure from
-// the event listener.
 #[wasm_bindgen_test]
 fn click_event() {
     console_error_panic_hook::set_once();
@@ -84,7 +77,7 @@ fn click_event() {
 
     let elem_id = "click-on-div";
     let vdiv: Node<()> = div([id(elem_id),
-                              onclick(move |_ev: sauron_vdom::Event| {
+                              onclick(move |_| {
                                   console::log_1(&"clicked event called".into());
                                   clicked_clone.set(true);
                               })],
@@ -93,7 +86,7 @@ fn click_event() {
     let _dom_updater =
         DomUpdater::new_append_to_mount(&simple_program(), vdiv, &body);
 
-    let click_event = Event::new("click").unwrap();
+    let click_event = web_sys::MouseEvent::new("click").unwrap();
 
     let div = document.get_element_by_id(&elem_id).unwrap();
 

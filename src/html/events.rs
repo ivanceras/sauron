@@ -96,9 +96,9 @@ declare_events! {
 
 // keyboard events
 declare_events! {
-    onkeydown : keydown =>|sauron_vdom::InputEvent| input_value_mapper;
-    onkeypress : keypress =>|sauron_vdom::InputEvent| input_value_mapper;
-    onkeyup : keyup =>|sauron_vdom::InputEvent| input_value_mapper;
+    onkeydown : keydown =>|sauron_vdom::KeyEvent| keyboard_event_mapper;
+    onkeypress : keypress =>|sauron_vdom::KeyEvent| keyboard_event_mapper;
+    onkeyup : keyup =>|sauron_vdom::KeyEvent| keyboard_event_mapper;
 }
 
 // focus events

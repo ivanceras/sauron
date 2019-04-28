@@ -2,6 +2,8 @@ use sauron::{html::{attributes::*,
                     events::*,
                     *},
              Component,
+             InputEvent,
+             KeyEvent,
              Node};
 
 #[derive(Clone, Debug)]
@@ -201,14 +203,14 @@ impl Model {
         input([class("new-todo"),
                placeholder("What needs to be done?"),
                value(self.value.to_string()),
-               oninput(|v: String| Msg::Update(v)),
-               onkeypress(|key| {
-                              if key == "Enter" {
-                                  Msg::Add
-                              } else {
-                                  Msg::Nope
-                              }
-                          })],
+               oninput(|v: InputEvent| Msg::Update(v.value)),
+               onkeypress(|key: KeyEvent| {
+                   if key.key == "Enter" {
+                       Msg::Add
+                   } else {
+                       Msg::Nope
+                   }
+               })],
               [])
     }
 }
@@ -240,10 +242,10 @@ fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
         input([class("edit"),
                r#type("text"),
                value(&entry.description),
-               oninput(|value: String| Msg::UpdateEdit(value)),
+               oninput(|input: InputEvent| Msg::UpdateEdit(input.value)),
                onblur(move |_| Msg::Edit(idx)),
-               onkeypress(move |key: String| {
-                   if key == "Enter" {
+               onkeypress(move |event: KeyEvent| {
+                   if event.key == "Enter" {
                        Msg::Edit(idx)
                    } else {
                        Msg::Nope

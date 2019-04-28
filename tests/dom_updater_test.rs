@@ -53,18 +53,13 @@ fn updates_active_closure_on_replace() {
 
     let elem_id = "update-active-closures-on-replace";
 
-    let replace_node = input([id(elem_id),
-                              oninput(move |event: sauron_vdom::Event| {
-                                  match event {
-                                      sauron_vdom::Event::InputEvent(input) => {
-                                          *text_clone.borrow_mut() =
-                                              input.value;
-                                      }
-                                      _ => unimplemented!(),
-                                  }
-                              }),
-                              value("End Text")],
-                             []);
+    let replace_node =
+        input([id(elem_id),
+               oninput(move |event: sauron_vdom::InputEvent| {
+                   *text_clone.borrow_mut() = event.value;
+               }),
+               value("End Text")],
+              []);
 
     // New node replaces old node.
     // We are testing that we've stored this new node's closures even though `new` will be dropped
@@ -106,13 +101,8 @@ fn updates_active_closures_on_append() {
         let append_node =
             div([],
                 [input([id(elem_id),
-                        oninput(move |event: sauron_vdom::Event| {
-                            match event {
-                                sauron_vdom::Event::InputEvent(input) => {
-                                    *text_clone.borrow_mut() = input.value;
-                                }
-                                _ => unimplemented!(),
-                            }
+                        oninput(move |event: sauron_vdom::InputEvent| {
+                            *text_clone.borrow_mut() = event.value;
                         }),
                         value("End Text")],
                        [])]);
