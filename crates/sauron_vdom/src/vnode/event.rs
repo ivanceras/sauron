@@ -1,64 +1,86 @@
 /// A container for generic event and the common values
 /// needed for the user.
-/// This events are derived from their corresponding backend source
-/// ie: html events from mouse, keypresses and input changes.
-/// This events should also be recreatable from gtk-rs, libui-rs,
-/// orbtk, ncurses, etc.
-#[derive(Debug, PartialEq, Clone)]
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Event {
     MouseEvent(MouseEvent),
     KeyEvent(KeyEvent),
     InputEvent(InputEvent),
-    Generic(String),
-    Tick,
 }
 
-/// A mouse related event.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum MouseEvent {
-    /// A mouse button was pressed.
-    Press(MouseButton, i32, i32),
-    /// A mouse button was released.
-    Release(i32, i32),
-    /// A mouse button is held over the given coordinates.
-    Hold(i32, i32),
+/// A mouse event contains the (x,y) coordinates, buttons and modifier keys
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MouseEvent {
+    coordinate: Coordinate,
+    modifier: Modifier,
+    buttons: Buttons,
 }
+impl MouseEvent {
+    pub fn new(coordinate: Coordinate,
+               modifier: Modifier,
+               buttons: Buttons)
+               -> Self {
+        MouseEvent { coordinate,
+                     modifier,
+                     buttons }
+    }
 
-/// A mouse button.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum MouseButton {
-    /// The left mouse button.
-    Left,
-    /// The right mouse button.
-    Right,
-    /// The middle mouse button.
-    Middle,
-    /// Mouse wheel is going up.
-    ///
-    /// This event is typically only used with Mouse::Press.
-    WheelUp,
-    /// Mouse wheel is going down.
-    ///
-    /// This event is typically only used with Mouse::Press.
-    WheelDown,
-}
+    pub fn x(&self) -> i32 {
+        self.coordinate.x()
+    }
 
-#[derive(Debug, PartialEq, Clone, Default)]
-pub struct KeyEvent {
-    pub key: String,
-    pub ctrl: bool,
-    pub alt: bool,
-    pub shift: bool,
-    pub meta: bool,
-}
-impl KeyEvent {
-    pub fn new(ch: char) -> Self {
-        KeyEvent { key: ch.to_string(),
-                   ..Default::default() }
+    pub fn y(&self) -> i32 {
+        self.coordinate.y()
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct KeyEvent {
+    pub key: String,
+    pub modifier: Modifier,
+    pub repeat: bool,
+    pub location: u32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InputEvent {
     pub value: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Buttons {
+    pub button: i16,
+    pub buttons: u16,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Coordinate {
+    pub client_x: i32,
+    pub client_y: i32,
+    pub movement_x: i32,
+    pub movement_y: i32,
+    pub offset_x: i32,
+    pub offset_y: i32,
+    pub screen_x: i32,
+    pub screen_y: i32,
+    pub x: i32,
+    pub y: i32,
+}
+
+impl Coordinate {
+    pub fn x(&self) -> i32 {
+        self.x
+    }
+
+    pub fn y(&self) -> i32 {
+        self.y
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Modifier {
+    pub alt_key: bool,
+    pub ctrl_key: bool,
+    pub meta_key: bool,
+    pub shift_key: bool,
 }

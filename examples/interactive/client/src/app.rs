@@ -7,6 +7,9 @@ use sauron::{html::{attributes::*,
 use wasm_bindgen::{self,
                    prelude::*};
 
+use sauron::{InputEvent,
+             MouseEvent};
+
 #[derive(Debug, Clone)]
 pub enum Msg {
     Click,
@@ -76,16 +79,22 @@ impl Component<Msg> for App {
              div([],
                  [text("Your name is: "),
                   input([r#type("text"),
-                         oninput(|v: String| Msg::ChangeName(v)),
+                         oninput(|event: InputEvent| {
+                             Msg::ChangeName(event.value)
+                         }),
                          placeholder("John Smith")],
                         []),
-                  button([onclick(|(x, y)| {
-                             sauron::log!("Clicked at ({},{})", x, y);
+                  button([onclick(|event: MouseEvent| {
+                             sauron::log!("Clicked at ({},{})",
+                                          event.x(),
+                                          event.y());
                              Msg::Click
                          })],
                          [text("Click me!")]),
-                  button([ondblclick(|(x, y)| {
-                             sauron::log!("Double clicked at ({},{})", x, y);
+                  button([ondblclick(|event: MouseEvent| {
+                             sauron::log!("Double clicked at ({},{})",
+                                          event.x(),
+                                          event.y());
                              Msg::DoubleClick
                          })],
                          [text(format!("DoubleClicks {}",
@@ -106,8 +115,8 @@ impl Component<Msg> for App {
                   div([],
                       [textarea([rows(10),
                                  cols(80),
-                                 oninput(|v: String| {
-                                     Msg::ChangeBiography(v)
+                                 oninput(|event: InputEvent| {
+                                     Msg::ChangeBiography(event.value)
                                  }),
                                  placeholder("I'm a...")],
                                 [])]),
@@ -115,7 +124,9 @@ impl Component<Msg> for App {
              div([],
                  [text("What are you thinking right now?"),
                   input([r#type("text"),
-                         onchange(|v: String| Msg::ChangeThought(v)),
+                         onchange(|event: InputEvent| {
+                             Msg::ChangeThought(event.value)
+                         }),
                          placeholder("Elephants...")],
                         []),
                   if let Some(thought) = &self.thought {

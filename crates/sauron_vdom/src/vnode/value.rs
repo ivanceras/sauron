@@ -189,28 +189,28 @@ mod tests {
 
     #[test]
     fn tuple_value() {
-        let line: Node<&'static str, ()> =
+        let line: Node<&'static str, (), ()> =
             element("line", [attr("stroke-dasharray", (10, 20))], []);
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(format!("{}", line),
                    expected,
                    "The value in tuple should be flatten to string");
 
-        let line: Node<&'static str, ()> =
+        let line: Node<&'static str, (), ()> =
             element("line", [attr("transition", ("opacity", 1))], []);
         let expected = "<line transition=\"opacity 1\"></line>";
         assert_eq!(format!("{}", line),
                    expected,
                    "The value in tuple should be flatten to string");
 
-        let line: Node<&'static str, ()> =
+        let line: Node<&'static str, (), ()> =
             element("line", [attr("transition", ("opacity", 1, "linear"))], []);
         let expected = "<line transition=\"opacity 1 linear\"></line>";
         assert_eq!(format!("{}", line),
                    expected,
                    "The value in tuple should be flatten to string");
 
-        let line: Node<&'static str, ()> =
+        let line: Node<&'static str, (), ()> =
             element("line",
                     [attr("transition", ("opacity", 1, "linear", true))],
                     []);
@@ -222,14 +222,14 @@ mod tests {
 
     #[test]
     fn array_value() {
-        let line: Node<&'static str, ()> =
+        let line: Node<&'static str, (), ()> =
             element("line", [attr("stroke-dasharray", [10, 20])], []);
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(format!("{}", line),
                    expected,
                    "The value in array should be flatten to string");
 
-        let line: Node<&'static str, ()> =
+        let line: Node<&'static str, (), ()> =
             element("line", [attr("stroke-dasharray", [10, 20, 30, 40])], []);
         let expected = "<line stroke-dasharray=\"10 20 30 40\"></line>";
         assert_eq!(format!("{}", line),

@@ -2,15 +2,11 @@ use std::{collections::BTreeMap,
           fmt};
 
 pub mod builder;
-mod event;
+pub mod event;
 mod value;
 
 use crate::Callback;
-pub use event::{Event,
-                InputEvent,
-                KeyEvent,
-                MouseButton,
-                MouseEvent};
+pub use event::Event;
 pub use value::Value;
 
 /// This is the core data structure of the library.

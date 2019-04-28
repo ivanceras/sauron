@@ -169,7 +169,10 @@ pub use util::{body,
                request_animation_frame,
                window};
 
-use web_sys::Event;
+pub use sauron_vdom::{Event,
+                      InputEvent,
+                      KeyEvent,
+                      MouseEvent};
 
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users

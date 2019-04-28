@@ -12,10 +12,13 @@ pub use diff::diff;
 pub use patch::Patch;
 pub use vnode::{Element,
                 Event,
-                InputEvent,
-                KeyEvent,
-                MouseButton,
-                MouseEvent,
                 Node,
                 Text,
                 Value};
+
+pub use vnode::event::{Buttons,
+                       Coordinate,
+                       InputEvent,
+                       KeyEvent,
+                       Modifier,
+                       MouseEvent};

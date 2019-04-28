@@ -2,7 +2,6 @@ use sauron::{html::{attributes::*,
                     events::*,
                     *},
              Component,
-             Event,
              Node};
 
 #[derive(Clone, Debug)]
@@ -202,24 +201,14 @@ impl Model {
         input([class("new-todo"),
                placeholder("What needs to be done?"),
                value(self.value.to_string()),
-               oninput(|e: Event| {
-                   if let Event::InputEvent(input) = e {
-                       Msg::Update(input.value)
-                   } else {
-                       Msg::Nope
-                   }
-               }),
-               onkeypress(|e: Event| {
-                   if let Event::KeyEvent(key) = e {
-                       if key.key == "Enter" {
-                           Msg::Add
-                       } else {
-                           Msg::Nope
-                       }
-                   } else {
-                       Msg::Nope
-                   }
-               })],
+               oninput(|v: String| Msg::Update(v)),
+               onkeypress(|key| {
+                              if key == "Enter" {
+                                  Msg::Add
+                              } else {
+                                  Msg::Nope
+                              }
+                          })],
               [])
     }
 }
@@ -251,21 +240,11 @@ fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
         input([class("edit"),
                r#type("text"),
                value(&entry.description),
-               oninput(|e: Event| {
-                   if let Event::InputEvent(input) = e {
-                       Msg::UpdateEdit(input.value)
-                   } else {
-                       Msg::Nope
-                   }
-               }),
+               oninput(|value: String| Msg::UpdateEdit(value)),
                onblur(move |_| Msg::Edit(idx)),
-               onkeypress(move |e: Event| {
-                   if let Event::KeyEvent(key) = e {
-                       if key.key == "Enter" {
-                           Msg::Edit(idx)
-                       } else {
-                           Msg::Nope
-                       }
+               onkeypress(move |key: String| {
+                   if key == "Enter" {
+                       Msg::Edit(idx)
                    } else {
                        Msg::Nope
                    }

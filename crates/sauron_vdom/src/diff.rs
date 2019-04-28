@@ -235,12 +235,11 @@ mod tests {
 
     #[test]
     fn test_replace_node() {
-        let old =
-            Node::Element::<&'static str, ()>(Element { tag: "div",
-                                                        ..Default::default() });
-        let new =
-            Node::Element::<&'static str, ()>(Element { tag: "span",
-                                                        ..Default::default() });
+        let old: Node<&'static str, (), ()> =
+            Node::Element(Element { tag: "div",
+                                    ..Default::default() });
+        let new = Node::Element(Element { tag: "span",
+                                          ..Default::default() });
 
         let diff = diff::diff(&old, &new);
         assert_eq!(diff,
@@ -250,21 +249,20 @@ mod tests {
 
     #[test]
     fn test_simple_diff() {
-        let old =
-            Node::Element::<&'static str, ()>(Element { tag: "div",
-                                                        attrs: btreemap! {
-                                                            "id" => "some-id".into(),
-                                                            "class" => "some-class".into(),
-                                                        },
-                                                        ..Default::default() });
+        let old: Node<&'static str, (), ()> =
+            Node::Element(Element { tag: "div",
+                                    attrs: btreemap! {
+                                        "id" => "some-id".into(),
+                                        "class" => "some-class".into(),
+                                    },
+                                    ..Default::default() });
 
-        let new =
-            Node::Element::<&'static str, ()>(Element { tag: "div",
-                                                        attrs: btreemap! {
-                                                            "id" => "some-id".into(),
-                                                            "class" => "some-class".into(),
-                                                        },
-                                                        ..Default::default() });
+        let new = Node::Element(Element { tag: "div",
+                                          attrs: btreemap! {
+                                              "id" => "some-id".into(),
+                                              "class" => "some-class".into(),
+                                          },
+                                          ..Default::default() });
 
         let diff = diff(&old, &new);
         assert_eq!(diff, vec![])
@@ -272,21 +270,20 @@ mod tests {
 
     #[test]
     fn test_class_changed() {
-        let old =
-            Node::Element::<&'static str, ()>(Element { tag: "div",
-                                                        attrs: btreemap! {
-                                                            "id" => "some-id".into(),
-                                                            "class" => "some-class".into(),
-                                                        },
-                                                        ..Default::default() });
+        let old: Node<&'static str, (), ()> =
+            Node::Element(Element { tag: "div",
+                                    attrs: btreemap! {
+                                        "id" => "some-id".into(),
+                                        "class" => "some-class".into(),
+                                    },
+                                    ..Default::default() });
 
-        let new =
-            Node::Element::<&'static str, ()>(Element { tag: "div",
-                                                        attrs: btreemap! {
-                                                            "id" => "some-id".into(),
-                                                            "class" => "some-class2".to_string().into(),
-                                                        },
-                                                        ..Default::default() });
+        let new = Node::Element(Element { tag: "div",
+                                          attrs: btreemap! {
+                                              "id" => "some-id".into(),
+                                              "class" => "some-class2".to_string().into(),
+                                          },
+                                          ..Default::default() });
 
         let diff = diff(&old, &new);
         let class2 = Value::String("some-class2".to_string());
@@ -299,20 +296,19 @@ mod tests {
 
     #[test]
     fn test_class_removed() {
-        let old =
-            Node::Element::<&'static str, ()>(Element { tag: "div",
-                                                        attrs: btreemap! {
-                                                            "id" => "some-id".into(),
-                                                            "class" => "some-class".into(),
-                                                        },
-                                                        ..Default::default() });
+        let old: Node<&'static str, (), ()> =
+            Node::Element(Element { tag: "div",
+                                    attrs: btreemap! {
+                                        "id" => "some-id".into(),
+                                        "class" => "some-class".into(),
+                                    },
+                                    ..Default::default() });
 
-        let new =
-            Node::Element::<&'static str, ()>(Element { tag: "div",
-                                                        attrs: btreemap! {
-                                                            "id" => "some-id".into(),
-                                                        },
-                                                        ..Default::default() });
+        let new = Node::Element(Element { tag: "div",
+                                          attrs: btreemap! {
+                                              "id" => "some-id".into(),
+                                          },
+                                          ..Default::default() });
 
         let diff = diff(&old, &new);
         assert_eq!(diff, vec![Patch::RemoveAttributes(0, vec!["class"])])
@@ -321,8 +317,8 @@ mod tests {
     #[test]
     fn no_change_event() {
         let func = |_| println!("Clicked!");
-        let cb: Callback<EVENT, ()> = func.into();
-        let old: Node<&'static str, ()> =
+        let cb: Callback<(), ()> = func.into();
+        let old: Node<&'static str, (), ()> =
             Node::Element(Element { tag: "div",
                                     events: btreemap! {
                                         "click" => cb.clone(),
@@ -346,9 +342,9 @@ mod tests {
     #[test]
     fn add_event() {
         let func = |_| println!("Clicked!");
-        let cb: Callback<EVENT, ()> = func.into();
+        let cb: Callback<(), ()> = func.into();
 
-        let old: Node<&'static str, ()> =
+        let old: Node<&'static str, (), ()> =
             Node::Element(Element { tag: "div",
                                     attrs: BTreeMap::new(),
                                     events: BTreeMap::new(),

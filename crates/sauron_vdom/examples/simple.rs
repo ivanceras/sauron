@@ -4,7 +4,7 @@ use sauron_vdom::{builder::*,
                   Node};
 
 fn main() {
-    let old: Node<&'static str, ()> =
+    let old: Node<&'static str, (), ()> =
         element("div",
                 [attr("class", "some-class"),
                  attr("id", "some-id"),

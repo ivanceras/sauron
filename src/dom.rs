@@ -2,7 +2,10 @@ use crate::Dispatch;
 use apply_patches::patch;
 use sauron_vdom::{self,
                   diff,
-                  Callback};
+                  Buttons,
+                  Callback,
+                  Coordinate,
+                  Modifier};
 use std::{collections::HashMap,
           fmt::Debug,
           marker::PhantomData,
@@ -13,8 +16,9 @@ use wasm_bindgen::{closure::Closure,
                    JsCast};
 use web_sys::{self,
               Element,
-              Event,
               EventTarget,
+              HtmlInputElement,
+              HtmlTextAreaElement,
               Node,
               Text};
 
@@ -42,7 +46,8 @@ pub(self) const DATA_SAURON_VDOM_ID: &str = "data-sauron-vdom-id";
 ///   descendants somehow and invalidate those closures..? Need to plan this out..
 ///   At it stands now this hashmap will grow anytime a new element with closures is
 ///   appended or replaced and we will never free those closures.
-pub type ActiveClosure = HashMap<u32, Vec<(&'static str, Closure<Fn(Event)>)>>;
+pub type ActiveClosure =
+    HashMap<u32, Vec<(&'static str, Closure<Fn(web_sys::Event)>)>>;
 
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
@@ -137,7 +142,7 @@ impl<T> CreatedNode<T> {
             for (event_str, callback) in velem.events.iter() {
                 let current_elm: &EventTarget =
                     element.dyn_ref().expect("unable to cast to event targe");
-                let closure_wrap: Closure<Fn(Event)> =
+                let closure_wrap: Closure<Fn(web_sys::Event)> =
                     create_closure_wrap(program, &callback);
                 current_elm
                     .add_event_listener_with_callback(
@@ -197,18 +202,92 @@ impl<T> CreatedNode<T> {
 
 /// This wrap into a closure the function that is dispatched when the event is triggered.
 fn create_closure_wrap<DSP, MSG>(program: &Rc<DSP>,
-                                 callback: &Callback<Event, MSG>)
-                                 -> Closure<Fn(Event)>
+                                 callback: &Callback<sauron_vdom::Event, MSG>)
+                                 -> Closure<Fn(web_sys::Event)>
     where MSG: Clone + Debug + 'static,
           DSP: Dispatch<MSG> + 'static + 'static
 {
     let callback_clone = callback.clone();
     let program_clone = Rc::clone(&program);
 
-    Closure::wrap(Box::new(move |event: Event| {
-                      let msg = callback_clone.emit(event);
+    Closure::wrap(Box::new(move |event: web_sys::Event| {
+                      let cb_event = convert_event(event);
+                      let msg = callback_clone.emit(cb_event);
                       program_clone.dispatch(msg);
                   }))
+}
+
+fn convert_event(event: web_sys::Event) -> sauron_vdom::Event {
+    let vdom_event = if let Some(mouse_event) = mouse_event_mapper(&event) {
+        Some(sauron_vdom::Event::MouseEvent(mouse_event))
+    } else if let Some(key_event) = keyboard_event_mapper(&event) {
+        Some(sauron_vdom::Event::KeyEvent(key_event))
+    } else if let Some(input_event) = input_event_mapper(&event) {
+        Some(sauron_vdom::Event::InputEvent(input_event))
+    } else {
+        None
+    };
+
+    vdom_event.expect("Expecting to be any of the vdom events")
+}
+
+fn mouse_event_mapper(event: &web_sys::Event)
+                      -> Option<sauron_vdom::MouseEvent> {
+    let mouse_event: Option<&web_sys::MouseEvent> = event.dyn_ref();
+    mouse_event.map(|mouse| {
+                   let coordinate =
+                       Coordinate { client_x: mouse.client_x(),
+                                    client_y: mouse.client_y(),
+                                    movement_x: mouse.movement_x(),
+                                    movement_y: mouse.movement_y(),
+                                    offset_x: mouse.offset_x(),
+                                    offset_y: mouse.offset_y(),
+                                    screen_x: mouse.screen_x(),
+                                    screen_y: mouse.screen_y(),
+                                    x: mouse.x(),
+                                    y: mouse.y() };
+                   let modifier = Modifier { alt_key: mouse.alt_key(),
+                                             ctrl_key: mouse.ctrl_key(),
+                                             meta_key: mouse.meta_key(),
+                                             shift_key: mouse.shift_key() };
+                   let buttons = Buttons { button: mouse.button(),
+                                           buttons: mouse.buttons() };
+                   sauron_vdom::MouseEvent::new(coordinate, modifier, buttons)
+               })
+}
+
+fn keyboard_event_mapper(event: &web_sys::Event)
+                         -> Option<sauron_vdom::KeyEvent> {
+    let key_event: Option<&web_sys::KeyboardEvent> = event.dyn_ref();
+    key_event.map(|key_event| {
+                 let modifier = Modifier { alt_key: key_event.alt_key(),
+                                           ctrl_key: key_event.ctrl_key(),
+                                           meta_key: key_event.meta_key(),
+                                           shift_key: key_event.shift_key() };
+                 sauron_vdom::KeyEvent { key: key_event.key(),
+                                         modifier,
+                                         repeat: key_event.repeat(),
+                                         location: key_event.location() }
+             })
+}
+
+fn input_event_mapper(event: &web_sys::Event)
+                      -> Option<sauron_vdom::InputEvent> {
+    let target: Option<EventTarget> = event.target();
+    if let Some(target) = target {
+        let input: Option<&HtmlInputElement> = target.dyn_ref();
+        let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
+        if input.is_some(){
+            input.map(|input| sauron_vdom::InputEvent { value: input.value() })
+        }
+        else if textarea.is_some(){
+            textarea.map(|textarea|sauron_vdom::InputEvent { value: textarea.value() })
+        }else{
+            None
+        }
+    } else {
+        None
+    }
 }
 
 impl<DSP, MSG> DomUpdater<DSP, MSG>
