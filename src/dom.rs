@@ -7,7 +7,6 @@ use sauron_vdom::{self,
                   Coordinate,
                   Modifier};
 use std::{collections::HashMap,
-          fmt::Debug,
           marker::PhantomData,
           ops::Deref,
           rc::Rc,
@@ -88,7 +87,7 @@ impl<T> CreatedNode<T> {
     pub fn create_dom_node<DSP, MSG>(program: &Rc<DSP>,
                                      vnode: &crate::Node<MSG>)
                                      -> CreatedNode<Node>
-        where MSG: Clone + Debug + 'static,
+        where MSG: Clone + 'static,
               DSP: Dispatch<MSG> + 'static
     {
         match vnode {
@@ -108,7 +107,7 @@ impl<T> CreatedNode<T> {
     pub fn create_element_node<DSP, MSG>(program: &Rc<DSP>,
                                          velem: &crate::Element<MSG>)
                                          -> CreatedNode<Element>
-        where MSG: Clone + Debug + 'static,
+        where MSG: Clone + 'static,
               DSP: Dispatch<MSG> + 'static
     {
         let document = crate::document();
@@ -204,7 +203,7 @@ impl<T> CreatedNode<T> {
 fn create_closure_wrap<DSP, MSG>(program: &Rc<DSP>,
                                  callback: &Callback<sauron_vdom::Event, MSG>)
                                  -> Closure<Fn(web_sys::Event)>
-    where MSG: Clone + Debug + 'static,
+    where MSG: Clone + 'static,
           DSP: Dispatch<MSG> + 'static + 'static
 {
     let callback_clone = callback.clone();
@@ -295,7 +294,7 @@ fn input_event_mapper(event: &web_sys::Event)
 }
 
 impl<DSP, MSG> DomUpdater<DSP, MSG>
-    where MSG: Clone + Debug + 'static,
+    where MSG: Clone + 'static,
           DSP: Dispatch<MSG> + 'static
 {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.

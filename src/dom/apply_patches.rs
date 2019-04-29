@@ -4,10 +4,8 @@ use crate::{dom,
             Dispatch,
             Patch};
 use js_sys::Function;
-//use std::cmp::min;
 use std::{collections::{HashMap,
                         HashSet},
-          fmt::Debug,
           rc::Rc};
 use wasm_bindgen::{closure::Closure,
                    JsCast,
@@ -26,7 +24,7 @@ pub fn patch<N, DSP, MSG>(program: &Rc<DSP>,
                           patches: &[Patch<MSG>])
                           -> Result<ActiveClosure, JsValue>
     where N: Into<Node>,
-          MSG: Clone + Debug + 'static,
+          MSG: Clone + 'static,
           DSP: Dispatch<MSG> + 'static
 {
     let root_node: Node = root_node.into();
@@ -178,7 +176,7 @@ fn apply_element_patch<DSP, MSG>(program: &Rc<DSP>,
                                  old_closures: &mut ActiveClosure,
                                  patch: &Patch<MSG>)
                                  -> Result<ActiveClosure, JsValue>
-    where MSG: Clone + Debug + 'static,
+    where MSG: Clone + 'static,
           DSP: Dispatch<MSG> + 'static
 {
     let mut active_closures = ActiveClosure::new();
@@ -286,7 +284,7 @@ fn apply_text_patch<DSP, MSG>(program: &Rc<DSP>,
                               node: &Text,
                               patch: &Patch<MSG>)
                               -> Result<(), JsValue>
-    where MSG: Clone + Debug + 'static,
+    where MSG: Clone + 'static,
           DSP: Dispatch<MSG> + 'static
 {
     match patch {
@@ -294,13 +292,16 @@ fn apply_text_patch<DSP, MSG>(program: &Rc<DSP>,
             node.set_node_value(Some(&new_node.text));
         }
         Patch::Replace(_node_idx, new_node) => {
-            let created_node = CreatedNode::<Node>::create_dom_node::<DSP, MSG>(program, new_node);
+            let created_node =
+                CreatedNode::<Node>::create_dom_node::<DSP, MSG>(program,
+                                                                 new_node);
             node.replace_with_with_node_1(&created_node.node)?;
         }
-        other => unreachable!(
-            "Text nodes should only receive ChangeText or Replace patches, not {:?}.",
-            other,
-        ),
+        _other => {
+            unreachable!(
+            "Text nodes should only receive ChangeText or Replace patches."
+        )
+        }
     };
 
     Ok(())
