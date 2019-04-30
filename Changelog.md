@@ -1,3 +1,6 @@
+# 0.7.0
+- MSG don't need to be debug
+
 # 0.6.0
 - Refactor sauron_vdom::Event to cater general usecase for mouse, keyboard and input event
 - Events such as onclick, onkeypress, and oninput are now supplied with: MouseEvent, KeyEvent, and InputEvent

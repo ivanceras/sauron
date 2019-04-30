@@ -1,7 +1,7 @@
 #![deny(warnings)]
-use maplit::btreemap;
 use sauron_vdom::*;
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap,
+          iter::FromIterator};
 
 #[test]
 fn test_replace_node() {
@@ -21,17 +21,18 @@ fn test_replace_node() {
 fn test_simple_diff() {
     let old: Node<&'static str, (), ()> =
         Node::Element(Element { tag: "div",
-                                attrs: btreemap! {
-                                    "id" => "some-id".into(),
-                                    "class" => "some-class".into(),
-                                },
+                                attrs:
+                                    BTreeMap::from_iter(vec![("id",
+                                                          "some-id".into()),
+                                                         ("class",
+                                                          "some-class".into())]),
                                 ..Default::default() });
 
     let new = Node::Element(Element { tag: "div",
-                                      attrs: btreemap! {
-                                          "id" => "some-id".into(),
-                                          "class" => "some-class".into(),
-                                      },
+                                      attrs: BTreeMap::from_iter(vec![
+        ("id", "some-id".into()),
+        ("class", "some-class".into()),
+    ]),
                                       ..Default::default() });
 
     let diff = diff(&old, &new);
@@ -42,42 +43,44 @@ fn test_simple_diff() {
 fn test_class_changed() {
     let old: Node<&'static str, (), ()> =
         Node::Element(Element { tag: "div",
-                                attrs: btreemap! {
-                                    "id" => "some-id".into(),
-                                    "class" => "some-class".into(),
-                                },
+                                attrs:
+                                    BTreeMap::from_iter(vec![("id",
+                                                          "some-id".into()),
+                                                         ("class",
+                                                          "some-class".into())]),
                                 ..Default::default() });
 
     let new = Node::Element(Element { tag: "div",
-                                      attrs: btreemap! {
-                                          "id" => "some-id".into(),
-                                          "class" => "some-class2".to_string().into(),
-                                      },
+                                      attrs: BTreeMap::from_iter(vec![
+        ("id", "some-id".into()),
+        ("class", "some-class2".into()),
+    ]),
                                       ..Default::default() });
 
     let diff = diff(&old, &new);
-    let class2 = Value::String("some-class2".to_string());
+    let class2 = Value::Str("some-class2");
     assert_eq!(diff,
                vec![Patch::AddAttributes(0,
-                                         btreemap! {
-                                         "class" => &class2,
-                                         })])
+                                         BTreeMap::from_iter(vec![("class",
+                                                                   &class2),]))])
 }
 
 #[test]
 fn test_class_removed() {
     let old: Node<&'static str, (), ()> =
         Node::Element(Element { tag: "div",
-                                attrs: btreemap! {
-                                    "id" => "some-id".into(),
-                                    "class" => "some-class".into(),
-                                },
+                                attrs:
+                                    BTreeMap::from_iter(vec![("id",
+                                                          "some-id".into()),
+                                                         ("class",
+                                                          "some-class".into())]),
                                 ..Default::default() });
 
     let new = Node::Element(Element { tag: "div",
-                                      attrs: btreemap! {
-                                          "id" => "some-id".into(),
-                                      },
+                                      attrs: BTreeMap::from_iter(vec![(
+        "id",
+        "some-id".into(),
+    )]),
                                       ..Default::default() });
 
     let diff = diff(&old, &new);
@@ -90,17 +93,16 @@ fn no_change_event() {
     let cb: Callback<(), ()> = func.into();
     let old: Node<&'static str, (), ()> =
         Node::Element(Element { tag: "div",
-                                events: btreemap! {
-                                    "click" => cb.clone(),
-                                },
+                                events: BTreeMap::from_iter(vec![("click",
+                                                              cb.clone())]),
                                 attrs: BTreeMap::new(),
                                 children: vec![],
                                 namespace: None });
 
     let new = Node::Element(Element { tag: "div",
-                                      events: btreemap! {
-                                          "click" => cb,
-                                      },
+                                      events:
+                                          BTreeMap::from_iter(vec![("click",
+                                                                    cb)]),
                                       attrs: BTreeMap::new(),
                                       children: vec![],
                                       namespace: None });
@@ -122,14 +124,16 @@ fn add_event() {
                                 namespace: None });
 
     let new = Node::Element(Element { tag: "div",
-                                      events: btreemap! {
-                                          "click" => cb.clone(),
-                                      },
+                                      events:
+                                          BTreeMap::from_iter(vec![("click",
+                                                                cb.clone())]),
                                       attrs: BTreeMap::new(),
                                       children: vec![],
                                       namespace: None });
 
     let diff = diff(&old, &new);
     assert_eq!(diff,
-               vec![Patch::AddEventListener(0, btreemap! {"click" => &cb})])
+               vec![Patch::AddEventListener(0,
+                                            BTreeMap::from_iter(vec![("click",
+                                                                  &cb)]))])
 }

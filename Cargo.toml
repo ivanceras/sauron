@@ -13,7 +13,6 @@ edition = "2018"
 [dependencies]
 js-sys = "0.3.19"
 sauron_vdom = "0.6.0"
-maplit = "1.0.1"
 wasm-bindgen = "0.2.42"
 lazy_static = "1.3.0"
 

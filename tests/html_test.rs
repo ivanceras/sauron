@@ -1,5 +1,4 @@
 #![feature(type_alias_enum_variants)]
-use maplit::btreemap;
 use sauron::{diff,
              html::{attributes::*,
                     events::*,
@@ -13,16 +12,17 @@ use sauron_vdom::{builder::{attr,
                   Event,
                   Text,
                   Value};
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap,
+          iter::FromIterator};
 
 #[test]
 fn simple_builder() {
     let div: Element<()> =
         Element::new("div").add_attributes([attr("class", "some-class")]);
     let expected: Element<()> = Element { tag: "div",
-                                          attrs: btreemap! {
-                                              "class" => "some-class".into(),
-                                          },
+                                          attrs: BTreeMap::from_iter(vec![
+        ("class", "some-class".into()),
+    ]),
                                           events: BTreeMap::new(),
                                           children: vec![],
                                           namespace: None };
@@ -39,9 +39,9 @@ fn builder_with_event() {
     let div: Element<()> =
         Element::new("div").add_event_listener("click", callback.clone());
     let expected: Element<()> = Element { tag: "div",
-                                          events: btreemap! {
-                                              "click" => callback.clone(),
-                                          },
+                                          events: BTreeMap::from_iter(vec![
+        ("click", callback.clone()),
+    ]),
                                           attrs: BTreeMap::new(),
                                           children: vec![],
                                           namespace: None };
@@ -57,15 +57,14 @@ fn builder_with_children() {
                            .add_children(vec![Node::Text(
             Text { text: "Hello".to_string(), },
         )]);
-    let expected = Element { tag: "div",
-                             attrs: btreemap! {
-                                 "class" => "some-class".into(),
-                             },
-                             children: vec![Node::Text(
-            Text { text: "Hello".to_string() }
-        )],
-                             events: BTreeMap::new(),
-                             namespace: None };
+    let expected =
+        Element { tag: "div",
+                  attrs: BTreeMap::from_iter(vec![("class",
+                                                   "some-class".into()),]),
+                  children: vec![Node::Text(Text { text:
+                                                       "Hello".to_string() })],
+                  events: BTreeMap::new(),
+                  namespace: None };
 
     assert_eq!(div, expected);
 }
@@ -83,19 +82,19 @@ fn div_builder() {
                                  [text("Hello world!")])]);
     println!("{:#?}", div);
     let expected = Node::Element(Element { tag: "div",
-                                           attrs: btreemap! {
-                                              "class" => "some-class".into(),
-                                              "type" => "submit".into(),
-                                           },
-                                           events: btreemap! {
-                                               "click" => cb.clone(),
-                                           },
+                                           attrs: BTreeMap::from_iter(
+        vec![("class", "some-class".into()), ("type", "submit".into())],
+    ),
+                                           events: BTreeMap::from_iter(
+        vec![("click", cb.clone())],
+    ),
                                            namespace: None,
                                            children: vec![Node::Element(
         Element { tag: "div",
-                  attrs: btreemap! {
-                      "class" => "some-class".into()
-                  },
+                  attrs: BTreeMap::from_iter(vec![(
+            "class",
+            "some-class".into(),
+        )]),
                   children: vec![Node::Text(
             Text { text: "Hello world!".into(), }
         )],
@@ -172,9 +171,7 @@ fn remove_nodes() {
 #[test]
 fn add_attributes() {
     let hello: Value = "hello".into();
-    let attributes = btreemap! {
-    "id" => &hello,
-    };
+    let attributes = BTreeMap::from_iter(vec![("id", &hello),]);
 
     let old: Node<()> = div([], []); //{ <div> </div> },
     let new = div([id("hello")], []); //{ <div id="hello"> </div> },
@@ -196,9 +193,7 @@ fn new_different_event_will_replace_what_was_first_set() {
         println!("hello");
     };
     let hello: Callback<sauron_vdom::Event, ()> = func.into();
-    let events = btreemap! {
-    "click" => &hello,
-    };
+    let events = BTreeMap::from_iter(vec![("click", &hello),]);
 
     let old: Node<()> = div([], []);
     let new: Node<()> = div([on("click", hello.clone())], []);
@@ -243,9 +238,7 @@ fn remove_events() {
 #[test]
 fn change_attribute() {
     let changed: Value = "changed".into();
-    let attributes = btreemap! {
-    "id" => &changed,
-    };
+    let attributes = BTreeMap::from_iter(vec![("id", &changed),]);
 
     let old: Node<()> = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
     let new = div([id("changed")], []); //{ <div id="changed"> </div> },

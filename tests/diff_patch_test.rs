@@ -7,8 +7,8 @@ use sauron_vdom::{diff,
                   Patch,
                   Text,
                   Value};
-
-use maplit::btreemap;
+use std::{collections::BTreeMap,
+          iter::FromIterator};
 
 #[test]
 fn truncate_children() {
@@ -50,9 +50,9 @@ fn truncate_children_different_attributes() {
     let class7 = "class7".into();
     assert_eq!(diff(&old, &new),
                vec![Patch::TruncateChildren(0, 3),
-                    Patch::AddAttributes(1, btreemap! { "class" => &class5}),
-                    Patch::AddAttributes(2, btreemap! { "class"=> &class6}),
-                    Patch::AddAttributes(3, btreemap! { "class"=> &class7}),],
+                    Patch::AddAttributes(1, BTreeMap::from_iter(vec![ ("class", &class5)])),
+                    Patch::AddAttributes(2, BTreeMap::from_iter(vec![ ("class",  &class6)])),
+                    Patch::AddAttributes(3, BTreeMap::from_iter(vec![ ("class",  &class7)]))],
                "Should truncate children");
 }
 
@@ -123,9 +123,7 @@ fn remove_nodes() {
 #[test]
 fn add_attributes() {
     let hello: Value = "hello".into();
-    let attributes = btreemap! {
-    "id" => &hello,
-    };
+    let attributes = BTreeMap::from_iter(vec![("id", &hello),]);
 
     let old: Node<()> = div([], []); //{ <div> </div> },
     let new = div([id("hello")], []); //{ <div id="hello"> </div> },
@@ -148,8 +146,8 @@ fn no_replacing_of_events() {
         println!("hello");
     };
     let hello: Callback<sauron::MouseEvent, ()> = func.into();
-    let events = btreemap! {
-    "click" => &hello,
+    let events = BTreeMap::from_iter(vec![
+    "click" ,  &hello,
     };
 
     let old: Node<()> = div([], []);
@@ -191,9 +189,7 @@ fn remove_events() {
 #[test]
 fn change_attribute() {
     let changed: Value = "changed".into();
-    let attributes = btreemap! {
-    "id" => &changed,
-    };
+    let attributes = BTreeMap::from_iter(vec![("id", &changed),]);
 
     let old: Node<()> = div([id("hey-there")], []); //{ <div id="hey-there"></div> },
     let new = div([id("changed")], []); //{ <div id="changed"> </div> },
