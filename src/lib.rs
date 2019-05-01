@@ -1,4 +1,4 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 #![deny(clippy::all)]
 #![feature(type_alias_enum_variants)]
 #![feature(arbitrary_self_types)]
@@ -169,10 +169,10 @@ pub use util::{body,
                request_animation_frame,
                window};
 
-pub use sauron_vdom::{Event,
-                      InputEvent,
+pub use sauron_vdom::{InputEvent,
                       KeyEvent,
                       MouseEvent};
+use web_sys::Event;
 
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users

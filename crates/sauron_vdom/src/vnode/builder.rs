@@ -215,20 +215,21 @@ pub fn on<C, EVENT, MSG>(name: &'static str, c: C) -> Attribute<EVENT, MSG>
                 value: AttribValue::Callback(c.into()) }
 }
 
-/// the func will be used to convert the native browser event and the result will
-/// be fed into the Callback input
-pub fn on_with_mapper<C, F, OUT, EVENT, MSG>(name: &'static str,
-                                             func: F,
-                                             c: C)
-                                             -> Attribute<EVENT, MSG>
-    where C: Into<Callback<OUT, MSG>>,
-          F: Fn(EVENT) -> OUT + 'static,
-          EVENT: Clone,
+/// Create an callback event which has a function
+/// to map web_sys::Event to user event
+pub fn on_with_extractor<EVENT, WEV2UDEF, UDEF, UDEF2MSG, MSG>(
+    name: &'static str,
+    webevent_to_user_def: WEV2UDEF,
+    user_def_to_msg: UDEF2MSG)
+    -> Attribute<EVENT, MSG>
+    where WEV2UDEF: Fn(EVENT) -> UDEF + 'static,
+          UDEF2MSG: Fn(UDEF) -> MSG + 'static,
           MSG: Clone + 'static,
-          OUT: 'static
+          UDEF: 'static,
+          EVENT: Clone + 'static
 {
-    let cb: Callback<OUT, MSG> = c.into();
-    let cb2: Callback<EVENT, MSG> = cb.reform(func);
+    let cb: Callback<EVENT, UDEF> = Callback::from(webevent_to_user_def);
+    let cb2: Callback<EVENT, MSG> = cb.map(user_def_to_msg);
     Attribute { name,
                 value: AttribValue::Callback(cb2) }
 }

@@ -201,7 +201,7 @@ impl<T> CreatedNode<T> {
 
 /// This wrap into a closure the function that is dispatched when the event is triggered.
 fn create_closure_wrap<DSP, MSG>(program: &Rc<DSP>,
-                                 callback: &Callback<sauron_vdom::Event, MSG>)
+                                 callback: &Callback<web_sys::Event, MSG>)
                                  -> Closure<Fn(web_sys::Event)>
     where MSG: Clone + 'static,
           DSP: Dispatch<MSG> + 'static + 'static
@@ -210,87 +210,10 @@ fn create_closure_wrap<DSP, MSG>(program: &Rc<DSP>,
     let program_clone = Rc::clone(&program);
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
-                      let cb_event = convert_event(event);
-                      let msg = callback_clone.emit(cb_event);
+                      //let cb_event = convert_event(event);
+                      let msg = callback_clone.emit(event);
                       program_clone.dispatch(msg);
                   }))
-}
-
-fn convert_event(event: web_sys::Event) -> sauron_vdom::Event {
-    let vdom_event = if let Some(mouse_event) = mouse_event_mapper(&event) {
-        Some(sauron_vdom::Event::MouseEvent(mouse_event))
-    } else if let Some(key_event) = keyboard_event_mapper(&event) {
-        Some(sauron_vdom::Event::KeyEvent(key_event))
-    } else if let Some(input_event) = input_event_mapper(&event) {
-        Some(sauron_vdom::Event::InputEvent(input_event))
-    } else {
-        None
-    };
-
-    vdom_event.unwrap_or_else(|| {
-        panic!("Expecting to be any of the vdom events, instead got: {}",
-               event.type_())
-    })
-}
-
-fn mouse_event_mapper(event: &web_sys::Event)
-                      -> Option<sauron_vdom::MouseEvent> {
-    let mouse_event: Option<&web_sys::MouseEvent> = event.dyn_ref();
-    mouse_event.map(|mouse| {
-                   let coordinate =
-                       Coordinate { client_x: mouse.client_x(),
-                                    client_y: mouse.client_y(),
-                                    movement_x: mouse.movement_x(),
-                                    movement_y: mouse.movement_y(),
-                                    offset_x: mouse.offset_x(),
-                                    offset_y: mouse.offset_y(),
-                                    screen_x: mouse.screen_x(),
-                                    screen_y: mouse.screen_y(),
-                                    x: mouse.x(),
-                                    y: mouse.y() };
-                   let modifier = Modifier { alt_key: mouse.alt_key(),
-                                             ctrl_key: mouse.ctrl_key(),
-                                             meta_key: mouse.meta_key(),
-                                             shift_key: mouse.shift_key() };
-                   let buttons = Buttons { button: mouse.button(),
-                                           buttons: mouse.buttons() };
-                   sauron_vdom::MouseEvent::new(coordinate, modifier, buttons)
-               })
-}
-
-fn keyboard_event_mapper(event: &web_sys::Event)
-                         -> Option<sauron_vdom::KeyEvent> {
-    let key_event: Option<&web_sys::KeyboardEvent> = event.dyn_ref();
-    key_event.map(|key_event| {
-                 let modifier = Modifier { alt_key: key_event.alt_key(),
-                                           ctrl_key: key_event.ctrl_key(),
-                                           meta_key: key_event.meta_key(),
-                                           shift_key: key_event.shift_key() };
-                 sauron_vdom::KeyEvent { key: key_event.key(),
-                                         modifier,
-                                         repeat: key_event.repeat(),
-                                         location: key_event.location() }
-             })
-}
-
-fn input_event_mapper(event: &web_sys::Event)
-                      -> Option<sauron_vdom::InputEvent> {
-    let target: Option<EventTarget> = event.target();
-    if let Some(target) = target {
-        let input: Option<&HtmlInputElement> = target.dyn_ref();
-        let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
-        if input.is_some() {
-            input.map(|input| sauron_vdom::InputEvent { value: input.value() })
-        } else if textarea.is_some() {
-            textarea.map(|textarea| {
-                        sauron_vdom::InputEvent { value: textarea.value() }
-                    })
-        } else {
-            None
-        }
-    } else {
-        None
-    }
 }
 
 impl<DSP, MSG> DomUpdater<DSP, MSG>

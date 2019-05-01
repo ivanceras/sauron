@@ -16,9 +16,12 @@ pub use vnode::{Element,
                 Text,
                 Value};
 
+//TODO: expose only event
 pub use vnode::event::{Buttons,
                        Coordinate,
                        InputEvent,
                        KeyEvent,
                        Modifier,
                        MouseEvent};
+
+pub use vnode::event;

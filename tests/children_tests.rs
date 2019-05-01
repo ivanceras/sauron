@@ -1,11 +1,11 @@
 #![deny(warnings)]
-use sauron::{svg::{attributes::*,
-                   *},
-             Node};
+use sauron::svg::{attributes::*,
+                  *};
+use sauron_vdom::Node;
 
 #[test]
 fn children() {
-    let lines: Vec<Node<()>> =
+    let lines: Vec<Node<&'static str, (), ()>> =
         (0..5).map(|_| line([x1(100), x2(100), y1(100), y2(200)], []))
               .collect();
     let html = svg([], [circle([], [])]).children(lines);

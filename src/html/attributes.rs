@@ -231,3 +231,14 @@ pub fn styles_flag<V, MSG, P>(trio: P) -> Attribute<MSG>
     }
     style(style_list.join(""))
 }
+
+/// a helper function which append `px` into a value
+/// Example:
+/// ```
+/// style("width", px(100))
+/// ```
+pub fn px<V>(v: V) -> String
+    where V: Into<Value> + Clone
+{
+    format!("{}px", v.into())
+}

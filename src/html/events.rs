@@ -1,41 +1,76 @@
 //! https://developer.mozilla.org/en-US/docs/Web/Events
-pub use sauron_vdom::builder::{on,
-                               on_with_mapper};
-use sauron_vdom::Callback;
-
 use mapper::*;
+pub use sauron_vdom::builder::{on,
+                               on_with_extractor};
+use sauron_vdom::Callback;
+use wasm_bindgen::JsCast;
 
 pub mod mapper {
 
-    /// extract the mouse x and y value regardless of what kind of mouse event
-    pub fn mouse_event_mapper(event: sauron_vdom::Event)
+    use sauron_vdom::{event::Buttons,
+                      Coordinate,
+                      Modifier};
+    use wasm_bindgen::JsCast;
+    use web_sys::{EventTarget,
+                  HtmlInputElement,
+                  HtmlTextAreaElement};
+
+    pub fn mouse_event_mapper(event: web_sys::Event)
                               -> sauron_vdom::MouseEvent {
-        if let sauron_vdom::Event::MouseEvent(mouse_event) = event {
-            mouse_event
-        } else {
-            panic!("Expecting a mouse event")
-        }
+        let mouse: &web_sys::MouseEvent =
+            event.dyn_ref().expect("Unable to cast to mouse event");
+        let coordinate = Coordinate { client_x: mouse.client_x(),
+                                      client_y: mouse.client_y(),
+                                      movement_x: mouse.movement_x(),
+                                      movement_y: mouse.movement_y(),
+                                      offset_x: mouse.offset_x(),
+                                      offset_y: mouse.offset_y(),
+                                      screen_x: mouse.screen_x(),
+                                      screen_y: mouse.screen_y(),
+                                      x: mouse.x(),
+                                      y: mouse.y() };
+        let modifier = Modifier { alt_key: mouse.alt_key(),
+                                  ctrl_key: mouse.ctrl_key(),
+                                  meta_key: mouse.meta_key(),
+                                  shift_key: mouse.shift_key() };
+        let buttons = Buttons { button: mouse.button(),
+                                buttons: mouse.buttons() };
+        sauron_vdom::MouseEvent::new(coordinate, modifier, buttons)
     }
 
-    /// extract the input element value
-    pub fn input_value_mapper(event: sauron_vdom::Event)
-                              -> sauron_vdom::InputEvent {
-        if let sauron_vdom::Event::InputEvent(input_event) = event {
-            input_event
-        } else {
-            panic!("Expecting an input event")
-        }
-    }
-
-    /// extract the pressed key from a keyboard event
-    pub fn keyboard_event_mapper(event: sauron_vdom::Event)
+    pub fn keyboard_event_mapper(event: web_sys::Event)
                                  -> sauron_vdom::KeyEvent {
-        if let sauron_vdom::Event::KeyEvent(key_event) = event {
-            key_event
-        } else {
-            panic!("Expecting a key event")
-        }
+        let key_event: &web_sys::KeyboardEvent =
+            event.dyn_ref().expect("Unable to cast as key event");
+        let modifier = Modifier { alt_key: key_event.alt_key(),
+                                  ctrl_key: key_event.ctrl_key(),
+                                  meta_key: key_event.meta_key(),
+                                  shift_key: key_event.shift_key() };
+        sauron_vdom::KeyEvent { key: key_event.key(),
+                                modifier,
+                                repeat: key_event.repeat(),
+                                location: key_event.location() }
     }
+
+    pub fn input_event_mapper(event: web_sys::Event)
+                              -> sauron_vdom::InputEvent {
+        let target: EventTarget =
+            event.target().expect("Unable to get event target");
+        let input: Option<&HtmlInputElement> = target.dyn_ref();
+        let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
+        let input_event = if input.is_some() {
+            input.map(|input| sauron_vdom::InputEvent { value: input.value() })
+        } else if textarea.is_some() {
+            textarea.map(|textarea| {
+                        sauron_vdom::InputEvent { value: textarea.value() }
+                    })
+        } else {
+            None
+        };
+
+        input_event.expect("Expecting an input event from input element or textarea element")
+    }
+
 }
 
 macro_rules! declare_events {
@@ -47,11 +82,11 @@ macro_rules! declare_events {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<F, MSG>(f: F) -> crate::Attribute<MSG>
-                where F: Into<Callback<$ret, MSG>>,
+            pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
+                where CB: Fn($ret)-> MSG +'static,
                       MSG: Clone + 'static,
                 {
-                    on_with_mapper(stringify!($event), |event|{$mapper(event)}, f)
+                    on_with_extractor(stringify!($event), |event|$mapper(event), cb)
                 }
          )*
     };
@@ -64,14 +99,29 @@ macro_rules! declare_events {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<F, MSG>(f: F) -> crate::Attribute<MSG>
-                where F: Into<Callback<(), MSG>>,
+            pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
+                where CB: Fn(()) -> MSG + 'static,
                       MSG: Clone + 'static,
                 {
-                    on_with_mapper(stringify!($event), |_|{}, f)
+                    on_with_extractor(stringify!($event), |_|{}, cb)
                 }
          )*
     }
+}
+
+pub fn onscroll<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
+    where CB: Fn((i32, i32)) -> MSG + 'static,
+          MSG: Clone + 'static
+{
+    let webevent_to_scroll_offset = |event: web_sys::Event| {
+        let target = event.target().expect("can't get target");
+        let element: &web_sys::Element =
+            target.dyn_ref().expect("Cant cast to Element");
+        let scroll_top = element.scroll_top();
+        let scroll_left = element.scroll_left();
+        (scroll_top, scroll_left)
+    };
+    on_with_extractor("scroll", webevent_to_scroll_offset, cb)
 }
 
 // Mouse events
@@ -114,8 +164,8 @@ declare_events! {
 }
 
 declare_events! {
-    oninput : input => |sauron_vdom::InputEvent| input_value_mapper;
-    onchange : change => | sauron_vdom::InputEvent | input_value_mapper;
+    oninput : input => |sauron_vdom::InputEvent| input_event_mapper;
+    onchange : change => | sauron_vdom::InputEvent | input_event_mapper;
 }
 declare_events! {
     onbroadcast : broadcast;
