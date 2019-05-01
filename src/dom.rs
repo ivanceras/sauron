@@ -201,7 +201,7 @@ impl<T> CreatedNode<T> {
 
 /// This wrap into a closure the function that is dispatched when the event is triggered.
 fn create_closure_wrap<DSP, MSG>(program: &Rc<DSP>,
-                                 callback: &Callback<web_sys::Event, MSG>)
+                                 callback: &Callback<crate::Event, MSG>)
                                  -> Closure<Fn(web_sys::Event)>
     where MSG: Clone + 'static,
           DSP: Dispatch<MSG> + 'static + 'static
@@ -210,8 +210,8 @@ fn create_closure_wrap<DSP, MSG>(program: &Rc<DSP>,
     let program_clone = Rc::clone(&program);
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
-                      //let cb_event = convert_event(event);
-                      let msg = callback_clone.emit(event);
+                      let cb_event = crate::Event(event);
+                      let msg = callback_clone.emit(cb_event);
                       program_clone.dispatch(msg);
                   }))
 }

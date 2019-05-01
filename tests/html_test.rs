@@ -9,11 +9,12 @@ use sauron::{diff,
 use sauron_vdom::{builder::{attr,
                             text},
                   Callback,
-                  Event,
                   Text,
                   Value};
 use std::{collections::BTreeMap,
           iter::FromIterator};
+
+use sauron::Event;
 
 #[test]
 fn simple_builder() {
@@ -192,7 +193,7 @@ fn new_different_event_will_replace_what_was_first_set() {
     let func = |_| {
         println!("hello");
     };
-    let hello: Callback<sauron_vdom::Event, ()> = func.into();
+    let hello: Callback<Event, ()> = func.into();
     let events = BTreeMap::from_iter(vec![("click", &hello),]);
 
     let old: Node<()> = div([], []);
@@ -201,7 +202,7 @@ fn new_different_event_will_replace_what_was_first_set() {
                vec![Patch::AddEventListener(0, events.clone())],
                "Add event listener",);
 
-    let hello2: Callback<sauron_vdom::Event, ()> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
+    let hello2: Callback<Event, ()> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
     assert_ne!(hello, hello2, "Same function, different Rc::new()");
     let old = div([on("click", hello.clone())], []);
     let new = div([on("click", hello2.clone())], []);

@@ -15,10 +15,10 @@ pub mod mapper {
                   HtmlInputElement,
                   HtmlTextAreaElement};
 
-    pub fn mouse_event_mapper(event: web_sys::Event)
+    pub fn mouse_event_mapper(event: crate::Event)
                               -> sauron_vdom::MouseEvent {
         let mouse: &web_sys::MouseEvent =
-            event.dyn_ref().expect("Unable to cast to mouse event");
+            event.0.dyn_ref().expect("Unable to cast to mouse event");
         let coordinate = Coordinate { client_x: mouse.client_x(),
                                       client_y: mouse.client_y(),
                                       movement_x: mouse.movement_x(),
@@ -38,10 +38,10 @@ pub mod mapper {
         sauron_vdom::MouseEvent::new(coordinate, modifier, buttons)
     }
 
-    pub fn keyboard_event_mapper(event: web_sys::Event)
+    pub fn keyboard_event_mapper(event: crate::Event)
                                  -> sauron_vdom::KeyEvent {
         let key_event: &web_sys::KeyboardEvent =
-            event.dyn_ref().expect("Unable to cast as key event");
+            event.0.dyn_ref().expect("Unable to cast as key event");
         let modifier = Modifier { alt_key: key_event.alt_key(),
                                   ctrl_key: key_event.ctrl_key(),
                                   meta_key: key_event.meta_key(),
@@ -52,10 +52,10 @@ pub mod mapper {
                                 location: key_event.location() }
     }
 
-    pub fn input_event_mapper(event: web_sys::Event)
+    pub fn input_event_mapper(event: crate::Event)
                               -> sauron_vdom::InputEvent {
         let target: EventTarget =
-            event.target().expect("Unable to get event target");
+            event.0.target().expect("Unable to get event target");
         let input: Option<&HtmlInputElement> = target.dyn_ref();
         let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
         let input_event = if input.is_some() {
@@ -113,8 +113,8 @@ pub fn onscroll<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
     where CB: Fn((i32, i32)) -> MSG + 'static,
           MSG: Clone + 'static
 {
-    let webevent_to_scroll_offset = |event: web_sys::Event| {
-        let target = event.target().expect("can't get target");
+    let webevent_to_scroll_offset = |event: crate::Event| {
+        let target = event.0.target().expect("can't get target");
         let element: &web_sys::Element =
             target.dyn_ref().expect("Cant cast to Element");
         let scroll_top = element.scroll_top();

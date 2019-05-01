@@ -234,7 +234,7 @@ pub fn styles_flag<V, MSG, P>(trio: P) -> Attribute<MSG>
 
 /// a helper function which append `px` into a value
 /// Example:
-/// ```
+/// ```ignore
 /// style("width", px(100))
 /// ```
 pub fn px<V>(v: V) -> String
