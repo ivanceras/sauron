@@ -2,8 +2,6 @@ use sauron::{html::{attributes::*,
                     events::*,
                     *},
              Component,
-             InputEvent,
-             KeyEvent,
              Node};
 
 #[derive(Clone, Debug)]

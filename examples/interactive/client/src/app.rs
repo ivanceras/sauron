@@ -7,9 +7,6 @@ use sauron::{html::{attributes::*,
 use wasm_bindgen::{self,
                    prelude::*};
 
-use sauron::{InputEvent,
-             MouseEvent};
-
 #[derive(Debug, Clone)]
 pub enum Msg {
     Click,

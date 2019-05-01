@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 #![deny(clippy::all)]
 #![feature(type_alias_enum_variants)]
 #![feature(arbitrary_self_types)]
@@ -169,20 +169,16 @@ pub use util::{body,
                request_animation_frame,
                window};
 
-pub use sauron_vdom::{InputEvent,
-                      KeyEvent,
-                      MouseEvent};
-//use web_sys::Event;
-use wasm_bindgen::{JsValue,JsCast};
+use wasm_bindgen::{JsCast,
+                   JsValue};
 
 /// This needs wrapping only so that we can implement
 /// PartialEq for testing purposes
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct Event(web_sys::Event);
-impl PartialEq for Event{
-
+impl PartialEq for Event {
     fn eq(&self, other: &Self) -> bool {
-        let js_value: Option<&JsValue> = self.0.dyn_ref(); 
+        let js_value: Option<&JsValue> = self.0.dyn_ref();
         let other_value: Option<&JsValue> = other.0.dyn_ref();
         js_value == other_value
     }

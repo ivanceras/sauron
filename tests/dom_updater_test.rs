@@ -55,7 +55,7 @@ fn updates_active_closure_on_replace() {
 
     let replace_node =
         input([id(elem_id),
-               oninput(move |event: sauron_vdom::InputEvent| {
+               oninput(move |event: sauron_vdom::event::InputEvent| {
                    *text_clone.borrow_mut() = event.value;
                }),
                value("End Text")],
@@ -101,7 +101,7 @@ fn updates_active_closures_on_append() {
         let append_node =
             div([],
                 [input([id(elem_id),
-                        oninput(move |event: sauron_vdom::InputEvent| {
+                        oninput(move |event: sauron_vdom::event::InputEvent| {
                             *text_clone.borrow_mut() = event.value;
                         }),
                         value("End Text")],

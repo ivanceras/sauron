@@ -14,7 +14,6 @@ use sauron::{dom::DomUpdater,
              Node};
 use std::{cell::RefCell,
           collections::BTreeMap};
-use web_sys::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -29,13 +28,13 @@ fn on_input() {
     let input: Node<()> =
         input([// On input we'll set our Rc<RefCell<String>> value to the input elements value
                id(elem_id),
-               oninput(move |event: sauron_vdom::InputEvent| {
+               oninput(move |event: sauron_vdom::event::InputEvent| {
                    *text_clone.borrow_mut() = event.value;
                }),
                value("End Text")],
               []);
 
-    let input_event = InputEvent::new("input").unwrap();
+    let input_event = web_sys::InputEvent::new("input").unwrap();
 
     let body = sauron::body();
     let simple_program = simple_program();
@@ -68,12 +67,12 @@ fn added_event() {
     let new = input([// On input we'll set our Rc<RefCell<String>> value to the input elements value
                      id(elem_id),
                      value("End Text"),
-                     oninput(move |event: sauron_vdom::InputEvent| {
+                     oninput(move |event: sauron_vdom::event::InputEvent| {
                          *text_clone.borrow_mut() = event.value;
                      })],
                     []);
 
-    let input_event = InputEvent::new("input").unwrap();
+    let input_event = web_sys::InputEvent::new("input").unwrap();
 
     let body = sauron::body();
     let simple_program = simple_program();
@@ -105,7 +104,7 @@ fn remove_event() {
         input([// On input we'll set our Rc<RefCell<String>> value to the input elements value
                id(elem_id),
                value("End Text"),
-               oninput(move |event: sauron_vdom::InputEvent| {
+               oninput(move |event: sauron_vdom::event::InputEvent| {
                    *text_clone.borrow_mut() = event.value;
                })],
               []);
@@ -115,7 +114,7 @@ fn remove_event() {
                      value("End Text")],
                     []);
 
-    let input_event = InputEvent::new("input").unwrap();
+    let input_event = web_sys::InputEvent::new("input").unwrap();
 
     let body = sauron::body();
     let simple_program = simple_program();

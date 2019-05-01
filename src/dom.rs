@@ -2,10 +2,7 @@ use crate::Dispatch;
 use apply_patches::patch;
 use sauron_vdom::{self,
                   diff,
-                  Buttons,
-                  Callback,
-                  Coordinate,
-                  Modifier};
+                  Callback};
 use std::{collections::HashMap,
           marker::PhantomData,
           ops::Deref,
@@ -16,8 +13,6 @@ use wasm_bindgen::{closure::Closure,
 use web_sys::{self,
               Element,
               EventTarget,
-              HtmlInputElement,
-              HtmlTextAreaElement,
               Node,
               Text};
 

@@ -1,22 +1,30 @@
 //! https://developer.mozilla.org/en-US/docs/Web/Events
 use mapper::*;
-pub use sauron_vdom::builder::{on,
-                               on_with_extractor};
-use sauron_vdom::Callback;
+pub use sauron_vdom::{builder::{on,
+                                on_with_extractor},
+                      event::{Buttons,
+                              Coordinate,
+                              InputEvent,
+                              KeyEvent,
+                              Modifier,
+                              MouseEvent},
+                      Callback};
 use wasm_bindgen::JsCast;
 
 pub mod mapper {
 
-    use sauron_vdom::{event::Buttons,
-                      Coordinate,
-                      Modifier};
+    use sauron_vdom::event::{Buttons,
+                             Coordinate,
+                             InputEvent,
+                             KeyEvent,
+                             Modifier,
+                             MouseEvent};
     use wasm_bindgen::JsCast;
     use web_sys::{EventTarget,
                   HtmlInputElement,
                   HtmlTextAreaElement};
 
-    pub fn mouse_event_mapper(event: crate::Event)
-                              -> sauron_vdom::MouseEvent {
+    pub fn mouse_event_mapper(event: crate::Event) -> MouseEvent {
         let mouse: &web_sys::MouseEvent =
             event.0.dyn_ref().expect("Unable to cast to mouse event");
         let coordinate = Coordinate { client_x: mouse.client_x(),
@@ -35,35 +43,31 @@ pub mod mapper {
                                   shift_key: mouse.shift_key() };
         let buttons = Buttons { button: mouse.button(),
                                 buttons: mouse.buttons() };
-        sauron_vdom::MouseEvent::new(coordinate, modifier, buttons)
+        MouseEvent::new(coordinate, modifier, buttons)
     }
 
-    pub fn keyboard_event_mapper(event: crate::Event)
-                                 -> sauron_vdom::KeyEvent {
+    pub fn keyboard_event_mapper(event: crate::Event) -> KeyEvent {
         let key_event: &web_sys::KeyboardEvent =
             event.0.dyn_ref().expect("Unable to cast as key event");
         let modifier = Modifier { alt_key: key_event.alt_key(),
                                   ctrl_key: key_event.ctrl_key(),
                                   meta_key: key_event.meta_key(),
                                   shift_key: key_event.shift_key() };
-        sauron_vdom::KeyEvent { key: key_event.key(),
-                                modifier,
-                                repeat: key_event.repeat(),
-                                location: key_event.location() }
+        KeyEvent { key: key_event.key(),
+                   modifier,
+                   repeat: key_event.repeat(),
+                   location: key_event.location() }
     }
 
-    pub fn input_event_mapper(event: crate::Event)
-                              -> sauron_vdom::InputEvent {
+    pub fn input_event_mapper(event: crate::Event) -> InputEvent {
         let target: EventTarget =
             event.0.target().expect("Unable to get event target");
         let input: Option<&HtmlInputElement> = target.dyn_ref();
         let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
         let input_event = if input.is_some() {
-            input.map(|input| sauron_vdom::InputEvent { value: input.value() })
+            input.map(|input| InputEvent { value: input.value() })
         } else if textarea.is_some() {
-            textarea.map(|textarea| {
-                        sauron_vdom::InputEvent { value: textarea.value() }
-                    })
+            textarea.map(|textarea| InputEvent { value: textarea.value() })
         } else {
             None
         };
@@ -126,29 +130,29 @@ pub fn onscroll<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
 
 // Mouse events
 declare_events! {
-    onclick : click => |sauron_vdom::MouseEvent| mouse_event_mapper;
-    onauxclick : auxclick => |sauron_vdom::MouseEvent | mouse_event_mapper;
-    oncontextmenu : contextmenu => |sauron_vdom::MouseEvent| mouse_event_mapper ;
-    ondblclick  : dblclick =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    onmousedown : mousedown =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    onmouseenter : mouseenter =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    onmouseleave : mouseleave =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    onmousemove : mousemove =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    onmouseover : mouseover =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    onmouseout : mouseout =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    onmouseup : mouseup =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    onpointerlockchange : pointerlockchange =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    onpointerlockerror : pointerlockerror =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    onselect : select =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    onwheel : wheel =>|sauron_vdom::MouseEvent | mouse_event_mapper;
-    ondoubleclick : doubleclick =>|sauron_vdom::MouseEvent | mouse_event_mapper;
+    onclick : click => |MouseEvent| mouse_event_mapper;
+    onauxclick : auxclick => |MouseEvent | mouse_event_mapper;
+    oncontextmenu : contextmenu => |MouseEvent| mouse_event_mapper ;
+    ondblclick  : dblclick =>|MouseEvent | mouse_event_mapper;
+    onmousedown : mousedown =>|MouseEvent | mouse_event_mapper;
+    onmouseenter : mouseenter =>|MouseEvent | mouse_event_mapper;
+    onmouseleave : mouseleave =>|MouseEvent | mouse_event_mapper;
+    onmousemove : mousemove =>|MouseEvent | mouse_event_mapper;
+    onmouseover : mouseover =>|MouseEvent | mouse_event_mapper;
+    onmouseout : mouseout =>|MouseEvent | mouse_event_mapper;
+    onmouseup : mouseup =>|MouseEvent | mouse_event_mapper;
+    onpointerlockchange : pointerlockchange =>|MouseEvent | mouse_event_mapper;
+    onpointerlockerror : pointerlockerror =>|MouseEvent | mouse_event_mapper;
+    onselect : select =>|MouseEvent | mouse_event_mapper;
+    onwheel : wheel =>|MouseEvent | mouse_event_mapper;
+    ondoubleclick : doubleclick =>|MouseEvent | mouse_event_mapper;
 }
 
 // keyboard events
 declare_events! {
-    onkeydown : keydown =>|sauron_vdom::KeyEvent| keyboard_event_mapper;
-    onkeypress : keypress =>|sauron_vdom::KeyEvent| keyboard_event_mapper;
-    onkeyup : keyup =>|sauron_vdom::KeyEvent| keyboard_event_mapper;
+    onkeydown : keydown =>|KeyEvent| keyboard_event_mapper;
+    onkeypress : keypress =>|KeyEvent| keyboard_event_mapper;
+    onkeyup : keyup =>|KeyEvent| keyboard_event_mapper;
 }
 
 // focus events
@@ -164,8 +168,8 @@ declare_events! {
 }
 
 declare_events! {
-    oninput : input => |sauron_vdom::InputEvent| input_event_mapper;
-    onchange : change => | sauron_vdom::InputEvent | input_event_mapper;
+    oninput : input => |InputEvent| input_event_mapper;
+    onchange : change => | InputEvent | input_event_mapper;
 }
 declare_events! {
     onbroadcast : broadcast;
