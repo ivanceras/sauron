@@ -25,6 +25,11 @@ pub fn performance() -> web_sys::Performance {
             .expect("should have performance on window")
 }
 
+pub fn now() -> f64 {
+    performance().now()
+}
+
+
 #[inline]
 pub fn log<S: Into<String>>(s: S) {
     web_sys::console::log_1(&s.into().into());

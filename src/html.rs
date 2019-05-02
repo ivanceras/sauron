@@ -551,3 +551,15 @@ declare_tags! {
     /// element.
     template;
 }
+
+/// A help function which render the view when the condition is met, otherwise
+/// just display a text("")
+pub fn view_if<MSG>(flag: bool, node: Node<MSG>) -> Node<MSG>
+    where MSG: Clone
+{
+    if flag {
+        node
+    } else {
+        text("")
+    }
+}

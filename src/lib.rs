@@ -166,6 +166,7 @@ pub use util::{body,
                document,
                log,
                performance,
+               now,
                request_animation_frame,
                window};
 
