@@ -165,8 +165,8 @@ pub use sauron_vdom::{diff,
 pub use util::{body,
                document,
                log,
-               performance,
                now,
+               performance,
                request_animation_frame,
                window};
 

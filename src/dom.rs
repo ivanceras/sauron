@@ -41,7 +41,7 @@ pub(self) const DATA_SAURON_VDOM_ID: &str = "data-sauron-vdom-id";
 ///   At it stands now this hashmap will grow anytime a new element with closures is
 ///   appended or replaced and we will never free those closures.
 pub type ActiveClosure =
-    HashMap<u32, Vec<(&'static str, Closure<Fn(web_sys::Event)>)>>;
+    HashMap<u32, Vec<(&'static str, Closure<FnMut(web_sys::Event)>)>>;
 
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
@@ -136,7 +136,7 @@ impl<T> CreatedNode<T> {
             for (event_str, callback) in velem.events.iter() {
                 let current_elm: &EventTarget =
                     element.dyn_ref().expect("unable to cast to event targe");
-                let closure_wrap: Closure<Fn(web_sys::Event)> =
+                let closure_wrap: Closure<FnMut(web_sys::Event)> =
                     create_closure_wrap(program, &callback);
                 current_elm
                     .add_event_listener_with_callback(
@@ -197,7 +197,7 @@ impl<T> CreatedNode<T> {
 /// This wrap into a closure the function that is dispatched when the event is triggered.
 fn create_closure_wrap<DSP, MSG>(program: &Rc<DSP>,
                                  callback: &Callback<crate::Event, MSG>)
-                                 -> Closure<Fn(web_sys::Event)>
+                                 -> Closure<FnMut(web_sys::Event)>
     where MSG: Clone + 'static,
           DSP: Dispatch<MSG> + 'static + 'static
 {

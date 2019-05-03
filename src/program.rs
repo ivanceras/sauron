@@ -58,9 +58,16 @@ impl<APP, MSG> Program<APP, MSG>
 
     /// This is called when an event is triggered in the html DOM.
     fn dispatch_inner(self: &Rc<Self>, msg: MSG) {
+        let t1 = crate::now();
         self.app.borrow_mut().update(msg);
+        let t2 = crate::now();
+        crate::log!("app update took: {}ms", t2 - t1);
         let view = self.app.borrow().view();
+        let t3 = crate::now();
+        crate::log!("app view took: {}ms", t3 - t2);
         self.dom_updater.borrow_mut().update(self, view);
+        let t4 = crate::now();
+        crate::log!("dom update took: {}ms", t4 - t3);
     }
 }
 
