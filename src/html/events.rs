@@ -85,7 +85,6 @@ macro_rules! declare_events {
      ) => {
         $(
             $(#[$attr])*
-            #[inline]
             pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
                 where CB: Fn($ret)-> MSG +'static,
                       MSG: Clone + 'static,
@@ -102,7 +101,6 @@ macro_rules! declare_events {
      ) => {
         $(
             $(#[$attr])*
-            #[inline]
             pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
                 where CB: Fn(()) -> MSG + 'static,
                       MSG: Clone + 'static,
@@ -126,6 +124,22 @@ pub fn onscroll<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
         (scroll_top, scroll_left)
     };
     on_with_extractor("scroll", webevent_to_scroll_offset, cb)
+}
+
+pub fn onresize<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
+    where CB: Fn((i32, i32)) -> MSG + 'static,
+          MSG: Clone + 'static
+{
+    crate::log("resizing..");
+    let target_size_fn = |event: crate::Event| {
+        let target = event.0.target().expect("can't get target");
+        let element: &web_sys::Element =
+            target.dyn_ref().expect("Cant cast to Element");
+        let target_width = element.client_width();
+        let target_height = element.client_height();
+        (target_width, target_height)
+    };
+    on_with_extractor("resize", target_size_fn, cb)
 }
 
 // Mouse events

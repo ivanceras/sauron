@@ -29,12 +29,10 @@ pub fn now() -> f64 {
     performance().now()
 }
 
-#[inline]
 pub fn log<S: Into<String>>(s: S) {
     web_sys::console::log_1(&s.into().into());
 }
 
-#[inline]
 #[macro_export]
 macro_rules! log {
     ($($t:tt)*) => ($crate::log(format!($($t)*)))

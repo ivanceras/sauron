@@ -95,20 +95,17 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
           MSG: Clone,
           EVENT: Clone
 {
-    #[inline]
     pub fn new(tag: T) -> Self {
         Self::with_children(tag, [])
     }
 
     /// Create a Element using the supplied tag name
-    #[inline]
     pub fn with_children<C>(tag: T, children: C) -> Self
         where C: AsRef<[Node<T, EVENT, MSG>]>
     {
         Self::with_children_and_maybe_ns(tag, children, None)
     }
 
-    #[inline]
     pub fn with_children_and_maybe_ns<C>(tag: T,
                                          children: C,
                                          ns: Option<&'static str>)

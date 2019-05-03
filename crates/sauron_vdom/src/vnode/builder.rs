@@ -151,7 +151,6 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
 ///    );
 /// }
 /// ```
-#[inline]
 pub fn element<A, C, T, EVENT, MSG>(tag: T,
                                     attrs: A,
                                     children: C)
@@ -164,7 +163,6 @@ pub fn element<A, C, T, EVENT, MSG>(tag: T,
 {
     Node::Element(Element::with_children(tag, children).add_attributes(attrs))
 }
-#[inline]
 pub fn element_ns<A, C, T, EVENT, MSG>(tag: T,
                                        namespace: &'static str,
                                        attrs: A,
@@ -181,7 +179,6 @@ pub fn element_ns<A, C, T, EVENT, MSG>(tag: T,
 }
 
 /// Create a textnode element
-#[inline]
 pub fn text<V, T, EVENT, MSG>(v: V) -> Node<T, EVENT, MSG>
     where V: ToString,
           EVENT: Clone,
@@ -191,7 +188,6 @@ pub fn text<V, T, EVENT, MSG>(v: V) -> Node<T, EVENT, MSG>
 }
 
 /// Create an attribute
-#[inline]
 pub fn attr<V, EVENT, MSG>(name: &'static str, v: V) -> Attribute<EVENT, MSG>
     where V: Into<Value>,
           EVENT: Clone,
@@ -208,7 +204,6 @@ pub fn attr<V, EVENT, MSG>(name: &'static str, v: V) -> Attribute<EVENT, MSG>
 /// FIXME: callbacks are recrated eveytime, therefore they are not
 /// equivalent when compared since function contents
 /// can not be compared. Only Rc's are compared.
-#[inline]
 pub fn on<C, EVENT, MSG>(name: &'static str, c: C) -> Attribute<EVENT, MSG>
     where C: Into<Callback<EVENT, MSG>>,
           EVENT: Clone,
