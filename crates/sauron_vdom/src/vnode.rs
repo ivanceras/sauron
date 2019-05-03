@@ -90,20 +90,39 @@ pub struct Text {
     pub text: String,
 }
 
-impl<T, EVENT, MSG> Element<T, EVENT, MSG> {
-    /// Create a Element using the supplied tag name
+impl<T, EVENT, MSG> Element<T, EVENT, MSG>
+    where T: Clone,
+          MSG: Clone,
+          EVENT: Clone
+{
+    #[inline]
     pub fn new(tag: T) -> Self {
+        Self::with_children(tag, [])
+    }
+
+    /// Create a Element using the supplied tag name
+    #[inline]
+    pub fn with_children<C>(tag: T, children: C) -> Self
+        where C: AsRef<[Node<T, EVENT, MSG>]>
+    {
+        Self::with_children_and_maybe_ns(tag, children, None)
+    }
+
+    #[inline]
+    pub fn with_children_and_maybe_ns<C>(tag: T,
+                                         children: C,
+                                         ns: Option<&'static str>)
+                                         -> Self
+        where C: AsRef<[Node<T, EVENT, MSG>]>
+    {
         Element { tag,
                   attrs: BTreeMap::new(),
                   events: BTreeMap::new(),
-                  children: vec![],
-                  namespace: None }
-    }
-
-    /// set the namespace of this element
-    pub fn namespace(mut self, namespace: &'static str) -> Self {
-        self.namespace = Some(namespace);
-        self
+                  children: children.as_ref()
+                                    .into_iter()
+                                    .map(|c| c.clone())
+                                    .collect::<Vec<Node<T, EVENT, MSG>>>(),
+                  namespace: ns }
     }
 }
 

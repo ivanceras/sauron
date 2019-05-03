@@ -51,9 +51,7 @@ impl<T, EVENT, MSG> Node<T, EVENT, MSG>
         where C: AsRef<[Node<T, EVENT, MSG>]>
     {
         if let Some(element) = self.as_element() {
-            for child in children.as_ref() {
-                element.children.push(child.clone());
-            }
+            element.add_children_ref(children);
         }
         self
     }
@@ -83,7 +81,7 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
 
     /// add the attribute values or events callback
     /// into this element
-    pub fn add_attributes_ref<A>(&mut self, attrs: A) -> &mut Self
+    fn add_attributes_ref<A>(&mut self, attrs: A) -> &mut Self
         where A: AsRef<[Attribute<EVENT, MSG>]>
     {
         for a in attrs.as_ref() {
@@ -104,6 +102,13 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
     }
 
     pub fn add_children<C>(mut self, children: C) -> Self
+        where C: AsRef<[Node<T, EVENT, MSG>]>
+    {
+        self.add_children_ref(children);
+        self
+    }
+
+    fn add_children_ref<C>(&mut self, children: C) -> &mut Self
         where C: AsRef<[Node<T, EVENT, MSG>]>
     {
         for c in children.as_ref() {
@@ -157,8 +162,7 @@ pub fn element<A, C, T, EVENT, MSG>(tag: T,
           MSG: Clone,
           EVENT: Clone
 {
-    Node::Element(Element::new(tag).add_children(children)
-                                   .add_attributes(attrs))
+    Node::Element(Element::with_children(tag, children).add_attributes(attrs))
 }
 #[inline]
 pub fn element_ns<A, C, T, EVENT, MSG>(tag: T,
@@ -172,9 +176,8 @@ pub fn element_ns<A, C, T, EVENT, MSG>(tag: T,
           MSG: Clone,
           EVENT: Clone
 {
-    Node::Element(Element::new(tag).namespace(namespace)
-                                   .add_children(children)
-                                   .add_attributes(attrs))
+    Node::Element(Element::with_children_and_maybe_ns(tag, children, Some(namespace))
+                                             .add_attributes(attrs))
 }
 
 /// Create a textnode element
