@@ -119,9 +119,7 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
     fn add_children_ref<C>(&mut self, children: C) -> &mut Self
         where C: AsRef<[Node<T, EVENT, MSG>]>
     {
-        for c in children.as_ref() {
-            self.children.push(c.clone());
-        }
+        self.children.extend(children.as_ref().to_vec());
         self
     }
 
