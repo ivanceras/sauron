@@ -48,7 +48,6 @@ impl<T, EVENT, MSG> Node<T, EVENT, MSG>
           MSG: 'static
 {
     /// map the return of the callback from MSG to MSG2
-    #[inline]
     pub fn map<F, MSG2>(self, func: F) -> Node<T, EVENT, MSG2>
         where F: Fn(MSG) -> MSG2 + 'static + Clone
     {
@@ -64,7 +63,6 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
           MSG: 'static
 {
     /// map the return of the callback from MSG to MSG2
-    #[inline]
     pub fn map<F, MSG2>(self, func: F) -> Element<T, EVENT, MSG2>
         where F: Fn(MSG) -> MSG2 + 'static + Clone
     {
@@ -110,7 +108,6 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
         Self::with_children_and_maybe_ns(tag, children, None)
     }
 
-    #[inline]
     pub fn with_children_and_maybe_ns<C>(tag: T,
                                          children: C,
                                          ns: Option<&'static str>)
@@ -148,7 +145,6 @@ impl<T, EVENT, MSG> fmt::Display for Element<T, EVENT, MSG> where T: ToString
 }
 
 impl Text {
-    #[inline]
     pub fn new<S: Into<String>>(s: S) -> Self {
         Text { text: s.into() }
     }

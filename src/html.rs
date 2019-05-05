@@ -10,6 +10,7 @@ pub use sauron_vdom::builder::{attr,
 pub mod attributes;
 pub mod events;
 
+#[inline]
 pub fn html_element<A, C, MSG>(tag: &'static str,
                                attrs: A,
                                children: C)
@@ -21,6 +22,7 @@ pub fn html_element<A, C, MSG>(tag: &'static str,
     sauron_vdom::builder::element(tag, attrs, children)
 }
 
+#[inline]
 pub fn html_element_ns<A, C, MSG>(tag: &'static str,
                                   namespace: &'static str,
                                   attrs: A,
@@ -41,6 +43,7 @@ macro_rules! declare_tags {
      ) => {
         $(
             $(#[$attr])*
+            #[inline]
             pub fn $name<A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
                 where C: AsRef<[$crate::Node<MSG>]>,
                       A: AsRef<[$crate::Attribute<MSG>]>,
