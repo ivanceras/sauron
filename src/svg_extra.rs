@@ -16,6 +16,7 @@ pub mod attributes {
         width;
         height;
         id;
+        path;
     }
 
     declare_attributes! {

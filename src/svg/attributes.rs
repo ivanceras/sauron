@@ -133,7 +133,6 @@ declare_attributes! {
     orientation;
     origin;
     overflow;
-    path;
     #[allow(non_snake_case)]
     pathLength;
     #[allow(non_snake_case)]
