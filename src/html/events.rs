@@ -85,11 +85,12 @@ macro_rules! declare_events {
      ) => {
         $(
             $(#[$attr])*
+            #[inline]
             pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
                 where CB: Fn($ret)-> MSG +'static,
                       MSG: Clone + 'static,
                 {
-                    on_with_extractor(stringify!($event), |event|$mapper(event), cb)
+                    on_with_extractor(stringify!($event), $mapper, cb)
                 }
          )*
     };
@@ -101,6 +102,7 @@ macro_rules! declare_events {
      ) => {
         $(
             $(#[$attr])*
+            #[inline]
             pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
                 where CB: Fn(()) -> MSG + 'static,
                       MSG: Clone + 'static,
@@ -111,6 +113,7 @@ macro_rules! declare_events {
     }
 }
 
+#[inline]
 pub fn onscroll<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
     where CB: Fn((i32, i32)) -> MSG + 'static,
           MSG: Clone + 'static

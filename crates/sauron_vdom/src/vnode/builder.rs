@@ -32,6 +32,7 @@ impl<T, EVENT, MSG> Node<T, EVENT, MSG>
           MSG: Clone,
           EVENT: Clone
 {
+    #[inline]
     pub fn as_element(&mut self) -> Option<&mut Element<T, EVENT, MSG>> {
         match *self {
             Node::Element(ref mut element) => Some(element),
@@ -39,6 +40,7 @@ impl<T, EVENT, MSG> Node<T, EVENT, MSG>
         }
     }
 
+    #[inline]
     pub fn as_element_ref(&mut self) -> Option<&Element<T, EVENT, MSG>> {
         match *self {
             Node::Element(ref element) => Some(element),
@@ -47,6 +49,7 @@ impl<T, EVENT, MSG> Node<T, EVENT, MSG>
     }
 
     /// Append children to this element
+    #[inline]
     pub fn children<C>(mut self, children: C) -> Self
         where C: AsRef<[Node<T, EVENT, MSG>]>
     {
@@ -57,6 +60,7 @@ impl<T, EVENT, MSG> Node<T, EVENT, MSG>
     }
 
     /// add attributes to the node
+    #[inline]
     pub fn attributes<A>(mut self, attributes: A) -> Self
         where A: AsRef<[Attribute<EVENT, MSG>]>
     {
@@ -72,6 +76,7 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
           MSG: Clone,
           EVENT: Clone
 {
+    #[inline]
     pub fn add_attributes<A>(mut self, attrs: A) -> Self
         where A: AsRef<[Attribute<EVENT, MSG>]>
     {
@@ -81,6 +86,7 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
 
     /// add the attribute values or events callback
     /// into this element
+    #[inline]
     fn add_attributes_ref<A>(&mut self, attrs: A) -> &mut Self
         where A: AsRef<[Attribute<EVENT, MSG>]>
     {
@@ -101,6 +107,7 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
         self
     }
 
+    #[inline]
     pub fn add_children<C>(mut self, children: C) -> Self
         where C: AsRef<[Node<T, EVENT, MSG>]>
     {
@@ -108,6 +115,7 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
         self
     }
 
+    #[inline]
     fn add_children_ref<C>(&mut self, children: C) -> &mut Self
         where C: AsRef<[Node<T, EVENT, MSG>]>
     {
@@ -117,6 +125,7 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
         self
     }
 
+    #[inline]
     pub fn add_event_listener(mut self,
                               event: &'static str,
                               cb: Callback<EVENT, MSG>)
@@ -151,6 +160,7 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
 ///    );
 /// }
 /// ```
+#[inline]
 pub fn element<A, C, T, EVENT, MSG>(tag: T,
                                     attrs: A,
                                     children: C)
@@ -163,6 +173,7 @@ pub fn element<A, C, T, EVENT, MSG>(tag: T,
 {
     Node::Element(Element::with_children(tag, children).add_attributes(attrs))
 }
+#[inline]
 pub fn element_ns<A, C, T, EVENT, MSG>(tag: T,
                                        namespace: &'static str,
                                        attrs: A,
@@ -179,6 +190,7 @@ pub fn element_ns<A, C, T, EVENT, MSG>(tag: T,
 }
 
 /// Create a textnode element
+#[inline]
 pub fn text<V, T, EVENT, MSG>(v: V) -> Node<T, EVENT, MSG>
     where V: ToString,
           EVENT: Clone,
@@ -188,6 +200,7 @@ pub fn text<V, T, EVENT, MSG>(v: V) -> Node<T, EVENT, MSG>
 }
 
 /// Create an attribute
+#[inline]
 pub fn attr<V, EVENT, MSG>(name: &'static str, v: V) -> Attribute<EVENT, MSG>
     where V: Into<Value>,
           EVENT: Clone,
@@ -204,6 +217,7 @@ pub fn attr<V, EVENT, MSG>(name: &'static str, v: V) -> Attribute<EVENT, MSG>
 /// FIXME: callbacks are recrated eveytime, therefore they are not
 /// equivalent when compared since function contents
 /// can not be compared. Only Rc's are compared.
+#[inline]
 pub fn on<C, EVENT, MSG>(name: &'static str, c: C) -> Attribute<EVENT, MSG>
     where C: Into<Callback<EVENT, MSG>>,
           EVENT: Clone,
@@ -215,6 +229,7 @@ pub fn on<C, EVENT, MSG>(name: &'static str, c: C) -> Attribute<EVENT, MSG>
 
 /// Create an callback event which has a function
 /// to map web_sys::Event to user event
+#[inline]
 pub fn on_with_extractor<EVENT, WEV2UDEF, UDEF, UDEF2MSG, MSG>(
     name: &'static str,
     webevent_to_user_def: WEV2UDEF,

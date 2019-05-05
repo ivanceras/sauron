@@ -12,6 +12,7 @@ macro_rules! declare_attributes {
      ) => {
         $(
             $(#[$attr])*
+            #[inline]
             pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
                 where V: Into<Value>,
                     MSG: Clone,
@@ -27,6 +28,7 @@ macro_rules! declare_attributes {
      ) => {
         $(
             $(#[$attr])*
+            #[inline]
             pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
                 where V: Into<Value>,
                     MSG: Clone,
@@ -230,10 +232,9 @@ pub fn styles_flag<V, MSG, P>(trio: P) -> Attribute<MSG>
     style(style_list.join(""))
 }
 
-pub fn classes_flag<P,MSG>(pair: P) -> Attribute<MSG>
-    where
-          P: AsRef<[(&'static str, bool)]>,
-          MSG: Clone,
+pub fn classes_flag<P, MSG>(pair: P) -> Attribute<MSG>
+    where P: AsRef<[(&'static str, bool)]>,
+          MSG: Clone
 {
     let mut class_list = Vec::with_capacity(pair.as_ref().len());
     for (class, flag) in pair.as_ref() {
