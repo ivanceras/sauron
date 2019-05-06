@@ -245,6 +245,32 @@ pub fn classes_flag<P, MSG>(pair: P) -> Attribute<MSG>
     class(class_list.join(" "))
 }
 
+/// A helper function for setting attributes with no values such as checked
+/// in checkbox input type
+/// This is best called to be appended to the node since this
+/// returns an array of attributes which doesn't play well with the others
+/// Example:
+/// ```ignore
+/// input([r#type("checkbox")], []).attributes(attrs_flag([(
+///                             "checked",
+///                             "checked",
+///                             is_checked,
+///                         )])),
+/// ```
+pub fn attrs_flag<V, MSG, P>(trio: P) -> Vec<Attribute<MSG>>
+    where V: Into<Value> + Clone,
+          MSG: Clone,
+          P: AsRef<[(&'static str, V, bool)]>
+{
+    let mut attributes = Vec::with_capacity(trio.as_ref().len());
+    for (key, value, flag) in trio.as_ref() {
+        if *flag {
+            attributes.push(attr(key, value.clone()));
+        }
+    }
+    attributes
+}
+
 /// a helper function which append `px` into a value
 /// Example:
 /// ```ignore
