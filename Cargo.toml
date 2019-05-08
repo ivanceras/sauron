@@ -38,6 +38,7 @@ features = [
     "CharacterData",
     "Performance",
     "Window",
+    "Response",
 ]
 
 [dev-dependencies]
