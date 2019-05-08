@@ -29,8 +29,14 @@ pub fn now() -> f64 {
     performance().now()
 }
 
+#[cfg(target_arch = "wasm32")]
 pub fn log<S: Into<String>>(s: S) {
     web_sys::console::log_1(&s.into().into());
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn log<S: Into<String>>(_s: S) {
+    println!("{}",s.into())
 }
 
 #[macro_export]
