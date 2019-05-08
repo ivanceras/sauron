@@ -152,10 +152,11 @@ pub mod html_extra;
 mod program;
 #[macro_use]
 pub mod svg;
+mod browser;
+mod http;
 pub mod svg_extra;
 pub mod test_fixtures;
 mod util;
-//pub mod browser;
 
 pub use component::Component;
 pub use dispatch::Dispatch;
@@ -171,6 +172,9 @@ pub use util::{body,
                performance,
                request_animation_frame,
                window};
+
+pub use browser::Browser;
+pub use http::Http;
 
 use wasm_bindgen::{JsCast,
                    JsValue};

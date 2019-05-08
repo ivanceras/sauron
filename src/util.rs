@@ -36,7 +36,7 @@ pub fn log<S: Into<String>>(s: S) {
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn log<S: Into<String>>(s: S) {
-    println!("{}",s.into())
+    println!("{}", s.into())
 }
 
 #[macro_export]
