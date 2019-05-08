@@ -155,12 +155,14 @@ pub mod svg;
 pub mod svg_extra;
 pub mod test_fixtures;
 mod util;
+//pub mod browser;
 
 pub use component::Component;
 pub use dispatch::Dispatch;
 pub use dom::DomUpdater;
 pub use program::Program;
 pub use sauron_vdom::{diff,
+                      Callback,
                       Text};
 pub use util::{body,
                document,
