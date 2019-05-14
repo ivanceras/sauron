@@ -10,7 +10,8 @@ pub use vnode::builder;
 pub use callback::Callback;
 pub use diff::diff;
 pub use patch::Patch;
-pub use vnode::{Element,
+pub use vnode::{Attribute,
+                Element,
                 Event,
                 Node,
                 Text,

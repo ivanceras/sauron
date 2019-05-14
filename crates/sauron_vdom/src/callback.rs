@@ -50,7 +50,6 @@ impl<IN, OUT> Callback<IN, OUT>
         };
         Callback::from(func_wrap)
     }
-
 }
 
 impl<IN, OUT> PartialEq for Callback<IN, OUT> {

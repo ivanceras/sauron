@@ -6,6 +6,7 @@ pub mod event;
 mod value;
 
 use crate::Callback;
+pub use builder::Attribute;
 pub use event::Event;
 pub use value::Value;
 
