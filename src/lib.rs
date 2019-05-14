@@ -182,7 +182,7 @@ use wasm_bindgen::{JsCast,
 /// This needs wrapping only so that we can implement
 /// PartialEq for testing purposes
 #[derive(Clone, Debug)]
-pub struct Event(web_sys::Event);
+pub struct Event(pub web_sys::Event);
 impl PartialEq for Event {
     fn eq(&self, other: &Self) -> bool {
         let js_value: Option<&JsValue> = self.0.dyn_ref();

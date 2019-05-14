@@ -30,8 +30,8 @@ impl<IN, OUT> Callback<IN, OUT>
 
     /// Changes input type of the callback to another.
     /// Works like common `map` method but in an opposite direction.
-    pub fn reform<F, T>(self, func: F) -> Callback<T, OUT>
-        where F: Fn(T) -> IN + 'static
+    pub fn reform<F, IN2>(self, func: F) -> Callback<IN2, OUT>
+        where F: Fn(IN2) -> IN + 'static
     {
         let func_wrap = move |input| {
             let output = func(input);
@@ -50,6 +50,7 @@ impl<IN, OUT> Callback<IN, OUT>
         };
         Callback::from(func_wrap)
     }
+
 }
 
 impl<IN, OUT> PartialEq for Callback<IN, OUT> {
