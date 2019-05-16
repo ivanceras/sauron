@@ -19,7 +19,7 @@ impl Http {
         where CB: Fn(Result<OUT, JsValue>) -> MSG + Clone + 'static,
               DE: Fn(String) -> OUT + Clone + 'static,
               OUT: 'static,
-              APP: Component<APP, MSG> + 'static,
+              APP: Component<MSG> + 'static,
               MSG: Debug + Clone + 'static
     {
         let cb_clone = cb.clone();
@@ -40,7 +40,7 @@ impl Http {
                                                          -> Cmd<APP, MSG>
         where F: Fn(JsValue) -> MSG + Clone + 'static,
               ERR: Fn(JsValue) -> MSG + Clone + 'static,
-              APP: Component<APP, MSG> + 'static,
+              APP: Component<MSG> + 'static,
               MSG: Debug + Clone + 'static
     {
         let url_clone = url.to_string();

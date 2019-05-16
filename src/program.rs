@@ -18,7 +18,7 @@ pub struct Program<APP, MSG> {
 
 impl<APP, MSG> Program<APP, MSG>
     where MSG: Debug + Clone + 'static,
-          APP: Component<APP, MSG> + 'static
+          APP: Component<MSG> + 'static
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
@@ -81,7 +81,7 @@ impl<APP, MSG> Program<APP, MSG>
 /// Defined in the DomUpdater::create_closure_wrap function
 impl<APP, MSG> Dispatch<MSG> for Program<APP, MSG>
     where MSG: Debug + Clone + 'static,
-          APP: Component<APP, MSG> + 'static
+          APP: Component<MSG> + 'static
 {
     fn dispatch(self: &Rc<Self>, msg: MSG) {
         let program_clone = Rc::clone(self);

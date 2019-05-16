@@ -1,15 +1,14 @@
 use crate::{Cmd,
-            Dispatch,
             Node};
-use std::{fmt::Debug,
-          rc::Rc};
+use std::fmt::Debug;
 
 /// The app should implement this trait for it to be handled by the Program
-pub trait Component<APP, MSG>
-    where MSG: Debug + 'static,
-          APP: 'static
+pub trait Component<MSG>
+    where MSG: Debug + 'static
 {
-    fn init(&self) -> Cmd<APP, MSG> {
+    fn init(&self) -> Cmd<Self, MSG>
+        where Self: Sized + 'static
+    {
         Cmd::none()
     }
     /// Called each time an action is triggered from the view

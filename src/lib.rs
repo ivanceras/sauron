@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 #![deny(clippy::all)]
 #![feature(type_alias_enum_variants)]
 #![feature(arbitrary_self_types)]
@@ -143,7 +143,6 @@
 //! ## Personal plug:
 //! I'm actively looking for a job that has to do with rust.
 //! Please contact me: ivanceras[at]gmail.com
-use std::rc::Rc;
 
 pub mod dom;
 #[macro_use]

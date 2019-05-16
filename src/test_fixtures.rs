@@ -3,7 +3,6 @@
 //! use for doing component tests
 //!
 use crate::{html::div,
-            Cmd,
             Component,
             Program};
 use std::{cell::RefCell,
@@ -12,7 +11,7 @@ use std::{cell::RefCell,
 #[derive(Clone)]
 pub struct SimpleComponent;
 
-impl Component<SimpleComponent, ()> for SimpleComponent {
+impl Component<()> for SimpleComponent {
     fn update(&mut self, _msg: ()) {
         crate::log!("updating in SimpleComponent");
     }

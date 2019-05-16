@@ -1,8 +1,7 @@
 use crate::{Cmd,
             Component,
             Dispatch};
-use std::{fmt::Debug,
-          rc::Rc};
+use std::fmt::Debug;
 use wasm_bindgen::{closure::Closure,
                    JsCast};
 
@@ -14,7 +13,7 @@ impl Browser {
     pub fn onresize<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
         where F: Fn(i32, i32) -> MSG + Clone + 'static,
               MSG: Debug + Clone + 'static,
-              APP: Component<APP, MSG> + 'static
+              APP: Component<MSG> + 'static
     {
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
             let cb_clone = cb.clone();
