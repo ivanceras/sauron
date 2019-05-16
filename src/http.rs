@@ -61,17 +61,18 @@ impl Http {
                 Closure::once(move |js_value: JsValue| {
                     let response: &Response = js_value.as_ref().unchecked_ref();
                     let status = response.status();
-                    crate::log!("status: {}", status);
                     if status == 200 {
-                        let response_promise =
-                            response.text().expect("expecting a text");
+                        let response_promise = response.text();
+                        if let Ok(response_promise) = response_promise {
+                            let decoder_and_dispatcher_cb: Closure<FnMut(JsValue)> =
+                                Closure::once(decoder_and_dispatcher);
 
-                        let decoder_and_dispatcher_cb: Closure<FnMut(JsValue)> =
-                            Closure::once(decoder_and_dispatcher);
+                            response_promise.then(&decoder_and_dispatcher_cb);
 
-                        response_promise.then(&decoder_and_dispatcher_cb);
-
-                        decoder_and_dispatcher_cb.forget();
+                            decoder_and_dispatcher_cb.forget();
+                        } else {
+                            panic!("Expecting a string");
+                        }
                     } else {
                         program_clone_status_err.dispatch(fail_status_cb(js_value));
                     }
@@ -81,7 +82,6 @@ impl Http {
             let fail_cb_clone = fail_cb.clone();
             let fail_closure: Closure<FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
-                    crate::log!("failed to get a response: {:#?}", js_value);
                     program_clone_response_error.dispatch(fail_cb_clone(js_value));
                 });
 

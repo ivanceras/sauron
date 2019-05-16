@@ -29,7 +29,7 @@ impl<APP, MSG> Cmd<APP, MSG>
     }
 
     pub fn emit(self, program: &Rc<Program<APP, MSG>>) {
-        crate::log!("emitting cmd..");
+        crate::log!("Here in... emitting cmd..");
         crate::log!("There are {} cmds", self.0.len());
         for cb in self.0 {
             let program_clone = Rc::clone(&program);

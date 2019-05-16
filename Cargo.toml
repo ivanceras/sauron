@@ -64,6 +64,7 @@ features = [
 members = [
     "crates/sauron_vdom",
     "examples/minimal",
+    "examples/fetch_data",
     "examples/interactive/client",
     "examples/todomvc",
     "examples/window_tab_rows",
