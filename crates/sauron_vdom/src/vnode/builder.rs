@@ -5,6 +5,7 @@ use crate::{Callback,
             Value};
 use std::convert::AsRef;
 
+#[derive(Clone)]
 pub struct Attribute<EVENT, MSG>
     where MSG: Clone
 {
@@ -12,6 +13,7 @@ pub struct Attribute<EVENT, MSG>
     value: AttribValue<EVENT, MSG>,
 }
 
+#[derive(Clone)]
 pub enum AttribValue<EVENT, MSG>
     where MSG: Clone
 {
@@ -47,21 +49,19 @@ impl<T, EVENT, MSG> Node<T, EVENT, MSG>
     }
 
     /// Append children to this element
-    pub fn children<C>(mut self, children: C) -> Self
-        where C: AsRef<[Node<T, EVENT, MSG>]>
-    {
+    pub fn children(mut self, children: Vec<Node<T, EVENT, MSG>>) -> Self {
         if let Some(element) = self.as_element() {
-            element.add_children_ref(children);
+            element.add_children(children);
         }
         self
     }
 
     /// add attributes to the node
-    pub fn attributes<A>(mut self, attributes: A) -> Self
-        where A: AsRef<[Attribute<EVENT, MSG>]>
-    {
+    pub fn attributes(mut self,
+                      attributes: Vec<Attribute<EVENT, MSG>>)
+                      -> Self {
         if let Some(elm) = self.as_element() {
-            elm.add_attributes_ref(attributes.as_ref());
+            elm.add_attributes(attributes);
         }
         self
     }
@@ -73,19 +73,8 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
           EVENT: Clone
 {
     #[inline]
-    pub fn add_attributes<A>(mut self, attrs: A) -> Self
-        where A: AsRef<[Attribute<EVENT, MSG>]>
-    {
-        self.add_attributes_ref(attrs);
-        self
-    }
-
-    /// add the attribute values or events callback
-    /// into this element
-    fn add_attributes_ref<A>(&mut self, attrs: A) -> &mut Self
-        where A: AsRef<[Attribute<EVENT, MSG>]>
-    {
-        for a in attrs.as_ref() {
+    pub fn add_attributes(&mut self, attrs: Vec<Attribute<EVENT, MSG>>) {
+        for a in attrs {
             match a.value {
                 AttribValue::Value(ref v) => {
                     if let Some(existing) = self.attrs.get_mut(a.name) {
@@ -99,32 +88,18 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
                 }
             }
         }
-        self
     }
 
     #[inline]
-    pub fn add_children<C>(mut self, children: C) -> Self
-        where C: AsRef<[Node<T, EVENT, MSG>]>
-    {
-        self.add_children_ref(children);
-        self
+    pub fn add_children(&mut self, children: Vec<Node<T, EVENT, MSG>>) {
+        self.children.extend(children);
     }
 
     #[inline]
-    fn add_children_ref<C>(&mut self, children: C) -> &mut Self
-        where C: AsRef<[Node<T, EVENT, MSG>]>
-    {
-        self.children.extend(children.as_ref().to_vec());
-        self
-    }
-
-    #[inline]
-    pub fn add_event_listener(mut self,
+    pub fn add_event_listener(&mut self,
                               event: &'static str,
-                              cb: Callback<EVENT, MSG>)
-                              -> Self {
+                              cb: Callback<EVENT, MSG>) {
         self.events.insert(event, cb);
-        self
     }
 }
 
@@ -163,10 +138,10 @@ pub fn element<A, C, T, EVENT, MSG>(tag: T,
           MSG: Clone,
           EVENT: Clone
 {
-    Node::Element(Element::with_children(tag, children).add_attributes(attrs))
+    element_ns(tag, None, attrs, children)
 }
 pub fn element_ns<A, C, T, EVENT, MSG>(tag: T,
-                                       namespace: &'static str,
+                                       namespace: Option<&'static str>,
                                        attrs: A,
                                        children: C)
                                        -> Node<T, EVENT, MSG>
@@ -176,8 +151,10 @@ pub fn element_ns<A, C, T, EVENT, MSG>(tag: T,
           MSG: Clone,
           EVENT: Clone
 {
-    Node::Element(Element::with_children_and_maybe_ns(tag, children, Some(namespace))
-                                             .add_attributes(attrs))
+    let mut element =
+        Element::with_children_and_maybe_ns(tag, children, namespace);
+    element.add_attributes(attrs.as_ref().to_vec());
+    Node::Element(element)
 }
 
 /// Create a textnode element

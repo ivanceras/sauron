@@ -18,8 +18,8 @@ use sauron::Event;
 
 #[test]
 fn simple_builder() {
-    let div: Element<()> =
-        Element::new("div").add_attributes([attr("class", "some-class")]);
+    let mut div: Element<()> = Element::new("div");
+    div.add_attributes(vec![attr("class", "some-class")]);
     let expected: Element<()> = Element { tag: "div",
                                           attrs: BTreeMap::from_iter(vec![
         ("class", "some-class".into()),
@@ -37,8 +37,8 @@ fn builder_with_event() {
         println!("hello! {:?}", x);
     };
     let callback: Callback<Event, ()> = cb.into();
-    let div: Element<()> =
-        Element::new("div").add_event_listener("click", callback.clone());
+    let mut div: Element<()> = Element::new("div");
+    div.add_event_listener("click", callback.clone());
     let expected: Element<()> = Element { tag: "div",
                                           events: BTreeMap::from_iter(vec![
         ("click", callback.clone()),
@@ -53,11 +53,9 @@ fn builder_with_event() {
 
 #[test]
 fn builder_with_children() {
-    let div: Element<()> =
-        Element::new("div").add_attributes([attr("class", "some-class")])
-                           .add_children(vec![Node::Text(
-            Text { text: "Hello".to_string(), },
-        )]);
+    let mut div: Element<()> = Element::new("div");
+    div.add_attributes(vec![attr("class", "some-class")]);
+    div.add_children(vec![Node::Text(Text { text: "Hello".to_string() })]);
     let expected =
         Element { tag: "div",
                   attrs: BTreeMap::from_iter(vec![("class",

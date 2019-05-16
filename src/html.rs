@@ -32,7 +32,7 @@ pub fn html_element_ns<A, C, MSG>(tag: &'static str,
           A: AsRef<[Attribute<MSG>]>,
           MSG: Clone
 {
-    sauron_vdom::builder::element_ns(tag, namespace, attrs, children)
+    sauron_vdom::builder::element_ns(tag, Some(namespace), attrs, children)
 }
 
 macro_rules! declare_tags {
