@@ -1,4 +1,4 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 #![deny(clippy::all)]
 #![feature(type_alias_enum_variants)]
 #![feature(arbitrary_self_types)]
@@ -143,6 +143,8 @@
 //! ## Personal plug:
 //! I'm actively looking for a job that has to do with rust.
 //! Please contact me: ivanceras[at]gmail.com
+use std::rc::Rc;
+
 pub mod dom;
 #[macro_use]
 pub mod html;
@@ -153,6 +155,7 @@ mod program;
 #[macro_use]
 pub mod svg;
 mod browser;
+mod cmd;
 mod http;
 pub mod svg_extra;
 pub mod test_fixtures;
@@ -174,6 +177,7 @@ pub use util::{body,
                window};
 
 pub use browser::Browser;
+pub use cmd::Cmd;
 pub use http::Http;
 
 use wasm_bindgen::{JsCast,

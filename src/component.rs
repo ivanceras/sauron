@@ -1,14 +1,16 @@
-use crate::{Dispatch,
+use crate::{Cmd,
+            Dispatch,
             Node};
-use std::rc::Rc;
+use std::{fmt::Debug,
+          rc::Rc};
 
 /// The app should implement this trait for it to be handled by the Program
-pub trait Component<MSG> {
-    /// The init function of your app
-    /// such as fetching data from a rest api to populate the app
-    fn init<DSP>(&self, _program: &Rc<DSP>)
-        where DSP: Dispatch<MSG> + 'static
-    {
+pub trait Component<APP, MSG>
+    where MSG: Debug + 'static,
+          APP: 'static
+{
+    fn init(&self) -> Cmd<APP, MSG> {
+        Cmd::none()
     }
     /// Called each time an action is triggered from the view
     fn update(&mut self, msg: MSG);

@@ -1,5 +1,8 @@
-use crate::Dispatch;
-use std::rc::Rc;
+use crate::{Cmd,
+            Component,
+            Dispatch};
+use std::{fmt::Debug,
+          rc::Rc};
 use wasm_bindgen::{closure::Closure,
                    JsCast};
 
@@ -8,21 +11,26 @@ use wasm_bindgen::{closure::Closure,
 pub struct Browser;
 
 impl Browser {
-    pub fn onresize<F, DSP, MSG>(program: &Rc<DSP>, cb: F)
-        where F: Fn(i32, i32) -> MSG + 'static,
-              DSP: Dispatch<MSG> + 'static
+    pub fn onresize<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
+        where F: Fn(i32, i32) -> MSG + Clone + 'static,
+              MSG: Debug + Clone + 'static,
+              APP: Component<APP, MSG> + 'static
     {
-        let program_clone = Rc::clone(program);
-        let resize_callback: Closure<Fn(web_sys::Event)> =
-            Closure::wrap(Box::new(move |_| {
-                              let (window_width, window_height) =
-                                  Self::get_size();
-                              let msg = cb(window_width, window_height);
-                              program_clone.dispatch(msg);
-                          }));
-        crate::window().set_onresize(Some(resize_callback.as_ref()
-                                                         .unchecked_ref()));
-        resize_callback.forget();
+        let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
+            let cb_clone = cb.clone();
+            let resize_callback: Closure<Fn(web_sys::Event)> =
+                Closure::wrap(Box::new(move |_| {
+                                  let (window_width, window_height) =
+                                      Self::get_size();
+                                  let msg =
+                                      cb_clone(window_width, window_height);
+                                  program.dispatch(msg);
+                              }));
+            crate::window().set_onresize(Some(resize_callback.as_ref()
+                                                             .unchecked_ref()));
+            resize_callback.forget();
+        });
+        cmd
     }
 
     fn get_size() -> (i32, i32) {
