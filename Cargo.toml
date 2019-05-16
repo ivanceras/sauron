@@ -16,7 +16,6 @@ sauron_vdom = "0.6.0"
 wasm-bindgen = "0.2.42"
 lazy_static = "1.3.0"
 
-
 [dependencies.web-sys]
 version = "0.3.19"
 features = [
@@ -40,6 +39,10 @@ features = [
     "Window",
     "Response",
 ]
+
+
+[features]
+performance = []
 
 [dev-dependencies]
 wasm-bindgen-test = "0.2.42"
