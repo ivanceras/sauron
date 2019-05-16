@@ -1,5 +1,9 @@
 # 0.7.0
-- MSG don't need to be debug
+- Added Examples usage of Http fetch
+- Added Http for fetching data which returns a Cmd
+- Added Browser for listening to browser resize event which returns a Cmd
+- Added Cmd module for abstracting calls such as Http requests
+
 
 # 0.6.0
 - Refactor sauron_vdom::Event to cater general usecase for mouse, keyboard and input event

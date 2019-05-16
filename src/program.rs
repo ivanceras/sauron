@@ -30,7 +30,6 @@ impl<APP, MSG> Program<APP, MSG>
                                     Rc::new(RefCell::new(dom_updater)) };
         let rc_program: Rc<Self> = Rc::new(program);
         // call the init of the component
-        crate::log!("Calling init function of the app now");
         let cmds: Cmd<APP, MSG> = rc_program.app.borrow().init();
         cmds.emit(&rc_program);
         rc_program
