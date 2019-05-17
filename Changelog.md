@@ -3,6 +3,7 @@
 - Added Http for fetching data which returns a Cmd
 - Added Browser for listening to browser resize event which returns a Cmd
 - Added Cmd module for abstracting calls such as Http requests
+- Change the update method in Component to return Cmd<Self,Msg>
 
 
 # 0.6.0
