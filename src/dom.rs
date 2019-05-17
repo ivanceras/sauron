@@ -290,7 +290,9 @@ impl<DSP, MSG> DomUpdater<DSP, MSG>
     ///
     /// Then use that diff to patch the real DOM in the user's browser so that they are
     /// seeing the latest state of the application.
-    pub fn update(&mut self, program: &Rc<DSP>, new_vdom: crate::Node<MSG>) {
+    pub fn update_dom(&mut self,
+                      program: &Rc<DSP>,
+                      new_vdom: crate::Node<MSG>) {
         let patches = diff(&self.current_vdom, &new_vdom);
         let active_closures =
             patch(program,
