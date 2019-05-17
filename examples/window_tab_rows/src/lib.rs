@@ -2,6 +2,7 @@
 use sauron::{html::{attributes::*,
                     events::*,
                     *},
+             Cmd,
              Component,
              Node,
              Program};
@@ -60,12 +61,18 @@ impl Window {
 }
 
 impl Component<Msg> for Window {
-    fn update(&mut self, msg: Msg) {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         self.window_activities += 1;
         match msg {
-            Msg::WindowClick => {}
-            Msg::ActivateTab(index) => self.activate_tab(index),
-            Msg::TabMsg(index, tab_msg) => self.tabs[index].update(tab_msg),
+            Msg::WindowClick => Cmd::none(),
+            Msg::ActivateTab(index) => {
+                self.activate_tab(index);
+                Cmd::none()
+            }
+            Msg::TabMsg(index, tab_msg) => {
+                self.tabs[index].update(tab_msg);
+                Cmd::none()
+            }
         }
     }
 

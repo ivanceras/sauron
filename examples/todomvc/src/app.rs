@@ -1,6 +1,7 @@
 use sauron::{html::{attributes::*,
                     events::*,
                     *},
+             Cmd,
              Component,
              Node};
 
@@ -44,7 +45,7 @@ impl Model {
 }
 
 impl Component<Msg> for Model {
-    fn update(&mut self, msg: Msg) {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Add => {
                 let entry = Entry { description: self.value.clone(),
@@ -88,6 +89,7 @@ impl Component<Msg> for Model {
             }
             Msg::Nope => {}
         }
+        Cmd::none()
     }
 
     fn view(&self) -> Node<Msg> {

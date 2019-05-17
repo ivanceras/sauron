@@ -80,7 +80,7 @@ impl<APP, MSG> Program<APP, MSG>
             crate::log!("app view took: {}ms", t3 - t2);
             t3
         };
-        self.dom_updater.borrow_mut().update(self, view);
+        self.dom_updater.borrow_mut().update_dom(self, view);
         #[cfg(feature = "performance")]
         {
             let t4 = crate::now();

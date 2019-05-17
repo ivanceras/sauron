@@ -1,6 +1,7 @@
 use sauron::{html::{attributes::*,
                     events::*,
                     *},
+             Cmd,
              Component,
              Node};
 
@@ -22,10 +23,11 @@ impl Field {
 }
 
 impl Component<Msg> for Field {
-    fn update(&mut self, msg: Msg) {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::FieldClick => self.field_clicks += 1,
         }
+        Cmd::none()
     }
 
     fn view(&self) -> Node<Msg> {

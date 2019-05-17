@@ -6,6 +6,8 @@ use sauron::{html::{attributes::*,
              Component,
              Node};
 
+use sauron::Cmd;
+
 #[derive(Debug, Clone)]
 pub enum Msg {
     TabClick,
@@ -42,11 +44,16 @@ impl Tab {
 }
 
 impl Component<Msg> for Tab {
-    fn update(&mut self, msg: Msg) {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
-            Msg::TabClick => self.tab_clicks += 1,
-            Msg::RowMsg(index, row_msg) => self.rows[index].update(row_msg),
+            Msg::TabClick => {
+                self.tab_clicks += 1;
+            }
+            Msg::RowMsg(index, row_msg) => {
+                self.rows[index].update(row_msg);
+            }
         }
+        Cmd::none()
     }
 
     fn view(&self) -> Node<Msg> {

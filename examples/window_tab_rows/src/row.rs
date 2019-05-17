@@ -7,6 +7,8 @@ use sauron::{html::{attributes::*,
 use crate::field::{self,
                    Field};
 
+use sauron::Cmd;
+
 #[derive(Debug, Clone)]
 pub enum Msg {
     RowClick,
@@ -31,13 +33,16 @@ impl Row {
 }
 
 impl Component<Msg> for Row {
-    fn update(&mut self, msg: Msg) {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
-            Msg::RowClick => self.row_clicks += 1,
+            Msg::RowClick => {
+                self.row_clicks += 1;
+            }
             Msg::FieldMsg(index, field_msg) => {
-                self.fields[index].update(field_msg)
+                self.fields[index].update(field_msg);
             }
         }
+        Cmd::none()
     }
 
     fn view(&self) -> Node<Msg> {

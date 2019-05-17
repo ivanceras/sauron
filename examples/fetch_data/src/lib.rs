@@ -86,7 +86,7 @@ impl Component<Msg> for App {
                                       .collect())])
     }
 
-    fn update(&mut self, msg: Msg) {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         sauron::log!("App is updating from msg: {:?}", msg);
         match msg {
             Msg::Click => self.click_count += 1,
@@ -97,6 +97,7 @@ impl Component<Msg> for App {
                 sauron::log!("Error fetching users! {:#?}", js_value);
             }
         }
+        Cmd::none()
     }
 }
 

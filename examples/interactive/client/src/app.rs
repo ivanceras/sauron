@@ -2,6 +2,7 @@ use js_sys::Date;
 use sauron::{html::{attributes::*,
                     events::*,
                     *},
+             Cmd,
              Node,
              *};
 use wasm_bindgen::{self,
@@ -38,7 +39,7 @@ impl App {
 }
 
 impl Component<Msg> for App {
-    fn update(&mut self, msg: Msg) {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Click => {
                 self.click_count += 1;
@@ -63,6 +64,7 @@ impl Component<Msg> for App {
                 }
             }
         }
+        Cmd::none()
     }
 
     fn view(&self) -> Node<Msg> {

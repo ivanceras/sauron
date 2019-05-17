@@ -29,7 +29,7 @@ fn patches_dom() {
                                                           &sauron::body());
 
     let new_vdom = div([id("patched")], []); //html! { <div id="patched"></div> };
-    dom_updater.update(&simple_program, new_vdom);
+    dom_updater.update_dom(&simple_program, new_vdom);
 
     assert_eq!(document.query_selector("#patched").unwrap().is_some(), true);
 }
@@ -64,7 +64,7 @@ fn updates_active_closure_on_replace() {
     // New node replaces old node.
     // We are testing that we've stored this new node's closures even though `new` will be dropped
     // at the end of this block.
-    dom_updater.update(&simple_program, replace_node);
+    dom_updater.update_dom(&simple_program, replace_node);
 
     let input_event = InputEvent::new("input").unwrap();
 
@@ -110,7 +110,7 @@ fn updates_active_closures_on_append() {
         // New node gets appended into the DOM.
         // We are testing that we've stored this new node's closures even though `new` will be dropped
         // at the end of this block.
-        dom_updater.update(&simple_program, append_node);
+        dom_updater.update_dom(&simple_program, append_node);
     }
 
     let input_event = InputEvent::new("input").unwrap();

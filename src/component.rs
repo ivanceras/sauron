@@ -12,7 +12,8 @@ pub trait Component<MSG>
         Cmd::none()
     }
     /// Called each time an action is triggered from the view
-    fn update(&mut self, msg: MSG);
+    fn update(&mut self, msg: MSG) -> Cmd<Self, MSG>
+        where Self: Sized + 'static;
     /// Returns a node on how the component is presented.
     fn view(&self) -> Node<MSG>;
 }

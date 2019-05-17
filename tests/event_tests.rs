@@ -79,7 +79,7 @@ fn added_event() {
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);
     // update to new dom with no event attached
-    dom_updater.update(&simple_program, new);
+    dom_updater.update_dom(&simple_program, new);
 
     let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 
@@ -121,7 +121,7 @@ fn remove_event() {
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);
     // update to new dom with no event attached
-    dom_updater.update(&simple_program, new);
+    dom_updater.update_dom(&simple_program, new);
 
     let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
 
@@ -159,7 +159,7 @@ fn remove_event_from_truncated_children() {
     assert_eq!(dom_updater.active_closure_len(),
                5,
                "There should be 5 events attached to the DomUpdater");
-    dom_updater.update(&simple_program, new);
+    dom_updater.update_dom(&simple_program, new);
 
     assert_eq!(dom_updater.active_closure_len(),
                1,
@@ -189,7 +189,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     assert_eq!(dom_updater.active_closure_len(),
                3,
                "There should be 3 events attached to the DomUpdater");
-    dom_updater.update(&simple_program, new);
+    dom_updater.update_dom(&simple_program, new);
 
     assert_eq!(dom_updater.active_closure_len(),
                1,
@@ -223,7 +223,7 @@ fn remove_event_from_replaced_node() {
     assert_eq!(dom_updater.active_closure_len(),
                1,
                "There should be 1 event attached to the DomUpdater");
-    dom_updater.update(&simple_program, new);
+    dom_updater.update_dom(&simple_program, new);
 
     assert_eq!(
         dom_updater.active_closure_len(),

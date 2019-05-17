@@ -39,6 +39,7 @@
 //! use sauron::Component;
 //! use sauron::Node;
 //! use sauron::Program;
+//! use sauron::Cmd;
 //! use wasm_bindgen::prelude::*;
 //!
 //! #[derive(Debug, Clone)]
@@ -79,10 +80,13 @@
 //!         )
 //!     }
 //!
-//!     fn update(&mut self, msg: Msg) {
+//!     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
 //!         sauron::log!("App is updating from msg: {:?}", msg);
 //!         match msg {
-//!             Msg::Click => self.click_count += 1,
+//!             Msg::Click => {
+//!                 self.click_count += 1;
+//!                 Cmd::none()
+//!             }
 //!         }
 //!     }
 //!
