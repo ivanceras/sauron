@@ -63,10 +63,18 @@ impl<APP, MSG> Program<APP, MSG>
     }
 
     /// This is called when an event is triggered in the html DOM.
+    /// The sequence of things happening here:
+    /// - The app component update is executed.
+    /// - The returned Cmd from the component update is then emitted.
+    /// - The view is reconstructed with the new state of the app.
+    /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(self: &Rc<Self>, msg: MSG) {
         #[cfg(feature = "performance")]
         let t1 = crate::now();
-        self.app.borrow_mut().update(msg);
+        // update the app and emit the cmd returned from the update
+        let cmd = self.app.borrow_mut().update(msg);
+        cmd.emit(self);
+        crate::log("Executing cmd..");
         #[cfg(feature = "performance")]
         let t2 = {
             let t2 = crate::now();
