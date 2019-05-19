@@ -6,6 +6,14 @@ declare_tags! {
     /// [`<style>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style)
     /// element.
     style;
+    /// Build a
+    /// [`<html>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html)
+    /// element.
+    html;
+    /// Build a
+    /// [`<title>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title)
+    /// element.
+    title;
 }
 pub mod attributes {
     use sauron_vdom::{builder::attr,

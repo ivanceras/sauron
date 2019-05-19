@@ -78,10 +78,6 @@ declare_tags! {
     /// [`<meta>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta)
     /// element.
     meta;
-    /// Build a
-    /// [`<title>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title)
-    /// element.
-    title;
 
     // Sectioning root
 
