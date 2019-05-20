@@ -1,9 +1,10 @@
 # 0.7.0
+- Added an intial implemnetion for Http for fetching data which returns a Cmd
 - Added Examples usage of Http fetch
-- Added Http for fetching data which returns a Cmd
 - Added Browser for listening to browser resize event which returns a Cmd
 - Added Cmd module for abstracting calls such as Http requests
-- Change the update method in Component to return Cmd<Self,Msg>
+- Added an optional `init` function in Component which allows apps execute Cmd Task such as fetching data at the start of the app
+- Change the update method in Component to return Cmd<Self,Msg> in update method
 
 
 # 0.6.0

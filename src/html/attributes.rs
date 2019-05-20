@@ -86,7 +86,6 @@ declare_attributes! {
     dropzone;
     enctype;
     enterkeyhint;
-    form;
     formaction;
     formnovalidate;
     headers;

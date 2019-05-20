@@ -22,5 +22,6 @@ pub mod attributes {
     declare_attributes! {
         span;
         label;
+        form;
     }
 }
