@@ -1,10 +1,14 @@
-use crate::{Cmd,
-            Component,
-            Dispatch,
-            DomUpdater};
-use std::{cell::RefCell,
-          fmt::Debug,
-          rc::Rc};
+use crate::{
+    Cmd,
+    Component,
+    Dispatch,
+    DomUpdater,
+};
+use std::{
+    cell::RefCell,
+    fmt::Debug,
+    rc::Rc,
+};
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;
 
@@ -17,17 +21,19 @@ pub struct Program<APP, MSG> {
 }
 
 impl<APP, MSG> Program<APP, MSG>
-    where MSG: Debug + Clone + 'static,
-          APP: Component<MSG> + 'static
+where
+    MSG: Debug + Clone + 'static,
+    APP: Component<MSG> + 'static,
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
     fn new(app: APP, root_node: &Node) -> Rc<Self> {
         let dom_updater: DomUpdater<Self, MSG> =
             DomUpdater::new(app.view(), root_node);
-        let program = Program { app: Rc::new(RefCell::new(app)),
-                                dom_updater:
-                                    Rc::new(RefCell::new(dom_updater)) };
+        let program = Program {
+            app: Rc::new(RefCell::new(app)),
+            dom_updater: Rc::new(RefCell::new(dom_updater)),
+        };
         let rc_program: Rc<Self> = Rc::new(program);
         // call the init of the component
         let cmds: Cmd<APP, MSG> = rc_program.app.borrow().init();
@@ -100,8 +106,9 @@ impl<APP, MSG> Program<APP, MSG>
 /// This will be called when the actual event is triggered.
 /// Defined in the DomUpdater::create_closure_wrap function
 impl<APP, MSG> Dispatch<MSG> for Program<APP, MSG>
-    where MSG: Debug + Clone + 'static,
-          APP: Component<MSG> + 'static
+where
+    MSG: Debug + Clone + 'static,
+    APP: Component<MSG> + 'static,
 {
     fn dispatch(self: &Rc<Self>, msg: MSG) {
         let program_clone = Rc::clone(self);

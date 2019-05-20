@@ -192,9 +192,10 @@ declare_attributes! {
 /// div([style("display:flex;flex-direction:row;")],[])
 /// ```
 pub fn styles<V, MSG, P>(pairs: P) -> Attribute<MSG>
-    where V: Into<Value> + Clone,
-          MSG: Clone,
-          P: AsRef<[(&'static str, V)]>
+where
+    V: Into<Value> + Clone,
+    MSG: Clone,
+    P: AsRef<[(&'static str, V)]>,
 {
     let mut style_str = String::new();
     for (key, value) in pairs.as_ref() {
@@ -217,9 +218,10 @@ pub fn styles<V, MSG, P>(pairs: P) -> Attribute<MSG>
 ///     styles([("display", if self.is_active { "block" }else{ "none" })])
 /// ```
 pub fn styles_flag<V, MSG, P>(trio: P) -> Attribute<MSG>
-    where V: Into<Value> + Clone,
-          MSG: Clone,
-          P: AsRef<[(&'static str, V, bool)]>
+where
+    V: Into<Value> + Clone,
+    MSG: Clone,
+    P: AsRef<[(&'static str, V, bool)]>,
 {
     let mut style_list = Vec::with_capacity(trio.as_ref().len());
     for (key, value, flag) in trio.as_ref() {
@@ -232,8 +234,9 @@ pub fn styles_flag<V, MSG, P>(trio: P) -> Attribute<MSG>
 }
 
 pub fn classes_flag<P, MSG>(pair: P) -> Attribute<MSG>
-    where P: AsRef<[(&'static str, bool)]>,
-          MSG: Clone
+where
+    P: AsRef<[(&'static str, bool)]>,
+    MSG: Clone,
 {
     let mut class_list = Vec::with_capacity(pair.as_ref().len());
     for (class, flag) in pair.as_ref() {
@@ -257,9 +260,10 @@ pub fn classes_flag<P, MSG>(pair: P) -> Attribute<MSG>
 ///                         )])),
 /// ```
 pub fn attrs_flag<V, MSG, P>(trio: P) -> Vec<Attribute<MSG>>
-    where V: Into<Value> + Clone,
-          MSG: Clone,
-          P: AsRef<[(&'static str, V, bool)]>
+where
+    V: Into<Value> + Clone,
+    MSG: Clone,
+    P: AsRef<[(&'static str, V, bool)]>,
 {
     let mut attributes = Vec::with_capacity(trio.as_ref().len());
     for (key, value, flag) in trio.as_ref() {
@@ -276,7 +280,8 @@ pub fn attrs_flag<V, MSG, P>(trio: P) -> Vec<Attribute<MSG>>
 /// style("width", px(100))
 /// ```
 pub fn px<V>(v: V) -> String
-    where V: Into<Value> + Clone
+where
+    V: Into<Value> + Clone,
 {
     format!("{}px", v.into())
 }

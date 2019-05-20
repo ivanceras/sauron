@@ -1,48 +1,67 @@
 #![deny(warnings)]
-use sauron::{dom::CreatedNode,
-             html::{attributes::*,
-                    events::*,
-                    *},
-             svg::{attributes::{cx,
-                                cy,
-                                r,
-                                xmlns},
-                   circle,
-                   svg},
-             *};
-use std::{cell::Cell,
-          rc::Rc};
+use sauron::{
+    dom::CreatedNode,
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
+    svg::{
+        attributes::{
+            cx,
+            cy,
+            r,
+            xmlns,
+        },
+        circle,
+        svg,
+    },
+    *,
+};
+use std::{
+    cell::Cell,
+    rc::Rc,
+};
 
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 
-use sauron::{test_fixtures::simple_program,
-             Node};
-use web_sys::{console,
-              Element,
-              EventTarget};
+use sauron::{
+    test_fixtures::simple_program,
+    Node,
+};
+use web_sys::{
+    console,
+    Element,
+    EventTarget,
+};
 
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 fn nested_divs() {
     let vdiv: Node<()> = div([], [div([], [div([], [])])]); // <div> <div> <div></div> </div> </div>
-    let div: Element = CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
-        .node
-        .unchecked_into();
+    let div: Element =
+        CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
+            .node
+            .unchecked_into();
 
     assert_eq!(&div.inner_html(), "<div><div></div></div>");
 }
 
 #[wasm_bindgen_test]
 fn svg_element() {
-    let vdiv: Node<()> = div([],
-                             [svg([xmlns("http://www.w3.org/2000/svg")],
-                                  [circle([cx("50"), cy("50"), r("50")],
-                                          [])])]);
-    let div: Element = CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
-        .node
-        .unchecked_into();
+    let vdiv: Node<()> = div(
+        [],
+        [svg(
+            [xmlns("http://www.w3.org/2000/svg")],
+            [circle([cx("50"), cy("50"), r("50")], [])],
+        )],
+    );
+    let div: Element =
+        CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
+            .node
+            .unchecked_into();
 
     assert_eq!(
         &div.inner_html(),
@@ -53,9 +72,10 @@ fn svg_element() {
 #[wasm_bindgen_test]
 fn div_with_attributes() {
     let vdiv: Node<()> = div([id("id-here"), class("two classes")], []);
-    let div: Element = CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
-        .node
-        .unchecked_into();
+    let div: Element =
+        CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
+            .node
+            .unchecked_into();
 
     assert_eq!(&div.id(), "id-here");
 
@@ -76,12 +96,16 @@ fn click_event() {
     let clicked_clone = Rc::clone(&clicked);
 
     let elem_id = "click-on-div";
-    let vdiv: Node<()> = div([id(elem_id),
-                              onclick(move |_| {
-                                  console::log_1(&"clicked event called".into());
-                                  clicked_clone.set(true);
-                              })],
-                             []);
+    let vdiv: Node<()> = div(
+        [
+            id(elem_id),
+            onclick(move |_| {
+                console::log_1(&"clicked event called".into());
+                clicked_clone.set(true);
+            }),
+        ],
+        [],
+    );
 
     let _dom_updater =
         DomUpdater::new_append_to_mount(&simple_program(), vdiv, &body);
@@ -90,8 +114,9 @@ fn click_event() {
 
     let div = document.get_element_by_id(&elem_id).unwrap();
 
-    (EventTarget::from(div)).dispatch_event(&click_event)
-                            .unwrap();
+    (EventTarget::from(div))
+        .dispatch_event(&click_event)
+        .unwrap();
 
     assert_eq!(*clicked, Cell::new(true));
 }

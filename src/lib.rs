@@ -168,23 +168,29 @@ pub use component::Component;
 pub use dispatch::Dispatch;
 pub use dom::DomUpdater;
 pub use program::Program;
-pub use sauron_vdom::{diff,
-                      Callback,
-                      Text};
-pub use util::{body,
-               document,
-               log,
-               now,
-               performance,
-               request_animation_frame,
-               window};
+pub use sauron_vdom::{
+    diff,
+    Callback,
+    Text,
+};
+pub use util::{
+    body,
+    document,
+    log,
+    now,
+    performance,
+    request_animation_frame,
+    window,
+};
 
 pub use browser::Browser;
 pub use cmd::Cmd;
 pub use http::Http;
 
-use wasm_bindgen::{JsCast,
-                   JsValue};
+use wasm_bindgen::{
+    JsCast,
+    JsValue,
+};
 
 /// This needs wrapping only so that we can implement
 /// PartialEq for testing purposes

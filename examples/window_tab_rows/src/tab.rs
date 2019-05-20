@@ -1,10 +1,16 @@
-use crate::row::{self,
-                 Row};
-use sauron::{html::{attributes::*,
-                    events::*,
-                    *},
-             Component,
-             Node};
+use crate::row::{
+    self,
+    Row,
+};
+use sauron::{
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
+    Component,
+    Node,
+};
 
 use sauron::Cmd;
 
@@ -24,13 +30,16 @@ pub struct Tab {
 
 impl Tab {
     pub fn new(name: &str, color: &str) -> Self {
-        Tab { tab_clicks: 0,
-              rows: (0..10).into_iter()
-                           .map(|index| Row::new(format!("Row {}", index)))
-                           .collect(),
-              is_active: false,
-              name: name.to_string(),
-              color: color.to_string() }
+        Tab {
+            tab_clicks: 0,
+            rows: (0..10)
+                .into_iter()
+                .map(|index| Row::new(format!("Row {}", index)))
+                .collect(),
+            is_active: false,
+            name: name.to_string(),
+            color: color.to_string(),
+        }
     }
 
     pub fn show(&mut self) {
@@ -57,21 +66,35 @@ impl Component<Msg> for Tab {
     }
 
     fn view(&self) -> Node<Msg> {
-        div([class("tab tabcontent"),
-             styles([("background-color", &self.color)]),
-             styles_flag([("display", "block", self.is_active),
-                          ("display", "none", !self.is_active)])],
-            [button([onclick(|_| Msg::TabClick)],
-                    [text(format!("{} is clicked for {} times",
-                                  self.name, self.tab_clicks))]),
-             div([class("rows")],
-                 self.rows
-                     .iter()
-                     .enumerate()
-                     .map(|(index, row)| {
-                         row.view()
-                            .map(move |row_msg| Msg::RowMsg(index, row_msg))
-                     })
-                     .collect::<Vec<Node<Msg>>>())])
+        div(
+            [
+                class("tab tabcontent"),
+                styles([("background-color", &self.color)]),
+                styles_flag([
+                    ("display", "block", self.is_active),
+                    ("display", "none", !self.is_active),
+                ]),
+            ],
+            [
+                button(
+                    [onclick(|_| Msg::TabClick)],
+                    [text(format!(
+                        "{} is clicked for {} times",
+                        self.name, self.tab_clicks
+                    ))],
+                ),
+                div(
+                    [class("rows")],
+                    self.rows
+                        .iter()
+                        .enumerate()
+                        .map(|(index, row)| {
+                            row.view()
+                                .map(move |row_msg| Msg::RowMsg(index, row_msg))
+                        })
+                        .collect::<Vec<Node<Msg>>>(),
+                ),
+            ],
+        )
     }
 }

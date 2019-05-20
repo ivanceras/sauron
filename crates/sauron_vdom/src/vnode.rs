@@ -1,5 +1,7 @@
-use std::{collections::BTreeMap,
-          fmt};
+use std::{
+    collections::BTreeMap,
+    fmt,
+};
 
 pub mod builder;
 pub mod event;
@@ -45,12 +47,14 @@ pub struct Element<T, EVENT, MSG> {
 }
 
 impl<T, EVENT, MSG> Node<T, EVENT, MSG>
-    where EVENT: 'static,
-          MSG: 'static
+where
+    EVENT: 'static,
+    MSG: 'static,
 {
     /// map the return of the callback from MSG to MSG2
     pub fn map<F, MSG2>(self, func: F) -> Node<T, EVENT, MSG2>
-        where F: Fn(MSG) -> MSG2 + 'static + Clone
+    where
+        F: Fn(MSG) -> MSG2 + 'static + Clone,
     {
         match self {
             Node::Element(element) => Node::Element(element.map(func)),
@@ -60,19 +64,22 @@ impl<T, EVENT, MSG> Node<T, EVENT, MSG>
 }
 
 impl<T, EVENT, MSG> Element<T, EVENT, MSG>
-    where EVENT: 'static,
-          MSG: 'static
+where
+    EVENT: 'static,
+    MSG: 'static,
 {
     /// map the return of the callback from MSG to MSG2
     pub fn map<F, MSG2>(self, func: F) -> Element<T, EVENT, MSG2>
-        where F: Fn(MSG) -> MSG2 + 'static + Clone
+    where
+        F: Fn(MSG) -> MSG2 + 'static + Clone,
     {
-        let mut new_element: Element<T, EVENT, MSG2> =
-            Element { tag: self.tag,
-                      attrs: self.attrs,
-                      namespace: self.namespace,
-                      children: vec![],
-                      events: BTreeMap::new() };
+        let mut new_element: Element<T, EVENT, MSG2> = Element {
+            tag: self.tag,
+            attrs: self.attrs,
+            namespace: self.namespace,
+            children: vec![],
+            events: BTreeMap::new(),
+        };
         for child in self.children {
             let new_child = child.map(func.clone());
             new_element.children.push(new_child);
@@ -92,9 +99,10 @@ pub struct Text {
 }
 
 impl<T, EVENT, MSG> Element<T, EVENT, MSG>
-    where T: Clone,
-          MSG: Clone,
-          EVENT: Clone
+where
+    T: Clone,
+    MSG: Clone,
+    EVENT: Clone,
 {
     #[inline]
     pub fn new(tag: T) -> Self {
@@ -104,26 +112,33 @@ impl<T, EVENT, MSG> Element<T, EVENT, MSG>
     /// Create a Element using the supplied tag name
     #[inline]
     pub fn with_children<C>(tag: T, children: C) -> Self
-        where C: AsRef<[Node<T, EVENT, MSG>]>
+    where
+        C: AsRef<[Node<T, EVENT, MSG>]>,
     {
         Self::with_children_and_maybe_ns(tag, children, None)
     }
 
-    pub fn with_children_and_maybe_ns<C>(tag: T,
-                                         children: C,
-                                         ns: Option<&'static str>)
-                                         -> Self
-        where C: AsRef<[Node<T, EVENT, MSG>]>
+    pub fn with_children_and_maybe_ns<C>(
+        tag: T,
+        children: C,
+        ns: Option<&'static str>,
+    ) -> Self
+    where
+        C: AsRef<[Node<T, EVENT, MSG>]>,
     {
-        Element { tag,
-                  attrs: BTreeMap::new(),
-                  events: BTreeMap::new(),
-                  children: children.as_ref().to_vec(),
-                  namespace: ns }
+        Element {
+            tag,
+            attrs: BTreeMap::new(),
+            events: BTreeMap::new(),
+            children: children.as_ref().to_vec(),
+            namespace: ns,
+        }
     }
 }
 
-impl<T, EVENT, MSG> fmt::Display for Element<T, EVENT, MSG> where T: ToString
+impl<T, EVENT, MSG> fmt::Display for Element<T, EVENT, MSG>
+where
+    T: ToString,
 {
     // Turn a Element and all of it's children (recursively) into an HTML string
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -159,7 +174,9 @@ impl fmt::Display for Text {
 }
 
 // Turn a Node into an HTML string (delegate impl to variants)
-impl<T, EVENT, MSG> fmt::Display for Node<T, EVENT, MSG> where T: ToString
+impl<T, EVENT, MSG> fmt::Display for Node<T, EVENT, MSG>
+where
+    T: ToString,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {

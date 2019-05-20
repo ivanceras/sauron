@@ -1,11 +1,15 @@
 #![deny(warnings)]
-use sauron::{html::{attributes::*,
-                    events::*,
-                    *},
-             Cmd,
-             Component,
-             Node,
-             Program};
+use sauron::{
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
+    Cmd,
+    Component,
+    Node,
+    Program,
+};
 use tab::Tab;
 use wasm_bindgen::prelude::*;
 
@@ -28,13 +32,16 @@ pub struct Window {
 
 impl Window {
     pub fn new() -> Self {
-        let mut window =
-            Window { window_activities: 0,
-                     tabs: vec![Tab::new("First tab", "peachpuff"),
-                                Tab::new("Second tab", "lightyellow"),
-                                Tab::new("Third tab", "lightblue"),
-                                Tab::new("Fourth tab", "papayawhip"),],
-                     active_tab: 0 };
+        let mut window = Window {
+            window_activities: 0,
+            tabs: vec![
+                Tab::new("First tab", "peachpuff"),
+                Tab::new("Second tab", "lightyellow"),
+                Tab::new("Third tab", "lightblue"),
+                Tab::new("Fourth tab", "papayawhip"),
+            ],
+            active_tab: 0,
+        };
         window.update_active_tab();
         window
     }
@@ -77,31 +84,46 @@ impl Component<Msg> for Window {
     }
 
     fn view(&self) -> Node<Msg> {
-        div([class("window")],
-            [button([onclick(|_| Msg::WindowClick)],
-                    [text(format!("Total window activities: {}",
-                                  self.window_activities))]),
-             div([class("tab-list-buttons")],
-                 self.tabs
-                     .iter()
-                     .enumerate()
-                     .map(|(index, tab)| {
-                         button([class("tablink"),
-                                 styles([("background-color", &tab.color)]),
-                                 onclick(move |_| Msg::ActivateTab(index))],
-                                [text(&tab.name)])
-                     })
-                     .collect::<Vec<Node<Msg>>>()),
-             div([class("tab-list")],
-                 self.tabs
-                     .iter()
-                     .enumerate()
-                     .map(|(index, tab)| {
-                         Tab::view(tab).map(move |tab_msg| {
-                                           Msg::TabMsg(index, tab_msg)
-                                       })
-                     })
-                     .collect::<Vec<Node<Msg>>>())])
+        div(
+            [class("window")],
+            [
+                button(
+                    [onclick(|_| Msg::WindowClick)],
+                    [text(format!(
+                        "Total window activities: {}",
+                        self.window_activities
+                    ))],
+                ),
+                div(
+                    [class("tab-list-buttons")],
+                    self.tabs
+                        .iter()
+                        .enumerate()
+                        .map(|(index, tab)| {
+                            button(
+                                [
+                                    class("tablink"),
+                                    styles([("background-color", &tab.color)]),
+                                    onclick(move |_| Msg::ActivateTab(index)),
+                                ],
+                                [text(&tab.name)],
+                            )
+                        })
+                        .collect::<Vec<Node<Msg>>>(),
+                ),
+                div(
+                    [class("tab-list")],
+                    self.tabs
+                        .iter()
+                        .enumerate()
+                        .map(|(index, tab)| {
+                            Tab::view(tab)
+                                .map(move |tab_msg| Msg::TabMsg(index, tab_msg))
+                        })
+                        .collect::<Vec<Node<Msg>>>(),
+                ),
+            ],
+        )
     }
 }
 

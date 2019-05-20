@@ -1,11 +1,15 @@
 #![deny(warnings)]
-use sauron::{html::{attributes::*,
-                    events::*,
-                    *},
-             Cmd,
-             Component,
-             Node,
-             Program};
+use sauron::{
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
+    Cmd,
+    Component,
+    Node,
+    Program,
+};
 use wasm_bindgen::prelude::*;
 
 #[derive(Debug, Clone)]
@@ -25,16 +29,24 @@ impl App {
 
 impl Component<Msg> for App {
     fn view(&self) -> Node<Msg> {
-        div([class("some-class"), id("some-id"), attr("data-id", 1)],
-            [input([class("client"),
-                    r#type("button"),
-                    value("Click me!"),
-                    onclick(|_| {
-                        sauron::log("Button is clicked");
-                        Msg::Click
-                    })],
-                   []),
-             text(format!("Clicked: {}", self.click_count))])
+        div(
+            [class("some-class"), id("some-id"), attr("data-id", 1)],
+            [
+                input(
+                    [
+                        class("client"),
+                        r#type("button"),
+                        value("Click me!"),
+                        onclick(|_| {
+                            sauron::log("Button is clicked");
+                            Msg::Click
+                        }),
+                    ],
+                    [],
+                ),
+                text(format!("Clicked: {}", self.click_count)),
+            ],
+        )
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {

@@ -1,16 +1,22 @@
-use crate::{Callback,
-            Program};
-use std::{fmt::Debug,
-          rc::Rc};
+use crate::{
+    Callback,
+    Program,
+};
+use std::{
+    fmt::Debug,
+    rc::Rc,
+};
 
 pub struct Cmd<APP, MSG>(pub Vec<Callback<Rc<Program<APP, MSG>>, ()>>);
 
 impl<APP, MSG> Cmd<APP, MSG>
-    where APP: 'static,
-          MSG: Debug + 'static
+where
+    APP: 'static,
+    MSG: Debug + 'static,
 {
     pub fn new<F>(cmd: F) -> Self
-        where F: Fn(Rc<Program<APP, MSG>>) + 'static
+    where
+        F: Fn(Rc<Program<APP, MSG>>) + 'static,
     {
         let cb: Callback<Rc<Program<APP, MSG>>, ()> = cmd.into();
         Cmd(vec![cb])

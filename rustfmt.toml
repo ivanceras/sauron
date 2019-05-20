@@ -4,8 +4,8 @@ unstable_features = true
 max_width = 80
 
 ## Visually align, useful in writing the view
-indent_style = "Visual"
-imports_indent = "Visual"
+indent_style = "Block"
+imports_indent = "Block"
 reorder_imports = true
 reorder_impl_items = true
 merge_imports = true

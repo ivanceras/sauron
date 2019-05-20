@@ -1,11 +1,17 @@
-use sauron::{html::{attributes::*,
-                    events::*,
-                    *},
-             Component,
-             Node};
+use sauron::{
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
+    Component,
+    Node,
+};
 
-use crate::field::{self,
-                   Field};
+use crate::field::{
+    self,
+    Field,
+};
 
 use sauron::Cmd;
 
@@ -23,12 +29,14 @@ pub struct Row {
 
 impl Row {
     pub fn new(row_name: String) -> Self {
-        Row { row_clicks: 0,
-              fields:
-                  (0..10).into_iter()
-                         .map(|index| Field::new(format!("Field {}", index)))
-                         .collect(),
-              row_name }
+        Row {
+            row_clicks: 0,
+            fields: (0..10)
+                .into_iter()
+                .map(|index| Field::new(format!("Field {}", index)))
+                .collect(),
+            row_name,
+        }
     }
 }
 
@@ -46,20 +54,28 @@ impl Component<Msg> for Row {
     }
 
     fn view(&self) -> Node<Msg> {
-        div([class("row"), onclick(|_| Msg::RowClick)],
-            [text(&self.row_name),
-             input([class("row-selector"), r#type("checkbox")], []),
-             div([],
-                 self.fields
-                     .iter()
-                     .enumerate()
-                     .map(|(index, field)| {
-                         field.view().map(move |field_msg| {
-                                         Msg::FieldMsg(index, field_msg)
-                                     })
-                     })
-                     .collect::<Vec<Node<Msg>>>()),
-             span([],
-                  [text(format!("total activities: {}", self.row_clicks))])])
+        div(
+            [class("row"), onclick(|_| Msg::RowClick)],
+            [
+                text(&self.row_name),
+                input([class("row-selector"), r#type("checkbox")], []),
+                div(
+                    [],
+                    self.fields
+                        .iter()
+                        .enumerate()
+                        .map(|(index, field)| {
+                            field.view().map(move |field_msg| {
+                                Msg::FieldMsg(index, field_msg)
+                            })
+                        })
+                        .collect::<Vec<Node<Msg>>>(),
+                ),
+                span(
+                    [],
+                    [text(format!("total activities: {}", self.row_clicks))],
+                ),
+            ],
+        )
     }
 }

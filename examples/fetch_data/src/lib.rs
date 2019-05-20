@@ -1,12 +1,16 @@
 #![deny(warnings)]
-use sauron::{html::{attributes::*,
-                    events::*,
-                    *},
-             Cmd,
-             Component,
-             Http,
-             Node,
-             Program};
+use sauron::{
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
+    Cmd,
+    Component,
+    Http,
+    Node,
+    Program,
+};
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
@@ -41,8 +45,10 @@ pub struct User {
 
 impl App {
     pub fn new() -> Self {
-        App { click_count: 0,
-              data: Data::default() }
+        App {
+            click_count: 0,
+            data: Data::default(),
+        }
     }
 }
 
@@ -54,36 +60,54 @@ impl Component<Msg> for App {
             sauron::log!("data: {:#?}", data);
             data.expect("Error deserializing data")
         };
-        Http::fetch_with_text_response_decoder(url,
-                                               data_decoder,
-                                               Msg::ReceivedData)
+        Http::fetch_with_text_response_decoder(
+            url,
+            data_decoder,
+            Msg::ReceivedData,
+        )
     }
 
     fn view(&self) -> Node<Msg> {
-        div([],
-            [div([class("some-class"), id("some-id"), attr("data-id", 1)],
-                 [input([class("client"),
-                         r#type("button"),
-                         value("Click me!"),
-                         onclick(|_| {
-                             sauron::log("Button is clicked");
-                             Msg::Click
-                         })],
-                        []),
-                  text(format!("Clicked: {}", self.click_count))]),
-             div([], []).children(self.data
-                                      .data
-                                      .iter()
-                                      .map(|user| {
-                                          ul([],
-                                             [li([], [text(&user.id)]),
-                                              li([], [text(&user.email)]),
-                                              li([], [text(&user.first_name)]),
-                                              li([],
-                                                 [img([src(&user.avatar)],
-                                                      [])])])
-                                      })
-                                      .collect())])
+        div(
+            [],
+            [
+                div(
+                    [class("some-class"), id("some-id"), attr("data-id", 1)],
+                    [
+                        input(
+                            [
+                                class("client"),
+                                r#type("button"),
+                                value("Click me!"),
+                                onclick(|_| {
+                                    sauron::log("Button is clicked");
+                                    Msg::Click
+                                }),
+                            ],
+                            [],
+                        ),
+                        text(format!("Clicked: {}", self.click_count)),
+                    ],
+                ),
+                div([], []).children(
+                    self.data
+                        .data
+                        .iter()
+                        .map(|user| {
+                            ul(
+                                [],
+                                [
+                                    li([], [text(&user.id)]),
+                                    li([], [text(&user.email)]),
+                                    li([], [text(&user.first_name)]),
+                                    li([], [img([src(&user.avatar)], [])]),
+                                ],
+                            )
+                        })
+                        .collect(),
+                ),
+            ],
+        )
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {

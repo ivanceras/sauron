@@ -1,10 +1,12 @@
 //! Our Patch enum is intentionally kept in it's own file for easy inclusion into
 //! The Percy Book.
 
-use crate::{Callback,
-            Node,
-            Text,
-            Value};
+use crate::{
+    Callback,
+    Node,
+    Text,
+    Value,
+};
 use std::collections::BTreeMap;
 
 /// A Patch encodes an operation that modifies a real DOM element.

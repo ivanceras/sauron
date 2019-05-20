@@ -1,31 +1,45 @@
-use super::{ActiveClosure,
-            CreatedNode};
-use crate::{dom,
-            Dispatch,
-            Patch};
+use super::{
+    ActiveClosure,
+    CreatedNode,
+};
+use crate::{
+    dom,
+    Dispatch,
+    Patch,
+};
 use js_sys::Function;
-use std::{collections::{HashMap,
-                        HashSet},
-          rc::Rc};
-use wasm_bindgen::{closure::Closure,
-                   JsCast,
-                   JsValue};
-use web_sys::{Element,
-              Event,
-              Node,
-              Text};
+use std::{
+    collections::{
+        HashMap,
+        HashSet,
+    },
+    rc::Rc,
+};
+use wasm_bindgen::{
+    closure::Closure,
+    JsCast,
+    JsValue,
+};
+use web_sys::{
+    Element,
+    Event,
+    Node,
+    Text,
+};
 
 /// Apply all of the patches to our old root node in order to create the new root node
 /// that we desire.
 /// This is usually used after diffing two virtual nodes.
-pub fn patch<N, DSP, MSG>(program: &Rc<DSP>,
-                          root_node: N,
-                          old_closures: &mut ActiveClosure,
-                          patches: &[Patch<MSG>])
-                          -> Result<ActiveClosure, JsValue>
-    where N: Into<Node>,
-          MSG: Clone + 'static,
-          DSP: Dispatch<MSG> + 'static
+pub fn patch<N, DSP, MSG>(
+    program: &Rc<DSP>,
+    root_node: N,
+    old_closures: &mut ActiveClosure,
+    patches: &[Patch<MSG>],
+) -> Result<ActiveClosure, JsValue>
+where
+    N: Into<Node>,
+    MSG: Clone + 'static,
+    DSP: Dispatch<MSG> + 'static,
 {
     let root_node: Node = root_node.into();
 
@@ -66,9 +80,10 @@ pub fn patch<N, DSP, MSG>(program: &Rc<DSP>,
 /// Instead of finding the nodes each time in the patching process.
 /// We find them before hand so as not to keep calling this function for each and every element to
 /// be patched.
-fn find_nodes<MSG>(root_node: Node,
-                   patches: &[Patch<MSG>])
-                   -> (HashMap<usize, Element>, HashMap<usize, Text>) {
+fn find_nodes<MSG>(
+    root_node: Node,
+    patches: &[Patch<MSG>],
+) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
     let mut cur_node_idx = 0;
     let mut nodes_to_find = HashSet::new();
 
@@ -79,10 +94,11 @@ fn find_nodes<MSG>(root_node: Node,
     find_nodes_recursive(root_node, &mut cur_node_idx, &nodes_to_find)
 }
 
-fn find_nodes_recursive(root_node: Node,
-                        cur_node_idx: &mut usize,
-                        nodes_to_find: &HashSet<usize>)
-                        -> (HashMap<usize, Element>, HashMap<usize, Text>) {
+fn find_nodes_recursive(
+    root_node: Node,
+    cur_node_idx: &mut usize,
+    nodes_to_find: &HashSet<usize>,
+) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
     if nodes_to_find.is_empty() {
         return (HashMap::new(), HashMap::new());
     }
@@ -98,12 +114,12 @@ fn find_nodes_recursive(root_node: Node,
     if nodes_to_find.get(&cur_node_idx).is_some() {
         match root_node.node_type() {
             Node::ELEMENT_NODE => {
-                element_nodes_to_patch.insert(*cur_node_idx,
-                                              root_node.unchecked_into());
+                element_nodes_to_patch
+                    .insert(*cur_node_idx, root_node.unchecked_into());
             }
             Node::TEXT_NODE => {
-                text_nodes_to_patch.insert(*cur_node_idx,
-                                           root_node.unchecked_into());
+                text_nodes_to_patch
+                    .insert(*cur_node_idx, root_node.unchecked_into());
             }
             other => unimplemented!("Unsupported root node type: {}", other),
         }
@@ -116,17 +132,19 @@ fn find_nodes_recursive(root_node: Node,
 
         match child_node.node_type() {
             Node::ELEMENT_NODE => {
-                let child_to_patch = find_nodes_recursive(child_node,
-                                                          cur_node_idx,
-                                                          nodes_to_find);
+                let child_to_patch = find_nodes_recursive(
+                    child_node,
+                    cur_node_idx,
+                    nodes_to_find,
+                );
 
                 element_nodes_to_patch.extend(child_to_patch.0);
                 text_nodes_to_patch.extend(child_to_patch.1);
             }
             Node::TEXT_NODE => {
                 if nodes_to_find.get(&cur_node_idx).is_some() {
-                    text_nodes_to_patch.insert(*cur_node_idx,
-                                               child_node.unchecked_into());
+                    text_nodes_to_patch
+                        .insert(*cur_node_idx, child_node.unchecked_into());
                 }
 
                 *cur_node_idx += 1;
@@ -148,36 +166,41 @@ fn find_nodes_recursive(root_node: Node,
 }
 
 /// remove all the event listeners for this node
-fn remove_event_listeners(node: &Element,
-                          old_closures: &mut ActiveClosure)
-                          -> Result<(), JsValue> {
+fn remove_event_listeners(
+    node: &Element,
+    old_closures: &mut ActiveClosure,
+) -> Result<(), JsValue> {
     // TODO: there should be a better way to get the node-id back
     // without having to read from the actual dom node element
     if let Some(vdom_id_str) = node.get_attribute(super::DATA_SAURON_VDOM_ID) {
-        let vdom_id = vdom_id_str.parse::<u32>()
-                                 .expect("unable to parse sauron_vdom-id");
-        let old_closure =
-            old_closures.get(&vdom_id)
-                        .expect("There is no marked with that vdom_id");
+        let vdom_id = vdom_id_str
+            .parse::<u32>()
+            .expect("unable to parse sauron_vdom-id");
+        let old_closure = old_closures
+            .get(&vdom_id)
+            .expect("There is no marked with that vdom_id");
         for (event, oc) in old_closure.iter() {
             let func: &Function = oc.as_ref().unchecked_ref();
             node.remove_event_listener_with_callback(event, func)?;
         }
 
         // remove closure active_closure in dom_updater to free up memory
-        old_closures.remove(&vdom_id)
-                    .expect("Unable to remove old closure");
+        old_closures
+            .remove(&vdom_id)
+            .expect("Unable to remove old closure");
     }
     Ok(())
 }
 
-fn apply_element_patch<DSP, MSG>(program: &Rc<DSP>,
-                                 node: &Element,
-                                 old_closures: &mut ActiveClosure,
-                                 patch: &Patch<MSG>)
-                                 -> Result<ActiveClosure, JsValue>
-    where MSG: Clone + 'static,
-          DSP: Dispatch<MSG> + 'static
+fn apply_element_patch<DSP, MSG>(
+    program: &Rc<DSP>,
+    node: &Element,
+    old_closures: &mut ActiveClosure,
+    patch: &Patch<MSG>,
+) -> Result<ActiveClosure, JsValue>
+where
+    MSG: Clone + 'static,
+    DSP: Dispatch<MSG> + 'static,
 {
     let mut active_closures = ActiveClosure::new();
     match patch {
@@ -207,8 +230,8 @@ fn apply_element_patch<DSP, MSG>(program: &Rc<DSP>,
                 if let Some(closure) = active_closures.get_mut(&node_id) {
                     closure.push((event, closure_wrap));
                 } else {
-                    active_closures.insert(node_id,
-                                           vec![(event, closure_wrap)]);
+                    active_closures
+                        .insert(node_id, vec![(event, closure_wrap)]);
                 }
             }
 
@@ -224,9 +247,9 @@ fn apply_element_patch<DSP, MSG>(program: &Rc<DSP>,
         // Note and TODO: This doesn't free the closure and event listeners
         // of the children of this node
         Patch::Replace(_node_idx, new_node) => {
-            let created_node =
-                CreatedNode::<Node>::create_dom_node::<DSP, MSG>(program,
-                                                                 new_node);
+            let created_node = CreatedNode::<Node>::create_dom_node::<DSP, MSG>(
+                program, new_node,
+            );
             remove_event_listeners(&node, old_closures)?;
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
@@ -265,9 +288,10 @@ fn apply_element_patch<DSP, MSG>(program: &Rc<DSP>,
             let parent = &node;
             let mut active_closures = HashMap::new();
             for new_node in new_nodes {
-                let created_node =
-                    CreatedNode::<Node>::create_dom_node::<DSP, MSG>(program,
-                                                                     &new_node);
+                let created_node = CreatedNode::<Node>::create_dom_node::<
+                    DSP,
+                    MSG,
+                >(program, &new_node);
                 parent.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }
@@ -280,27 +304,29 @@ fn apply_element_patch<DSP, MSG>(program: &Rc<DSP>,
     }
 }
 
-fn apply_text_patch<DSP, MSG>(program: &Rc<DSP>,
-                              node: &Text,
-                              patch: &Patch<MSG>)
-                              -> Result<(), JsValue>
-    where MSG: Clone + 'static,
-          DSP: Dispatch<MSG> + 'static
+fn apply_text_patch<DSP, MSG>(
+    program: &Rc<DSP>,
+    node: &Text,
+    patch: &Patch<MSG>,
+) -> Result<(), JsValue>
+where
+    MSG: Clone + 'static,
+    DSP: Dispatch<MSG> + 'static,
 {
     match patch {
         Patch::ChangeText(_node_idx, new_node) => {
             node.set_node_value(Some(&new_node.text));
         }
         Patch::Replace(_node_idx, new_node) => {
-            let created_node =
-                CreatedNode::<Node>::create_dom_node::<DSP, MSG>(program,
-                                                                 new_node);
+            let created_node = CreatedNode::<Node>::create_dom_node::<DSP, MSG>(
+                program, new_node,
+            );
             node.replace_with_with_node_1(&created_node.node)?;
         }
         _other => {
             unreachable!(
-            "Text nodes should only receive ChangeText or Replace patches."
-        )
+                "Text nodes should only receive ChangeText or Replace patches."
+            )
         }
     };
 

@@ -16,13 +16,16 @@ pub struct MouseEvent {
     buttons: Buttons,
 }
 impl MouseEvent {
-    pub fn new(coordinate: Coordinate,
-               modifier: Modifier,
-               buttons: Buttons)
-               -> Self {
-        MouseEvent { coordinate,
-                     modifier,
-                     buttons }
+    pub fn new(
+        coordinate: Coordinate,
+        modifier: Modifier,
+        buttons: Buttons,
+    ) -> Self {
+        MouseEvent {
+            coordinate,
+            modifier,
+            buttons,
+        }
     }
 
     pub fn x(&self) -> i32 {
@@ -44,8 +47,10 @@ pub struct KeyEvent {
 
 impl KeyEvent {
     pub fn new(key: String) -> Self {
-        KeyEvent { key,
-                   ..Default::default() }
+        KeyEvent {
+            key,
+            ..Default::default()
+        }
     }
 }
 

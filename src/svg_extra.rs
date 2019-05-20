@@ -9,8 +9,10 @@ declare_svg_tags! {
 }
 
 pub mod attributes {
-    use sauron_vdom::{builder::attr,
-                      Value};
+    use sauron_vdom::{
+        builder::attr,
+        Value,
+    };
     declare_attributes! {
         style;
         width;

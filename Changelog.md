@@ -1,5 +1,5 @@
 # 0.7.0
-- Added an intial implemnetion for Http for fetching data which returns a Cmd
+- Added an initial implementation for Http for fetching data which returns a Cmd
 - Added Examples usage of Http fetch
 - Added Browser for listening to browser resize event which returns a Cmd
 - Added Cmd module for abstracting calls such as Http requests

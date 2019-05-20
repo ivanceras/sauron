@@ -1,11 +1,17 @@
-use crate::{Cmd,
-            Component,
-            Dispatch};
-use std::{fmt::Debug,
-          rc::Rc};
-use wasm_bindgen::{closure::Closure,
-                   JsCast,
-                   JsValue};
+use crate::{
+    Cmd,
+    Component,
+    Dispatch,
+};
+use std::{
+    fmt::Debug,
+    rc::Rc,
+};
+use wasm_bindgen::{
+    closure::Closure,
+    JsCast,
+    JsValue,
+};
 use web_sys::Response;
 
 pub struct Http;
@@ -14,13 +20,14 @@ impl Http {
     pub fn fetch_with_text_response_decoder<DE, CB, OUT, APP, MSG>(
         url: &str,
         response_text_decoder: DE,
-        cb: CB)
-        -> Cmd<APP, MSG>
-        where CB: Fn(Result<OUT, JsValue>) -> MSG + Clone + 'static,
-              DE: Fn(String) -> OUT + Clone + 'static,
-              OUT: 'static,
-              APP: Component<MSG> + 'static,
-              MSG: Debug + Clone + 'static
+        cb: CB,
+    ) -> Cmd<APP, MSG>
+    where
+        CB: Fn(Result<OUT, JsValue>) -> MSG + Clone + 'static,
+        DE: Fn(String) -> OUT + Clone + 'static,
+        OUT: 'static,
+        APP: Component<MSG> + 'static,
+        MSG: Debug + Clone + 'static,
     {
         let cb_clone = cb.clone();
         let response_decoder = move |js_value: JsValue| {
@@ -34,14 +41,16 @@ impl Http {
     }
 
     /// API for fetching http rest request
-    pub fn fetch_with_response_decoder<F, ERR, APP, MSG>(url: &str,
-                                                         response_decoder: F,
-                                                         fail_cb: ERR)
-                                                         -> Cmd<APP, MSG>
-        where F: Fn(JsValue) -> MSG + Clone + 'static,
-              ERR: Fn(JsValue) -> MSG + Clone + 'static,
-              APP: Component<MSG> + 'static,
-              MSG: Debug + Clone + 'static
+    pub fn fetch_with_response_decoder<F, ERR, APP, MSG>(
+        url: &str,
+        response_decoder: F,
+        fail_cb: ERR,
+    ) -> Cmd<APP, MSG>
+    where
+        F: Fn(JsValue) -> MSG + Clone + 'static,
+        ERR: Fn(JsValue) -> MSG + Clone + 'static,
+        APP: Component<MSG> + 'static,
+        MSG: Debug + Clone + 'static,
     {
         let url_clone = url.to_string();
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
@@ -64,8 +73,9 @@ impl Http {
                     if status == 200 {
                         let response_promise = response.text();
                         if let Ok(response_promise) = response_promise {
-                            let decoder_and_dispatcher_cb: Closure<FnMut(JsValue)> =
-                                Closure::once(decoder_and_dispatcher);
+                            let decoder_and_dispatcher_cb: Closure<
+                                FnMut(JsValue),
+                            > = Closure::once(decoder_and_dispatcher);
 
                             response_promise.then(&decoder_and_dispatcher_cb);
 
@@ -74,7 +84,8 @@ impl Http {
                             panic!("Expecting a string");
                         }
                     } else {
-                        program_clone_status_err.dispatch(fail_status_cb(js_value));
+                        program_clone_status_err
+                            .dispatch(fail_status_cb(js_value));
                     }
                 });
 
@@ -82,7 +93,8 @@ impl Http {
             let fail_cb_clone = fail_cb.clone();
             let fail_closure: Closure<FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
-                    program_clone_response_error.dispatch(fail_cb_clone(js_value));
+                    program_clone_response_error
+                        .dispatch(fail_cb_clone(js_value));
                 });
 
             promise.then(&cb).catch(&fail_closure);

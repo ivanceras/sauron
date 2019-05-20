@@ -16,8 +16,10 @@ declare_tags! {
     title;
 }
 pub mod attributes {
-    use sauron_vdom::{builder::attr,
-                      Value};
+    use sauron_vdom::{
+        builder::attr,
+        Value,
+    };
 
     declare_attributes! {
         span;

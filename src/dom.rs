@@ -1,20 +1,28 @@
 use crate::Dispatch;
 use apply_patches::patch;
-use sauron_vdom::{self,
-                  diff,
-                  Callback};
-use std::{collections::HashMap,
-          marker::PhantomData,
-          ops::Deref,
-          rc::Rc,
-          sync::Mutex};
-use wasm_bindgen::{closure::Closure,
-                   JsCast};
-use web_sys::{self,
-              Element,
-              EventTarget,
-              Node,
-              Text};
+use sauron_vdom::{
+    self,
+    diff,
+    Callback,
+};
+use std::{
+    collections::HashMap,
+    marker::PhantomData,
+    ops::Deref,
+    rc::Rc,
+    sync::Mutex,
+};
+use wasm_bindgen::{
+    closure::Closure,
+    JsCast,
+};
+use web_sys::{
+    self,
+    Element,
+    EventTarget,
+    Node,
+    Text,
+};
 
 mod apply_patches;
 
@@ -69,8 +77,10 @@ pub struct DomUpdater<DSP, MSG> {
 
 impl<T> CreatedNode<T> {
     pub fn without_closures<N: Into<T>>(node: N) -> Self {
-        CreatedNode { node: node.into(),
-                      closures: HashMap::with_capacity(0) }
+        CreatedNode {
+            node: node.into(),
+            closures: HashMap::with_capacity(0),
+        }
     }
 
     pub fn create_text_node(text: &sauron_vdom::Text) -> Text {
@@ -79,11 +89,13 @@ impl<T> CreatedNode<T> {
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
-    pub fn create_dom_node<DSP, MSG>(program: &Rc<DSP>,
-                                     vnode: &crate::Node<MSG>)
-                                     -> CreatedNode<Node>
-        where MSG: Clone + 'static,
-              DSP: Dispatch<MSG> + 'static
+    pub fn create_dom_node<DSP, MSG>(
+        program: &Rc<DSP>,
+        vnode: &crate::Node<MSG>,
+    ) -> CreatedNode<Node>
+    where
+        MSG: Clone + 'static,
+        DSP: Dispatch<MSG> + 'static,
     {
         match vnode {
             crate::Node::Text(text_node) => {
@@ -99,37 +111,42 @@ impl<T> CreatedNode<T> {
 
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
-    pub fn create_element_node<DSP, MSG>(program: &Rc<DSP>,
-                                         velem: &crate::Element<MSG>)
-                                         -> CreatedNode<Element>
-        where MSG: Clone + 'static,
-              DSP: Dispatch<MSG> + 'static
+    pub fn create_element_node<DSP, MSG>(
+        program: &Rc<DSP>,
+        velem: &crate::Element<MSG>,
+    ) -> CreatedNode<Element>
+    where
+        MSG: Clone + 'static,
+        DSP: Dispatch<MSG> + 'static,
     {
         let document = crate::document();
 
         let element = if let Some(ref namespace) = velem.namespace {
-            document.create_element_ns(Some(namespace), &velem.tag)
-                    .expect("Unable to create element")
+            document
+                .create_element_ns(Some(namespace), &velem.tag)
+                .expect("Unable to create element")
         } else {
-            document.create_element(&velem.tag)
-                    .expect("Unable to create element")
+            document
+                .create_element(&velem.tag)
+                .expect("Unable to create element")
         };
 
         let mut closures = ActiveClosure::new();
 
         velem.attrs.iter().for_each(|(name, value)| {
-                              element
+            element
                 .set_attribute(name, &value.to_string())
                 .expect("Set element attribute in create element");
-                          });
+        });
 
         if !velem.events.is_empty() {
             let unique_id = create_unique_identifier();
 
             // set the data-sauron_vdom-id this will be read later on
             // when it's time to remove this element and its closures and event listeners
-            element.set_attribute(DATA_SAURON_VDOM_ID, &unique_id.to_string())
-                   .expect("Could not set attribute on element");
+            element
+                .set_attribute(DATA_SAURON_VDOM_ID, &unique_id.to_string())
+                .expect("Could not set attribute on element");
 
             closures.insert(unique_id, vec![]);
 
@@ -144,9 +161,10 @@ impl<T> CreatedNode<T> {
                         closure_wrap.as_ref().unchecked_ref(),
                     )
                     .expect("Unable to attached event listener");
-                closures.get_mut(&unique_id)
-                        .expect("Unable to get closure")
-                        .push((event_str, closure_wrap));
+                closures
+                    .get_mut(&unique_id)
+                    .expect("Unable to get closure")
+                    .push((event_str, closure_wrap));
             }
         }
 
@@ -164,9 +182,9 @@ impl<T> CreatedNode<T> {
                     // `ptns` = Percy text node separator
                     if previous_node_was_text {
                         let separator = document.create_comment("ptns");
-                        current_node.append_child(separator.as_ref()
-                                                  as &web_sys::Node)
-                                    .expect("Unable to append child");
+                        current_node
+                            .append_child(separator.as_ref() as &web_sys::Node)
+                            .expect("Unable to append child");
                     }
 
                     current_node
@@ -183,46 +201,55 @@ impl<T> CreatedNode<T> {
                     let child_elem: Element = child.node;
                     closures.extend(child.closures);
 
-                    element.append_child(&child_elem)
-                           .expect("Unable to append element node");
+                    element
+                        .append_child(&child_elem)
+                        .expect("Unable to append element node");
                 }
             }
         }
 
-        CreatedNode { node: element,
-                      closures }
+        CreatedNode {
+            node: element,
+            closures,
+        }
     }
 }
 
 /// This wrap into a closure the function that is dispatched when the event is triggered.
-fn create_closure_wrap<DSP, MSG>(program: &Rc<DSP>,
-                                 callback: &Callback<crate::Event, MSG>)
-                                 -> Closure<FnMut(web_sys::Event)>
-    where MSG: Clone + 'static,
-          DSP: Dispatch<MSG> + 'static + 'static
+fn create_closure_wrap<DSP, MSG>(
+    program: &Rc<DSP>,
+    callback: &Callback<crate::Event, MSG>,
+) -> Closure<FnMut(web_sys::Event)>
+where
+    MSG: Clone + 'static,
+    DSP: Dispatch<MSG> + 'static + 'static,
 {
     let callback_clone = callback.clone();
     let program_clone = Rc::clone(&program);
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
-                      let cb_event = crate::Event(event);
-                      let msg = callback_clone.emit(cb_event);
-                      program_clone.dispatch(msg);
-                  }))
+        let cb_event = crate::Event(event);
+        let msg = callback_clone.emit(cb_event);
+        program_clone.dispatch(msg);
+    }))
 }
 
 impl<DSP, MSG> DomUpdater<DSP, MSG>
-    where MSG: Clone + 'static,
-          DSP: Dispatch<MSG> + 'static
+where
+    MSG: Clone + 'static,
+    DSP: Dispatch<MSG> + 'static,
 {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.
-    pub fn new(current_vdom: crate::Node<MSG>,
-               root_node: &Node)
-               -> DomUpdater<DSP, MSG> {
-        DomUpdater { current_vdom,
-                     root_node: root_node.clone(),
-                     active_closures: ActiveClosure::new(),
-                     _phantom_dsp: PhantomData }
+    pub fn new(
+        current_vdom: crate::Node<MSG>,
+        root_node: &Node,
+    ) -> DomUpdater<DSP, MSG> {
+        DomUpdater {
+            current_vdom,
+            root_node: root_node.clone(),
+            active_closures: ActiveClosure::new(),
+            _phantom_dsp: PhantomData,
+        }
     }
 
     /// count the total active closures
@@ -254,8 +281,9 @@ impl<DSP, MSG> DomUpdater<DSP, MSG>
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         let root_element: &Element = self.root_node.unchecked_ref();
-        root_element.replace_with_with_node_1(&created_node.node)
-                    .expect("Could not append child to mount");
+        root_element
+            .replace_with_with_node_1(&created_node.node)
+            .expect("Could not append child to mount");
         self.root_node = created_node.node;
         self.active_closures = created_node.closures;
     }
@@ -264,10 +292,11 @@ impl<DSP, MSG> DomUpdater<DSP, MSG>
     ///
     /// A root `Node` will be created and appended (as a child) to your passed
     /// in mount element.
-    pub fn new_append_to_mount(program: &Rc<DSP>,
-                               current_vdom: crate::Node<MSG>,
-                               mount: &Element)
-                               -> DomUpdater<DSP, MSG> {
+    pub fn new_append_to_mount(
+        program: &Rc<DSP>,
+        current_vdom: crate::Node<MSG>,
+        mount: &Element,
+    ) -> DomUpdater<DSP, MSG> {
         let mut dom_updater = Self::new(current_vdom, mount);
         dom_updater.append_to_mount(program);
         dom_updater
@@ -277,10 +306,11 @@ impl<DSP, MSG> DomUpdater<DSP, MSG>
     ///
     /// A root `Node` will be created and it will replace your passed in mount
     /// element.
-    pub fn new_replace_mount(program: &Rc<DSP>,
-                             current_vdom: crate::Node<MSG>,
-                             mount: Element)
-                             -> DomUpdater<DSP, MSG> {
+    pub fn new_replace_mount(
+        program: &Rc<DSP>,
+        current_vdom: crate::Node<MSG>,
+        mount: Element,
+    ) -> DomUpdater<DSP, MSG> {
         let mut dom_updater = Self::new(current_vdom, &mount);
         dom_updater.replace_mount(program);
         dom_updater
@@ -290,15 +320,19 @@ impl<DSP, MSG> DomUpdater<DSP, MSG>
     ///
     /// Then use that diff to patch the real DOM in the user's browser so that they are
     /// seeing the latest state of the application.
-    pub fn update_dom(&mut self,
-                      program: &Rc<DSP>,
-                      new_vdom: crate::Node<MSG>) {
+    pub fn update_dom(
+        &mut self,
+        program: &Rc<DSP>,
+        new_vdom: crate::Node<MSG>,
+    ) {
         let patches = diff(&self.current_vdom, &new_vdom);
-        let active_closures =
-            patch(program,
-                  self.root_node.clone(),
-                  &mut self.active_closures,
-                  &patches).expect("Error in patching the dom");
+        let active_closures = patch(
+            program,
+            self.root_node.clone(),
+            &mut self.active_closures,
+            &patches,
+        )
+        .expect("Error in patching the dom");
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
     }
@@ -321,8 +355,10 @@ fn create_unique_identifier() -> u32 {
 
 impl From<CreatedNode<Element>> for CreatedNode<Node> {
     fn from(other: CreatedNode<Element>) -> CreatedNode<Node> {
-        CreatedNode { node: other.node.into(),
-                      closures: other.closures }
+        CreatedNode {
+            node: other.node.into(),
+            closures: other.closures,
+        }
     }
 }
 
