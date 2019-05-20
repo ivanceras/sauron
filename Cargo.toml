@@ -1,6 +1,6 @@
 [package]
 name = "sauron"
-version = "0.6.0"
+version = "0.7.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -12,8 +12,9 @@ edition = "2018"
 
 [dependencies]
 js-sys = "0.3.19"
-sauron_vdom = "0.6.0"
-wasm-bindgen = "0.2.42"
+sauron_vdom = "0.7.0"
+# Lock this to 0.2.43 for now see [issue#1547](https://github.com/rustwasm/wasm-bindgen/issues/1547)
+wasm-bindgen = "=0.2.43"
 lazy_static = "1.3.0"
 
 [dependencies.web-sys]
@@ -71,7 +72,7 @@ members = [
 ]
 
 [replace]
-"sauron:0.6.0" = { path = "." }
+"sauron:0.7.0" = { path = "." }
 "sauron_vdom:0.7.0" = { path = "crates/sauron_vdom" }
 
 
