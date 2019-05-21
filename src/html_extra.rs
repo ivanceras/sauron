@@ -14,6 +14,11 @@ declare_tags! {
     /// [`<title>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title)
     /// element.
     title;
+
+    /// Build a
+    /// [`<slot>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot)
+    /// element.
+    slot;
 }
 pub mod attributes {
     use sauron_vdom::{

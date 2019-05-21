@@ -547,10 +547,6 @@ declare_tags! {
     // Web components
 
     /// Build a
-    /// [`<slot>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot)
-    /// element.
-    slot;
-    /// Build a
     /// [`<template>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template)
     /// element.
     template;
