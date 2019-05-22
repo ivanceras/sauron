@@ -15,7 +15,7 @@
 //!    One crate to find the elements
 //!    One crate to bring JSON
 //!    And in the Rust code bind Strings
-//!    
+//!
 //!    This code, no other, is made by code elves
 //!    Who'd pawn parent process to get it themselves
 //!    Ruler of net troll and mortal and hacker
@@ -152,25 +152,23 @@ pub mod dom;
 #[macro_use]
 pub mod html;
 mod component;
-mod dispatch;
 pub mod html_extra;
 mod program;
 #[macro_use]
 pub mod svg;
 mod browser;
-mod cmd;
 mod http;
 pub mod svg_extra;
 pub mod test_fixtures;
 mod util;
 
 pub use component::Component;
-pub use dispatch::Dispatch;
 pub use dom::DomUpdater;
 pub use program::Program;
 pub use sauron_vdom::{
     diff,
     Callback,
+    Dispatch,
     Text,
 };
 pub use util::{
@@ -184,7 +182,6 @@ pub use util::{
 };
 
 pub use browser::Browser;
-pub use cmd::Cmd;
 pub use http::Http;
 
 use wasm_bindgen::{
@@ -211,3 +208,4 @@ pub type Node<MSG> = sauron_vdom::Node<&'static str, Event, MSG>;
 pub type Element<MSG> = sauron_vdom::Element<&'static str, Event, MSG>;
 pub type Patch<'a, MSG> = sauron_vdom::Patch<'a, &'static str, Event, MSG>;
 pub type Attribute<MSG> = sauron_vdom::builder::Attribute<Event, MSG>;
+pub type Cmd<APP, MSG> = sauron_vdom::Cmd<Program<APP, MSG>, MSG>;

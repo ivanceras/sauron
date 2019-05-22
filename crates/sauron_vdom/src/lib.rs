@@ -1,16 +1,20 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
+#![feature(arbitrary_self_types)]
 mod callback;
+mod cmd;
 mod diff;
+mod dispatch;
 mod patch;
 mod vnode;
 
-pub use vnode::builder;
-
 pub use callback::Callback;
+pub use cmd::Cmd;
 pub use diff::diff;
+pub use dispatch::Dispatch;
 pub use patch::Patch;
 pub use vnode::{
+    builder,
     Attribute,
     Element,
     Event,

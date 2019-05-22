@@ -1,25 +1,28 @@
 use crate::{
+    dispatch::Dispatch,
     Callback,
-    Program,
 };
 use std::{
     fmt::Debug,
+    marker::PhantomData,
     rc::Rc,
 };
 
-pub struct Cmd<APP, MSG>(pub Vec<Callback<Rc<Program<APP, MSG>>, ()>>);
-
-impl<APP, MSG> Cmd<APP, MSG>
+pub struct Cmd<DSP, MSG>(pub Vec<Callback<Rc<DSP>, ()>>, PhantomData<MSG>)
 where
-    APP: 'static,
+    DSP: Dispatch<MSG> + 'static;
+
+impl<DSP, MSG> Cmd<DSP, MSG>
+where
     MSG: Debug + 'static,
+    DSP: Dispatch<MSG> + 'static,
 {
     pub fn new<F>(cmd: F) -> Self
     where
-        F: Fn(Rc<Program<APP, MSG>>) + 'static,
+        F: Fn(Rc<DSP>) -> () + 'static,
     {
-        let cb: Callback<Rc<Program<APP, MSG>>, ()> = cmd.into();
-        Cmd(vec![cb])
+        let cb: Callback<Rc<DSP>, ()> = cmd.into();
+        Cmd(vec![cb], PhantomData)
     }
 
     pub fn batch(cmds: Vec<Self>) -> Self {
@@ -27,14 +30,14 @@ where
         for cmd in cmds {
             callbacks.extend(cmd.0);
         }
-        Cmd(callbacks)
+        Cmd(callbacks, PhantomData)
     }
 
     pub fn none() -> Self {
-        Cmd(vec![])
+        Cmd(vec![], PhantomData)
     }
 
-    pub fn emit(self, program: &Rc<Program<APP, MSG>>) {
+    pub fn emit(self, program: &Rc<DSP>) {
         for cb in self.0 {
             let program_clone = Rc::clone(&program);
             cb.emit(program_clone);

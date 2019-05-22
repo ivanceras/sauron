@@ -7,7 +7,7 @@ use std::fmt::Debug;
 /// The app should implement this trait for it to be handled by the Program
 pub trait Component<MSG>
 where
-    MSG: Debug + 'static,
+    MSG: Debug + Clone + 'static,
 {
     fn init(&self) -> Cmd<Self, MSG>
     where
