@@ -47,7 +47,6 @@ macro_rules! declare_svg_tags{
 }
 
 declare_svg_tags! {
-    a;
     animate;
     #[allow(non_snake_case)]
     animateMotion;
@@ -142,10 +141,8 @@ declare_svg_tags! {
     svg;
     switch;
     symbol;
-    text;
     #[allow(non_snake_case)]
     textPath;
-    title;
     tspan;
     unknown;
     view;

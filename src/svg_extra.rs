@@ -6,6 +6,9 @@ use crate::svg::SVG_NAMESPACE;
 
 declare_svg_tags! {
     style;
+    text;
+    a;
+    title;
 }
 
 pub mod attributes {
