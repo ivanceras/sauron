@@ -75,27 +75,27 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(self: &Rc<Self>, msg: MSG) {
-        #[cfg(feature = "performance")]
+        #[cfg(feature = "measure")]
         let t1 = crate::now();
         // update the app and emit the cmd returned from the update
         let cmd = self.app.borrow_mut().update(msg);
         cmd.emit(self);
         crate::log("Executing cmd..");
-        #[cfg(feature = "performance")]
+        #[cfg(feature = "measure")]
         let t2 = {
             let t2 = crate::now();
             crate::log!("app update took: {}ms", t2 - t1);
             t2
         };
         let view = self.app.borrow().view();
-        #[cfg(feature = "performance")]
+        #[cfg(feature = "measure")]
         let t3 = {
             let t3 = crate::now();
             crate::log!("app view took: {}ms", t3 - t2);
             t3
         };
         self.dom_updater.borrow_mut().update_dom(self, view);
-        #[cfg(feature = "performance")]
+        #[cfg(feature = "measure")]
         {
             let t4 = crate::now();
             crate::log!("dom update took: {}ms", t4 - t3);

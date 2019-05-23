@@ -1,4 +1,3 @@
-
 use std::rc::Rc;
 
 /// This trait is used in the DomUpdater to call the dispatch

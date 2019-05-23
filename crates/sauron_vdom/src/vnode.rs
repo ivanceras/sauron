@@ -73,23 +73,23 @@ where
     where
         F: Fn(MSG) -> MSG2 + 'static + Clone,
     {
-        let mut new_element: Element<T, EVENT, MSG2> = Element {
+        Element {
             tag: self.tag,
             attrs: self.attrs,
             namespace: self.namespace,
-            children: vec![],
-            events: BTreeMap::new(),
-        };
-        for child in self.children {
-            let new_child = child.map(func.clone());
-            new_element.children.push(new_child);
+            children: self
+                .children
+                .into_iter()
+                .map(|child| child.map(func.clone()))
+                .collect(),
+            events: self.events
+            .into_iter()
+            .fold(BTreeMap::new(), |mut acc, (event, cb)| {
+                acc.insert(event, cb.map(func.clone()));
+                acc
+            })
+
         }
-        for (event, cb) in self.events {
-            // map the callback to return something else
-            let new_cb = cb.map(func.clone());
-            new_element.events.insert(event, new_cb);
-        }
-        new_element
     }
 }
 
