@@ -61,7 +61,6 @@ declare_attributes! {
     checked;
     cite;
     class;
-    code;
     codebase;
     color;
     cols;

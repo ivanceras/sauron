@@ -30,5 +30,6 @@ pub mod attributes {
         span;
         label;
         form;
+        code;
     }
 }

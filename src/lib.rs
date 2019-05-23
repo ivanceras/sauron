@@ -1,4 +1,4 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 #![deny(clippy::all)]
 #![feature(type_alias_enum_variants)]
 #![feature(arbitrary_self_types)]
@@ -158,6 +158,8 @@ mod program;
 pub mod svg;
 mod browser;
 mod http;
+#[cfg(feature = "with-markdown")]
+mod markdown;
 pub mod svg_extra;
 pub mod test_fixtures;
 mod util;

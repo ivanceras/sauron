@@ -82,13 +82,13 @@ where
                 .into_iter()
                 .map(|child| child.map(func.clone()))
                 .collect(),
-            events: self.events
-            .into_iter()
-            .fold(BTreeMap::new(), |mut acc, (event, cb)| {
-                acc.insert(event, cb.map(func.clone()));
-                acc
-            })
-
+            events: self.events.into_iter().fold(
+                BTreeMap::new(),
+                |mut acc, (event, cb)| {
+                    acc.insert(event, cb.map(func.clone()));
+                    acc
+                },
+            ),
         }
     }
 }
