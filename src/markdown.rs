@@ -24,6 +24,7 @@ where
     let mut elems = vec![];
     let mut spine = vec![];
 
+    // Add a child to the previous encountered element
     macro_rules! add_child {
         ($child:expr) => {{
             let l = spine.len();
@@ -131,7 +132,7 @@ where
         }
         Tag::List(None) => ul([], []),
         Tag::List(Some(1)) => ol([], []),
-        Tag::List(Some(ref start)) => ol([class("start")], []),
+        Tag::List(Some(ref start)) => ol([attr("start", *start)], []),
         Tag::Item => li([], []),
         Tag::Table(_) => table([class("table")], []),
         Tag::TableHead => tr([], []),
