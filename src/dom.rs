@@ -228,6 +228,7 @@ where
     let program_clone = Rc::clone(&program);
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
+        event.stop_propagation();
         let cb_event = crate::Event(event);
         let msg = callback_clone.emit(cb_event);
         program_clone.dispatch(msg);
