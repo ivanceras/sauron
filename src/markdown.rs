@@ -140,6 +140,7 @@ where
         Tag::TableCell => td([], []),
         Tag::Emphasis => span([class("font-italic")], []),
         Tag::Strong => span([class("font-weight-bold")], []),
+        // TODO: parse the html block and convert to sauron node
         Tag::HtmlBlock => div([], []),
         Tag::Strikethrough => s([], []),
         Tag::Link(_, ref _href, ref _title) => {
