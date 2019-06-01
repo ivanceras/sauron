@@ -52,13 +52,26 @@ where
                     if let Some(element) = top.as_element() {
                         for r in element.children.iter_mut() {
                             if let Some(r) = r.as_element() {
-                                for (i, c) in r.children.iter_mut().enumerate() {
+                                for (i, c) in r.children.iter_mut().enumerate()
+                                {
                                     if let Some(tag) = c.as_element() {
                                         match aligns[i] {
                                             Alignment::None => {}
-                                            Alignment::Left => tag.add_attributes(vec![class("text-left")]),
-                                            Alignment::Center => tag.add_attributes(vec![class("text-center")]),
-                                            Alignment::Right => tag.add_attributes(vec![class("text-right")]),
+                                            Alignment::Left => {
+                                                tag.add_attributes(vec![class(
+                                                    "text-left",
+                                                )])
+                                            }
+                                            Alignment::Center => {
+                                                tag.add_attributes(vec![class(
+                                                    "text-center",
+                                                )])
+                                            }
+                                            Alignment::Right => {
+                                                tag.add_attributes(vec![class(
+                                                    "text-right",
+                                                )])
+                                            }
                                         }
                                     }
                                 }
@@ -184,7 +197,6 @@ look like:
         assert_eq!("<div><p><a href=\"http://dev.nodeca.com\" title=\"\">link text</a></p><p><a href=\"http://nodeca.github.io/pica/demo/\" title=\"title text!\">link with title</a></p></div>",
                    view.to_string());
     }
-
 
     #[test]
     fn test_md_tables() {

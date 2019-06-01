@@ -22,7 +22,7 @@ impl Browser {
     {
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
             let cb_clone = cb.clone();
-            let resize_callback: Closure<Fn(web_sys::Event)> =
+            let resize_callback: Closure<dyn Fn(web_sys::Event)> =
                 Closure::wrap(Box::new(move |_| {
                     let (window_width, window_height) = Self::get_size();
                     let msg = cb_clone(window_width, window_height);

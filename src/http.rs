@@ -66,7 +66,7 @@ impl Http {
             let fail_status_cb = fail_cb.clone();
 
             let promise = crate::window().fetch_with_str(&url_clone);
-            let cb: Closure<FnMut(JsValue)> =
+            let cb: Closure<dyn FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
                     let response: &Response = js_value.as_ref().unchecked_ref();
                     let status = response.status();
@@ -74,7 +74,7 @@ impl Http {
                         let response_promise = response.text();
                         if let Ok(response_promise) = response_promise {
                             let decoder_and_dispatcher_cb: Closure<
-                                FnMut(JsValue),
+                                dyn FnMut(JsValue),
                             > = Closure::once(decoder_and_dispatcher);
 
                             response_promise.then(&decoder_and_dispatcher_cb);
@@ -91,7 +91,7 @@ impl Http {
 
             let program_clone_response_error = Rc::clone(&program);
             let fail_cb_clone = fail_cb.clone();
-            let fail_closure: Closure<FnMut(JsValue)> =
+            let fail_closure: Closure<dyn FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
                     program_clone_response_error
                         .dispatch(fail_cb_clone(js_value));

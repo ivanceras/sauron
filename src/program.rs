@@ -112,7 +112,7 @@ where
 {
     fn dispatch(self: &Rc<Self>, msg: MSG) {
         let program_clone = Rc::clone(self);
-        let closure_raf: Closure<FnMut() + 'static> =
+        let closure_raf: Closure<dyn FnMut() + 'static> =
             Closure::once(move || {
                 program_clone.dispatch_inner(msg);
             });
