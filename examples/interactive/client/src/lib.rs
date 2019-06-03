@@ -40,7 +40,7 @@ impl Client {
         let app = App::new(0);
         let program = Program::new_replace_mount(app, &root_node);
         let program_clone = Rc::clone(&program);
-        let clock: Closure<Fn()> = Closure::wrap(Box::new(move || {
+        let clock: Closure<dyn Fn()> = Closure::wrap(Box::new(move || {
             program_clone.dispatch(Msg::Clock);
         }));
         window()

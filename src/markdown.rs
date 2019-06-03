@@ -211,7 +211,7 @@ look like:
 }
 "#;
         let view: Node<()> = render_markdown(md);
-        assert_eq!("<div><h2>Tables</h2><table class=\"table\"><tr><th class=\"text-left\" scope=\"col\">Option </th><th class=\"text-right\" scope=\"col\">Description </th></tr><tr><td class=\"text-left\">data   </td><td class=\"text-right\">path to data files to supply the data that will be passed into templates. </td></tr><tr><td class=\"text-left\">engine </td><td class=\"text-right\">engine to be used for processing templates. Handlebars is the default. </td></tr><tr><td class=\"text-left\">ext    </td><td class=\"text-right\">extension to be used for dest files. </td></tr><tr><td class=\"text-left\">}</td><td class=\"text-right\"></td></tr></table></div>",
+        assert_eq!("<div><h2>Tables</h2><table class=\"table\"><tr><th class=\"text-left\" scope=\"col\">Option</th><th class=\"text-right\" scope=\"col\">Description</th></tr><tr><td class=\"text-left\">data</td><td class=\"text-right\">path to data files to supply the data that will be passed into templates.</td></tr><tr><td class=\"text-left\">engine</td><td class=\"text-right\">engine to be used for processing templates. Handlebars is the default.</td></tr><tr><td class=\"text-left\">ext</td><td class=\"text-right\">extension to be used for dest files.</td></tr><tr><td class=\"text-left\">}</td><td class=\"text-right\"></td></tr></table></div>",
                    view.to_string());
     }
 }
