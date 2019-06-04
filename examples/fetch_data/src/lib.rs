@@ -53,7 +53,7 @@ impl App {
 }
 
 impl Component<Msg> for App {
-    fn init(&self) -> Cmd<App, Msg> {
+    fn init(&self) -> Cmd<Self, Msg> {
         let url = "https://reqres.in/api/users";
         let data_decoder = |v: String| {
             let data: Result<Data, _> = serde_json::from_str(&v);
