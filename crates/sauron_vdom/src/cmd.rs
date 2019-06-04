@@ -8,6 +8,12 @@ use std::{
     rc::Rc,
 };
 
+/// Cmd is a command to be executed by the system.
+/// This is returned at the init function of a component and is executed right
+/// after instantiation of that component.
+/// Cmd required a DSP object which is the Program as an argument
+/// The emit function is called with the program argument.
+/// The callback is supplied with the program an is then executed/emitted.
 pub struct Cmd<DSP, MSG>(pub Vec<Callback<Rc<DSP>, ()>>, PhantomData<MSG>)
 where
     DSP: Dispatch<MSG> + 'static;
