@@ -183,6 +183,7 @@ pub use util::{
     performance,
     request_animation_frame,
     window,
+    history,
 };
 
 pub use browser::Browser;

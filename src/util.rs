@@ -8,6 +8,10 @@ pub fn window() -> web_sys::Window {
     web_sys::window().expect("no global `window` exists")
 }
 
+pub fn history() -> web_sys::History {
+    window().history().expect("should have a history object")
+}
+
 pub fn request_animation_frame(f: &Closure<dyn FnMut()>) {
     window()
         .request_animation_frame(f.as_ref().unchecked_ref())

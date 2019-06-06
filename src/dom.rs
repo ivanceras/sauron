@@ -228,7 +228,11 @@ where
     let program_clone = Rc::clone(&program);
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
+        // stop propagation to the containers of this element to have
+        // a more fine grain control and expected results
         event.stop_propagation();
+        // prevent the reloading the page in href links
+        event.prevent_default();
         let cb_event = crate::Event(event);
         let msg = callback_clone.emit(cb_event);
         program_clone.dispatch(msg);
