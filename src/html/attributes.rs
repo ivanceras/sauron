@@ -273,14 +273,3 @@ where
     attributes
 }
 
-/// a helper function which append `px` into a value
-/// Example:
-/// ```ignore
-/// style("width", px(100))
-/// ```
-pub fn px<V>(v: V) -> String
-where
-    V: Into<Value> + Clone,
-{
-    format!("{}px", v.into())
-}

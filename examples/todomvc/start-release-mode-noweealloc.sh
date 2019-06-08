@@ -4,7 +4,7 @@ set -v
 
 . ./bootstrap.sh
 
-wasm-pack build --target no-modules --release -- --features "wee_alloc"
+wasm-pack build --target no-modules --release
 
 
 cp -r index.html style.css pkg ../../../todomvc-perf-comparison/todomvc-benchmark/todomvc/sauron/

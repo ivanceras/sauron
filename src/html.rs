@@ -13,6 +13,7 @@ pub use sauron_vdom::builder::{
 #[macro_use]
 pub mod attributes;
 pub mod events;
+pub mod units;
 
 #[inline]
 pub fn html_element<A, C, MSG>(
