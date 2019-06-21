@@ -61,6 +61,23 @@ where
             Node::Text(text) => Node::Text(Text::new(text.text)),
         }
     }
+
+    fn to_pretty_string(&self, indent: i32) -> String
+    where
+        T: ToString,
+    {
+        match self {
+            Node::Element(element) => element.to_pretty_string(indent),
+            Node::Text(text) => format!("{}", text),
+        }
+    }
+
+    fn is_text_node(&self) -> bool {
+        match self {
+            Node::Element(_) => false,
+            Node::Text(_) => true,
+        }
+    }
 }
 
 impl<T, EVENT, MSG> Element<T, EVENT, MSG>
@@ -90,6 +107,45 @@ where
                 },
             ),
         }
+    }
+
+    /// check if the children of this node is only 1 and it is a text node
+    fn is_children_a_node_text(&self) -> bool {
+        self.children.len() == 1 && self.children[0].is_text_node()
+    }
+
+    /// make a pretty string representation of this node
+    fn to_pretty_string(&self, indent: i32) -> String
+    where
+        T: ToString,
+    {
+        let mut buffer = String::new();
+        buffer += &format!("<{}", self.tag.to_string());
+
+        for (attr, value) in self.attrs.iter() {
+            buffer += &format!(r#" {}="{}""#, attr, value);
+        }
+        buffer += ">";
+
+        // do not indent if it is only text child node
+        if self.is_children_a_node_text() {
+            buffer += &format!("{}", self.children[0].to_pretty_string(indent));
+        } else {
+            // otherwise print all child nodes with each line and indented
+            for child in self.children.iter() {
+                buffer += &format!(
+                    "\n{}{}",
+                    padd(indent + 1),
+                    child.to_pretty_string(indent + 1)
+                );
+            }
+        }
+        // do not make a new line it if is only a text child node or it has no child nodes
+        if !(self.is_children_a_node_text() || self.children.is_empty()) {
+            buffer += &format!("\n{}", padd(indent));
+        }
+        buffer += &format!("</{}>", self.tag.to_string());
+        buffer
     }
 }
 
@@ -136,30 +192,6 @@ where
     }
 }
 
-impl<T, EVENT, MSG> fmt::Display for Element<T, EVENT, MSG>
-where
-    T: ToString,
-{
-    // Turn a Element and all of it's children (recursively) into an HTML string
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "<{}", self.tag.to_string())?;
-
-        for (attr, value) in self.attrs.iter() {
-            write!(f, r#" {}="{}""#, attr, value)?;
-        }
-
-        write!(f, ">")?;
-
-        for child in self.children.iter() {
-            write!(f, "{}", child)?;
-        }
-
-        write!(f, "</{}>", self.tag.to_string())?;
-
-        Ok(())
-    }
-}
-
 impl Text {
     pub fn new<S: Into<String>>(s: S) -> Self {
         Text { text: s.into() }
@@ -173,16 +205,14 @@ impl fmt::Display for Text {
     }
 }
 
-// Turn a Node into an HTML string (delegate impl to variants)
 impl<T, EVENT, MSG> fmt::Display for Node<T, EVENT, MSG>
 where
     T: ToString,
+    EVENT: 'static,
+    MSG: 'static,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Node::Element(element) => write!(f, "{}", element),
-            Node::Text(text) => write!(f, "{}", text),
-        }
+        write!(f, "{}", self.to_pretty_string(0))
     }
 }
 
@@ -190,4 +220,13 @@ impl<T, EVENT, MSG> From<Element<T, EVENT, MSG>> for Node<T, EVENT, MSG> {
     fn from(v: Element<T, EVENT, MSG>) -> Self {
         Node::Element(v)
     }
+}
+
+/// make a blank string with indented padd
+fn padd(n: i32) -> String {
+    let mut buffer = String::new();
+    for _ in 0..n {
+        buffer += "    ";
+    }
+    buffer
 }

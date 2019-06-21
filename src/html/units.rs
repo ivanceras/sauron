@@ -32,7 +32,7 @@ macro_rules! declare_units{
     }
 }
 
-declare_units!{
+declare_units! {
 
     /// a helper function which append `px` into a value
     /// Example:
@@ -53,16 +53,16 @@ declare_units!{
     vh;
 }
 
-declare_units!{
+declare_units! {
     r#in => "in";
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
-    fn test_units(){
+    fn test_units() {
         assert_eq!(px(1), "1px");
         assert_eq!(mm(1), "1mm");
         assert_eq!(cm(2), "2cm");

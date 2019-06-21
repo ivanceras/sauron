@@ -178,12 +178,12 @@ pub use sauron_vdom::{
 pub use util::{
     body,
     document,
+    history,
     log,
     now,
     performance,
     request_animation_frame,
     window,
-    history,
 };
 
 pub use browser::Browser;

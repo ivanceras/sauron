@@ -178,12 +178,20 @@ An h1 header
 look like:
   * this one
   * that one
-  * the other one
-            "#;
+  * the other one"#;
         let view: Node<()> = render_markdown(md);
+
+        let expected = r#"<div>
+    <h1>An h1 header</h1>
+    <p>look like:</p>
+    <ul>
+        <li>this one</li>
+        <li>that one</li>
+        <li>the other one</li>
+    </ul>
+</div>"#;
         println!("{}", view.to_string());
-        assert_eq!("<div><h1>An h1 header</h1><p>look like:</p><ul><li>this one</li><li>that one</li><li>the other one
-</li></ul></div>", view.to_string());
+        assert_eq!(expected, view.to_string());
     }
 
     #[test]
@@ -191,11 +199,17 @@ look like:
         let md = r#"
 [link text](http://dev.nodeca.com)
 
-[link with title](http://nodeca.github.io/pica/demo/ "title text!")
-"#;
+[link with title](http://nodeca.github.io/pica/demo/ "title text!")"#;
         let view: Node<()> = render_markdown(md);
-        assert_eq!("<div><p><a href=\"http://dev.nodeca.com\" title=\"\">link text</a></p><p><a href=\"http://nodeca.github.io/pica/demo/\" title=\"title text!\">link with title</a></p></div>",
-                   view.to_string());
+        let expected = r#"<div>
+    <p>
+        <a href="http://dev.nodeca.com" title="">link text</a>
+    </p>
+    <p>
+        <a href="http://nodeca.github.io/pica/demo/" title="title text!">link with title</a>
+    </p>
+</div>"#;
+        assert_eq!(expected, view.to_string());
     }
 
     #[test]
@@ -211,7 +225,31 @@ look like:
 }
 "#;
         let view: Node<()> = render_markdown(md);
-        assert_eq!("<div><h2>Tables</h2><table class=\"table\"><tr><th class=\"text-left\" scope=\"col\">Option</th><th class=\"text-right\" scope=\"col\">Description</th></tr><tr><td class=\"text-left\">data</td><td class=\"text-right\">path to data files to supply the data that will be passed into templates.</td></tr><tr><td class=\"text-left\">engine</td><td class=\"text-right\">engine to be used for processing templates. Handlebars is the default.</td></tr><tr><td class=\"text-left\">ext</td><td class=\"text-right\">extension to be used for dest files.</td></tr><tr><td class=\"text-left\">}</td><td class=\"text-right\"></td></tr></table></div>",
-                   view.to_string());
+        let expected = r#"<div>
+    <h2>Tables</h2>
+    <table class="table">
+        <tr>
+            <th class="text-left" scope="col">Option</th>
+            <th class="text-right" scope="col">Description</th>
+        </tr>
+        <tr>
+            <td class="text-left">data</td>
+            <td class="text-right">path to data files to supply the data that will be passed into templates.</td>
+        </tr>
+        <tr>
+            <td class="text-left">engine</td>
+            <td class="text-right">engine to be used for processing templates. Handlebars is the default.</td>
+        </tr>
+        <tr>
+            <td class="text-left">ext</td>
+            <td class="text-right">extension to be used for dest files.</td>
+        </tr>
+        <tr>
+            <td class="text-left">}</td>
+            <td class="text-right"></td>
+        </tr>
+    </table>
+</div>"#;
+        assert_eq!(expected, view.to_string());
     }
 }
