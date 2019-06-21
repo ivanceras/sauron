@@ -129,7 +129,7 @@ where
 
         // do not indent if it is only text child node
         if self.is_children_a_node_text() {
-            buffer += &format!("{}", self.children[0].to_pretty_string(indent));
+            buffer += &self.children[0].to_pretty_string(indent);
         } else {
             // otherwise print all child nodes with each line and indented
             for child in self.children.iter() {
