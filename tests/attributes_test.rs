@@ -7,8 +7,8 @@ use sauron::html::{
 #[test]
 fn test_styles() {
     let actual: Node<&'static str> = div(
-        [styles([("display", "flex"), ("flex-direction", "row")])],
-        [],
+        vec![styles([("display", "flex"), ("flex-direction", "row")])],
+        vec![],
     );
     let actual_html = format!("{}", actual);
     let expected: Node<&'static str> =

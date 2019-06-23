@@ -28,7 +28,7 @@ use sauron::Event;
 
 #[test]
 fn simple_builder() {
-    let mut div: Element<()> = Element::new("div");
+    let mut div: Element<()> = div(vec![], vec![]);
     div.add_attributes(vec![attr("class", "some-class")]);
     let expected: Element<()> = Element {
         tag: "div",
