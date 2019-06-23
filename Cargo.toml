@@ -47,6 +47,7 @@ features = [
 default = ["with-markdown"]
 measure = []
 with-markdown = ["pulldown-cmark"]
+no_request_animation_frame = [] # disable request animation frame
 
 [dev-dependencies]
 wasm-bindgen-test = "0.2.45"

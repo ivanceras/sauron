@@ -4,7 +4,7 @@ set -v
 
 . ./bootstrap.sh
 
-wasm-pack build --target no-modules --profiling
+wasm-pack build --target no-modules --profiling --
 
 sleep 1
 
