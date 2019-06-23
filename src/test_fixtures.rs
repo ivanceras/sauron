@@ -23,7 +23,7 @@ impl Component<()> for SimpleComponent {
     }
 
     fn view(&self) -> crate::Node<()> {
-        div([], [])
+        div([], vec![])
     }
 }
 

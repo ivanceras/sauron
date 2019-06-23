@@ -103,17 +103,17 @@ impl Component<Msg> for Model {
     fn view(&self) -> Node<Msg> {
         div(
             [class("todomvc-wrapper")],
-            [
+            vec![
                 section(
                     [class("todoapp")],
-                    [
+                    vec![
                         header(
                             [class("header")],
-                            [h1([], [text("todos")]), self.view_input()],
+                            vec![h1([], vec![text("todos")]), self.view_input()],
                         ),
                         section(
                             [class("main")],
-                            [
+                            vec![
                                 input(
                                     [
                                         class("toggle-all"),
@@ -121,7 +121,7 @@ impl Component<Msg> for Model {
                                         checked(self.is_all_completed()),
                                         onclick(|_| Msg::ToggleAll),
                                     ],
-                                    [],
+                                    vec![],
                                 ),
                                 ul([class("todo-list")], {
                                     self.entries
@@ -135,20 +135,20 @@ impl Component<Msg> for Model {
                         ),
                         footer(
                             [class("footer")],
-                            [
+                            vec![
                                 span(
                                     [class("todo-count")],
-                                    [
+                                    vec![
                                         strong(
                                             [],
-                                            [text(format!("{}", self.total()))],
+                                            vec![text(format!("{}", self.total()))],
                                         ),
                                         text(" item(s) left"),
                                     ],
                                 ),
                                 ul(
                                     [class("filters")],
-                                    [
+                                    vec![
                                         self.view_filter(Filter::All),
                                         self.view_filter(Filter::Active),
                                         self.view_filter(Filter::Completed),
@@ -159,7 +159,7 @@ impl Component<Msg> for Model {
                                         class("clear-completed"),
                                         onclick(|_| Msg::ClearCompleted),
                                     ],
-                                    [text(format!(
+                                    vec![text(format!(
                                         "Clear completed ({})",
                                         self.total_completed()
                                     ))],
@@ -170,31 +170,31 @@ impl Component<Msg> for Model {
                 ),
                 footer(
                     [class("info")],
-                    [
-                        p([], [text("Double-click to edit a todo")]),
+                    vec![
+                        p([], vec![text("Double-click to edit a todo")]),
                         p(
                             [],
-                            [
+                            vec![
                                 text("Written by "),
                                 a(
                                     [
                                         href("https://github.com/ivanceras/"),
                                         target("_blank"),
                                     ],
-                                    [text("Jovansonlee Cesar")],
+                                    vec![text("Jovansonlee Cesar")],
                                 ),
                             ],
                         ),
                         p(
                             [],
-                            [
+                            vec![
                                 text("Part of "),
                                 a(
                                     [
                                         href("http://todomvc.com/"),
                                         target("_blank"),
                                     ],
-                                    [text("TodoMVC")],
+                                    vec![text("TodoMVC")],
                                 ),
                             ],
                         ),
@@ -210,7 +210,7 @@ impl Model {
         let flt = filter.clone();
         li(
             [],
-            [a(
+            vec![a(
                 [
                     class(if self.filter == flt {
                         "selected"
@@ -220,7 +220,7 @@ impl Model {
                     href(flt.to_string()),
                     onclick(move |_| Msg::SetFilter(flt.clone())),
                 ],
-                [text(filter.to_string())],
+                vec![text(filter.to_string())],
             )],
         )
     }
@@ -240,7 +240,7 @@ impl Model {
                     }
                 }),
             ],
-            [],
+            vec![],
         )
     }
 }
@@ -255,10 +255,10 @@ fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
     }
     li(
         [class(class_name)],
-        [
+        vec![
             div(
                 [class("view")],
-                [
+                vec![
                     input(
                         [
                             class("toggle"),
@@ -266,15 +266,15 @@ fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
                             checked(entry.completed),
                             onclick(move |_| Msg::Toggle(idx)),
                         ],
-                        [],
+                        vec![],
                     ),
                     label(
                         [ondoubleclick(move |_| Msg::ToggleEdit(idx))],
-                        [text(format!("{}", entry.description))],
+                        vec![text(format!("{}", entry.description))],
                     ),
                     button(
                         [class("destroy"), onclick(move |_| Msg::Remove(idx))],
-                        [],
+                        vec![],
                     ),
                 ],
             ),
@@ -300,10 +300,10 @@ fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
                     }
                 }),
             ],
-            [],
+            vec![],
         )
     } else {
-        input([r#type("hidden")], [])
+        input([r#type("hidden")], vec![])
     }
 }
 

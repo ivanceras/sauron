@@ -16,13 +16,12 @@ pub mod events;
 pub mod units;
 
 #[inline]
-pub fn html_element<A, C, MSG>(
+pub fn html_element<A, MSG>(
     tag: &'static str,
     attrs: A,
-    children: C,
+    children: Vec<Node<MSG>>,
 ) -> Node<MSG>
 where
-    C: AsRef<[Node<MSG>]>,
     A: AsRef<[Attribute<MSG>]>,
     MSG: Clone,
 {
@@ -30,14 +29,13 @@ where
 }
 
 #[inline]
-pub fn html_element_ns<A, C, MSG>(
+pub fn html_element_ns<A, MSG>(
     tag: &'static str,
     namespace: &'static str,
     attrs: A,
-    children: C,
+    children: Vec<Node<MSG>>,
 ) -> Node<MSG>
 where
-    C: AsRef<[Node<MSG>]>,
     A: AsRef<[Attribute<MSG>]>,
     MSG: Clone,
 {
@@ -53,8 +51,8 @@ macro_rules! declare_tags {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
-                where C: AsRef<[$crate::Node<MSG>]>,
+            pub fn $name<A, MSG>(attrs: A, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
+                where
                       A: AsRef<[$crate::Attribute<MSG>]>,
                       MSG: Clone,
                 {

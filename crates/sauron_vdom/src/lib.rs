@@ -15,7 +15,6 @@ pub use dispatch::Dispatch;
 pub use patch::Patch;
 pub use vnode::{
     builder,
-    Attribute,
     Element,
     Event,
     Node,
@@ -24,3 +23,4 @@ pub use vnode::{
 };
 
 pub use vnode::event;
+pub use vnode::Attribute;

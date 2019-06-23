@@ -22,7 +22,7 @@ fn bench_view_builing_100_child_nodes(b: &mut Bencher) {
             (0..100)
                 .into_iter()
                 .map(|n| {
-                    div([class("child-div")], [text(format!("node: {}", n))])
+                    div([class("child-div")], vec![text(format!("node: {}", n))])
                 })
                 .collect::<Vec<Node<()>>>(),
         ));
@@ -44,7 +44,7 @@ fn bench_view_builing_100_nodes_with_100_child_nodes(b: &mut Bencher) {
                             .map(|n2| {
                                 div(
                                     [class("child-div")],
-                                    [text(format!("node: {}", n2))],
+                                    vec![text(format!("node: {}", n2))],
                                 )
                             })
                             .collect::<Vec<Node<()>>>(),

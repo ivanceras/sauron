@@ -19,7 +19,7 @@ fn main() {
                 println!("i've been clicked");
             }),
         ],
-        [element("div", [], [text("Hello world!")])],
+        vec![element("div", [], vec![text("Hello world!")])],
     );
 
     let new = element(
@@ -35,7 +35,7 @@ fn main() {
                 println!("i've been clicked");
             }),
         ],
-        [element("div", [], [text("Wazzup!")])],
+        vec![element("div", [], vec![text("Wazzup!")])],
     );
 
     println!("old: {}", old);

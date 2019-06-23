@@ -17,8 +17,8 @@ macro_rules! declare_svg_tags{
      ) => {
         $(
             $(#[$attr])*
-            pub fn $name<A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
-                where C: AsRef<[$crate::Node<MSG>]>,
+            pub fn $name<A, MSG>(attrs: A, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
+                where
                       A: AsRef<[$crate::Attribute<MSG>]>,
                       MSG: Clone,
                 {
@@ -34,8 +34,8 @@ macro_rules! declare_svg_tags{
      ) => {
         $(
             $(#[$attr])*
-            pub fn $name<A, C,MSG>(attrs: A, children: C) -> $crate::Node<MSG>
-                where C: AsRef<[$crate::Node<MSG>]>,
+            pub fn $name<A, MSG>(attrs: A, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
+                where
                       A: AsRef<[$crate::Attribute<MSG>]>,
                       MSG: Clone,
                 {

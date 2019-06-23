@@ -22,7 +22,7 @@ fn main() {
                 println!("i've been clicked");
             }),
         ],
-        [input([class("client"), r#type("checkbox")], [])],
+        vec![input([class("client"), r#type("checkbox")], vec![])],
     );
     let new = div(
         [
@@ -36,7 +36,7 @@ fn main() {
                 println!("i've been clicked2");
             }),
         ],
-        [input([class("client"), r#type("checkbox")], [])],
+        vec![input([class("client"), r#type("checkbox")], vec![])],
     );
     println!("{}", old);
     println!("{}", new);

@@ -6,33 +6,9 @@ use crate::{
     Value,
 };
 use std::convert::AsRef;
+use crate::vnode::AttribValue;
+use crate::vnode::Attribute;
 
-#[derive(Clone)]
-pub struct Attribute<EVENT, MSG>
-where
-    MSG: Clone,
-{
-    name: &'static str,
-    value: AttribValue<EVENT, MSG>,
-}
-
-#[derive(Clone)]
-pub enum AttribValue<EVENT, MSG>
-where
-    MSG: Clone,
-{
-    Value(Value),
-    Callback(Callback<EVENT, MSG>),
-}
-
-impl<EVENT, MSG> From<Callback<EVENT, MSG>> for AttribValue<EVENT, MSG>
-where
-    MSG: Clone,
-{
-    fn from(cb: Callback<EVENT, MSG>) -> Self {
-        AttribValue::Callback(cb)
-    }
-}
 
 impl<T, EVENT, MSG> Node<T, EVENT, MSG>
 where
@@ -140,13 +116,12 @@ where
 ///     );
 /// }
 /// ```
-pub fn element<A, C, T, EVENT, MSG>(
+pub fn element<A, T, EVENT, MSG>(
     tag: T,
     attrs: A,
-    children: C,
+    children: Vec<Node<T,EVENT,MSG>>,
 ) -> Node<T, EVENT, MSG>
 where
-    C: AsRef<[Node<T, EVENT, MSG>]>,
     A: AsRef<[Attribute<EVENT, MSG>]>,
     T: Clone,
     MSG: Clone,
@@ -154,14 +129,13 @@ where
 {
     element_ns(tag, None, attrs, children)
 }
-pub fn element_ns<A, C, T, EVENT, MSG>(
+pub fn element_ns<A, T, EVENT, MSG>(
     tag: T,
     namespace: Option<&'static str>,
     attrs: A,
-    children: C,
+    children: Vec<Node<T,EVENT,MSG>>,
 ) -> Node<T, EVENT, MSG>
 where
-    C: AsRef<[Node<T, EVENT, MSG>]>,
     A: AsRef<[Attribute<EVENT, MSG>]>,
     T: Clone,
     MSG: Clone,

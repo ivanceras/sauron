@@ -8,7 +8,6 @@ pub mod event;
 mod value;
 
 use crate::Callback;
-pub use builder::Attribute;
 pub use event::Event;
 pub use value::Value;
 
@@ -38,12 +37,37 @@ pub enum Node<T, EVENT, MSG> {
 }
 
 #[derive(Debug, PartialEq, Clone, Default)]
-pub struct Element<T, EVENT, MSG> {
+pub struct Element<T, EVENT, MSG>
+{
     pub tag: T,
     pub attrs: BTreeMap<&'static str, Value>,
     pub events: BTreeMap<&'static str, Callback<EVENT, MSG>>,
     pub children: Vec<Node<T, EVENT, MSG>>,
     pub namespace: Option<&'static str>,
+}
+
+#[derive(Clone)]
+pub struct Attribute<EVENT, MSG>
+    where MSG:Clone,
+{
+    name: &'static str,
+    value: AttribValue<EVENT, MSG>,
+}
+
+#[derive(Clone)]
+pub enum AttribValue<EVENT, MSG>
+    where MSG:Clone,
+{
+    Value(Value),
+    Callback(Callback<EVENT, MSG>),
+}
+
+impl<EVENT, MSG> From<Callback<EVENT, MSG>> for AttribValue<EVENT, MSG>
+    where MSG:Clone,
+{
+    fn from(cb: Callback<EVENT, MSG>) -> Self {
+        AttribValue::Callback(cb)
+    }
 }
 
 impl<T, EVENT, MSG> Node<T, EVENT, MSG>
@@ -83,7 +107,7 @@ where
 impl<T, EVENT, MSG> Element<T, EVENT, MSG>
 where
     EVENT: 'static,
-    MSG: 'static,
+    MSG:  'static,
 {
     /// map the return of the callback from MSG to MSG2
     pub fn map<F, MSG2>(self, func: F) -> Element<T, EVENT, MSG2>
@@ -162,31 +186,27 @@ where
 {
     #[inline]
     pub fn new(tag: T) -> Self {
-        Self::with_children(tag, [])
+        Self::with_children(tag, vec![])
     }
 
     /// Create a Element using the supplied tag name
     #[inline]
-    pub fn with_children<C>(tag: T, children: C) -> Self
-    where
-        C: AsRef<[Node<T, EVENT, MSG>]>,
+    pub fn with_children(tag: T, children: Vec<Node<T,EVENT,MSG>>) -> Self
     {
         Self::with_children_and_maybe_ns(tag, children, None)
     }
 
-    pub fn with_children_and_maybe_ns<C>(
+    pub fn with_children_and_maybe_ns(
         tag: T,
-        children: C,
+        children: Vec<Node<T,EVENT,MSG>>,
         ns: Option<&'static str>,
     ) -> Self
-    where
-        C: AsRef<[Node<T, EVENT, MSG>]>,
     {
         Element {
             tag,
             attrs: BTreeMap::new(),
             events: BTreeMap::new(),
-            children: children.as_ref().to_vec(),
+            children,
             namespace: ns,
         }
     }
@@ -216,7 +236,8 @@ where
     }
 }
 
-impl<T, EVENT, MSG> From<Element<T, EVENT, MSG>> for Node<T, EVENT, MSG> {
+impl<T, EVENT, MSG> From<Element<T, EVENT, MSG>> for Node<T, EVENT, MSG>
+{
     fn from(v: Element<T, EVENT, MSG>) -> Self {
         Node::Element(v)
     }

@@ -212,5 +212,5 @@ impl PartialEq for Event {
 pub type Node<MSG> = sauron_vdom::Node<&'static str, Event, MSG>;
 pub type Element<MSG> = sauron_vdom::Element<&'static str, Event, MSG>;
 pub type Patch<'a, MSG> = sauron_vdom::Patch<'a, &'static str, Event, MSG>;
-pub type Attribute<MSG> = sauron_vdom::builder::Attribute<Event, MSG>;
+pub type Attribute<MSG> = sauron_vdom::Attribute<Event, MSG>;
 pub type Cmd<APP, MSG> = sauron_vdom::Cmd<Program<APP, MSG>, MSG>;
