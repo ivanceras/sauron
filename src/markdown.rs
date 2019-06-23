@@ -160,10 +160,16 @@ where
         Tag::HtmlBlock => div(vec![], vec![]),
         Tag::Strikethrough => s(vec![], vec![]),
         Tag::Link(_, ref _href, ref _title) => {
-            a(vec![href(_href.to_string()), title(_title.to_string())], vec![])
+            a(
+                vec![href(_href.to_string()), title(_title.to_string())],
+                vec![],
+            )
         }
         Tag::Image(_, ref _src, ref _title) => {
-            img(vec![src(_src.to_string()), title(_title.to_string())], vec![])
+            img(
+                vec![src(_src.to_string()), title(_title.to_string())],
+                vec![],
+            )
         }
         Tag::FootnoteDefinition(ref _footnote_id) => span(vec![], vec![]),
     }
@@ -174,12 +180,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_md_with_html(){
+    fn test_md_with_html() {
         let md = r#"
 [Hello](link.html)
 <img src="img.jpeg"/>"#;
 
-        let expected = "<p>\n    <a href=\"link.html\" title=\"\">Hello</a>\n    \n\n</p>";
+        let expected =
+            "<p>\n    <a href=\"link.html\" title=\"\">Hello</a>\n    \n\n</p>";
         let view: Node<()> = render_markdown(md);
         assert_eq!(expected, view.to_string())
     }

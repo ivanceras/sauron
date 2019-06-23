@@ -213,8 +213,11 @@ mod tests {
             "The value in tuple should be flatten to string"
         );
 
-        let line: Node<&'static str, (), ()> =
-            element("line", vec![attr("transition", ("opacity", 1, "linear"))], vec![]);
+        let line: Node<&'static str, (), ()> = element(
+            "line",
+            vec![attr("transition", ("opacity", 1, "linear"))],
+            vec![],
+        );
         let expected = "<line transition=\"opacity 1 linear\"></line>";
         assert_eq!(
             format!("{}", line),
@@ -246,8 +249,11 @@ mod tests {
             "The value in array should be flatten to string"
         );
 
-        let line: Node<&'static str, (), ()> =
-            element("line", vec![attr("stroke-dasharray", [10, 20, 30, 40])], vec![]);
+        let line: Node<&'static str, (), ()> = element(
+            "line",
+            vec![attr("stroke-dasharray", [10, 20, 30, 40])],
+            vec![],
+        );
         let expected = "<line stroke-dasharray=\"10 20 30 40\"></line>";
         assert_eq!(
             format!("{}", line),

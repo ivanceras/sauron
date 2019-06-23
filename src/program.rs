@@ -9,7 +9,7 @@ use std::{
     fmt::Debug,
     rc::Rc,
 };
-#[cfg(not(feature="no_request_animation_frame"))]
+#[cfg(not(feature = "no_request_animation_frame"))]
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;
 
@@ -114,8 +114,7 @@ where
     MSG: PartialEq + Debug + Clone + 'static,
     APP: Component<MSG> + 'static,
 {
-
-    #[cfg(not(feature="no_request_animation_frame"))]
+    #[cfg(not(feature = "no_request_animation_frame"))]
     fn dispatch(self: &Rc<Self>, msg: MSG) {
         let program_clone = Rc::clone(self);
         let closure_raf: Closure<dyn FnMut() + 'static> =
@@ -126,7 +125,7 @@ where
         closure_raf.forget();
     }
 
-    #[cfg(feature="no_request_animation_frame")]
+    #[cfg(feature = "no_request_animation_frame")]
     fn dispatch(self: &Rc<Self>, msg: MSG) {
         self.dispatch_inner(msg)
     }
