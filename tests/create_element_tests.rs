@@ -40,7 +40,8 @@ wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 fn nested_divs() {
-    let vdiv: Node<()> = div([], [div([], [div([], [])])]); // <div> <div> <div></div> </div> </div>
+    let vdiv: Node<()> =
+        div(vec![], vec![div(vec![], vec![div(vec![], vec![])])]); // <div> <div> <div></div> </div> </div>
     let div: Element =
         CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
             .node
@@ -52,10 +53,10 @@ fn nested_divs() {
 #[wasm_bindgen_test]
 fn svg_element() {
     let vdiv: Node<()> = div(
-        [],
-        [svg(
-            [xmlns("http://www.w3.org/2000/svg")],
-            [circle([cx("50"), cy("50"), r("50")], [])],
+        vec![],
+        vec![svg(
+            vec![xmlns("http://www.w3.org/2000/svg")],
+            vec![circle(vec![cx("50"), cy("50"), r("50")], vec![])],
         )],
     );
     let div: Element =
@@ -71,7 +72,7 @@ fn svg_element() {
 
 #[wasm_bindgen_test]
 fn div_with_attributes() {
-    let vdiv: Node<()> = div([id("id-here"), class("two classes")], []);
+    let vdiv: Node<()> = div(vec![id("id-here"), class("two classes")], vec![]);
     let div: Element =
         CreatedNode::<Element>::create_dom_node(&simple_program(), &vdiv)
             .node
@@ -97,14 +98,14 @@ fn click_event() {
 
     let elem_id = "click-on-div";
     let vdiv: Node<()> = div(
-        [
+        vec![
             id(elem_id),
             onclick(move |_| {
                 console::log_1(&"clicked event called".into());
                 clicked_clone.set(true);
             }),
         ],
-        [],
+        vec![],
     );
 
     let _dom_updater =

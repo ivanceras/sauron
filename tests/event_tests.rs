@@ -16,10 +16,7 @@ use sauron::{
     test_fixtures::simple_program,
     Node,
 };
-use std::{
-    cell::RefCell,
-    collections::BTreeMap,
-};
+use std::cell::RefCell;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -32,7 +29,7 @@ fn on_input() {
     let elem_id = "input-element-1";
 
     let input: Node<()> = input(
-        [
+        vec![
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
             oninput(move |event: sauron_vdom::event::InputEvent| {
@@ -40,7 +37,7 @@ fn on_input() {
             }),
             value("End Text"),
         ],
-        [],
+        vec![],
     );
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
@@ -70,16 +67,16 @@ fn added_event() {
     let elem_id = "input-add-event-test";
 
     let old: Node<()> = input(
-        [
+        vec![
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
             value("End Text"),
         ],
-        [],
+        vec![],
     );
 
     let new = input(
-        [
+        vec![
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
             value("End Text"),
@@ -87,7 +84,7 @@ fn added_event() {
                 *text_clone.borrow_mut() = event.value;
             }),
         ],
-        [],
+        vec![],
     );
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
@@ -120,7 +117,7 @@ fn remove_event() {
     let elem_id = "input-remove-event-test";
 
     let old: Node<()> = input(
-        [
+        vec![
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
             value("End Text"),
@@ -128,16 +125,16 @@ fn remove_event() {
                 *text_clone.borrow_mut() = event.value;
             }),
         ],
-        [],
+        vec![],
     );
 
     let new = input(
-        [
+        vec![
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
             value("End Text"),
         ],
-        [],
+        vec![],
     );
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
@@ -166,18 +163,23 @@ fn remove_event() {
 #[wasm_bindgen_test]
 fn remove_event_from_truncated_children() {
     let old: Node<()> = div(
-        [],
-        [
-            button([onclick(|_| sauron::log("Clicked here"))], []),
-            button([onclick(|_| sauron::log("Clicked here"))], []),
-            button([onclick(|_| sauron::log("Clicked here"))], []),
-            button([onclick(|_| sauron::log("Clicked here"))], []),
-            button([onclick(|_| sauron::log("Clicked here"))], []),
+        vec![],
+        vec![
+            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
+            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
+            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
+            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
+            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
         ],
     );
 
-    let new: Node<()> =
-        div([], [button([onclick(|_| sauron::log("Clicked here"))], [])]);
+    let new: Node<()> = div(
+        vec![],
+        vec![button(
+            vec![onclick(|_| sauron::log("Clicked here"))],
+            vec![],
+        )],
+    );
 
     let body = sauron::body();
     let simple_program = simple_program();
@@ -205,18 +207,23 @@ fn remove_event_from_truncated_children() {
 #[wasm_bindgen_test]
 fn remove_event_from_truncated_children_some_with_no_events() {
     let old: Node<()> = div(
-        [],
-        [
-            button([onclick(|_| sauron::log("Clicked here"))], []),
-            button([onclick(|_| sauron::log("Clicked here"))], []),
-            button([], []),
-            button([], []),
-            button([onclick(|_| sauron::log("Clicked here"))], []),
+        vec![],
+        vec![
+            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
+            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
+            button(vec![], vec![]),
+            button(vec![], vec![]),
+            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
         ],
     );
 
-    let new: Node<()> =
-        div([], [button([onclick(|_| sauron::log("Clicked here"))], [])]);
+    let new: Node<()> = div(
+        vec![],
+        vec![button(
+            vec![onclick(|_| sauron::log("Clicked here"))],
+            vec![],
+        )],
+    );
 
     let body = sauron::body();
     let simple_program = simple_program();
@@ -243,9 +250,10 @@ fn remove_event_from_truncated_children_some_with_no_events() {
 
 #[wasm_bindgen_test]
 fn remove_event_from_replaced_node() {
-    let old: Node<()> = div([onclick(|_| sauron::log("I'm a div"))], []);
+    let old: Node<()> =
+        div(vec![onclick(|_| sauron::log("I'm a div"))], vec![]);
 
-    let new: Node<()> = p([], []);
+    let new: Node<()> = p(vec![], vec![]);
 
     let body = sauron::body();
     let simple_program = simple_program();
@@ -255,8 +263,7 @@ fn remove_event_from_replaced_node() {
             0,
             &sauron_vdom::Node::Element(sauron_vdom::Element {
                 tag: "p",
-                attrs: BTreeMap::new(),
-                events: BTreeMap::new(),
+                attrs: vec![],
                 children: vec![],
                 namespace: None
             })

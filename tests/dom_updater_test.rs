@@ -28,7 +28,7 @@ fn patches_dom() {
 
     let document = web_sys::window().unwrap().document().unwrap();
 
-    let sauron_vdom: Node<()> = div([], []);
+    let sauron_vdom: Node<()> = div(vec![], vec![]);
     let simple_program = simple_program();
     let mut dom_updater = DomUpdater::new_append_to_mount(
         &simple_program,
@@ -36,7 +36,7 @@ fn patches_dom() {
         &sauron::body(),
     );
 
-    let new_vdom = div([id("patched")], []); //html! { <div id="patched"></div> };
+    let new_vdom = div(vec![id("patched")], vec![]); //html! { <div id="patched"></div> };
     dom_updater.update_dom(&simple_program, new_vdom);
 
     assert_eq!(document.query_selector("#patched").unwrap().is_some(), true);
@@ -52,7 +52,7 @@ fn updates_active_closure_on_replace() {
     let body = sauron::body();
 
     let simple_program = simple_program();
-    let old = div([], []);
+    let old = div(vec![], vec![]);
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);
 
@@ -62,14 +62,14 @@ fn updates_active_closure_on_replace() {
     let elem_id = "update-active-closures-on-replace";
 
     let replace_node = input(
-        [
+        vec![
             id(elem_id),
             oninput(move |event: sauron_vdom::event::InputEvent| {
                 *text_clone.borrow_mut() = event.value;
             }),
             value("End Text"),
         ],
-        [],
+        vec![],
     );
 
     // New node replaces old node.
@@ -99,7 +99,7 @@ fn updates_active_closures_on_append() {
 
     let body = sauron::body();
 
-    let old = div([], []);
+    let old = div(vec![], vec![]);
     let simple_program = simple_program();
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);
@@ -111,16 +111,16 @@ fn updates_active_closures_on_append() {
 
     {
         let append_node = div(
-            [],
-            [input(
-                [
+            vec![],
+            vec![input(
+                vec![
                     id(elem_id),
                     oninput(move |event: sauron_vdom::event::InputEvent| {
                         *text_clone.borrow_mut() = event.value;
                     }),
                     value("End Text"),
                 ],
-                [],
+                vec![],
             )],
         );
 

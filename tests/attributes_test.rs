@@ -12,7 +12,7 @@ fn test_styles() {
     );
     let actual_html = format!("{}", actual);
     let expected: Node<&'static str> =
-        div([style("display:flex;flex-direction:row;")], []);
+        div(vec![style("display:flex;flex-direction:row;")], vec![]);
     let expected_html = format!("{}", expected);
     assert_eq!(actual_html, expected_html);
 }

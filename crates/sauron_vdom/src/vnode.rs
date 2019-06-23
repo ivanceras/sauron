@@ -294,6 +294,15 @@ where
     MSG: Clone + 'static,
     EVENT: Clone + 'static,
 {
+
+    pub fn with_tag(tag: T) -> Self {
+        Element{
+            tag,
+            attrs: vec![],
+            children: vec![],
+            namespace: None,
+        }
+    }
     pub fn get_attr(&self, key: &str) -> Option<&Attribute<EVENT, MSG>> {
         self.attrs.iter().find_map(|ref att| {
             if att.name == key {

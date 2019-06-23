@@ -55,7 +55,8 @@ where
         if let (Some(old_key_value), Some(new_key_value)) =
             (old_key_value, new_key_value)
         {
-            replace = old_key_value == new_key_value;
+            // replace if the 2 keys differ
+            replace = old_key_value != new_key_value;
         }
     }
 
@@ -151,30 +152,23 @@ where
     EVENT: PartialEq + Clone + 'static,
 {
     let mut patches = vec![];
-    let mut add_attributes: Vec<Attribute<EVENT, MSG>> = vec![];
+    let mut add_attributes: Vec<&Attribute<EVENT, MSG>> = vec![];
     let mut remove_attributes: Vec<&str> = vec![];
 
-    // TODO: -> split out into func
-    for new_attr in new_element.attrs.iter() {
+    for new_attr in new_element.attributes().iter() {
         match old_element.get_attrib_value(new_attr.name) {
             Some(old_attr_val) => {
                 if *old_attr_val != new_attr.value {
-                    add_attributes.push(Attribute::new(
-                        new_attr.name,
-                        new_attr.value.clone(),
-                    ));
+                    add_attributes.push(new_attr);
                 }
             }
             None => {
-                add_attributes.push(Attribute::new(
-                    new_attr.name,
-                    new_attr.value.clone(),
-                ));
+                add_attributes.push(new_attr);
             }
         };
     }
 
-    for old_attr in old_element.attrs.iter() {
+    for old_attr in old_element.attributes().iter() {
         if add_attributes
             .iter()
             .find(|attr| attr.name == old_attr.name)
