@@ -61,7 +61,10 @@ pub struct CreatedNode<T> {
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
-pub struct DomUpdater<DSP, MSG> {
+pub struct DomUpdater<DSP, MSG>
+where
+    MSG: Clone,
+{
     current_vdom: crate::Node<MSG>,
     root_node: Node,
 
@@ -133,9 +136,9 @@ impl<T> CreatedNode<T> {
 
         let mut closures = ActiveClosure::new();
 
-        velem.attrs.iter().for_each(|(name, value)| {
+        velem.attrs.iter().for_each(|attr| {
             element
-                .set_attribute(name, &value.to_string())
+                .set_attribute(attr.name, &attr.value.to_string())
                 .expect("Set element attribute in create element");
         });
 
@@ -241,7 +244,7 @@ where
 
 impl<DSP, MSG> DomUpdater<DSP, MSG>
 where
-    MSG: Clone + 'static,
+    MSG: PartialEq + Clone + 'static,
     DSP: Dispatch<MSG> + 'static,
 {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.

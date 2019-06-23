@@ -1,4 +1,4 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 #![deny(clippy::all)]
 #![feature(arbitrary_self_types)]
 mod callback;
@@ -22,5 +22,7 @@ pub use vnode::{
     Value,
 };
 
-pub use vnode::event;
-pub use vnode::Attribute;
+pub use vnode::{
+    event,
+    Attribute,
+};

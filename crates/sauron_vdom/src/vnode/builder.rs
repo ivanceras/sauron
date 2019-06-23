@@ -1,4 +1,8 @@
 use crate::{
+    vnode::{
+        AttribValue,
+        Attribute,
+    },
     Callback,
     Element,
     Node,
@@ -6,9 +10,6 @@ use crate::{
     Value,
 };
 use std::convert::AsRef;
-use crate::vnode::AttribValue;
-use crate::vnode::Attribute;
-
 
 impl<T, EVENT, MSG> Node<T, EVENT, MSG>
 where
@@ -50,45 +51,6 @@ where
     }
 }
 
-impl<T, EVENT, MSG> Element<T, EVENT, MSG>
-where
-    T: Clone,
-    MSG: Clone,
-    EVENT: Clone,
-{
-    #[inline]
-    pub fn add_attributes(&mut self, attrs: Vec<Attribute<EVENT, MSG>>) {
-        for a in attrs {
-            match a.value {
-                AttribValue::Value(ref v) => {
-                    if let Some(existing) = self.attrs.get_mut(a.name) {
-                        existing.append(v.clone());
-                    } else {
-                        self.attrs.insert(a.name, v.clone());
-                    }
-                }
-                AttribValue::Callback(ref v) => {
-                    self.events.insert(a.name, v.clone());
-                }
-            }
-        }
-    }
-
-    #[inline]
-    pub fn add_children(&mut self, children: Vec<Node<T, EVENT, MSG>>) {
-        self.children.extend(children);
-    }
-
-    #[inline]
-    pub fn add_event_listener(
-        &mut self,
-        event: &'static str,
-        cb: Callback<EVENT, MSG>,
-    ) {
-        self.events.insert(event, cb);
-    }
-}
-
 /// Create an element
 ///
 ///```
@@ -119,7 +81,7 @@ where
 pub fn element<A, T, EVENT, MSG>(
     tag: T,
     attrs: A,
-    children: Vec<Node<T,EVENT,MSG>>,
+    children: Vec<Node<T, EVENT, MSG>>,
 ) -> Node<T, EVENT, MSG>
 where
     A: AsRef<[Attribute<EVENT, MSG>]>,
@@ -133,7 +95,7 @@ pub fn element_ns<A, T, EVENT, MSG>(
     tag: T,
     namespace: Option<&'static str>,
     attrs: A,
-    children: Vec<Node<T,EVENT,MSG>>,
+    children: Vec<Node<T, EVENT, MSG>>,
 ) -> Node<T, EVENT, MSG>
 where
     A: AsRef<[Attribute<EVENT, MSG>]>,

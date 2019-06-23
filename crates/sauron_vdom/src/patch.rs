@@ -2,10 +2,10 @@
 //! The Percy Book.
 
 use crate::{
+    Attribute,
     Callback,
     Node,
     Text,
-    Value,
 };
 use std::collections::BTreeMap;
 
@@ -43,7 +43,10 @@ use std::collections::BTreeMap;
 ///
 /// The patching process is tested in a real browser in tests/diff_patch.rs
 #[derive(Debug, PartialEq)]
-pub enum Patch<'a, T, EVENT, MSG> {
+pub enum Patch<'a, T, EVENT, MSG>
+where
+    MSG: Clone,
+{
     /// Append a vector of child nodes to a parent node id.
     AppendChildren(NodeIdx, Vec<&'a Node<T, EVENT, MSG>>),
     /// For a `node_i32`, remove all children besides the first `len`
@@ -52,7 +55,7 @@ pub enum Patch<'a, T, EVENT, MSG> {
     /// ex: <div> becomes <span>
     Replace(NodeIdx, &'a Node<T, EVENT, MSG>),
     /// Add attributes that the new node has that the old node does not
-    AddAttributes(NodeIdx, BTreeMap<&'static str, &'a Value>),
+    AddAttributes(NodeIdx, Vec<Attribute<EVENT, MSG>>),
     /// Remove attributes that the old node had that the new node doesn't
     RemoveAttributes(NodeIdx, Vec<&'static str>),
     /// Add attributes that the new node has that the old node does not
@@ -65,7 +68,10 @@ pub enum Patch<'a, T, EVENT, MSG> {
 
 type NodeIdx = usize;
 
-impl<'a, T, EVENT, MSG> Patch<'a, T, EVENT, MSG> {
+impl<'a, T, EVENT, MSG> Patch<'a, T, EVENT, MSG>
+where
+    MSG: Clone,
+{
     /// Every Patch is meant to be applied to a specific node within the DOM. Get the
     /// index of the DOM node that this patch should apply to. DOM nodes are indexed
     /// depth first with the root node in the tree having index 0.

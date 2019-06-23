@@ -15,14 +15,17 @@ use web_sys::Node;
 /// Holds the app and the dom updater
 /// This is passed into the event listener and the dispatch program
 /// will be called after the event is triggered.
-pub struct Program<APP, MSG> {
+pub struct Program<APP, MSG>
+where
+    MSG: Clone,
+{
     pub app: Rc<RefCell<APP>>,
     pub dom_updater: Rc<RefCell<DomUpdater<Self, MSG>>>,
 }
 
 impl<APP, MSG> Program<APP, MSG>
 where
-    MSG: Debug + Clone + 'static,
+    MSG: PartialEq + Debug + Clone + 'static,
     APP: Component<MSG> + 'static,
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
@@ -107,7 +110,7 @@ where
 /// Defined in the DomUpdater::create_closure_wrap function
 impl<APP, MSG> Dispatch<MSG> for Program<APP, MSG>
 where
-    MSG: Debug + Clone + 'static,
+    MSG: PartialEq + Debug + Clone + 'static,
     APP: Component<MSG> + 'static,
 {
     fn dispatch(self: &Rc<Self>, msg: MSG) {

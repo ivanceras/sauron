@@ -83,7 +83,10 @@ where
 fn find_nodes<MSG>(
     root_node: Node,
     patches: &[Patch<MSG>],
-) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
+) -> (HashMap<usize, Element>, HashMap<usize, Text>)
+where
+    MSG: Clone,
+{
     let mut cur_node_idx = 0;
     let mut nodes_to_find = HashSet::new();
 
@@ -205,8 +208,8 @@ where
     let mut active_closures = ActiveClosure::new();
     match patch {
         Patch::AddAttributes(_node_idx, attributes) => {
-            for (attrib_name, attrib_val) in attributes.iter() {
-                node.set_attribute(attrib_name, &attrib_val.to_string())?;
+            for attr in attributes.iter() {
+                node.set_attribute(attr.name, &attr.value.to_string())?;
             }
 
             Ok(active_closures)

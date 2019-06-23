@@ -24,7 +24,7 @@ struct Entry {
     editing: bool,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum Msg {
     Add,
     Edit(usize),
@@ -109,7 +109,10 @@ impl Component<Msg> for Model {
                     vec![
                         header(
                             [class("header")],
-                            vec![h1([], vec![text("todos")]), self.view_input()],
+                            vec![
+                                h1([], vec![text("todos")]),
+                                self.view_input(),
+                            ],
                         ),
                         section(
                             [class("main")],
@@ -141,7 +144,10 @@ impl Component<Msg> for Model {
                                     vec![
                                         strong(
                                             [],
-                                            vec![text(format!("{}", self.total()))],
+                                            vec![text(format!(
+                                                "{}",
+                                                self.total()
+                                            ))],
                                         ),
                                         text(" item(s) left"),
                                     ],

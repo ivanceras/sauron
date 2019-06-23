@@ -27,7 +27,7 @@ impl Http {
         DE: Fn(String) -> OUT + Clone + 'static,
         OUT: 'static,
         APP: Component<MSG> + 'static,
-        MSG: Debug + Clone + 'static,
+        MSG: PartialEq + Debug + Clone + 'static,
     {
         let cb_clone = cb.clone();
         let response_decoder = move |js_value: JsValue| {
@@ -50,7 +50,7 @@ impl Http {
         F: Fn(JsValue) -> MSG + Clone + 'static,
         ERR: Fn(JsValue) -> MSG + Clone + 'static,
         APP: Component<MSG> + 'static,
-        MSG: Debug + Clone + 'static,
+        MSG: PartialEq + Debug + Clone + 'static,
     {
         let url_clone = url.to_string();
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {

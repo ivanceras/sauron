@@ -17,7 +17,7 @@ impl Browser {
     pub fn onresize<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
     where
         F: Fn(i32, i32) -> MSG + Clone + 'static,
-        MSG: Debug + Clone + 'static,
+        MSG: PartialEq + Debug + Clone + 'static,
         APP: Component<MSG> + 'static,
     {
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {

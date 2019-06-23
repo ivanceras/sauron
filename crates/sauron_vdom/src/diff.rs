@@ -1,9 +1,9 @@
 use crate::{
+    Attribute,
     Callback,
     Element,
     Node,
     Patch,
-    Value,
 };
 use std::{
     cmp::min,
@@ -18,7 +18,9 @@ pub fn diff<'a, T, EVENT, MSG>(
     new: &'a Node<T, EVENT, MSG>,
 ) -> Vec<Patch<'a, T, EVENT, MSG>>
 where
-    T: PartialEq,
+    T: PartialEq + Clone,
+    MSG: PartialEq + Clone + 'static,
+    EVENT: PartialEq + Clone + 'static,
 {
     diff_recursive(&old, &new, &mut 0)
 }
@@ -29,7 +31,9 @@ fn diff_recursive<'a, 'b, T, EVENT, MSG>(
     cur_node_idx: &'b mut usize,
 ) -> Vec<Patch<'a, T, EVENT, MSG>>
 where
-    T: PartialEq,
+    T: PartialEq + Clone,
+    MSG: PartialEq + Clone + 'static,
+    EVENT: PartialEq + Clone + 'static,
 {
     let mut patches = vec![];
     // Different enum variants, replace!
@@ -46,10 +50,12 @@ where
         // TODO: More robust key support. This is just an early stopgap to allow you to force replace
         // an element... say if it's event changed. Just change the key name for now.
         // In the future we want keys to be used to create a Patch::ReOrder to re-order siblings
-        if old_element.attrs.get("key").is_some()
-            && old_element.attrs.get("key") != new_element.attrs.get("key")
+        let old_key_value = old_element.get_attrib_value("key");
+        let new_key_value = new_element.get_attrib_value("key");
+        if let (Some(old_key_value), Some(new_key_value)) =
+            (old_key_value, new_key_value)
         {
-            replace = true;
+            replace = old_key_value == new_key_value;
         }
     }
 
@@ -138,39 +144,53 @@ fn diff_attributes<'a, 'b, T, EVENT, MSG>(
     old_element: &'a Element<T, EVENT, MSG>,
     new_element: &'a Element<T, EVENT, MSG>,
     cur_node_idx: &'b mut usize,
-) -> Vec<Patch<'a, T, EVENT, MSG>> {
+) -> Vec<Patch<'a, T, EVENT, MSG>>
+where
+    MSG: PartialEq + Clone + 'static,
+    T: Clone,
+    EVENT: PartialEq + Clone + 'static,
+{
     let mut patches = vec![];
-    let mut add_attributes: BTreeMap<&str, &Value> = BTreeMap::new();
+    let mut add_attributes: Vec<Attribute<EVENT, MSG>> = vec![];
     let mut remove_attributes: Vec<&str> = vec![];
 
     // TODO: -> split out into func
-    for (new_attr_name, new_attr_val) in new_element.attrs.iter() {
-        match old_element.attrs.get(new_attr_name) {
-            Some(ref old_attr_val) => {
-                if old_attr_val != &new_attr_val {
-                    add_attributes.insert(new_attr_name, new_attr_val);
+    for new_attr in new_element.attrs.iter() {
+        match old_element.get_attrib_value(new_attr.name) {
+            Some(old_attr_val) => {
+                if *old_attr_val != new_attr.value {
+                    add_attributes.push(Attribute::new(
+                        new_attr.name,
+                        new_attr.value.clone(),
+                    ));
                 }
             }
             None => {
-                add_attributes.insert(new_attr_name, new_attr_val);
+                add_attributes.push(Attribute::new(
+                    new_attr.name,
+                    new_attr.value.clone(),
+                ));
             }
         };
     }
 
-    // TODO: -> split out into func
-    for (old_attr_name, old_attr_val) in old_element.attrs.iter() {
-        if add_attributes.get(&old_attr_name[..]).is_some() {
+    for old_attr in old_element.attrs.iter() {
+        if add_attributes
+            .iter()
+            .find(|attr| attr.name == old_attr.name)
+            .is_some()
+        {
             continue;
         };
 
-        match new_element.attrs.get(old_attr_name) {
-            Some(ref new_attr_val) => {
-                if new_attr_val != &old_attr_val {
-                    remove_attributes.push(old_attr_name);
+        match new_element.get_attr(old_attr.name) {
+            Some(ref new_attr) => {
+                if new_attr.value != old_attr.value {
+                    remove_attributes.push(old_attr.name);
                 }
             }
             None => {
-                remove_attributes.push(old_attr_name);
+                remove_attributes.push(old_attr.name);
             }
         };
     }
@@ -189,7 +209,10 @@ fn diff_event_listener<'a, 'b, T, EVENT, MSG>(
     old_element: &'a Element<T, EVENT, MSG>,
     new_element: &'a Element<T, EVENT, MSG>,
     cur_node_idx: &'b mut usize,
-) -> Vec<Patch<'a, T, EVENT, MSG>> {
+) -> Vec<Patch<'a, T, EVENT, MSG>>
+where
+    MSG: Clone,
+{
     let mut patches = vec![];
     let mut add_event_listener: BTreeMap<&str, &Callback<EVENT, MSG>> =
         BTreeMap::new();
@@ -232,7 +255,9 @@ fn diff_event_listener<'a, 'b, T, EVENT, MSG>(
 fn increment_node_idx_for_children<T, EVENT, MSG>(
     old: &Node<T, EVENT, MSG>,
     cur_node_idx: &mut usize,
-) {
+) where
+    MSG: Clone,
+{
     *cur_node_idx += 1;
     if let Node::Element(element_node) = old {
         for child in element_node.children.iter() {
