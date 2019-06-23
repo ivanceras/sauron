@@ -1,9 +1,7 @@
 #![deny(warnings)]
 use sauron_vdom::*;
-use std::{
-    collections::BTreeMap,
-    iter::FromIterator,
-};
+use sauron_vdom::builder::attr;
+use sauron_vdom::builder::on;
 
 #[test]
 fn test_replace_node() {
@@ -28,19 +26,19 @@ fn test_replace_node() {
 fn test_simple_diff() {
     let old: Node<&'static str, (), ()> = Node::Element(Element {
         tag: "div",
-        attrs: BTreeMap::from_iter(vec![
-            ("id", "some-id".into()),
-            ("class", "some-class".into()),
-        ]),
+        attrs: vec![
+            attr("id", "some-id"),
+            attr("class", "some-class"),
+        ],
         ..Default::default()
     });
 
-    let new = Node::Element(Element {
+    let new:Node<&'static str, (), () > = Node::Element(Element {
         tag: "div",
-        attrs: BTreeMap::from_iter(vec![
-            ("id", "some-id".into()),
-            ("class", "some-class".into()),
-        ]),
+        attrs: vec![
+            attr("id", "some-id"),
+            attr("class", "some-class"),
+        ],
         ..Default::default()
     });
 
@@ -52,30 +50,29 @@ fn test_simple_diff() {
 fn test_class_changed() {
     let old: Node<&'static str, (), ()> = Node::Element(Element {
         tag: "div",
-        attrs: BTreeMap::from_iter(vec![
-            ("id", "some-id".into()),
-            ("class", "some-class".into()),
-        ]),
+        attrs:vec![
+            attr("id", "some-id"),
+            attr("class", "some-class"),
+        ],
         ..Default::default()
     });
 
     let new = Node::Element(Element {
         tag: "div",
-        attrs: BTreeMap::from_iter(vec![
-            ("id", "some-id".into()),
-            ("class", "some-class2".into()),
-        ]),
+        attrs: vec![
+            attr("id", "some-id"),
+            attr("class", "some-class2"),
+        ],
         ..Default::default()
     });
 
     let diff = diff(&old, &new);
-    let class2 = Value::Str("some-class2");
     assert_eq!(
         diff,
         vec![Patch::AddAttributes(
             0,
-            BTreeMap::from_iter(vec![("class", &class2),])
-        )]
+            vec![&attr("class","some-class2")])
+        ]
     )
 }
 
@@ -83,16 +80,16 @@ fn test_class_changed() {
 fn test_class_removed() {
     let old: Node<&'static str, (), ()> = Node::Element(Element {
         tag: "div",
-        attrs: BTreeMap::from_iter(vec![
-            ("id", "some-id".into()),
-            ("class", "some-class".into()),
-        ]),
+        attrs: vec![
+            attr("id","some-id"),
+            attr("class","some-class"),
+        ],
         ..Default::default()
     });
 
     let new = Node::Element(Element {
         tag: "div",
-        attrs: BTreeMap::from_iter(vec![("id", "some-id".into())]),
+        attrs:vec![attr("id","some-id")],
         ..Default::default()
     });
 
@@ -106,16 +103,14 @@ fn no_change_event() {
     let cb: Callback<(), ()> = func.into();
     let old: Node<&'static str, (), ()> = Node::Element(Element {
         tag: "div",
-        events: BTreeMap::from_iter(vec![("click", cb.clone())]),
-        attrs: BTreeMap::new(),
+        attrs: vec![on("click",cb.clone())],
         children: vec![],
         namespace: None,
     });
 
     let new = Node::Element(Element {
         tag: "div",
-        events: BTreeMap::from_iter(vec![("click", cb)]),
-        attrs: BTreeMap::new(),
+        attrs:vec![on("click", cb)],
         children: vec![],
         namespace: None,
     });
@@ -131,16 +126,14 @@ fn add_event() {
 
     let old: Node<&'static str, (), ()> = Node::Element(Element {
         tag: "div",
-        attrs: BTreeMap::new(),
-        events: BTreeMap::new(),
+        attrs: vec![] ,
         children: vec![],
         namespace: None,
     });
 
     let new = Node::Element(Element {
         tag: "div",
-        events: BTreeMap::from_iter(vec![("click", cb.clone())]),
-        attrs: BTreeMap::new(),
+        attrs: vec![on("click", cb.clone())],
         children: vec![],
         namespace: None,
     });
@@ -150,7 +143,7 @@ fn add_event() {
         diff,
         vec![Patch::AddEventListener(
             0,
-            BTreeMap::from_iter(vec![("click", &cb)])
-        )]
+            vec![&on("click", cb)])
+        ]
     )
 }

@@ -1,3 +1,4 @@
+#![deny(warnings)]
 use sauron::Node;
 
 use sauron::html::{

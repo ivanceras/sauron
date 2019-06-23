@@ -22,7 +22,7 @@ use crate::{
 /// fn main() {
 ///     let old: Node<&'static str, (), ()> = element(
 ///         "div",
-///         [
+///         vec![
 ///             attr("class", "some-class"),
 ///             attr("id", "some-id"),
 ///             on("click", |_| {
@@ -33,7 +33,7 @@ use crate::{
 ///                 println!("i've been clicked");
 ///             }),
 ///         ],
-///         [element("div", [], [text("Hello world!")])],
+///         vec![element("div", vec![], vec![text("Hello world!")])],
 ///     );
 /// }
 /// ```

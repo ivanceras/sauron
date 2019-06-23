@@ -1,3 +1,4 @@
+#![deny(warnings)]
 #![feature(type_alias_enum_variants)]
 use sauron::{
     diff,
@@ -17,11 +18,6 @@ use sauron_vdom::{
     },
     Callback,
     Text,
-    Value,
-};
-use std::{
-    collections::BTreeMap,
-    iter::FromIterator,
 };
 
 use sauron::Event;

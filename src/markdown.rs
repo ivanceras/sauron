@@ -47,7 +47,7 @@ where
                 assert!(l >= 1);
                 let mut top = spine.pop().unwrap();
                 if let Tag::CodeBlock(_) = tag {
-                    top = pre([], [top]);
+                    top = pre(vec![], vec![top]);
                 } else if let Tag::Table(aligns) = tag {
                     if let Some(element) = top.as_element() {
                         for r in element.children.iter_mut() {
@@ -99,7 +99,7 @@ where
             }
             Event::Text(content) => add_child!(text(content)),
             Event::SoftBreak => add_child!(text("\n")),
-            Event::HardBreak => add_child!(br([], [])),
+            Event::HardBreak => add_child!(br(vec![], vec![])),
             _ => println!("Unknown event: {:#?}", ev),
         }
     }
@@ -107,7 +107,7 @@ where
     if elems.len() == 1 {
         elems.pop().unwrap()
     } else {
-        div([], elems)
+        div(vec![], elems)
     }
 }
 
@@ -116,53 +116,53 @@ where
     MSG: Clone + 'static,
 {
     match t {
-        Tag::Paragraph => p([], []),
-        Tag::Rule => hr([], []),
+        Tag::Paragraph => p(vec![], vec![]),
+        Tag::Rule => hr(vec![], vec![]),
         Tag::Header(n) => {
             assert!(n > 0);
             assert!(n < 7);
             match n {
-                1 => h1([], []),
-                2 => h2([], []),
-                3 => h3([], []),
-                4 => h4([], []),
-                5 => h5([], []),
-                6 => h6([], []),
+                1 => h1(vec![], vec![]),
+                2 => h2(vec![], vec![]),
+                3 => h3(vec![], vec![]),
+                4 => h4(vec![], vec![]),
+                5 => h5(vec![], vec![]),
+                6 => h6(vec![], vec![]),
                 _ => unreachable!(),
             }
         }
-        Tag::BlockQuote => blockquote([class("blockquote")], []),
+        Tag::BlockQuote => blockquote(vec![class("blockquote")], vec![]),
         Tag::CodeBlock(lang) => {
             code(
-                [classes_flag([
+                vec![classes_flag(vec![
                     ("html-language", lang.as_ref() == "html"),
                     ("rust-language", lang.as_ref() == "rust"),
                     ("java-language", lang.as_ref() == "java"),
                     ("c-language", lang.as_ref() == "c-language"),
                 ])],
-                [],
+                vec![],
             )
         }
-        Tag::List(None) => ul([], []),
-        Tag::List(Some(1)) => ol([], []),
-        Tag::List(Some(ref start)) => ol([attr("start", *start)], []),
-        Tag::Item => li([], []),
-        Tag::Table(_) => table([class("table")], []),
-        Tag::TableHead => tr([], []),
-        Tag::TableRow => tr([], []),
-        Tag::TableCell => td([], []),
-        Tag::Emphasis => span([class("font-italic")], []),
-        Tag::Strong => span([class("font-weight-bold")], []),
+        Tag::List(None) => ul(vec![], vec![]),
+        Tag::List(Some(1)) => ol(vec![], vec![]),
+        Tag::List(Some(ref start)) => ol(vec![attr("start", *start)], vec![]),
+        Tag::Item => li(vec![], vec![]),
+        Tag::Table(_) => table(vec![class("table")], vec![]),
+        Tag::TableHead => tr(vec![], vec![]),
+        Tag::TableRow => tr(vec![], vec![]),
+        Tag::TableCell => td(vec![], vec![]),
+        Tag::Emphasis => span(vec![class("font-italic")], vec![]),
+        Tag::Strong => span(vec![class("font-weight-bold")], vec![]),
         // TODO: parse the html block and convert to sauron node
-        Tag::HtmlBlock => div([], []),
-        Tag::Strikethrough => s([], []),
+        Tag::HtmlBlock => div(vec![], vec![]),
+        Tag::Strikethrough => s(vec![], vec![]),
         Tag::Link(_, ref _href, ref _title) => {
-            a([href(_href.to_string()), title(_title.to_string())], [])
+            a(vec![href(_href.to_string()), title(_title.to_string())], vec![])
         }
         Tag::Image(_, ref _src, ref _title) => {
-            img([src(_src.to_string()), title(_title.to_string())], [])
+            img(vec![src(_src.to_string()), title(_title.to_string())], vec![])
         }
-        Tag::FootnoteDefinition(ref _footnote_id) => span([], []),
+        Tag::FootnoteDefinition(ref _footnote_id) => span(vec![], vec![]),
     }
 }
 
@@ -229,8 +229,8 @@ look like:
     <h2>Tables</h2>
     <table class="table">
         <tr>
-            <th class="text-left" scope="col">Option</th>
-            <th class="text-right" scope="col">Description</th>
+            <th scope="col" class="text-left">Option</th>
+            <th scope="col" class="text-right">Description</th>
         </tr>
         <tr>
             <td class="text-left">data</td>

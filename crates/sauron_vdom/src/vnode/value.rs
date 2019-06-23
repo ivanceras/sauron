@@ -196,7 +196,7 @@ mod tests {
     #[test]
     fn tuple_value() {
         let line: Node<&'static str, (), ()> =
-            element("line", [attr("stroke-dasharray", (10, 20))], []);
+            element("line", vec![attr("stroke-dasharray", (10, 20))], vec![]);
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(
             format!("{}", line),
@@ -205,7 +205,7 @@ mod tests {
         );
 
         let line: Node<&'static str, (), ()> =
-            element("line", [attr("transition", ("opacity", 1))], []);
+            element("line", vec![attr("transition", ("opacity", 1))], vec![]);
         let expected = "<line transition=\"opacity 1\"></line>";
         assert_eq!(
             format!("{}", line),
@@ -214,7 +214,7 @@ mod tests {
         );
 
         let line: Node<&'static str, (), ()> =
-            element("line", [attr("transition", ("opacity", 1, "linear"))], []);
+            element("line", vec![attr("transition", ("opacity", 1, "linear"))], vec![]);
         let expected = "<line transition=\"opacity 1 linear\"></line>";
         assert_eq!(
             format!("{}", line),
@@ -224,8 +224,8 @@ mod tests {
 
         let line: Node<&'static str, (), ()> = element(
             "line",
-            [attr("transition", ("opacity", 1, "linear", true))],
-            [],
+            vec![attr("transition", ("opacity", 1, "linear", true))],
+            vec![],
         );
         let expected = "<line transition=\"opacity 1 linear true\"></line>";
         assert_eq!(
@@ -238,7 +238,7 @@ mod tests {
     #[test]
     fn array_value() {
         let line: Node<&'static str, (), ()> =
-            element("line", [attr("stroke-dasharray", [10, 20])], []);
+            element("line", vec![attr("stroke-dasharray", [10, 20])], vec![]);
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(
             format!("{}", line),
@@ -247,7 +247,7 @@ mod tests {
         );
 
         let line: Node<&'static str, (), ()> =
-            element("line", [attr("stroke-dasharray", [10, 20, 30, 40])], []);
+            element("line", vec![attr("stroke-dasharray", [10, 20, 30, 40])], vec![]);
         let expected = "<line stroke-dasharray=\"10 20 30 40\"></line>";
         assert_eq!(
             format!("{}", line),
