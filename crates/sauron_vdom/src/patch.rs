@@ -45,7 +45,8 @@ use std::collections::BTreeMap;
 #[derive(Debug, PartialEq)]
 pub enum Patch<'a, T, EVENT, MSG>
 where
-    MSG: Clone,
+    MSG: Clone +'static,
+    EVENT: 'static,
 {
     /// Append a vector of child nodes to a parent node id.
     AppendChildren(NodeIdx, Vec<&'a Node<T, EVENT, MSG>>),
@@ -59,7 +60,7 @@ where
     /// Remove attributes that the old node had that the new node doesn't
     RemoveAttributes(NodeIdx, Vec<&'static str>),
     /// Add attributes that the new node has that the old node does not
-    AddEventListener(NodeIdx, BTreeMap<&'static str, &'a Callback<EVENT, MSG>>),
+    AddEventListener(NodeIdx, Vec<&'a Attribute<EVENT, MSG>>),
     /// Remove attributes that the old node had that the new node doesn't
     RemoveEventListener(NodeIdx, Vec<&'static str>),
     /// Change the text of a Text node.

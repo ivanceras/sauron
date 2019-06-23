@@ -17,7 +17,7 @@ use web_sys::Node;
 /// will be called after the event is triggered.
 pub struct Program<APP, MSG>
 where
-    MSG: Clone,
+    MSG: Clone + 'static,
 {
     pub app: Rc<RefCell<APP>>,
     pub dom_updater: Rc<RefCell<DomUpdater<Self, MSG>>>,

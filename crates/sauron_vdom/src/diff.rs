@@ -211,31 +211,33 @@ fn diff_event_listener<'a, 'b, T, EVENT, MSG>(
     cur_node_idx: &'b mut usize,
 ) -> Vec<Patch<'a, T, EVENT, MSG>>
 where
-    MSG: Clone,
+    MSG: PartialEq + Clone + 'static,
+    T: Clone,
+    EVENT: PartialEq + Clone + 'static,
 {
     let mut patches = vec![];
-    let mut add_event_listener: BTreeMap<&str, &Callback<EVENT, MSG>> =
-        BTreeMap::new();
+    let mut add_event_listener: Vec<&Attribute<EVENT,MSG>> = vec![];
     let mut remove_event_listener: Vec<&str> = vec![];
 
-    for (new_event_name, new_event_cb) in new_element.events.iter() {
+    for new_event in new_element.events().iter() {
         // Only add the event listener when nothing is set on that
         // event yet, since there is no way to compare the functions
         // inside the callback. Comparing the callback is pointless
         // since they are uniquely created at each instantiation of
         // each element on the vdom
-        if old_element.events.get(new_event_name).is_none() {
-            add_event_listener.insert(new_event_name, new_event_cb);
+        let old_event = old_element.get_event(new_event.name);
+        if old_event.is_none(){
+            add_event_listener.push(new_event);
         }
     }
 
-    for (old_event_name, _old_event_cb) in old_element.events.iter() {
-        if add_event_listener.get(&old_event_name[..]).is_some() {
+    for old_event in old_element.events().iter() {
+        if add_event_listener.iter().find(|event|event.name == old_event.name).is_some() {
             continue;
         };
 
-        if new_element.events.get(old_event_name).is_none() {
-            remove_event_listener.push(old_event_name);
+        if new_element.get_event(old_event.name).is_none() {
+            remove_event_listener.push(old_event.name);
         }
     }
 

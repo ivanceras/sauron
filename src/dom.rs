@@ -63,7 +63,7 @@ pub struct CreatedNode<T> {
 /// and a new incoming Node that represents our latest DOM state.
 pub struct DomUpdater<DSP, MSG>
 where
-    MSG: Clone,
+    MSG: Clone + 'static,
 {
     current_vdom: crate::Node<MSG>,
     root_node: Node,
@@ -142,7 +142,7 @@ impl<T> CreatedNode<T> {
                 .expect("Set element attribute in create element");
         });
 
-        if !velem.events.is_empty() {
+        if !velem.events().is_empty() {
             let unique_id = create_unique_identifier();
 
             // set the data-sauron_vdom-id this will be read later on
@@ -153,7 +153,9 @@ impl<T> CreatedNode<T> {
 
             closures.insert(unique_id, vec![]);
 
-            for (event_str, callback) in velem.events.iter() {
+            for event_attr in velem.events().iter() {
+                let event_str = event_attr.name;
+                let callback = event_attr.value.get_callback().expect("expecting a callback");
                 let current_elm: &EventTarget =
                     element.dyn_ref().expect("unable to cast to event targe");
                 let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =

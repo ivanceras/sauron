@@ -224,17 +224,18 @@ where
 
         // TODO: Shall we also remove the listener first?
         Patch::AddEventListener(node_idx, events) => {
-            for (event, callback) in events.iter() {
+            for event in events.iter() {
+                let callback = event.value.get_callback().expect("expecting a callback");
                 let closure_wrap: Closure<dyn FnMut(Event)> =
                     dom::create_closure_wrap(program, callback);
                 let func: &Function = closure_wrap.as_ref().unchecked_ref();
-                node.add_event_listener_with_callback(event, func)?;
+                node.add_event_listener_with_callback(event.name, func)?;
                 let node_id = *node_idx as u32;
                 if let Some(closure) = active_closures.get_mut(&node_id) {
-                    closure.push((event, closure_wrap));
+                    closure.push((event.name, closure_wrap));
                 } else {
                     active_closures
-                        .insert(node_id, vec![(event, closure_wrap)]);
+                        .insert(node_id, vec![(event.name, closure_wrap)]);
                 }
             }
 

@@ -33,7 +33,8 @@ pub use value::Value;
 #[derive(Debug, PartialEq, Clone)]
 pub enum Node<T, EVENT, MSG>
 where
-    MSG: Clone,
+    MSG: Clone +'static,
+    EVENT: 'static,
 {
     Element(Element<T, EVENT, MSG>),
     Text(Text),
@@ -42,11 +43,11 @@ where
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct Element<T, EVENT, MSG>
 where
-    MSG: Clone,
+    MSG: Clone + 'static,
+    EVENT: 'static,
 {
     pub tag: T,
     pub attrs: Vec<Attribute<EVENT, MSG>>,
-    pub events: BTreeMap<&'static str, Callback<EVENT, MSG>>,
     pub children: Vec<Node<T, EVENT, MSG>>,
     pub namespace: Option<&'static str>,
 }
@@ -76,6 +77,10 @@ where
     {
         Attribute::new(self.name, self.value.map(func.clone()))
     }
+
+    fn is_event(&self) -> bool {
+        self.value.is_event()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -102,6 +107,21 @@ where
             AttribValue::Callback(cb) => {
                 AttribValue::Callback(cb.map(func.clone()))
             }
+        }
+    }
+
+
+    fn is_event(&self) -> bool {
+        match self {
+            AttribValue::Value(_) => false,
+            AttribValue::Callback(_) => true,
+        }
+    }
+
+    pub fn get_callback(&self) -> Option<&Callback<EVENT,MSG>> {
+        match self {
+            AttribValue::Value(_) => None,
+            AttribValue::Callback(cb) => Some(cb),
         }
     }
 }
@@ -186,13 +206,6 @@ where
                 .into_iter()
                 .map(|child| child.map(func.clone()))
                 .collect(),
-            events: self.events.into_iter().fold(
-                BTreeMap::new(),
-                |mut acc, (event, cb)| {
-                    acc.insert(event, cb.map(func.clone()));
-                    acc
-                },
-            ),
         }
     }
 
@@ -244,8 +257,8 @@ pub struct Text {
 impl<T, EVENT, MSG> Element<T, EVENT, MSG>
 where
     T: Clone,
-    MSG: Clone,
-    EVENT: Clone,
+    MSG: Clone + 'static,
+    EVENT: Clone + 'static,
 {
     #[inline]
     pub fn new(tag: T) -> Self {
@@ -266,7 +279,6 @@ where
         Element {
             tag,
             attrs: vec![],
-            events: BTreeMap::new(),
             children,
             namespace: ns,
         }
@@ -282,11 +294,25 @@ where
         })
     }
 
+
+    /// get the attributes that are events
+    pub fn events(&self) -> Vec<&Attribute<EVENT,MSG>> {
+        self.attrs.iter().filter(|attr|attr.is_event()).collect()
+    }
+
+    pub fn get_event(&self, name: &str) -> Option<&Attribute<EVENT,MSG>> {
+        self.events().iter().find(|event|event.name == name).map(|event|*event)
+    }
+
+    pub fn attributes(&self) -> Vec<&Attribute<EVENT,MSG>> {
+        self.attrs.iter().filter(|attr|!attr.is_event()).collect()
+    }
+
     pub fn get_attrib_value(
         &self,
         key: &str,
     ) -> Option<&AttribValue<EVENT, MSG>> {
-        self.attrs.iter().find_map(|ref att| {
+        self.attributes().iter().find_map(|ref att| {
             if att.name == key {
                 Some(&att.value)
             } else {
@@ -297,16 +323,7 @@ where
 
     #[inline]
     pub fn add_attributes(&mut self, attrs: Vec<Attribute<EVENT, MSG>>) {
-        for a in attrs {
-            match a.value {
-                AttribValue::Value(_) => {
-                    self.attrs.push(a);
-                }
-                AttribValue::Callback(ref v) => {
-                    self.events.insert(a.name, v.clone());
-                }
-            }
-        }
+        self.attrs.extend(attrs);
     }
 
     #[inline]
@@ -320,7 +337,8 @@ where
         event: &'static str,
         cb: Callback<EVENT, MSG>,
     ) {
-        self.events.insert(event, cb);
+        let attr_event = Attribute::new(event, cb.into());
+        self.attrs.push(attr_event);
     }
 }
 
