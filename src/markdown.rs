@@ -100,6 +100,9 @@ where
             Event::Text(content) => add_child!(text(content)),
             Event::SoftBreak => add_child!(text("\n")),
             Event::HardBreak => add_child!(br(vec![], vec![])),
+            Event::InlineHtml(inline) => {
+                println!("inline html: {}", inline);
+            }
             _ => println!("Unknown event: {:#?}", ev),
         }
     }
@@ -169,6 +172,17 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_md_with_html(){
+        let md = r#"
+[Hello](link.html)
+<img src="img.jpeg"/>"#;
+
+        let expected = "<p>\n    <a href=\"link.html\" title=\"\">Hello</a>\n    \n\n</p>";
+        let view: Node<()> = render_markdown(md);
+        assert_eq!(expected, view.to_string())
+    }
 
     #[test]
     fn test_md() {

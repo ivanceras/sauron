@@ -44,6 +44,7 @@ features = [
 
 
 [features]
+default = ["with-markdown"]
 measure = []
 with-markdown = ["pulldown-cmark"]
 

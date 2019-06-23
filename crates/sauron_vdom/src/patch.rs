@@ -3,11 +3,9 @@
 
 use crate::{
     Attribute,
-    Callback,
     Node,
     Text,
 };
-use std::collections::BTreeMap;
 
 /// A Patch encodes an operation that modifies a real DOM element.
 ///

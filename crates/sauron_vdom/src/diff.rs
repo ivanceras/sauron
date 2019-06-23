@@ -1,13 +1,11 @@
 use crate::{
     Attribute,
-    Callback,
     Element,
     Node,
     Patch,
 };
 use std::{
     cmp::min,
-    collections::BTreeMap,
     mem,
 };
 
