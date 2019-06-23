@@ -85,7 +85,6 @@ fn builder_with_children() {
     assert_eq!(div, expected);
 }
 
-
 #[test]
 fn replace_node() {
     let old: Node<()> = div(vec![], vec![]);
@@ -104,7 +103,8 @@ fn replace_node() {
         "Replace a child node"
     );
 
-    let old: Node<()> = div(vec![], vec![b(vec![], vec![text("1")]), b(vec![], vec![])]);
+    let old: Node<()> =
+        div(vec![], vec![b(vec![], vec![text("1")]), b(vec![], vec![])]);
     let new = div(vec![], vec![i(vec![], vec![text("1")]), i(vec![], vec![])]);
     assert_eq!(
         diff(&old, &new),
@@ -119,17 +119,24 @@ fn replace_node() {
 #[test]
 fn add_children() {
     let old: Node<()> = div(vec![], vec![b(vec![], vec![])]); //{ <div> <b></b> </div> },
-    let new = div(vec![], vec![b(vec![], vec![]), html_element("new", vec![], vec![])]); //{ <div> <b></b> <new></new> </div> },
+    let new = div(
+        vec![],
+        vec![b(vec![], vec![]), html_element("new", vec![], vec![])],
+    ); //{ <div> <b></b> <new></new> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AppendChildren(0, vec![&html_element("new", vec![], vec![])])],
+        vec![Patch::AppendChildren(
+            0,
+            vec![&html_element("new", vec![], vec![])]
+        )],
         "Added a new node to the root node",
     )
 }
 
 #[test]
 fn remove_nodes() {
-    let old: Node<()> = div(vec![], vec![b(vec![], vec![]), span(vec![], vec![])]); //{ <div> <b></b> <span></span> </div> },
+    let old: Node<()> =
+        div(vec![], vec![b(vec![], vec![]), span(vec![], vec![])]); //{ <div> <b></b> <span></span> </div> },
     let new = div(vec![], vec![]); //{ <div> </div> },
 
     assert_eq!(
@@ -162,18 +169,29 @@ fn remove_nodes() {
         "Remove a child and a grandchild node",
     );
 
-    let old: Node<()> = div(vec![], vec![b(vec![], vec![i(vec![], vec![]), i(vec![], vec![])]), b(vec![], vec![])]); //{ <div> <b> <i></i> <i></i> </b> <b></b> </div> },
-    let new = div(vec![], vec![b(vec![], vec![i(vec![], vec![])]), i(vec![], vec![])]); //{ <div> <b> <i></i> </b> <i></i> </div>},
+    let old: Node<()> = div(
+        vec![],
+        vec![
+            b(vec![], vec![i(vec![], vec![]), i(vec![], vec![])]),
+            b(vec![], vec![]),
+        ],
+    ); //{ <div> <b> <i></i> <i></i> </b> <b></b> </div> },
+    let new = div(
+        vec![],
+        vec![b(vec![], vec![i(vec![], vec![])]), i(vec![], vec![])],
+    ); //{ <div> <b> <i></i> </b> <i></i> </div>},
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::TruncateChildren(1, 1), Patch::Replace(4, &i(vec![], vec![])),],
+        vec![
+            Patch::TruncateChildren(1, 1),
+            Patch::Replace(4, &i(vec![], vec![])),
+        ],
         "Removing child and change next node after parent",
     )
 }
 
 #[test]
 fn add_attributes() {
-
     let old: Node<()> = div(vec![], vec![]); //{ <div> </div> },
     let new = div(vec![id("hello")], vec![]); //{ <div id="hello"> </div> },
     assert_eq!(
@@ -203,7 +221,10 @@ fn new_different_event_will_replace_what_was_first_set() {
     let new: Node<()> = div(vec![on("click", hello.clone())], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddEventListener(0, vec![&on("click", hello.clone())])],
+        vec![Patch::AddEventListener(
+            0,
+            vec![&on("click", hello.clone())]
+        )],
         "Add event listener",
     );
 
@@ -247,7 +268,6 @@ fn remove_events() {
 
 #[test]
 fn change_attribute() {
-
     let old: Node<()> = div(vec![id("hey-there")], vec![]); //{ <div id="hey-there"></div> },
     let new = div(vec![id("changed")], vec![]); //{ <div id="changed"> </div> },
 

@@ -8,7 +8,7 @@ use sauron_vdom::{
 fn main() {
     let old: Node<&'static str, (), ()> = element(
         "div",
-        [
+        vec![
             attr("class", "some-class"),
             attr("id", "some-id"),
             on("click", |_| {
@@ -19,12 +19,12 @@ fn main() {
                 println!("i've been clicked");
             }),
         ],
-        vec![element("div", [], vec![text("Hello world!")])],
+        vec![element("div", vec![], vec![text("Hello world!")])],
     );
 
     let new = element(
         "div",
-        [
+        vec![
             attr("class", "some-class2"),
             attr("id", "some-id2"),
             on("click", |_| {
@@ -35,7 +35,7 @@ fn main() {
                 println!("i've been clicked");
             }),
         ],
-        vec![element("div", [], vec![text("Wazzup!")])],
+        vec![element("div", vec![], vec![text("Wazzup!")])],
     );
 
     println!("old: {}", old);

@@ -12,7 +12,7 @@ use sauron::{
 };
 use wasm_bindgen::prelude::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     Click,
 }
@@ -30,10 +30,10 @@ impl App {
 impl Component<Msg> for App {
     fn view(&self) -> Node<Msg> {
         div(
-            [class("some-class"), id("some-id"), attr("data-id", 1)],
-            [
+            vec![class("some-class"), id("some-id"), attr("data-id", 1)],
+            vec![
                 input(
-                    [
+                    vec![
                         class("client"),
                         r#type("button"),
                         value("Click me!"),
@@ -42,7 +42,7 @@ impl Component<Msg> for App {
                             Msg::Click
                         }),
                     ],
-                    [],
+                    vec![],
                 ),
                 text(format!("Clicked: {}", self.click_count)),
             ],

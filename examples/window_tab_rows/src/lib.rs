@@ -17,7 +17,7 @@ mod field;
 mod row;
 mod tab;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     WindowClick,
     ActivateTab(usize),
@@ -85,34 +85,34 @@ impl Component<Msg> for Window {
 
     fn view(&self) -> Node<Msg> {
         div(
-            [class("window")],
-            [
+            vec![class("window")],
+            vec![
                 button(
-                    [onclick(|_| Msg::WindowClick)],
-                    [text(format!(
+                    vec![onclick(|_| Msg::WindowClick)],
+                    vec![text(format!(
                         "Total window activities: {}",
                         self.window_activities
                     ))],
                 ),
                 div(
-                    [class("tab-list-buttons")],
+                    vec![class("tab-list-buttons")],
                     self.tabs
                         .iter()
                         .enumerate()
                         .map(|(index, tab)| {
                             button(
-                                [
+                                vec![
                                     class("tablink"),
                                     styles([("background-color", &tab.color)]),
                                     onclick(move |_| Msg::ActivateTab(index)),
                                 ],
-                                [text(&tab.name)],
+                                vec![text(&tab.name)],
                             )
                         })
                         .collect::<Vec<Node<Msg>>>(),
                 ),
                 div(
-                    [class("tab-list")],
+                    vec![class("tab-list")],
                     self.tabs
                         .iter()
                         .enumerate()

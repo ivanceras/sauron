@@ -256,7 +256,7 @@ where
         let mut buffer = String::new();
         buffer += &format!("<{}", self.tag.to_string());
 
-        for attr in self.attrs.iter() {
+        for attr in self.attributes().iter() {
             buffer += &format!(r#" {}="{}""#, attr.name, attr.value);
         }
         buffer += ">";
@@ -294,15 +294,15 @@ where
     MSG: Clone + 'static,
     EVENT: Clone + 'static,
 {
-
     pub fn with_tag(tag: T) -> Self {
-        Element{
+        Element {
             tag,
             attrs: vec![],
             children: vec![],
             namespace: None,
         }
     }
+
     pub fn get_attr(&self, key: &str) -> Option<&Attribute<EVENT, MSG>> {
         self.attrs.iter().find_map(|ref att| {
             if att.name == key {

@@ -9,7 +9,7 @@ use sauron::{
     Node,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     FieldClick,
 }
@@ -38,8 +38,8 @@ impl Component<Msg> for Field {
 
     fn view(&self) -> Node<Msg> {
         button(
-            [class("field"), onclick(|_| Msg::FieldClick)],
-            [text(format!("{} ({})", self.field_name, self.field_clicks))],
+            vec![class("field"), onclick(|_| Msg::FieldClick)],
+            vec![text(format!("{} ({})", self.field_name, self.field_clicks))],
         )
     }
 }

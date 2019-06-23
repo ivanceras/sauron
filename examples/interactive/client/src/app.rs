@@ -14,7 +14,7 @@ use wasm_bindgen::{
     prelude::*,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     Click,
     DoubleClick,
@@ -81,28 +81,28 @@ impl Component<Msg> for App {
             .to_locale_string("en-GB", &JsValue::undefined())
             .into();
         div(
-            [class("some-class"), id("some-id"), attr("data-id", 1)],
-            [
+            vec![class("some-class"), id("some-id"), attr("data-id", 1)],
+            vec![
                 div(
-                    [id("current-time")],
-                    [text(format!("Today is {}", date_str))],
+                    vec![id("current-time")],
+                    vec![text(format!("Today is {}", date_str))],
                 ),
                 div(
-                    [],
-                    [
+                    vec![],
+                    vec![
                         text("Your name is: "),
                         input(
-                            [
+                            vec![
                                 r#type("text"),
                                 oninput(|event: InputEvent| {
                                     Msg::ChangeName(event.value)
                                 }),
                                 placeholder("John Smith"),
                             ],
-                            [],
+                            vec![],
                         ),
                         button(
-                            [onclick(|event: MouseEvent| {
+                            vec![onclick(|event: MouseEvent| {
                                 sauron::log!(
                                     "Clicked at ({},{})",
                                     event.x(),
@@ -110,10 +110,10 @@ impl Component<Msg> for App {
                                 );
                                 Msg::Click
                             })],
-                            [text("Click me!")],
+                            vec![text("Click me!")],
                         ),
                         button(
-                            [ondblclick(|event: MouseEvent| {
+                            vec![ondblclick(|event: MouseEvent| {
                                 sauron::log!(
                                     "Double clicked at ({},{})",
                                     event.x(),
@@ -121,7 +121,7 @@ impl Component<Msg> for App {
                                 );
                                 Msg::DoubleClick
                             })],
-                            [text(format!(
+                            vec![text(format!(
                                 "DoubleClicks {}",
                                 self.double_clicks
                             ))],
@@ -129,8 +129,8 @@ impl Component<Msg> for App {
                     ],
                 ),
                 p(
-                    [],
-                    [
+                    vec![],
+                    vec![
                         text(format!("Hello {}!", self.name,)),
                         if self.click_count > 0 {
                             text(format!(
@@ -139,18 +139,21 @@ impl Component<Msg> for App {
                                 if self.click_count > 1 { "s" } else { "" }
                             ))
                         } else {
-                            span([], [])
+                            span(vec![], vec![])
                         },
                     ],
                 ),
                 div(
-                    [],
-                    [
-                        p([], [text("Tell us something about yourself:")]),
+                    vec![],
+                    vec![
+                        p(
+                            vec![],
+                            vec![text("Tell us something about yourself:")],
+                        ),
                         div(
-                            [],
-                            [textarea(
-                                [
+                            vec![],
+                            vec![textarea(
+                                vec![
                                     rows(10),
                                     cols(80),
                                     oninput(|event: InputEvent| {
@@ -158,30 +161,30 @@ impl Component<Msg> for App {
                                     }),
                                     placeholder("I'm a..."),
                                 ],
-                                [],
+                                vec![],
                             )],
                         ),
-                        p([], [text(&self.biography)]),
+                        p(vec![], vec![text(&self.biography)]),
                     ],
                 ),
                 div(
-                    [],
-                    [
+                    vec![],
+                    vec![
                         text("What are you thinking right now?"),
                         input(
-                            [
+                            vec![
                                 r#type("text"),
                                 onchange(|event: InputEvent| {
                                     Msg::ChangeThought(event.value)
                                 }),
                                 placeholder("Elephants..."),
                             ],
-                            [],
+                            vec![],
                         ),
                         if let Some(thought) = &self.thought {
                             text(format!("Hmmn {}... Interesting.", thought))
                         } else {
-                            span([], [])
+                            span(vec![], vec![])
                         },
                     ],
                 ),

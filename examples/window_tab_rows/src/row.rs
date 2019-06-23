@@ -15,7 +15,7 @@ use crate::field::{
 
 use sauron::Cmd;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     RowClick,
     FieldMsg(usize, field::Msg),
@@ -55,12 +55,12 @@ impl Component<Msg> for Row {
 
     fn view(&self) -> Node<Msg> {
         div(
-            [class("row"), onclick(|_| Msg::RowClick)],
-            [
+            vec![class("row"), onclick(|_| Msg::RowClick)],
+            vec![
                 text(&self.row_name),
-                input([class("row-selector"), r#type("checkbox")], []),
+                input(vec![class("row-selector"), r#type("checkbox")], vec![]),
                 div(
-                    [],
+                    vec![],
                     self.fields
                         .iter()
                         .enumerate()
@@ -72,8 +72,11 @@ impl Component<Msg> for Row {
                         .collect::<Vec<Node<Msg>>>(),
                 ),
                 span(
-                    [],
-                    [text(format!("total activities: {}", self.row_clicks))],
+                    vec![],
+                    vec![text(format!(
+                        "total activities: {}",
+                        self.row_clicks
+                    ))],
                 ),
             ],
         )

@@ -14,7 +14,7 @@ use sauron::{
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     Click,
     ReceivedData(Result<Data, JsValue>),
@@ -25,7 +25,7 @@ pub struct App {
     data: Data,
 }
 
-#[derive(Deserialize, Debug, Clone, Default)]
+#[derive(Deserialize, Debug, PartialEq, Clone, Default)]
 pub struct Data {
     page: i32,
     per_page: i32,
@@ -34,7 +34,7 @@ pub struct Data {
     data: Vec<User>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, PartialEq, Debug, Clone)]
 pub struct User {
     id: i32,
     email: String,
@@ -69,13 +69,17 @@ impl Component<Msg> for App {
 
     fn view(&self) -> Node<Msg> {
         div(
-            [],
-            [
+            vec![],
+            vec![
                 div(
-                    [class("some-class"), id("some-id"), attr("data-id", 1)],
-                    [
+                    vec![
+                        class("some-class"),
+                        id("some-id"),
+                        attr("data-id", 1),
+                    ],
+                    vec![
                         input(
-                            [
+                            vec![
                                 class("client"),
                                 r#type("button"),
                                 value("Click me!"),
@@ -84,23 +88,29 @@ impl Component<Msg> for App {
                                     Msg::Click
                                 }),
                             ],
-                            [],
+                            vec![],
                         ),
                         text(format!("Clicked: {}", self.click_count)),
                     ],
                 ),
-                div([], []).children(
+                div(vec![], vec![]).children(
                     self.data
                         .data
                         .iter()
                         .map(|user| {
                             ul(
-                                [],
-                                [
-                                    li([], [text(&user.id)]),
-                                    li([], [text(&user.email)]),
-                                    li([], [text(&user.first_name)]),
-                                    li([], [img([src(&user.avatar)], [])]),
+                                vec![],
+                                vec![
+                                    li(vec![], vec![text(&user.id)]),
+                                    li(vec![], vec![text(&user.email)]),
+                                    li(vec![], vec![text(&user.first_name)]),
+                                    li(
+                                        vec![],
+                                        vec![img(
+                                            vec![src(&user.avatar)],
+                                            vec![],
+                                        )],
+                                    ),
                                 ],
                             )
                         })

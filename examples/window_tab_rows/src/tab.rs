@@ -14,7 +14,7 @@ use sauron::{
 
 use sauron::Cmd;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     TabClick,
     RowMsg(usize, row::Msg),
@@ -67,7 +67,7 @@ impl Component<Msg> for Tab {
 
     fn view(&self) -> Node<Msg> {
         div(
-            [
+            vec![
                 class("tab tabcontent"),
                 styles([("background-color", &self.color)]),
                 styles_flag([
@@ -75,16 +75,16 @@ impl Component<Msg> for Tab {
                     ("display", "none", !self.is_active),
                 ]),
             ],
-            [
+            vec![
                 button(
-                    [onclick(|_| Msg::TabClick)],
-                    [text(format!(
+                    vec![onclick(|_| Msg::TabClick)],
+                    vec![text(format!(
                         "{} is clicked for {} times",
                         self.name, self.tab_clicks
                     ))],
                 ),
                 div(
-                    [class("rows")],
+                    vec![class("rows")],
                     self.rows
                         .iter()
                         .enumerate()
