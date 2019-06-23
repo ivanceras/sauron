@@ -102,23 +102,23 @@ impl Component<Msg> for Model {
 
     fn view(&self) -> Node<Msg> {
         div(
-            [class("todomvc-wrapper")],
+            vec![class("todomvc-wrapper")],
             vec![
                 section(
-                    [class("todoapp")],
+                    vec![class("todoapp")],
                     vec![
                         header(
-                            [class("header")],
+                            vec![class("header")],
                             vec![
-                                h1([], vec![text("todos")]),
+                                h1(vec![], vec![text("todos")]),
                                 self.view_input(),
                             ],
                         ),
                         section(
-                            [class("main")],
+                            vec![class("main")],
                             vec![
                                 input(
-                                    [
+                                    vec![
                                         class("toggle-all"),
                                         r#type("checkbox"),
                                         checked(self.is_all_completed()),
@@ -126,7 +126,7 @@ impl Component<Msg> for Model {
                                     ],
                                     vec![],
                                 ),
-                                ul([class("todo-list")], {
+                                ul(vec![class("todo-list")], {
                                     self.entries
                                         .iter()
                                         .filter(|e| self.filter.fit(e))
@@ -137,13 +137,13 @@ impl Component<Msg> for Model {
                             ],
                         ),
                         footer(
-                            [class("footer")],
+                            vec![class("footer")],
                             vec![
                                 span(
-                                    [class("todo-count")],
+                                    vec![class("todo-count")],
                                     vec![
                                         strong(
-                                            [],
+                                            vec![],
                                             vec![text(format!(
                                                 "{}",
                                                 self.total()
@@ -153,7 +153,7 @@ impl Component<Msg> for Model {
                                     ],
                                 ),
                                 ul(
-                                    [class("filters")],
+                                    vec![class("filters")],
                                     vec![
                                         self.view_filter(Filter::All),
                                         self.view_filter(Filter::Active),
@@ -161,7 +161,7 @@ impl Component<Msg> for Model {
                                     ],
                                 ),
                                 button(
-                                    [
+                                    vec![
                                         class("clear-completed"),
                                         onclick(|_| Msg::ClearCompleted),
                                     ],
@@ -175,15 +175,15 @@ impl Component<Msg> for Model {
                     ],
                 ),
                 footer(
-                    [class("info")],
+                    vec![class("info")],
                     vec![
-                        p([], vec![text("Double-click to edit a todo")]),
+                        p(vec![], vec![text("Double-click to edit a todo")]),
                         p(
-                            [],
+                            vec![],
                             vec![
                                 text("Written by "),
                                 a(
-                                    [
+                                    vec![
                                         href("https://github.com/ivanceras/"),
                                         target("_blank"),
                                     ],
@@ -192,11 +192,11 @@ impl Component<Msg> for Model {
                             ],
                         ),
                         p(
-                            [],
+                            vec![],
                             vec![
                                 text("Part of "),
                                 a(
-                                    [
+                                    vec![
                                         href("http://todomvc.com/"),
                                         target("_blank"),
                                     ],
@@ -215,9 +215,9 @@ impl Model {
     fn view_filter(&self, filter: Filter) -> Node<Msg> {
         let flt = filter.clone();
         li(
-            [],
+            vec![],
             vec![a(
-                [
+                vec![
                     class(if self.filter == flt {
                         "selected"
                     } else {
@@ -233,7 +233,7 @@ impl Model {
 
     fn view_input(&self) -> Node<Msg> {
         input(
-            [
+            vec![
                 class("new-todo"),
                 placeholder("What needs to be done?"),
                 value(self.value.to_string()),
@@ -260,13 +260,13 @@ fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
         class_name.push_str(" completed");
     }
     li(
-        [class(class_name)],
+        vec![class(class_name)],
         vec![
             div(
-                [class("view")],
+                vec![class("view")],
                 vec![
                     input(
-                        [
+                        vec![
                             class("toggle"),
                             r#type("checkbox"),
                             checked(entry.completed),
@@ -275,11 +275,14 @@ fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
                         vec![],
                     ),
                     label(
-                        [ondoubleclick(move |_| Msg::ToggleEdit(idx))],
+                        vec![ondoubleclick(move |_| Msg::ToggleEdit(idx))],
                         vec![text(format!("{}", entry.description))],
                     ),
                     button(
-                        [class("destroy"), onclick(move |_| Msg::Remove(idx))],
+                        vec![
+                            class("destroy"),
+                            onclick(move |_| Msg::Remove(idx)),
+                        ],
                         vec![],
                     ),
                 ],
@@ -292,7 +295,7 @@ fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
 fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
     if entry.editing == true {
         input(
-            [
+            vec![
                 class("edit"),
                 r#type("text"),
                 value(&entry.description),
@@ -309,7 +312,7 @@ fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
             vec![],
         )
     } else {
-        input([r#type("hidden")], vec![])
+        input(vec![r#type("hidden")], vec![])
     }
 }
 

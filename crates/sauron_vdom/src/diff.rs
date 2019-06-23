@@ -216,7 +216,7 @@ where
     EVENT: PartialEq + Clone + 'static,
 {
     let mut patches = vec![];
-    let mut add_event_listener: Vec<&Attribute<EVENT,MSG>> = vec![];
+    let mut add_event_listener: Vec<&Attribute<EVENT, MSG>> = vec![];
     let mut remove_event_listener: Vec<&str> = vec![];
 
     for new_event in new_element.events().iter() {
@@ -226,13 +226,17 @@ where
         // since they are uniquely created at each instantiation of
         // each element on the vdom
         let old_event = old_element.get_event(new_event.name);
-        if old_event.is_none(){
+        if old_event.is_none() {
             add_event_listener.push(new_event);
         }
     }
 
     for old_event in old_element.events().iter() {
-        if add_event_listener.iter().find(|event|event.name == old_event.name).is_some() {
+        if add_event_listener
+            .iter()
+            .find(|event| event.name == old_event.name)
+            .is_some()
+        {
             continue;
         };
 

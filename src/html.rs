@@ -1,5 +1,3 @@
-use std::convert::AsRef;
-
 use crate::{
     Attribute,
     Node,
@@ -16,27 +14,25 @@ pub mod events;
 pub mod units;
 
 #[inline]
-pub fn html_element<A, MSG>(
+pub fn html_element<MSG>(
     tag: &'static str,
-    attrs: A,
+    attrs: Vec<Attribute<MSG>>,
     children: Vec<Node<MSG>>,
 ) -> Node<MSG>
 where
-    A: AsRef<[Attribute<MSG>]>,
     MSG: Clone,
 {
     sauron_vdom::builder::element(tag, attrs, children)
 }
 
 #[inline]
-pub fn html_element_ns<A, MSG>(
+pub fn html_element_ns<MSG>(
     tag: &'static str,
     namespace: &'static str,
-    attrs: A,
+    attrs: Vec<Attribute<MSG>>,
     children: Vec<Node<MSG>>,
 ) -> Node<MSG>
 where
-    A: AsRef<[Attribute<MSG>]>,
     MSG: Clone,
 {
     sauron_vdom::builder::element_ns(tag, Some(namespace), attrs, children)
@@ -51,9 +47,8 @@ macro_rules! declare_tags {
         $(
             $(#[$attr])*
             #[inline]
-            pub fn $name<A, MSG>(attrs: A, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
+            pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
                 where
-                      A: AsRef<[$crate::Attribute<MSG>]>,
                       MSG: Clone,
                 {
                     $crate::html::html_element(stringify!($name), attrs, children)

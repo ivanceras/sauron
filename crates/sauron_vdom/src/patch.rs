@@ -45,7 +45,7 @@ use std::collections::BTreeMap;
 #[derive(Debug, PartialEq)]
 pub enum Patch<'a, T, EVENT, MSG>
 where
-    MSG: Clone +'static,
+    MSG: Clone + 'static,
     EVENT: 'static,
 {
     /// Append a vector of child nodes to a parent node id.

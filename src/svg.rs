@@ -17,9 +17,8 @@ macro_rules! declare_svg_tags{
      ) => {
         $(
             $(#[$attr])*
-            pub fn $name<A, MSG>(attrs: A, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
+            pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
                 where
-                      A: AsRef<[$crate::Attribute<MSG>]>,
                       MSG: Clone,
                 {
                     $crate::html::html_element_ns(stringify!($name), SVG_NAMESPACE, attrs, children)
@@ -34,9 +33,8 @@ macro_rules! declare_svg_tags{
      ) => {
         $(
             $(#[$attr])*
-            pub fn $name<A, MSG>(attrs: A, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
+            pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
                 where
-                      A: AsRef<[$crate::Attribute<MSG>]>,
                       MSG: Clone,
                 {
                     $crate::html::html_element_ns($attribute, SVG_NAMESPACE, attrs, children)

@@ -225,7 +225,8 @@ where
         // TODO: Shall we also remove the listener first?
         Patch::AddEventListener(node_idx, events) => {
             for event in events.iter() {
-                let callback = event.value.get_callback().expect("expecting a callback");
+                let callback =
+                    event.value.get_callback().expect("expecting a callback");
                 let closure_wrap: Closure<dyn FnMut(Event)> =
                     dom::create_closure_wrap(program, callback);
                 let func: &Function = closure_wrap.as_ref().unchecked_ref();

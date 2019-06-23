@@ -9,47 +9,6 @@ use crate::{
     Text,
     Value,
 };
-use std::convert::AsRef;
-
-impl<T, EVENT, MSG> Node<T, EVENT, MSG>
-where
-    T: Clone,
-    MSG: Clone,
-    EVENT: Clone,
-{
-    pub fn as_element(&mut self) -> Option<&mut Element<T, EVENT, MSG>> {
-        match *self {
-            Node::Element(ref mut element) => Some(element),
-            Node::Text(_) => None,
-        }
-    }
-
-    pub fn as_element_ref(&mut self) -> Option<&Element<T, EVENT, MSG>> {
-        match *self {
-            Node::Element(ref element) => Some(element),
-            Node::Text(_) => None,
-        }
-    }
-
-    /// Append children to this element
-    pub fn children(mut self, children: Vec<Node<T, EVENT, MSG>>) -> Self {
-        if let Some(element) = self.as_element() {
-            element.add_children(children);
-        }
-        self
-    }
-
-    /// add attributes to the node
-    pub fn attributes(
-        mut self,
-        attributes: Vec<Attribute<EVENT, MSG>>,
-    ) -> Self {
-        if let Some(elm) = self.as_element() {
-            elm.add_attributes(attributes);
-        }
-        self
-    }
-}
 
 /// Create an element
 ///
@@ -78,38 +37,42 @@ where
 ///     );
 /// }
 /// ```
-pub fn element<A, T, EVENT, MSG>(
+#[inline]
+pub fn element<T, EVENT, MSG>(
     tag: T,
-    attrs: A,
+    attrs: Vec<Attribute<EVENT, MSG>>,
     children: Vec<Node<T, EVENT, MSG>>,
 ) -> Node<T, EVENT, MSG>
 where
-    A: AsRef<[Attribute<EVENT, MSG>]>,
     T: Clone,
     MSG: Clone,
     EVENT: Clone,
 {
     element_ns(tag, None, attrs, children)
 }
-pub fn element_ns<A, T, EVENT, MSG>(
+
+#[inline]
+pub fn element_ns<T, EVENT, MSG>(
     tag: T,
     namespace: Option<&'static str>,
-    attrs: A,
+    attrs: Vec<Attribute<EVENT, MSG>>,
     children: Vec<Node<T, EVENT, MSG>>,
 ) -> Node<T, EVENT, MSG>
 where
-    A: AsRef<[Attribute<EVENT, MSG>]>,
     T: Clone,
     MSG: Clone,
     EVENT: Clone,
 {
-    let mut element =
-        Element::with_children_and_maybe_ns(tag, children, namespace);
-    element.add_attributes(attrs.as_ref().to_vec());
-    Node::Element(element)
+    Node::Element(Element {
+        tag,
+        attrs,
+        children,
+        namespace,
+    })
 }
 
 /// Create a textnode element
+#[inline]
 pub fn text<V, T, EVENT, MSG>(v: V) -> Node<T, EVENT, MSG>
 where
     V: ToString,
@@ -122,6 +85,7 @@ where
 }
 
 /// Create an attribute
+#[inline]
 pub fn attr<V, EVENT, MSG>(name: &'static str, v: V) -> Attribute<EVENT, MSG>
 where
     V: Into<Value>,
@@ -141,6 +105,7 @@ where
 /// FIXME: callbacks are recrated eveytime, therefore they are not
 /// equivalent when compared since function contents
 /// can not be compared. Only Rc's are compared.
+#[inline]
 pub fn on<C, EVENT, MSG>(name: &'static str, c: C) -> Attribute<EVENT, MSG>
 where
     C: Into<Callback<EVENT, MSG>>,

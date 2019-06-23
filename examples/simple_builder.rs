@@ -11,7 +11,7 @@ use sauron_vdom::diff;
 
 fn main() {
     let old: Node<()> = div(
-        [
+        vec![
             class("some-class"),
             id("some-id"),
             onclick(|_| {
@@ -22,10 +22,10 @@ fn main() {
                 println!("i've been clicked");
             }),
         ],
-        vec![input([class("client"), r#type("checkbox")], vec![])],
+        vec![input(vec![class("client"), r#type("checkbox")], vec![])],
     );
     let new = div(
-        [
+        vec![
             class("some-class2"),
             id("some-id2"),
             onclick(|_| {
@@ -36,7 +36,7 @@ fn main() {
                 println!("i've been clicked2");
             }),
         ],
-        vec![input([class("client"), r#type("checkbox")], vec![])],
+        vec![input(vec![class("client"), r#type("checkbox")], vec![])],
     );
     println!("{}", old);
     println!("{}", new);

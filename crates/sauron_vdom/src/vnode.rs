@@ -33,7 +33,7 @@ pub use value::Value;
 #[derive(Debug, PartialEq, Clone)]
 pub enum Node<T, EVENT, MSG>
 where
-    MSG: Clone +'static,
+    MSG: Clone + 'static,
     EVENT: 'static,
 {
     Element(Element<T, EVENT, MSG>),
@@ -110,7 +110,6 @@ where
         }
     }
 
-
     fn is_event(&self) -> bool {
         match self {
             AttribValue::Value(_) => false,
@@ -118,7 +117,7 @@ where
         }
     }
 
-    pub fn get_callback(&self) -> Option<&Callback<EVENT,MSG>> {
+    pub fn get_callback(&self) -> Option<&Callback<EVENT, MSG>> {
         match self {
             AttribValue::Value(_) => None,
             AttribValue::Callback(cb) => Some(cb),
@@ -149,8 +148,9 @@ where
 
 impl<T, EVENT, MSG> Node<T, EVENT, MSG>
 where
-    EVENT: 'static,
+    EVENT: Clone + 'static,
     MSG: Clone + 'static,
+    T: Clone,
 {
     /// map the return of the callback from MSG to MSG2
     pub fn map<F, MSG2>(self, func: F) -> Node<T, EVENT, MSG2>
@@ -180,12 +180,46 @@ where
             Node::Text(_) => true,
         }
     }
+
+    pub fn as_element(&mut self) -> Option<&mut Element<T, EVENT, MSG>> {
+        match *self {
+            Node::Element(ref mut element) => Some(element),
+            Node::Text(_) => None,
+        }
+    }
+
+    pub fn as_element_ref(&mut self) -> Option<&Element<T, EVENT, MSG>> {
+        match *self {
+            Node::Element(ref element) => Some(element),
+            Node::Text(_) => None,
+        }
+    }
+
+    /// Append children to this element
+    pub fn children(mut self, children: Vec<Node<T, EVENT, MSG>>) -> Self {
+        if let Some(element) = self.as_element() {
+            element.add_children(children);
+        }
+        self
+    }
+
+    /// add attributes to the node
+    pub fn attributes(
+        mut self,
+        attributes: Vec<Attribute<EVENT, MSG>>,
+    ) -> Self {
+        if let Some(elm) = self.as_element() {
+            elm.add_attributes(attributes);
+        }
+        self
+    }
 }
 
 impl<T, EVENT, MSG> Element<T, EVENT, MSG>
 where
-    EVENT: 'static,
+    EVENT: Clone + 'static,
     MSG: Clone + 'static,
+    T: Clone,
 {
     /// map the return of the callback from MSG to MSG2
     pub fn map<F, MSG2>(self, func: F) -> Element<T, EVENT, MSG2>
@@ -217,7 +251,7 @@ where
     /// make a pretty string representation of this node
     fn to_pretty_string(&self, indent: i32) -> String
     where
-        T: ToString,
+        T: Clone + ToString,
     {
         let mut buffer = String::new();
         buffer += &format!("<{}", self.tag.to_string());
@@ -260,30 +294,6 @@ where
     MSG: Clone + 'static,
     EVENT: Clone + 'static,
 {
-    #[inline]
-    pub fn new(tag: T) -> Self {
-        Self::with_children(tag, vec![])
-    }
-
-    /// Create a Element using the supplied tag name
-    #[inline]
-    pub fn with_children(tag: T, children: Vec<Node<T, EVENT, MSG>>) -> Self {
-        Self::with_children_and_maybe_ns(tag, children, None)
-    }
-
-    pub fn with_children_and_maybe_ns(
-        tag: T,
-        children: Vec<Node<T, EVENT, MSG>>,
-        ns: Option<&'static str>,
-    ) -> Self {
-        Element {
-            tag,
-            attrs: vec![],
-            children,
-            namespace: ns,
-        }
-    }
-
     pub fn get_attr(&self, key: &str) -> Option<&Attribute<EVENT, MSG>> {
         self.attrs.iter().find_map(|ref att| {
             if att.name == key {
@@ -294,18 +304,20 @@ where
         })
     }
 
-
     /// get the attributes that are events
-    pub fn events(&self) -> Vec<&Attribute<EVENT,MSG>> {
-        self.attrs.iter().filter(|attr|attr.is_event()).collect()
+    pub fn events(&self) -> Vec<&Attribute<EVENT, MSG>> {
+        self.attrs.iter().filter(|attr| attr.is_event()).collect()
     }
 
-    pub fn get_event(&self, name: &str) -> Option<&Attribute<EVENT,MSG>> {
-        self.events().iter().find(|event|event.name == name).map(|event|*event)
+    pub fn get_event(&self, name: &str) -> Option<&Attribute<EVENT, MSG>> {
+        self.events()
+            .iter()
+            .find(|event| event.name == name)
+            .map(|event| *event)
     }
 
-    pub fn attributes(&self) -> Vec<&Attribute<EVENT,MSG>> {
-        self.attrs.iter().filter(|attr|!attr.is_event()).collect()
+    pub fn attributes(&self) -> Vec<&Attribute<EVENT, MSG>> {
+        self.attrs.iter().filter(|attr| !attr.is_event()).collect()
     }
 
     pub fn get_attrib_value(
@@ -357,8 +369,8 @@ impl fmt::Display for Text {
 
 impl<T, EVENT, MSG> fmt::Display for Node<T, EVENT, MSG>
 where
-    T: ToString,
-    EVENT: 'static,
+    T: Clone + ToString,
+    EVENT: Clone + 'static,
     MSG: Clone + 'static,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

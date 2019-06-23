@@ -155,7 +155,10 @@ impl<T> CreatedNode<T> {
 
             for event_attr in velem.events().iter() {
                 let event_str = event_attr.name;
-                let callback = event_attr.value.get_callback().expect("expecting a callback");
+                let callback = event_attr
+                    .value
+                    .get_callback()
+                    .expect("expecting a callback");
                 let current_elm: &EventTarget =
                     element.dyn_ref().expect("unable to cast to event targe");
                 let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
