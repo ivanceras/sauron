@@ -14,7 +14,6 @@ use wasm_bindgen::{
     prelude::*,
 };
 
-#[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     Click,
     DoubleClick,

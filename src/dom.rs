@@ -63,7 +63,7 @@ pub struct CreatedNode<T> {
 /// and a new incoming Node that represents our latest DOM state.
 pub struct DomUpdater<DSP, MSG>
 where
-    MSG: Clone + 'static,
+    MSG: 'static,
 {
     current_vdom: crate::Node<MSG>,
     root_node: Node,
@@ -97,7 +97,7 @@ impl<T> CreatedNode<T> {
         vnode: &crate::Node<MSG>,
     ) -> CreatedNode<Node>
     where
-        MSG: Clone + 'static,
+        MSG: 'static,
         DSP: Dispatch<MSG> + 'static,
     {
         match vnode {
@@ -119,7 +119,7 @@ impl<T> CreatedNode<T> {
         velem: &crate::Element<MSG>,
     ) -> CreatedNode<Element>
     where
-        MSG: Clone + 'static,
+        MSG: 'static,
         DSP: Dispatch<MSG> + 'static,
     {
         let document = crate::document();
@@ -229,7 +229,7 @@ fn create_closure_wrap<DSP, MSG>(
     callback: &Callback<crate::Event, MSG>,
 ) -> Closure<dyn FnMut(web_sys::Event)>
 where
-    MSG: Clone + 'static,
+    MSG: 'static,
     DSP: Dispatch<MSG> + 'static + 'static,
 {
     let callback_clone = callback.clone();
@@ -249,7 +249,7 @@ where
 
 impl<DSP, MSG> DomUpdater<DSP, MSG>
 where
-    MSG: PartialEq + Clone + 'static,
+    MSG: 'static,
     DSP: Dispatch<MSG> + 'static,
 {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.

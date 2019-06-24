@@ -6,38 +6,37 @@ use std::{
 
 /// A generic sized representation of a function that can be
 /// attached to a Node. The callback will essentially be owned by the element
-#[derive(Clone)]
-pub struct Callback<IN, OUT>(Rc<dyn Fn(IN) -> OUT>);
+pub struct Callback<EVENT, MSG>(Rc<dyn Fn(EVENT) -> MSG>);
 
-impl<IN, F, OUT> From<F> for Callback<IN, OUT>
+impl<EVENT, F, MSG> From<F> for Callback<EVENT, MSG>
 where
-    F: Fn(IN) -> OUT + 'static,
+    F: Fn(EVENT) -> MSG + 'static,
 {
     fn from(func: F) -> Self {
         Callback(Rc::new(func))
     }
 }
-impl<IN, OUT> fmt::Debug for Callback<IN, OUT> {
+impl<EVENT, MSG> fmt::Debug for Callback<EVENT, MSG> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "||{{..}}")
     }
 }
 
-impl<IN, OUT> Callback<IN, OUT>
+impl<EVENT, MSG> Callback<EVENT, MSG>
 where
-    IN: 'static,
-    OUT: 'static,
+    EVENT: 'static,
+    MSG: 'static,
 {
     /// This method calls the actual callback.
-    pub fn emit<T: Into<IN>>(&self, value: T) -> OUT {
+    pub fn emit<T: Into<EVENT>>(&self, value: T) -> MSG {
         (self.0)(value.into())
     }
 
     /// Changes input type of the callback to another.
     /// Works like common `map` method but in an opposite direction.
-    pub fn reform<F, IN2>(self, func: F) -> Callback<IN2, OUT>
+    pub fn reform<F, EVENT2>(self, func: F) -> Callback<EVENT2, MSG>
     where
-        F: Fn(IN2) -> IN + 'static,
+        F: Fn(EVENT2) -> EVENT + 'static,
     {
         let func_wrap = move |input| {
             let output = func(input);
@@ -47,9 +46,9 @@ where
     }
 
     /// Map the output of this callback to return a different type
-    pub fn map<F, OUT2>(self, func: F) -> Callback<IN, OUT2>
+    pub fn map<F, MSG2>(self, func: F) -> Callback<EVENT, MSG2>
     where
-        F: Fn(OUT) -> OUT2 + 'static,
+        F: Fn(MSG) -> MSG2 + 'static,
     {
         let func_wrap = move |input| {
             let out = self.emit(input);
@@ -57,9 +56,29 @@ where
         };
         Callback::from(func_wrap)
     }
+
+    pub fn map_callback<MSG2>(
+        self,
+        cb: Callback<MSG, MSG2>,
+    ) -> Callback<EVENT, MSG2>
+    where
+        MSG2: 'static,
+    {
+        let func_wrap = move |input| {
+            let out = self.emit(input);
+            cb.emit(out)
+        };
+        Callback::from(func_wrap)
+    }
 }
 
-impl<IN, OUT> PartialEq for Callback<IN, OUT> {
+impl<EVENT, MSG> Clone for Callback<EVENT, MSG> {
+    fn clone(&self) -> Self {
+        Callback(Rc::clone(&self.0))
+    }
+}
+
+impl<EVENT, MSG> PartialEq for Callback<EVENT, MSG> {
     fn eq(&self, rhs: &Self) -> bool {
         // Comparing the callback is only applicable
         // when they are a clone to each other.

@@ -16,9 +16,9 @@ pub fn diff<'a, T, EVENT, MSG>(
     new: &'a Node<T, EVENT, MSG>,
 ) -> Vec<Patch<'a, T, EVENT, MSG>>
 where
-    T: PartialEq + Clone,
-    MSG: PartialEq + Clone + 'static,
-    EVENT: PartialEq + Clone + 'static,
+    MSG: 'static,
+    EVENT: 'static,
+    T: PartialEq,
 {
     diff_recursive(&old, &new, &mut 0)
 }
@@ -29,9 +29,9 @@ fn diff_recursive<'a, 'b, T, EVENT, MSG>(
     cur_node_idx: &'b mut usize,
 ) -> Vec<Patch<'a, T, EVENT, MSG>>
 where
-    T: PartialEq + Clone,
-    MSG: PartialEq + Clone + 'static,
-    EVENT: PartialEq + Clone + 'static,
+    MSG: 'static,
+    EVENT: 'static,
+    T: PartialEq,
 {
     let mut patches = vec![];
     // Different enum variants, replace!
@@ -145,9 +145,8 @@ fn diff_attributes<'a, 'b, T, EVENT, MSG>(
     cur_node_idx: &'b mut usize,
 ) -> Vec<Patch<'a, T, EVENT, MSG>>
 where
-    MSG: PartialEq + Clone + 'static,
-    T: Clone,
-    EVENT: PartialEq + Clone + 'static,
+    MSG: 'static,
+    EVENT: 'static,
 {
     let mut patches = vec![];
     let mut add_attributes: Vec<Attribute<EVENT, MSG>> = vec![];
@@ -157,7 +156,12 @@ where
         let old_attr_value = old_element.get_attr_value(new_attr.name);
         let new_attr_value = new_element.get_attr_value(new_attr.name);
         if old_attr_value.is_none() || old_attr_value != new_attr_value {
-            add_attributes.push(new_attr.clone());
+            if let Some(new_attr_value) = new_attr_value {
+                add_attributes.push(Attribute::with_name_value(
+                    new_attr.name,
+                    new_attr_value,
+                ));
+            }
         }
     }
 
@@ -188,9 +192,8 @@ fn diff_event_listener<'a, 'b, T, EVENT, MSG>(
     cur_node_idx: &'b mut usize,
 ) -> Vec<Patch<'a, T, EVENT, MSG>>
 where
-    MSG: PartialEq + Clone + 'static,
-    T: Clone,
-    EVENT: PartialEq + Clone + 'static,
+    MSG: 'static,
+    EVENT: 'static,
 {
     let mut patches = vec![];
     let mut add_event_listener: Vec<&Attribute<EVENT, MSG>> = vec![];
@@ -230,9 +233,7 @@ where
 fn increment_node_idx_for_children<T, EVENT, MSG>(
     old: &Node<T, EVENT, MSG>,
     cur_node_idx: &mut usize,
-) where
-    MSG: Clone,
-{
+) {
     *cur_node_idx += 1;
     if let Node::Element(element_node) = old {
         for child in element_node.children.iter() {

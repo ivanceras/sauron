@@ -27,20 +27,20 @@ pub use value::Value;
 /// ```
 /// Cloning is only done once, and happens when constructing the views into a node tree.
 /// Cloning also allows flexibility such as adding more children into an existing node/element.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Node<T, EVENT, MSG>
 where
-    MSG: Clone + 'static,
+    MSG: 'static,
     EVENT: 'static,
 {
     Element(Element<T, EVENT, MSG>),
     Text(Text),
 }
 
-#[derive(Debug, PartialEq, Clone, Default)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Element<T, EVENT, MSG>
 where
-    MSG: Clone + 'static,
+    MSG: 'static,
     EVENT: 'static,
 {
     pub tag: T,
@@ -50,17 +50,14 @@ where
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Attribute<EVENT, MSG>
-where
-    MSG: Clone,
-{
+pub struct Attribute<EVENT, MSG> {
     pub name: &'static str,
     pub value: AttribValue<EVENT, MSG>,
 }
 
 impl<EVENT, MSG> Attribute<EVENT, MSG>
 where
-    MSG: Clone + 'static,
+    MSG: 'static,
     EVENT: 'static,
 {
     pub fn new(name: &'static str, value: AttribValue<EVENT, MSG>) -> Self {
@@ -74,12 +71,14 @@ where
         }
     }
 
-    pub fn map<F, MSG2>(self, func: F) -> Attribute<EVENT, MSG2>
+    fn map_callback<MSG2>(
+        self,
+        cb: Callback<MSG, MSG2>,
+    ) -> Attribute<EVENT, MSG2>
     where
-        F: Fn(MSG) -> MSG2 + 'static + Clone,
-        MSG2: Clone + 'static,
+        MSG2: 'static,
     {
-        Attribute::new(self.name, self.value.map(func.clone()))
+        Attribute::new(self.name, self.value.map_callback(cb))
     }
 
     fn is_event(&self) -> bool {
@@ -88,28 +87,27 @@ where
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum AttribValue<EVENT, MSG>
-where
-    MSG: Clone,
-{
+pub enum AttribValue<EVENT, MSG> {
     Value(Value),
     Callback(Callback<EVENT, MSG>),
 }
 
 impl<EVENT, MSG> AttribValue<EVENT, MSG>
 where
-    MSG: Clone + 'static,
+    MSG: 'static,
     EVENT: 'static,
 {
-    pub fn map<F, MSG2>(self, func: F) -> AttribValue<EVENT, MSG2>
+    fn map_callback<MSG2>(
+        self,
+        cb: Callback<MSG, MSG2>,
+    ) -> AttribValue<EVENT, MSG2>
     where
-        F: Fn(MSG) -> MSG2 + 'static + Clone,
-        MSG2: Clone,
+        MSG2: 'static,
     {
         match self {
             AttribValue::Value(value) => AttribValue::Value(value),
-            AttribValue::Callback(cb) => {
-                AttribValue::Callback(cb.map(func.clone()))
+            AttribValue::Callback(existing) => {
+                AttribValue::Callback(existing.map_callback(cb))
             }
         }
     }
@@ -136,10 +134,7 @@ where
     }
 }
 
-impl<EVENT, MSG> fmt::Display for AttribValue<EVENT, MSG>
-where
-    MSG: Clone,
-{
+impl<EVENT, MSG> fmt::Display for AttribValue<EVENT, MSG> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             AttribValue::Value(value) => write!(f, "{}", value),
@@ -148,19 +143,13 @@ where
     }
 }
 
-impl<EVENT, MSG> From<Callback<EVENT, MSG>> for AttribValue<EVENT, MSG>
-where
-    MSG: Clone,
-{
+impl<EVENT, MSG> From<Callback<EVENT, MSG>> for AttribValue<EVENT, MSG> {
     fn from(cb: Callback<EVENT, MSG>) -> Self {
         AttribValue::Callback(cb)
     }
 }
 
-impl<EVENT, MSG> From<Value> for AttribValue<EVENT, MSG>
-where
-    MSG: Clone,
-{
+impl<EVENT, MSG> From<Value> for AttribValue<EVENT, MSG> {
     fn from(value: Value) -> Self {
         AttribValue::Value(value)
     }
@@ -168,18 +157,25 @@ where
 
 impl<T, EVENT, MSG> Node<T, EVENT, MSG>
 where
-    EVENT: Clone + 'static,
-    MSG: Clone + 'static,
-    T: Clone,
+    EVENT: 'static,
+    MSG: 'static,
 {
-    /// map the return of the callback from MSG to MSG2
-    pub fn map<F, MSG2>(self, func: F) -> Node<T, EVENT, MSG2>
+    pub fn map_msg<F, MSG2>(self, func: F) -> Node<T, EVENT, MSG2>
     where
-        F: Fn(MSG) -> MSG2 + 'static + Clone,
-        MSG2: Clone + 'static,
+        F: Fn(MSG) -> MSG2 + 'static,
+        MSG2: 'static,
+    {
+        let cb = Callback::from(func);
+        self.map_callback(cb)
+    }
+
+    /// map_callback the return of the callback from MSG to MSG2
+    fn map_callback<MSG2>(self, cb: Callback<MSG, MSG2>) -> Node<T, EVENT, MSG2>
+    where
+        MSG2: 'static,
     {
         match self {
-            Node::Element(element) => Node::Element(element.map(func)),
+            Node::Element(element) => Node::Element(element.map_callback(cb)),
             Node::Text(text) => Node::Text(Text::new(text.text)),
         }
     }
@@ -249,28 +245,29 @@ where
 
 impl<T, EVENT, MSG> Element<T, EVENT, MSG>
 where
-    EVENT: Clone + 'static,
-    MSG: Clone + 'static,
-    T: Clone,
+    EVENT: 'static,
+    MSG: 'static,
 {
-    /// map the return of the callback from MSG to MSG2
-    pub fn map<F, MSG2>(self, func: F) -> Element<T, EVENT, MSG2>
+    /// map_callback the return of the callback from MSG to MSG2
+    fn map_callback<MSG2>(
+        self,
+        cb: Callback<MSG, MSG2>,
+    ) -> Element<T, EVENT, MSG2>
     where
-        F: Fn(MSG) -> MSG2 + 'static + Clone,
-        MSG2: Clone + 'static,
+        MSG2: 'static,
     {
         Element {
             tag: self.tag,
             attrs: self
                 .attrs
                 .into_iter()
-                .map(|attr| attr.map(func.clone()))
+                .map(|attr| attr.map_callback(cb.clone()))
                 .collect(),
             namespace: self.namespace,
             children: self
                 .children
                 .into_iter()
-                .map(|child| child.map(func.clone()))
+                .map(|child| child.map_callback(cb.clone()))
                 .collect(),
         }
     }
@@ -283,7 +280,7 @@ where
     /// make a pretty string representation of this node
     fn to_pretty_string(&self, indent: i32) -> String
     where
-        T: Clone + ToString,
+        T: ToString,
     {
         let mut buffer = String::new();
         buffer += &format!("<{}", self.tag.to_string());
@@ -315,16 +312,15 @@ where
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Default)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct Text {
     pub text: String,
 }
 
 impl<T, EVENT, MSG> Element<T, EVENT, MSG>
 where
-    T: Clone,
-    MSG: Clone + 'static,
-    EVENT: Clone + 'static,
+    MSG: 'static,
+    EVENT: 'static,
 {
     pub fn with_tag(tag: T) -> Self {
         Element {
@@ -455,19 +451,16 @@ impl fmt::Display for Text {
 
 impl<T, EVENT, MSG> fmt::Display for Node<T, EVENT, MSG>
 where
-    T: Clone + ToString,
-    EVENT: Clone + 'static,
-    MSG: Clone + 'static,
+    T: ToString,
+    EVENT: 'static,
+    MSG: 'static,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.to_pretty_string(0))
     }
 }
 
-impl<T, EVENT, MSG> From<Element<T, EVENT, MSG>> for Node<T, EVENT, MSG>
-where
-    MSG: Clone,
-{
+impl<T, EVENT, MSG> From<Element<T, EVENT, MSG>> for Node<T, EVENT, MSG> {
     fn from(v: Element<T, EVENT, MSG>) -> Self {
         Node::Element(v)
     }

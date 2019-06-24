@@ -117,8 +117,9 @@ impl Component<Msg> for Window {
                         .iter()
                         .enumerate()
                         .map(|(index, tab)| {
-                            Tab::view(tab)
-                                .map(move |tab_msg| Msg::TabMsg(index, tab_msg))
+                            Tab::view(tab).map_msg(move |tab_msg| {
+                                Msg::TabMsg(index, tab_msg)
+                            })
                         })
                         .collect::<Vec<Node<Msg>>>(),
                 ),

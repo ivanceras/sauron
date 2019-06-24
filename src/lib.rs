@@ -153,10 +153,8 @@ pub mod dom;
 #[macro_use]
 pub mod html;
 mod component;
-pub mod html_array;
 pub mod html_extra;
 mod program;
-pub mod svg_array;
 #[macro_use]
 pub mod svg;
 mod browser;

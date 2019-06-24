@@ -1,12 +1,10 @@
 use crate::{
+    Callback,
     Cmd,
     Component,
     Dispatch,
 };
-use std::{
-    fmt::Debug,
-    rc::Rc,
-};
+use std::rc::Rc;
 use wasm_bindgen::{
     closure::Closure,
     JsCast,
@@ -27,16 +25,18 @@ impl Http {
         DE: Fn(String) -> OUT + Clone + 'static,
         OUT: 'static,
         APP: Component<MSG> + 'static,
-        MSG: PartialEq + Debug + Clone + 'static,
+        MSG: 'static,
     {
+        let response_text_decoder = Callback::from(response_text_decoder);
+        let cb = Callback::from(cb);
         let cb_clone = cb.clone();
         let response_decoder = move |js_value: JsValue| {
             let response_text =
                 js_value.as_string().expect("There's no string value");
-            let msg_value = response_text_decoder(response_text);
-            cb(Ok(msg_value))
+            let msg_value = response_text_decoder.emit(response_text);
+            cb.emit(Ok(msg_value))
         };
-        let fail_cb = move |js_value| cb_clone(Err(js_value));
+        let fail_cb = move |js_value| cb_clone.emit(Err(js_value));
         Self::fetch_with_response_decoder(url, response_decoder, fail_cb)
     }
 
@@ -47,27 +47,35 @@ impl Http {
         fail_cb: ERR,
     ) -> Cmd<APP, MSG>
     where
-        F: Fn(JsValue) -> MSG + Clone + 'static,
-        ERR: Fn(JsValue) -> MSG + Clone + 'static,
+        F: Fn(JsValue) -> MSG + 'static,
+        ERR: Fn(JsValue) -> MSG + 'static,
         APP: Component<MSG> + 'static,
-        MSG: PartialEq + Debug + Clone + 'static,
+        MSG: 'static,
     {
         let url_clone = url.to_string();
+        let response_decoder = Callback::from(response_decoder);
+
+        let fail_cb = Callback::from(fail_cb);
+
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
             let program_clone = Rc::clone(&program);
 
-            let response_decoder_clone = response_decoder.clone();
+            let response_decoder = response_decoder.clone();
+
             let decoder_and_dispatcher = move |js_value: JsValue| {
-                let msg = response_decoder_clone(js_value);
+                let msg = response_decoder.emit(js_value);
                 program_clone.dispatch(msg);
             };
 
+            let fail_cb = fail_cb.clone();
+            let fail_cb2 = fail_cb.clone();
+
             let program_clone_status_err = Rc::clone(&program);
-            let fail_status_cb = fail_cb.clone();
 
             let promise = crate::window().fetch_with_str(&url_clone);
             let cb: Closure<dyn FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
+                    let fail_cb = fail_cb.clone();
                     let response: &Response = js_value.as_ref().unchecked_ref();
                     let status = response.status();
                     if status == 200 {
@@ -85,16 +93,16 @@ impl Http {
                         }
                     } else {
                         program_clone_status_err
-                            .dispatch(fail_status_cb(js_value));
+                            .dispatch(fail_cb.emit(js_value));
                     }
                 });
 
             let program_clone_response_error = Rc::clone(&program);
-            let fail_cb_clone = fail_cb.clone();
             let fail_closure: Closure<dyn FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
+                    let fail_cb = fail_cb2.clone();
                     program_clone_response_error
-                        .dispatch(fail_cb_clone(js_value));
+                        .dispatch(fail_cb.emit(js_value));
                 });
 
             promise.then(&cb).catch(&fail_closure);
