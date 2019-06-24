@@ -18,9 +18,36 @@ use sauron_vdom::{
     },
     Callback,
     Text,
+    Value,
 };
 
 use sauron::Event;
+
+#[test]
+fn should_merge_classes() {
+    let html: Node<()> = div(vec![class("class1"), class("class2")], vec![]);
+    let attrs = html.get_attributes();
+    println!("attrs: {:#?}", attrs);
+    let elm = html.as_element_ref().expect("expecting an element");
+    let classes = elm.get_attr_value("class");
+    assert_eq!(classes, Some(Value::from(["class1", "class2"])));
+}
+
+#[test]
+fn should_merge_classes_flag() {
+    let html: Node<()> = div(
+        vec![class("class1"), classes_flag([("class_flag", true)])],
+        vec![],
+    );
+    let attrs = html.get_attributes();
+    println!("attrs: {:#?}", attrs);
+    let elm = html.as_element_ref().expect("expecting an element");
+    let classes = elm.get_attr_value("class");
+    assert_eq!(
+        classes,
+        Some(Value::from(("class1", "class_flag".to_string())))
+    );
+}
 
 #[test]
 fn simple_builder() {
@@ -192,7 +219,7 @@ fn add_attributes() {
     let new = div(vec![id("hello")], vec![]); //{ <div id="hello"> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(0, vec![&id("hello")])],
+        vec![Patch::AddAttributes(0, vec![id("hello")])],
         "Add attributes",
     );
 
@@ -201,7 +228,7 @@ fn add_attributes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(0, vec![&id("hello")])],
+        vec![Patch::AddAttributes(0, vec![id("hello")])],
         "Change attribute",
     );
 }
@@ -269,7 +296,7 @@ fn change_attribute() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(0, vec![&id("changed")])],
+        vec![Patch::AddAttributes(0, vec![id("changed")])],
         "Add attributes",
     );
 }

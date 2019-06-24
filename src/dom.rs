@@ -136,7 +136,7 @@ impl<T> CreatedNode<T> {
 
         let mut closures = ActiveClosure::new();
 
-        velem.attrs.iter().for_each(|attr| {
+        velem.attributes().iter().for_each(|attr| {
             element
                 .set_attribute(attr.name, &attr.value.to_string())
                 .expect("Set element attribute in create element");

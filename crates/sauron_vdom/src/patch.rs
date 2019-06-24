@@ -54,7 +54,9 @@ where
     /// ex: <div> becomes <span>
     Replace(NodeIdx, &'a Node<T, EVENT, MSG>),
     /// Add attributes that the new node has that the old node does not
-    AddAttributes(NodeIdx, Vec<&'a Attribute<EVENT, MSG>>),
+    /// Note: the attributes is not a reference since attributes of same
+    /// name are merged to produce a new unify attribute
+    AddAttributes(NodeIdx, Vec<Attribute<EVENT, MSG>>),
     /// Remove attributes that the old node had that the new node doesn't
     RemoveAttributes(NodeIdx, Vec<&'static str>),
     /// Add attributes that the new node has that the old node does not

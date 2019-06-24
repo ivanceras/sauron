@@ -70,9 +70,9 @@ fn truncate_children_different_attributes() {
         diff(&old, &new),
         vec![
             Patch::TruncateChildren(0, 3),
-            Patch::AddAttributes(1, vec![&class("class5")]),
-            Patch::AddAttributes(2, vec![&class("class6")]),
-            Patch::AddAttributes(3, vec![&class("class7")])
+            Patch::AddAttributes(1, vec![class("class5")]),
+            Patch::AddAttributes(2, vec![class("class6")]),
+            Patch::AddAttributes(3, vec![class("class7")])
         ],
         "Should truncate children"
     );
@@ -190,7 +190,7 @@ fn add_attributes() {
     let new = div(vec![id("hello")], vec![]); //{ <div id="hello"> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(0, vec![&id("hello")])],
+        vec![Patch::AddAttributes(0, vec![id("hello")])],
         "Add attributes",
     );
 
@@ -199,7 +199,7 @@ fn add_attributes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(0, vec![&id("hello")])],
+        vec![Patch::AddAttributes(0, vec![id("hello")])],
         "Change attribute",
     );
 }
@@ -233,7 +233,7 @@ fn change_attribute() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(0, vec![&id("changed")])],
+        vec![Patch::AddAttributes(0, vec![id("changed")])],
         "Add attributes",
     );
 }

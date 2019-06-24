@@ -67,6 +67,10 @@ where
         Attribute { name, value }
     }
 
+    pub fn with_name_value(name: &'static str, value: Value) -> Self {
+        Attribute{ name, value: value.into()}
+    }
+
     pub fn map<F, MSG2>(self, func: F) -> Attribute<EVENT, MSG2>
     where
         F: Fn(MSG) -> MSG2 + 'static + Clone,
@@ -120,6 +124,13 @@ where
             AttribValue::Callback(cb) => Some(cb),
         }
     }
+
+    pub fn get_value(&self) -> Option<&Value> {
+        match self {
+            AttribValue::Value(value) => Some(value),
+            AttribValue::Callback(_) => None,
+        }
+    }
 }
 
 impl<EVENT, MSG> fmt::Display for AttribValue<EVENT, MSG>
@@ -142,6 +153,16 @@ where
         AttribValue::Callback(cb)
     }
 }
+
+impl<EVENT, MSG> From<Value> for AttribValue<EVENT, MSG>
+where
+    MSG: Clone,
+{
+    fn from(value: Value) -> Self {
+        AttribValue::Value(value)
+    }
+}
+
 
 impl<T, EVENT, MSG> Node<T, EVENT, MSG>
 where
@@ -185,13 +206,15 @@ where
         }
     }
 
-    pub fn as_element_ref(&mut self) -> Option<&Element<T, EVENT, MSG>> {
+    pub fn as_element_ref(&self) -> Option<&Element<T, EVENT, MSG>> {
         match *self {
             Node::Element(ref element) => Some(element),
             Node::Text(_) => None,
         }
     }
 
+    /// FIXME: change the name to add_children
+    /// since this looks like a getter
     /// Append children to this element
     pub fn children(mut self, children: Vec<Node<T, EVENT, MSG>>) -> Self {
         if let Some(element) = self.as_element() {
@@ -200,6 +223,8 @@ where
         self
     }
 
+    /// FIXME: change the naming to add_attribute
+    /// since this looks like a getter
     /// add attributes to the node
     pub fn attributes(
         mut self,
@@ -209,6 +234,14 @@ where
             elm.add_attributes(attributes);
         }
         self
+    }
+
+    /// get the attributes of this node
+    pub fn get_attributes(&self) -> Vec<&Attribute<EVENT, MSG>> {
+        match *self {
+            Node::Element(ref element) => element.attributes(),
+            Node::Text(_) => vec![],
+        }
     }
 }
 
@@ -322,26 +355,68 @@ where
             .map(|event| *event)
     }
 
+    // TODO all similar attributes are merged
     pub fn attributes(&self) -> Vec<&Attribute<EVENT, MSG>> {
         self.attrs.iter().filter(|attr| !attr.is_event()).collect()
     }
 
-    pub fn get_attrib_value(
+
+    /// return all the attributes that match the name
+    pub fn get_attributes_with_name(
         &self,
         key: &str,
-    ) -> Option<&AttribValue<EVENT, MSG>> {
-        self.attributes().iter().find_map(|ref att| {
-            if att.name == key {
-                Some(&att.value)
-            } else {
-                None
+    ) -> Vec<&Attribute<EVENT, MSG>> {
+        self.attributes()
+            .iter()
+            .filter(|att| att.name == key)
+            .map(|att|*att)
+            .collect()
+    }
+
+    pub fn get_attributes_name(&self) -> Vec<&'static str> {
+        let mut names = self.attributes()
+            .iter()
+            .map(|att|att.name)
+            .collect::<Vec<&str>>();
+        names.sort();
+        names.dedup();
+        names
+    }
+
+    /// TODO get all the attributes
+    /// that has the same key and merge the value
+    /// when it is an attrib value
+    pub fn get_attr_value(&self, key: &str) -> Option<Value> {
+        let attrs = self.get_attributes_with_name(key);
+        if !attrs.is_empty(){
+            Some(Self::merge_attributes_values(attrs))
+        }
+        else{
+            None
+        }
+    }
+
+    /// merge this all attributes,
+    /// this assumes that that this attributes has the same name
+    fn merge_attributes_values(attrs: Vec<&Attribute<EVENT,MSG>>) -> Value {
+        if attrs.len() == 1{
+            let one_value = attrs[0].value.get_value().expect("Should have a value");
+            one_value.clone()
+        }
+        else{
+            let mut merged_value: Value = Value::Vec(vec![]);
+            for att in attrs{
+                if let Some(v) = att.value.get_value(){
+                   merged_value.append(v.clone());
+                }
             }
-        })
+            merged_value
+        }
     }
 
     #[inline]
     pub fn add_attributes(&mut self, attrs: Vec<Attribute<EVENT, MSG>>) {
-        self.attrs.extend(attrs);
+        self.attrs.extend(attrs)
     }
 
     #[inline]

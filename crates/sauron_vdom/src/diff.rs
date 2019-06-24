@@ -48,8 +48,8 @@ where
         // TODO: More robust key support. This is just an early stopgap to allow you to force replace
         // an element... say if it's event changed. Just change the key name for now.
         // In the future we want keys to be used to create a Patch::ReOrder to re-order siblings
-        let old_key_value = old_element.get_attrib_value("key");
-        let new_key_value = new_element.get_attrib_value("key");
+        let old_key_value = old_element.get_attr_value("key");
+        let new_key_value = new_element.get_attr_value("key");
         if let (Some(old_key_value), Some(new_key_value)) =
             (old_key_value, new_key_value)
         {
@@ -150,20 +150,17 @@ where
     EVENT: PartialEq + Clone + 'static,
 {
     let mut patches = vec![];
-    let mut add_attributes: Vec<&Attribute<EVENT, MSG>> = vec![];
+    let mut add_attributes: Vec<Attribute<EVENT, MSG>> = vec![];
     let mut remove_attributes: Vec<&str> = vec![];
 
-    for new_attr in new_element.attributes().iter() {
-        match old_element.get_attrib_value(new_attr.name) {
-            Some(old_attr_val) => {
-                if *old_attr_val != new_attr.value {
-                    add_attributes.push(new_attr);
-                }
+    for new_attr_name in new_element.get_attributes_name().iter() {
+        let old_attr_value = old_element.get_attr_value(new_attr_name);
+        let new_attr_value = new_element.get_attr_value(new_attr_name);
+        if old_attr_value.is_none() || old_attr_value != new_attr_value {
+            if let Some(new_attr_value) = new_attr_value{
+                add_attributes.push(Attribute::with_name_value(new_attr_name, new_attr_value));
             }
-            None => {
-                add_attributes.push(new_attr);
-            }
-        };
+        }
     }
 
     for old_attr in old_element.attributes().iter() {
