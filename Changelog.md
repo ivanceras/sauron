@@ -1,3 +1,7 @@
+# 0.10.0 (Unreleased)
+ - performance improvement on node tree building
+ - using vec![] as the argumemts for attributes and children
+
 # 0.7.1
  - Add initial implementation for markdown handling
  - Add history function get history object
