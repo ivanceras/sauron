@@ -12,7 +12,6 @@ use sauron::{
 };
 use wasm_bindgen::prelude::*;
 
-#[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     Click,
 }
@@ -50,7 +49,6 @@ impl Component<Msg> for App {
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-        sauron::log!("App is updating from msg: {:?}", msg);
         match msg {
             Msg::Click => self.click_count += 1,
         }

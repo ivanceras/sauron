@@ -65,7 +65,7 @@ impl Component<Msg> for Row {
                         .iter()
                         .enumerate()
                         .map(|(index, field)| {
-                            field.view().map(move |field_msg| {
+                            field.view().map_msg(move |field_msg| {
                                 Msg::FieldMsg(index, field_msg)
                             })
                         })

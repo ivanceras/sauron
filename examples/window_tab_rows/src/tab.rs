@@ -89,8 +89,9 @@ impl Component<Msg> for Tab {
                         .iter()
                         .enumerate()
                         .map(|(index, row)| {
-                            row.view()
-                                .map(move |row_msg| Msg::RowMsg(index, row_msg))
+                            row.view().map_msg(move |row_msg| {
+                                Msg::RowMsg(index, row_msg)
+                            })
                         })
                         .collect::<Vec<Node<Msg>>>(),
                 ),

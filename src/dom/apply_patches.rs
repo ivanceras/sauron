@@ -38,7 +38,7 @@ pub fn patch<N, DSP, MSG>(
 ) -> Result<ActiveClosure, JsValue>
 where
     N: Into<Node>,
-    MSG: Clone + 'static,
+    MSG: 'static,
     DSP: Dispatch<MSG> + 'static,
 {
     let root_node: Node = root_node.into();
@@ -83,10 +83,7 @@ where
 fn find_nodes<MSG>(
     root_node: Node,
     patches: &[Patch<MSG>],
-) -> (HashMap<usize, Element>, HashMap<usize, Text>)
-where
-    MSG: Clone,
-{
+) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
     let mut cur_node_idx = 0;
     let mut nodes_to_find = HashSet::new();
 
@@ -202,7 +199,7 @@ fn apply_element_patch<DSP, MSG>(
     patch: &Patch<MSG>,
 ) -> Result<ActiveClosure, JsValue>
 where
-    MSG: Clone + 'static,
+    MSG: 'static,
     DSP: Dispatch<MSG> + 'static,
 {
     let mut active_closures = ActiveClosure::new();
@@ -315,7 +312,7 @@ fn apply_text_patch<DSP, MSG>(
     patch: &Patch<MSG>,
 ) -> Result<(), JsValue>
 where
-    MSG: Clone + 'static,
+    MSG: 'static,
     DSP: Dispatch<MSG> + 'static,
 {
     match patch {

@@ -9,7 +9,6 @@ use sauron::{
     Node,
 };
 
-#[derive(Clone, Debug)]
 pub struct Model {
     entries: Vec<Entry>,
     filter: Filter,
@@ -17,14 +16,12 @@ pub struct Model {
     edit_value: String,
 }
 
-#[derive(Clone, Debug)]
 struct Entry {
     description: String,
     completed: bool,
     editing: bool,
 }
 
-#[derive(Clone, PartialEq, Debug)]
 pub enum Msg {
     Add,
     Edit(usize),

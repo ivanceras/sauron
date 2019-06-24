@@ -118,7 +118,7 @@ macro_rules! declare_events {
             #[inline]
             pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
                 where CB: Fn($ret)-> MSG +'static,
-                      MSG: Clone + 'static,
+                      MSG: 'static,
                 {
                     on_with_extractor(stringify!($event), $mapper, cb)
                 }
@@ -135,7 +135,7 @@ macro_rules! declare_events {
             #[inline]
             pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
                 where CB: Fn(()) -> MSG + 'static,
-                      MSG: Clone + 'static,
+                      MSG: 'static,
                 {
                     on_with_extractor(stringify!($event), |_|{}, cb)
                 }
@@ -147,7 +147,7 @@ macro_rules! declare_events {
 pub fn onscroll<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
 where
     CB: Fn((i32, i32)) -> MSG + 'static,
-    MSG: Clone + 'static,
+    MSG: 'static,
 {
     let webevent_to_scroll_offset = |event: crate::Event| {
         let target = event.0.target().expect("can't get target");
@@ -163,7 +163,7 @@ where
 pub fn onresize<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
 where
     CB: Fn((i32, i32)) -> MSG + 'static,
-    MSG: Clone + 'static,
+    MSG: 'static,
 {
     crate::log("resizing..");
     let target_size_fn = |event: crate::Event| {

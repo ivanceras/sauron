@@ -42,12 +42,7 @@ pub fn element<T, EVENT, MSG>(
     tag: T,
     attrs: Vec<Attribute<EVENT, MSG>>,
     children: Vec<Node<T, EVENT, MSG>>,
-) -> Node<T, EVENT, MSG>
-where
-    T: Clone,
-    MSG: Clone,
-    EVENT: Clone,
-{
+) -> Node<T, EVENT, MSG> {
     element_ns(tag, None, attrs, children)
 }
 
@@ -57,12 +52,7 @@ pub fn element_ns<T, EVENT, MSG>(
     namespace: Option<&'static str>,
     attrs: Vec<Attribute<EVENT, MSG>>,
     children: Vec<Node<T, EVENT, MSG>>,
-) -> Node<T, EVENT, MSG>
-where
-    T: Clone,
-    MSG: Clone,
-    EVENT: Clone,
-{
+) -> Node<T, EVENT, MSG> {
     Node::Element(Element {
         tag,
         attrs,
@@ -76,8 +66,6 @@ where
 pub fn text<V, T, EVENT, MSG>(v: V) -> Node<T, EVENT, MSG>
 where
     V: ToString,
-    EVENT: Clone,
-    MSG: Clone,
 {
     Node::Text(Text {
         text: v.to_string(),
@@ -89,8 +77,6 @@ where
 pub fn attr<V, EVENT, MSG>(name: &'static str, v: V) -> Attribute<EVENT, MSG>
 where
     V: Into<Value>,
-    EVENT: Clone,
-    MSG: Clone,
 {
     Attribute {
         name,
@@ -109,8 +95,6 @@ where
 pub fn on<C, EVENT, MSG>(name: &'static str, c: C) -> Attribute<EVENT, MSG>
 where
     C: Into<Callback<EVENT, MSG>>,
-    EVENT: Clone,
-    MSG: Clone,
 {
     Attribute {
         name,
@@ -128,9 +112,9 @@ pub fn on_with_extractor<EVENT, WEV2UDEF, UDEF, UDEF2MSG, MSG>(
 where
     WEV2UDEF: Fn(EVENT) -> UDEF + 'static,
     UDEF2MSG: Fn(UDEF) -> MSG + 'static,
-    MSG: Clone + 'static,
+    MSG: 'static,
     UDEF: 'static,
-    EVENT: Clone + 'static,
+    EVENT: 'static,
 {
     let cb: Callback<EVENT, UDEF> = Callback::from(webevent_to_user_def);
     let cb2: Callback<EVENT, MSG> = cb.map(user_def_to_msg);

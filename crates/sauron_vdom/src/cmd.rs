@@ -3,7 +3,6 @@ use crate::{
     Callback,
 };
 use std::{
-    fmt::Debug,
     marker::PhantomData,
     rc::Rc,
 };
@@ -20,7 +19,7 @@ where
 
 impl<DSP, MSG> Cmd<DSP, MSG>
 where
-    MSG: Debug + 'static,
+    MSG: 'static,
     DSP: Dispatch<MSG> + 'static,
 {
     pub fn new<F>(cmd: F) -> Self

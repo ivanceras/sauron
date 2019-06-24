@@ -15,7 +15,6 @@ macro_rules! declare_attributes {
             #[inline]
             pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
                 where V: Into<Value>,
-                    MSG: Clone,
                 {
                     attr(stringify!($name), v)
                 }
@@ -31,7 +30,6 @@ macro_rules! declare_attributes {
             #[inline]
             pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
                 where V: Into<Value>,
-                    MSG: Clone,
                 {
                     attr($attribute, v)
                 }

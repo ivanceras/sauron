@@ -9,7 +9,7 @@ macro_rules! declare_units{
         $(
             $(#[$attr])*
             pub fn $name<V>(v: V) -> String
-            where V: Into<Value> + Clone,
+            where V: Into<Value>,
                   {
                       format!("{}{}", v.into(), stringify!($name))
                   }
@@ -24,7 +24,7 @@ macro_rules! declare_units{
         $(
             $(#[$attr])*
             pub fn $name<V>(v: V) -> String
-            where V: Into<Value> + Clone,
+            where V: Into<Value>,
                   {
                       format!("{}{}", v.into(), $unit)
                   }

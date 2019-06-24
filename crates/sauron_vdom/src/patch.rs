@@ -43,7 +43,7 @@ use crate::{
 #[derive(Debug, PartialEq)]
 pub enum Patch<'a, T, EVENT, MSG>
 where
-    MSG: Clone + 'static,
+    MSG: 'static,
     EVENT: 'static,
 {
     /// Append a vector of child nodes to a parent node id.
@@ -69,10 +69,7 @@ where
 
 type NodeIdx = usize;
 
-impl<'a, T, EVENT, MSG> Patch<'a, T, EVENT, MSG>
-where
-    MSG: Clone,
-{
+impl<'a, T, EVENT, MSG> Patch<'a, T, EVENT, MSG> {
     /// Every Patch is meant to be applied to a specific node within the DOM. Get the
     /// index of the DOM node that this patch should apply to. DOM nodes are indexed
     /// depth first with the root node in the tree having index 0.

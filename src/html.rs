@@ -18,10 +18,7 @@ pub fn html_element<MSG>(
     tag: &'static str,
     attrs: Vec<Attribute<MSG>>,
     children: Vec<Node<MSG>>,
-) -> Node<MSG>
-where
-    MSG: Clone,
-{
+) -> Node<MSG> {
     sauron_vdom::builder::element(tag, attrs, children)
 }
 
@@ -31,10 +28,7 @@ pub fn html_element_ns<MSG>(
     namespace: &'static str,
     attrs: Vec<Attribute<MSG>>,
     children: Vec<Node<MSG>>,
-) -> Node<MSG>
-where
-    MSG: Clone,
-{
+) -> Node<MSG> {
     sauron_vdom::builder::element_ns(tag, Some(namespace), attrs, children)
 }
 
@@ -48,8 +42,6 @@ macro_rules! declare_tags {
             $(#[$attr])*
             #[inline]
             pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
-                where
-                      MSG: Clone,
                 {
                     $crate::html::html_element(stringify!($name), attrs, children)
                 }
@@ -177,10 +169,7 @@ declare_tags! {
 
 /// A help function which render the view when the condition is met, otherwise
 /// just display a text("")
-pub fn view_if<MSG>(flag: bool, node: Node<MSG>) -> Node<MSG>
-where
-    MSG: Clone,
-{
+pub fn view_if<MSG>(flag: bool, node: Node<MSG>) -> Node<MSG> {
     if flag {
         node
     } else {
