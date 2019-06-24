@@ -28,6 +28,7 @@ fn should_merge_classes() {
     let html: Node<()> = div(vec![class("class1"), class("class2")], vec![]);
     let attrs = html.get_attributes();
     println!("attrs: {:#?}", attrs);
+    assert_eq!(attrs.len(), 1);
     let elm = html.as_element_ref().expect("expecting an element");
     let classes = elm.get_attr_value("class");
     assert_eq!(classes, Some(Value::from(["class1", "class2"])));
@@ -41,6 +42,7 @@ fn should_merge_classes_flag() {
     );
     let attrs = html.get_attributes();
     println!("attrs: {:#?}", attrs);
+    assert_eq!(attrs.len(), 1);
     let elm = html.as_element_ref().expect("expecting an element");
     let classes = elm.get_attr_value("class");
     assert_eq!(

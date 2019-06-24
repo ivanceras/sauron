@@ -250,8 +250,8 @@ look like:
     <h2>Tables</h2>
     <table class="table">
         <tr>
-            <th scope="col" class="text-left">Option</th>
-            <th scope="col" class="text-right">Description</th>
+            <th class="text-left" scope="col">Option</th>
+            <th class="text-right" scope="col">Description</th>
         </tr>
         <tr>
             <td class="text-left">data</td>

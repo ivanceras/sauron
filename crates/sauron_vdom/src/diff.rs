@@ -153,35 +153,23 @@ where
     let mut add_attributes: Vec<Attribute<EVENT, MSG>> = vec![];
     let mut remove_attributes: Vec<&str> = vec![];
 
-    for new_attr_name in new_element.get_attributes_name().iter() {
-        let old_attr_value = old_element.get_attr_value(new_attr_name);
-        let new_attr_value = new_element.get_attr_value(new_attr_name);
+    for new_attr in new_element.attributes().iter() {
+        let old_attr_value = old_element.get_attr_value(new_attr.name);
+        let new_attr_value = new_element.get_attr_value(new_attr.name);
         if old_attr_value.is_none() || old_attr_value != new_attr_value {
-            if let Some(new_attr_value) = new_attr_value{
-                add_attributes.push(Attribute::with_name_value(new_attr_name, new_attr_value));
-            }
+            add_attributes.push(new_attr.clone());
         }
     }
 
+    // if this attribute name does not exist anymore
+    // to the new element, remove it
     for old_attr in old_element.attributes().iter() {
-        if add_attributes
-            .iter()
-            .find(|attr| attr.name == old_attr.name)
-            .is_some()
-        {
-            continue;
-        };
-
-        match new_element.get_attr(old_attr.name) {
-            Some(ref new_attr) => {
-                if new_attr.value != old_attr.value {
-                    remove_attributes.push(old_attr.name);
-                }
-            }
-            None => {
-                remove_attributes.push(old_attr.name);
-            }
-        };
+        if let Some(_) = new_element.get_attr_value(old_attr.name){
+            // the attribute still exist in the new element
+            // and it must have been changed in add_attributes when they differe
+        }else{
+            remove_attributes.push(old_attr.name);
+        }
     }
 
     if !add_attributes.is_empty() {
@@ -221,14 +209,6 @@ where
     }
 
     for old_event in old_element.events().iter() {
-        if add_event_listener
-            .iter()
-            .find(|event| event.name == old_event.name)
-            .is_some()
-        {
-            continue;
-        };
-
         if new_element.get_event(old_event.name).is_none() {
             remove_event_listener.push(old_event.name);
         }

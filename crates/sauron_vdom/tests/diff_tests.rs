@@ -61,7 +61,7 @@ fn test_class_changed() {
     let diff = diff(&old, &new);
     assert_eq!(
         diff,
-        vec![Patch::AddAttributes(0, vec![&attr("class", "some-class2")])]
+        vec![Patch::AddAttributes(0, vec![attr("class", "some-class2")])]
     )
 }
 

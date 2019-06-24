@@ -237,7 +237,7 @@ where
     }
 
     /// get the attributes of this node
-    pub fn get_attributes(&self) -> Vec<&Attribute<EVENT, MSG>> {
+    pub fn get_attributes(&self) -> Vec<Attribute<EVENT, MSG>> {
         match *self {
             Node::Element(ref element) => element.attributes(),
             Node::Text(_) => vec![],
@@ -333,15 +333,6 @@ where
         }
     }
 
-    pub fn get_attr(&self, key: &str) -> Option<&Attribute<EVENT, MSG>> {
-        self.attrs.iter().find_map(|ref att| {
-            if att.name == key {
-                Some(*att)
-            } else {
-                None
-            }
-        })
-    }
 
     /// get the attributes that are events
     pub fn events(&self) -> Vec<&Attribute<EVENT, MSG>> {
@@ -356,25 +347,37 @@ where
     }
 
     // TODO all similar attributes are merged
-    pub fn attributes(&self) -> Vec<&Attribute<EVENT, MSG>> {
+    fn attributes_internal(&self) -> Vec<&Attribute<EVENT, MSG>> {
         self.attrs.iter().filter(|attr| !attr.is_event()).collect()
     }
 
+    pub fn attributes(&self) -> Vec<Attribute<EVENT,MSG>> {
+        let names = self.get_attributes_name();
+        let mut attributes = vec![];
+        for name in names{
+            if let Some(value) = self.get_attr_value(name){
+                attributes.push(Attribute::with_name_value(name, value));
+            }
+        }
+        attributes
+    }
+
+
 
     /// return all the attributes that match the name
-    pub fn get_attributes_with_name(
+    fn get_attributes_with_name(
         &self,
         key: &str,
     ) -> Vec<&Attribute<EVENT, MSG>> {
-        self.attributes()
+        self.attributes_internal()
             .iter()
             .filter(|att| att.name == key)
             .map(|att|*att)
             .collect()
     }
 
-    pub fn get_attributes_name(&self) -> Vec<&'static str> {
-        let mut names = self.attributes()
+    fn get_attributes_name(&self) -> Vec<&'static str> {
+        let mut names = self.attributes_internal()
             .iter()
             .map(|att|att.name)
             .collect::<Vec<&str>>();

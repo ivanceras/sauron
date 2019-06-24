@@ -14,6 +14,18 @@ use sauron_vdom::{
 };
 
 #[test]
+fn change_class_attribute() {
+    let old: Node<()> = div(vec![class("class1"), class("class2")], vec![]);
+
+    let new = div(vec![class("class1"), class("difference_class")], vec![]);
+    assert_eq!(
+        diff(&old, &new),
+        vec![Patch::AddAttributes(0, vec![class(["class1", "difference_class"])])],
+        "Should add the new attributes"
+    );
+}
+
+#[test]
 fn truncate_children() {
     let old: Node<()> = div(
         vec![],
