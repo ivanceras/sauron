@@ -1,6 +1,7 @@
 # 0.10.0 (Unreleased)
  - performance improvement on node tree building
- - using vec![] as the argumemts for attributes and children
+ - using vec![] as the argumemts for attributes and children, this changes the syntax a lot
+ - `map` function mapping Msg from in between component is now `map_msg` to avoid confusion with the rust std common maps such `Iterator.map`
 
 # 0.7.1
  - Add initial implementation for markdown handling
