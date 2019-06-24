@@ -8,7 +8,7 @@ macro_rules! declare_nicer_tags {
 
     ( $(
          $(#[$attr:meta])*
-         $name:ident => $M:tt,$N:tt;
+         $name:ident => $M:ident,$N:ident;
        )*
      ) => {
         $(
@@ -21,15 +21,14 @@ macro_rules! declare_nicer_tags {
                 {
                     $crate::html::$name(attrs.as_ref().to_vec(), children.as_ref().to_vec())
                 }
-
-            /*
+                /* //TODO: use this when const generic is not panicking anymore
             pub fn $name<MSG, const $M: usize, const $N: usize>(attrs: [$crate::Attribute<MSG>;$M], children: [$crate::Node<MSG>;$N]) -> $crate::Node<MSG>
                 where
                       MSG: Clone,
                 {
                     $crate::html::$name(attrs.to_vec(), children.to_vec())
                 }
-            */
+                */
          )*
     }
 }

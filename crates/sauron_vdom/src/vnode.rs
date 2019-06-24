@@ -352,6 +352,9 @@ where
         self.attrs.iter().filter(|attr| !attr.is_event()).collect()
     }
 
+    // TODO: optimize this by grouping the attibutes
+    // by name into a BTreeMap then merge per entry
+    // before returning
     pub fn attributes(&self) -> Vec<Attribute<EVENT, MSG>> {
         let names = self.get_attributes_name();
         let mut attributes = vec![];
