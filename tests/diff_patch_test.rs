@@ -20,7 +20,10 @@ fn change_class_attribute() {
     let new = div(vec![class("class1"), class("difference_class")], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(0, vec![class(["class1", "difference_class"])])],
+        vec![Patch::AddAttributes(
+            0,
+            vec![class(["class1", "difference_class"])]
+        )],
         "Should add the new attributes"
     );
 }

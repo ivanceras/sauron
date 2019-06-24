@@ -68,7 +68,10 @@ where
     }
 
     pub fn with_name_value(name: &'static str, value: Value) -> Self {
-        Attribute{ name, value: value.into()}
+        Attribute {
+            name,
+            value: value.into(),
+        }
     }
 
     pub fn map<F, MSG2>(self, func: F) -> Attribute<EVENT, MSG2>
@@ -162,7 +165,6 @@ where
         AttribValue::Value(value)
     }
 }
-
 
 impl<T, EVENT, MSG> Node<T, EVENT, MSG>
 where
@@ -333,7 +335,6 @@ where
         }
     }
 
-
     /// get the attributes that are events
     pub fn events(&self) -> Vec<&Attribute<EVENT, MSG>> {
         self.attrs.iter().filter(|attr| attr.is_event()).collect()
@@ -351,18 +352,16 @@ where
         self.attrs.iter().filter(|attr| !attr.is_event()).collect()
     }
 
-    pub fn attributes(&self) -> Vec<Attribute<EVENT,MSG>> {
+    pub fn attributes(&self) -> Vec<Attribute<EVENT, MSG>> {
         let names = self.get_attributes_name();
         let mut attributes = vec![];
-        for name in names{
-            if let Some(value) = self.get_attr_value(name){
+        for name in names {
+            if let Some(value) = self.get_attr_value(name) {
                 attributes.push(Attribute::with_name_value(name, value));
             }
         }
         attributes
     }
-
-
 
     /// return all the attributes that match the name
     fn get_attributes_with_name(
@@ -372,14 +371,15 @@ where
         self.attributes_internal()
             .iter()
             .filter(|att| att.name == key)
-            .map(|att|*att)
+            .map(|att| *att)
             .collect()
     }
 
     fn get_attributes_name(&self) -> Vec<&'static str> {
-        let mut names = self.attributes_internal()
+        let mut names = self
+            .attributes_internal()
             .iter()
-            .map(|att|att.name)
+            .map(|att| att.name)
             .collect::<Vec<&str>>();
         names.sort();
         names.dedup();
@@ -391,26 +391,25 @@ where
     /// when it is an attrib value
     pub fn get_attr_value(&self, key: &str) -> Option<Value> {
         let attrs = self.get_attributes_with_name(key);
-        if !attrs.is_empty(){
+        if !attrs.is_empty() {
             Some(Self::merge_attributes_values(attrs))
-        }
-        else{
+        } else {
             None
         }
     }
 
     /// merge this all attributes,
     /// this assumes that that this attributes has the same name
-    fn merge_attributes_values(attrs: Vec<&Attribute<EVENT,MSG>>) -> Value {
-        if attrs.len() == 1{
-            let one_value = attrs[0].value.get_value().expect("Should have a value");
+    fn merge_attributes_values(attrs: Vec<&Attribute<EVENT, MSG>>) -> Value {
+        if attrs.len() == 1 {
+            let one_value =
+                attrs[0].value.get_value().expect("Should have a value");
             one_value.clone()
-        }
-        else{
+        } else {
             let mut merged_value: Value = Value::Vec(vec![]);
-            for att in attrs{
-                if let Some(v) = att.value.get_value(){
-                   merged_value.append(v.clone());
+            for att in attrs {
+                if let Some(v) = att.value.get_value() {
+                    merged_value.append(v.clone());
                 }
             }
             merged_value
