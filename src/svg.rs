@@ -17,6 +17,8 @@ macro_rules! declare_svg_tags{
      ) => {
         $(
             $(#[$attr])*
+            #[inline]
+            #[allow(non_snake_case)]
             pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
                 {
                     $crate::html::html_element_ns(stringify!($name), SVG_NAMESPACE, attrs, children)
@@ -31,6 +33,8 @@ macro_rules! declare_svg_tags{
      ) => {
         $(
             $(#[$attr])*
+            #[inline]
+            #[allow(non_snake_case)]
             pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
                 {
                     $crate::html::html_element_ns($attribute, SVG_NAMESPACE, attrs, children)
@@ -42,76 +46,46 @@ macro_rules! declare_svg_tags{
 
 declare_svg_tags! {
     animate;
-    #[allow(non_snake_case)]
     animateMotion;
-    #[allow(non_snake_case)]
     animateTransform;
     circle;
-    #[allow(non_snake_case)]
     clipPath;
     defs;
     desc;
     discard;
     ellipse;
-    #[allow(non_snake_case)]
     feBlend;
-    #[allow(non_snake_case)]
     feColorMatrix;
-    #[allow(non_snake_case)]
     feComponentTransfer;
-    #[allow(non_snake_case)]
     feComposite;
-    #[allow(non_snake_case)]
     feConvolveMatrix;
-    #[allow(non_snake_case)]
     feDiffuseLighting;
-    #[allow(non_snake_case)]
     feDisplacementMap;
-    #[allow(non_snake_case)]
     feDistantLight;
-    #[allow(non_snake_case)]
     feDropShadow;
-    #[allow(non_snake_case)]
     feFlood;
-    #[allow(non_snake_case)]
     feFuncA;
-    #[allow(non_snake_case)]
     feFuncB;
-    #[allow(non_snake_case)]
     feFuncG;
-    #[allow(non_snake_case)]
     feFuncR;
-    #[allow(non_snake_case)]
     feGaussianBlur;
-    #[allow(non_snake_case)]
     feImage;
-    #[allow(non_snake_case)]
     feMerge;
-    #[allow(non_snake_case)]
     feMergeNode;
-    #[allow(non_snake_case)]
     feMorphology;
-    #[allow(non_snake_case)]
     feOffset;
-    #[allow(non_snake_case)]
     fePointLight;
-    #[allow(non_snake_case)]
     feSpecularLighting;
-    #[allow(non_snake_case)]
     feSpotLight;
-    #[allow(non_snake_case)]
     feTile;
-    #[allow(non_snake_case)]
     feTurbulence;
     filter;
-    #[allow(non_snake_case)]
     foreignObject;
     g;
     hatch;
     hatchpath;
     image;
     line;
-    #[allow(non_snake_case)]
     linearGradient;
     marker;
     mask;
@@ -125,7 +99,6 @@ declare_svg_tags! {
     pattern;
     polygon;
     polyline;
-    #[allow(non_snake_case)]
     radialGradient;
     rect;
     script;
@@ -135,7 +108,6 @@ declare_svg_tags! {
     svg;
     switch;
     symbol;
-    #[allow(non_snake_case)]
     textPath;
     tspan;
     unknown;

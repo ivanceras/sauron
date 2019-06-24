@@ -6,36 +6,26 @@ use sauron_vdom::Value;
 declare_attributes! {
     accumulate;
     additive;
-    #[allow(non_snake_case)]
     allowReorder;
     alphabetic;
     amplitude;
     ascent;
-    #[allow(non_snake_case)]
     attributeName;
-    #[allow(non_snake_case)]
     attributeType;
-    #[allow(non_snake_case)]
     autoReverse;
     azimuth;
-    #[allow(non_snake_case)]
     baseFrequency;
-    #[allow(non_snake_case)]
     baseProfile;
     bbox;
     begin;
     bias;
     by;
-    #[allow(non_snake_case)]
     calcMode;
     class;
     clip;
-    #[allow(non_snake_case)]
     clipPathUnits;
     color;
-    #[allow(non_snake_case)]
     contentScriptType;
-    #[allow(non_snake_case)]
     contentStyleType;
     cursor;
     cx;
@@ -43,7 +33,6 @@ declare_attributes! {
     d;
     decelerate;
     descent;
-    #[allow(non_snake_case)]
     diffuseConstant;
     direction;
     display;
@@ -51,18 +40,14 @@ declare_attributes! {
     dur;
     dx;
     dy;
-    #[allow(non_snake_case)]
     edgeMode;
     elevation;
     end;
     exponent;
-    #[allow(non_snake_case)]
     externalResourcesRequired;
     fill;
     filter;
-    #[allow(non_snake_case)]
     filterRes;
-    #[allow(non_snake_case)]
     filterUnits;
     format;
     from;
@@ -71,11 +56,8 @@ declare_attributes! {
     fy;
     g1;
     g2;
-    #[allow(non_snake_case)]
     glyphRef;
-    #[allow(non_snake_case)]
     gradientTransform;
-    #[allow(non_snake_case)]
     gradientUnits;
     hanging;
     href;
@@ -88,33 +70,21 @@ declare_attributes! {
     k2;
     k3;
     k4;
-    #[allow(non_snake_case)]
     kernelMatrix;
-    #[allow(non_snake_case)]
     kernelUnitLength;
     kerning;
-    #[allow(non_snake_case)]
     keyPoints;
-    #[allow(non_snake_case)]
     keySplines;
-    #[allow(non_snake_case)]
     keyTimes;
     lang;
-    #[allow(non_snake_case)]
     lengthAdjust;
-    #[allow(non_snake_case)]
     limitingConeAngle;
     local;
-    #[allow(non_snake_case)]
     markerHeight;
-    #[allow(non_snake_case)]
     markerUnits;
-    #[allow(non_snake_case)]
     markerWidth;
     mask;
-    #[allow(non_snake_case)]
     maskContentUnits;
-    #[allow(non_snake_case)]
     maskUnits;
     mathematical;
     max;
@@ -123,7 +93,6 @@ declare_attributes! {
     min;
     mode;
     name;
-    #[allow(non_snake_case)]
     numOctaves;
     offset;
     opacity;
@@ -133,44 +102,27 @@ declare_attributes! {
     orientation;
     origin;
     overflow;
-    #[allow(non_snake_case)]
     pathLength;
-    #[allow(non_snake_case)]
     patternContentUnits;
-    #[allow(non_snake_case)]
     patternTransform;
-    #[allow(non_snake_case)]
     patternUnits;
     ping;
     points;
-    #[allow(non_snake_case)]
     pointsAtX;
-    #[allow(non_snake_case)]
     pointsAtY;
-    #[allow(non_snake_case)]
     pointsAtZ;
-    #[allow(non_snake_case)]
     preserveAlpha;
-    #[allow(non_snake_case)]
     preserveAspectRatio;
-    #[allow(non_snake_case)]
     primitiveUnits;
     r;
     radius;
-    #[allow(non_snake_case)]
     referrerPolicy;
-    #[allow(non_snake_case)]
     refX;
-    #[allow(non_snake_case)]
     refY;
     rel;
-    #[allow(non_snake_case)]
     repeatCount;
-    #[allow(non_snake_case)]
     repeatDur;
-    #[allow(non_snake_case)]
     requiredExtensions;
-    #[allow(non_snake_case)]
     requiredFeatures;
     restart;
     result;
@@ -181,36 +133,24 @@ declare_attributes! {
     seed;
     slope;
     spacing;
-    #[allow(non_snake_case)]
     specularConstant;
-    #[allow(non_snake_case)]
     specularExponent;
     speed;
-    #[allow(non_snake_case)]
     spreadMethod;
-    #[allow(non_snake_case)]
     startOffset;
-    #[allow(non_snake_case)]
     stdDeviation;
     stemh;
     stemv;
-    #[allow(non_snake_case)]
     stitchTiles;
     string;
     stroke;
-    #[allow(non_snake_case)]
     surfaceScale;
-    #[allow(non_snake_case)]
     systemLanguage;
     tabindex;
-    #[allow(non_snake_case)]
     tableValues;
     target;
-    #[allow(non_snake_case)]
     targetX;
-    #[allow(non_snake_case)]
     targetY;
-    #[allow(non_snake_case)]
     textLength;
     to;
     transform;
@@ -219,25 +159,20 @@ declare_attributes! {
     unicode;
     values;
     version;
-    #[allow(non_snake_case)]
     viewBox;
-    #[allow(non_snake_case)]
     viewTarget;
     visibility;
     widths;
     x;
     x1;
     x2;
-    #[allow(non_snake_case)]
     xChannelSelector;
     xmlns;
     y;
     y1;
     y2;
-    #[allow(non_snake_case)]
     yChannelSelector;
     z;
-    #[allow(non_snake_case)]
     zoomAndPan;
 }
 

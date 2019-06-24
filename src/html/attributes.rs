@@ -13,6 +13,7 @@ macro_rules! declare_attributes {
         $(
             $(#[$attr])*
             #[inline]
+            #[allow(non_snake_case)]
             pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
                 where V: Into<Value>,
                 {
@@ -28,6 +29,7 @@ macro_rules! declare_attributes {
         $(
             $(#[$attr])*
             #[inline]
+            #[allow(non_snake_case)]
             pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
                 where V: Into<Value>,
                 {

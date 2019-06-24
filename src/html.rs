@@ -41,6 +41,7 @@ macro_rules! declare_tags {
         $(
             $(#[$attr])*
             #[inline]
+            #[allow(non_snake_case)]
             pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
                 {
                     $crate::html::html_element(stringify!($name), attrs, children)
