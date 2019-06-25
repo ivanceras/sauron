@@ -261,6 +261,11 @@ where
         //
         // Note and TODO: This doesn't free the closure and event listeners
         // of the children of this node
+        // FIXME: The browser will take handling of removing the event listeners
+        // of the children and indirect children of this node ( so we don't have to manually remove
+        // them). However, we keep a list of our active closure in dom::ActiveClosure
+        // whic needs to be manually remove by traversing of getting the
+        // sauron VDOM id for each and remove is from the ActiveClosure hashmap
         Patch::TruncateChildren(_node_idx, num_children_remaining) => {
             let children = node.child_nodes();
             let child_count = children.length();

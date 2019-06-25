@@ -1,4 +1,5 @@
 use std::fmt;
+use crate::util;
 
 pub mod builder;
 pub mod event;
@@ -298,14 +299,14 @@ where
             for child in self.children.iter() {
                 buffer += &format!(
                     "\n{}{}",
-                    padd(indent + 1),
+                    util::indent(indent + 1),
                     child.to_pretty_string(indent + 1)
                 );
             }
         }
         // do not make a new line it if is only a text child node or it has no child nodes
         if !(self.is_children_a_node_text() || self.children.is_empty()) {
-            buffer += &format!("\n{}", padd(indent));
+            buffer += &format!("\n{}", util::indent(indent));
         }
         buffer += &format!("</{}>", self.tag.to_string());
         buffer
@@ -464,13 +465,4 @@ impl<T, EVENT, MSG> From<Element<T, EVENT, MSG>> for Node<T, EVENT, MSG> {
     fn from(v: Element<T, EVENT, MSG>) -> Self {
         Node::Element(v)
     }
-}
-
-/// make a blank string with indented padd
-fn padd(n: i32) -> String {
-    let mut buffer = String::new();
-    for _ in 0..n {
-        buffer += "    ";
-    }
-    buffer
 }
