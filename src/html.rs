@@ -46,6 +46,7 @@ macro_rules! declare_tags {
                 {
                     $crate::html::html_element(stringify!($name), attrs, children)
                 }
+
          )*
     }
 }

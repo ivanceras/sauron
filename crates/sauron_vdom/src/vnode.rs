@@ -1,5 +1,5 @@
-use std::fmt;
 use crate::util;
+use std::fmt;
 
 pub mod builder;
 pub mod event;

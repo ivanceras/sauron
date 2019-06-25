@@ -13,8 +13,6 @@ merge_imports = true
 imports_layout = "Vertical"
 ## Default value is false, yet clipy keeps nagging on this
 use_field_init_shorthand = true
-## Also format the doc comments
-format_doc_comments = true
 
 ## also format macro
 format_macro_matchers = true

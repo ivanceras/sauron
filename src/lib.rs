@@ -152,6 +152,7 @@
 pub mod dom;
 #[macro_use]
 pub mod html;
+pub mod html_array;
 mod component;
 pub mod html_extra;
 mod program;
