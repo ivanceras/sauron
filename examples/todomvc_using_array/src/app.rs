@@ -3,10 +3,10 @@ use sauron::{
         attributes::*,
         events::*,
     },
+    html_array::*,
     Cmd,
     Component,
     Node,
-    html_array::*,
 };
 
 pub struct Model {
@@ -107,10 +107,7 @@ impl Component<Msg> for Model {
                     [
                         header(
                             [class("header")],
-                            [
-                                h1([], [text("todos")]),
-                                self.view_input(),
-                            ],
+                            [h1([], [text("todos")]), self.view_input()],
                         ),
                         section(
                             [class("main")],
@@ -142,10 +139,7 @@ impl Component<Msg> for Model {
                                     [
                                         strong(
                                             [],
-                                            [text(format!(
-                                                "{}",
-                                                self.total()
-                                            ))],
+                                            [text(format!("{}", self.total()))],
                                         ),
                                         text(" item(s) left"),
                                     ],
@@ -277,10 +271,7 @@ fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
                         [text(format!("{}", entry.description))],
                     ),
                     button(
-                        [
-                            class("destroy"),
-                            onclick(move |_| Msg::Remove(idx)),
-                        ],
+                        [class("destroy"), onclick(move |_| Msg::Remove(idx))],
                         [],
                     ),
                 ],

@@ -1,12 +1,9 @@
-use crate::{
-    Node,
-};
+use crate::Node;
 pub use sauron_vdom::builder::{
     attr,
     on,
     text,
 };
-
 
 macro_rules! declare_tags_using_array {
     ( $(
@@ -34,7 +31,6 @@ macro_rules! declare_tags_using_array {
          )*
     }
 }
-
 
 // Organized in the same order as
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element
