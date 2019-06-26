@@ -43,14 +43,10 @@ where
             .map(|event| *event)
     }
 
-    // TODO all similar attributes are merged
     fn attributes_internal(&self) -> Vec<&Attribute<EVENT, MSG>> {
         self.attrs.iter().filter(|attr| !attr.is_event()).collect()
     }
 
-    // TODO: optimize this by grouping the attibutes
-    // by name into a BTreeMap then merge per entry
-    // before returning
     pub fn attributes(&self) -> Vec<Attribute<EVENT, MSG>> {
         let names = self.get_attributes_name();
         let mut attributes = vec![];
@@ -85,9 +81,7 @@ where
         names
     }
 
-    /// TODO get all the attributes
-    /// that has the same key and merge the value
-    /// when it is an attrib value
+    /// get all the attributes with the same name and merge their value
     pub fn get_attr_value(&self, key: &str) -> Option<Value> {
         let attrs = self.get_attributes_with_name(key);
         if !attrs.is_empty() {

@@ -43,6 +43,13 @@ where
     pub(in super) fn is_event(&self) -> bool {
         self.value.is_event()
     }
+
+    pub fn reform<F,EVENT2>(self, func: F) -> Attribute<EVENT2,MSG>
+        where F: Fn(EVENT2) -> EVENT + 'static,
+        EVENT2: 'static,
+    {
+        Attribute::new(self.name, self.value.reform(func))
+    }
 }
 
 impl<EVENT, MSG> AttribValue<EVENT, MSG>
@@ -62,6 +69,17 @@ where
             AttribValue::Callback(existing) => {
                 AttribValue::Callback(existing.map_callback(cb))
             }
+        }
+    }
+
+    fn reform<F,EVENT2>(self, func: F) -> AttribValue<EVENT2,MSG>
+        where
+            F: Fn(EVENT2) -> EVENT + 'static,
+            EVENT2: 'static,
+        {
+        match self{
+            AttribValue::Value(value) => AttribValue::Value(value),
+            AttribValue::Callback(cb) => AttribValue::Callback(cb.reform(func)),
         }
     }
 
