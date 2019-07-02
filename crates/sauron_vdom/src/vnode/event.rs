@@ -8,6 +8,12 @@ pub enum Event {
     InputEvent(InputEvent),
 }
 
+impl From<MouseEvent> for Event {
+    fn from(me: MouseEvent) -> Event {
+        Event::MouseEvent(me)
+    }
+}
+
 /// A mouse event contains the (x,y) coordinates, buttons and modifier keys
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct MouseEvent {

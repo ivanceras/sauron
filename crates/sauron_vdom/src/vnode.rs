@@ -7,12 +7,14 @@ use crate::Callback;
 pub use event::Event;
 pub use value::Value;
 
-pub use attribute::Attribute;
-pub use attribute::AttribValue;
+pub use attribute::{
+    AttribValue,
+    Attribute,
+};
 pub use element::Element;
 
-mod element;
 mod attribute;
+mod element;
 
 /// This is the core data structure of the library.
 /// Any tree can be represented by `Node`.
@@ -42,12 +44,6 @@ where
     Element(Element<T, EVENT, MSG>),
     Text(Text),
 }
-
-
-
-
-
-
 
 impl<T, EVENT, MSG> Node<T, EVENT, MSG>
 where
@@ -137,7 +133,6 @@ where
     }
 }
 
-
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Text {
     pub text: String,
@@ -166,4 +161,3 @@ where
         write!(f, "{}", self.to_pretty_string(0))
     }
 }
-

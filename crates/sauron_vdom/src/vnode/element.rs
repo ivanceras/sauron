@@ -1,8 +1,10 @@
-use crate::Attribute;
-use crate::Value;
-use crate::util;
-use crate::Node;
-use crate::Callback;
+use crate::{
+    util,
+    Attribute,
+    Callback,
+    Node,
+    Value,
+};
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Element<T, EVENT, MSG>
@@ -21,7 +23,6 @@ where
     EVENT: 'static,
     MSG: 'static,
 {
-
     pub fn with_tag(tag: T) -> Self {
         Element {
             tag,
@@ -128,8 +129,9 @@ where
         let attr_event = Attribute::new(event, cb.into());
         self.attrs.push(attr_event);
     }
+
     /// map_callback the return of the callback from MSG to MSG2
-    pub(in super) fn map_callback<MSG2>(
+    pub(super) fn map_callback<MSG2>(
         self,
         cb: Callback<MSG, MSG2>,
     ) -> Element<T, EVENT, MSG2>
@@ -152,14 +154,13 @@ where
         }
     }
 
-
     /// check if the children of this node is only 1 and it is a text node
     fn is_children_a_node_text(&self) -> bool {
         self.children.len() == 1 && self.children[0].is_text_node()
     }
 
     /// make a pretty string representation of this node
-    pub(in super) fn to_pretty_string(&self, indent: i32) -> String
+    pub(super) fn to_pretty_string(&self, indent: i32) -> String
     where
         T: ToString,
     {

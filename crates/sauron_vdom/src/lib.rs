@@ -25,5 +25,6 @@ pub use vnode::{
 
 pub use vnode::{
     event,
+    AttribValue,
     Attribute,
 };

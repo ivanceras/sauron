@@ -1,5 +1,7 @@
-use crate::Value;
-use crate::Callback;
+use crate::{
+    Callback,
+    Value,
+};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -30,7 +32,7 @@ where
         }
     }
 
-    pub(in super) fn map_callback<MSG2>(
+    pub(super) fn map_callback<MSG2>(
         self,
         cb: Callback<MSG, MSG2>,
     ) -> Attribute<EVENT, MSG2>
@@ -40,15 +42,20 @@ where
         Attribute::new(self.name, self.value.map_callback(cb))
     }
 
-    pub(in super) fn is_event(&self) -> bool {
+    pub(super) fn is_event(&self) -> bool {
         self.value.is_event()
     }
 
-    pub fn reform<F,EVENT2>(self, func: F) -> Attribute<EVENT2,MSG>
-        where F: Fn(EVENT2) -> EVENT + 'static,
+    pub fn reform<F, EVENT2>(self, func: F) -> Attribute<EVENT2, MSG>
+    where
+        F: Fn(EVENT2) -> EVENT + 'static,
         EVENT2: 'static,
     {
         Attribute::new(self.name, self.value.reform(func))
+    }
+
+    pub fn get_value(&self) -> Option<&Value> {
+        self.value.get_value()
     }
 }
 
@@ -72,12 +79,12 @@ where
         }
     }
 
-    fn reform<F,EVENT2>(self, func: F) -> AttribValue<EVENT2,MSG>
-        where
-            F: Fn(EVENT2) -> EVENT + 'static,
-            EVENT2: 'static,
-        {
-        match self{
+    fn reform<F, EVENT2>(self, func: F) -> AttribValue<EVENT2, MSG>
+    where
+        F: Fn(EVENT2) -> EVENT + 'static,
+        EVENT2: 'static,
+    {
+        match self {
             AttribValue::Value(value) => AttribValue::Value(value),
             AttribValue::Callback(cb) => AttribValue::Callback(cb.reform(func)),
         }

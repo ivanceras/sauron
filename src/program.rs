@@ -90,6 +90,7 @@ where
             crate::log!("app update took: {}ms", t2 - t1);
             t2
         };
+        // a new view is created due to the app update
         let view = self.app.borrow().view();
         #[cfg(feature = "measure")]
         let t3 = {
@@ -97,6 +98,7 @@ where
             crate::log!("app view took: {}ms", t3 - t2);
             t3
         };
+        // update the last DOM node tree with this new view
         self.dom_updater.borrow_mut().update_dom(self, view);
         #[cfg(feature = "measure")]
         {
