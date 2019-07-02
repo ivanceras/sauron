@@ -36,9 +36,10 @@ use sauron::html::*;
 use sauron::Component;
 use sauron::Node;
 use sauron::Program;
+use sauron::Cmd;
 use wasm_bindgen::prelude::*;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     Click,
 }
@@ -57,10 +58,10 @@ impl Component<Msg> for App {
 
     fn view(&self) -> Node<Msg> {
         div(
-            [class("some-class"), id("some-id"), attr("data-id", 1)],
-            [
+            vec![class("some-class"), id("some-id"), attr("data-id", 1)],
+            vec![
                 input(
-                    [
+                    vec![
                         class("client"),
                         r#type("button"),
                         value("Click me!"),
@@ -69,17 +70,20 @@ impl Component<Msg> for App {
                             Msg::Click
                         }),
                     ],
-                    [],
+                    vec![],
                 ),
                 text(format!("Clicked: {}", self.click_count)),
             ],
         )
     }
 
-    fn update(&mut self, msg: Msg) {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         sauron::log!("App is updating from msg: {:?}", msg);
         match msg {
-            Msg::Click => self.click_count += 1,
+            Msg::Click => {
+                self.click_count += 1;
+                Cmd::none()
+            }
         }
     }
 
@@ -87,7 +91,7 @@ impl Component<Msg> for App {
 
 #[wasm_bindgen(start)]
 pub fn main() {
-    Program::new_append_to_mount(App::new(), &sauron::body());
+    Program::mount_to_body(App::new());
 }
 ```
 index.html
