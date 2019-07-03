@@ -99,9 +99,6 @@ fn find_nodes_recursive(
     cur_node_idx: &mut usize,
     nodes_to_find: &HashSet<usize>,
 ) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
-    if nodes_to_find.is_empty() {
-        return (HashMap::new(), HashMap::new());
-    }
 
     let mut element_nodes_to_patch = HashMap::new();
     let mut text_nodes_to_patch = HashMap::new();
