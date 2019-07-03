@@ -1,5 +1,4 @@
 #![deny(warnings)]
-#![feature(type_alias_enum_variants)]
 use sauron::{
     diff,
     html::{

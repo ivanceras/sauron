@@ -1,6 +1,5 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
-#![feature(type_alias_enum_variants)]
 #![feature(arbitrary_self_types)]
 #![feature(const_generics)]
 
@@ -114,6 +113,9 @@
 //!   </body>
 //! </html>
 //! ```
+//!
+//! Note: You need to use the nightly compiler with minimum version: rustc 1.37.0-nightly (17e62f77f 2019-07-01)
+//!
 //! Build using
 //! ```sh
 //! $> wasm-pack build --target no-modules
@@ -145,8 +147,6 @@
 //!  [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
 //!
 //!
-//! ## Personal plug:
-//! I'm actively looking for a job that has to do with rust.
 //! Please contact me: ivanceras[at]gmail.com
 
 pub mod dom;
