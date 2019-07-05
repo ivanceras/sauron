@@ -9,8 +9,14 @@ pub enum Event {
 }
 
 impl From<MouseEvent> for Event {
-    fn from(me: MouseEvent) -> Event {
+    fn from(me: MouseEvent) -> Self {
         Event::MouseEvent(me)
+    }
+}
+
+impl From<InputEvent> for Event {
+    fn from(ie: InputEvent) -> Self {
+        Event::InputEvent(ie)
     }
 }
 
@@ -63,6 +69,15 @@ impl KeyEvent {
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct InputEvent {
     pub value: String,
+}
+
+impl InputEvent{
+
+    pub fn new(value: String) -> Self {
+        InputEvent{
+            value
+        }
+    }
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
