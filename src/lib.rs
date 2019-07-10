@@ -190,6 +190,7 @@ pub use util::{
 
 pub use browser::Browser;
 pub use http::Http;
+use std::ops::Deref;
 
 use wasm_bindgen::{
     JsCast,
@@ -205,6 +206,12 @@ impl PartialEq for Event {
         let js_value: Option<&JsValue> = self.0.dyn_ref();
         let other_value: Option<&JsValue> = other.0.dyn_ref();
         js_value == other_value
+    }
+}
+impl Deref for Event{
+    type Target = web_sys::Event;
+    fn deref(&self) -> &Self::Target{
+        &self.0
     }
 }
 
