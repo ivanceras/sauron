@@ -199,3 +199,4 @@ impl<T, EVENT, MSG> From<Element<T, EVENT, MSG>> for Node<T, EVENT, MSG> {
         Node::Element(v)
     }
 }
+

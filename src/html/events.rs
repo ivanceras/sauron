@@ -6,12 +6,12 @@ pub use sauron_vdom::{
         on_with_extractor,
     },
     event::{
-        Buttons,
         Coordinate,
         InputEvent,
         KeyEvent,
         Modifier,
         MouseEvent,
+        MouseButton,
     },
     Callback,
 };
@@ -20,12 +20,12 @@ use wasm_bindgen::JsCast;
 pub mod mapper {
 
     use sauron_vdom::event::{
-        Buttons,
         Coordinate,
         InputEvent,
         KeyEvent,
         Modifier,
         MouseEvent,
+        MouseButton,
     };
     use wasm_bindgen::JsCast;
     use web_sys::{
@@ -55,11 +55,26 @@ pub mod mapper {
             meta_key: mouse.meta_key(),
             shift_key: mouse.shift_key(),
         };
-        let buttons = Buttons {
-            button: mouse.button(),
-            buttons: mouse.buttons(),
+        let buttons = match mouse.button(){
+            0 => MouseButton::Left,
+            1 => MouseButton::Middle,
+            2 => MouseButton::Left,
+            3 => MouseButton::WheelUp,
+            4 => MouseButton::WheelDown,
+            _ => Default::default(), // defaults to left
         };
-        MouseEvent::new(coordinate, modifier, buttons)
+        let r#type = match &*event.0.type_(){
+            "click" => "click",
+            "mouseup" => "mouseup",
+            "mousedown" => "mousedown",
+            _e => panic!("unhandled event type: {}", _e),
+        };
+        MouseEvent{
+            r#type,
+            coordinate,
+            modifier,
+            buttons
+        }
     }
 
     pub fn keyboard_event_mapper(event: crate::Event) -> KeyEvent {

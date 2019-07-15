@@ -20,23 +20,28 @@ impl From<InputEvent> for Event {
     }
 }
 
+impl From<KeyEvent> for Event {
+    fn from(ke: KeyEvent) -> Self {
+        Event::KeyEvent(ke)
+    }
+}
+
 /// A mouse event contains the (x,y) coordinates, buttons and modifier keys
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct MouseEvent {
-    coordinate: Coordinate,
-    modifier: Modifier,
-    buttons: Buttons,
+    pub r#type: &'static str,
+    pub coordinate: Coordinate,
+    pub modifier: Modifier,
+    pub buttons: MouseButton,
 }
 impl MouseEvent {
-    pub fn new(
-        coordinate: Coordinate,
-        modifier: Modifier,
-        buttons: Buttons,
-    ) -> Self {
-        MouseEvent {
-            coordinate,
-            modifier,
-            buttons,
+
+    pub fn click(x:i32, y:i32) -> Self {
+        MouseEvent{
+            r#type: "click",
+            coordinate: Coordinate::new(x,y),
+            //TODO: specify the buttons
+            ..Default::default()
         }
     }
 
@@ -80,10 +85,20 @@ impl InputEvent{
     }
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
-pub struct Buttons {
-    pub button: i16,
-    pub buttons: u16,
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MouseButton {
+    Left,
+    Right,
+    Middle,
+    WheelUp,
+    WheelDown,
+}
+
+impl Default for MouseButton {
+
+    fn default() -> Self {
+        MouseButton::Left
+    }
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
@@ -101,6 +116,9 @@ pub struct Coordinate {
 }
 
 impl Coordinate {
+    pub fn new(x: i32, y: i32) -> Self {
+        Coordinate{x, y, ..Default::default()}
+    }
     pub fn x(&self) -> i32 {
         self.x
     }
@@ -116,4 +134,14 @@ pub struct Modifier {
     pub ctrl_key: bool,
     pub meta_key: bool,
     pub shift_key: bool,
+}
+
+impl Modifier{
+
+    pub fn ctrl() -> Self {
+        Modifier{
+            ctrl_key: true,
+            ..Default::default()
+        }
+    }
 }

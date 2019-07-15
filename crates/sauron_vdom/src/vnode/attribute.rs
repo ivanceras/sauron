@@ -42,7 +42,7 @@ where
         Attribute::new(self.name, self.value.map_callback(cb))
     }
 
-    pub(super) fn is_event(&self) -> bool {
+    pub fn is_event(&self) -> bool {
         self.value.is_event()
     }
 
@@ -56,6 +56,10 @@ where
 
     pub fn get_value(&self) -> Option<&Value> {
         self.value.get_value()
+    }
+
+    pub fn get_callback(&self) -> Option<&Callback<EVENT, MSG>> {
+        self.value.get_callback()
     }
 }
 
