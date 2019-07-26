@@ -22,11 +22,10 @@
 ```
 
 
- Sauron is an html web framework for building web-apps with the goal to
- closely adhere to [The Elm Architecture](https://guide.elm-lang.org/architecture/), A true
- king for elegant design.
+ Sauron is an html web framework for building web-apps with the goal of
+ closely adhering to [The Elm Architecture](https://guide.elm-lang.org/architecture/), a paragon for elegant design.
 
- As with elm, sauron don't use macro to provide the view, instead just uses plain rust function calls to construct the view.
+ As with elm, sauron doesn't use macros to provide the view, instead just using plain rust function calls to construct the view.
 
 ### Example
 ```rust
