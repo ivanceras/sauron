@@ -1,7 +1,11 @@
-# 0.10.0 (Unreleased)
+# 0.10.0
  - performance improvement on node tree building
  - using vec![] as the argumemts for attributes and children, this changes the syntax a lot
+    - The original array based syntax is still preserved by using the `html_array` module. This however has performance penalty
+ - events and attributes are now unified in one field: `attrs`
  - `map` function mapping Msg from in between component is now `map_msg` to avoid confusion with the rust std common maps such `Iterator.map`
+ - add units utility functions
+ - Remove requirement for Msg to have any Clone,Debug,PartialEq
 
 # 0.7.1
  - Add initial implementation for markdown handling
