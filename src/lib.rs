@@ -140,8 +140,8 @@
 //!  - [yew](https://github.com/DenisKolodin/yew)
 //!  - [willow](https://github.com/sindreij/willow)
 //!
-//! ## Performance: Is not too bad.
-//! ![Benchmark](https://raw.githubusercontent.com/ivanceras/todomvc-perf-comparison/sauron-benchmark/sauron-benchmark.png)
+//! ## Performance:
+//! ![Benchmark](https://raw.githubusercontent.com/ivanceras/todomvc-perf-comparison/sauron-benchmark/sauron-0.10.0.png)
 //!
 //! ## Please support this project:
 //!  [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
