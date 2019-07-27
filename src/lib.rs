@@ -10,7 +10,7 @@
 //!
 //! ![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.jpg)
 //!
-//!```log,ignore
+//! ```log,ignore
 //!    One crate to rule the DOM
 //!    One crate to find the elements
 //!    One crate to bring JSON
@@ -25,13 +25,12 @@
 //! ```
 //!
 //!
-//!  Sauron is an html web framework for building web-apps with the goal to
-//!  closely adhere to [The Elm Architecture](https://guide.elm-lang.org/architecture/), A true
-//!  king for elegant design.
+//!  Sauron is an html web framework for building web-apps with the goal of
+//!  closely adhering to [The Elm Architecture](https://guide.elm-lang.org/architecture/), a paragon for elegant design.
 //!
-//!  As with elm, sauron don't use macro to provide the view, instead just uses plain rust function calls to construct the view.
+//!  As with elm, sauron doesn't use macros to provide the view, instead just using plain rust function calls to construct the view.
 //!
-//! ## Example
+//! ### Example
 //! ```rust,no_run
 //! use sauron::html::attributes::*;
 //! use sauron::html::events::*;
@@ -124,7 +123,7 @@
 //!
 //! Warning: You need to use the latest nightly compiler in order for this to work.
 //!
-//! ## Prerequisite:
+//! ### Prerequisite:
 //!
 //! ```sh
 //! cargo install wasm-pack
@@ -137,10 +136,10 @@
 //!  - [yew](https://github.com/DenisKolodin/yew)
 //!  - [willow](https://github.com/sindreij/willow)
 //!
-//! ## Performance:
+//! ### Performance:
 //! ![Benchmark](https://raw.githubusercontent.com/ivanceras/todomvc-perf-comparison/sauron-benchmark/sauron-0.10.0.png)
 //!
-//! ## Please support this project:
+//! ### Please support this project:
 //!  [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
 //!
 //!

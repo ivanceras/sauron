@@ -27,7 +27,7 @@
 
  As with elm, sauron doesn't use macros to provide the view, instead just using plain rust function calls to construct the view.
 
-### Example
+#### Example
 ```rust
 use sauron::html::attributes::*;
 use sauron::html::events::*;
@@ -120,7 +120,7 @@ Look at the [examples](https://github.com/ivanceras/sauron/tree/master/examples)
 
 Warning: You need to use the latest nightly compiler in order for this to work.
 
-### Prerequisite:
+#### Prerequisite:
 
 ```sh
 cargo install wasm-pack
@@ -133,10 +133,10 @@ This project is based on the existing projects:
  - [yew](https://github.com/DenisKolodin/yew)
  - [willow](https://github.com/sindreij/willow)
 
-### Performance:
+#### Performance:
 ![Benchmark](https://raw.githubusercontent.com/ivanceras/todomvc-perf-comparison/sauron-benchmark/sauron-0.10.0.png)
 
-### Please support this project:
+#### Please support this project:
  [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
 
 
