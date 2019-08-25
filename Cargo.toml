@@ -12,7 +12,7 @@ edition = "2018"
 
 [dependencies]
 js-sys = "0.3.19"
-sauron_vdom = "0.10.0"
+sauron_vdom = "0.10.1-alpha.0"
 wasm-bindgen = "0.2.45"
 lazy_static = "1.3.0"
 pulldown-cmark = { version = "0.5.1", optional = true }
@@ -82,3 +82,6 @@ members = [
 # Warning: Do not use 'z' it removes a lot of things including the closures
 opt-level = 's'
 lto = true
+
+[replace]
+"sauron_vdom:0.10.1-alpha.0" = { path = "crates/sauron_vdom" }

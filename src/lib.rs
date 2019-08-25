@@ -1,8 +1,6 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
 #![feature(arbitrary_self_types)]
-#![feature(const_generics)]
-
 //!
 //! [![Latest Version](https://img.shields.io/crates/v/sauron.svg)](https://crates.io/crates/sauron)
 //! [![Build Status](https://travis-ci.org/ivanceras/sauron.svg?branch=master)](https://travis-ci.org/ivanceras/sauron)
