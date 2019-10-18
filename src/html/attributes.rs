@@ -232,6 +232,12 @@ where
     style(style_list.join(""))
 }
 
+/// ```ignore
+///    classes_flag([
+///        ("dashed", self.is_hidden),
+///        ("error", self.has_error),
+///    ]),
+/// ```
 pub fn classes_flag<P, MSG>(pair: P) -> Attribute<MSG>
 where
     P: AsRef<[(&'static str, bool)]>,
