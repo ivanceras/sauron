@@ -1,3 +1,7 @@
+# 0.10.1
+ - implemented removing the associated closures of elements that has been removed from the DOM including the removed element descendants.
+
+
 # 0.10.0
  - performance improvement on node tree building
  - using vec![] as the argumemts for attributes and children, this changes the syntax a lot
