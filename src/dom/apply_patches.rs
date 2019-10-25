@@ -274,10 +274,9 @@ where
             Ok(active_closures)
         }
         // THis also removes the associated closures and event listeners to the node being replaced
+        // including the associated closures of the descendant of replaced node
         // before it is actully replaced in the DOM
         //
-        // Note and TODO: This doesn't free the closure and event listeners
-        // of the children of this node
         Patch::Replace(_node_idx, new_node) => {
             let created_node = CreatedNode::<Node>::create_dom_node::<DSP, MSG>(
                 program, new_node,
@@ -289,13 +288,10 @@ where
         // This also removes the associated closures and event listener to the truncated chilren
         // before actually removing it from the DOM
         //
-        // Note and TODO: This doesn't free the closure and event listeners
-        // of the children of this node
-        // FIXME: The browser will take handling of removing the event listeners
+        // The browser will take handling of removing the event listeners
         // of the children and indirect children of this node ( so we don't have to manually remove
-        // them). However, we keep a list of our active closure in dom::ActiveClosure
-        // whic needs to be manually remove by traversing of getting the
-        // sauron VDOM id for each and remove is from the ActiveClosure hashmap
+        // them).
+        // The closures of descendant of the children is also removed
         Patch::TruncateChildren(_node_idx, num_children_remaining) => {
             let children = node.child_nodes();
             let child_count = children.length();
