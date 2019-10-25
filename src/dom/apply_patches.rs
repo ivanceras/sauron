@@ -74,7 +74,6 @@ where
 
 /// find the nodes to be patched
 /// each patch contains a node index, arranged in depth first tree.
-/// TODO: split for elements and text nodes to patch
 ///
 /// This function is needed for optimization purposes.
 /// Instead of finding the nodes each time in the patching process.
@@ -99,7 +98,6 @@ fn find_nodes_recursive(
     cur_node_idx: &mut usize,
     nodes_to_find: &HashSet<usize>,
 ) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
-
     let mut element_nodes_to_patch = HashMap::new();
     let mut text_nodes_to_patch = HashMap::new();
 
@@ -162,20 +160,55 @@ fn find_nodes_recursive(
     (element_nodes_to_patch, text_nodes_to_patch)
 }
 
+/// Get the "data-sauron-vdom-id" of all the desendent of this node including itself
+/// This is needed to free-up the closure that was attached ActiveClosure manually
+/// TODO: Make a test when an element is removed, all of it's descendant closure should also be
+/// removed as well.
+fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<u32> {
+    let mut data_vdom_id = vec![];
+
+    // TODO: there should be a better way to get the node-id back
+    // without having to read from the actual dom node element
+    if let Some(vdom_id_str) =
+        root_element.get_attribute(super::DATA_SAURON_VDOM_ID)
+    {
+        let vdom_id = vdom_id_str
+            .parse::<u32>()
+            .expect("unable to parse sauron_vdom-id");
+        data_vdom_id.push(vdom_id);
+    }
+
+    let children = root_element.child_nodes();
+    let child_node_count = children.length();
+    for i in 0..child_node_count {
+        let child_node = children.item(i).expect("Expecting a child node");
+        match child_node.node_type() {
+            Node::ELEMENT_NODE => {
+                let child_element = child_node.unchecked_ref::<Element>();
+                let child_data_vdom_id =
+                    get_node_descendant_data_vdom_id(child_element);
+                data_vdom_id.extend(child_data_vdom_id);
+            }
+            _ => (),
+        }
+    }
+    data_vdom_id
+}
+
 /// remove all the event listeners for this node
 fn remove_event_listeners(
     node: &Element,
     old_closures: &mut ActiveClosure,
 ) -> Result<(), JsValue> {
-    // TODO: there should be a better way to get the node-id back
-    // without having to read from the actual dom node element
-    if let Some(vdom_id_str) = node.get_attribute(super::DATA_SAURON_VDOM_ID) {
-        let vdom_id = vdom_id_str
-            .parse::<u32>()
-            .expect("unable to parse sauron_vdom-id");
+    let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
+    //crate::log!("all descendatant vdom_id: {:#?}", all_descendant_vdom_id);
+    for vdom_id in all_descendant_vdom_id {
+        //crate::log!("Removing listener for vdom_id: {}", vdom_id);
+
         let old_closure = old_closures
             .get(&vdom_id)
             .expect("There is no marked with that vdom_id");
+
         for (event, oc) in old_closure.iter() {
             let func: &Function = oc.as_ref().unchecked_ref();
             node.remove_event_listener_with_callback(event, func)?;
