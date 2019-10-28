@@ -48,6 +48,7 @@ default = ["with-markdown"]
 measure = []
 with-markdown = ["pulldown-cmark"]
 no_request_animation_frame = [] # disable request animation frame
+with-serde = ["sauron_vdom/serde"]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.2.45"

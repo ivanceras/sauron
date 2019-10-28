@@ -6,6 +6,7 @@ use crate::{
     Value,
 };
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Element<T, EVENT, MSG>
 where
@@ -199,4 +200,3 @@ impl<T, EVENT, MSG> From<Element<T, EVENT, MSG>> for Node<T, EVENT, MSG> {
         Node::Element(v)
     }
 }
-

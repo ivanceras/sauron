@@ -1,6 +1,7 @@
 /// A container for generic event and the common values
 /// needed for the user.
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Event {
     MouseEvent(MouseEvent),
@@ -27,6 +28,7 @@ impl From<KeyEvent> for Event {
 }
 
 /// A mouse event contains the (x,y) coordinates, buttons and modifier keys
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct MouseEvent {
     pub r#type: &'static str,
@@ -35,11 +37,10 @@ pub struct MouseEvent {
     pub buttons: MouseButton,
 }
 impl MouseEvent {
-
-    pub fn click(x:i32, y:i32) -> Self {
-        MouseEvent{
+    pub fn click(x: i32, y: i32) -> Self {
+        MouseEvent {
             r#type: "click",
-            coordinate: Coordinate::new(x,y),
+            coordinate: Coordinate::new(x, y),
             //TODO: specify the buttons
             ..Default::default()
         }
@@ -54,6 +55,7 @@ impl MouseEvent {
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct KeyEvent {
     pub key: String,
@@ -71,20 +73,19 @@ impl KeyEvent {
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct InputEvent {
     pub value: String,
 }
 
-impl InputEvent{
-
+impl InputEvent {
     pub fn new(value: String) -> Self {
-        InputEvent{
-            value
-        }
+        InputEvent { value }
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MouseButton {
     Left,
@@ -95,12 +96,12 @@ pub enum MouseButton {
 }
 
 impl Default for MouseButton {
-
     fn default() -> Self {
         MouseButton::Left
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Coordinate {
     pub client_x: i32,
@@ -117,8 +118,13 @@ pub struct Coordinate {
 
 impl Coordinate {
     pub fn new(x: i32, y: i32) -> Self {
-        Coordinate{x, y, ..Default::default()}
+        Coordinate {
+            x,
+            y,
+            ..Default::default()
+        }
     }
+
     pub fn x(&self) -> i32 {
         self.x
     }
@@ -128,6 +134,7 @@ impl Coordinate {
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Modifier {
     pub alt_key: bool,
@@ -136,10 +143,9 @@ pub struct Modifier {
     pub shift_key: bool,
 }
 
-impl Modifier{
-
+impl Modifier {
     pub fn ctrl() -> Self {
-        Modifier{
+        Modifier {
             ctrl_key: true,
             ..Default::default()
         }

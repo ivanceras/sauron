@@ -4,15 +4,18 @@ use crate::{
 };
 use std::fmt;
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Attribute<EVENT, MSG> {
     pub name: &'static str,
     pub value: AttribValue<EVENT, MSG>,
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum AttribValue<EVENT, MSG> {
     Value(Value),
+    #[cfg_attr(feature = "serde", serde(skip_serializing))]
     Callback(Callback<EVENT, MSG>),
 }
 

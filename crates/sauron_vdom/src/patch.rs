@@ -40,6 +40,7 @@ use crate::{
 /// ```
 ///
 /// The patching process is tested in a real browser in tests/diff_patch.rs
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, PartialEq)]
 pub enum Patch<'a, T, EVENT, MSG>
 where

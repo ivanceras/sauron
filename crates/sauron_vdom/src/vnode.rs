@@ -35,6 +35,7 @@ mod element;
 /// ```
 /// Cloning is only done once, and happens when constructing the views into a node tree.
 /// Cloning also allows flexibility such as adding more children into an existing node/element.
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq)]
 pub enum Node<T, EVENT, MSG>
 where
@@ -133,6 +134,7 @@ where
     }
 }
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Text {
     pub text: String,

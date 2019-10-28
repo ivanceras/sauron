@@ -1,4 +1,7 @@
-use crate::Dispatch;
+use crate::{
+    Dispatch,
+    Patch,
+};
 use apply_patches::patch;
 use sauron_vdom::{
     self,
@@ -32,7 +35,16 @@ mod apply_patches;
 // Rc'd Closures for those events.
 use lazy_static::lazy_static;
 lazy_static! {
-    static ref ELEM_UNIQUE_ID: Mutex<u32> = Mutex::new(0);
+    /// This is the value of the data-sauron-vdom-id.
+    static ref DATA_SAURON_VDOM_ID_VALUE: Mutex<u32> = Mutex::new(0);
+}
+
+fn create_unique_identifier() -> u32 {
+    let mut elem_unique_id = DATA_SAURON_VDOM_ID_VALUE
+        .lock()
+        .expect("Unable to obtain lock");
+    *elem_unique_id += 1;
+    *elem_unique_id
 }
 
 pub(self) const DATA_SAURON_VDOM_ID: &str = "data-sauron-vdom-id";
@@ -343,6 +355,24 @@ where
         self.current_vdom = new_vdom;
     }
 
+    /// Apply a patch to the DOM
+    /// The patch can be coming from somewhere else, not only
+    /// as the effect of dom_update, this can also come
+    /// from a server_side pre-processed diff
+    ///
+    /// Warning: Use only when the dom update is only one-way
+    /// meaning, the source keep track of the previous vdom
+    pub fn patch_dom(&mut self, program: &Rc<DSP>, patches: &[Patch<MSG>]) {
+        let active_closures = patch(
+            program,
+            self.root_node.clone(),
+            &mut self.active_closures,
+            &patches,
+        )
+        .expect("Error in patching the dom");
+        self.active_closures.extend(active_closures);
+    }
+
     /// Return the root node of your application, the highest ancestor of all other nodes in
     /// your real DOM tree.
     pub fn root_node(&self) -> Node {
@@ -350,13 +380,6 @@ where
         // So we're effectively cloning a pointer here, which is fast.
         self.root_node.clone()
     }
-}
-
-fn create_unique_identifier() -> u32 {
-    let mut elem_unique_id =
-        ELEM_UNIQUE_ID.lock().expect("Unable to obtain lock");
-    *elem_unique_id += 1;
-    *elem_unique_id
 }
 
 impl From<CreatedNode<Element>> for CreatedNode<Node> {
