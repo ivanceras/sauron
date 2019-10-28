@@ -43,11 +43,6 @@ pub(self) const DATA_SAURON_VDOM_ID: &str = "data-sauron-vdom-id";
 /// The u32 is a unique identifier that is associated with the DOM element that this closure is
 /// attached to.
 ///
-/// TODO: Periodically check if the DOM element is still there, and if not drop the closure.
-///   Maybe whenever a DOM node is replaced or truncated we figure out all of it's
-///   descendants somehow and invalidate those closures..? Need to plan this out..
-///   At it stands now this hashmap will grow anytime a new element with closures is
-///   appended or replaced and we will never free those closures.
 pub type ActiveClosure =
     HashMap<u32, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
 
@@ -72,8 +67,6 @@ where
     ///
     /// We keep these around so that they don't get dropped (and thus stop working);
     ///
-    /// FIXME: Drop them when the element is no longer in the page. Need to figure out
-    /// a good strategy for when to do this.
     pub active_closures: ActiveClosure,
     _phantom_dsp: PhantomData<DSP>,
 }
