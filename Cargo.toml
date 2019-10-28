@@ -16,6 +16,7 @@ sauron_vdom = { version = "0.10.1", path ="crates/sauron_vdom", features = ["ser
 wasm-bindgen = "0.2.45"
 lazy_static = "1.3.0"
 pulldown-cmark = { version = "0.5.1", optional = true }
+serde = {version = "1.0.102", optional = true, features = ["derive"]}
 
 [dependencies.web-sys]
 version = "0.3.22"
@@ -48,7 +49,7 @@ default = ["with-markdown"]
 measure = []
 with-markdown = ["pulldown-cmark"]
 no_request_animation_frame = [] # disable request animation frame
-with-serde = ["sauron_vdom/serde"]
+with-serde = ["sauron_vdom/serde", "serde"]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.2.45"

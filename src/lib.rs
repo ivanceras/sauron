@@ -210,6 +210,16 @@ impl Deref for Event {
     }
 }
 
+#[cfg(feature = "with-serde")]
+impl serde::Serialize for Event {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_unit()
+    }
+}
+
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
 /// App code.
