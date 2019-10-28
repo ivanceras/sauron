@@ -202,9 +202,10 @@ impl PartialEq for Event {
         js_value == other_value
     }
 }
-impl Deref for Event{
+impl Deref for Event {
     type Target = web_sys::Event;
-    fn deref(&self) -> &Self::Target{
+
+    fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
