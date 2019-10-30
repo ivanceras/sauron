@@ -30,7 +30,7 @@ where
             let l = spine.len();
             assert_ne!(l, 0);
             spine[l - 1]
-                .as_element()
+                .as_element_mut()
                 .expect("expecting an element")
                 .add_children(vec![$child]);
         }};
@@ -49,12 +49,12 @@ where
                 if let Tag::CodeBlock(_) = tag {
                     top = pre(vec![], vec![top]);
                 } else if let Tag::Table(aligns) = tag {
-                    if let Some(element) = top.as_element() {
+                    if let Some(element) = top.as_element_mut() {
                         for r in element.children.iter_mut() {
-                            if let Some(r) = r.as_element() {
+                            if let Some(r) = r.as_element_mut() {
                                 for (i, c) in r.children.iter_mut().enumerate()
                                 {
-                                    if let Some(tag) = c.as_element() {
+                                    if let Some(tag) = c.as_element_mut() {
                                         match aligns[i] {
                                             Alignment::None => {}
                                             Alignment::Left => {
@@ -79,9 +79,9 @@ where
                         }
                     }
                 } else if let Tag::TableHead = tag {
-                    if let Some(element) = top.as_element() {
+                    if let Some(element) = top.as_element_mut() {
                         for c in element.children.iter_mut() {
-                            if let Some(tag) = c.as_element() {
+                            if let Some(tag) = c.as_element_mut() {
                                 tag.tag = "th";
                                 tag.add_attributes(vec![attr("scope", "col")]);
                             }
@@ -92,7 +92,7 @@ where
                     elems.push(top);
                 } else {
                     spine[l - 2]
-                        .as_element()
+                        .as_element_mut()
                         .expect("expecting element")
                         .add_children(vec![top]);
                 }

@@ -88,7 +88,8 @@ where
         }
     }
 
-    pub fn as_element(&mut self) -> Option<&mut Element<T, EVENT, MSG>> {
+    /// Get a mutable reference to the element
+    pub fn as_element_mut(&mut self) -> Option<&mut Element<T, EVENT, MSG>> {
         match *self {
             Node::Element(ref mut element) => Some(element),
             Node::Text(_) => None,
@@ -102,24 +103,20 @@ where
         }
     }
 
-    /// FIXME: change the name to add_children
-    /// since this looks like a getter
     /// Append children to this element
-    pub fn children(mut self, children: Vec<Node<T, EVENT, MSG>>) -> Self {
-        if let Some(element) = self.as_element() {
+    pub fn add_children(mut self, children: Vec<Node<T, EVENT, MSG>>) -> Self {
+        if let Some(element) = self.as_element_mut() {
             element.add_children(children);
         }
         self
     }
 
-    /// FIXME: change the naming to add_attribute
-    /// since this looks like a getter
     /// add attributes to the node
-    pub fn attributes(
+    pub fn add_attributes(
         mut self,
         attributes: Vec<Attribute<EVENT, MSG>>,
     ) -> Self {
-        if let Some(elm) = self.as_element() {
+        if let Some(elm) = self.as_element_mut() {
             elm.add_attributes(attributes);
         }
         self

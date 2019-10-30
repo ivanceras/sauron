@@ -93,7 +93,7 @@ impl Component<Msg> for App {
                         text(format!("Clicked: {}", self.click_count)),
                     ],
                 ),
-                div(vec![], vec![]).children(
+                div(vec![], vec![]).add_children(
                     self.data
                         .data
                         .iter()
