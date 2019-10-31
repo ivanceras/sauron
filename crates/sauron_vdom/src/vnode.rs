@@ -88,6 +88,14 @@ where
         }
     }
 
+    /// consume the element
+    pub fn take_element(self) -> Option<Element<T, EVENT, MSG>> {
+        match self {
+            Node::Element(element) => Some(element),
+            Node::Text(_) => None,
+        }
+    }
+
     /// Get a mutable reference to the element
     pub fn as_element_mut(&mut self) -> Option<&mut Element<T, EVENT, MSG>> {
         match *self {
