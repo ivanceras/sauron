@@ -1,6 +1,8 @@
 pub use sauron_vdom::builder::attr;
 use sauron_vdom::Value;
 
+pub use crate::html::attributes::classes_flag;
+
 // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
 // complete list svg attributes
 declare_attributes! {
@@ -264,5 +266,3 @@ declare_attributes! {
     r#in => "in";
     r#type => "type";
 }
-
-//TODO: add the rest of the attributes that are used in svg elements
