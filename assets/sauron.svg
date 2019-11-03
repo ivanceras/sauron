@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   height="102.0255"
+   width="152.02847"
+   version="1.1"
+   id="svg44">
+  <metadata
+     id="metadata50">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs48" />
+  <style
+     id="style2">line, path, circle,rect,polygon {
+                          stroke: rgba(255,255,255,255);
+                          stroke-width: 2;
+                          stroke-opacity: 1;
+                          fill-opacity: 1;
+                          stroke-linecap: round;
+                          stroke-linejoin: miter;
+                        }
+
+                    text {
+                        fill: rgba(255,255,255,255);
+                        }
+                        rect.backdrop{
+                            stroke: none;
+                            fill: white;
+                        }
+                        .broken{
+                            stroke-dasharray: 8;
+                        }
+                        .filled{
+                            fill: rgba(35,39,41,255);
+                        }
+                        .nofill{
+                            fill: none;
+                        }
+
+                        text {
+                         font-family: monospace;
+                         font-size: 16px;
+                        }
+                        </style>
+  <rect
+     id="rect5"
+     height="102.0255"
+     width="152.02847"
+     y="0.0"
+     x="0.0"
+     class="backdrop" />
+  <g
+     id="layer1"
+     transform="translate(-8.985758,-8.987251)">
+    <path
+       style="fill:#ff7d00;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 70,40 60,60 70,80 h 30 L 110,60 100,40 Z"
+       id="path4594" />
+  </g>
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line6"
+     y2="11.01275"
+     y1="11.01275"
+     x2="111.01424"
+     x1="41.01424"
+     class="solid" />
+  <path
+     style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="path8"
+     d="m 41.014242,11.012749 a 40,40 0 0 0 -20,20"
+     class="nofill" />
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line10"
+     y2="51.012749"
+     y1="11.01275"
+     x2="51.014244"
+     x1="71.014244"
+     class="solid" />
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line12"
+     y2="31.012749"
+     y1="31.012749"
+     x2="111.01424"
+     x1="61.014244"
+     class="solid" />
+  <path
+     style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="path14"
+     d="m 111.01424,11.012749 a 40,40 0 0 1 20,20"
+     class="nofill" />
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line16"
+     y2="51.012749"
+     y1="31.012749"
+     x2="11.014242"
+     x1="21.014242"
+     class="solid" />
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line20"
+     y2="71.012749"
+     y1="31.012749"
+     x2="61.014244"
+     x1="41.01424"
+     class="solid" />
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line22"
+     y2="71.012749"
+     y1="31.012749"
+     x2="111.01424"
+     x1="91.014244"
+     class="solid" />
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line26"
+     y2="51.012749"
+     y1="31.012749"
+     x2="141.01424"
+     x1="131.01424"
+     class="solid" />
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line28"
+     y2="71.012749"
+     y1="51.012749"
+     x2="21.014242"
+     x1="11.014242"
+     class="solid" />
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line30"
+     y2="71.012749"
+     y1="71.012749"
+     x2="91.014244"
+     x1="31.014242"
+     class="solid" />
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line32"
+     y2="91.012749"
+     y1="51.012749"
+     x2="81.014244"
+     x1="101.01424"
+     class="solid" />
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line34"
+     y2="71.012749"
+     y1="51.012749"
+     x2="131.01424"
+     x1="141.01424"
+     class="solid" />
+  <path
+     style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="path36"
+     d="m 21.014242,71.012749 a 40,40 0 0 0 20,20"
+     class="nofill" />
+  <line
+     style="fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="line38"
+     y2="91.012749"
+     y1="91.012749"
+     x2="111.01424"
+     x1="41.01424"
+     class="solid" />
+  <path
+     style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1"
+     id="path40"
+     d="m 131.01424,71.012749 a 40,40 0 0 1 -20,20"
+     class="nofill" />
+  <g
+     id="layer2"
+     transform="translate(-8.985758,-8.987251)" />
+</svg>
