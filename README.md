@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.org/ivanceras/sauron.svg?branch=master)](https://travis-ci.org/ivanceras/sauron)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.svg)
+![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png)
 
 ```log,ignore
    One crate to rule the DOM
