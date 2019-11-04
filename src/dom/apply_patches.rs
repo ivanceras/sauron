@@ -30,8 +30,11 @@ use web_sys::{
 /// Apply all of the patches to our old root node in order to create the new root node
 /// that we desire.
 /// This is usually used after diffing two virtual nodes.
+///
+/// Note: If Program is None, it is a dumb patch, meaning
+/// there is no event listener attached or changed
 pub fn patch<N, DSP, MSG>(
-    program: &Rc<DSP>,
+    program: Option<&Rc<DSP>>,
     root_node: N,
     old_closures: &mut ActiveClosure,
     patches: &[Patch<MSG>],
@@ -62,7 +65,7 @@ where
         }
 
         if let Some(text_node) = text_nodes_to_patch.get(&patch_node_idx) {
-            apply_text_patch(&text_node, &patch)?;
+            apply_text_patch(program, &text_node, &patch)?;
             continue;
         }
 
@@ -223,7 +226,7 @@ fn remove_event_listeners(
 }
 
 fn apply_element_patch<DSP, MSG>(
-    program: &Rc<DSP>,
+    program: Option<&Rc<DSP>>,
     node: &Element,
     old_closures: &mut ActiveClosure,
     patch: &Patch<MSG>,
@@ -251,19 +254,23 @@ where
 
         // TODO: Shall we also remove the listener first?
         Patch::AddEventListener(node_idx, events) => {
-            for event in events.iter() {
-                let callback =
-                    event.value.get_callback().expect("expecting a callback");
-                let closure_wrap: Closure<dyn FnMut(Event)> =
-                    dom::create_closure_wrap(program, callback);
-                let func: &Function = closure_wrap.as_ref().unchecked_ref();
-                node.add_event_listener_with_callback(event.name, func)?;
-                let node_id = *node_idx as u32;
-                if let Some(closure) = active_closures.get_mut(&node_id) {
-                    closure.push((event.name, closure_wrap));
-                } else {
-                    active_closures
-                        .insert(node_id, vec![(event.name, closure_wrap)]);
+            if let Some(program) = program {
+                for event in events.iter() {
+                    let callback = event
+                        .value
+                        .get_callback()
+                        .expect("expecting a callback");
+                    let closure_wrap: Closure<dyn FnMut(Event)> =
+                        dom::create_closure_wrap(program, callback);
+                    let func: &Function = closure_wrap.as_ref().unchecked_ref();
+                    node.add_event_listener_with_callback(event.name, func)?;
+                    let node_id = *node_idx as u32;
+                    if let Some(closure) = active_closures.get_mut(&node_id) {
+                        closure.push((event.name, closure_wrap));
+                    } else {
+                        active_closures
+                            .insert(node_id, vec![(event.name, closure_wrap)]);
+                    }
                 }
             }
 
@@ -278,9 +285,10 @@ where
         // before it is actully replaced in the DOM
         //
         Patch::Replace(_node_idx, new_node) => {
-            let created_node = CreatedNode::<Node>::create_dom_node::<DSP, MSG>(
-                program, new_node,
-            );
+            let created_node = CreatedNode::<Node>::create_dom_node_opt::<
+                DSP,
+                MSG,
+            >(program, new_node);
             remove_event_listeners(&node, old_closures)?;
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
@@ -321,7 +329,7 @@ where
             let parent = &node;
             let mut active_closures = HashMap::new();
             for new_node in new_nodes {
-                let created_node = CreatedNode::<Node>::create_dom_node::<
+                let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                     DSP,
                     MSG,
                 >(program, &new_node);
@@ -337,22 +345,24 @@ where
     }
 }
 
-fn apply_text_patch<MSG>(
+fn apply_text_patch<DSP, MSG>(
+    program: Option<&Rc<DSP>>,
     node: &Text,
     patch: &Patch<MSG>,
-) -> Result<(), JsValue> {
+) -> Result<(), JsValue>
+where
+    MSG: 'static,
+    DSP: Dispatch<MSG> + 'static,
+{
     match patch {
         Patch::ChangeText(_node_idx, new_node) => {
             node.set_node_value(Some(&new_node.text));
         }
         Patch::Replace(_node_idx, new_node) => {
-            let text_node = match new_node {
-                crate::Node::Text(text_node) => text_node,
-                _ => unreachable!(),
-            };
-            let created_node: CreatedNode<Node> = CreatedNode::without_closures(
-                CreatedNode::<Node>::create_text_node(text_node),
-            );
+            let created_node = CreatedNode::<Node>::create_dom_node_opt::<
+                DSP,
+                MSG,
+            >(program, new_node);
             node.replace_with_with_node_1(&created_node.node)?;
         }
         _other => {

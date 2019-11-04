@@ -95,10 +95,21 @@ impl<T> CreatedNode<T> {
         crate::document().create_text_node(&text.text)
     }
 
-    /// Create and return a `CreatedNode` instance (containing a DOM `Node`
-    /// together with potentially related closures) for this virtual node.
     pub fn create_dom_node<DSP, MSG>(
         program: &Rc<DSP>,
+        vnode: &crate::Node<MSG>,
+    ) -> CreatedNode<Node>
+    where
+        MSG: 'static,
+        DSP: Dispatch<MSG> + 'static,
+    {
+        Self::create_dom_node_opt(Some(program), vnode)
+    }
+
+    /// Create and return a `CreatedNode` instance (containing a DOM `Node`
+    /// together with potentially related closures) for this virtual node.
+    pub fn create_dom_node_opt<DSP, MSG>(
+        program: Option<&Rc<DSP>>,
         vnode: &crate::Node<MSG>,
     ) -> CreatedNode<Node>
     where
@@ -120,7 +131,7 @@ impl<T> CreatedNode<T> {
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
     pub fn create_element_node<DSP, MSG>(
-        program: &Rc<DSP>,
+        program: Option<&Rc<DSP>>,
         velem: &crate::Element<MSG>,
     ) -> CreatedNode<Element>
     where
@@ -158,26 +169,29 @@ impl<T> CreatedNode<T> {
 
             closures.insert(unique_id, vec![]);
 
-            for event_attr in velem.events().iter() {
-                let event_str = event_attr.name;
-                let callback = event_attr
-                    .value
-                    .get_callback()
-                    .expect("expecting a callback");
-                let current_elm: &EventTarget =
-                    element.dyn_ref().expect("unable to cast to event targe");
-                let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
-                    create_closure_wrap(program, &callback);
-                current_elm
-                    .add_event_listener_with_callback(
-                        event_str,
-                        closure_wrap.as_ref().unchecked_ref(),
-                    )
-                    .expect("Unable to attached event listener");
-                closures
-                    .get_mut(&unique_id)
-                    .expect("Unable to get closure")
-                    .push((event_str, closure_wrap));
+            if let Some(program) = program {
+                for event_attr in velem.events().iter() {
+                    let event_str = event_attr.name;
+                    let callback = event_attr
+                        .value
+                        .get_callback()
+                        .expect("expecting a callback");
+                    let current_elm: &EventTarget = element
+                        .dyn_ref()
+                        .expect("unable to cast to event targe");
+                    let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
+                        create_closure_wrap(program, &callback);
+                    current_elm
+                        .add_event_listener_with_callback(
+                            event_str,
+                            closure_wrap.as_ref().unchecked_ref(),
+                        )
+                        .expect("Unable to attached event listener");
+                    closures
+                        .get_mut(&unique_id)
+                        .expect("Unable to get closure")
+                        .push((event_str, closure_wrap));
+                }
             }
         }
 
@@ -345,7 +359,7 @@ where
     ) {
         let patches = diff(&self.current_vdom, &new_vdom);
         let active_closures = patch(
-            program,
+            Some(program),
             self.root_node.clone(),
             &mut self.active_closures,
             &patches,
@@ -362,9 +376,9 @@ where
     ///
     /// Warning: Use only when the dom update is only one-way
     /// meaning, the source keep track of the previous vdom
-    pub fn patch_dom(&mut self, program: &Rc<DSP>, patches: &[Patch<MSG>]) {
+    pub fn dumb_patch_dom(&mut self, patches: &[Patch<MSG>]) {
         let active_closures = patch(
-            program,
+            None::<&Rc<DSP>>,
             self.root_node.clone(),
             &mut self.active_closures,
             &patches,
