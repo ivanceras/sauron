@@ -1,7 +1,4 @@
-use crate::{
-    Dispatch,
-    Patch,
-};
+use crate::Dispatch;
 use apply_patches::patch;
 use sauron_vdom::{
     self,
@@ -27,7 +24,7 @@ use web_sys::{
     Text,
 };
 
-mod apply_patches;
+pub mod apply_patches;
 
 // Used to uniquely identify elements that contain closures so that the DomUpdater can
 // look them up by their unique id.
@@ -367,24 +364,6 @@ where
         .expect("Error in patching the dom");
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
-    }
-
-    /// Apply a patch to the DOM
-    /// The patch can be coming from somewhere else, not only
-    /// as the effect of dom_update, this can also come
-    /// from a server_side pre-processed diff
-    ///
-    /// Warning: Use only when the dom update is only one-way
-    /// meaning, the source keep track of the previous vdom
-    pub fn dumb_patch_dom(&mut self, patches: &[Patch<MSG>]) {
-        let active_closures = patch(
-            None::<&Rc<DSP>>,
-            self.root_node.clone(),
-            &mut self.active_closures,
-            &patches,
-        )
-        .expect("Error in patching the dom");
-        self.active_closures.extend(active_closures);
     }
 
     /// Return the root node of your application, the highest ancestor of all other nodes in
