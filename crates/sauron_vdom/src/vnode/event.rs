@@ -1,7 +1,6 @@
 /// A container for generic event and the common values
 /// needed for the user.
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Event {
     MouseEvent(MouseEvent),
@@ -28,7 +27,6 @@ impl From<KeyEvent> for Event {
 }
 
 /// A mouse event contains the (x,y) coordinates, buttons and modifier keys
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct MouseEvent {
     pub r#type: &'static str,
@@ -55,7 +53,6 @@ impl MouseEvent {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct KeyEvent {
     pub key: String,
@@ -73,7 +70,6 @@ impl KeyEvent {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct InputEvent {
     pub value: String,
@@ -85,7 +81,6 @@ impl InputEvent {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MouseButton {
     Left,
@@ -101,7 +96,6 @@ impl Default for MouseButton {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Coordinate {
     pub client_x: i32,
@@ -134,7 +128,6 @@ impl Coordinate {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Modifier {
     pub alt_key: bool,
