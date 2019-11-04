@@ -171,14 +171,18 @@ declare_attributes! {
     accept_charset => "accept-charset";
 
     r#async => "async";
+    async_ => "async";
 
     r#for => "for";
+    for_ => "for";
+
     font_family => "font-family";
-
     font_size => "font-size";
-
     flex_direction => "flex-direction";
+
     r#loop => "loop";
+    loop_ => "loop";
+
     r#type => "type";
     type_ => "type";
 }
