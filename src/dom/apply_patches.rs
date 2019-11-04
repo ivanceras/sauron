@@ -62,7 +62,7 @@ where
         }
 
         if let Some(text_node) = text_nodes_to_patch.get(&patch_node_idx) {
-            apply_text_patch(program, &text_node, &patch)?;
+            apply_text_patch(&text_node, &patch)?;
             continue;
         }
 
@@ -337,22 +337,21 @@ where
     }
 }
 
-fn apply_text_patch<DSP, MSG>(
-    program: &Rc<DSP>,
+fn apply_text_patch<MSG>(
     node: &Text,
     patch: &Patch<MSG>,
-) -> Result<(), JsValue>
-where
-    MSG: 'static,
-    DSP: Dispatch<MSG> + 'static,
-{
+) -> Result<(), JsValue> {
     match patch {
         Patch::ChangeText(_node_idx, new_node) => {
             node.set_node_value(Some(&new_node.text));
         }
         Patch::Replace(_node_idx, new_node) => {
-            let created_node = CreatedNode::<Node>::create_dom_node::<DSP, MSG>(
-                program, new_node,
+            let text_node = match new_node {
+                crate::Node::Text(text_node) => text_node,
+                _ => unreachable!(),
+            };
+            let created_node: CreatedNode<Node> = CreatedNode::without_closures(
+                CreatedNode::<Node>::create_text_node(text_node),
             );
             node.replace_with_with_node_1(&created_node.node)?;
         }
