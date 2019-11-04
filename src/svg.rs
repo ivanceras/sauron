@@ -126,3 +126,13 @@ declare_svg_tags! {
     color_profile => "color-profile";
     r#use => "use";
 }
+
+/// TODO: deprecate svg_extra in favor of tag submodule
+pub mod tag {
+    declare_svg_tags! {
+        style;
+        text;
+        a;
+        title;
+    }
+}

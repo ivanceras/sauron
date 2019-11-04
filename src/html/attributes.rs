@@ -180,6 +180,7 @@ declare_attributes! {
     flex_direction => "flex-direction";
     r#loop => "loop";
     r#type => "type";
+    type_ => "type";
 }
 
 /// A helper function which creates a style attribute by assembling the tuples into a string for the style value.

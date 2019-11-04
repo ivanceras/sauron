@@ -169,6 +169,18 @@ declare_tags! {
     template;
 }
 
+/// Not commonly used as tags, but may collide with
+/// most commonly used attribtues such as <style> tag and style="..", attribute"
+/// TODO: deprecate html_extra in favor of this explicit module tag in html
+pub mod tag {
+    declare_tags! {
+        style;
+        html;
+        title;
+        slot;
+    }
+}
+
 /// A help function which render the view when the condition is met, otherwise
 /// just display a text("")
 pub fn view_if<MSG>(flag: bool, node: Node<MSG>) -> Node<MSG> {
