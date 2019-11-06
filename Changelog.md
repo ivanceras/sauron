@@ -1,3 +1,13 @@
+# 0.11.1
+ - attributes helper functions such as (styles, classes, etc) should not require MSG to be Clone.
+
+# 0.11.0
+ - Add underscores on html tags and attribtues(`type`,`for`, `async`, `loop`) that are also special keywords in rust.
+    Now, you can use `type_("text")` as an alternative to `r#type("text")`
+ - rename as_element -> as_element_mut,  children -> add_children
+ - Add `dumb_patch` for patching the dom without involving the callbacks.
+ - Expose to `html::tag` module for the uncommon html tags which conflicts with common html attributes such as `style`, `title`.
+
 # 0.10.1
  - implemented removing the associated closures of elements that has been removed from the DOM including the removed element descendants.
 
