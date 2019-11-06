@@ -198,7 +198,6 @@ declare_attributes! {
 pub fn styles<V, MSG, P>(pairs: P) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
-    MSG: Clone,
     P: AsRef<[(&'static str, V)]>,
 {
     let mut style_str = String::new();
@@ -224,7 +223,6 @@ where
 pub fn styles_flag<V, MSG, P>(trio: P) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
-    MSG: Clone,
     P: AsRef<[(&'static str, V, bool)]>,
 {
     let mut style_list = Vec::with_capacity(trio.as_ref().len());
@@ -246,7 +244,6 @@ where
 pub fn classes_flag<P, MSG>(pair: P) -> Attribute<MSG>
 where
     P: AsRef<[(&'static str, bool)]>,
-    MSG: Clone,
 {
     let mut class_list = Vec::with_capacity(pair.as_ref().len());
     for (class, flag) in pair.as_ref() {
@@ -272,7 +269,6 @@ where
 pub fn attrs_flag<V, MSG, P>(trio: P) -> Vec<Attribute<MSG>>
 where
     V: Into<Value> + Clone,
-    MSG: Clone,
     P: AsRef<[(&'static str, V, bool)]>,
 {
     let mut attributes = Vec::with_capacity(trio.as_ref().len());
