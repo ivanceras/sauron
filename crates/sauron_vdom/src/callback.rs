@@ -10,7 +10,8 @@ pub struct Callback<EVENT, MSG>(Rc<dyn Fn(EVENT) -> MSG>);
 
 impl<EVENT, F, MSG> From<F> for Callback<EVENT, MSG>
 where
-    F: Fn(EVENT) -> MSG + 'static,
+    F: Fn(EVENT) -> MSG,
+    F: 'static,
 {
     fn from(func: F) -> Self {
         Callback(Rc::new(func))
@@ -36,7 +37,8 @@ where
     /// Works like common `map` method but in an opposite direction.
     pub fn reform<F, EVENT2>(self, func: F) -> Callback<EVENT2, MSG>
     where
-        F: Fn(EVENT2) -> EVENT + 'static,
+        F: Fn(EVENT2) -> EVENT,
+        F: 'static,
     {
         let func_wrap = move |input| {
             let output = func(input);
@@ -48,7 +50,8 @@ where
     /// Map the output of this callback to return a different type
     pub fn map<F, MSG2>(self, func: F) -> Callback<EVENT, MSG2>
     where
-        F: Fn(MSG) -> MSG2 + 'static,
+        F: Fn(MSG) -> MSG2,
+        F: 'static,
     {
         let func_wrap = move |input| {
             let out = self.emit(input);
