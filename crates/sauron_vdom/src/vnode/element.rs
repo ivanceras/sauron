@@ -6,7 +6,6 @@ use crate::{
     Value,
 };
 
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Element<T, EVENT, MSG>
 where

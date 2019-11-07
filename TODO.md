@@ -1,0 +1,3 @@
+ - [ ] Add a prelude to import all html tags, svg tags, html attributes, svg attributes that doesn't conflicts
+ - [ ] Make a module that isolate the `with-dom` features.
+ - [ ] Rework the dumb patch taking the advantage of feature gating the dom capability.

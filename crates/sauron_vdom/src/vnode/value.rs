@@ -3,7 +3,6 @@ use std::fmt;
 /// Value is an abstraction of the values used in the actual
 /// backend. Html and gtk-rs have different set of compatible values
 /// therefore a need for a storage of these intermediate value is needed
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[derive(Debug, PartialEq, Clone)]
 pub enum Value {
     Bool(bool),

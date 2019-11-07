@@ -230,17 +230,6 @@ impl std::ops::Deref for DomEvent {
 }
 
 #[cfg(feature = "with-dom")]
-#[cfg(feature = "with-serde")]
-impl serde::Serialize for Event {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        serializer.serialize_unit()
-    }
-}
-
-#[cfg(feature = "with-dom")]
 pub type Event = DomEvent;
 
 #[cfg(not(feature = "with-dom"))]

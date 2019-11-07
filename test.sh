@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cargo test --all
+cargo test --all --no-default-features
 cargo test --all --all-features
 
 
