@@ -11,14 +11,15 @@ keywords = ["html", "dom", "web"]
 edition = "2018"
 
 [dependencies]
-js-sys = "0.3.19"
+js-sys = { version = "0.3.19", optional = true }
 sauron_vdom = { version = "0.11.0", path ="crates/sauron_vdom"}
-wasm-bindgen = "0.2.45"
+wasm-bindgen = { version = "0.2.45", optional = true }
 lazy_static = "1.3.0"
 pulldown-cmark = { version = "0.5.1", optional = true }
 
 [dependencies.web-sys]
 version = "0.3.22"
+optional = true
 features = [
     "Comment",
     "console",
@@ -44,10 +45,11 @@ features = [
 
 
 [features]
-default = ["with-markdown"]
+default = ["with-markdown", "with-dom"]
 measure = []
 with-markdown = ["pulldown-cmark"]
 no_request_animation_frame = [] # disable request animation frame
+with-dom = ["wasm-bindgen", "js-sys", "web-sys"]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.2.45"

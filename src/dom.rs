@@ -257,7 +257,7 @@ where
         event.stop_propagation();
         // prevent the reloading the page in href links
         event.prevent_default();
-        let cb_event = crate::Event(event);
+        let cb_event = crate::DomEvent(event);
         let msg = callback_clone.emit(cb_event);
         program_clone.dispatch(msg);
     }))

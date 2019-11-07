@@ -10,6 +10,7 @@ pub use sauron_vdom::builder::{
 
 #[macro_use]
 pub mod attributes;
+#[cfg(feature = "with-dom")]
 pub mod events;
 pub mod units;
 
