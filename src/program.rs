@@ -1,3 +1,5 @@
+use log::*;
+
 use crate::{
     Cmd,
     Component,

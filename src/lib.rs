@@ -38,6 +38,7 @@
 //! use sauron::Program;
 //! use sauron::Cmd;
 //! use wasm_bindgen::prelude::*;
+//! use log::*;
 //!
 //! #[derive(Debug, PartialEq, Clone)]
 //! pub enum Msg {
@@ -143,9 +144,6 @@
 //!
 //! Please contact me: ivanceras[at]gmail.com
 //!
-
-#[macro_use]
-extern crate log;
 
 #[cfg(feature = "with-dom")]
 pub mod dom;

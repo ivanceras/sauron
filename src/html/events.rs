@@ -1,5 +1,7 @@
 //! https://developer.mozilla.org/en-US/docs/Web/Events
+use log::*;
 use mapper::*;
+
 pub use sauron_vdom::{
     builder::{
         on,

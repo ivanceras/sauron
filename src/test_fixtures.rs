@@ -8,6 +8,7 @@ use crate::{
     Component,
     Program,
 };
+use log::*;
 use std::{
     cell::RefCell,
     rc::Rc,
