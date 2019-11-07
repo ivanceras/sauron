@@ -1,3 +1,7 @@
+# Unreleased
+ - feature gate `with-dom` to isolate browser specific functionality, to make sauron
+    be efficiently used in server side rendering.
+
 # 0.11.1
  - attributes helper functions such as (styles, classes, etc) should not require MSG to be Clone.
 
