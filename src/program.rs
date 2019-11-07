@@ -83,11 +83,11 @@ where
         // update the app and emit the cmd returned from the update
         let cmd = self.app.borrow_mut().update(msg);
         cmd.emit(self);
-        crate::log("Executing cmd..");
+        trace!("Executing cmd..");
         #[cfg(feature = "measure")]
         let t2 = {
             let t2 = crate::now();
-            crate::log!("app update took: {}ms", t2 - t1);
+            trace!("app update took: {}ms", t2 - t1);
             t2
         };
         // a new view is created due to the app update
@@ -95,7 +95,7 @@ where
         #[cfg(feature = "measure")]
         let t3 = {
             let t3 = crate::now();
-            crate::log!("app view took: {}ms", t3 - t2);
+            trace!("app view took: {}ms", t3 - t2);
             t3
         };
         // update the last DOM node tree with this new view
@@ -103,7 +103,7 @@ where
         #[cfg(feature = "measure")]
         {
             let t4 = crate::now();
-            crate::log!("dom update took: {}ms", t4 - t3);
+            trace!("dom update took: {}ms", t4 - t3);
         };
     }
 }

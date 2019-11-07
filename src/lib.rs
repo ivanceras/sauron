@@ -66,7 +66,7 @@
 //!                         r#type("button"),
 //!                         value("Click me!"),
 //!                         onclick(|_| {
-//!                             sauron::log("Button is clicked");
+//!                             trace!("Button is clicked");
 //!                             Msg::Click
 //!                         }),
 //!                     ],
@@ -78,7 +78,7 @@
 //!     }
 //!
 //!     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-//!         sauron::log!("App is updating from msg: {:?}", msg);
+//!         trace!("App is updating from msg: {:?}", msg);
 //!         match msg {
 //!             Msg::Click => {
 //!                 self.click_count += 1;
@@ -142,6 +142,10 @@
 //!
 //!
 //! Please contact me: ivanceras[at]gmail.com
+//!
+
+#[macro_use]
+extern crate log;
 
 #[cfg(feature = "with-dom")]
 pub mod dom;
@@ -187,7 +191,6 @@ pub use util::{
     body,
     document,
     history,
-    log,
     now,
     performance,
     request_animation_frame,

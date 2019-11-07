@@ -14,6 +14,9 @@ use sauron::{
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
+#[macro_use]
+extern crate log;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     Click,
@@ -54,10 +57,11 @@ impl App {
 
 impl Component<Msg> for App {
     fn init(&self) -> Cmd<Self, Msg> {
+        console_log::init_with_level(log::Level::Trace).unwrap();
         let url = "https://reqres.in/api/users";
         let data_decoder = |v: String| {
             let data: Result<Data, _> = serde_json::from_str(&v);
-            sauron::log!("data: {:#?}", data);
+            trace!("data: {:#?}", data);
             data.expect("Error deserializing data")
         };
         Http::fetch_with_text_response_decoder(
@@ -84,7 +88,7 @@ impl Component<Msg> for App {
                                 r#type("button"),
                                 value("Click me!"),
                                 onclick(|_| {
-                                    sauron::log("Button is clicked");
+                                    trace!("Button is clicked");
                                     Msg::Click
                                 }),
                             ],
@@ -121,14 +125,14 @@ impl Component<Msg> for App {
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-        sauron::log!("App is updating from msg: {:?}", msg);
+        trace!("App is updating from msg: {:?}", msg);
         match msg {
             Msg::Click => self.click_count += 1,
             Msg::ReceivedData(Ok(data)) => {
                 self.data = data;
             }
             Msg::ReceivedData(Err(js_value)) => {
-                sauron::log!("Error fetching users! {:#?}", js_value);
+                trace!("Error fetching users! {:#?}", js_value);
             }
         }
         Cmd::none()

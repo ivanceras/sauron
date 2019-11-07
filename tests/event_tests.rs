@@ -1,6 +1,8 @@
 #![deny(warnings)]
 #![feature(proc_macro_hygiene)]
 
+#[macro_use]
+extern crate log;
 extern crate wasm_bindgen_test;
 extern crate web_sys;
 use std::rc::Rc;
@@ -165,20 +167,17 @@ fn remove_event_from_truncated_children() {
     let old: Node<()> = div(
         vec![],
         vec![
-            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
-            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
-            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
-            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
-            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
+            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
+            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
+            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
+            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
+            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
         ],
     );
 
     let new: Node<()> = div(
         vec![],
-        vec![button(
-            vec![onclick(|_| sauron::log("Clicked here"))],
-            vec![],
-        )],
+        vec![button(vec![onclick(|_| trace!("Clicked here"))], vec![])],
     );
 
     let body = sauron::body();
@@ -209,20 +208,17 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     let old: Node<()> = div(
         vec![],
         vec![
-            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
-            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
+            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
+            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
             button(vec![], vec![]),
             button(vec![], vec![]),
-            button(vec![onclick(|_| sauron::log("Clicked here"))], vec![]),
+            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
         ],
     );
 
     let new: Node<()> = div(
         vec![],
-        vec![button(
-            vec![onclick(|_| sauron::log("Clicked here"))],
-            vec![],
-        )],
+        vec![button(vec![onclick(|_| trace!("Clicked here"))], vec![])],
     );
 
     let body = sauron::body();
@@ -250,8 +246,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
 
 #[wasm_bindgen_test]
 fn remove_event_from_replaced_node() {
-    let old: Node<()> =
-        div(vec![onclick(|_| sauron::log("I'm a div"))], vec![]);
+    let old: Node<()> = div(vec![onclick(|_| trace!("I'm a div"))], vec![]);
 
     let new: Node<()> = p(vec![], vec![]);
 

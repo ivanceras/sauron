@@ -10,8 +10,8 @@ pub use sauron_vdom::{
         InputEvent,
         KeyEvent,
         Modifier,
-        MouseEvent,
         MouseButton,
+        MouseEvent,
     },
     Callback,
 };
@@ -24,8 +24,8 @@ pub mod mapper {
         InputEvent,
         KeyEvent,
         Modifier,
-        MouseEvent,
         MouseButton,
+        MouseEvent,
     };
     use wasm_bindgen::JsCast;
     use web_sys::{
@@ -55,7 +55,7 @@ pub mod mapper {
             meta_key: mouse.meta_key(),
             shift_key: mouse.shift_key(),
         };
-        let buttons = match mouse.button(){
+        let buttons = match mouse.button() {
             0 => MouseButton::Left,
             1 => MouseButton::Middle,
             2 => MouseButton::Left,
@@ -63,17 +63,17 @@ pub mod mapper {
             4 => MouseButton::WheelDown,
             _ => Default::default(), // defaults to left
         };
-        let r#type = match &*event.0.type_(){
+        let r#type = match &*event.0.type_() {
             "click" => "click",
             "mouseup" => "mouseup",
             "mousedown" => "mousedown",
             _e => panic!("unhandled event type: {}", _e),
         };
-        MouseEvent{
+        MouseEvent {
             r#type,
             coordinate,
             modifier,
-            buttons
+            buttons,
         }
     }
 
@@ -119,7 +119,6 @@ pub mod mapper {
             "Expecting an input event from input element or textarea element",
         )
     }
-
 }
 
 macro_rules! declare_events {
@@ -180,7 +179,7 @@ where
     CB: Fn((i32, i32)) -> MSG + 'static,
     MSG: 'static,
 {
-    crate::log("resizing..");
+    trace!("resizing..");
     let target_size_fn = |event: crate::Event| {
         let target = event.0.target().expect("can't get target");
         let element: &web_sys::Element =

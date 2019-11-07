@@ -102,7 +102,7 @@ impl Component<Msg> for App {
                         ),
                         button(
                             vec![onclick(|event: MouseEvent| {
-                                sauron::log!(
+                                trace!(
                                     "Clicked at ({},{})",
                                     event.x(),
                                     event.y()
@@ -113,7 +113,7 @@ impl Component<Msg> for App {
                         ),
                         button(
                             vec![ondblclick(|event: MouseEvent| {
-                                sauron::log!(
+                                trace!(
                                     "Double clicked at ({},{})",
                                     event.x(),
                                     event.y()

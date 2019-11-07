@@ -12,6 +12,9 @@ use sauron::{
 };
 use wasm_bindgen::prelude::*;
 
+#[macro_use]
+extern crate log;
+
 pub enum Msg {
     Click,
 }
@@ -37,7 +40,7 @@ impl Component<Msg> for App {
                         r#type("button"),
                         value("Click me!"),
                         onclick(|_| {
-                            sauron::log("Button is clicked");
+                            trace!("Button is clicked");
                             Msg::Click
                         }),
                     ],
@@ -58,5 +61,6 @@ impl Component<Msg> for App {
 
 #[wasm_bindgen(start)]
 pub fn main() {
+    console_log::init_with_level(log::Level::Trace).unwrap();
     Program::mount_to_body(App::new());
 }

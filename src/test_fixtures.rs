@@ -18,7 +18,7 @@ pub struct SimpleComponent;
 
 impl Component<()> for SimpleComponent {
     fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
-        crate::log!("updating in SimpleComponent");
+        trace!("updating in SimpleComponent");
         Cmd::none()
     }
 

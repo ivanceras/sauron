@@ -37,18 +37,3 @@ pub fn performance() -> web_sys::Performance {
 pub fn now() -> f64 {
     performance().now()
 }
-
-#[cfg(target_arch = "wasm32")]
-pub fn log<S: Into<String>>(s: S) {
-    web_sys::console::log_1(&s.into().into());
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-pub fn log<S: Into<String>>(s: S) {
-    println!("{}", s.into())
-}
-
-#[macro_export]
-macro_rules! log {
-    ($($t:tt)*) => ($crate::log(format!($($t)*)))
-}

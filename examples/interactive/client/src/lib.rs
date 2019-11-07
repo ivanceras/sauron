@@ -14,6 +14,9 @@ use app::{
     Msg,
 };
 
+#[macro_use]
+extern crate log;
+
 mod app;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -32,8 +35,9 @@ pub struct Client {
 impl Client {
     #[wasm_bindgen(constructor)]
     pub fn new(initial_state: &str) -> Client {
+        console_log::init_with_level(log::Level::Trace).unwrap();
         console_error_panic_hook::set_once();
-        sauron::log!("Do something with the initial state: {}", initial_state);
+        trace!("Do something with the initial state: {}", initial_state);
 
         let root_node = document().get_element_by_id("web-app").unwrap();
 

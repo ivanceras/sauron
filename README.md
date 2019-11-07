@@ -65,7 +65,7 @@ impl Component<Msg> for App {
                         r#type("button"),
                         value("Click me!"),
                         onclick(|_| {
-                            sauron::log("Button is clicked");
+                            trace!("Button is clicked");
                             Msg::Click
                         }),
                     ],
@@ -77,7 +77,7 @@ impl Component<Msg> for App {
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-        sauron::log!("App is updating from msg: {:?}", msg);
+        trace!("App is updating from msg: {:?}", msg);
         match msg {
             Msg::Click => {
                 self.click_count += 1;
@@ -141,5 +141,6 @@ This project is based on the existing projects:
 
 
 Please contact me: ivanceras[at]gmail.com
+
 
 License: MIT
