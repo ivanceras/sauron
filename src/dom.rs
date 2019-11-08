@@ -203,9 +203,9 @@ impl<T> CreatedNode<T> {
                     //  -> https://reactjs.org/blog/2016/04/07/react-v15.html#major-changes
                     //  -> https://github.com/facebook/react/pull/5753
                     //
-                    // `ptns` = Percy text node separator
+                    // `mordor` one does not simply walk into mordor
                     if previous_node_was_text {
-                        let separator = document.create_comment("ptns");
+                        let separator = document.create_comment("mordor");
                         current_node
                             .append_child(separator.as_ref() as &web_sys::Node)
                             .expect("Unable to append child");
