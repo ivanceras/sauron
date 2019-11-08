@@ -151,8 +151,6 @@ pub mod dom;
 pub mod html;
 #[cfg(feature = "with-dom")]
 mod component;
-pub mod html_array;
-pub mod html_extra;
 #[cfg(feature = "with-dom")]
 mod program;
 #[macro_use]
@@ -165,7 +163,6 @@ mod http;
 mod markdown;
 #[cfg(feature = "with-markdown")]
 pub use markdown::render_markdown as markdown;
-pub mod svg_extra;
 #[cfg(feature = "with-dom")]
 pub mod test_fixtures;
 #[cfg(feature = "with-dom")]

@@ -75,7 +75,6 @@ members = [
     "examples/fetch_data",
     "examples/interactive/client",
     "examples/todomvc",
-    "examples/todomvc_using_array",
     "examples/window_tab_rows",
 ]
 
