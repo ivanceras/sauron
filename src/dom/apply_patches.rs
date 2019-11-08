@@ -336,7 +336,7 @@ where
             let child_count = children.length();
 
             // We skip over any separators that we placed between two text nodes
-            //   -> `<!--ptns-->`
+            //   -> `<!--mordor-->`
             //  and trim all children that come after our new desired `num_children_remaining`
             //let mut non_separator_children_found = 0;
 
