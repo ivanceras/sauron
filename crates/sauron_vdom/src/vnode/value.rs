@@ -138,7 +138,7 @@ macro_rules! impl_from {
         {
             fn from(v: [T; $n]) -> Self {
                 Value::Vec(
-                    v.into_iter()
+                    v.iter()
                         .map(|i| i.to_owned().into())
                         .collect::<Vec<Value>>(),
                 )
