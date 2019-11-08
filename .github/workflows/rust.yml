@@ -1,0 +1,31 @@
+name: Rust
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build no features
+      run: cargo build --all --no-default-features
+      
+    - name: Build with all features
+      run: cargo build --all --all-features
+      
+    - name: Build with dom features
+      run: cargo build --all --features "with-dom"
+      
+
+    - name: Run tests no features
+      run: cargo test --all --no-default-features
+            
+    - name: Run tests with all features
+      run: cargo test --all --all-features
+      
+    - name: Run tests with dom features
+      run: cargo test --all --features "with-dom"
+      
+
