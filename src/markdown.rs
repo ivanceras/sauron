@@ -15,12 +15,13 @@ use pulldown_cmark::{
     Tag,
 };
 
+pub fn markdown<MSG>(src: &str) -> Node<MSG> {
+    render_markdown(src)
+}
+
 /// Renders a string of Markdown to HTML with the default options (footnotes
 /// disabled, tables enabled).
-pub fn render_markdown<MSG>(src: &str) -> Node<MSG>
-where
-    MSG: Clone + 'static,
-{
+pub fn render_markdown<MSG>(src: &str) -> Node<MSG> {
     let mut elems = vec![];
     let mut spine = vec![];
 
@@ -114,10 +115,7 @@ where
     }
 }
 
-fn make_tag<MSG>(t: Tag) -> Node<MSG>
-where
-    MSG: Clone + 'static,
-{
+fn make_tag<MSG>(t: Tag) -> Node<MSG> {
     match t {
         Tag::Paragraph => p(vec![], vec![]),
         Tag::Rule => hr(vec![], vec![]),

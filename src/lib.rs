@@ -145,93 +145,33 @@
 //! Please contact me: ivanceras[at]gmail.com
 //!
 
-#[cfg(feature = "with-dom")]
-pub mod dom;
+use cfg_if::cfg_if;
+
+cfg_if! {if #[cfg(feature = "with-dom")] {
+    pub mod dom;
+    pub use dom::*;
+}}
+
+#[cfg(not(feature = "with-dom"))]
+pub type Event = ();
+
+cfg_if! {if #[cfg(feature = "with-markdown")] {
+    mod markdown;
+    pub use markdown::*;
+}}
+
 #[macro_use]
 pub mod html;
-#[cfg(feature = "with-dom")]
-mod component;
-#[cfg(feature = "with-dom")]
-mod program;
+
 #[macro_use]
 pub mod svg;
-#[cfg(feature = "with-dom")]
-mod browser;
-#[cfg(feature = "with-dom")]
-mod http;
-#[cfg(feature = "with-markdown")]
-mod markdown;
-#[cfg(feature = "with-markdown")]
-pub use markdown::render_markdown as markdown;
-#[cfg(feature = "with-dom")]
-pub mod test_fixtures;
-#[cfg(feature = "with-dom")]
-mod util;
 
-#[cfg(feature = "with-dom")]
-pub use component::Component;
-#[cfg(feature = "with-dom")]
-pub use dom::DomUpdater;
-#[cfg(feature = "with-dom")]
-pub use program::Program;
 pub use sauron_vdom::{
     diff,
     Callback,
     Dispatch,
     Text,
 };
-
-#[cfg(feature = "with-dom")]
-pub use util::{
-    body,
-    document,
-    history,
-    now,
-    performance,
-    request_animation_frame,
-    window,
-};
-
-#[cfg(feature = "with-dom")]
-pub use browser::Browser;
-#[cfg(feature = "with-dom")]
-pub use http::Http;
-
-#[cfg(feature = "with-dom")]
-use wasm_bindgen::{
-    JsCast,
-    JsValue,
-};
-
-/// This needs wrapping only so that we can implement
-/// PartialEq for testing purposes
-#[cfg(feature = "with-dom")]
-#[derive(Clone, Debug)]
-pub struct DomEvent(pub web_sys::Event);
-
-#[cfg(feature = "with-dom")]
-impl PartialEq for Event {
-    fn eq(&self, other: &Self) -> bool {
-        let js_value: Option<&JsValue> = self.0.dyn_ref();
-        let other_value: Option<&JsValue> = other.0.dyn_ref();
-        js_value == other_value
-    }
-}
-
-#[cfg(feature = "with-dom")]
-impl std::ops::Deref for DomEvent {
-    type Target = web_sys::Event;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-#[cfg(feature = "with-dom")]
-pub type Event = DomEvent;
-
-#[cfg(not(feature = "with-dom"))]
-pub type Event = ();
 
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
@@ -240,6 +180,3 @@ pub type Node<MSG> = sauron_vdom::Node<&'static str, Event, MSG>;
 pub type Element<MSG> = sauron_vdom::Element<&'static str, Event, MSG>;
 pub type Patch<'a, MSG> = sauron_vdom::Patch<'a, &'static str, Event, MSG>;
 pub type Attribute<MSG> = sauron_vdom::Attribute<Event, MSG>;
-
-#[cfg(feature = "with-dom")]
-pub type Cmd<APP, MSG> = sauron_vdom::Cmd<Program<APP, MSG>, MSG>;

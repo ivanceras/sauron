@@ -3,7 +3,7 @@ use super::{
     CreatedNode,
 };
 use crate::{
-    dom,
+    dom::create_closure_wrap,
     Dispatch,
     Patch,
 };
@@ -292,7 +292,7 @@ where
                         .get_callback()
                         .expect("expecting a callback");
                     let closure_wrap: Closure<dyn FnMut(Event)> =
-                        dom::create_closure_wrap(program, callback);
+                        create_closure_wrap(program, callback);
                     let func: &Function = closure_wrap.as_ref().unchecked_ref();
                     node.add_event_listener_with_callback(event.name, func)?;
                     let node_id = *node_idx as u32;

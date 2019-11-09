@@ -15,7 +15,6 @@ use std::{
 use wasm_bindgen::{
     closure::Closure,
     JsCast,
-    JsValue,
 };
 use web_sys::{
     self,
@@ -25,55 +24,7 @@ use web_sys::{
     Text,
 };
 
-mod browser;
-mod component;
-//pub mod dom;
 pub mod apply_patches;
-mod http;
-mod program;
-pub mod test_fixtures;
-mod util;
-
-pub use browser::Browser;
-pub use component::Component;
-pub use http::Http;
-pub use program::Program;
-pub use util::{
-    body,
-    document,
-    history,
-    now,
-    performance,
-    request_animation_frame,
-    window,
-};
-
-impl std::ops::Deref for DomEvent {
-    type Target = web_sys::Event;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-/// This needs wrapping only so that we can implement
-/// PartialEq for testing purposes
-#[derive(Clone, Debug)]
-pub struct DomEvent(pub web_sys::Event);
-
-pub type Cmd<APP, MSG> = sauron_vdom::Cmd<Program<APP, MSG>, MSG>;
-
-#[cfg(feature = "with-dom")]
-pub type Event = DomEvent;
-
-#[cfg(feature = "with-dom")]
-impl PartialEq for Event {
-    fn eq(&self, other: &Self) -> bool {
-        let js_value: Option<&JsValue> = self.0.dyn_ref();
-        let other_value: Option<&JsValue> = other.0.dyn_ref();
-        js_value == other_value
-    }
-}
 
 // Used to uniquely identify elements that contain closures so that the DomUpdater can
 // look them up by their unique id.
