@@ -37,6 +37,7 @@ use sauron::Node;
 use sauron::Program;
 use sauron::Cmd;
 use wasm_bindgen::prelude::*;
+use log::*;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
@@ -116,7 +117,8 @@ Build using
 ```sh
 $> wasm-pack build --target no-modules
 ```
-Look at the [examples](https://github.com/ivanceras/sauron/tree/master/examples) and the build script for the details.
+Look at the [examples](https://github.com/ivanceras/sauron/tree/master/examples)
+and the build script for the details.
 
 Warning: You need to use the latest nightly compiler in order for this to work.
 

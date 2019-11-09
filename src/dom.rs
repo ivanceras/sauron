@@ -63,10 +63,8 @@ pub struct DomEvent(pub web_sys::Event);
 
 pub type Cmd<APP, MSG> = sauron_vdom::Cmd<Program<APP, MSG>, MSG>;
 
-#[cfg(feature = "with-dom")]
 pub type Event = DomEvent;
 
-#[cfg(feature = "with-dom")]
 impl PartialEq for Event {
     fn eq(&self, other: &Self) -> bool {
         let js_value: Option<&JsValue> = self.0.dyn_ref();
