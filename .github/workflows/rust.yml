@@ -9,8 +9,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-        with:
-            toolchain: nightly
+
+    - name: Install nightly
+      run: rustup toolchain install nightly && rustup override set nightly
 
     - name: Build no features
       run: cargo build --all --no-default-features
