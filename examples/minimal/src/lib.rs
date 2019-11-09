@@ -1,10 +1,12 @@
 #![deny(warnings)]
 use sauron::{
+    div,
     html::{
         attributes::*,
         events::*,
         *,
     },
+    input,
     Cmd,
     Component,
     Node,
@@ -31,11 +33,11 @@ impl App {
 
 impl Component<Msg> for App {
     fn view(&self) -> Node<Msg> {
-        div(
-            vec![class("some-class"), id("some-id"), attr("data-id", 1)],
-            vec![
-                input(
-                    vec![
+        div!(
+            [class("some-class"), id("some-id"), attr("data-id", 1),],
+            [
+                input!(
+                    [
                         class("client"),
                         r#type("button"),
                         value("Click me!"),
@@ -44,10 +46,10 @@ impl Component<Msg> for App {
                             Msg::Click
                         }),
                     ],
-                    vec![],
+                    []
                 ),
-                text(format!("Clicked: {}", self.click_count)),
-            ],
+                text(format!("Clicked: {}", self.click_count))
+            ]
         )
     }
 
