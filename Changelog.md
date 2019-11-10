@@ -1,7 +1,4 @@
-# Unreleased
- - feature gate `with-dom` to isolate browser specific functionality, to make sauron
-    be efficiently used in server side rendering.
- - Use the `log` and `console_log` crate to properly implement the logging system
+# 0.20.0-unreleased
  - Add macro based syntax to provide a cleaner syntax in writing the view:
     ## Old syntax:
     ```rust
@@ -50,6 +47,21 @@
         )
     }
     ```
+
+ - Move DomEvent in dom module
+ - nicer name for dumb_patch -> apply_dumb_patch
+ - Refactor dom_updater and created_node out of the dom module
+ - Add macro syntax, which provides a cleaner code by eliminating the vec![] syntax on the components view functions
+ - Enable github actions
+ - Reorganize dom specific module to get rid of multiple cfg feature code in the library
+ - Reorganize html::tags and svg::tags
+ - Remove the html_array syntax
+ - Fix unused warning errors when no feature is enabled
+ - Use the proper logging by using `log` and `console_log crate`
+ - Completely remove the with-serde feature
+ - Add feature gate 'with-dom' for browser specific functionality, such that sauron can be efficiently used for server-side rendering
+ - Constraint the generic Type: `F` to be 'static in Callback, instead of the return generic type
+ - Fix attributes helper functions: (`styles`, `styles_flag`, `classes`, `classes_flag`, `attrs_flag`) should not require MSG to be clone
 
 # 0.11.1
  - attributes helper functions such as (styles, classes, etc) should not require MSG to be Clone.
