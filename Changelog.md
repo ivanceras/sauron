@@ -2,6 +2,54 @@
  - feature gate `with-dom` to isolate browser specific functionality, to make sauron
     be efficiently used in server side rendering.
  - Use the `log` and `console_log` crate to properly implement the logging system
+ - Add macro based syntax to provide a cleaner syntax in writing the view:
+    ## Old syntax:
+    ```rust
+    fn view(&self) -> Node<Msg> {
+        div(
+            vec![class("some-class"), id("some-id"), attr("data-id", 1)],
+            vec![
+                input(
+                    vec![
+                        class("client"),
+                        r#type("button"),
+                        value("Click me!"),
+                        onclick(|_| {
+                            trace!("Button is clicked");
+                            Msg::Click
+                        }),
+                    ],
+                    vec![],
+                ),
+                text(format!("Clicked: {}", self.click_count)),
+            ],
+        )
+    }
+    ```
+
+    ## New syntax:
+    ```rust
+    fn view(&self) -> Node<Msg> {
+        div!(
+            [class("some-class"), id("some-id"), attr("data-id", 1)],
+            [
+                input!(
+                    [
+                        class("client"),
+                        type_("button"),
+                        value("Click me!"),
+                        onclick(|_| {
+                            trace!("Button is clicked");
+                            Msg::Click
+                        }),
+                    ],
+                    [],
+                ),
+                text!("Clicked: {}", self.click_count),
+            ],
+        )
+    }
+    ```
 
 # 0.11.1
  - attributes helper functions such as (styles, classes, etc) should not require MSG to be Clone.
