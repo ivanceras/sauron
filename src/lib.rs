@@ -21,7 +21,7 @@
 //! > If trashed or buggy it cannot be remade
 //! > If found send to Ivan, the bandwidth is prepaid
 //!
-//! --[po8](https://www.reddit.com/user/po8/)
+//! -- The Harvard Lampoon & [po8](https://www.reddit.com/user/po8/)
 //!
 //!
 //!  Sauron is an html web framework for building web-apps with the goal of
