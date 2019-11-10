@@ -68,8 +68,19 @@ macro_rules! declare_tags_macro {
                 $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
             };
 
+            /////////////////////////////////////////////////
+            //
+            // Pass through the expression as it was with the old function call
+            //
+            /////////////////////////////////////////////////
 
+            // Pass through the div(vec![], vec![])
             ( $att: expr, $children: expr ) => {
+                $crate::html::$name( $att, $children)
+            };
+
+            // Pass through the div!(vec![], vec![],) with trailing comma
+            ( $att: expr, $children: expr, ) => {
                 $crate::html::$name( $att, $children)
             };
         }

@@ -3,7 +3,6 @@ use sauron::{
     html::{
         attributes::*,
         events::*,
-        *,
     },
     Cmd,
     Node,
@@ -79,29 +78,26 @@ impl Component<Msg> for App {
             .date
             .to_locale_string("en-GB", &JsValue::undefined())
             .into();
-        div(
-            vec![class("some-class"), id("some-id"), attr("data-id", 1)],
-            vec![
-                div(
-                    vec![id("current-time")],
-                    vec![text(format!("Today is {}", date_str))],
-                ),
-                div(
-                    vec![],
-                    vec![
-                        text("Your name is: "),
-                        input(
-                            vec![
+        div!(
+            [class("some-class"), id("some-id"), attr("data-id", 1)],
+            [
+                div!([id("current-time")], [text!("Today is {}", date_str)],),
+                div!(
+                    [],
+                    [
+                        text!("Your name is: "),
+                        input!(
+                            [
                                 r#type("text"),
                                 oninput(|event: InputEvent| {
                                     Msg::ChangeName(event.value)
                                 }),
                                 placeholder("John Smith"),
                             ],
-                            vec![],
+                            [],
                         ),
-                        button(
-                            vec![onclick(|event: MouseEvent| {
+                        button!(
+                            [onclick(|event: MouseEvent| {
                                 trace!(
                                     "Clicked at ({},{})",
                                     event.x(),
@@ -109,10 +105,10 @@ impl Component<Msg> for App {
                                 );
                                 Msg::Click
                             })],
-                            vec![text("Click me!")],
+                            [text!("Click me!")],
                         ),
-                        button(
-                            vec![ondblclick(|event: MouseEvent| {
+                        button!(
+                            [ondblclick(|event: MouseEvent| {
                                 trace!(
                                     "Double clicked at ({},{})",
                                     event.x(),
@@ -120,39 +116,33 @@ impl Component<Msg> for App {
                                 );
                                 Msg::DoubleClick
                             })],
-                            vec![text(format!(
-                                "DoubleClicks {}",
-                                self.double_clicks
-                            ))],
+                            [text!("DoubleClicks {}", self.double_clicks)],
                         ),
                     ],
                 ),
-                p(
-                    vec![],
-                    vec![
-                        text(format!("Hello {}!", self.name,)),
+                p!(
+                    [],
+                    [
+                        text!("Hello {}!", self.name),
                         if self.click_count > 0 {
-                            text(format!(
+                            text!(
                                 ", You've clicked on that button for {} time{}",
                                 self.click_count,
                                 if self.click_count > 1 { "s" } else { "" }
-                            ))
+                            )
                         } else {
-                            span(vec![], vec![])
+                            span!([], [])
                         },
                     ],
                 ),
-                div(
-                    vec![],
-                    vec![
-                        p(
-                            vec![],
-                            vec![text("Tell us something about yourself:")],
-                        ),
-                        div(
-                            vec![],
-                            vec![textarea(
-                                vec![
+                div!(
+                    [],
+                    [
+                        p!([], [text!("Tell us something about yourself:")],),
+                        div!(
+                            [],
+                            [textarea!(
+                                [
                                     rows(10),
                                     cols(80),
                                     oninput(|event: InputEvent| {
@@ -160,30 +150,30 @@ impl Component<Msg> for App {
                                     }),
                                     placeholder("I'm a..."),
                                 ],
-                                vec![],
+                                [],
                             )],
                         ),
-                        p(vec![], vec![text(&self.biography)]),
+                        p!([], [text!("{}", self.biography)]),
                     ],
                 ),
-                div(
-                    vec![],
-                    vec![
-                        text("What are you thinking right now?"),
-                        input(
-                            vec![
+                div!(
+                    [],
+                    [
+                        text!("What are you thinking right now?"),
+                        input!(
+                            [
                                 r#type("text"),
                                 onchange(|event: InputEvent| {
                                     Msg::ChangeThought(event.value)
                                 }),
                                 placeholder("Elephants..."),
                             ],
-                            vec![],
+                            [],
                         ),
                         if let Some(thought) = &self.thought {
-                            text(format!("Hmmn {}... Interesting.", thought))
+                            text!("Hmmn {}... Interesting.", thought)
                         } else {
-                            span(vec![], vec![])
+                            span!([], [])
                         },
                     ],
                 ),

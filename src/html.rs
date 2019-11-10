@@ -45,3 +45,10 @@ pub fn html_element_ns<MSG>(
 ) -> Node<MSG> {
     sauron_vdom::builder::element_ns(tag, Some(namespace), attrs, children)
 }
+
+#[macro_export]
+macro_rules! text {
+    ( $($arg: tt)* ) => {
+        $crate::html::text(format!($($arg)*))
+    };
+}
