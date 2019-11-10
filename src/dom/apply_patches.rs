@@ -1,9 +1,12 @@
-use super::{
-    ActiveClosure,
-    CreatedNode,
-};
 use crate::{
-    dom::create_closure_wrap,
+    dom::{
+        created_node,
+        created_node::{
+            create_closure_wrap,
+            ActiveClosure,
+            CreatedNode,
+        },
+    },
     Dispatch,
     Patch,
 };
@@ -173,7 +176,7 @@ fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<u32> {
     // TODO: there should be a better way to get the node-id back
     // without having to read from the actual dom node element
     if let Some(vdom_id_str) =
-        root_element.get_attribute(super::DATA_SAURON_VDOM_ID)
+        root_element.get_attribute(created_node::DATA_SAURON_VDOM_ID)
     {
         let vdom_id = vdom_id_str
             .parse::<u32>()

@@ -1,10 +1,10 @@
 use log::*;
 
 use crate::{
+    dom::dom_updater::DomUpdater,
     Cmd,
     Component,
     Dispatch,
-    DomUpdater,
 };
 use std::{
     cell::RefCell,

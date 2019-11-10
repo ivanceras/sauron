@@ -39,7 +39,7 @@ fn create_unique_identifier() -> u32 {
     *elem_unique_id
 }
 
-pub(self) const DATA_SAURON_VDOM_ID: &str = "data-sauron-vdom-id";
+pub(crate) const DATA_SAURON_VDOM_ID: &str = "data-sauron-vdom-id";
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
 /// VirtualNode is dropped.
@@ -218,7 +218,7 @@ impl<T> CreatedNode<T> {
 }
 
 /// This wrap into a closure the function that is dispatched when the event is triggered.
-fn create_closure_wrap<DSP, MSG>(
+pub(crate) fn create_closure_wrap<DSP, MSG>(
     program: &Rc<DSP>,
     callback: &Callback<crate::Event, MSG>,
 ) -> Closure<dyn FnMut(web_sys::Event)>
