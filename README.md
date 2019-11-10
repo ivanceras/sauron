@@ -31,7 +31,7 @@
 ```rust
 use sauron::html::attributes::*;
 use sauron::html::events::*;
-use sauron::html::*;
+use sauron::*;
 use sauron::Component;
 use sauron::Node;
 use sauron::Program;
@@ -57,22 +57,22 @@ impl App {
 impl Component<Msg> for App {
 
     fn view(&self) -> Node<Msg> {
-        div(
-            vec![class("some-class"), id("some-id"), attr("data-id", 1)],
-            vec![
-                input(
-                    vec![
+        div!(
+            [class("some-class"), id("some-id"), attr("data-id", 1)],
+            [
+                input!(
+                    [
                         class("client"),
-                        r#type("button"),
+                        type_("button"),
                         value("Click me!"),
                         onclick(|_| {
                             trace!("Button is clicked");
                             Msg::Click
                         }),
                     ],
-                    vec![],
+                    [],
                 ),
-                text(format!("Clicked: {}", self.click_count)),
+                text!("Clicked: {}", self.click_count),
             ],
         )
     }

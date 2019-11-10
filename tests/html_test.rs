@@ -1,11 +1,13 @@
 #![deny(warnings)]
 use sauron::{
     diff,
+    div,
     html::{
         attributes::*,
         events::*,
         *,
     },
+    input,
     Element,
     Node,
     Patch,
@@ -21,6 +23,70 @@ use sauron_vdom::{
 };
 
 use sauron::Event;
+
+#[test]
+fn test_macros() {
+    let html: Node<()> = div!([class("class1"), class("class2")], []);
+    let attrs = html.get_attributes();
+    println!("attrs: {:#?}", attrs);
+    assert_eq!(attrs.len(), 1);
+}
+
+#[test]
+fn test_macros_trailing_commas() {
+    let html: Node<()> = div!([class("class1"), class("class2"),], [],);
+    let attrs = html.get_attributes();
+    println!("attrs: {:#?}", attrs);
+    assert_eq!(attrs.len(), 1);
+}
+
+#[test]
+fn test_macros_trailing_commas_in_attributes_only() {
+    let html: Node<()> = div!([class("class1"), class("class2")], []);
+    let attrs = html.get_attributes();
+    println!("attrs: {:#?}", attrs);
+    assert_eq!(attrs.len(), 1);
+}
+
+#[test]
+fn test_macros_trailing_commas_in_children_only() {
+    let html: Node<()> =
+        div!([class("class1"), class("class2")], [text("This is input"),]);
+    let attrs = html.get_attributes();
+    println!("attrs: {:#?}", attrs);
+    assert_eq!(attrs.len(), 1);
+}
+
+#[test]
+fn test_macros_trailing_commas_in_children_and_params() {
+    let html: Node<()> =
+        div!([class("class1"), class("class2")], [text("This is input"),],);
+    let attrs = html.get_attributes();
+    println!("attrs: {:#?}", attrs);
+    assert_eq!(attrs.len(), 1);
+}
+
+#[test]
+fn test_macros_trailing_commas_in_attribute_and_children() {
+    let html: Node<()> = div!(
+        [class("class1"), class("class2"),],
+        [text("This is input"),]
+    );
+    let attrs = html.get_attributes();
+    println!("attrs: {:#?}", attrs);
+    assert_eq!(attrs.len(), 1);
+}
+
+#[test]
+fn test_macros_with_lines() {
+    let html: Node<()> = div!(
+        [class("class1"), class("class2")],
+        [input!([], [text("This is an input")])]
+    );
+    let attrs = html.get_attributes();
+    println!("attrs: {:#?}", attrs);
+    assert_eq!(attrs.len(), 1);
+}
 
 #[test]
 fn should_merge_classes() {
