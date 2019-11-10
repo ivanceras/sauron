@@ -1,4 +1,4 @@
-# 0.20.0-unreleased
+# 0.20.0
  - Add macro based syntax to provide a cleaner syntax in writing the view:
     ## Old syntax:
     ```rust
