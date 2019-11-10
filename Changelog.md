@@ -49,12 +49,12 @@
     ```
 
  - Move DomEvent in dom module
- - nicer name for dumb_patch -> apply_dumb_patch
- - Refactor dom_updater and created_node out of the dom module
- - Add macro syntax, which provides a cleaner code by eliminating the vec![] syntax on the components view functions
+ - nicer name for `dumb_patch` -> `apply_dumb_patch`
+ - Refactor `dom_updater` and `created_node` out of the dom module
+ - Add macro syntax, which provides a cleaner code by eliminating the `vec![]` syntax on the components view functions
  - Enable github actions
  - Reorganize dom specific module to get rid of multiple cfg feature code in the library
- - Reorganize html::tags and svg::tags
+ - Reorganize `html::tags` and `svg::tags`
  - Remove the html_array syntax
  - Fix unused warning errors when no feature is enabled
  - Use the proper logging by using `log` and `console_log crate`
