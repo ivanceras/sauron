@@ -8,7 +8,6 @@ use test::{
 use sauron::{
     html::{
         attributes::*,
-        events::*,
         *,
     },
     Node,
@@ -17,7 +16,7 @@ use sauron::{
 #[bench]
 fn bench_view_builing_100_child_nodes(b: &mut Bencher) {
     b.iter(|| {
-        let view: Node<()> = black_box(div(
+        let _view: Node<()> = black_box(div(
             vec![class("some-class")],
             (0..100)
                 .into_iter()
@@ -35,7 +34,7 @@ fn bench_view_builing_100_child_nodes(b: &mut Bencher) {
 #[bench]
 fn bench_view_builing_100_nodes_with_100_child_nodes(b: &mut Bencher) {
     b.iter(|| {
-        let view: Node<()> = black_box(div(
+        let _view: Node<()> = black_box(div(
             vec![class("some-class")],
             (0..100)
                 .into_iter()

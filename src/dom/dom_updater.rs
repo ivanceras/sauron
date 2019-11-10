@@ -11,25 +11,17 @@ use crate::{
 use sauron_vdom::{
     self,
     diff,
-    Callback,
 };
 use std::{
-    collections::HashMap,
     marker::PhantomData,
     ops::Deref,
     rc::Rc,
-    sync::Mutex,
 };
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-};
+use wasm_bindgen::JsCast;
 use web_sys::{
     self,
     Element,
-    EventTarget,
     Node,
-    Text,
 };
 
 /// Used for keeping a real DOM node up to date based on the current Node

@@ -1,21 +1,17 @@
 use std::{
     collections::HashMap,
-    marker::PhantomData,
-    ops::Deref,
     rc::Rc,
     sync::Mutex,
 };
 
 use sauron_vdom::{
     self,
-    diff,
     Callback,
     Dispatch,
 };
 use wasm_bindgen::{
     closure::Closure,
     JsCast,
-    JsValue,
 };
 use web_sys::{
     self,
