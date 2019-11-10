@@ -189,6 +189,7 @@ declare_common_svg_tags_and_macro! {
 declare_svg_tags! {
     color_profile => "color-profile";
     r#use => "use";
+    use_ => "use";
 }
 
 // These are non-common tags
