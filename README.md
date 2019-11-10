@@ -33,10 +33,10 @@
 -- The Harvard Lampoon & [po8](https://www.reddit.com/user/po8/)
 
 
- Sauron is an html web framework for building web-apps with the goal of
+ **Sauron** is an html web framework for building web-apps with the goal of
  closely adhering to [The Elm Architecture](https://guide.elm-lang.org/architecture/), a paragon for elegant design.
 
- As with elm, sauron doesn't use macros to provide the view, instead just using plain rust function calls to construct the view.
+ As with elm, sauron follows the simplistic design of writing view code.
 
 #### Example
 ```rust
@@ -122,7 +122,7 @@ index.html
 </html>
 ```
 
-Note: You need to use the nightly compiler with minimum version: rustc 1.37.0-nightly (17e62f77f 2019-07-01)
+**Note:** You need to use the nightly compiler with minimum version: rustc 1.37.0-nightly (17e62f77f 2019-07-01)
 
 Build using
 ```sh
@@ -131,7 +131,6 @@ $> wasm-pack build --target no-modules
 Look at the [examples](https://github.com/ivanceras/sauron/tree/master/examples)
 and the build script for the details.
 
-Warning: You need to use the latest nightly compiler in order for this to work.
 
 #### Prerequisite:
 
@@ -140,6 +139,7 @@ cargo install wasm-pack
 cargo install basic-http-server
 ```
 
+**Warning:** I repeat, You need to use the latest nightly compiler in order for this to work.
 
 This project is based on the existing projects:
  - [percy](https://github.com/chinedufn/percy)
