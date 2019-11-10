@@ -22,8 +22,8 @@ pub use component::Component;
 pub use created_node::CreatedNode;
 pub use dom_updater::DomUpdater;
 pub use dumb_patch::{
+    apply_dumb_patch,
     create_dumb_node,
-    dumb_patch,
 };
 pub use http::Http;
 pub use program::Program;

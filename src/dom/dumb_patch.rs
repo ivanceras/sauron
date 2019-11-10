@@ -10,9 +10,7 @@ use crate::{
     Patch,
 };
 use std::rc::Rc;
-use wasm_bindgen::{
-    JsValue,
-};
+use wasm_bindgen::JsValue;
 use web_sys::Node;
 
 struct DumbProgram();
@@ -32,7 +30,10 @@ pub fn create_dumb_node(vnode: &crate::Node<()>) -> CreatedNode<Node> {
 ///
 /// Warning: Use only when the dom update is only one-way
 /// meaning, the source keep track of the previous vdom
-pub fn dumb_patch<N>(root_node: N, patches: &[Patch<()>]) -> Result<(), JsValue>
+pub fn apply_dumb_patch<N>(
+    root_node: N,
+    patches: &[Patch<()>],
+) -> Result<(), JsValue>
 where
     N: Into<Node>,
 {
