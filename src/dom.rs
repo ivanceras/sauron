@@ -25,10 +25,11 @@ use web_sys::{
     Text,
 };
 
+pub mod apply_patches;
 mod browser;
 mod component;
-//pub mod dom;
-pub mod apply_patches;
+mod created_node;
+mod dom_updater;
 mod http;
 mod program;
 pub mod test_fixtures;
