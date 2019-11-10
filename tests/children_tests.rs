@@ -2,6 +2,7 @@
 use sauron::{
     svg::{
         attributes::*,
+        tags::line,
         *,
     },
     Node,

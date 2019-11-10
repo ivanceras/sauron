@@ -91,10 +91,10 @@ macro_rules! declare_tags_macro {
 macro_rules! declare_common_tags_and_macro {
     ($($(#[$attr:meta])* $name:ident;)*) => {
 
-        pub mod commons {
+        pub(crate) mod commons {
             declare_tags! { $($name;)* }
 
-            pub mod macros{
+            pub(crate) mod macros{
                 declare_tags_macro! {($) $($name;)* }
             }
         }
@@ -234,8 +234,8 @@ declare_common_tags_and_macro! {
 // html::tags::style, html::tags::html, etc
 //
 declare_tags_and_macro! {
-    style;
-    html;
-    title;
-    slot;
+    style;  //  conflicts with html::attributes::style
+    html; // conflicts with $crate::html module
+    title; // conflicts with html::attributes::title
+    slot;  // conflicts with html::attributes::slot
 }
