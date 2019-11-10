@@ -10,15 +10,24 @@
 //!
 //!
 //! > One crate to rule the DOM
+//! >
 //! > One crate to mind it
+//! >
 //! > One crate to bring JSON
+//! >
 //! > And in the Rust code bind it
 //!
+//!
 //! > This code, no other, is made by code elves
+//! >
 //! > Who'd pawn parent process to get it themselves
+//! >
 //! > Ruler of net troll and mortal and hacker
+//! >
 //! > This code is a lib crate for Patreon backers
+//! >
 //! > If trashed or buggy it cannot be remade
+//! >
 //! > If found send to Ivan, the bandwidth is prepaid
 //!
 //! -- The Harvard Lampoon & [po8](https://www.reddit.com/user/po8/)
