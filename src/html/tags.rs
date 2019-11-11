@@ -144,6 +144,7 @@ declare_common_tags_and_macro! {
     figcaption;
     figure;
     hr;
+    html;
     li;
     ol;
     p;
@@ -235,7 +236,6 @@ declare_common_tags_and_macro! {
 //
 declare_tags_and_macro! {
     style;  //  conflicts with html::attributes::style
-    html; // conflicts with $crate::html module
     title; // conflicts with html::attributes::title
     slot;  // conflicts with html::attributes::slot
 }
