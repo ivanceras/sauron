@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sauron Clock</title>
+    <style type="text/css">
+        body {
+            font-family: "Fira Sans", "Courier New", Courier,"Lucida Sans Typewriter","Lucida Typewriter",monospace;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+  <script src='./pkg/svg_clock.js'></script>
+  <script type="module">
+      window.wasm_bindgen('pkg/svg_clock_bg.wasm')
+            .then( main )
+            .catch(console.error)
+      function main(){
+        const { SvgClock } = window.wasm_bindgen
+        new SvgClock()
+      }
+  </script>
+</body>
+</html>
