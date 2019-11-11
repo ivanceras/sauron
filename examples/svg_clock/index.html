@@ -18,12 +18,7 @@
   <script src='./pkg/svg_clock.js'></script>
   <script type="module">
       window.wasm_bindgen('pkg/svg_clock_bg.wasm')
-            .then( main )
-            .catch(console.error)
-      function main(){
-        const { SvgClock } = window.wasm_bindgen
-        new SvgClock()
-      }
+            .catch(console.error);
   </script>
 </body>
 </html>
