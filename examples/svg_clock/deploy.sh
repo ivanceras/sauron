@@ -17,4 +17,7 @@ dest_dir="../../../ivanceras.github.io/svg_clock"
 mkdir -p $dest_dir;
 
 cp index.html $dest_dir/index.html
-cp -r pkg $dest_dir/svg_clock/
+cp -r pkg $dest_dir/
+
+## Remove the ignore file on the pkg directory
+rm $dest_dir/pkg/.gitignore

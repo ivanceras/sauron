@@ -87,21 +87,25 @@ impl Component<Msg> for Clock {
         let hour_rotate =
             90.0 + ((ms / 1000.0 / 60.0 / 60.0) % 12.0) * 360.0 / 12.0;
 
-        div!(
-            [style(
-                "display: flex; align-items: center; flex-direction: column;"
-            )],
-            [svg!(
-                [width(400), height(400), viewBox([0, 0, 200, 200])],
-                [
-                    circle,
-                    hand(subsecond_rotate, "#e2e8f0", 10, 90),
-                    hand(hour_rotate, "#2d3748", 4, 50),
-                    hand(minute_rotate, "#2d3748", 3, 70),
-                    hand(second_rotate, "#e53e3e", 2, 90),
-                ]
-            )]
-        )
+        article!([],[
+            h2!([],[text!("Sauron clock demonstrating svg dom manipulation")]),
+            a!([html::attributes::href("https://github.com/ivanceras/sauron/tree/master/examples/svg_clock")],[text!("code")]),
+            div!(
+                [style(
+                    "display: flex; align-items: center; flex-direction: column;"
+                )],
+                [svg!(
+                    [width(400), height(400), viewBox([0, 0, 200, 200])],
+                    [
+                        circle,
+                        hand(subsecond_rotate, "#e2e8f0", 10, 90),
+                        hand(hour_rotate, "#2d3748", 4, 50),
+                        hand(minute_rotate, "#2d3748", 3, 70),
+                        hand(second_rotate, "#e53e3e", 2, 90),
+                    ]
+                )]
+            )
+        ])
     }
 }
 
