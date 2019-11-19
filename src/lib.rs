@@ -1,6 +1,10 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
 #![feature(arbitrary_self_types)]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png"
+)]
+
 //!
 //! [![Latest Version](https://img.shields.io/crates/v/sauron.svg)](https://crates.io/crates/sauron)
 //! [![Build Status](https://travis-ci.org/ivanceras/sauron.svg?branch=master)](https://travis-ci.org/ivanceras/sauron)
@@ -154,7 +158,6 @@
 //!  [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
 //!
 //!
-//! Please contact me: ivanceras[at]gmail.com
 //!
 
 use cfg_if::cfg_if;
