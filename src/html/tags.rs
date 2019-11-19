@@ -235,7 +235,7 @@ declare_common_tags_and_macro! {
 // html::tags::style, html::tags::html, etc
 //
 declare_tags_and_macro! {
-    style;  //  conflicts with html::attributes::style
-    title; // conflicts with html::attributes::title
-    slot;  // conflicts with html::attributes::slot
+    style;  //  conflicts with html::attributes::style, attribute::style    > tags::style
+    title; // conflicts with html::attributes::title  , attributes::title   > tags::title
+    slot;  // conflicts with html::attributes::slot   , attrributes::slot   > tags::slot
 }

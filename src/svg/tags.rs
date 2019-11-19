@@ -197,10 +197,10 @@ declare_svg_tags! {
 // svg::tags::style, svg::tags::text, svg::tags::title, etc
 //
 declare_svg_tags! {
-    line; // since this conflicts with std::line! macro
-    script; // this conflicts with html::script
-    style; // conflics with html::attributes::style
-    text; // conflicts with html::text
-    a;   // conflicts with html::a
-    title;  // conflicts with html::attributes::title
+    line; // since this conflicts with std::line! macro, std::line                > svg::tags::line
+    script; // this conflicts with html::script        , html::tags::script       > svg::tags::script
+    style; // conflics with html::attributes::style    , html::attributes::style  > svg::tags::style
+    text; // conflicts with html::text                 , html::text               > svg::tags::text
+    a;   // conflicts with html::a                     , html::tags::a            > svg::tags::a
+    title;  // conflicts with html::attributes::title  , html::attributes::title  > svg::tags::title
 }
