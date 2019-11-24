@@ -5,6 +5,7 @@ use sauron::{
         attributes::{
             height,
             id,
+            style,
             width,
         },
     },
@@ -38,7 +39,7 @@ impl App {
 
 impl Component<Msg> for App {
     fn view(&self) -> Node<Msg> {
-        svg!([viewBox([0, 0, 800, 460]), xmlns("http://www.w3.org/2000/svg")], [
+        svg!([viewBox([0, 0, 800, 500]), xmlns("http://www.w3.org/2000/svg")], [
           desc!([], [text!("Star Trek vs. Star Wars - Book mentions via Google NGRAM. Source: https://books.google.com/ngrams/graph?content=Star+Wars%2C+Star+Trek&year_start=1960&year_end=2008&corpus=15&smoothing=3&share=&direct_url=t1%3B%2CStar%20Wars%3B%2Cc0%3B.t1%3B%2CStar%20Trek%3B%2Cc0")]),
           defs!([], [
             radialGradient!([id("gradient-1"), gradientUnits("userSpaceOnUse"), cx(545), cy(213), r(500), gradientTransform("matrix(0.7, 0, 0, 0.4642, 0, 130)")],[
@@ -125,8 +126,9 @@ impl Component<Msg> for App {
             svg::tags::text(vec![y(430),x(586)],vec![text!("1995")]),
             svg::tags::text(vec![y(430),x(664)],vec![text!("2000")]),
             svg::tags::text(vec![y(430),x(742)],vec![text!("2005")]),
-          ])
-
+          ]),
+          svg::tags::a(vec![href("https://github.com/ivanceras/sauron/blob/master/examples/svg_graph/src/lib.rs")],
+              vec![svg::tags::text(vec![x(400),y(480), style("fill: blue")], vec![text!("code")])])
         ])
     }
 
