@@ -4,7 +4,7 @@ set -v
 
 ./bootstrap.sh
 
-wasm-pack build --target no-modules --release -- --features "wee_alloc console_error_panic_hook"
+wasm-pack build --target no-modules --release -- --features ""
 
 ./copy_files_to_benchmark_directory.sh
 

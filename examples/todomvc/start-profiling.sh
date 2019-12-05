@@ -2,16 +2,11 @@
 
 set -v
 
-. ./bootstrap.sh
+./bootstrap.sh
 
 wasm-pack build --target no-modules --profiling --
 
-sleep 1
 
-
-cp -r index.html style.css pkg ../../../todomvc-perf-comparison/todomvc-benchmark/todomvc/sauron/
-
-mkdir -p $HOME/playground/mogwai-perf/todomvc/sauron/
-cp -r index.html style.css pkg $HOME/playground/mogwai-perf/todomvc/sauron/
+./copy_files_to_benchmark_directory.sh
 
 basic-http-server ./ -a 0.0.0.0:6001
