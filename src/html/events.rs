@@ -99,19 +99,15 @@ pub mod mapper {
     pub fn input_event_mapper(event: crate::Event) -> InputEvent {
         let target: EventTarget =
             event.0.target().expect("Unable to get event target");
-        let input: Option<&HtmlInputElement> = target.dyn_ref();
-        let textarea: Option<&HtmlTextAreaElement> = target.dyn_ref();
-        let input_event = if input.is_some() {
-            input.map(|input| {
-                InputEvent {
-                    value: input.value(),
-                }
+        let input_event = if let Some(input) =
+            target.dyn_ref::<HtmlInputElement>()
+        {
+            Some(InputEvent {
+                value: input.value(),
             })
-        } else if textarea.is_some() {
-            textarea.map(|textarea| {
-                InputEvent {
-                    value: textarea.value(),
-                }
+        } else if let Some(textarea) = target.dyn_ref::<HtmlTextAreaElement>() {
+            Some(InputEvent {
+                value: textarea.value(),
             })
         } else {
             None
