@@ -230,11 +230,21 @@ where
     let program_clone = Rc::clone(&program);
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
-        // stop propagation to the containers of this element to have
-        // a more fine grain control and expected results
+        // FIXME: need to allow users to control this
+        // Note:
+        // calling `event.stop_propagation()` to the containers of this element to have
+        // a more fine grain control and expected results,
+        // and for most cases this is what we want. We don't want the containing div of a button
+        // also receives that click event.
         event.stop_propagation();
-        // prevent the reloading the page in href links
-        event.prevent_default();
+        // FIXME: need to allow users control this
+        //
+        // Notes:
+        // - calling event.prevent_default() prevents the reloading the page in href links, which is what we
+        // want mostly in an SPA app
+        // - calling event.prevent_default() prevent InputEvent to trigger when KeyPressEvent is
+        // also one of the event callback
+        // event.prevent_default();
         let cb_event = crate::DomEvent(event);
         let msg = callback_clone.emit(cb_event);
         program_clone.dispatch(msg);
