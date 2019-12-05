@@ -1,3 +1,14 @@
+# (Unreleased)
+ - Enable doubleclick event
+ - improve and modularize shell scripts
+ - Fix errors in the todomvc benchmark
+ - Explicitly set the value of element by calling the set_value function since just setting the attribute value is not enough
+ - Enable calling to event.prevent_default() to allow both oninput and keypress event play nicely together, as used in the todomvc example
+ - Add svg_graph example
+
+# 0.20.1
+ - bumped up to see logo in docs.rs
+
 # 0.20.0
  - Add macro based syntax to provide a cleaner syntax in writing the view:
     ## Old syntax:
