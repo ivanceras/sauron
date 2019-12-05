@@ -65,11 +65,9 @@ impl Component<Msg> for Model {
                 self.edit_value = "".to_string();
             }
             Msg::Update(val) => {
-                println!("Input: {}", val);
                 self.value = val;
             }
             Msg::UpdateEdit(val) => {
-                println!("Input: {}", val);
                 self.edit_value = val;
             }
             Msg::Remove(idx) => {
@@ -232,6 +230,7 @@ impl Model {
         input(
             vec![
                 class("new-todo"),
+                id("new-todo"),
                 placeholder("What needs to be done?"),
                 value(self.value.to_string()),
                 oninput(|v: InputEvent| Msg::Update(v.value)),

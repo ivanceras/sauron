@@ -11,7 +11,6 @@ use crate::{
     Patch,
 };
 use js_sys::Function;
-use log::*;
 use std::{
     collections::{
         HashMap,
@@ -261,7 +260,7 @@ where
                             textarea.set_value(&attr.value.to_string());
                         }
                     }
-                    _ => trace!("something else.."),
+                    _ => (),
                 }
             }
 

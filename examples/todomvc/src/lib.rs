@@ -12,7 +12,7 @@ mod app;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-#[wasm_bindgen]
+#[wasm_bindgen(start)]
 pub fn main() {
     console_log::init_with_level(log::Level::Trace).unwrap();
     #[cfg(feature = "console_error_panic_hook")]

@@ -31,6 +31,7 @@ pub mod mapper {
     };
     use wasm_bindgen::JsCast;
     use web_sys::{
+        self,
         EventTarget,
         HtmlInputElement,
         HtmlTextAreaElement,
@@ -80,19 +81,23 @@ pub mod mapper {
     }
 
     pub fn keyboard_event_mapper(event: crate::Event) -> KeyEvent {
-        let key_event: &web_sys::KeyboardEvent =
-            event.0.dyn_ref().expect("Unable to cast as key event");
-        let modifier = Modifier {
-            alt_key: key_event.alt_key(),
-            ctrl_key: key_event.ctrl_key(),
-            meta_key: key_event.meta_key(),
-            shift_key: key_event.shift_key(),
-        };
-        KeyEvent {
-            key: key_event.key(),
-            modifier,
-            repeat: key_event.repeat(),
-            location: key_event.location(),
+        if let Some(key_event) = event.0.dyn_ref::<web_sys::KeyboardEvent>() {
+            let modifier = Modifier {
+                alt_key: key_event.alt_key(),
+                ctrl_key: key_event.ctrl_key(),
+                meta_key: key_event.meta_key(),
+                shift_key: key_event.shift_key(),
+            };
+            KeyEvent {
+                key: key_event.key(),
+                modifier,
+                repeat: key_event.repeat(),
+                location: key_event.location(),
+            }
+        } else {
+            //FIXME: not a keyboard event just make something up,
+            //maybe make the return type optional?
+            KeyEvent::default()
         }
     }
 

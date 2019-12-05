@@ -9,7 +9,6 @@
     <script src='pkg/todomvc.js'></script>
     <script type=module>
         window.wasm_bindgen('pkg/todomvc_bg.wasm')
-            .then( m => m.main())
             .catch(console.error);
     </script>
   </body>
