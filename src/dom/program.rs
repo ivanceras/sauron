@@ -1,5 +1,3 @@
-use log::*;
-
 use crate::{
     dom::dom_updater::DomUpdater,
     Cmd,
@@ -85,7 +83,7 @@ where
         // update the app and emit the cmd returned from the update
         let cmd = self.app.borrow_mut().update(msg);
         cmd.emit(self);
-        trace!("Executing cmd..");
+        //trace!("Executing cmd..");
         #[cfg(feature = "measure")]
         let t2 = {
             let t2 = crate::now();

@@ -70,6 +70,7 @@ pub mod mapper {
             "click" => "click",
             "mouseup" => "mouseup",
             "mousedown" => "mousedown",
+            "dblclick" => "dblclick",
             _e => panic!("unhandled event type: {}", _e),
         };
         MouseEvent {
@@ -211,7 +212,7 @@ declare_events! {
     onpointerlockerror : pointerlockerror =>|MouseEvent | mouse_event_mapper;
     onselect : select =>|MouseEvent | mouse_event_mapper;
     onwheel : wheel =>|MouseEvent | mouse_event_mapper;
-    ondoubleclick : doubleclick =>|MouseEvent | mouse_event_mapper;
+    ondoubleclick : dblclick =>|MouseEvent | mouse_event_mapper;
 }
 
 // keyboard events
