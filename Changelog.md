@@ -1,4 +1,4 @@
-# (Unreleased)
+# 0.20.2
  - Enable doubleclick event
  - improve and modularize shell scripts
  - Fix errors in the todomvc benchmark
