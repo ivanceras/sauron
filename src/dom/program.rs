@@ -87,7 +87,7 @@ where
         #[cfg(feature = "measure")]
         let t2 = {
             let t2 = crate::now();
-            trace!("app update took: {}ms", t2 - t1);
+            log::trace!("app update took: {}ms", t2 - t1);
             t2
         };
         // a new view is created due to the app update
@@ -95,7 +95,7 @@ where
         #[cfg(feature = "measure")]
         let t3 = {
             let t3 = crate::now();
-            trace!("app view took: {}ms", t3 - t2);
+            log::trace!("app view took: {}ms", t3 - t2);
             t3
         };
         // update the last DOM node tree with this new view
@@ -103,7 +103,7 @@ where
         #[cfg(feature = "measure")]
         {
             let t4 = crate::now();
-            trace!("dom update took: {}ms", t4 - t3);
+            log::trace!("dom update took: {}ms", t4 - t3);
         };
     }
 }
