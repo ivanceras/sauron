@@ -40,6 +40,7 @@ pub mod mapper {
     pub fn mouse_event_mapper(event: crate::Event) -> MouseEvent {
         let mouse: &web_sys::MouseEvent =
             event.0.dyn_ref().expect("Unable to cast to mouse event");
+
         let coordinate = Coordinate {
             client_x: mouse.client_x(),
             client_y: mouse.client_y(),
@@ -128,7 +129,7 @@ pub mod mapper {
 macro_rules! declare_events {
     ( $(
          $(#[$attr:meta])*
-         $name:ident : $event:ident => | $ret:ty |  $mapper:ident;
+         $name:ident : $event:ident => $ret:ty =>  $mapper:expr;
        )*
      ) => {
         $(
@@ -195,31 +196,85 @@ where
     on_with_extractor("resize", target_size_fn, cb)
 }
 
+/// on click with both prevent_default and stop_propagation turned on
+pub fn onclick_prevent_all<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
+where
+    CB: Fn(MouseEvent) -> MSG + 'static,
+    MSG: 'static,
+{
+    onclick_with(true, true, cb)
+}
+
+/// on click with prevent default on
+pub fn onclick_prevent_default<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
+where
+    CB: Fn(MouseEvent) -> MSG + 'static,
+    MSG: 'static,
+{
+    onclick_with(true, false, cb)
+}
+
+/// on click with stop_propagation on
+pub fn onclick_stop_propagation<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
+where
+    CB: Fn(MouseEvent) -> MSG + 'static,
+    MSG: 'static,
+{
+    onclick_with(false, true, cb)
+}
+
+/// a version of on_click where you can choose to manipulate the event
+/// whether to stop_progating that event to parent elements or
+/// prevent_default the default behavior as with the case for a href links
+pub fn onclick_with<CB, MSG>(
+    prevent_default: bool,
+    stop_propagation: bool,
+    cb: CB,
+) -> crate::Attribute<MSG>
+where
+    CB: Fn(MouseEvent) -> MSG + 'static,
+    MSG: 'static,
+{
+    on_with_extractor(
+        "click",
+        move |event: crate::Event| {
+            if prevent_default {
+                event.prevent_default();
+            }
+            if stop_propagation {
+                event.stop_propagation();
+            }
+            mouse_event_mapper(event)
+        },
+        cb,
+    )
+}
+
 // Mouse events
 declare_events! {
-    onclick : click => |MouseEvent| mouse_event_mapper;
-    onauxclick : auxclick => |MouseEvent | mouse_event_mapper;
-    oncontextmenu : contextmenu => |MouseEvent| mouse_event_mapper ;
-    ondblclick  : dblclick =>|MouseEvent | mouse_event_mapper;
-    onmousedown : mousedown =>|MouseEvent | mouse_event_mapper;
-    onmouseenter : mouseenter =>|MouseEvent | mouse_event_mapper;
-    onmouseleave : mouseleave =>|MouseEvent | mouse_event_mapper;
-    onmousemove : mousemove =>|MouseEvent | mouse_event_mapper;
-    onmouseover : mouseover =>|MouseEvent | mouse_event_mapper;
-    onmouseout : mouseout =>|MouseEvent | mouse_event_mapper;
-    onmouseup : mouseup =>|MouseEvent | mouse_event_mapper;
-    onpointerlockchange : pointerlockchange =>|MouseEvent | mouse_event_mapper;
-    onpointerlockerror : pointerlockerror =>|MouseEvent | mouse_event_mapper;
-    onselect : select =>|MouseEvent | mouse_event_mapper;
-    onwheel : wheel =>|MouseEvent | mouse_event_mapper;
-    ondoubleclick : dblclick =>|MouseEvent | mouse_event_mapper;
+    onclick : click => MouseEvent => mouse_event_mapper;
+    onauxclick : auxclick => MouseEvent => mouse_event_mapper;
+    oncontextmenu : contextmenu => MouseEvent => mouse_event_mapper ;
+    ondblclick  : dblclick => MouseEvent => mouse_event_mapper;
+    onmousedown : mousedown => MouseEvent => mouse_event_mapper;
+    onmouseenter : mouseenter => MouseEvent => mouse_event_mapper;
+    onmouseleave : mouseleave => MouseEvent => mouse_event_mapper;
+    onmousemove : mousemove => MouseEvent => mouse_event_mapper;
+    onmouseover : mouseover => MouseEvent => mouse_event_mapper;
+    onmouseout : mouseout => MouseEvent => mouse_event_mapper;
+    onmouseup : mouseup => MouseEvent => mouse_event_mapper;
+    onpointerlockchange : pointerlockchange =>MouseEvent => mouse_event_mapper;
+    onpointerlockerror : pointerlockerror =>MouseEvent => mouse_event_mapper;
+    onselect : select => MouseEvent => mouse_event_mapper;
+    onwheel : wheel => MouseEvent => mouse_event_mapper;
+    ondoubleclick : dblclick => MouseEvent => mouse_event_mapper;
 }
 
 // keyboard events
 declare_events! {
-    onkeydown : keydown =>|KeyEvent| keyboard_event_mapper;
-    onkeypress : keypress =>|KeyEvent| keyboard_event_mapper;
-    onkeyup : keyup =>|KeyEvent| keyboard_event_mapper;
+    onkeydown : keydown => KeyEvent => keyboard_event_mapper;
+    onkeypress : keypress => KeyEvent => keyboard_event_mapper;
+    onkeyup : keyup =>KeyEvent => keyboard_event_mapper;
 }
 
 // focus events
@@ -235,8 +290,8 @@ declare_events! {
 }
 
 declare_events! {
-    oninput : input => |InputEvent| input_event_mapper;
-    onchange : change => | InputEvent | input_event_mapper;
+    oninput : input => InputEvent => input_event_mapper;
+    onchange : change => InputEvent => input_event_mapper;
 }
 declare_events! {
     onbroadcast : broadcast;
