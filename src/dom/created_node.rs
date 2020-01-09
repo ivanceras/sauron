@@ -128,9 +128,19 @@ impl<T> CreatedNode<T> {
         let mut closures = ActiveClosure::new();
 
         velem.attributes().iter().for_each(|attr| {
-            element
-                .set_attribute(attr.name, &attr.value.to_string())
-                .expect("Set element attribute in create element");
+            if let Some(ref namespace) = attr.namespace {
+                element
+                    .set_attribute_ns(
+                        Some(namespace),
+                        attr.name,
+                        &attr.value.to_string(),
+                    )
+                    .expect("Set element attribute_ns in create element");
+            } else {
+                element
+                    .set_attribute(attr.name, &attr.value.to_string())
+                    .expect("Set element attribute in create element");
+            }
         });
 
         if !velem.events().is_empty() {

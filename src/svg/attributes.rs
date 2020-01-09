@@ -1,7 +1,12 @@
-pub use sauron_vdom::builder::attr;
+pub use sauron_vdom::builder::{
+    attr,
+    attr_ns,
+};
 use sauron_vdom::Value;
 
 pub use crate::html::attributes::classes_flag;
+
+pub(in crate) const XLINK_NAMESPACE: &str = "http://www.w3.org/1999/xlink";
 
 // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
 // complete list svg attributes
@@ -23,7 +28,6 @@ declare_attributes! {
     bias;
     by;
     calcMode;
-    class;
     clip;
     clipPathUnits;
     color;
@@ -250,13 +254,6 @@ declare_attributes! {
     word_spacing => "word-spacing";
     writing_mode => "writing-mode";
     x_height => "x-height";
-    xlink_actuate => "xlink:actuate";
-    xlink_arcrole => "xlink:arcrole";
-    xlink_href => "xlink:href";
-    xlink_role => "xlink:role";
-    xlink_show => "xlink:show";
-    xlink_title => "xlink:title";
-    xlink_type => "xlink:type";
     xml_base => "xml:base";
     xml_lang => "xml:lang";
     xml_space => "xml:space";
@@ -265,4 +262,33 @@ declare_attributes! {
 declare_attributes! {
     r#in => "in";
     r#type => "type";
+}
+
+macro_rules! declare_xlink_attributes {
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident => $attribute:tt;
+       )*
+     ) => {
+        $(
+            $(#[$attr])*
+            #[inline]
+            #[allow(non_snake_case)]
+            pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
+                where V: Into<Value>,
+                {
+                    attr_ns(Some(XLINK_NAMESPACE), $attribute, v)
+                }
+         )*
+    }
+}
+
+declare_xlink_attributes! {
+    xlink_actuate => "actuate";
+    xlink_arcrole => "arcrole";
+    xlink_href => "href";
+    xlink_role => "role";
+    xlink_show => "show";
+    xlink_title => "title";
+    xlink_type => "type";
 }

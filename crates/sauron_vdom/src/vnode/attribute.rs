@@ -8,6 +8,7 @@ use std::fmt;
 pub struct Attribute<EVENT, MSG> {
     pub name: &'static str,
     pub value: AttribValue<EVENT, MSG>,
+    pub namespace: Option<&'static str>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -22,13 +23,18 @@ where
     EVENT: 'static,
 {
     pub fn new(name: &'static str, value: AttribValue<EVENT, MSG>) -> Self {
-        Attribute { name, value }
+        Attribute {
+            name,
+            value,
+            namespace: None,
+        }
     }
 
     pub fn with_name_value(name: &'static str, value: Value) -> Self {
         Attribute {
             name,
             value: value.into(),
+            namespace: None,
         }
     }
 

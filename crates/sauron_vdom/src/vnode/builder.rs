@@ -78,9 +78,23 @@ pub fn attr<V, EVENT, MSG>(name: &'static str, v: V) -> Attribute<EVENT, MSG>
 where
     V: Into<Value>,
 {
+    attr_ns(None, name, v)
+}
+
+/// Create an attribute
+#[inline]
+pub fn attr_ns<V, EVENT, MSG>(
+    namespace: Option<&'static str>,
+    name: &'static str,
+    v: V,
+) -> Attribute<EVENT, MSG>
+where
+    V: Into<Value>,
+{
     Attribute {
         name,
         value: AttribValue::Value(v.into()),
+        namespace,
     }
 }
 
@@ -99,6 +113,7 @@ where
     Attribute {
         name,
         value: AttribValue::Callback(c.into()),
+        namespace: None,
     }
 }
 
@@ -121,5 +136,6 @@ where
     Attribute {
         name,
         value: AttribValue::Callback(cb2),
+        namespace: None,
     }
 }
