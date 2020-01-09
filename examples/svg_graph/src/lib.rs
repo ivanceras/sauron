@@ -3,6 +3,7 @@ use sauron::{
     html::{
         attributes,
         attributes::{
+            class,
             height,
             id,
             style,
