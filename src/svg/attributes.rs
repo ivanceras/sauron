@@ -66,7 +66,6 @@ declare_attributes! {
     gradientTransform;
     gradientUnits;
     hanging;
-    href;
     hreflang;
     ideographic;
     in2;

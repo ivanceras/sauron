@@ -5,6 +5,7 @@ use crate::{
     Node,
     Value,
 };
+use log::*;
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Element<T, EVENT, MSG>
@@ -49,11 +50,15 @@ where
     }
 
     pub fn attributes(&self) -> Vec<Attribute<EVENT, MSG>> {
-        let names = self.get_attributes_name();
+        let names = self.get_attributes_name_and_ns();
         let mut attributes = vec![];
-        for name in names {
+        for (name, namespace) in names {
             if let Some(value) = self.get_attr_value(name) {
-                attributes.push(Attribute::with_name_value(name, value));
+                attributes.push(Attribute {
+                    namespace,
+                    name,
+                    value: value.into(),
+                });
             }
         }
         attributes
@@ -71,12 +76,14 @@ where
             .collect()
     }
 
-    fn get_attributes_name(&self) -> Vec<&'static str> {
+    fn get_attributes_name_and_ns(
+        &self,
+    ) -> Vec<(&'static str, Option<&'static str>)> {
         let mut names = self
             .attributes_internal()
             .iter()
-            .map(|att| att.name)
-            .collect::<Vec<&str>>();
+            .map(|att| (att.name, att.namespace))
+            .collect::<Vec<_>>();
         names.sort();
         names.dedup();
         names
@@ -126,7 +133,11 @@ where
         event: &'static str,
         cb: Callback<EVENT, MSG>,
     ) {
-        let attr_event = Attribute::new(event, cb.into());
+        let attr_event = Attribute {
+            name: event,
+            value: cb.into(),
+            namespace: None,
+        };
         self.attrs.push(attr_event);
     }
 
@@ -168,7 +179,13 @@ where
         buffer += &format!("<{}", self.tag.to_string());
 
         for attr in self.attributes().iter() {
-            buffer += &format!(r#" {}="{}""#, attr.name, attr.value);
+            if let Some(_ns) = attr.namespace {
+                // TODO: get a mapping of namespace for each: xlink, xml,
+                buffer += &format!(r#" xlink:{}="{}""#, attr.name, attr.value);
+            } else {
+                debug!("no namespace!");
+                buffer += &format!(r#" {}="{}""#, attr.name, attr.value);
+            }
         }
         buffer += ">";
 

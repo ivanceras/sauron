@@ -22,22 +22,6 @@ where
     MSG: 'static,
     EVENT: 'static,
 {
-    pub fn new(name: &'static str, value: AttribValue<EVENT, MSG>) -> Self {
-        Attribute {
-            name,
-            value,
-            namespace: None,
-        }
-    }
-
-    pub fn with_name_value(name: &'static str, value: Value) -> Self {
-        Attribute {
-            name,
-            value: value.into(),
-            namespace: None,
-        }
-    }
-
     pub(super) fn map_callback<MSG2>(
         self,
         cb: Callback<MSG, MSG2>,
@@ -45,7 +29,11 @@ where
     where
         MSG2: 'static,
     {
-        Attribute::new(self.name, self.value.map_callback(cb))
+        Attribute {
+            name: self.name,
+            value: self.value.map_callback(cb),
+            namespace: self.namespace,
+        }
     }
 
     pub fn is_event(&self) -> bool {
@@ -57,7 +45,11 @@ where
         F: Fn(EVENT2) -> EVENT + 'static,
         EVENT2: 'static,
     {
-        Attribute::new(self.name, self.value.reform(func))
+        Attribute {
+            name: self.name,
+            value: self.value.reform(func),
+            namespace: self.namespace,
+        }
     }
 
     pub fn get_value(&self) -> Option<&Value> {

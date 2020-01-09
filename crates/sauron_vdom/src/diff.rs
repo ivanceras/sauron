@@ -157,10 +157,11 @@ where
         let new_attr_value = new_element.get_attr_value(new_attr.name);
         if old_attr_value.is_none() || old_attr_value != new_attr_value {
             if let Some(new_attr_value) = new_attr_value {
-                add_attributes.push(Attribute::with_name_value(
-                    new_attr.name,
-                    new_attr_value,
-                ));
+                add_attributes.push(Attribute {
+                    namespace: new_attr.namespace,
+                    name: new_attr.name,
+                    value: new_attr_value.into(),
+                });
             }
         }
     }

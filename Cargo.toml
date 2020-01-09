@@ -12,7 +12,7 @@ edition = "2018"
 
 [dependencies]
 js-sys = { version = "0.3.19", optional = true }
-sauron_vdom = { version = "0.20.0", path ="crates/sauron_vdom"}
+sauron_vdom = { path ="crates/sauron_vdom"}
 wasm-bindgen = { version = "0.2.54", optional = true }
 lazy_static = "1.3.0"
 pulldown-cmark = { version = "0.5.1", optional = true }
