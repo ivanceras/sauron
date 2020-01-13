@@ -20,6 +20,7 @@ pub use sauron_vdom::{
 use wasm_bindgen::JsCast;
 
 pub mod mapper {
+    use log::*;
 
     use sauron_vdom::event::{
         Coordinate,
@@ -71,8 +72,12 @@ pub mod mapper {
             "click" => "click",
             "mouseup" => "mouseup",
             "mousedown" => "mousedown",
+            "mousemove" => "mousemove",
             "dblclick" => "dblclick",
-            _e => panic!("unhandled event type: {}", _e),
+            _e => {
+                error!("unhandled event type: {}", _e);
+                panic!("unhandled event type: {}", _e);
+            }
         };
         MouseEvent {
             r#type,
