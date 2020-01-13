@@ -1,3 +1,9 @@
+# (Unreleased)
+ - add Window as a global object to let components easily attached events to the window
+ - include mousemove in the supported event type
+ - implement creating an attribute that has namespace, such as xlink:href in embededd svg image
+ - fix error in svg_graph example
+
 # 0.20.3
  - expose `onclick_with`, `onclick_stop_propagation`, `onclick_prevent_default`, `onclick_prevent_all` which allows developers
    control on the behavior of the event of a DOM element.
