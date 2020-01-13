@@ -10,6 +10,7 @@ mod http;
 mod program;
 pub mod test_fixtures;
 mod util;
+mod window;
 
 pub use browser::Browser;
 pub use component::Component;
@@ -30,5 +31,6 @@ pub use util::{
     request_animation_frame,
     window,
 };
+pub use window::Window;
 
 pub type Cmd<APP, MSG> = sauron_vdom::Cmd<Program<APP, MSG>, MSG>;
