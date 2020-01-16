@@ -1,4 +1,4 @@
-# (Unreleased)
+# 0.21.0
  - add Window as a global object to let components easily attached events to the window
  - add style! macro for a nicer html style attribute syntax
  - **Breaking Change** remove tag style from the macro export, as it conflicts with the style attribute macro, which is more common
