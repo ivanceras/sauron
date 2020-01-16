@@ -1,0 +1,277 @@
+
+/* Use snake_case instead of kebab case for the class names
+ * The main advantage is text searching in vim where it matches the entire
+ * class name and treated as identifier
+ * */
+body {
+    font-family: system,-apple-system,".SFNSDisplay-Regular","Helvetica Neue",Helvetica,"Segoe UI",sans-serif;
+    color: #333;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+ol, ul, li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+
+/* generic classes */
+.flex-row{
+    display: flex;
+    flex-direction: row;
+}
+.flex-column{
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-column-reverse{
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.grid{
+    display: grid;
+    grid-template-columns: min-content max-content;
+    grid-template-rows: min-content max-content;
+}
+/* end of generic classes */
+
+.data_view{
+    border: 1px solid #ccc;
+    box-shadow: 0 1px 6px rgba(57,73,76,0.35);
+}
+
+
+.data_view__spacer__frozen_column_names{
+    background-color: #ddd;
+}
+.data_view__spacer {
+    height: 70px;
+}
+.data_view__spacer__multi_selector{
+    padding-bottom: 10px;
+}
+
+/* ol, contains the frozen columns and their selection*/
+.data_view__immovable_frozen_columns {
+    border-bottom: 1px dashed #ccc;
+}
+
+
+.data_view__normal_column_names, .data_view__frozen_column_names {
+    background-color: #ddd;
+}
+
+
+.column_view{
+}
+
+.column_view__grip {
+    cursor: col-resize;
+}
+.column_view__grip--left{
+    background-color: red;
+}
+
+.column_view__grip--right {
+    border-right: 1px solid #ccc;
+}
+
+.column_view__controls{
+    overflow: hidden;
+}
+
+/* remove the dashed border when in frozen column */
+.column_view__column_name--frozen{
+    border-right: 1px dashed #ccc;
+}
+
+/* if column name is frozen, change the color to something else */
+.column_view__controls--frozen{
+    background-color:#eefefb;
+}
+
+/* column_controls contain the column name and the sort btn */
+.column_controls{
+    justify-content: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.column_controls__column_name {
+    user-drag: none;
+    user-select: none;
+}
+
+.column_view__search{
+    justify-content: center;
+    margin: auto;
+}
+
+
+.search_widget{
+}
+.search_widget__search_icon{
+    width: 16px;
+    height: 19px;
+    color: #aaa;
+    padding: 3px 2px 0 3px;
+    border-color: #aaa;
+    border-width: 1px 0 1px 1px;
+    border-style: solid;
+    border-radius: 5px 0 0 5px;
+}
+
+input.search_widget__column_filter[type="text"]{
+    width: 160px;
+    height: 22px;
+    padding: 0;
+    border-color: #aaa;
+    border-width: 1px 1px 1px 1px;
+    border-style: solid;
+    border-radius: 0 5px 5px 0;
+}
+
+
+.data_view__normal_column_names__frozen_rows{
+    overflow-x: hidden;
+}
+/* add an animation for the transition of margin to smoothen out the
+ * transition */
+.normal_column_names__frozen_rows{
+    transition: margin 10ms ease;
+}
+
+.data_view__frozen_columns {
+    border-bottom: 1px dashed #ccc;
+}
+
+.data_view__frozen_rows{
+    list-style: none;
+}
+
+
+.field_view__value--frozen_row.field_view__value--frozen_column.field_view__value--modified{
+    background-color: papayawhip;
+}
+
+
+/*ol in table_view, listing of normal_rows
+ * can move: left, right, up, down */
+.data_view__normal_rows{
+    flex-shrink:0;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
+
+
+.page_view__page_holder{
+    flex-shrink:0;
+    width: 100%;
+}
+
+/* the selector and immovable frozen column at the top_right corner of the table*/
+.page_view__selector_box__immovable_rows{
+}
+
+.page_view__frozen_columns__selector__frozen_column_rows{
+}
+
+
+
+.row_view{
+    flex-shrink: 0;
+    background-color: #fff;
+}
+.row_view.modified{
+    background-color: papayawhip;
+}
+
+.row_view--frozen_row, .field_view__value--frozen_row{
+    background-color: #fefece;
+}
+
+
+/* can move up and down */
+.row_view--frozen_column, .field_view__value--frozen_column{
+    background-color: #eefefb;
+}
+
+/* both frozen row and frozen column, immovable */
+.row_view--frozen_row.row_view--frozen_column, .field_view__value--frozen_row.field_view__value--frozen_column {
+    background-color: #ecfeec;
+}
+
+.field_view{
+    border-right: 1px solid #ccc;
+    background-color: #fff;
+}
+/* dashed border when in frozen column */
+.field_view--frozen_column{
+    border-right: 1px dashed #ccc;
+}
+
+.field_view--detail{
+}
+
+.field_view__column--detail{
+    width: 200px;
+    text-align: right;
+    margin-right: 5px;
+}
+
+
+.field_view__value--modified{
+    background-color: papayawhip;
+}
+
+input.field_view__value[type="text"],
+input.field_view__value[type="number"],
+input.field_view__value[type="date"]
+{
+    border: 0;
+    border-bottom: 1px solid #ccc;
+    overflow: hidden;
+}
+input[type="checkbox"] {
+    border: 0;
+    outline: 0;
+}
+
+/* The wrapper to the checkbox */
+div.checkbox{
+    border: 0;
+    border-bottom: 1px solid #ccc;
+    overflow: hidden;
+}
+
+/*
+ * Wraps any widgets that can resize itself
+ * it may also propagate the resize event into the widgets it contains
+ */
+.resize_wrapper{
+    margin: 20px;
+}
+
+.resize_wrapper__resize_grip{
+    background-color: #ddd;
+}
+
+.resize_wrapper__resize_grip--right{
+    cursor: col-resize;
+    width: 10px;
+}
+
+.resize_wrapper__resize_grip--bottom {
+    cursor: row-resize;
+    height: 10px;
+}
+
+.resize_wrapper__resize_grip--bottom_right {
+    cursor: se-resize;
+    width: 10px;
+    height: 10px;
+}

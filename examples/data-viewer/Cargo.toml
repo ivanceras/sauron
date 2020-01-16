@@ -1,0 +1,44 @@
+[package]
+name = "data-viewer"
+version = "0.1.0"
+authors = ["lee"]
+edition = "2018"
+
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+sauron = {version = "0.21.0"}
+#sauron = { path = "../sauron", features = ["measure"] }
+#sauron = { path = "../sauron" }
+console_error_panic_hook = { version = "0.1", optional = true }
+js-sys = "0.3"
+wee_alloc = { version = "0.4.3", optional = true }
+log = "0.4.8"
+console_log = "0.1.2"
+#restq = { path = "../restq" }
+restq = "0.1.0"
+thiserror = "1.0.9"
+
+[dependencies.wasm-bindgen]
+version = "0.2.33"
+features = ["default", "nightly"]
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+    "console",
+    "Document",
+    "Element",
+    "Event",
+    "EventTarget",
+    "History",
+    "Location",
+    "Node",
+    "NodeList",
+    "Text",
+    "Window",
+    "HtmlCollection",
+    "Response",
+]

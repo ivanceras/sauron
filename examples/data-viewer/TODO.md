@@ -1,0 +1,11 @@
+# TODO
+ - [] Adjustable widths of the column view
+    - [] Data value widths are asigned programatically, and is affected by 2 things: default and the adjusted column with
+ - [] The whole table be resizable
+    - [] Resizable to the right
+    - [] Resizable to bottom
+    - [] Resizable bottom-right
+ - [] Connect the events to the top-level app
+    - [] on_scroll_bottom
+    - [] on row_clicked
+    - [] on primary frield clicked
