@@ -1,6 +1,6 @@
 [package]
 name = "sauron_vdom"
-version = "0.20.0"
+version = "0.21.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "A library for diffing virtual dom tree and generate patches"
