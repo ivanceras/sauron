@@ -1,5 +1,6 @@
 # (Unreleased)
  - add Window as a global object to let components easily attached events to the window
+ - add style! macro for a nicer style syntax
  - include mousemove in the supported event type
  - implement creating an attribute that has namespace, such as xlink:href in embededd svg image
  - fix error in svg_graph example

@@ -5,7 +5,6 @@ use crate::{
     Node,
     Value,
 };
-use log::*;
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Element<T, EVENT, MSG>
@@ -179,13 +178,7 @@ where
         buffer += &format!("<{}", self.tag.to_string());
 
         for attr in self.attributes().iter() {
-            if let Some(_ns) = attr.namespace {
-                // TODO: get a mapping of namespace for each: xlink, xml,
-                buffer += &format!(r#" xlink:{}="{}""#, attr.name, attr.value);
-            } else {
-                debug!("no namespace!");
-                buffer += &format!(r#" {}="{}""#, attr.name, attr.value);
-            }
+            buffer += &format!(" {}", &attr.to_pretty_string());
         }
         buffer += ">";
 

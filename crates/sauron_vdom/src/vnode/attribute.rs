@@ -59,6 +59,17 @@ where
     pub fn get_callback(&self) -> Option<&Callback<EVENT, MSG>> {
         self.value.get_callback()
     }
+
+    pub fn to_pretty_string(&self) -> String {
+        let mut buffer = String::new();
+        if let Some(_ns) = self.namespace {
+            // TODO: get a mapping of namespace for each: xlink, xml,
+            buffer += &format!(r#"xlink:{}="{}""#, self.name, self.value);
+        } else {
+            buffer += &format!(r#"{}="{}""#, self.name, self.value);
+        }
+        buffer
+    }
 }
 
 impl<EVENT, MSG> AttribValue<EVENT, MSG>

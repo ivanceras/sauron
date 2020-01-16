@@ -4,6 +4,8 @@ use crate::Attribute;
 pub use sauron_vdom::builder::attr;
 use sauron_vdom::Value;
 
+mod style_macro;
+
 macro_rules! declare_attributes {
     ( $(
          $(#[$attr:meta])*
@@ -195,14 +197,25 @@ declare_attributes! {
 /// ```ignore
 /// div([style("display:flex;flex-direction:row;")],[])
 /// ```
-pub fn styles<V, MSG, P>(pairs: P) -> Attribute<MSG>
+pub fn styles<'a, V, MSG, P>(pairs: P) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
-    P: AsRef<[(&'static str, V)]>,
+    P: AsRef<[(&'a str, V)]>,
 {
     let mut style_str = String::new();
     for (key, value) in pairs.as_ref() {
         let value: Value = value.clone().into();
+        style_str.push_str(&format!("{}:{};", key, value.to_string()));
+    }
+    style(style_str)
+}
+
+pub fn styles_values<'a, MSG, P>(pairs: P) -> Attribute<MSG>
+where
+    P: AsRef<[(&'a str, Value)]>,
+{
+    let mut style_str = String::new();
+    for (key, value) in pairs.as_ref() {
         style_str.push_str(&format!("{}:{};", key, value.to_string()));
     }
     style(style_str)
