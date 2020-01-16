@@ -1,4 +1,4 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 #![deny(clippy::all)]
 #![feature(arbitrary_self_types)]
 #![doc(
