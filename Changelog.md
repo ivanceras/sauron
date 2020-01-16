@@ -1,6 +1,7 @@
 # (Unreleased)
  - add Window as a global object to let components easily attached events to the window
- - add style! macro for a nicer style syntax
+ - add style! macro for a nicer html style attribute syntax
+ - **Breaking Change** remove tag style from the macro export, as it conflicts with the style attribute macro, which is more common
  - include mousemove in the supported event type
  - implement creating an attribute that has namespace, such as xlink:href in embededd svg image
  - fix error in svg_graph example
