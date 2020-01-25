@@ -7,6 +7,7 @@ use criterion::{
 };
 
 use sauron::{
+    diff,
     html::{
         attributes::*,
         *,
@@ -27,6 +28,36 @@ fn build_100_child_nodes() {
             })
             .collect::<Vec<Node<()>>>(),
     );
+}
+
+fn diff_100() {
+    let view1: Node<()> = div(
+        vec![class("some-class")],
+        (0..100)
+            .into_iter()
+            .map(|n| {
+                div(
+                    vec![class(format!("child-div_{}", n))],
+                    vec![text(format!("node: {}", n))],
+                )
+            })
+            .collect::<Vec<Node<()>>>(),
+    );
+
+    let view2: Node<()> = div(
+        vec![class("some-class")],
+        (0..100)
+            .into_iter()
+            .map(|n| {
+                div(
+                    vec![class(format!("child-div_{}", n + 1))],
+                    vec![text(format!("node: {}", n))],
+                )
+            })
+            .collect::<Vec<Node<()>>>(),
+    );
+    let node_diff = diff(&view1, &view2);
+    assert_eq!(node_diff.len(), 100)
 }
 
 fn build_100_nodes_with_100_child_nodes() {
@@ -60,6 +91,7 @@ fn criterion_benchmark(c: &mut Criterion) {
                 b.iter(|| build_100_nodes_with_100_child_nodes())
             }),
             Fun::new("100", |b, _i| b.iter(|| build_100_child_nodes())),
+            Fun::new("diff_100", |b, _i| b.iter(|| diff_100())),
         ],
         0,
     );
