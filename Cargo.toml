@@ -70,6 +70,14 @@ features = [
     "Performance",
 ]
 
+[dev-dependencies.criterion]
+version = "0.2"
+
+[[bench]]
+name = "nodes_benchmark"
+harness = false
+
+
 [workspace]
 members = [
     "crates/sauron_vdom",
