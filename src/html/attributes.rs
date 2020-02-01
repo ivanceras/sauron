@@ -267,6 +267,26 @@ where
     class(class_list.join(" "))
 }
 
+/// a helper function to add multiple classes to a node
+///
+/// ```ignore
+///    div(vec![classes(["dashed", "error"])], vec![])
+/// ```
+pub fn classes<C, V, MSG>(class_list: C) -> Attribute<MSG>
+where
+    V: ToString,
+    C: AsRef<[V]>,
+{
+    class(
+        class_list
+            .as_ref()
+            .iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<_>>()
+            .join(" "),
+    )
+}
+
 /// A helper function for setting attributes with no values such as checked
 /// in checkbox input type
 /// This is best called to be appended to the node since this
