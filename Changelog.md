@@ -1,3 +1,8 @@
+# 0.21.1
+ - Add a help function classes which joins an array of string into a space class
+ - Use criterion in benchmarks
+ - Add data-viewer as an example
+
 # 0.21.0
  - add Window as a global object to let components easily attached events to the window
  - add style! macro for a nicer html style attribute syntax
