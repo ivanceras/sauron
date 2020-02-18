@@ -121,6 +121,11 @@ index.html
   </body>
 </html>
 ```
+In Cargo.toml, specify the crate-type to be `cdylib`
+```toml
+[lib]
+crate-type = ["cdylib"]
+```
 
 **Note:** You need to use the nightly compiler with minimum version: rustc 1.37.0-nightly (17e62f77f 2019-07-01)
 
@@ -131,10 +136,6 @@ $> wasm-pack build --target no-modules
 Look at the [examples](https://github.com/ivanceras/sauron/tree/master/examples)
 and the build script for the details.
 
-### Demo examples
- - [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet csv data viewer
- - [svg_clock](https://ivanceras.github.io/svg_clock/) - A clock drawn using svg and window tick event.
- - [svg_graph](https://ivanceras.github.io/svg_graph/) - A simple graph using svg
 
 #### Prerequisite:
 
@@ -157,7 +158,6 @@ This project is based on the existing projects:
  [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
 
 
-Please contact me: ivanceras[at]gmail.com
 
 
 License: MIT
