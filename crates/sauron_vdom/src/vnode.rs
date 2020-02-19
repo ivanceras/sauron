@@ -70,7 +70,7 @@ where
         }
     }
 
-    fn to_pretty_string(&self, indent: i32) -> String
+    fn to_pretty_string(&self, indent: usize) -> String
     where
         T: ToString,
     {

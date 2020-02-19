@@ -170,7 +170,7 @@ where
     }
 
     /// make a pretty string representation of this node
-    pub(super) fn to_pretty_string(&self, indent: i32) -> String
+    pub(super) fn to_pretty_string(&self, indent: usize) -> String
     where
         T: ToString,
     {
