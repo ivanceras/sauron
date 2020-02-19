@@ -213,12 +213,16 @@ cfg_if! {if #[cfg(feature = "with-markdown")] {
     mod markdown;
     pub use markdown::*;
 }}
+#[cfg(feature = "with-parser")]
+pub mod parser;
 
 #[macro_use]
 pub mod html;
 
 #[macro_use]
 pub mod svg;
+
+pub use sauron_vdom;
 
 pub use sauron_vdom::{
     diff,

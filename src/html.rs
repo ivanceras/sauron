@@ -7,6 +7,10 @@ pub use sauron_vdom::builder::{
     on,
     text,
 };
+use std::{
+    collections::BTreeSet,
+    iter::FromIterator,
+};
 
 #[macro_use]
 pub mod attributes;

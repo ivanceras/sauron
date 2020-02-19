@@ -102,6 +102,7 @@ pub fn render_markdown<MSG>(src: &str) -> Node<MSG> {
             Event::SoftBreak => add_child!(text("\n")),
             Event::HardBreak => add_child!(br(vec![], vec![])),
             Event::InlineHtml(inline) => {
+                //TODO parse the inline html and convert them into sauron html tags
                 println!("inline html: {}", inline);
             }
             _ => println!("Unknown event: {:#?}", ev),
