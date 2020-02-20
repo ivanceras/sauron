@@ -231,7 +231,9 @@ pub use sauron_vdom::{
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
 /// App code.
-pub type Node<MSG> = sauron_vdom::Node<&'static str, Event, MSG>;
-pub type Element<MSG> = sauron_vdom::Element<&'static str, Event, MSG>;
-pub type Patch<'a, MSG> = sauron_vdom::Patch<'a, &'static str, Event, MSG>;
-pub type Attribute<MSG> = sauron_vdom::Attribute<Event, MSG>;
+pub type Node<MSG> = sauron_vdom::Node<&'static str, &'static str, Event, MSG>;
+pub type Element<MSG> =
+    sauron_vdom::Element<&'static str, &'static str, Event, MSG>;
+pub type Patch<'a, MSG> =
+    sauron_vdom::Patch<'a, &'static str, &'static str, Event, MSG>;
+pub type Attribute<MSG> = sauron_vdom::Attribute<&'static str, Event, MSG>;

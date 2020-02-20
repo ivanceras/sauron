@@ -304,7 +304,8 @@ where
     V: Into<Value> + Clone,
     P: AsRef<[(&'static str, V, bool)]>,
 {
-    let mut attributes = Vec::with_capacity(trio.as_ref().len());
+    let mut attributes: Vec<Attribute<MSG>> =
+        Vec::with_capacity(trio.as_ref().len());
     for (key, value, flag) in trio.as_ref() {
         if *flag {
             attributes.push(attr(key, value.clone()));

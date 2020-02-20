@@ -36,21 +36,23 @@ mod element;
 /// Cloning is only done once, and happens when constructing the views into a node tree.
 /// Cloning also allows flexibility such as adding more children into an existing node/element.
 #[derive(Debug, Clone, PartialEq)]
-pub enum Node<T, EVENT, MSG>
+pub enum Node<T, ATT, EVENT, MSG>
 where
     MSG: 'static,
     EVENT: 'static,
+    ATT: Clone,
 {
-    Element(Element<T, EVENT, MSG>),
+    Element(Element<T, ATT, EVENT, MSG>),
     Text(Text),
 }
 
-impl<T, EVENT, MSG> Node<T, EVENT, MSG>
+impl<T, ATT, EVENT, MSG> Node<T, ATT, EVENT, MSG>
 where
     EVENT: 'static,
     MSG: 'static,
+    ATT: PartialEq + Ord + ToString + Clone,
 {
-    pub fn map_msg<F, MSG2>(self, func: F) -> Node<T, EVENT, MSG2>
+    pub fn map_msg<F, MSG2>(self, func: F) -> Node<T, ATT, EVENT, MSG2>
     where
         F: Fn(MSG) -> MSG2 + 'static,
         MSG2: 'static,
@@ -60,7 +62,10 @@ where
     }
 
     /// map_callback the return of the callback from MSG to MSG2
-    fn map_callback<MSG2>(self, cb: Callback<MSG, MSG2>) -> Node<T, EVENT, MSG2>
+    fn map_callback<MSG2>(
+        self,
+        cb: Callback<MSG, MSG2>,
+    ) -> Node<T, ATT, EVENT, MSG2>
     where
         MSG2: 'static,
     {
@@ -88,7 +93,7 @@ where
     }
 
     /// consume the element
-    pub fn take_element(self) -> Option<Element<T, EVENT, MSG>> {
+    pub fn take_element(self) -> Option<Element<T, ATT, EVENT, MSG>> {
         match self {
             Node::Element(element) => Some(element),
             Node::Text(_) => None,
@@ -96,14 +101,16 @@ where
     }
 
     /// Get a mutable reference to the element
-    pub fn as_element_mut(&mut self) -> Option<&mut Element<T, EVENT, MSG>> {
+    pub fn as_element_mut(
+        &mut self,
+    ) -> Option<&mut Element<T, ATT, EVENT, MSG>> {
         match *self {
             Node::Element(ref mut element) => Some(element),
             Node::Text(_) => None,
         }
     }
 
-    pub fn as_element_ref(&self) -> Option<&Element<T, EVENT, MSG>> {
+    pub fn as_element_ref(&self) -> Option<&Element<T, ATT, EVENT, MSG>> {
         match *self {
             Node::Element(ref element) => Some(element),
             Node::Text(_) => None,
@@ -111,7 +118,10 @@ where
     }
 
     /// Append children to this element
-    pub fn add_children(mut self, children: Vec<Node<T, EVENT, MSG>>) -> Self {
+    pub fn add_children(
+        mut self,
+        children: Vec<Node<T, ATT, EVENT, MSG>>,
+    ) -> Self {
         if let Some(element) = self.as_element_mut() {
             element.add_children(children);
         }
@@ -121,7 +131,7 @@ where
     /// add attributes to the node
     pub fn add_attributes(
         mut self,
-        attributes: Vec<Attribute<EVENT, MSG>>,
+        attributes: Vec<Attribute<ATT, EVENT, MSG>>,
     ) -> Self {
         if let Some(elm) = self.as_element_mut() {
             elm.add_attributes(attributes);
@@ -130,7 +140,7 @@ where
     }
 
     /// get the attributes of this node
-    pub fn get_attributes(&self) -> Vec<Attribute<EVENT, MSG>> {
+    pub fn get_attributes(&self) -> Vec<Attribute<ATT, EVENT, MSG>> {
         match *self {
             Node::Element(ref element) => element.attributes(),
             Node::Text(_) => vec![],
@@ -156,11 +166,12 @@ impl fmt::Display for Text {
     }
 }
 
-impl<T, EVENT, MSG> fmt::Display for Node<T, EVENT, MSG>
+impl<T, ATT, EVENT, MSG> fmt::Display for Node<T, ATT, EVENT, MSG>
 where
     T: ToString,
     EVENT: 'static,
     MSG: 'static,
+    ATT: PartialEq + Ord + ToString + Clone,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.to_pretty_string(0))

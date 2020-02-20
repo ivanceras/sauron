@@ -7,21 +7,23 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq, Default)]
-pub struct Element<T, EVENT, MSG>
+pub struct Element<T, ATT, EVENT, MSG>
 where
     MSG: 'static,
     EVENT: 'static,
+    ATT: Clone,
 {
     pub tag: T,
-    pub attrs: Vec<Attribute<EVENT, MSG>>,
-    pub children: Vec<Node<T, EVENT, MSG>>,
+    pub attrs: Vec<Attribute<ATT, EVENT, MSG>>,
+    pub children: Vec<Node<T, ATT, EVENT, MSG>>,
     pub namespace: Option<&'static str>,
 }
 
-impl<T, EVENT, MSG> Element<T, EVENT, MSG>
+impl<T, ATT, EVENT, MSG> Element<T, ATT, EVENT, MSG>
 where
     EVENT: 'static,
     MSG: 'static,
+    ATT: PartialEq + Ord + ToString + Clone,
 {
     pub fn with_tag(tag: T) -> Self {
         Element {
@@ -33,29 +35,29 @@ where
     }
 
     /// get the attributes that are events
-    pub fn events(&self) -> Vec<&Attribute<EVENT, MSG>> {
+    pub fn events(&self) -> Vec<&Attribute<ATT, EVENT, MSG>> {
         self.attrs.iter().filter(|attr| attr.is_event()).collect()
     }
 
-    pub fn get_event(&self, name: &str) -> Option<&Attribute<EVENT, MSG>> {
+    pub fn get_event(&self, name: &ATT) -> Option<&Attribute<ATT, EVENT, MSG>> {
         self.events()
             .iter()
-            .find(|event| event.name == name)
+            .find(|event| event.name == *name)
             .map(|event| *event)
     }
 
-    fn attributes_internal(&self) -> Vec<&Attribute<EVENT, MSG>> {
+    fn attributes_internal(&self) -> Vec<&Attribute<ATT, EVENT, MSG>> {
         self.attrs.iter().filter(|attr| !attr.is_event()).collect()
     }
 
-    pub fn attributes(&self) -> Vec<Attribute<EVENT, MSG>> {
+    pub fn attributes(&self) -> Vec<Attribute<ATT, EVENT, MSG>> {
         let names = self.get_attributes_name_and_ns();
         let mut attributes = vec![];
         for (name, namespace) in names {
-            if let Some(value) = self.get_attr_value(name) {
+            if let Some(value) = self.get_attr_value(&name) {
                 attributes.push(Attribute {
                     namespace,
-                    name,
+                    name: name.clone(),
                     value: value.into(),
                 });
             }
@@ -66,22 +68,26 @@ where
     /// return all the attributes that match the name
     fn get_attributes_with_name(
         &self,
-        key: &str,
-    ) -> Vec<&Attribute<EVENT, MSG>> {
+        key: &ATT,
+    ) -> Vec<&Attribute<ATT, EVENT, MSG>>
+    where
+        ATT: PartialEq + Ord,
+    {
         self.attributes_internal()
             .iter()
-            .filter(|att| att.name == key)
+            .filter(|att| att.name == *key)
             .map(|att| *att)
             .collect()
     }
 
-    fn get_attributes_name_and_ns(
-        &self,
-    ) -> Vec<(&'static str, Option<&'static str>)> {
+    fn get_attributes_name_and_ns(&self) -> Vec<(&ATT, Option<&'static str>)>
+    where
+        ATT: PartialEq + Ord,
+    {
         let mut names = self
             .attributes_internal()
             .iter()
-            .map(|att| (att.name, att.namespace))
+            .map(|att| (&att.name, att.namespace))
             .collect::<Vec<_>>();
         names.sort();
         names.dedup();
@@ -89,7 +95,7 @@ where
     }
 
     /// get all the attributes with the same name and merge their value
-    pub fn get_attr_value(&self, key: &str) -> Option<Value> {
+    pub fn get_attr_value(&self, key: &ATT) -> Option<Value> {
         let attrs = self.get_attributes_with_name(key);
         if !attrs.is_empty() {
             Some(Self::merge_attributes_values(attrs))
@@ -100,7 +106,9 @@ where
 
     /// merge this all attributes,
     /// this assumes that that this attributes has the same name
-    fn merge_attributes_values(attrs: Vec<&Attribute<EVENT, MSG>>) -> Value {
+    fn merge_attributes_values(
+        attrs: Vec<&Attribute<ATT, EVENT, MSG>>,
+    ) -> Value {
         if attrs.len() == 1 {
             let one_value =
                 attrs[0].value.get_value().expect("Should have a value");
@@ -117,21 +125,17 @@ where
     }
 
     #[inline]
-    pub fn add_attributes(&mut self, attrs: Vec<Attribute<EVENT, MSG>>) {
+    pub fn add_attributes(&mut self, attrs: Vec<Attribute<ATT, EVENT, MSG>>) {
         self.attrs.extend(attrs)
     }
 
     #[inline]
-    pub fn add_children(&mut self, children: Vec<Node<T, EVENT, MSG>>) {
+    pub fn add_children(&mut self, children: Vec<Node<T, ATT, EVENT, MSG>>) {
         self.children.extend(children);
     }
 
     #[inline]
-    pub fn add_event_listener(
-        &mut self,
-        event: &'static str,
-        cb: Callback<EVENT, MSG>,
-    ) {
+    pub fn add_event_listener(&mut self, event: ATT, cb: Callback<EVENT, MSG>) {
         let attr_event = Attribute {
             name: event,
             value: cb.into(),
@@ -144,7 +148,7 @@ where
     pub(super) fn map_callback<MSG2>(
         self,
         cb: Callback<MSG, MSG2>,
-    ) -> Element<T, EVENT, MSG2>
+    ) -> Element<T, ATT, EVENT, MSG2>
     where
         MSG2: 'static,
     {
@@ -173,12 +177,13 @@ where
     pub(super) fn to_pretty_string(&self, indent: usize) -> String
     where
         T: ToString,
+        ATT: ToString,
     {
         let mut buffer = String::new();
         buffer += &format!("<{}", self.tag.to_string());
 
         for attr in self.attributes().iter() {
-            buffer += &format!(" {}", &attr.to_pretty_string());
+            buffer += &format!(" {}", attr.to_pretty_string());
         }
         buffer += ">";
 
@@ -204,8 +209,12 @@ where
     }
 }
 
-impl<T, EVENT, MSG> From<Element<T, EVENT, MSG>> for Node<T, EVENT, MSG> {
-    fn from(v: Element<T, EVENT, MSG>) -> Self {
+impl<T, ATT, EVENT, MSG> From<Element<T, ATT, EVENT, MSG>>
+    for Node<T, ATT, EVENT, MSG>
+where
+    ATT: Clone,
+{
+    fn from(v: Element<T, ATT, EVENT, MSG>) -> Self {
         Node::Element(v)
     }
 }

@@ -132,7 +132,7 @@ where
         program: &Rc<DSP>,
         new_vdom: crate::Node<MSG>,
     ) {
-        let patches = diff(&self.current_vdom, &new_vdom);
+        let patches = diff(&self.current_vdom, &new_vdom, &"key");
         let active_closures = patch(
             Some(program),
             self.root_node.clone(),

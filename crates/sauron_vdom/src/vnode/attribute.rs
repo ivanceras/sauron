@@ -5,8 +5,11 @@ use crate::{
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Attribute<EVENT, MSG> {
-    pub name: &'static str,
+pub struct Attribute<ATT, EVENT, MSG>
+where
+    ATT: Clone,
+{
+    pub name: ATT,
     pub value: AttribValue<EVENT, MSG>,
     pub namespace: Option<&'static str>,
 }
@@ -17,15 +20,16 @@ pub enum AttribValue<EVENT, MSG> {
     Callback(Callback<EVENT, MSG>),
 }
 
-impl<EVENT, MSG> Attribute<EVENT, MSG>
+impl<ATT, EVENT, MSG> Attribute<ATT, EVENT, MSG>
 where
     MSG: 'static,
     EVENT: 'static,
+    ATT: PartialEq + Ord + ToString + Clone,
 {
     pub(super) fn map_callback<MSG2>(
         self,
         cb: Callback<MSG, MSG2>,
-    ) -> Attribute<EVENT, MSG2>
+    ) -> Attribute<ATT, EVENT, MSG2>
     where
         MSG2: 'static,
     {
@@ -40,7 +44,7 @@ where
         self.value.is_event()
     }
 
-    pub fn reform<F, EVENT2>(self, func: F) -> Attribute<EVENT2, MSG>
+    pub fn reform<F, EVENT2>(self, func: F) -> Attribute<ATT, EVENT2, MSG>
     where
         F: Fn(EVENT2) -> EVENT + 'static,
         EVENT2: 'static,
@@ -60,13 +64,16 @@ where
         self.value.get_callback()
     }
 
-    pub fn to_pretty_string(&self) -> String {
+    pub fn to_pretty_string(&self) -> String
+    where
+        ATT: ToString,
+    {
         let mut buffer = String::new();
         if let Some(_ns) = self.namespace {
-            // TODO: get a mapping of namespace for each: xlink, xml,
-            buffer += &format!(r#"xlink:{}="{}""#, self.name, self.value);
+            buffer +=
+                &format!(r#"xlink:{}="{}""#, self.name.to_string(), self.value);
         } else {
-            buffer += &format!(r#"{}="{}""#, self.name, self.value);
+            buffer += &format!(r#"{}="{}""#, self.name.to_string(), self.value);
         }
         buffer
     }

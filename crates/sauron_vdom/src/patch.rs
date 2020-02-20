@@ -41,35 +41,39 @@ use crate::{
 ///
 /// The patching process is tested in a real browser in tests/diff_patch.rs
 #[derive(Debug, PartialEq)]
-pub enum Patch<'a, T, EVENT, MSG>
+pub enum Patch<'a, T, ATT, EVENT, MSG>
 where
     MSG: 'static,
     EVENT: 'static,
+    ATT: Clone,
 {
     /// Append a vector of child nodes to a parent node id.
-    AppendChildren(NodeIdx, Vec<&'a Node<T, EVENT, MSG>>),
+    AppendChildren(NodeIdx, Vec<&'a Node<T, ATT, EVENT, MSG>>),
     /// For a `node_i32`, remove all children besides the first `len`
     TruncateChildren(NodeIdx, usize),
     /// Replace a node with another node. This typically happens when a node's tag changes.
     /// ex: <div> becomes <span>
-    Replace(NodeIdx, &'a Node<T, EVENT, MSG>),
+    Replace(NodeIdx, &'a Node<T, ATT, EVENT, MSG>),
     /// Add attributes that the new node has that the old node does not
     /// Note: the attributes is not a reference since attributes of same
     /// name are merged to produce a new unify attribute
-    AddAttributes(NodeIdx, Vec<Attribute<EVENT, MSG>>),
+    AddAttributes(NodeIdx, Vec<Attribute<ATT, EVENT, MSG>>),
     /// Remove attributes that the old node had that the new node doesn't
-    RemoveAttributes(NodeIdx, Vec<&'static str>),
+    RemoveAttributes(NodeIdx, Vec<ATT>),
     /// Add attributes that the new node has that the old node does not
-    AddEventListener(NodeIdx, Vec<&'a Attribute<EVENT, MSG>>),
+    AddEventListener(NodeIdx, Vec<&'a Attribute<ATT, EVENT, MSG>>),
     /// Remove attributes that the old node had that the new node doesn't
-    RemoveEventListener(NodeIdx, Vec<&'static str>),
+    RemoveEventListener(NodeIdx, Vec<ATT>),
     /// Change the text of a Text node.
     ChangeText(NodeIdx, &'a Text),
 }
 
 type NodeIdx = usize;
 
-impl<'a, T, EVENT, MSG> Patch<'a, T, EVENT, MSG> {
+impl<'a, T, ATT, EVENT, MSG> Patch<'a, T, ATT, EVENT, MSG>
+where
+    ATT: Clone,
+{
     /// Every Patch is meant to be applied to a specific node within the DOM. Get the
     /// index of the DOM node that this patch should apply to. DOM nodes are indexed
     /// depth first with the root node in the tree having index 0.

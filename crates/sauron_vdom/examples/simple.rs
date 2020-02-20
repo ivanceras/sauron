@@ -6,7 +6,7 @@ use sauron_vdom::{
 };
 
 fn main() {
-    let old: Node<&'static str, (), ()> = element(
+    let old: Node<&'static str, &'static str, (), ()> = element(
         "div",
         vec![
             attr("class", "some-class"),
