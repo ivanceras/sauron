@@ -51,7 +51,6 @@ macro_rules! declare_html_attributes{
      ) => {
         declare_attributes!{ $($name;)*}
 
-        #[cfg(feature = "with-parser")]
         pub(crate) const HTML_ATTRS:[&'static str; 119] = [$(stringify!($name),)*];
     }
 }
@@ -65,9 +64,8 @@ macro_rules! declare_html_attributes_special{
          $name:ident => $attribute:tt;
        )*
      ) => {
-        declare_attributes!{ $($name;)*}
+        declare_attributes!{ $($name => $attribute;)*}
 
-        #[cfg(feature = "with-parser")]
         pub(crate) const HTML_ATTRS_SPECIAL:[(&'static str,&'static str); 12] = [$((stringify!($name),$attribute),)*];
     }
 }
