@@ -44,6 +44,7 @@ use markup5ever_rcdom::{
     RcDom,
 };
 use std::{
+    borrow::Cow,
     fmt,
     io,
     io::Cursor,
@@ -219,12 +220,12 @@ fn parse_html(html: &str) -> Result<Document, ParseError> {
     let node = parse_doc(&dom.document);
 
     if !dom.errors.is_empty() {
-        println!("\nParse errors:");
-        for err in dom.errors.iter() {
-            println!("    {}", err);
-        }
+        let errors: Vec<String> =
+            dom.errors.iter().map(|i| i.to_string()).collect();
+        Err(ParseError::Generic(errors.join(", ")))
+    } else {
+        Ok(node.expect("must have a node"))
     }
-    Ok(node.unwrap())
 }
 
 fn parse_html_fragment(html: &str) -> Result<Document, ParseError> {
@@ -240,14 +241,13 @@ fn parse_html_fragment(html: &str) -> Result<Document, ParseError> {
     .read_from(&mut cursor)?;
 
     let node = parse_doc(&dom.document);
-
     if !dom.errors.is_empty() {
-        println!("\nParse errors:");
-        for err in dom.errors.iter() {
-            println!("    {}", err);
-        }
+        let errors: Vec<String> =
+            dom.errors.iter().map(|i| i.to_string()).collect();
+        Err(ParseError::Generic(errors.join(", ")))
+    } else {
+        Ok(node.expect("must have a node"))
     }
-    Ok(node.unwrap())
 }
 
 #[cfg(test)]
