@@ -51,8 +51,11 @@ use std::{
 };
 use thiserror::Error;
 
-pub type Node = sauron_vdom::Node<String, String, Event, ()>;
-pub type Attribute = sauron_vdom::Attribute<String, Event, ()>;
+pub(crate) type Node = sauron_vdom::Node<String, String, Event, ()>;
+pub(crate) type Attribute = sauron_vdom::Attribute<String, Event, ()>;
+pub(crate) type Element = sauron_vdom::Element<String, String, Event, ()>;
+
+mod to_syntax;
 
 #[derive(Debug)]
 struct Document {
@@ -169,7 +172,12 @@ fn has_any_doc_type(node: &Handle) -> bool {
 fn process_node(node: &Handle) -> Option<Node> {
     match &node.data {
         NodeData::Text { ref contents } => {
-            Some(text(str::escape_default(&contents.borrow())))
+            let text_content = contents.borrow().to_string();
+            if text_content.trim().is_empty() {
+                None
+            } else {
+                Some(text(text_content))
+            }
         }
 
         NodeData::Element {
@@ -177,12 +185,6 @@ fn process_node(node: &Handle) -> Option<Node> {
             ref attrs,
             ..
         } => {
-            print!("<<<{}", name.local);
-            for attr in attrs.borrow().iter() {
-                print!(" {}=\"{}\"", attr.name.local, attr.value);
-            }
-            println!(">>>");
-
             let tag = name.local.to_string();
             if let Some(html_tag) = match_tag(&tag) {
                 let children_nodes = process_children(node);
@@ -250,7 +252,10 @@ fn parse_html_fragment(html: &str) -> Result<Document, ParseError> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{
+        to_syntax::ToSyntax,
+        *,
+    };
 
     #[test]
     fn simpe_test() {
@@ -258,9 +263,15 @@ mod tests {
         <div>content1</div>
         <div>content2</div>
             "#;
+
+        let expected = r#"html!([],[
+    div!([],[text("content1")]),
+    div!([],[text("content2")]),
+])"#;
         let res = parse_html_fragment(input);
-        println!("res: {}", res.unwrap().root.unwrap());
-        panic!();
+        let syntax = res.unwrap().root.unwrap().to_syntax(true, 0);
+        println!("syntax: {}", syntax);
+        assert_eq!(expected, syntax);
     }
 
     #[test]
@@ -285,9 +296,27 @@ mod tests {
 </body>
 </html>
 "#;
+        let expected = r#"html!([lang("en"),],[
+    head!([],[
+        meta!([charset("UTF-8"),],[]),
+        meta!([content("width=device-width, initial-scale=1"),name("viewport"),],[]),
+        title!([],[text("Interactive sauron app")]),
+        style!([r#type("text/css"),],[text("
+        body {
+            font-family: "Fira Sans", "Courier New";
+        }
+    ")]),
+    ]),
+    body!([style("margin: 0; padding: 0; width: 100%; height: 100%;"),],[
+        div!([id("web-app"),style("width: 100%; height: 100%;"),],[text("
+      #HTML_INSERTED_HERE_BY_SERVER#
+  ")]),
+    ]),
+])"#;
         let res = parse_html(input);
-        println!("res: {}", res.unwrap().root.unwrap());
-        panic!();
+        let syntax = res.unwrap().root.unwrap().to_syntax(true, 0);
+        println!("syntax: {}", syntax);
+        assert_eq!(expected, syntax);
     }
 
     #[test]
@@ -300,13 +329,27 @@ mod tests {
         </filter>
     </defs>
     <image height="400" xlink:href="data:image/jpeg;base64,/9j/4AAQSkZJRgABA" width="600" x="0" y="0"></image>
-    <text fill="red" font-family="monospace" font-size="40" stroke="white" stroke-width="1" style="filter:url(#shadow);" x="65" y="55">Rune Christensen1</text>
+    <text fill="red" font-family="monospace" font-size="40" stroke="white" stroke-width="1" style="filter:url(#shadow);" x="65" y="55">John Smith</text>
     <text fill="white" font-family="monospace" font-size="20" style="filter:url(#shadow);" x="100" y="100">10101011</text>
     <text fill="red" font-family="monospace" font-size="50" style="filter:url(#shadow);" width="500" x="20" y="200">Happy birthday</text>
 </svg>
 "#;
+        let expected = r#"html!([],[
+    svg!([height(400),viewBox("0 0 600 400"),width(600),xmlns("http://www.w3.org/2000/svg"),],[
+        defs!([],[
+            filter!([id("shadow"),],[
+                feDropShadow!([dx(2),dy(1),stdDeviation(0.2),],[]),
+            ]),
+        ]),
+        image!([height(400),href("data:image/jpeg;base64,/9j/4AAQSkZJRgABA"),width(600),x(0),y(0),],[]),
+        text!([fill("red"),font_family("monospace"),font_size(40),stroke("white"),stroke_width(1),style("filter:url(#shadow);"),x(65),y(55),],[text("John Smith")]),
+        text!([fill("white"),font_family("monospace"),font_size(20),style("filter:url(#shadow);"),x(100),y(100),],[text("10101011")]),
+        text!([fill("red"),font_family("monospace"),font_size(50),style("filter:url(#shadow);"),width(500),x(20),y(200),],[text("Happy birthday")]),
+    ]),
+])"#;
         let res = parse_html_fragment(input);
-        println!("res: {}", res.unwrap().root.unwrap());
-        panic!();
+        let syntax = res.unwrap().root.unwrap().to_syntax(true, 0);
+        println!("syntax: {}", syntax);
+        assert_eq!(expected, syntax);
     }
 }
