@@ -195,7 +195,7 @@ mod tests {
 
     #[test]
     fn tuple_value() {
-        let line: Node<&'static str, (), ()> =
+        let line: Node<&'static str, &'static str, (), ()> =
             element("line", vec![attr("stroke-dasharray", (10, 20))], vec![]);
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(
@@ -204,7 +204,7 @@ mod tests {
             "The value in tuple should be flatten to string"
         );
 
-        let line: Node<&'static str, (), ()> =
+        let line: Node<&'static str, &'static str, (), ()> =
             element("line", vec![attr("transition", ("opacity", 1))], vec![]);
         let expected = "<line transition=\"opacity 1\"></line>";
         assert_eq!(
@@ -213,7 +213,7 @@ mod tests {
             "The value in tuple should be flatten to string"
         );
 
-        let line: Node<&'static str, (), ()> = element(
+        let line: Node<&'static str, &'static str, (), ()> = element(
             "line",
             vec![attr("transition", ("opacity", 1, "linear"))],
             vec![],
@@ -225,7 +225,7 @@ mod tests {
             "The value in tuple should be flatten to string"
         );
 
-        let line: Node<&'static str, (), ()> = element(
+        let line: Node<&'static str, &'static str, (), ()> = element(
             "line",
             vec![attr("transition", ("opacity", 1, "linear", true))],
             vec![],
@@ -240,7 +240,7 @@ mod tests {
 
     #[test]
     fn array_value() {
-        let line: Node<&'static str, (), ()> =
+        let line: Node<&'static str, &'static str, (), ()> =
             element("line", vec![attr("stroke-dasharray", [10, 20])], vec![]);
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(
@@ -249,7 +249,7 @@ mod tests {
             "The value in array should be flatten to string"
         );
 
-        let line: Node<&'static str, (), ()> = element(
+        let line: Node<&'static str, &'static str, (), ()> = element(
             "line",
             vec![attr("stroke-dasharray", [10, 20, 30, 40])],
             vec![],

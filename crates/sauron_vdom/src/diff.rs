@@ -9,9 +9,21 @@ use std::{
     mem,
 };
 
+pub fn diff<'a, T, EVENT, MSG>(
+    old: &'a Node<T, &'static str, EVENT, MSG>,
+    new: &'a Node<T, &'static str, EVENT, MSG>,
+) -> Vec<Patch<'a, T, &'static str, EVENT, MSG>>
+where
+    MSG: 'static,
+    EVENT: 'static,
+    T: PartialEq,
+{
+    diff_with_key(old, new, &"key")
+}
+
 /// Given two Node's generate Patch's that would turn the old virtual node's
 /// real DOM node equivalent into the new Node's real DOM node equivalent.
-pub fn diff<'a, T, ATT, EVENT, MSG>(
+pub fn diff_with_key<'a, T, ATT, EVENT, MSG>(
     old: &'a Node<T, ATT, EVENT, MSG>,
     new: &'a Node<T, ATT, EVENT, MSG>,
     key: &ATT,

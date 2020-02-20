@@ -95,7 +95,7 @@ fn should_merge_classes() {
     println!("attrs: {:#?}", attrs);
     assert_eq!(attrs.len(), 1);
     let elm = html.as_element_ref().expect("expecting an element");
-    let classes = elm.get_attr_value("class");
+    let classes = elm.get_attr_value(&"class");
     assert_eq!(classes, Some(Value::from(["class1", "class2"])));
 }
 
@@ -109,7 +109,7 @@ fn should_merge_classes_flag() {
     println!("attrs: {:#?}", attrs);
     assert_eq!(attrs.len(), 1);
     let elm = html.as_element_ref().expect("expecting an element");
-    let classes = elm.get_attr_value("class");
+    let classes = elm.get_attr_value(&"class");
     assert_eq!(
         classes,
         Some(Value::from(("class1", "class_flag".to_string())))

@@ -9,10 +9,11 @@ use sauron_vdom::{
 
 #[test]
 fn test_replace_node() {
-    let old: Node<&'static str, (), ()> = Node::Element(Element {
-        tag: "div",
-        ..Default::default()
-    });
+    let old: Node<&'static str, &'static str, (), ()> =
+        Node::Element(Element {
+            tag: "div",
+            ..Default::default()
+        });
     let new = Node::Element(Element {
         tag: "span",
         ..Default::default()
@@ -28,17 +29,19 @@ fn test_replace_node() {
 
 #[test]
 fn test_simple_diff() {
-    let old: Node<&'static str, (), ()> = Node::Element(Element {
-        tag: "div",
-        attrs: vec![attr("id", "some-id"), attr("class", "some-class")],
-        ..Default::default()
-    });
+    let old: Node<&'static str, &'static str, (), ()> =
+        Node::Element(Element {
+            tag: "div",
+            attrs: vec![attr("id", "some-id"), attr("class", "some-class")],
+            ..Default::default()
+        });
 
-    let new: Node<&'static str, (), ()> = Node::Element(Element {
-        tag: "div",
-        attrs: vec![attr("id", "some-id"), attr("class", "some-class")],
-        ..Default::default()
-    });
+    let new: Node<&'static str, &'static str, (), ()> =
+        Node::Element(Element {
+            tag: "div",
+            attrs: vec![attr("id", "some-id"), attr("class", "some-class")],
+            ..Default::default()
+        });
 
     let diff = diff(&old, &new);
     assert_eq!(diff, vec![])
@@ -46,11 +49,12 @@ fn test_simple_diff() {
 
 #[test]
 fn test_class_changed() {
-    let old: Node<&'static str, (), ()> = Node::Element(Element {
-        tag: "div",
-        attrs: vec![attr("id", "some-id"), attr("class", "some-class")],
-        ..Default::default()
-    });
+    let old: Node<&'static str, &'static str, (), ()> =
+        Node::Element(Element {
+            tag: "div",
+            attrs: vec![attr("id", "some-id"), attr("class", "some-class")],
+            ..Default::default()
+        });
 
     let new = Node::Element(Element {
         tag: "div",
@@ -67,11 +71,12 @@ fn test_class_changed() {
 
 #[test]
 fn test_class_removed() {
-    let old: Node<&'static str, (), ()> = Node::Element(Element {
-        tag: "div",
-        attrs: vec![attr("id", "some-id"), attr("class", "some-class")],
-        ..Default::default()
-    });
+    let old: Node<&'static str, &'static str, (), ()> =
+        Node::Element(Element {
+            tag: "div",
+            attrs: vec![attr("id", "some-id"), attr("class", "some-class")],
+            ..Default::default()
+        });
 
     let new = Node::Element(Element {
         tag: "div",
@@ -87,12 +92,13 @@ fn test_class_removed() {
 fn no_change_event() {
     let func = |_| println!("Clicked!");
     let cb: Callback<(), ()> = func.into();
-    let old: Node<&'static str, (), ()> = Node::Element(Element {
-        tag: "div",
-        attrs: vec![on("click", cb.clone())],
-        children: vec![],
-        namespace: None,
-    });
+    let old: Node<&'static str, &'static str, (), ()> =
+        Node::Element(Element {
+            tag: "div",
+            attrs: vec![on("click", cb.clone())],
+            children: vec![],
+            namespace: None,
+        });
 
     let new = Node::Element(Element {
         tag: "div",
@@ -110,12 +116,13 @@ fn add_event() {
     let func = |_| println!("Clicked!");
     let cb: Callback<(), ()> = func.into();
 
-    let old: Node<&'static str, (), ()> = Node::Element(Element {
-        tag: "div",
-        attrs: vec![],
-        children: vec![],
-        namespace: None,
-    });
+    let old: Node<&'static str, &'static str, (), ()> =
+        Node::Element(Element {
+            tag: "div",
+            attrs: vec![],
+            children: vec![],
+            namespace: None,
+        });
 
     let new = Node::Element(Element {
         tag: "div",
