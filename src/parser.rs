@@ -2,15 +2,30 @@
 
 use crate::{
     html::{
-        attributes::HTML_ATTRS,
+        attributes::{
+            HTML_ATTRS,
+            HTML_ATTRS_SPECIAL,
+        },
         html_element,
-        tags::HTML_TAGS,
+        tags::{
+            HTML_TAGS,
+            HTML_TAGS_NON_COMMON,
+            HTML_TAGS_WITH_MACRO_NON_COMMON,
+        },
         text,
     },
     sauron_vdom::builder::element,
     svg::{
-        attributes::SVG_ATTRS,
-        tags::SVG_TAGS,
+        attributes::{
+            SVG_ATTRS,
+            SVG_ATTRS_SPECIAL,
+            SVG_ATTRS_XLINK,
+        },
+        tags::{
+            SVG_TAGS,
+            SVG_TAGS_NON_COMMON,
+            SVG_TAGS_SPECIAL,
+        },
     },
     Event,
 };
@@ -34,6 +49,7 @@ use std::{
     io::Cursor,
     iter::repeat,
 };
+use thiserror::Error;
 
 pub type Node = sauron_vdom::Node<String, String, Event, ()>;
 pub type Attribute = sauron_vdom::Attribute<String, Event, ()>;
@@ -56,9 +72,12 @@ impl fmt::Display for Document {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 enum ParseError {
+    #[error("Generic Error {0}")]
     Generic(String),
+    #[error("{0}")]
+    IoError(#[from] io::Error),
 }
 
 fn has_doc_type(node: &Handle) -> bool {
@@ -77,7 +96,7 @@ fn parse_doc<'a>(node: &Handle) -> Option<Document> {
         NodeData::Document => {
             println!("this is a document..");
             Some(Document {
-                has_doc_type: has_doc_type(node),
+                has_doc_type: has_any_doc_type(node),
                 root: process_node(node),
             })
         }
@@ -86,31 +105,36 @@ fn parse_doc<'a>(node: &Handle) -> Option<Document> {
 }
 
 fn match_tag(tag: &str) -> Option<String> {
-    let html_tag = HTML_TAGS
+    HTML_TAGS
         .iter()
+        .chain(HTML_TAGS_NON_COMMON.iter())
+        .chain(HTML_TAGS_WITH_MACRO_NON_COMMON.iter())
+        .chain(SVG_TAGS.iter())
+        .chain(SVG_TAGS_NON_COMMON.iter())
         .find(|item| item.eq_ignore_ascii_case(&tag))
-        .map(|item| item.to_string());
-
-    html_tag.or_else(|| {
-        SVG_TAGS
-            .iter()
-            .find(|item| item.eq_ignore_ascii_case(&tag))
-            .map(|item| item.to_string())
-    })
+        .map(|item| item.to_string())
+        .or_else(|| {
+            SVG_TAGS_SPECIAL
+                .iter()
+                .find(|(func, item)| item.eq_ignore_ascii_case(&tag))
+                .map(|(func, item)| func.to_string())
+        })
 }
 
 fn match_attribute(key: &str) -> Option<String> {
-    let html_attr = HTML_ATTRS
+    HTML_ATTRS
         .iter()
-        .find(|item| item.eq_ignore_ascii_case(key))
-        .map(|item| item.to_string());
-
-    html_attr.or_else(|| {
-        SVG_ATTRS
-            .iter()
-            .find(|item| item.eq_ignore_ascii_case(key))
-            .map(|item| item.to_string())
-    })
+        .chain(SVG_ATTRS.iter())
+        .find(|att| att.eq_ignore_ascii_case(key))
+        .map(|att| att.to_string())
+        .or_else(|| {
+            HTML_ATTRS_SPECIAL
+                .iter()
+                .chain(SVG_ATTRS_SPECIAL.iter())
+                .chain(SVG_ATTRS_XLINK.iter())
+                .find(|(func, att)| att.eq_ignore_ascii_case(key))
+                .map(|(func, att)| func.to_string())
+        })
 }
 
 fn extract_attributes(attrs: &Vec<html5ever::Attribute>) -> Vec<Attribute> {
@@ -135,6 +159,13 @@ fn process_children(node: &Handle) -> Vec<Node> {
         .filter_map(|child_node| process_node(child_node))
         .collect()
 }
+
+fn has_any_doc_type(node: &Handle) -> bool {
+    node.children
+        .borrow()
+        .iter()
+        .any(|child_node| has_doc_type(child_node))
+}
 fn process_node(node: &Handle) -> Option<Node> {
     match &node.data {
         NodeData::Text { ref contents } => {
@@ -146,11 +177,11 @@ fn process_node(node: &Handle) -> Option<Node> {
             ref attrs,
             ..
         } => {
-            print!("<{}", name.local);
+            print!("<<<{}", name.local);
             for attr in attrs.borrow().iter() {
                 print!(" {}=\"{}\"", attr.name.local, attr.value);
             }
-            println!(">");
+            println!(">>>");
 
             let tag = name.local.to_string();
             if let Some(html_tag) = match_tag(&tag) {
@@ -182,8 +213,7 @@ fn parse_html(html: &str) -> Result<Document, ParseError> {
     let mut cursor = Cursor::new(html);
     let dom = parse_document(RcDom::default(), Default::default())
         .from_utf8()
-        .read_from(&mut cursor)
-        .unwrap();
+        .read_from(&mut cursor)?;
     let node = parse_doc(&dom.document);
 
     if !dom.errors.is_empty() {
@@ -205,8 +235,7 @@ fn parse_html_fragment(html: &str) -> Result<Document, ParseError> {
         vec![],
     )
     .from_utf8()
-    .read_from(&mut cursor)
-    .unwrap();
+    .read_from(&mut cursor)?;
 
     let node = parse_doc(&dom.document);
 

@@ -24,12 +24,38 @@ macro_rules! declare_xlink_attributes {
                     attr_ns(Some(XLINK_NAMESPACE), $attribute, v)
                 }
          )*
+
+        pub(crate) const SVG_ATTRS_XLINK:[(&'static str,&'static str); 7] = [$((stringify!($name),$attribute),)*];
+    }
+}
+
+/// declare svg attributes, at the same time fill up the
+/// SVG_ATTR const with all the common svg attributes
+macro_rules! declare_svg_attributes{
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+        declare_attributes!{ $($name;)*}
+        pub(crate) const SVG_ATTRS:[&'static str; 168] = [$(stringify!($name),)*];
+    }
+}
+
+macro_rules! declare_svg_attributes_special{
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident => $attribute:tt;
+       )*
+     ) => {
+        declare_attributes!{ $($name;)*}
+        pub(crate) const SVG_ATTRS_SPECIAL:[(&'static str,&'static str); 77] = [$((stringify!($name),$attribute),)*];
     }
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
 // complete list svg attributes
-declare_attributes! {
+declare_svg_attributes! {
     accumulate;
     additive;
     allowReorder;
@@ -201,7 +227,7 @@ declare_attributes! {
 }
 
 // attributes that has dash
-declare_attributes! {
+declare_svg_attributes_special! {
     accent_height => "accent-height";
     alignment_baseline => "alignment-baseline";
     arabic_form => "arabic-form";
@@ -275,11 +301,10 @@ declare_attributes! {
     xml_base => "xml:base";
     xml_lang => "xml:lang";
     xml_space => "xml:space";
-}
-
-declare_attributes! {
     r#in => "in";
+    in_ => "in";
     r#type => "type";
+    type_ => "type";
 }
 
 declare_xlink_attributes! {
@@ -291,256 +316,3 @@ declare_xlink_attributes! {
     xlink_title => "title";
     xlink_type => "type";
 }
-
-pub(crate) const SVG_ATTRS: [&'static str; 250] = [
-    "accumulate",
-    "additive",
-    "allowReorder",
-    "alphabetic",
-    "amplitude",
-    "ascent",
-    "attributeName",
-    "attributeType",
-    "autoReverse",
-    "azimuth",
-    "baseFrequency",
-    "baseProfile",
-    "bbox",
-    "begin",
-    "bias",
-    "by",
-    "calcMode",
-    "clip",
-    "clipPathUnits",
-    "color",
-    "contentScriptType",
-    "contentStyleType",
-    "cursor",
-    "cx",
-    "cy",
-    "d",
-    "decelerate",
-    "descent",
-    "diffuseConstant",
-    "direction",
-    "display",
-    "divisor",
-    "dur",
-    "dx",
-    "dy",
-    "edgeMode",
-    "elevation",
-    "end",
-    "exponent",
-    "externalResourcesRequired",
-    "fill",
-    "filter",
-    "filterRes",
-    "filterUnits",
-    "format",
-    "from",
-    "fr",
-    "fx",
-    "fy",
-    "g1",
-    "g2",
-    "glyphRef",
-    "gradientTransform",
-    "gradientUnits",
-    "hanging",
-    "hreflang",
-    "ideographic",
-    "in2",
-    "intercept",
-    "k",
-    "k1",
-    "k2",
-    "k3",
-    "k4",
-    "kernelMatrix",
-    "kernelUnitLength",
-    "kerning",
-    "keyPoints",
-    "keySplines",
-    "keyTimes",
-    "lang",
-    "lengthAdjust",
-    "limitingConeAngle",
-    "local",
-    "markerHeight",
-    "markerUnits",
-    "markerWidth",
-    "mask",
-    "maskContentUnits",
-    "maskUnits",
-    "mathematical",
-    "max",
-    "media",
-    "method",
-    "min",
-    "mode",
-    "name",
-    "numOctaves",
-    "offset",
-    "opacity",
-    "operator",
-    "order",
-    "orient",
-    "orientation",
-    "origin",
-    "overflow",
-    "pathLength",
-    "patternContentUnits",
-    "patternTransform",
-    "patternUnits",
-    "ping",
-    "points",
-    "pointsAtX",
-    "pointsAtY",
-    "pointsAtZ",
-    "preserveAlpha",
-    "preserveAspectRatio",
-    "primitiveUnits",
-    "r",
-    "radius",
-    "referrerPolicy",
-    "refX",
-    "refY",
-    "rel",
-    "repeatCount",
-    "repeatDur",
-    "requiredExtensions",
-    "requiredFeatures",
-    "restart",
-    "result",
-    "rotate",
-    "rx",
-    "ry",
-    "scale",
-    "seed",
-    "slope",
-    "spacing",
-    "specularConstant",
-    "specularExponent",
-    "speed",
-    "spreadMethod",
-    "startOffset",
-    "stdDeviation",
-    "stemh",
-    "stemv",
-    "stitchTiles",
-    "string",
-    "stroke",
-    "surfaceScale",
-    "systemLanguage",
-    "tabindex",
-    "tableValues",
-    "target",
-    "targetX",
-    "targetY",
-    "textLength",
-    "to",
-    "transform",
-    "u1",
-    "u2",
-    "unicode",
-    "values",
-    "version",
-    "viewBox",
-    "viewTarget",
-    "visibility",
-    "widths",
-    "x",
-    "x1",
-    "x2",
-    "xChannelSelector",
-    "xmlns",
-    "y",
-    "y1",
-    "y2",
-    "yChannelSelector",
-    "z",
-    "zoomAndPan",
-    "accent-height",
-    "alignment-baseline",
-    "arabic-form",
-    "baseline-shift",
-    "cap-height",
-    "clip-path",
-    "clip-rule",
-    "color-interpolation",
-    "color-interpolation-filters",
-    "color-profile",
-    "color-rendering",
-    "dominant-baseline",
-    "enable-background",
-    "fill-opacity",
-    "fill-rule",
-    "flood-color",
-    "flood-opacity",
-    "font-size-adjust",
-    "font-stretch",
-    "font-style",
-    "font-variant",
-    "font-weight",
-    "glyph-name",
-    "glyph-orientation-horizontal",
-    "glyph-orientation-vertical",
-    "horiz-adv-x",
-    "horiz-origin-x",
-    "image-rendering",
-    "letter-spacing",
-    "lighting-color",
-    "marker-end",
-    "marker-mid",
-    "marker-start",
-    "overline-position",
-    "overline-thickness",
-    "panose-1",
-    "paint-order",
-    "pointer-events",
-    "rendering-intent",
-    "shape-rendering",
-    "stop-color",
-    "stop-opacity",
-    "strikethrough-position",
-    "strikethrough-thickness",
-    "stroke-dasharray",
-    "stroke-dashoffset",
-    "stroke-linecap",
-    "stroke-linejoin",
-    "stroke-miterlimit",
-    "stroke-opacity",
-    "stroke-width",
-    "text-anchor",
-    "text-decoration",
-    "text-rendering",
-    "underline-position",
-    "underline-thickness",
-    "unicode-bidi",
-    "unicode-range",
-    "units-per-em",
-    "v-alphabetic",
-    "v-hanging",
-    "v-ideographic",
-    "v-mathematical",
-    "vector-effect",
-    "vert-adv-y",
-    "vert-origin-x",
-    "vert-origin-y",
-    "word-spacing",
-    "writing-mode",
-    "x-height",
-    "xml:base",
-    "xml:lang",
-    "xml:space",
-    "in",
-    "type",
-    "actuate",
-    "arcrole",
-    "href",
-    "role",
-    "show",
-    "title",
-    "type",
-];

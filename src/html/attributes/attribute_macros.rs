@@ -21,6 +21,7 @@ macro_rules! declare_attributes {
                     attr(stringify!($name), v)
                 }
          )*
+
     };
     ( $(
          $(#[$attr:meta])*
@@ -40,9 +41,36 @@ macro_rules! declare_attributes {
     }
 }
 
+/// declare html attributes, at the same time this also
+/// fills up the HTML_ATTRS const with all the common html attributes
+macro_rules! declare_html_attributes{
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+        declare_attributes!{ $($name;)*}
+        pub(crate) const HTML_ATTRS:[&'static str; 119] = [$(stringify!($name),)*];
+    }
+}
+
+/// declare html attributes, at the same time this also
+/// fills up the HTML_ATTRS_SPECIAL const with the html attribute that are not
+/// regular identifiers
+macro_rules! declare_html_attributes_special{
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident => $attribute:tt;
+       )*
+     ) => {
+        declare_attributes!{ $($name;)*}
+        pub(crate) const HTML_ATTRS_SPECIAL:[(&'static str,&'static str); 12] = [$((stringify!($name),$attribute),)*];
+    }
+}
+
 // List from html attributes
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes
-declare_attributes! {
+declare_html_attributes! {
     accept;
     accesskey;
     action;
@@ -161,14 +189,11 @@ declare_attributes! {
     value;
     width;
     wrap;
-}
-
-declare_attributes! {
     key;
 }
 
 // attributes with dash
-declare_attributes! {
+declare_html_attributes_special! {
     accept_charset => "accept-charset";
 
     r#async => "async";
@@ -187,136 +212,3 @@ declare_attributes! {
     r#type => "type";
     type_ => "type";
 }
-
-/// All of the valid html attributes,
-/// had to reenumerate here since putting it in macro
-/// will recreate a redefinition of the container
-pub(crate) const HTML_ATTRS: [&'static str; 127] = [
-    "accept",
-    "accesskey",
-    "action",
-    "align",
-    "allow",
-    "alt",
-    "autocapitalize",
-    "autocomplete",
-    "autofocus",
-    "autoplay",
-    "background",
-    "bgcolor",
-    "border",
-    "buffered",
-    "challenge",
-    "charset",
-    "checked",
-    "cite",
-    "class",
-    "codebase",
-    "color",
-    "cols",
-    "colspan",
-    "content",
-    "contenteditable",
-    "contextmenu",
-    "controls",
-    "coords",
-    "crossorigin",
-    "csp",
-    "data",
-    "datetime",
-    "decoding",
-    "default",
-    "defer",
-    "dir",
-    "dirname",
-    "disabled",
-    "download",
-    "draggable",
-    "dropzone",
-    "enctype",
-    "enterkeyhint",
-    "formaction",
-    "formnovalidate",
-    "headers",
-    "height",
-    "hidden",
-    "high",
-    "href",
-    "hreflang",
-    "http",
-    "icon",
-    "id",
-    "importance",
-    "integrity",
-    "intrinsicsize",
-    "inputmode",
-    "ismap",
-    "itemprop",
-    "keytype",
-    "kind",
-    "lang",
-    "language",
-    "loading",
-    "list",
-    "low",
-    "manifest",
-    "max",
-    "maxlength",
-    "minlength",
-    "media",
-    "method",
-    "min",
-    "multiple",
-    "muted",
-    "name",
-    "novalidate",
-    "open",
-    "optimum",
-    "pattern",
-    "ping",
-    "placeholder",
-    "poster",
-    "preload",
-    "radiogroup",
-    "readonly",
-    "referrerpolicy",
-    "rel",
-    "required",
-    "reversed",
-    "rows",
-    "rowspan",
-    "sandbox",
-    "scope",
-    "scoped",
-    "selected",
-    "shape",
-    "size",
-    "sizes",
-    "slot",
-    "spellcheck",
-    "src",
-    "srcdoc",
-    "srclang",
-    "srcset",
-    "start",
-    "step",
-    "style",
-    "summary",
-    "tabindex",
-    "target",
-    "title",
-    "translate",
-    "usemap",
-    "value",
-    "width",
-    "wrap",
-    "key",
-    "accept-charset",
-    "async",
-    "for",
-    "font-family",
-    "font-size",
-    "flex-direction",
-    "loop",
-    "type",
-];

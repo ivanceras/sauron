@@ -99,6 +99,7 @@ macro_rules! declare_common_tags_and_macro {
             }
         }
 
+        pub(crate) const HTML_TAGS: [&'static str; 112] = [$(stringify!($name),)*];
     };
 }
 
@@ -108,7 +109,32 @@ macro_rules! declare_tags_and_macro {
         declare_tags! { $($name;)* }
 
         declare_tags_macro! {($) $($name;)* }
+
     };
+}
+
+macro_rules! declare_tags_non_common{
+
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+        declare_tags!{ $($name;)*}
+        pub(crate) const HTML_TAGS_NON_COMMON:[&'static str;1] = [$(stringify!($name),)*];
+    }
+}
+
+macro_rules! declare_tags_and_macro_non_common{
+
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+        declare_tags_and_macro!{ $($name;)*}
+        pub(crate) const HTML_TAGS_WITH_MACRO_NON_COMMON:[&'static str;2] = [$(stringify!($name),)*];
+    }
 }
 
 // Organized in the same order as
@@ -230,7 +256,7 @@ declare_common_tags_and_macro! {
     template;
 }
 
-declare_tags! {
+declare_tags_non_common! {
     style;  //  conflicts with html::attributes::style, attribute::style    > tags::style
 }
 
@@ -238,127 +264,7 @@ declare_tags! {
 // which the users need to explicitly import using
 // html::tags::style, html::tags::html, etc
 //
-declare_tags_and_macro! {
+declare_tags_and_macro_non_common! {
     title; // conflicts with html::attributes::title  , attributes::title   > tags::title
     slot;  // conflicts with html::attributes::slot   , attrributes::slot   > tags::slot
 }
-
-/// All the HTML tags, need to be re-enumerated since doing it in macro will duplicate the
-/// definition of the const container
-pub(crate) const HTML_TAGS: [&'static str; 115] = [
-    "base",
-    "head",
-    "link",
-    "meta",
-    "body",
-    "address",
-    "article",
-    "aside",
-    "footer",
-    "header",
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-    "hgroup",
-    "main",
-    "nav",
-    "section",
-    "blockquote",
-    "dd",
-    "div",
-    "dl",
-    "dt",
-    "figcaption",
-    "figure",
-    "hr",
-    "html",
-    "li",
-    "ol",
-    "p",
-    "pre",
-    "ul",
-    "a",
-    "abbr",
-    "b",
-    "bdi",
-    "bdo",
-    "br",
-    "cite",
-    "code",
-    "data",
-    "dfn",
-    "em",
-    "i",
-    "kbd",
-    "mark",
-    "q",
-    "rb",
-    "rp",
-    "rt",
-    "rtc",
-    "ruby",
-    "s",
-    "samp",
-    "small",
-    "span",
-    "strong",
-    "sub",
-    "sup",
-    "time",
-    "u",
-    "var",
-    "wbr",
-    "area",
-    "audio",
-    "img",
-    "map",
-    "track",
-    "video",
-    "embed",
-    "iframe",
-    "object",
-    "param",
-    "picture",
-    "source",
-    "canvas",
-    "noscript",
-    "script",
-    "del",
-    "ins",
-    "caption",
-    "col",
-    "colgroup",
-    "table",
-    "tbody",
-    "td",
-    "tfoot",
-    "th",
-    "thead",
-    "tr",
-    "button",
-    "datalist",
-    "fieldset",
-    "form",
-    "input",
-    "label",
-    "legend",
-    "meter",
-    "optgroup",
-    "option",
-    "output",
-    "progress",
-    "select",
-    "textarea",
-    "details",
-    "dialog",
-    "menu",
-    "menuitem",
-    "summary",
-    "template",
-    "style",
-    "title",
-    "slot",
-];
