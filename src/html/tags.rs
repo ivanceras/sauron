@@ -99,6 +99,7 @@ macro_rules! declare_common_tags_and_macro {
             }
         }
 
+        #[cfg(feature = "with-parser")]
         pub(crate) const HTML_TAGS: [&'static str; 112] = [$(stringify!($name),)*];
     };
 }
@@ -122,6 +123,7 @@ macro_rules! declare_tags_non_common{
      ) => {
         declare_tags!{ $($name;)*}
 
+        #[cfg(feature = "with-parser")]
         pub(crate) const HTML_TAGS_NON_COMMON:[&'static str;1] = [$(stringify!($name),)*];
     }
 }
@@ -135,6 +137,7 @@ macro_rules! declare_tags_and_macro_non_common{
      ) => {
         declare_tags_and_macro!{ $($name;)*}
 
+        #[cfg(feature = "with-parser")]
         pub(crate) const HTML_TAGS_WITH_MACRO_NON_COMMON:[&'static str;2] = [$(stringify!($name),)*];
     }
 }

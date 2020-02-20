@@ -25,6 +25,7 @@ macro_rules! declare_xlink_attributes {
                 }
          )*
 
+        #[cfg(feature = "with-parser")]
         pub(crate) const SVG_ATTRS_XLINK:[(&'static str,&'static str); 7] = [$((stringify!($name),$attribute),)*];
     }
 }
@@ -39,6 +40,7 @@ macro_rules! declare_svg_attributes{
      ) => {
         declare_attributes!{ $($name;)*}
 
+        #[cfg(feature = "with-parser")]
         pub(crate) const SVG_ATTRS:[&'static str; 168] = [$(stringify!($name),)*];
     }
 }
@@ -51,6 +53,7 @@ macro_rules! declare_svg_attributes_special{
      ) => {
         declare_attributes!{ $($name => $attribute;)*}
 
+        #[cfg(feature = "with-parser")]
         pub(crate) const SVG_ATTRS_SPECIAL:[(&'static str,&'static str); 77] = [$((stringify!($name),$attribute),)*];
     }
 }
