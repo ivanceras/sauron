@@ -35,7 +35,8 @@ use std::{
     iter::repeat,
 };
 
-pub type Node = sauron_vdom::Node<String, Event, ()>;
+pub type Node = sauron_vdom::Node<String, String, Event, ()>;
+pub type Attribute = sauron_vdom::Attribute<String, Event, ()>;
 
 #[derive(Debug)]
 struct Document {
@@ -112,17 +113,14 @@ fn match_attribute(key: &str) -> Option<String> {
     })
 }
 
-fn extract_attributes(
-    attrs: &Vec<html5ever::Attribute>,
-) -> Vec<crate::Attribute<()>> {
+fn extract_attributes(attrs: &Vec<html5ever::Attribute>) -> Vec<Attribute> {
     attrs
         .iter()
         .filter_map(|att| {
             let key = att.name.local.to_string();
             let value = att.value.to_string();
             if let Some(attr) = match_attribute(&key) {
-                //Some(crate::html::attributes::attr(attr, value))
-                None
+                Some(crate::html::attributes::attr(attr.to_string(), value))
             } else {
                 None
             }
@@ -158,7 +156,7 @@ fn process_node(node: &Handle) -> Option<Node> {
             if let Some(html_tag) = match_tag(&tag) {
                 let children_nodes = process_children(node);
                 let attributes = extract_attributes(&attrs.borrow());
-                Some(element(html_tag, vec![], children_nodes))
+                Some(element(html_tag, attributes, children_nodes))
             } else {
                 println!("tag not found: {}", tag);
                 None
@@ -227,7 +225,11 @@ mod tests {
 
     #[test]
     fn simpe_test() {
-        let res = parse_html_fragment("<div>content</div>");
+        let input = r#"
+        <div>content1</div>
+        <div>content2</div>
+            "#;
+        let res = parse_html_fragment(input);
         println!("res: {}", res.unwrap().root.unwrap());
         panic!();
     }

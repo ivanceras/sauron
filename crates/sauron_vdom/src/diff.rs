@@ -9,6 +9,9 @@ use std::{
     mem,
 };
 
+//TODO: Move this to sauron html specific
+/// This is a sauron html specific functionality
+/// diff 2 nodes with attribute using `&'static str` instead of generic ATT
 pub fn diff<'a, T, EVENT, MSG>(
     old: &'a Node<T, &'static str, EVENT, MSG>,
     new: &'a Node<T, &'static str, EVENT, MSG>,
