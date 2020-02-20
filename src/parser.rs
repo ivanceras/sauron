@@ -51,30 +51,13 @@ use std::{
     iter::repeat,
 };
 use thiserror::Error;
+use to_syntax::ToSyntax;
 
 pub(crate) type Node = sauron_vdom::Node<String, String, Event, ()>;
 pub(crate) type Attribute = sauron_vdom::Attribute<String, Event, ()>;
 pub(crate) type Element = sauron_vdom::Element<String, String, Event, ()>;
 
 mod to_syntax;
-
-#[derive(Debug)]
-struct Document {
-    has_doc_type: bool,
-    root: Option<Node>,
-}
-
-impl fmt::Display for Document {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.has_doc_type {
-            writeln!(f, "<!doctype html>")?;
-        }
-        if let Some(root) = &self.root {
-            writeln!(f, "{}", root)?;
-        }
-        Ok(())
-    }
-}
 
 #[derive(Debug, Error)]
 enum ParseError {
@@ -95,15 +78,9 @@ fn has_doc_type(node: &Handle) -> bool {
     }
 }
 
-fn parse_doc<'a>(node: &Handle) -> Option<Document> {
+fn parse_doc<'a>(node: &Handle) -> Option<Node> {
     match node.data {
-        NodeData::Document => {
-            println!("this is a document..");
-            Some(Document {
-                has_doc_type: has_any_doc_type(node),
-                root: process_node(node),
-            })
-        }
+        NodeData::Document => process_node(node),
         _ => None,
     }
 }
@@ -211,7 +188,7 @@ fn process_node(node: &Handle) -> Option<Node> {
     }
 }
 
-fn parse_html(html: &str) -> Result<Document, ParseError> {
+fn parse_html(html: &str) -> Result<Option<Node>, ParseError> {
     let html = html.to_string().into_bytes();
     let mut cursor = Cursor::new(html);
     let dom = parse_document(RcDom::default(), Default::default())
@@ -224,11 +201,11 @@ fn parse_html(html: &str) -> Result<Document, ParseError> {
             dom.errors.iter().map(|i| i.to_string()).collect();
         Err(ParseError::Generic(errors.join(", ")))
     } else {
-        Ok(node.expect("must have a node"))
+        Ok(node)
     }
 }
 
-fn parse_html_fragment(html: &str) -> Result<Document, ParseError> {
+fn parse_html_fragment(html: &str) -> Result<Option<Node>, ParseError> {
     let html = html.to_string().into_bytes();
     let mut cursor = Cursor::new(html);
     let dom = parse_fragment(
@@ -246,7 +223,28 @@ fn parse_html_fragment(html: &str) -> Result<Document, ParseError> {
             dom.errors.iter().map(|i| i.to_string()).collect();
         Err(ParseError::Generic(errors.join(", ")))
     } else {
-        Ok(node.expect("must have a node"))
+        Ok(node)
+    }
+}
+
+pub fn convert_html_to_syntax(html: &str, use_macro: bool) -> String {
+    log::info!("input: {}", html);
+    match parse_html_fragment(html) {
+        Ok(root_node) => {
+            if let Some(root_node) = root_node {
+                if let Some(mut root_element) = root_node.take_element() {
+                    root_element.to_syntax(use_macro, 0)
+                } else {
+                    String::new()
+                }
+            } else {
+                String::new()
+            }
+        }
+        Err(e) => {
+            log::error!("error: {}", e);
+            String::new()
+        }
     }
 }
 
@@ -269,7 +267,7 @@ mod tests {
     div!([],[text("content2")]),
 ])"#;
         let res = parse_html_fragment(input);
-        let syntax = res.unwrap().root.unwrap().to_syntax(true, 0);
+        let syntax = res.unwrap().unwrap().to_syntax(true, 0);
         println!("syntax: {}", syntax);
         assert_eq!(expected, syntax);
     }
@@ -314,7 +312,7 @@ mod tests {
     ]),
 ])"#;
         let res = parse_html(input);
-        let syntax = res.unwrap().root.unwrap().to_syntax(true, 0);
+        let syntax = res.unwrap().unwrap().to_syntax(true, 0);
         println!("syntax: {}", syntax);
         assert_eq!(expected, syntax);
     }
@@ -348,7 +346,7 @@ mod tests {
     ]),
 ])"#;
         let res = parse_html_fragment(input);
-        let syntax = res.unwrap().root.unwrap().to_syntax(true, 0);
+        let syntax = res.unwrap().unwrap().to_syntax(true, 0);
         println!("syntax: {}", syntax);
         assert_eq!(expected, syntax);
     }
