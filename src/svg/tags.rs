@@ -105,6 +105,8 @@ macro_rules! declare_svg_tags_macro {
     };
 }
 
+/// declare common svg tags that is not in conflict with the html tags
+/// at the same time this also fills the SVG_TAGS const with all the svg tags
 macro_rules! declare_common_svg_tags_and_macro {
     ($($(#[$attr:meta])* $name:ident;)*) => {
 
@@ -116,7 +118,41 @@ macro_rules! declare_common_svg_tags_and_macro {
             }
         }
 
+
+        #[cfg(feature = "with-parser")]
+        pub(crate) const SVG_TAGS: [&'static str; 65] = [ $(stringify!($name),)* ];
+
     };
+}
+
+/// declare svg tags, at the same time this also
+/// fills up the SVG_TAGS_SPECIAL const with the svg tags that are not
+/// regular identifiers
+macro_rules! declare_svg_tags_special{
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident => $attribute:tt;
+       )*
+     ) => {
+        declare_svg_tags!{ $($name=>$attribute;)*}
+
+        #[cfg(feature = "with-parser")]
+        pub(crate) const SVG_TAGS_SPECIAL:[(&'static str,&'static str); 3] = [$((stringify!($name),$attribute),)*];
+    }
+}
+
+macro_rules! declare_svg_tags_non_common{
+
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+        declare_svg_tags!{ $($name;)*}
+
+        #[cfg(feature = "with-parser")]
+        pub(crate) const SVG_TAGS_NON_COMMON:[&'static str;6] = [$(stringify!($name),)*];
+    }
 }
 
 declare_common_svg_tags_and_macro! {
@@ -186,7 +222,7 @@ declare_common_svg_tags_and_macro! {
     unknown;
     view;
 }
-declare_svg_tags! {
+declare_svg_tags_special! {
     color_profile => "color-profile";
     r#use => "use";
     use_ => "use";
@@ -196,7 +232,7 @@ declare_svg_tags! {
 // which the users need to explicitly import using
 // svg::tags::style, svg::tags::text, svg::tags::title, etc
 //
-declare_svg_tags! {
+declare_svg_tags_non_common! {
     line; // since this conflicts with std::line! macro, std::line                > svg::tags::line
     script; // this conflicts with html::script        , html::tags::script       > svg::tags::script
     style; // conflics with html::attributes::style    , html::attributes::style  > svg::tags::style

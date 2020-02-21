@@ -99,6 +99,8 @@ macro_rules! declare_common_tags_and_macro {
             }
         }
 
+        #[cfg(feature = "with-parser")]
+        pub(crate) const HTML_TAGS: [&'static str; 112] = [$(stringify!($name),)*];
     };
 }
 
@@ -108,7 +110,36 @@ macro_rules! declare_tags_and_macro {
         declare_tags! { $($name;)* }
 
         declare_tags_macro! {($) $($name;)* }
+
     };
+}
+
+macro_rules! declare_tags_non_common{
+
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+        declare_tags!{ $($name;)*}
+
+        #[cfg(feature = "with-parser")]
+        pub(crate) const HTML_TAGS_NON_COMMON:[&'static str;1] = [$(stringify!($name),)*];
+    }
+}
+
+macro_rules! declare_tags_and_macro_non_common{
+
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+        declare_tags_and_macro!{ $($name;)*}
+
+        #[cfg(feature = "with-parser")]
+        pub(crate) const HTML_TAGS_WITH_MACRO_NON_COMMON:[&'static str;2] = [$(stringify!($name),)*];
+    }
 }
 
 // Organized in the same order as
@@ -230,7 +261,7 @@ declare_common_tags_and_macro! {
     template;
 }
 
-declare_tags! {
+declare_tags_non_common! {
     style;  //  conflicts with html::attributes::style, attribute::style    > tags::style
 }
 
@@ -238,7 +269,7 @@ declare_tags! {
 // which the users need to explicitly import using
 // html::tags::style, html::tags::html, etc
 //
-declare_tags_and_macro! {
+declare_tags_and_macro_non_common! {
     title; // conflicts with html::attributes::title  , attributes::title   > tags::title
     slot;  // conflicts with html::attributes::slot   , attrributes::slot   > tags::slot
 }

@@ -147,6 +147,10 @@
 //! - [svg_clock](https://ivanceras.github.io/svg_clock/) - A clock drawn using svg and window tick event.
 //! - [svg_graph](https://ivanceras.github.io/svg_graph/) - A simple graph using svg
 //!
+//! ### Convert html to sauron syntax
+//! [html2sauron](https://ivanceras.github.io/html2sauron/) - A tool to easily convert html into
+//! sauron node tree for your views.
+//!
 //! ### Prerequisite:
 //!
 //! ```sh
@@ -213,12 +217,16 @@ cfg_if! {if #[cfg(feature = "with-markdown")] {
     mod markdown;
     pub use markdown::*;
 }}
+#[cfg(feature = "with-parser")]
+pub mod parser;
 
 #[macro_use]
 pub mod html;
 
 #[macro_use]
 pub mod svg;
+
+pub use sauron_vdom;
 
 pub use sauron_vdom::{
     diff,

@@ -169,7 +169,7 @@ where
     }
 
     /// check if the children of this node is only 1 and it is a text node
-    fn is_children_a_node_text(&self) -> bool {
+    pub fn is_children_a_node_text(&self) -> bool {
         self.children.len() == 1 && self.children[0].is_text_node()
     }
 

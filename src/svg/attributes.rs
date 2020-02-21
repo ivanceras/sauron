@@ -8,9 +8,59 @@ pub use crate::html::attributes::classes_flag;
 
 pub(in crate) const XLINK_NAMESPACE: &str = "http://www.w3.org/1999/xlink";
 
+macro_rules! declare_xlink_attributes {
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident => $attribute:tt;
+       )*
+     ) => {
+        $(
+            $(#[$attr])*
+            #[inline]
+            #[allow(non_snake_case)]
+            pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
+                where V: Into<Value>,
+                {
+                    attr_ns(Some(XLINK_NAMESPACE), $attribute, v)
+                }
+         )*
+
+        #[cfg(feature = "with-parser")]
+        pub(crate) const SVG_ATTRS_XLINK:[(&'static str,&'static str); 7] = [$((stringify!($name),$attribute),)*];
+    }
+}
+
+/// declare svg attributes, at the same time fill up the
+/// SVG_ATTR const with all the common svg attributes
+macro_rules! declare_svg_attributes{
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+        declare_attributes!{ $($name;)*}
+
+        #[cfg(feature = "with-parser")]
+        pub(crate) const SVG_ATTRS:[&'static str; 168] = [$(stringify!($name),)*];
+    }
+}
+
+macro_rules! declare_svg_attributes_special{
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident => $attribute:tt;
+       )*
+     ) => {
+        declare_attributes!{ $($name => $attribute;)*}
+
+        #[cfg(feature = "with-parser")]
+        pub(crate) const SVG_ATTRS_SPECIAL:[(&'static str,&'static str); 77] = [$((stringify!($name),$attribute),)*];
+    }
+}
+
 // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
 // complete list svg attributes
-declare_attributes! {
+declare_svg_attributes! {
     accumulate;
     additive;
     allowReorder;
@@ -182,7 +232,7 @@ declare_attributes! {
 }
 
 // attributes that has dash
-declare_attributes! {
+declare_svg_attributes_special! {
     accent_height => "accent-height";
     alignment_baseline => "alignment-baseline";
     arabic_form => "arabic-form";
@@ -256,30 +306,10 @@ declare_attributes! {
     xml_base => "xml:base";
     xml_lang => "xml:lang";
     xml_space => "xml:space";
-}
-
-declare_attributes! {
     r#in => "in";
+    in_ => "in";
     r#type => "type";
-}
-
-macro_rules! declare_xlink_attributes {
-    ( $(
-         $(#[$attr:meta])*
-         $name:ident => $attribute:tt;
-       )*
-     ) => {
-        $(
-            $(#[$attr])*
-            #[inline]
-            #[allow(non_snake_case)]
-            pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
-                where V: Into<Value>,
-                {
-                    attr_ns(Some(XLINK_NAMESPACE), $attribute, v)
-                }
-         )*
-    }
+    type_ => "type";
 }
 
 declare_xlink_attributes! {

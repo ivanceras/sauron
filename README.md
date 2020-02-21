@@ -137,6 +137,15 @@ Look at the [examples](https://github.com/ivanceras/sauron/tree/master/examples)
 and the build script for the details.
 
 
+#### Demo examples
+- [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet csv data viewer
+- [svg_clock](https://ivanceras.github.io/svg_clock/) - A clock drawn using svg and window tick event.
+- [svg_graph](https://ivanceras.github.io/svg_graph/) - A simple graph using svg
+
+#### Convert html to sauron syntax
+[html2sauron](https://ivanceras.github.io/html2sauron/) - A tool to easily convert html into
+sauron node tree for your views.
+
 #### Prerequisite:
 
 ```sh

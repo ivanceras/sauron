@@ -6,7 +6,7 @@ mod cmd;
 mod diff;
 mod dispatch;
 mod patch;
-pub(in crate) mod util;
+pub mod util;
 mod vnode;
 
 pub use callback::Callback;
