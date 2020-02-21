@@ -236,6 +236,9 @@ pub use sauron_vdom::{
     Value,
 };
 
+/// Prelude simplifies the imports from sauron
+/// This imports the necessary functions to build
+/// a basic sauron app.
 pub mod prelude {
     pub use crate::{
         html::{
