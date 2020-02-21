@@ -11,10 +11,7 @@ pub use restq::{
     DataType,
     DataValue,
 };
-use sauron::{
-    Program,
-};
-
+use sauron::prelude::*;
 use views::{
     resize_wrapper,
     DataView,
@@ -24,7 +21,6 @@ use wasm_bindgen::{
     self,
     prelude::*,
 };
-
 
 #[macro_use]
 extern crate log;

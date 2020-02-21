@@ -236,6 +236,27 @@ pub use sauron_vdom::{
     Value,
 };
 
+pub mod prelude {
+    pub use crate::{
+        html::{
+            attributes::*,
+            events::*,
+            tags::{
+                commons::*,
+                *,
+            },
+            units::*,
+            *,
+        },
+        svg::{
+            attributes::*,
+            tags::commons::*,
+            *,
+        },
+        *,
+    };
+}
+
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
 /// App code.

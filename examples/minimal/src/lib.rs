@@ -1,12 +1,6 @@
 #![deny(warnings)]
 use sauron::{
-    div,
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
-    input,
+    prelude::*,
     Cmd,
     Component,
     Node,
@@ -39,7 +33,7 @@ impl Component<Msg> for App {
                 input!(
                     [
                         class("client"),
-                        r#type("button"),
+                        type_("button"),
                         value("Click me!"),
                         onclick(|_| {
                             trace!("Button is clicked");

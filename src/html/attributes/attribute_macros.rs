@@ -1,4 +1,3 @@
-use crate::Attribute;
 use sauron_vdom::{
     builder::attr,
     Value,

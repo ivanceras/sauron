@@ -3,7 +3,6 @@ use sauron_vdom::{
     AttribValue,
     Text,
 };
-use std::convert::TryFrom;
 
 pub trait ToSyntax {
     fn to_syntax(&self, use_macros: bool, indent: usize) -> String;
@@ -19,7 +18,7 @@ impl ToSyntax for Node {
 }
 
 impl ToSyntax for Text {
-    fn to_syntax(&self, use_macros: bool, indent: usize) -> String {
+    fn to_syntax(&self, _use_macros: bool, _indent: usize) -> String {
         format!("text(\"{}\")", self)
     }
 }
@@ -31,13 +30,13 @@ impl ToSyntax for Attribute {
             buffer += &format!(
                 r#"xlink_{}({}),"#,
                 self.name.to_string(),
-                self.value.to_syntax(use_macros, 0),
+                self.value.to_syntax(use_macros, indent),
             );
         } else {
             buffer += &format!(
                 r#"{}({}),"#,
                 self.name.to_string(),
-                self.value.to_syntax(use_macros, 0)
+                self.value.to_syntax(use_macros, indent)
             );
         }
         buffer
@@ -45,7 +44,7 @@ impl ToSyntax for Attribute {
 }
 
 impl ToSyntax for AttribValue<Event, ()> {
-    fn to_syntax(&self, use_macros: bool, indent: usize) -> String {
+    fn to_syntax(&self, _use_macros: bool, _indent: usize) -> String {
         match self.get_value() {
             Some(v_str) => {
                 match v_str.as_str() {

@@ -92,6 +92,7 @@ members = [
     "examples/window_tab_rows",
     "examples/svg_clock",
     "examples/svg_graph",
+    "examples/data-viewer",
 ]
 
 

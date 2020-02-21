@@ -1,16 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
-    Cmd,
-    Component,
-    Http,
-    Node,
-    Program,
-};
+use sauron::prelude::*;
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 

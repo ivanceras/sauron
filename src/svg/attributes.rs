@@ -54,7 +54,7 @@ macro_rules! declare_svg_attributes_special{
         declare_attributes!{ $($name => $attribute;)*}
 
         #[cfg(feature = "with-parser")]
-        pub(crate) const SVG_ATTRS_SPECIAL:[(&'static str,&'static str); 77] = [$((stringify!($name),$attribute),)*];
+        pub(crate) const SVG_ATTRS_SPECIAL:[(&'static str,&'static str); 75] = [$((stringify!($name),$attribute),)*];
     }
 }
 
@@ -308,8 +308,8 @@ declare_svg_attributes_special! {
     xml_space => "xml:space";
     r#in => "in";
     in_ => "in";
-    r#type => "type";
-    type_ => "type";
+    //r#type => "type"; // already defined in html tags
+    //type_ => "type";  // already defined in html tags
 }
 
 declare_xlink_attributes! {

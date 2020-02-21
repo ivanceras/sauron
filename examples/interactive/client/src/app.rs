@@ -1,13 +1,5 @@
 use js_sys::Date;
-use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-    },
-    Cmd,
-    Node,
-    *,
-};
+use sauron::prelude::*;
 use wasm_bindgen::{
     self,
     prelude::*,

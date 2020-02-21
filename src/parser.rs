@@ -6,7 +6,6 @@ use crate::{
             HTML_ATTRS,
             HTML_ATTRS_SPECIAL,
         },
-        html_element,
         tags::{
             HTML_TAGS,
             HTML_TAGS_NON_COMMON,
@@ -44,11 +43,8 @@ use markup5ever_rcdom::{
     RcDom,
 };
 use std::{
-    borrow::Cow,
-    fmt,
     io,
     io::Cursor,
-    iter::repeat,
 };
 use thiserror::Error;
 use to_syntax::ToSyntax;
@@ -65,17 +61,6 @@ enum ParseError {
     Generic(String),
     #[error("{0}")]
     IoError(#[from] io::Error),
-}
-
-fn has_doc_type(node: &Handle) -> bool {
-    match node.data {
-        NodeData::Doctype {
-            ref name,
-            ref public_id,
-            ref system_id,
-        } => true,
-        _ => false,
-    }
 }
 
 fn parse_doc<'a>(node: &Handle) -> Option<Node> {
@@ -97,8 +82,8 @@ fn match_tag(tag: &str) -> Option<String> {
         .or_else(|| {
             SVG_TAGS_SPECIAL
                 .iter()
-                .find(|(func, item)| item.eq_ignore_ascii_case(&tag))
-                .map(|(func, item)| func.to_string())
+                .find(|(_func, item)| item.eq_ignore_ascii_case(&tag))
+                .map(|(func, _item)| func.to_string())
         })
 }
 
@@ -113,8 +98,8 @@ fn match_attribute(key: &str) -> Option<String> {
                 .iter()
                 .chain(SVG_ATTRS_SPECIAL.iter())
                 .chain(SVG_ATTRS_XLINK.iter())
-                .find(|(func, att)| att.eq_ignore_ascii_case(key))
-                .map(|(func, att)| func.to_string())
+                .find(|(_func, att)| att.eq_ignore_ascii_case(key))
+                .map(|(func, _att)| func.to_string())
         })
 }
 
@@ -141,12 +126,6 @@ fn process_children(node: &Handle) -> Vec<Node> {
         .collect()
 }
 
-fn has_any_doc_type(node: &Handle) -> bool {
-    node.children
-        .borrow()
-        .iter()
-        .any(|child_node| has_doc_type(child_node))
-}
 fn process_node(node: &Handle) -> Option<Node> {
     match &node.data {
         NodeData::Text { ref contents } => {
@@ -232,7 +211,7 @@ pub fn convert_html_to_syntax(html: &str, use_macro: bool) -> String {
     match parse_html_fragment(html) {
         Ok(root_node) => {
             if let Some(root_node) = root_node {
-                if let Some(mut root_element) = root_node.take_element() {
+                if let Some(root_element) = root_node.take_element() {
                     root_element.to_syntax(use_macro, 0)
                 } else {
                     String::new()

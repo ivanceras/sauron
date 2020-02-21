@@ -1,7 +1,7 @@
 [package]
 name = "data-viewer"
 version = "0.1.0"
-authors = ["lee"]
+authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
 edition = "2018"
 
 
@@ -9,15 +9,12 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = {version = "0.21.0"}
-#sauron = { path = "../sauron", features = ["measure"] }
-#sauron = { path = "../sauron" }
+sauron = {path = "../../", version = "0.21.0"}
 console_error_panic_hook = { version = "0.1", optional = true }
 js-sys = "0.3"
 wee_alloc = { version = "0.4.3", optional = true }
 log = "0.4.8"
 console_log = "0.1.2"
-#restq = { path = "../restq" }
 restq = "0.1.0"
 thiserror = "1.0.9"
 
