@@ -1,3 +1,14 @@
+# Changelog
+
+# 0.22.0
+- Make use of prelude to simpilfy imports in sauron
+- Add feature to parse html and convert it into sauron view syntax code.
+- Add link to [html2sauron](https://ivanceras.github.io/html2sauron/) tool in the docs
+- Refactor Attribute key to use generic type, Attribute key was previously using `&'static str`, It got changed to a generic type, which allows us to create attribute with key other than `&'static str` such as `String` or strongly typed `enums`.
+- Simplify the indent utility function
+- Improve the svg_clock example to make the subsecond update to the subsecond by ticking at every 20ms
+- Add cargo deny configuration
+
 # 0.21.1
  - Add a help function classes which joins an array of string into a space class
  - Use criterion in benchmarks
