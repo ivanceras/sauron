@@ -45,13 +45,7 @@
 //!
 //! ### Example
 //! ```rust,no_run
-//! use sauron::html::attributes::*;
-//! use sauron::html::events::*;
-//! use sauron::*;
-//! use sauron::Component;
-//! use sauron::Node;
-//! use sauron::Program;
-//! use sauron::Cmd;
+//! use sauron::prelude::*;
 //! use wasm_bindgen::prelude::*;
 //! use log::*;
 //!
@@ -159,11 +153,6 @@
 //! ```
 //!
 //! **Warning:** I repeat, You need to use the latest nightly compiler in order for this to work.
-//!
-//! This project is based on the existing projects:
-//!  - [percy](https://github.com/chinedufn/percy)
-//!  - [yew](https://github.com/DenisKolodin/yew)
-//!  - [willow](https://github.com/sindreij/willow)
 //!
 //! ### Performance:
 //! ![Benchmark](https://raw.githubusercontent.com/ivanceras/todomvc-perf-comparison/sauron-benchmark/sauron-0.10.0.png)

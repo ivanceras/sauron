@@ -74,7 +74,9 @@ where
             continue;
         }
 
-        unreachable!("Getting here means we didn't find the element or next node that we were supposed to patch.")
+        unreachable!(
+            "Getting here means we didn't find the element or next node that we were supposed to patch."
+        )
     }
 
     Ok(active_closures)
@@ -101,6 +103,7 @@ fn find_nodes<MSG>(
     find_nodes_recursive(root_node, &mut cur_node_idx, &nodes_to_find)
 }
 
+/// find the html nodes recursively
 fn find_nodes_recursive(
     root_node: Node,
     cur_node_idx: &mut usize,
@@ -230,6 +233,8 @@ fn remove_event_listeners(
     Ok(())
 }
 
+/// apply a the patch to this element node.
+/// and return the ActiveClosure that may be attached to that element
 fn apply_element_patch<DSP, MSG>(
     program: Option<&Rc<DSP>>,
     node: &Element,
