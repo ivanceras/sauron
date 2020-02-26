@@ -103,6 +103,22 @@ fn match_attribute(key: &str) -> Option<String> {
         })
 }
 
+fn match_attribute_function(key: &str) -> Option<String> {
+    HTML_ATTRS
+        .iter()
+        .chain(SVG_ATTRS.iter())
+        .find(|att| att.eq_ignore_ascii_case(key))
+        .map(|att| att.to_string())
+        .or_else(|| {
+            HTML_ATTRS_SPECIAL
+                .iter()
+                .chain(SVG_ATTRS_SPECIAL.iter())
+                .chain(SVG_ATTRS_XLINK.iter())
+                .find(|(func, _att)| func.eq_ignore_ascii_case(key))
+                .map(|(func, _att)| func.to_string())
+        })
+}
+
 fn extract_attributes(attrs: &Vec<html5ever::Attribute>) -> Vec<Attribute> {
     attrs
         .iter()
@@ -112,7 +128,8 @@ fn extract_attributes(attrs: &Vec<html5ever::Attribute>) -> Vec<Attribute> {
             if let Some(attr) = match_attribute(&key) {
                 Some(crate::html::attributes::attr(attr.to_string(), value))
             } else {
-                None
+                log::warn!("Not a standard html attribute: {}", key);
+                Some(crate::html::attributes::attr(key, value))
             }
         })
         .collect()
@@ -266,7 +283,7 @@ mod tests {
     </style>
 </head>
 <body style='margin: 0; padding: 0; width: 100%; height: 100%;'>
-  <div id="web-app" style='width: 100%; height: 100%;'>
+  <div data-control-id="10001" id="web-app" style='width: 100%; height: 100%;'>
       #HTML_INSERTED_HERE_BY_SERVER#
   </div>
   <!-- This is a comment -->
@@ -285,7 +302,7 @@ mod tests {
     ")]),
     ]),
     body!([style("margin: 0; padding: 0; width: 100%; height: 100%;"),],[
-        div!([id("web-app"),style("width: 100%; height: 100%;"),],[text("
+        div!([attr("data-control-id",10001),id("web-app"),style("width: 100%; height: 100%;"),],[text("
       #HTML_INSERTED_HERE_BY_SERVER#
   ")]),
     ]),
@@ -312,7 +329,7 @@ mod tests {
 </svg>
 "#;
         let expected = r#"html!([],[
-    svg!([height(400),viewBox("0 0 600 400"),width(600),xmlns("http://www.w3.org/2000/svg"),],[
+    svg!([height(400),viewBox("0 0 600 400"),width(600),attr("xlink","http://www.w3.org/1999/xlink"),xmlns("http://www.w3.org/2000/svg"),],[
         defs!([],[
             filter!([id("shadow"),],[
                 feDropShadow!([dx(2),dy(1),stdDeviation(0.2),],[]),

@@ -26,6 +26,8 @@ impl ToSyntax for Text {
 impl ToSyntax for Attribute {
     fn to_syntax(&self, use_macros: bool, indent: usize) -> String {
         let mut buffer = String::new();
+        let matched_attribute_func =
+            match_attribute_function(&self.name).is_some();
         if let Some(_ns) = self.namespace {
             buffer += &format!(
                 r#"xlink_{}({}),"#,
@@ -33,11 +35,19 @@ impl ToSyntax for Attribute {
                 self.value.to_syntax(use_macros, indent),
             );
         } else {
-            buffer += &format!(
-                r#"{}({}),"#,
-                self.name.to_string(),
-                self.value.to_syntax(use_macros, indent)
-            );
+            if matched_attribute_func {
+                buffer += &format!(
+                    r#"{}({}),"#,
+                    self.name.to_string(),
+                    self.value.to_syntax(use_macros, indent)
+                );
+            } else {
+                buffer += &format!(
+                    r#"attr("{}",{}),"#,
+                    self.name.to_string(),
+                    self.value.to_syntax(use_macros, indent)
+                );
+            }
         }
         buffer
     }
