@@ -1,5 +1,8 @@
 # Changelog
 
+# 0.22.1
+- Only expose html::events in prelude when 'with-dom' feature is enabled
+
 # 0.22.0
 - Make use of prelude to simpilfy imports in sauron
 - Add feature to parse html and convert it into sauron view syntax code.
