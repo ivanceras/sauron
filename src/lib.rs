@@ -232,7 +232,6 @@ pub mod prelude {
     pub use crate::{
         html::{
             attributes::*,
-            events::*,
             tags::{
                 commons::*,
                 *,
@@ -247,6 +246,9 @@ pub mod prelude {
         },
         *,
     };
+
+    #[cfg(feature = "with-dom")]
+    pub use crate::html::events::*;
 }
 
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
