@@ -56,18 +56,11 @@ pub(crate) type Element = sauron_vdom::Element<String, String, Event, ()>;
 mod to_syntax;
 
 #[derive(Debug, Error)]
-enum ParseError {
+pub enum ParseError {
     #[error("Generic Error {0}")]
     Generic(String),
     #[error("{0}")]
     IoError(#[from] io::Error),
-}
-
-fn parse_doc<'a>(node: &Handle) -> Option<Node> {
-    match node.data {
-        NodeData::Document => process_node(node),
-        _ => None,
-    }
 }
 
 fn match_tag(tag: &str) -> Option<String> {
@@ -165,7 +158,7 @@ fn process_node(node: &Handle) -> Option<Node> {
                 let attributes = extract_attributes(&attrs.borrow());
                 Some(element(html_tag, attributes, children_nodes))
             } else {
-                println!("tag not found: {}", tag);
+                log::warn!("Invalid tag: {}", tag);
                 None
             }
         }
@@ -184,62 +177,45 @@ fn process_node(node: &Handle) -> Option<Node> {
     }
 }
 
-fn parse_html(html: &str) -> Result<Option<Node>, ParseError> {
-    let html = html.to_string().into_bytes();
-    let mut cursor = Cursor::new(html);
-    let dom = parse_document(RcDom::default(), Default::default())
-        .from_utf8()
-        .read_from(&mut cursor)?;
-    let node = parse_doc(&dom.document);
-
-    if !dom.errors.is_empty() {
-        let errors: Vec<String> =
-            dom.errors.iter().map(|i| i.to_string()).collect();
-        Err(ParseError::Generic(errors.join(", ")))
+fn parse(html: &str) -> Result<Option<Node>, ParseError> {
+    let html_start = html.trim_start();
+    let parser = if html_start.starts_with("<html")
+        || html_start.starts_with("<!DOCTYPE")
+    {
+        println!("using document parser");
+        parse_document(RcDom::default(), Default::default())
     } else {
-        Ok(node)
-    }
+        println!("using fragment parser");
+        parse_fragment(
+            RcDom::default(),
+            Default::default(),
+            QualName::new(None, ns!(html), local_name!("div")),
+            vec![],
+        )
+    };
+
+    let dom = parser.one(html);
+    let node = process_node(&dom.document);
+    Ok(node)
 }
 
-fn parse_html_fragment(html: &str) -> Result<Option<Node>, ParseError> {
-    let html = html.to_string().into_bytes();
-    let mut cursor = Cursor::new(html);
-    let dom = parse_fragment(
-        RcDom::default(),
-        Default::default(),
-        QualName::new(None, ns!(html), local_name!("div")),
-        vec![],
-    )
-    .from_utf8()
-    .read_from(&mut cursor)?;
-
-    let node = parse_doc(&dom.document);
-    if !dom.errors.is_empty() {
-        let errors: Vec<String> =
-            dom.errors.iter().map(|i| i.to_string()).collect();
-        Err(ParseError::Generic(errors.join(", ")))
-    } else {
-        Ok(node)
-    }
-}
-
-pub fn convert_html_to_syntax(html: &str, use_macro: bool) -> String {
+pub fn convert_html_to_syntax(
+    html: &str,
+    use_macro: bool,
+) -> Result<String, ParseError> {
     log::info!("input: {}", html);
-    match parse_html_fragment(html) {
+    println!("input: {}", html);
+    match parse(html) {
         Ok(root_node) => {
             if let Some(root_node) = root_node {
-                if let Some(root_element) = root_node.take_element() {
-                    root_element.to_syntax(use_macro, 0)
-                } else {
-                    String::new()
-                }
+                Ok(root_node.to_syntax(use_macro, 0))
             } else {
-                String::new()
+                Ok("".to_string())
             }
         }
         Err(e) => {
             log::error!("error: {}", e);
-            String::new()
+            Err(e)
         }
     }
 }
@@ -252,26 +228,27 @@ mod tests {
     };
 
     #[test]
-    fn simpe_test() {
+    fn simpe_convert() {
         let input = r#"
         <div>content1</div>
         <div>content2</div>
+        <div>content3</div>
             "#;
 
         let expected = r#"html!([],[
     div!([],[text("content1")]),
     div!([],[text("content2")]),
+    div!([],[text("content3")]),
 ])"#;
-        let res = parse_html_fragment(input);
-        let syntax = res.unwrap().unwrap().to_syntax(true, 0);
+        let syntax =
+            convert_html_to_syntax(input, true).expect("must not fail");
         println!("syntax: {}", syntax);
         assert_eq!(expected, syntax);
     }
 
     #[test]
     fn simple_html_parse() {
-        let input = r#"<!DOCTYPE html>
-<html lang="en">
+        let input = r#"<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -288,8 +265,7 @@ mod tests {
   </div>
   <!-- This is a comment -->
 </body>
-</html>
-"#;
+</html>"#;
         let expected = r#"html!([lang("en"),],[
     head!([],[
         meta!([charset("UTF-8"),],[]),
@@ -307,8 +283,8 @@ mod tests {
   ")]),
     ]),
 ])"#;
-        let res = parse_html(input);
-        let syntax = res.unwrap().unwrap().to_syntax(true, 0);
+        let syntax =
+            convert_html_to_syntax(input, true).expect("must not fail");
         println!("syntax: {}", syntax);
         assert_eq!(expected, syntax);
     }
@@ -341,8 +317,8 @@ mod tests {
         text!([fill("red"),font_family("monospace"),font_size(50),style("filter:url(#shadow);"),width(500),x(20),y(200),],[text("Happy birthday")]),
     ]),
 ])"#;
-        let res = parse_html_fragment(input);
-        let syntax = res.unwrap().unwrap().to_syntax(true, 0);
+        let syntax =
+            convert_html_to_syntax(input, true).expect("must not fail");
         println!("syntax: {}", syntax);
         assert_eq!(expected, syntax);
     }
