@@ -11,7 +11,10 @@ mod vnode;
 
 pub use callback::Callback;
 pub use cmd::Cmd;
-pub use diff::diff;
+pub use diff::{
+    diff,
+    diff_with_key,
+};
 pub use dispatch::Dispatch;
 pub use patch::Patch;
 pub use vnode::{

@@ -64,6 +64,10 @@ where
         self.value.get_callback()
     }
 
+    pub fn take_callback(self) -> Option<Callback<EVENT, MSG>> {
+        self.value.take_callback()
+    }
+
     pub fn to_pretty_string(&self) -> String
     where
         ATT: ToString,
@@ -118,6 +122,13 @@ where
     }
 
     pub fn get_callback(&self) -> Option<&Callback<EVENT, MSG>> {
+        match self {
+            AttribValue::Value(_) => None,
+            AttribValue::Callback(cb) => Some(cb),
+        }
+    }
+
+    pub fn take_callback(self) -> Option<Callback<EVENT, MSG>> {
         match self {
             AttribValue::Value(_) => None,
             AttribValue::Callback(cb) => Some(cb),
