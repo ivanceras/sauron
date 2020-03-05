@@ -19,6 +19,9 @@ pub use sauron_vdom::{
 };
 use wasm_bindgen::JsCast;
 
+/// TODO: May not be needed if we can use fully generic event, when passed in the callback
+///
+/// This module convert browser events into sauron_vdom generic event
 pub mod mapper {
     use log::*;
 

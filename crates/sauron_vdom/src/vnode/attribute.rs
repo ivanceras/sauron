@@ -14,6 +14,27 @@ where
     pub namespace: Option<&'static str>,
 }
 
+impl<ATT, EVENT, MSG> Attribute<ATT, EVENT, MSG>
+where
+    ATT: Clone,
+{
+    pub fn from_callback(name: ATT, cb: Callback<EVENT, MSG>) -> Self {
+        Attribute {
+            name,
+            value: cb.into(),
+            namespace: None,
+        }
+    }
+
+    pub fn from_value(name: ATT, value: Value) -> Self {
+        Attribute {
+            name,
+            value: value.into(),
+            namespace: None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum AttribValue<EVENT, MSG> {
     Value(Value),
