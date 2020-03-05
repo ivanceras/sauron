@@ -9,6 +9,8 @@ documentation = "https://docs.rs/sauron"
 readme = "README.md"
 keywords = ["html", "dom", "web"]
 edition = "2018"
+
+[badges]
 maintenance = { status = "actively-developed" }
 
 [dependencies]
