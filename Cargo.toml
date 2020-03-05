@@ -9,6 +9,7 @@ documentation = "https://docs.rs/sauron"
 readme = "README.md"
 keywords = ["html", "dom", "web"]
 edition = "2018"
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 js-sys = { version = "0.3.19", optional = true }
