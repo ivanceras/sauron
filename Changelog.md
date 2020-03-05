@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.22.2
+- Export `sauron_vdom::diff::diff_with_key`
+- Add function `take_callback` to consume attribute and get the callback
+
 # 0.22.1
 - Only expose html::events in prelude when 'with-dom' feature is enabled
 
