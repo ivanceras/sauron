@@ -15,7 +15,7 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 js-sys = { version = "0.3.19", optional = true }
-sauron_vdom = { path ="crates/sauron_vdom", version = "0.22.0"}
+sauron_vdom = { path ="crates/sauron_vdom", version = "0.22.2"}
 wasm-bindgen = { version = "0.2.54", optional = true }
 lazy_static = "1.3.0"
 pulldown-cmark = { version = "0.5.1", optional = true }
