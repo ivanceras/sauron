@@ -15,7 +15,7 @@ use crate::{
 /// This diff operation will generate `Vec<Patch>` with zero or more patches that, when
 /// applied to your real DOM, will make your real DOM look like your new virtual dom.
 ///
-/// Each Patch has a u32 node index that helps us identify the real DOM node that it applies to.
+/// Each Patch has a usize node index that helps us identify the real DOM node that it applies to.
 ///
 /// Our old virtual dom's nodes are indexed depth first, as shown in this illustration
 /// (0 being the root node, 1 being it's first child, 2 being it's first child's first child).
