@@ -134,3 +134,11 @@ where
     }
     attributes
 }
+
+pub fn checked<MSG>(is_checked: bool) -> Attribute<MSG> {
+    if is_checked{
+        attr("checked", "checked")
+    }else{
+        attr("","")
+    }
+}

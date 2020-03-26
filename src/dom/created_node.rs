@@ -128,18 +128,22 @@ impl<T> CreatedNode<T> {
         let mut closures = ActiveClosure::new();
 
         velem.attributes().iter().for_each(|attr| {
-            if let Some(ref namespace) = attr.namespace {
-                element
-                    .set_attribute_ns(
-                        Some(namespace),
-                        attr.name,
-                        &attr.value.to_string(),
-                    )
-                    .expect("Set element attribute_ns in create element");
-            } else {
-                element
-                    .set_attribute(attr.name, &attr.value.to_string())
-                    .expect("Set element attribute in create element");
+            // attr "" is used in checked = false, since checked attribute is only unchecked
+            // when there is no checked attribute
+            if !attr.name.is_empty() {
+                if let Some(ref namespace) = attr.namespace {
+                    element
+                        .set_attribute_ns(
+                            Some(namespace),
+                            attr.name,
+                            &attr.value.to_string(),
+                        )
+                        .expect("Set element attribute_ns in create element");
+                } else {
+                    element
+                        .set_attribute(attr.name, &attr.value.to_string())
+                        .expect("Set element attribute in create element");
+                }
             }
         });
 

@@ -249,23 +249,27 @@ where
     match patch {
         Patch::AddAttributes(_node_idx, attributes) => {
             for attr in attributes.iter() {
-                node.set_attribute(attr.name, &attr.value.to_string())?;
-                // NOTE: set_attribute('value',..) is not enough
-                // value need to explicitly call the set_value in order for the
-                // actual value gets reflected.
-                // TODO: also implement for checked,
-                match attr.name {
-                    "value" => {
-                        if let Some(input) = node.dyn_ref::<HtmlInputElement>()
-                        {
-                            input.set_value(&attr.value.to_string());
-                        } else if let Some(textarea) =
-                            node.dyn_ref::<HtmlTextAreaElement>()
-                        {
-                            textarea.set_value(&attr.value.to_string());
+                // attr "" is used in checked = false, since checked attribute is only unchecked
+                // when there is no checked attribute
+                if !attr.name.is_empty() {
+                    node.set_attribute(attr.name, &attr.value.to_string())?;
+                    // NOTE: set_attribute('value',..) is not enough
+                    // value need to explicitly call the set_value in order for the
+                    // actual value gets reflected.
+                    match attr.name {
+                        "value" => {
+                            if let Some(input) =
+                                node.dyn_ref::<HtmlInputElement>()
+                            {
+                                input.set_value(&attr.value.to_string());
+                            } else if let Some(textarea) =
+                                node.dyn_ref::<HtmlTextAreaElement>()
+                            {
+                                textarea.set_value(&attr.value.to_string());
+                            }
                         }
+                        _ => (),
                     }
-                    _ => (),
                 }
             }
 

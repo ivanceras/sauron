@@ -90,7 +90,7 @@ declare_html_attributes! {
     buffered;
     challenge;
     charset;
-    checked;
+    //checked;
     cite;
     class;
     codebase;
