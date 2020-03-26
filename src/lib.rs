@@ -155,7 +155,7 @@
 //! **Warning:** I repeat, You need to use the latest nightly compiler in order for this to work.
 //!
 //! ### Performance:
-//! ![Benchmark](https://raw.githubusercontent.com/ivanceras/todomvc-perf-comparison/sauron-benchmark/sauron-0.10.0.png)
+//! ![Benchmark](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/perf.png)
 //!
 //! ### Please support this project:
 //!  [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
