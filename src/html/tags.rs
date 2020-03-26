@@ -95,6 +95,9 @@ macro_rules! declare_common_tags_and_macro {
             declare_tags! { $($name;)* }
 
             pub(crate) mod macros{
+                // we passed `$` which is the $d:tt in declare_tags_macro
+                // passing the `$` token is needed so as to prevent the called macro from unrolling
+                // it.
                 declare_tags_macro! {($) $($name;)* }
             }
         }
