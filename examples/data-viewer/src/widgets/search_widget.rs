@@ -10,7 +10,6 @@ use sauron::{
     Node,
 };
 
-
 pub struct SearchWidget {}
 
 pub struct SearchIcon {}

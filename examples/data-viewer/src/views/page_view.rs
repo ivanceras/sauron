@@ -24,7 +24,6 @@ use sauron::{
     Node,
 };
 
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     RowMsg(usize, row_view::Msg),

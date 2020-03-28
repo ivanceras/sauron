@@ -53,12 +53,10 @@ impl Component<Msg> for Clock {
             []
         );
 
-        let hand = |
-            rotate: f64,
-            stroke_color: &'static str,
-            stroke_width_value: u32,
-            height: u32,
-        | {
+        let hand = |rotate: f64,
+                    stroke_color: &'static str,
+                    stroke_width_value: u32,
+                    height: u32| {
             svg::tags::line(
                 vec![
                     x1(100),

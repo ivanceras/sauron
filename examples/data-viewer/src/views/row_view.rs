@@ -1,8 +1,6 @@
-use crate::{
-    views::{
-        field_view,
-        FieldView,
-    },
+use crate::views::{
+    field_view,
+    FieldView,
 };
 use restq::{
     ColumnDef,

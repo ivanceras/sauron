@@ -23,6 +23,7 @@ pub enum Value {
     Isize(isize),
     F32(f32),
     F64(f64),
+    Bytes(Vec<u8>),
 }
 
 impl Value {
@@ -37,6 +38,13 @@ impl Value {
     pub fn as_bool(&self) -> Option<bool> {
         match self {
             Value::Bool(v) => Some(*v),
+            _ => None,
+        }
+    }
+
+    pub fn as_bytes(&self) -> Option<&[u8]> {
+        match self {
+            Value::Bytes(bytes) => Some(bytes),
             _ => None,
         }
     }
@@ -61,6 +69,7 @@ impl Value {
             Value::Isize(v) => Some(*v as f64),
             Value::F32(v) => Some(f64::from(*v)),
             Value::F64(v) => Some(*v),
+            Value::Bytes(_) => None,
         }
     }
 
@@ -109,6 +118,7 @@ impl fmt::Display for Value {
             Value::Isize(v) => write!(f, "{}", v),
             Value::F32(v) => write!(f, "{}", v),
             Value::F64(v) => write!(f, "{}", v),
+            Value::Bytes(_) => panic!("bytes should not be displayed"),
         }
     }
 }
@@ -171,6 +181,7 @@ impl_from!(i128 => I128);
 impl_from!(isize => Isize);
 impl_from!(f32 => F32);
 impl_from!(f64 => F64);
+impl_from!(Vec<u8> => Bytes);
 
 impl_from!((T, U) => 0,1);
 impl_from!((T, U, V) => 0,1,2);

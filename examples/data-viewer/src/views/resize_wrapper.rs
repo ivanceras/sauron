@@ -32,7 +32,6 @@ use sauron::{
     *,
 };
 
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     DataViewMsg(data_view::Msg),

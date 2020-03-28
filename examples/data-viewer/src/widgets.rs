@@ -1,5 +1,3 @@
-
-
 use sauron::{
     html::{
         attributes::*,
@@ -10,7 +8,6 @@ use sauron::{
     Node,
 };
 use search_widget::SearchWidget;
-
 
 mod search_widget;
 
@@ -64,11 +61,9 @@ pub(crate) fn checkbox<MSG>(
 ) -> Node<MSG> {
     div(
         vec![class("checkbox")],
-        vec![
-            input(vec![r#type("checkbox")], vec![])
-                .add_attributes(attrs_flag([("checked", "checked", checked)]))
-                .add_attributes(attributes),
-        ],
+        vec![input(vec![r#type("checkbox")], vec![])
+            .add_attributes(attrs_flag([("checked", "checked", checked)]))
+            .add_attributes(attributes)],
     )
     .add_attributes(container_attributes)
 }
@@ -80,18 +75,16 @@ pub(crate) fn selector_box<MSG>(
 ) -> Node<MSG> {
     div(
         vec![class("selector_box")],
-        vec![
-            input(
-                vec![
-                    r#type("checkbox"),
-                    class("selector_box__checkbox"),
-                    styles([("width", px(30))]),
-                ],
-                vec![],
-            )
-            .add_attributes(attrs_flag([("checked", "checked", checked)]))
-            .add_attributes(attributes),
-        ],
+        vec![input(
+            vec![
+                r#type("checkbox"),
+                class("selector_box__checkbox"),
+                styles([("width", px(30))]),
+            ],
+            vec![],
+        )
+        .add_attributes(attrs_flag([("checked", "checked", checked)]))
+        .add_attributes(attributes)],
     )
     .add_attributes(container_attributes)
 }
