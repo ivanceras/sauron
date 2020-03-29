@@ -131,3 +131,6 @@ where
         self.dispatch_inner(msg)
     }
 }
+
+//TODO: use impl Dispatch for Rc<Program> and change Dispatch trait into using self instead of
+//Rc<Self>
