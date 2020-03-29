@@ -2,20 +2,16 @@
 #![deny(clippy::all)]
 #![feature(arbitrary_self_types)]
 mod callback;
-mod cmd;
 mod diff;
-mod dispatch;
 mod patch;
 pub mod util;
 mod vnode;
 
 pub use callback::Callback;
-pub use cmd::Cmd;
 pub use diff::{
     diff,
     diff_with_key,
 };
-pub use dispatch::Dispatch;
 pub use patch::Patch;
 pub use vnode::{
     builder,

@@ -51,7 +51,7 @@ macro_rules! declare_html_attributes{
         declare_attributes!{ $($name;)*}
 
         #[cfg(feature = "with-parser")]
-        pub(crate) const HTML_ATTRS:[&'static str; 119] = [$(stringify!($name),)*];
+        pub(crate) const HTML_ATTRS:[&'static str; 118] = [$(stringify!($name),)*];
     }
 }
 
@@ -90,7 +90,6 @@ declare_html_attributes! {
     buffered;
     challenge;
     charset;
-    //checked;
     cite;
     class;
     codebase;

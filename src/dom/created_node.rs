@@ -3,16 +3,15 @@ use std::{
     rc::Rc,
     sync::Mutex,
 };
-
 use sauron_vdom::{
     self,
     Callback,
-    Dispatch,
 };
 use wasm_bindgen::{
     closure::Closure,
     JsCast,
 };
+use crate::dom::Dispatch;
 use web_sys::{
     self,
     Element,

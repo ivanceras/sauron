@@ -1,6 +1,6 @@
 //#![deny(warnings)]
 #![deny(clippy::all)]
-#![feature(arbitrary_self_types)]
+//#![feature(arbitrary_self_types)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png"
 )]
@@ -220,7 +220,6 @@ pub use sauron_vdom;
 pub use sauron_vdom::{
     diff,
     Callback,
-    Dispatch,
     Text,
     Value,
 };

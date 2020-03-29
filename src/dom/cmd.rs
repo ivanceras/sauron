@@ -1,5 +1,5 @@
 use crate::{
-    dispatch::Dispatch,
+    dom::Dispatch,
     Callback,
 };
 use std::{
@@ -13,14 +13,12 @@ use std::{
 /// Cmd required a DSP object which is the Program as an argument
 /// The emit function is called with the program argument.
 /// The callback is supplied with the program an is then executed/emitted.
-pub struct Cmd<DSP, MSG>(pub Vec<Callback<Rc<DSP>, ()>>, PhantomData<MSG>)
-where
-    DSP: Dispatch<MSG> + 'static;
+pub struct Cmd<DSP, MSG>(pub Vec<Callback<Rc<DSP>, ()>>, PhantomData<MSG>);
 
 impl<DSP, MSG> Cmd<DSP, MSG>
 where
     MSG: 'static,
-    DSP: Dispatch<MSG> + 'static,
+    DSP: 'static,
 {
     pub fn new<F>(cmd: F) -> Self
     where
