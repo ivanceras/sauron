@@ -2,7 +2,6 @@ use wasm_bindgen::{
     closure::Closure,
     JsCast,
 };
-use web_sys;
 
 pub fn window() -> web_sys::Window {
     web_sys::window().expect("no global `window` exists")

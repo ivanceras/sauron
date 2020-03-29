@@ -1,5 +1,4 @@
 use crate::{
-    dom::Dispatch,
     Callback,
 };
 use std::{

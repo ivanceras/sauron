@@ -42,8 +42,7 @@ where
     pub fn get_event(&self, name: &ATT) -> Option<&Attribute<ATT, EVENT, MSG>> {
         self.events()
             .iter()
-            .find(|event| event.name == *name)
-            .map(|event| *event)
+            .find(|event| event.name == *name).copied()
     }
 
     fn attributes_internal(&self) -> Vec<&Attribute<ATT, EVENT, MSG>> {
@@ -75,9 +74,7 @@ where
     {
         self.attributes_internal()
             .iter()
-            .filter(|att| att.name == *key)
-            .map(|att| *att)
-            .collect()
+            .filter(|att| att.name == *key).copied().collect()
     }
 
     fn get_attributes_name_and_ns(&self) -> Vec<(&ATT, Option<&'static str>)>

@@ -1,6 +1,5 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
-#![feature(arbitrary_self_types)]
 mod callback;
 mod diff;
 mod patch;

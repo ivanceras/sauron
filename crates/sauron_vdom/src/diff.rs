@@ -192,7 +192,7 @@ where
     // if this attribute name does not exist anymore
     // to the new element, remove it
     for old_attr in old_element.attributes().iter() {
-        if let Some(_) = new_element.get_attr_value(&old_attr.name) {
+        if new_element.get_attr_value(&old_attr.name).is_some() {
             // the attribute still exist in the new element
             // and it must have been changed in add_attributes when they differe
         } else {
