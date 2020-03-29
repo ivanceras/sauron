@@ -193,15 +193,12 @@ fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<u32> {
     let child_node_count = children.length();
     for i in 0..child_node_count {
         let child_node = children.item(i).expect("Expecting a child node");
-        match child_node.node_type() {
-            Node::ELEMENT_NODE => {
+            if let Node::ELEMENT_NODE = child_node.node_type() {
                 let child_element = child_node.unchecked_ref::<Element>();
                 let child_data_vdom_id =
                     get_node_descendant_data_vdom_id(child_element);
                 data_vdom_id.extend(child_data_vdom_id);
             }
-            _ => (),
-        }
     }
     data_vdom_id
 }
@@ -266,6 +263,14 @@ where
                                 node.dyn_ref::<HtmlTextAreaElement>()
                             {
                                 textarea.set_value(&attr.value.to_string());
+                            }
+                        }
+                        "checked" => {
+                            if let Some(input) =
+                                node.dyn_ref::<HtmlInputElement>()
+                            {
+                                let checked = attr.value.get_value().map(|v|v.as_bool()).flatten().unwrap_or(false);
+                                input.set_checked(checked);
                             }
                         }
                         _ => (),

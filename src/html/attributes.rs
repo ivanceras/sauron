@@ -82,7 +82,7 @@ where
     let mut class_list = Vec::with_capacity(pair.as_ref().len());
     for (class, flag) in pair.as_ref() {
         if *flag {
-            class_list.push(class.to_string());
+            class_list.push((*class).to_string());
         }
     }
     class(class_list.join(" "))
