@@ -23,6 +23,16 @@ where
     pub dom_updater: Rc<RefCell<DomUpdater<Self, MSG>>>,
 }
 
+impl<APP,MSG> Clone for Program<APP,MSG> {
+
+    fn clone(&self) -> Self {
+        Program{
+            app: Rc::clone(&self.app),
+            dom_updater: Rc::clone(&self.dom_updater),
+        }
+    }
+}
+
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
@@ -30,44 +40,43 @@ where
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
-    fn new(app: APP, root_node: &Node) -> Rc<Self> {
+    fn new(app: APP, root_node: &Node) -> Self {
         let dom_updater: DomUpdater<Self, MSG> =
             DomUpdater::new(app.view(), root_node);
         let program = Program {
             app: Rc::new(RefCell::new(app)),
             dom_updater: Rc::new(RefCell::new(dom_updater)),
         };
-        let rc_program: Rc<Self> = Rc::new(program);
         // call the init of the component
-        let cmds: Cmd<APP, MSG> = rc_program.app.borrow().init();
-        cmds.emit(&rc_program);
-        rc_program
+        let cmds: Cmd<APP, MSG> = program.app.borrow().init();
+        cmds.emit(&program);
+        program
     }
 
     /// Creates an Rc wrapped instance of Program and mount the app view to the
     /// given root_node
-    pub fn new_replace_mount(app: APP, root_node: &Node) -> Rc<Self> {
+    pub fn new_replace_mount(app: APP, root_node: &Node) -> Self {
         let program = Self::new(app, root_node);
         program.start_replace_mount();
         program
     }
 
-    pub fn new_append_to_mount(app: APP, root_node: &Node) -> Rc<Self> {
+    pub fn new_append_to_mount(app: APP, root_node: &Node) -> Self {
         let program = Self::new(app, root_node);
         program.start_append_to_mount();
         program
     }
 
     /// Instantiate the app and then append it to the document body
-    pub fn mount_to_body(app: APP) -> Rc<Self> {
+    pub fn mount_to_body(app: APP) -> Self {
         Self::new_append_to_mount(app, &crate::body())
     }
 
-    fn start_append_to_mount(self: &Rc<Self>) {
+    fn start_append_to_mount(&self) {
         self.dom_updater.borrow_mut().append_to_mount(self)
     }
 
-    fn start_replace_mount(self: &Rc<Self>) {
+    fn start_replace_mount(&self) {
         self.dom_updater.borrow_mut().replace_mount(self)
     }
 
@@ -77,7 +86,7 @@ where
     /// - The returned Cmd from the component update is then emitted.
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
-    fn dispatch_inner(self: &Rc<Self>, msg: MSG) {
+    fn dispatch_inner(&self, msg: MSG) {
         #[cfg(feature = "measure")]
         let t1 = crate::now();
         // update the app and emit the cmd returned from the update
@@ -116,8 +125,8 @@ where
     APP: Component<MSG> + 'static,
 {
     #[cfg(not(feature = "no_request_animation_frame"))]
-    fn dispatch(self: &Rc<Self>, msg: MSG) {
-        let program_clone = Rc::clone(self);
+    fn dispatch(&self, msg: MSG) {
+        let program_clone = self.clone();
         let closure_raf: Closure<dyn FnMut() + 'static> =
             Closure::once(move || {
                 program_clone.dispatch_inner(msg);
@@ -127,7 +136,7 @@ where
     }
 
     #[cfg(feature = "no_request_animation_frame")]
-    fn dispatch(self: &Rc<Self>, msg: MSG) {
+    fn dispatch(&self, msg: MSG) {
         self.dispatch_inner(msg)
     }
 }

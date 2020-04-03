@@ -6,5 +6,5 @@ use std::rc::Rc;
 /// The Program will implement Dispatch instead of sending it to the
 /// DomUpdater, this will simplify the amount of generics being defined.
 pub trait Dispatch<MSG> {
-    fn dispatch(self: &Rc<Self>, msg: MSG);
+    fn dispatch(&self, msg: MSG);
 }

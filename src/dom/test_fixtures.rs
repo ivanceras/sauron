@@ -32,6 +32,6 @@ pub fn simple_component() -> Rc<RefCell<SimpleComponent>> {
     Rc::new(RefCell::new(SimpleComponent))
 }
 
-pub fn simple_program() -> Rc<Program<SimpleComponent, ()>> {
+pub fn simple_program() -> Program<SimpleComponent, ()> {
     Program::new_append_to_mount(SimpleComponent, &crate::body())
 }

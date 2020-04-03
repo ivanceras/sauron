@@ -12,7 +12,6 @@ use sauron::{
     Node,
     *,
 };
-use std::rc::Rc;
 use wasm_bindgen::{
     self,
     prelude::*,
@@ -133,7 +132,7 @@ pub fn main() {
     trace!("starting svg clock..");
 
     let program = Program::mount_to_body(Clock::new());
-    let program_clone = Rc::clone(&program);
+    let program_clone = program.clone();
     let clock: Closure<dyn Fn()> = Closure::wrap(Box::new(move || {
         program_clone.dispatch(Msg::Tick);
     }));

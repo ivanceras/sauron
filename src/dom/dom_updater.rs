@@ -44,7 +44,7 @@ where
 impl<DSP, MSG> DomUpdater<DSP, MSG>
 where
     MSG: 'static,
-    DSP: Dispatch<MSG> + 'static,
+    DSP: Clone + Dispatch<MSG> + 'static,
 {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.
     pub fn new(
@@ -71,7 +71,7 @@ where
     /// Mount the current_vdom appending to the actual browser DOM specified in the root_node
     /// This also gets the closures that was created when mounting the vdom to their
     /// actual DOM counterparts.
-    pub fn append_to_mount(&mut self, program: &Rc<DSP>) {
+    pub fn append_to_mount(&mut self, program: &DSP) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         self.root_node
@@ -84,7 +84,7 @@ where
     /// Mount the current_vdom replacing the actual browser DOM specified in the root_node
     /// This also gets the closures that was created when mounting the vdom to their
     /// actual DOM counterparts.
-    pub fn replace_mount(&mut self, program: &Rc<DSP>) {
+    pub fn replace_mount(&mut self, program: &DSP) {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         let root_element: &Element = self.root_node.unchecked_ref();
@@ -100,7 +100,7 @@ where
     /// A root `Node` will be created and appended (as a child) to your passed
     /// in mount element.
     pub fn new_append_to_mount(
-        program: &Rc<DSP>,
+        program: &DSP,
         current_vdom: crate::Node<MSG>,
         mount: &Element,
     ) -> DomUpdater<DSP, MSG> {
@@ -114,7 +114,7 @@ where
     /// A root `Node` will be created and it will replace your passed in mount
     /// element.
     pub fn new_replace_mount(
-        program: &Rc<DSP>,
+        program: &DSP,
         current_vdom: crate::Node<MSG>,
         mount: Element,
     ) -> DomUpdater<DSP, MSG> {
@@ -129,7 +129,7 @@ where
     /// seeing the latest state of the application.
     pub fn update_dom(
         &mut self,
-        program: &Rc<DSP>,
+        program: &DSP,
         new_vdom: crate::Node<MSG>,
     ) {
         let patches = diff(&self.current_vdom, &new_vdom);

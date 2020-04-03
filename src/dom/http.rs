@@ -58,7 +58,7 @@ impl Http {
         let fail_cb = Callback::from(fail_cb);
 
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
-            let program_clone = Rc::clone(&program);
+            let program_clone = program.clone();
 
             let response_decoder = response_decoder.clone();
 
@@ -70,7 +70,7 @@ impl Http {
             let fail_cb = fail_cb.clone();
             let fail_cb2 = fail_cb.clone();
 
-            let program_clone_status_err = Rc::clone(&program);
+            let program_clone_status_err = program.clone();
 
             let promise = crate::window().fetch_with_str(&url_clone);
             let cb: Closure<dyn FnMut(JsValue)> =
@@ -97,7 +97,7 @@ impl Http {
                     }
                 });
 
-            let program_clone_response_error = Rc::clone(&program);
+            let program_clone_response_error = program.clone();
             let fail_closure: Closure<dyn FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
                     let fail_cb = fail_cb2.clone();

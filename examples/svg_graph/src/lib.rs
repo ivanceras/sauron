@@ -3,7 +3,6 @@ use sauron::{
     html::attributes::*,
     svg::{
         attributes::*,
-        *,
     },
     Cmd,
     Component,

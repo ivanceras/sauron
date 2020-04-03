@@ -17,11 +17,11 @@
 
   <script src='./pkg/interactive.js'></script>
   <script type="module">
-      window.wasm_bindgen('pkg/interactive_bg.wasm')
+      wasm_bindgen('pkg/interactive_bg.wasm')
             .then( main )
             .catch(console.error)
       function main(){
-        const { Client } = window.wasm_bindgen
+        const { Client } = wasm_bindgen
         new Client(window.initialState)
       }
   </script>

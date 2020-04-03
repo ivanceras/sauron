@@ -2,7 +2,6 @@
 #![deny(clippy::all)]
 use console_error_panic_hook;
 use sauron::*;
-use std::rc::Rc;
 use wasm_bindgen::{
     self,
     prelude::*,
@@ -28,7 +27,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 pub struct Client {
     #[allow(unused)]
-    program: Rc<Program<App, Msg>>,
+    program: Program<App, Msg>,
 }
 
 #[wasm_bindgen]
@@ -43,7 +42,7 @@ impl Client {
 
         let app = App::new(0);
         let program = Program::new_replace_mount(app, &root_node);
-        let program_clone = Rc::clone(&program);
+        let program_clone = program.clone();
         let clock: Closure<dyn Fn()> = Closure::wrap(Box::new(move || {
             program_clone.dispatch(Msg::Clock);
         }));

@@ -70,12 +70,12 @@ impl<T> CreatedNode<T> {
     }
 
     pub fn create_dom_node<DSP, MSG>(
-        program: &Rc<DSP>,
+        program: &DSP,
         vnode: &crate::Node<MSG>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
-        DSP: Dispatch<MSG> + 'static,
+        DSP: Clone + Dispatch<MSG> + 'static,
     {
         Self::create_dom_node_opt(Some(program), vnode)
     }
@@ -83,12 +83,12 @@ impl<T> CreatedNode<T> {
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
     pub fn create_dom_node_opt<DSP, MSG>(
-        program: Option<&Rc<DSP>>,
+        program: Option<&DSP>,
         vnode: &crate::Node<MSG>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
-        DSP: Dispatch<MSG> + 'static,
+        DSP: Clone + Dispatch<MSG> + 'static,
     {
         match vnode {
             crate::Node::Text(text_node) => {
@@ -105,12 +105,12 @@ impl<T> CreatedNode<T> {
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
     pub fn create_element_node<DSP, MSG>(
-        program: Option<&Rc<DSP>>,
+        program: Option<&DSP>,
         velem: &crate::Element<MSG>,
     ) -> CreatedNode<Element>
     where
         MSG: 'static,
-        DSP: Dispatch<MSG> + 'static,
+        DSP: Clone + Dispatch<MSG> + 'static,
     {
         let document = crate::document();
 
@@ -232,17 +232,17 @@ impl<T> CreatedNode<T> {
 
 /// This wrap into a closure the function that is dispatched when the event is triggered.
 pub(crate) fn create_closure_wrap<DSP, MSG>(
-    program: &Rc<DSP>,
+    program: &DSP,
     callback: &Callback<crate::Event, MSG>,
 ) -> Closure<dyn FnMut(web_sys::Event)>
 where
     MSG: 'static,
-    DSP: Dispatch<MSG> + 'static,
+    DSP: Clone + Dispatch<MSG> + 'static,
 {
     let callback_clone = callback.clone();
     // TODO: use a weak pointer here
     // let program_weak = Rc::downgrade(&program)
-    let program_clone = Rc::clone(&program);
+    let program_clone = program.clone();
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
         // FIXME: need to allow users to control this

@@ -15,7 +15,7 @@ use sauron::{
         events::*,
         *,
     },
-    test_fixtures::simple_program,
+    dom::test_fixtures::simple_program,
     Node,
 };
 use std::cell::RefCell;

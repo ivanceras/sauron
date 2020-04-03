@@ -39,7 +39,7 @@ use web_sys::{
 /// Note: If Program is None, it is a dumb patch, meaning
 /// there is no event listener attached or changed
 pub fn patch<N, DSP, MSG>(
-    program: Option<&Rc<DSP>>,
+    program: Option<&DSP>,
     root_node: N,
     old_closures: &mut ActiveClosure,
     patches: &[Patch<MSG>],
@@ -47,7 +47,7 @@ pub fn patch<N, DSP, MSG>(
 where
     N: Into<Node>,
     MSG: 'static,
-    DSP: Dispatch<MSG> + 'static,
+    DSP: Clone + Dispatch<MSG> + 'static,
 {
     let root_node: Node = root_node.into();
 
@@ -233,14 +233,14 @@ fn remove_event_listeners(
 /// apply a the patch to this element node.
 /// and return the ActiveClosure that may be attached to that element
 fn apply_element_patch<DSP, MSG>(
-    program: Option<&Rc<DSP>>,
+    program: Option<&DSP>,
     node: &Element,
     old_closures: &mut ActiveClosure,
     patch: &Patch<MSG>,
 ) -> Result<ActiveClosure, JsValue>
 where
     MSG: 'static,
-    DSP: Dispatch<MSG> + 'static,
+    DSP: Clone + Dispatch<MSG> + 'static,
 {
     let mut active_closures = ActiveClosure::new();
     match patch {
@@ -383,13 +383,13 @@ where
 }
 
 fn apply_text_patch<DSP, MSG>(
-    program: Option<&Rc<DSP>>,
+    program: Option<&DSP>,
     node: &Text,
     patch: &Patch<MSG>,
 ) -> Result<(), JsValue>
 where
     MSG: 'static,
-    DSP: Dispatch<MSG> + 'static,
+    DSP: Clone + Dispatch<MSG> + 'static,
 {
     match patch {
         Patch::ChangeText(_node_idx, new_node) => {
