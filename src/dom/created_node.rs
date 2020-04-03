@@ -237,9 +237,11 @@ pub(crate) fn create_closure_wrap<DSP, MSG>(
 ) -> Closure<dyn FnMut(web_sys::Event)>
 where
     MSG: 'static,
-    DSP: Dispatch<MSG> + 'static + 'static,
+    DSP: Dispatch<MSG> + 'static,
 {
     let callback_clone = callback.clone();
+    // TODO: use a weak pointer here
+    // let program_weak = Rc::downgrade(&program)
     let program_clone = Rc::clone(&program);
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
