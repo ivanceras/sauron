@@ -4,7 +4,7 @@ use sauron::{
     html::{
         attributes::*,
         events::*,
-        *,
+        div,
     },
     svg::{
         attributes::{
