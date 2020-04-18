@@ -1,27 +1,14 @@
 use crate::{
     dom::{
         apply_patches::patch,
-        created_node::{
-            ActiveClosure,
-            CreatedNode,
-        },
+        created_node::{ActiveClosure, CreatedNode},
     },
     Dispatch,
 };
-use sauron_vdom::{
-    self,
-    diff,
-};
-use std::{
-    marker::PhantomData,
-    ops::Deref,
-};
+use sauron_vdom::{self, diff};
+use std::{marker::PhantomData, ops::Deref};
 use wasm_bindgen::JsCast;
-use web_sys::{
-    self,
-    Element,
-    Node,
-};
+use web_sys::{self, Element, Node};
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
@@ -126,11 +113,7 @@ where
     ///
     /// Then use that diff to patch the real DOM in the user's browser so that they are
     /// seeing the latest state of the application.
-    pub fn update_dom(
-        &mut self,
-        program: &DSP,
-        new_vdom: crate::Node<MSG>,
-    ) {
+    pub fn update_dom(&mut self, program: &DSP, new_vdom: crate::Node<MSG>) {
         let patches = diff(&self.current_vdom, &new_vdom);
         let active_closures = patch(
             Some(program),

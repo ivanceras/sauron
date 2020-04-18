@@ -2,17 +2,9 @@
 //! This is a simple component which just barely comply to being a component
 //! use for doing component tests
 //!
-use crate::{
-    html::div,
-    Cmd,
-    Component,
-    Program,
-};
+use crate::{html::div, Cmd, Component, Program};
 use log::*;
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use std::{cell::RefCell, rc::Rc};
 
 #[derive(Clone)]
 pub struct SimpleComponent;

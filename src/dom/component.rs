@@ -1,7 +1,4 @@
-use crate::{
-    Cmd,
-    Node,
-};
+use crate::{Cmd, Node};
 
 /// The app should implement this trait for it to be handled by the Program
 pub trait Component<MSG>

@@ -5,18 +5,8 @@
 #![deny(clippy::all)]
 use console_error_panic_hook;
 use js_sys::Date;
-use sauron::{
-    html::attributes::*,
-    svg::attributes::*,
-    Cmd,
-    Node,
-    *,
-};
-use wasm_bindgen::{
-    self,
-    prelude::*,
-    JsCast,
-};
+use sauron::{html::attributes::*, svg::attributes::*, Cmd, Node, *};
+use wasm_bindgen::{self, prelude::*, JsCast};
 #[macro_use]
 extern crate log;
 

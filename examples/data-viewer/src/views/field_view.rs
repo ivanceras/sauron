@@ -1,27 +1,15 @@
 use crate::widgets::*;
 use restq::{
-    ast::Value,
-    data_value::cast_data_value,
-    ColumnDef,
-    DataType,
-    DataValue,
+    ast::Value, data_value::cast_data_value, ColumnDef, DataType, DataValue,
 };
 use sauron::{
     html::{
-        attributes::{
-            class,
-            classes_flag,
-            r#type,
-            styles,
-        },
+        attributes::{class, classes_flag, r#type, styles},
         events::*,
         units::px,
         *,
     },
-    Attribute,
-    Cmd,
-    Component,
-    Node,
+    Attribute, Cmd, Component, Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -123,31 +111,17 @@ impl FieldView {
         let padding = self.css_padding();
 
         match &self.value {
-            DataValue::U32(v) => {
-                text_link(
-                    v.to_string(),
-                    format!("#{}", v),
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onclick(|_| Msg::PrimaryClicked),
-                    ],
-                )
-            }
+            DataValue::U32(v) => text_link(
+                v.to_string(),
+                format!("#{}", v),
+                vec![classes, size, padding, onclick(|_| Msg::PrimaryClicked)],
+            ),
 
-            DataValue::S32(v) => {
-                text_link(
-                    v.to_string(),
-                    format!("#{}", v),
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onclick(|_| Msg::PrimaryClicked),
-                    ],
-                )
-            }
+            DataValue::S32(v) => text_link(
+                v.to_string(),
+                format!("#{}", v),
+                vec![classes, size, padding, onclick(|_| Msg::PrimaryClicked)],
+            ),
             _ => {
                 trace!("todo primary: {:?}", self.value);
                 text("unknown")
@@ -161,181 +135,145 @@ impl FieldView {
         let padding = self.css_padding();
 
         match &self.value {
-            DataValue::Nil => {
-                match self.column.data_type_def.data_type {
-                    DataType::Bool => {
-                        checkbox(
-                            false,
-                            vec![classes, size, padding],
-                            vec![onchange(|input| {
-                                Msg::CheckedChange(input.value)
-                            })],
-                        )
-                    }
-                    _ => textbox("", vec![r#type("text"), classes]),
-                }
-            }
-            DataValue::Text(v) => {
-                textbox(
-                    v,
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::Uuid(v) => {
-                textbox(
-                    v.to_string(),
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::Bool(v) => {
-                checkbox(
-                    *v,
+            DataValue::Nil => match self.column.data_type_def.data_type {
+                DataType::Bool => checkbox(
+                    false,
                     vec![classes, size, padding],
                     vec![onchange(|input| Msg::CheckedChange(input.value))],
-                )
-            }
-            DataValue::S8(v) => {
-                numberbox(
-                    v,
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::S16(v) => {
-                numberbox(
-                    v,
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::S32(v) => {
-                numberbox(
-                    v,
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::S64(v) => {
-                numberbox(
-                    v,
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::U8(v) => {
-                numberbox(
-                    v,
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::U16(v) => {
-                numberbox(
-                    v,
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::U32(v) => {
-                numberbox(
-                    v,
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::U64(v) => {
-                numberbox(
-                    v,
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::F32(v) => {
-                numberbox(
-                    v,
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::F64(v) => {
-                numberbox(
-                    v,
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::Utc(v) => {
-                datebox(
-                    v.format("%Y-%m-%d").to_string(),
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
-            DataValue::Local(v) => {
-                datebox(
-                    v.format("%Y-%m-%d").to_string(),
-                    vec![
-                        classes,
-                        size,
-                        padding,
-                        onchange(|input| Msg::TextChange(input.value)),
-                    ],
-                )
-            }
+                ),
+                _ => textbox("", vec![r#type("text"), classes]),
+            },
+            DataValue::Text(v) => textbox(
+                v,
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::Uuid(v) => textbox(
+                v.to_string(),
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::Bool(v) => checkbox(
+                *v,
+                vec![classes, size, padding],
+                vec![onchange(|input| Msg::CheckedChange(input.value))],
+            ),
+            DataValue::S8(v) => numberbox(
+                v,
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::S16(v) => numberbox(
+                v,
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::S32(v) => numberbox(
+                v,
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::S64(v) => numberbox(
+                v,
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::U8(v) => numberbox(
+                v,
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::U16(v) => numberbox(
+                v,
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::U32(v) => numberbox(
+                v,
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::U64(v) => numberbox(
+                v,
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::F32(v) => numberbox(
+                v,
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::F64(v) => numberbox(
+                v,
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::Utc(v) => datebox(
+                v.format("%Y-%m-%d").to_string(),
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
+            DataValue::Local(v) => datebox(
+                v.format("%Y-%m-%d").to_string(),
+                vec![
+                    classes,
+                    size,
+                    padding,
+                    onchange(|input| Msg::TextChange(input.value)),
+                ],
+            ),
             _ => {
                 trace!("todo for: {:?}", self.value);
                 text("unknown")

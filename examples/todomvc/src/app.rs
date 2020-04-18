@@ -1,12 +1,6 @@
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
-    Cmd,
-    Component,
-    Node,
+    html::{attributes::*, events::*, *},
+    Cmd, Component, Node,
 };
 
 pub struct Model {

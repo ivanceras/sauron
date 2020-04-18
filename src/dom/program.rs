@@ -1,13 +1,5 @@
-use crate::{
-    dom::dom_updater::DomUpdater,
-    Cmd,
-    Component,
-    Dispatch,
-};
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use crate::{dom::dom_updater::DomUpdater, Cmd, Component, Dispatch};
+use std::{cell::RefCell, rc::Rc};
 #[cfg(not(feature = "no_request_animation_frame"))]
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;
@@ -23,10 +15,9 @@ where
     pub dom_updater: Rc<RefCell<DomUpdater<Self, MSG>>>,
 }
 
-impl<APP,MSG> Clone for Program<APP,MSG> {
-
+impl<APP, MSG> Clone for Program<APP, MSG> {
     fn clone(&self) -> Self {
-        Program{
+        Program {
             app: Rc::clone(&self.app),
             dom_updater: Rc::clone(&self.dom_updater),
         }

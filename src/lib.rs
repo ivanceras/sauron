@@ -217,12 +217,7 @@ pub mod svg;
 
 pub use sauron_vdom;
 
-pub use sauron_vdom::{
-    diff,
-    Callback,
-    Text,
-    Value,
-};
+pub use sauron_vdom::{diff, Callback, Text, Value};
 
 /// Prelude simplifies the imports from sauron
 /// This imports the necessary functions to build
@@ -231,18 +226,11 @@ pub mod prelude {
     pub use crate::{
         html::{
             attributes::*,
-            tags::{
-                commons::*,
-                *,
-            },
+            tags::{commons::*, *},
             units::*,
             *,
         },
-        svg::{
-            attributes::*,
-            tags::commons::*,
-            *,
-        },
+        svg::{attributes::*, tags::commons::*, *},
         *,
     };
 

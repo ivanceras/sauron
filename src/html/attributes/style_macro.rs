@@ -10,10 +10,7 @@ macro_rules! style {
 
 #[cfg(test)]
 mod tests {
-    use crate::html::{
-        units::px,
-        *,
-    };
+    use crate::html::{units::px, *};
 
     #[test]
     fn test_style_values() {

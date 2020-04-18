@@ -8,15 +8,8 @@ use std::rc::Rc;
 use wasm_bindgen_test::*;
 
 use sauron::{
-    dom::{
-        test_fixtures::simple_program,
-        DomUpdater,
-    },
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
+    dom::{test_fixtures::simple_program, DomUpdater},
+    html::{attributes::*, events::*, *},
     Node,
 };
 use std::cell::RefCell;

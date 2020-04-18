@@ -7,10 +7,7 @@ use crate::Callback;
 pub use event::Event;
 pub use value::Value;
 
-pub use attribute::{
-    AttribValue,
-    Attribute,
-};
+pub use attribute::{AttribValue, Attribute};
 pub use element::Element;
 
 mod attribute;

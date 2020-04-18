@@ -1,19 +1,13 @@
 use crate::{
     html::{
-        attributes::{class, title, classes_flag, href, src},
+        attributes::{class, classes_flag, href, src, title},
         *,
     },
     Node,
 };
 /// Original author of this code is [Nathan Ringo](https://github.com/remexre)
 /// Source: https://github.com/acmumn/mentoring/blob/master/web-client/src/view/markdown.rs
-use pulldown_cmark::{
-    Alignment,
-    Event,
-    Options,
-    Parser,
-    Tag,
-};
+use pulldown_cmark::{Alignment, Event, Options, Parser, Tag};
 
 pub fn markdown<MSG>(src: &str) -> Node<MSG> {
     render_markdown(src)
@@ -58,21 +52,18 @@ pub fn render_markdown<MSG>(src: &str) -> Node<MSG> {
                                     if let Some(tag) = c.as_element_mut() {
                                         match aligns[i] {
                                             Alignment::None => {}
-                                            Alignment::Left => {
-                                                tag.add_attributes(vec![class(
+                                            Alignment::Left => tag
+                                                .add_attributes(vec![class(
                                                     "text-left",
-                                                )])
-                                            }
-                                            Alignment::Center => {
-                                                tag.add_attributes(vec![class(
+                                                )]),
+                                            Alignment::Center => tag
+                                                .add_attributes(vec![class(
                                                     "text-center",
-                                                )])
-                                            }
-                                            Alignment::Right => {
-                                                tag.add_attributes(vec![class(
+                                                )]),
+                                            Alignment::Right => tag
+                                                .add_attributes(vec![class(
                                                     "text-right",
-                                                )])
-                                            }
+                                                )]),
                                         }
                                     }
                                 }
@@ -134,17 +125,15 @@ fn make_tag<MSG>(t: Tag) -> Node<MSG> {
             }
         }
         Tag::BlockQuote => blockquote(vec![class("blockquote")], vec![]),
-        Tag::CodeBlock(lang) => {
-            code(
-                vec![classes_flag(vec![
-                    ("html-language", lang.as_ref() == "html"),
-                    ("rust-language", lang.as_ref() == "rust"),
-                    ("java-language", lang.as_ref() == "java"),
-                    ("c-language", lang.as_ref() == "c-language"),
-                ])],
-                vec![],
-            )
-        }
+        Tag::CodeBlock(lang) => code(
+            vec![classes_flag(vec![
+                ("html-language", lang.as_ref() == "html"),
+                ("rust-language", lang.as_ref() == "rust"),
+                ("java-language", lang.as_ref() == "java"),
+                ("c-language", lang.as_ref() == "c-language"),
+            ])],
+            vec![],
+        ),
         Tag::List(None) => ul(vec![], vec![]),
         Tag::List(Some(1)) => ol(vec![], vec![]),
         Tag::List(Some(ref start)) => ol(vec![attr("start", *start)], vec![]),
@@ -158,18 +147,14 @@ fn make_tag<MSG>(t: Tag) -> Node<MSG> {
         // TODO: parse the html block and convert to sauron node
         Tag::HtmlBlock => div(vec![], vec![]),
         Tag::Strikethrough => s(vec![], vec![]),
-        Tag::Link(_, ref _href, ref _title) => {
-            a(
-                vec![href(_href.to_string()), title(_title.to_string())],
-                vec![],
-            )
-        }
-        Tag::Image(_, ref _src, ref _title) => {
-            img(
-                vec![src(_src.to_string()), title(_title.to_string())],
-                vec![],
-            )
-        }
+        Tag::Link(_, ref _href, ref _title) => a(
+            vec![href(_href.to_string()), title(_title.to_string())],
+            vec![],
+        ),
+        Tag::Image(_, ref _src, ref _title) => img(
+            vec![src(_src.to_string()), title(_title.to_string())],
+            vec![],
+        ),
         Tag::FootnoteDefinition(ref _footnote_id) => span(vec![], vec![]),
     }
 }

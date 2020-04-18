@@ -94,16 +94,14 @@ impl fmt::Display for Value {
             Value::Bool(v) => write!(f, "{}", v),
             Value::String(v) => write!(f, "{}", v),
             Value::Str(v) => write!(f, "{}", v),
-            Value::Vec(v) => {
-                write!(
-                    f,
-                    "{}",
-                    v.iter()
-                        .map(ToString::to_string)
-                        .collect::<Vec<String>>()
-                        .join(" ")
-                )
-            }
+            Value::Vec(v) => write!(
+                f,
+                "{}",
+                v.iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            ),
             Value::U8(v) => write!(f, "{}", v),
             Value::U16(v) => write!(f, "{}", v),
             Value::U32(v) => write!(f, "{}", v),
@@ -204,10 +202,7 @@ impl_from!([T; 12]);
 #[cfg(test)]
 mod tests {
     use crate::{
-        builder::{
-            attr,
-            element,
-        },
+        builder::{attr, element},
         Node,
     };
 

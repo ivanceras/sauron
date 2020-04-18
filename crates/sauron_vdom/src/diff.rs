@@ -1,13 +1,5 @@
-use crate::{
-    Attribute,
-    Element,
-    Node,
-    Patch,
-};
-use std::{
-    cmp::min,
-    mem,
-};
+use crate::{Attribute, Element, Node, Patch};
+use std::{cmp::min, mem};
 
 //TODO: Move this to sauron html specific
 /// This is a sauron html specific functionality

@@ -2,49 +2,25 @@
 
 use crate::{
     html::{
-        attributes::{
-            HTML_ATTRS,
-            HTML_ATTRS_SPECIAL,
-        },
+        attributes::{HTML_ATTRS, HTML_ATTRS_SPECIAL},
         tags::{
-            HTML_TAGS,
-            HTML_TAGS_NON_COMMON,
-            HTML_TAGS_WITH_MACRO_NON_COMMON,
+            HTML_TAGS, HTML_TAGS_NON_COMMON, HTML_TAGS_WITH_MACRO_NON_COMMON,
         },
         text,
     },
     sauron_vdom::builder::element,
     svg::{
-        attributes::{
-            SVG_ATTRS,
-            SVG_ATTRS_SPECIAL,
-            SVG_ATTRS_XLINK,
-        },
-        tags::{
-            SVG_TAGS,
-            SVG_TAGS_NON_COMMON,
-            SVG_TAGS_SPECIAL,
-        },
+        attributes::{SVG_ATTRS, SVG_ATTRS_SPECIAL, SVG_ATTRS_XLINK},
+        tags::{SVG_TAGS, SVG_TAGS_NON_COMMON, SVG_TAGS_SPECIAL},
     },
     Event,
 };
 use html5ever::{
-    local_name,
-    namespace_url,
-    ns,
-    parse_document,
-    parse_fragment,
-    tendril::TendrilSink,
-    QualName,
+    local_name, namespace_url, ns, parse_document, parse_fragment,
+    tendril::TendrilSink, QualName,
 };
-use markup5ever_rcdom::{
-    Handle,
-    NodeData,
-    RcDom,
-};
-use std::{
-    io,
-};
+use markup5ever_rcdom::{Handle, NodeData, RcDom};
+use std::io;
 use thiserror::Error;
 use to_syntax::ToSyntax;
 
@@ -221,9 +197,7 @@ pub fn convert_html_to_syntax(
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        *,
-    };
+    use super::*;
 
     #[test]
     fn simpe_convert() {

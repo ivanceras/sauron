@@ -1,10 +1,6 @@
 #![deny(warnings)]
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
+    html::{attributes::*, events::*, *},
     Node,
 };
 use sauron_vdom::diff;

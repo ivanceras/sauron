@@ -1,8 +1,5 @@
 use super::*;
-use sauron_vdom::{
-    AttribValue,
-    Text,
-};
+use sauron_vdom::{AttribValue, Text};
 
 pub trait ToSyntax {
     fn to_syntax(&self, use_macros: bool, indent: usize) -> String;
@@ -56,18 +53,16 @@ impl ToSyntax for Attribute {
 impl ToSyntax for AttribValue<Event, ()> {
     fn to_syntax(&self, _use_macros: bool, _indent: usize) -> String {
         match self.get_value() {
-            Some(v_str) => {
-                match v_str.as_str() {
-                    Some(v_str) => {
-                        if let Ok(v_str) = v_str.parse::<f64>() {
-                            format!("{}", v_str)
-                        } else {
-                            format!("\"{}\"", v_str)
-                        }
+            Some(v_str) => match v_str.as_str() {
+                Some(v_str) => {
+                    if let Ok(v_str) = v_str.parse::<f64>() {
+                        format!("{}", v_str)
+                    } else {
+                        format!("\"{}\"", v_str)
                     }
-                    None => self.to_string(),
                 }
-            }
+                None => self.to_string(),
+            },
             None => self.to_string(),
         }
     }

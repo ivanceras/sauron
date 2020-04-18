@@ -1,23 +1,8 @@
-use std::{
-    collections::HashMap,
-    sync::Mutex,
-};
-use sauron_vdom::{
-    self,
-    Callback,
-};
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-};
 use crate::dom::Dispatch;
-use web_sys::{
-    self,
-    Element,
-    EventTarget,
-    Node,
-    Text,
-};
+use sauron_vdom::{self, Callback};
+use std::{collections::HashMap, sync::Mutex};
+use wasm_bindgen::{closure::Closure, JsCast};
+use web_sys::{self, Element, EventTarget, Node, Text};
 
 // Used to uniquely identify elements that contain closures so that the DomUpdater can
 // look them up by their unique id.

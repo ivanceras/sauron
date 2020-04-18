@@ -1,20 +1,11 @@
 use sauron::{
     html::{
-        attributes::{
-            height,
-            width,
-        },
+        attributes::{height, width},
         units::*,
     },
     svg::{
         attributes::{
-            d,
-            enable_background,
-            fill,
-            points,
-            version,
-            viewBox,
-            xmlns,
+            d, enable_background, fill, points, version, viewBox, xmlns,
         },
         *,
     },

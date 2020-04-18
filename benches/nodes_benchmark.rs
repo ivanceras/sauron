@@ -1,17 +1,11 @@
 #[macro_use]
 extern crate criterion;
 
-use criterion::{
-    Criterion,
-    Fun,
-};
+use criterion::{Criterion, Fun};
 
 use sauron::{
     diff,
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     Node,
 };
 

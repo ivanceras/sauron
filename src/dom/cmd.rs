@@ -1,9 +1,5 @@
-use crate::{
-    Callback,
-};
-use std::{
-    marker::PhantomData,
-};
+use crate::Callback;
+use std::marker::PhantomData;
 
 /// Cmd is a command to be executed by the system.
 /// This is returned at the init function of a component and is executed right

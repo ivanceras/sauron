@@ -1,8 +1,4 @@
-use std::{
-    convert::Into,
-    fmt,
-    rc::Rc,
-};
+use std::{convert::Into, fmt, rc::Rc};
 
 /// A generic sized representation of a function that can be
 /// attached to a Node. The callback will essentially be owned by the element

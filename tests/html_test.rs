@@ -1,25 +1,12 @@
 #![deny(warnings)]
 use sauron::{
-    diff,
-    div,
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
-    input,
-    Element,
-    Node,
-    Patch,
+    diff, div,
+    html::{attributes::*, events::*, *},
+    input, Element, Node, Patch,
 };
 use sauron_vdom::{
-    builder::{
-        attr,
-        text,
-    },
-    Callback,
-    Text,
-    Value,
+    builder::{attr, text},
+    Callback, Text, Value,
 };
 
 use sauron::Event;

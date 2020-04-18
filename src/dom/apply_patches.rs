@@ -1,34 +1,15 @@
 use crate::{
     dom::{
         created_node,
-        created_node::{
-            create_closure_wrap,
-            ActiveClosure,
-            CreatedNode,
-        },
+        created_node::{create_closure_wrap, ActiveClosure, CreatedNode},
     },
-    Dispatch,
-    Patch,
+    Dispatch, Patch,
 };
 use js_sys::Function;
-use std::{
-    collections::{
-        HashMap,
-        HashSet,
-    },
-};
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-    JsValue,
-};
+use std::collections::{HashMap, HashSet};
+use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
-    Element,
-    Event,
-    HtmlInputElement,
-    HtmlTextAreaElement,
-    Node,
-    Text,
+    Element, Event, HtmlInputElement, HtmlTextAreaElement, Node, Text,
 };
 
 /// Apply all of the patches to our old root node in order to create the new root node
@@ -192,12 +173,12 @@ fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<u32> {
     let child_node_count = children.length();
     for i in 0..child_node_count {
         let child_node = children.item(i).expect("Expecting a child node");
-            if let Node::ELEMENT_NODE = child_node.node_type() {
-                let child_element = child_node.unchecked_ref::<Element>();
-                let child_data_vdom_id =
-                    get_node_descendant_data_vdom_id(child_element);
-                data_vdom_id.extend(child_data_vdom_id);
-            }
+        if let Node::ELEMENT_NODE = child_node.node_type() {
+            let child_element = child_node.unchecked_ref::<Element>();
+            let child_data_vdom_id =
+                get_node_descendant_data_vdom_id(child_element);
+            data_vdom_id.extend(child_data_vdom_id);
+        }
     }
     data_vdom_id
 }
@@ -268,7 +249,12 @@ where
                             if let Some(input) =
                                 node.dyn_ref::<HtmlInputElement>()
                             {
-                                let checked = attr.value.get_value().map(|v|v.as_bool()).flatten().unwrap_or(false);
+                                let checked = attr
+                                    .value
+                                    .get_value()
+                                    .map(|v| v.as_bool())
+                                    .flatten()
+                                    .unwrap_or(false);
                                 input.set_checked(checked);
                             }
                         }
@@ -401,11 +387,9 @@ where
             >(program, new_node);
             node.replace_with_with_node_1(&created_node.node)?;
         }
-        _other => {
-            unreachable!(
-                "Text nodes should only receive ChangeText or Replace patches."
-            )
-        }
+        _other => unreachable!(
+            "Text nodes should only receive ChangeText or Replace patches."
+        ),
     };
 
     Ok(())

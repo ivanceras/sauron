@@ -1,14 +1,5 @@
-use crate::{
-    Callback,
-    Cmd,
-    Component,
-    Dispatch,
-};
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-    JsValue,
-};
+use crate::{Callback, Cmd, Component, Dispatch};
+use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::Response;
 
 pub struct Http;
@@ -84,7 +75,8 @@ impl Http {
                                 dyn FnMut(JsValue),
                             > = Closure::once(decoder_and_dispatcher);
 
-                            let _ = response_promise.then(&decoder_and_dispatcher_cb);
+                            let _ = response_promise
+                                .then(&decoder_and_dispatcher_cb);
 
                             decoder_and_dispatcher_cb.forget();
                         } else {

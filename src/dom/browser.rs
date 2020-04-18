@@ -1,13 +1,6 @@
-use crate::{
-    Cmd,
-    Component,
-    Dispatch,
-};
+use crate::{Cmd, Component, Dispatch};
 use std::fmt::Debug;
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-};
+use wasm_bindgen::{closure::Closure, JsCast};
 
 /// provides an interface for doing url request, such as fetch
 /// resize events, keyboard event, timeout event

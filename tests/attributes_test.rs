@@ -1,10 +1,7 @@
 #![deny(warnings)]
 use sauron::Node;
 
-use sauron::html::{
-    attributes::*,
-    *,
-};
+use sauron::html::{attributes::*, *};
 #[test]
 fn test_styles() {
     let actual: Node<&'static str> = div(

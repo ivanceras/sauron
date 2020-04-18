@@ -1,9 +1,6 @@
 use js_sys::Date;
 use sauron::prelude::*;
-use wasm_bindgen::{
-    self,
-    prelude::*,
-};
+use wasm_bindgen::{self, prelude::*};
 
 pub enum Msg {
     Click,

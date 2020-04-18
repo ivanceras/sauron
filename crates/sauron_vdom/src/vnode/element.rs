@@ -1,10 +1,4 @@
-use crate::{
-    util,
-    Attribute,
-    Callback,
-    Node,
-    Value,
-};
+use crate::{util, Attribute, Callback, Node, Value};
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Element<T, ATT, EVENT, MSG>

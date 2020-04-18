@@ -1,13 +1,6 @@
 use crate::{
-    vnode::{
-        AttribValue,
-        Attribute,
-    },
-    Callback,
-    Element,
-    Node,
-    Text,
-    Value,
+    vnode::{AttribValue, Attribute},
+    Callback, Element, Node, Text, Value,
 };
 
 /// Create an element

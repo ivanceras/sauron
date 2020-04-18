@@ -1,7 +1,4 @@
-use crate::{
-    Callback,
-    Value,
-};
+use crate::{Callback, Value};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
