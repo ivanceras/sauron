@@ -1,12 +1,13 @@
 #![deny(warnings)]
 use sauron::{
     html::{
-        attributes::*,
+        attributes::{value,id},
         events::*,
-        *,
+        div,input,
     },
     test_fixtures::simple_program,
-    *,
+    DomUpdater,
+    Node,
 };
 use std::{
     cell::RefCell,
