@@ -1,30 +1,14 @@
-use crate::{
-    views::{
-        column_view,
-        data_view,
-        field_view,
-        page_view,
-        row_view,
-        ColumnView,
-        DataView,
-        FieldView,
-        PageView,
-        RowView,
-    },
-    ColumnDef,
-    DataValue,
-    Error,
-    Table,
+use crate::views::{
+    data_view,
+    DataView,
 };
 
 use sauron::{
     html::{
-        attributes::*,
+        attributes::class,
         events::*,
-        units::*,
         *,
     },
-    Attribute,
     Cmd,
     Component,
     Node,

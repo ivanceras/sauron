@@ -1,6 +1,6 @@
 use crate::{
     html::{
-        attributes::*,
+        attributes::{class, title, classes_flag, href, src},
         *,
     },
     Node,

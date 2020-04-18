@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 pub use error::Error;
 use log::Level;
 pub use restq::{

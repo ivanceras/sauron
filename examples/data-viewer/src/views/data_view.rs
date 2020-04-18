@@ -1,10 +1,7 @@
 use crate::{
-    resize_wrapper::Msg::DataViewMsg,
     views::{
         column_view,
-        field_view,
         page_view,
-        row_view,
         ColumnView,
         FieldView,
         PageView,
@@ -23,7 +20,11 @@ use restq::{
 };
 use sauron::{
     html::{
-        attributes::*,
+        attributes::{
+            class,
+            key,
+            styles,
+        },
         events::*,
         units::*,
         *,
@@ -139,13 +140,6 @@ impl DataView {
                 ))
             }),
         ])
-    }
-
-    fn row_count(&self) -> usize {
-        self.page_views.iter().fold(0, |mut acc, page_view| {
-            acc += page_view.row_count();
-            acc
-        })
     }
 
     pub fn set_pages(
@@ -520,17 +514,19 @@ impl Component<Msg> for DataView {
             }
             Msg::MouseMove(client_x, _client_y) => {
                 debug!("debug in column view from the window..");
-                if let Some((column_index, active_resize)) = &self.active_resize
+                if let Some((column_index, active_resize)) =
+                    self.active_resize.clone()
                 {
-                    let column_view = &mut self.column_views[*column_index];
                     match active_resize {
                         Grip::Left => {}
                         Grip::Right => {
                             let delta_x = client_x - self.start_x;
+                            let column_view =
+                                &mut self.column_views[column_index];
                             column_view.width += delta_x;
                             let column_width = column_view.calc_width();
                             self.start_x = client_x;
-                            self.set_field_width(*column_index, column_width);
+                            self.set_field_width(column_index, column_width);
                         }
                     }
                 }

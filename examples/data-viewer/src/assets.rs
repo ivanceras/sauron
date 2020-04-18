@@ -1,15 +1,27 @@
 use sauron::{
     html::{
-        attributes::*,
+        attributes::{
+            height,
+            width,
+        },
         units::*,
     },
     svg::{
-        attributes::*,
+        attributes::{
+            d,
+            enable_background,
+            fill,
+            points,
+            version,
+            viewBox,
+            xmlns,
+        },
         *,
     },
     Node,
 };
 
+#[allow(unused)]
 pub fn svg_table_icon<MSG>() -> Node<MSG>
 where
     MSG: Clone,
@@ -37,6 +49,7 @@ where
     vec![polygon(vec![points("256.5,64.5 64.5,256.5 176.5,256.5 176.5,448.5 336.5,448.5 336.5,256.5 448.5,256.5"), fill(kolor)], vec![]) ])
 }
 
+#[allow(unused)]
 pub fn close_button<MSG>(w: i32, h: i32, kolor: &'static str) -> Node<MSG>
 where
     MSG: Clone,

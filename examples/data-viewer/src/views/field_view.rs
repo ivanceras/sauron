@@ -8,7 +8,12 @@ use restq::{
 };
 use sauron::{
     html::{
-        attributes::*,
+        attributes::{
+            class,
+            classes_flag,
+            r#type,
+            styles,
+        },
         events::*,
         units::px,
         *,

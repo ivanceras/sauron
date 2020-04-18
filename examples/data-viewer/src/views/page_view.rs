@@ -6,16 +6,16 @@ use crate::{
     widgets::selector_box,
 };
 use restq::{
-    bytes_to_chars,
-    table_def,
     ColumnDef,
-    CsvRows,
     DataValue,
-    TableDef,
 };
 use sauron::{
     html::{
-        attributes::*,
+        attributes::{
+            class,
+            key,
+            styles,
+        },
         units::*,
         *,
     },
