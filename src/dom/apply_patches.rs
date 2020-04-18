@@ -16,7 +16,6 @@ use std::{
         HashMap,
         HashSet,
     },
-    rc::Rc,
 };
 use wasm_bindgen::{
     closure::Closure,

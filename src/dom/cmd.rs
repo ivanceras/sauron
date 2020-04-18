@@ -3,7 +3,6 @@ use crate::{
 };
 use std::{
     marker::PhantomData,
-    rc::Rc,
 };
 
 /// Cmd is a command to be executed by the system.

@@ -9,7 +9,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = {path = "../../", version = "0.22.0"}
+sauron = {path = "../../"}
 console_error_panic_hook = { version = "0.1", optional = true }
 js-sys = "0.3"
 wee_alloc = { version = "0.4.3", optional = true }

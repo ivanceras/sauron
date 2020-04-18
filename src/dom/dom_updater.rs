@@ -15,7 +15,6 @@ use sauron_vdom::{
 use std::{
     marker::PhantomData,
     ops::Deref,
-    rc::Rc,
 };
 use wasm_bindgen::JsCast;
 use web_sys::{

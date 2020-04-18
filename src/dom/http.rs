@@ -4,7 +4,6 @@ use crate::{
     Component,
     Dispatch,
 };
-use std::rc::Rc;
 use wasm_bindgen::{
     closure::Closure,
     JsCast,
@@ -85,7 +84,7 @@ impl Http {
                                 dyn FnMut(JsValue),
                             > = Closure::once(decoder_and_dispatcher);
 
-                            response_promise.then(&decoder_and_dispatcher_cb);
+                            let _ = response_promise.then(&decoder_and_dispatcher_cb);
 
                             decoder_and_dispatcher_cb.forget();
                         } else {
@@ -105,7 +104,7 @@ impl Http {
                         .dispatch(fail_cb.emit(js_value));
                 });
 
-            promise.then(&cb).catch(&fail_closure);
+            let _ = promise.then(&cb).catch(&fail_closure);
 
             cb.forget();
             fail_closure.forget();
