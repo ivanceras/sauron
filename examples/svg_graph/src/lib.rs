@@ -1,9 +1,7 @@
 //#![deny(warnings)]
 use sauron::{
     html::attributes::*,
-    svg::{
-        attributes::*,
-    },
+    svg::attributes::*,
     Cmd,
     Component,
     Node,
