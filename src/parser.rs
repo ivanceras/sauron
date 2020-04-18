@@ -44,7 +44,6 @@ use markup5ever_rcdom::{
 };
 use std::{
     io,
-    io::Cursor,
 };
 use thiserror::Error;
 use to_syntax::ToSyntax;
@@ -223,7 +222,6 @@ pub fn convert_html_to_syntax(
 #[cfg(test)]
 mod tests {
     use super::{
-        to_syntax::ToSyntax,
         *,
     };
 
