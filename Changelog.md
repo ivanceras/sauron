@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.23.0
+- move Cmd and Dispatch from sauron_vdom to sauron
+- Simplify the use Dispatch without the need for Rc
+
+
 # 0.22.2
 - Export `sauron_vdom::diff::diff_with_key`
 - Add function `take_callback` to consume attribute and get the callback
