@@ -96,7 +96,7 @@ impl Http {
                     }
                 });
 
-            let program_clone_response_error = program.clone();
+            let program_clone_response_error = program;
             let fail_closure: Closure<dyn FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
                     let fail_cb = fail_cb2.clone();
