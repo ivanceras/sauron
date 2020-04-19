@@ -1,5 +1,9 @@
 # Changelog
 
+# Unreleased
+- **Breaking** Add the tag in patches
+	- This is used in gtk, since widgets in gtk doesn't follow a proper tree nesting as with html
+
 # 0.23.0
 - move Cmd and Dispatch from sauron_vdom to sauron
 - Simplify the use Dispatch without the need for Rc

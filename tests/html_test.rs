@@ -168,7 +168,7 @@ fn replace_node() {
     let new = span(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::Replace(0, &span(vec![], vec![]))],
+        vec![Patch::Replace(&"div",0, &span(vec![], vec![]))],
         "Replace the root if the tag changed"
     );
 
@@ -176,7 +176,7 @@ fn replace_node() {
     let new = div(vec![], vec![strong(vec![], vec![])]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::Replace(1, &strong(vec![], vec![]))],
+        vec![Patch::Replace(&"b",1, &strong(vec![], vec![]))],
         "Replace a child node"
     );
 
@@ -186,8 +186,8 @@ fn replace_node() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::Replace(1, &i(vec![], vec![text("1")])),
-            Patch::Replace(3, &i(vec![], vec![])),
+            Patch::Replace(&"b",1, &i(vec![], vec![text("1")])),
+            Patch::Replace(&"b",3, &i(vec![], vec![])),
         ],
         "Replace node with a child",
     )
@@ -202,7 +202,7 @@ fn add_children() {
     ); //{ <div> <b></b> <new></new> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AppendChildren(
+        vec![Patch::AppendChildren(&"div",
             0,
             vec![&html_element("new", vec![], vec![])]
         )],
@@ -218,7 +218,7 @@ fn remove_nodes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::TruncateChildren(0, 0)],
+        vec![Patch::TruncateChildren(&"div",0, 0)],
         "Remove all child nodes at and after child sibling index 1",
     );
 
@@ -242,7 +242,7 @@ fn remove_nodes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::TruncateChildren(0, 1), Patch::TruncateChildren(1, 1)],
+        vec![Patch::TruncateChildren(&"div",0, 1), Patch::TruncateChildren(&"span",1, 1)],
         "Remove a child and a grandchild node",
     );
 
@@ -260,8 +260,8 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::TruncateChildren(1, 1),
-            Patch::Replace(4, &i(vec![], vec![])),
+            Patch::TruncateChildren(&"b",1, 1),
+            Patch::Replace(&"b",4, &i(vec![], vec![])),
         ],
         "Removing child and change next node after parent",
     )
@@ -273,7 +273,7 @@ fn add_attributes() {
     let new = div(vec![id("hello")], vec![]); //{ <div id="hello"> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(0, vec![id("hello")])],
+        vec![Patch::AddAttributes(&"div",0, vec![id("hello")])],
         "Add attributes",
     );
 
@@ -282,7 +282,7 @@ fn add_attributes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(0, vec![id("hello")])],
+        vec![Patch::AddAttributes(&"div",0, vec![id("hello")])],
         "Change attribute",
     );
 }
@@ -298,7 +298,7 @@ fn new_different_event_will_replace_what_was_first_set() {
     let new: Node<()> = div(vec![on("click", hello.clone())], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddEventListener(
+        vec![Patch::AddEventListener(&"div",
             0,
             vec![&on("click", hello.clone())]
         )],
@@ -327,7 +327,7 @@ fn remove_attributes() {
     let new = div(vec![], vec![]); //{ <div> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveAttributes(0, vec!["id"])],
+        vec![Patch::RemoveAttributes(&"div",0, vec!["id"])],
         "Remove attributes",
     );
 }
@@ -338,7 +338,7 @@ fn remove_events() {
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveEventListener(0, vec!["click"])],
+        vec![Patch::RemoveEventListener(&"div",0, vec!["click"])],
         "Remove events",
     );
 }
@@ -350,7 +350,7 @@ fn change_attribute() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(0, vec![id("changed")])],
+        vec![Patch::AddAttributes(&"div",0, vec![id("changed")])],
         "Add attributes",
     );
 }
@@ -376,7 +376,7 @@ fn replace_if_different_keys() {
     let new = div(vec![key(2)], vec![]); //{ <div key="2"> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::Replace(0, &div(vec![key(2)], vec![]))],
+        vec![Patch::Replace(&"div",0, &div(vec![key(2)], vec![]))],
         "If two nodes have different keys always generate a full replace.",
     );
 }

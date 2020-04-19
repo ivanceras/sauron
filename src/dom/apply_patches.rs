@@ -224,7 +224,7 @@ where
 {
     let mut active_closures = ActiveClosure::new();
     match patch {
-        Patch::AddAttributes(_node_idx, attributes) => {
+        Patch::AddAttributes(_tag, _node_idx, attributes) => {
             for attr in attributes.iter() {
                 // attr "" is used in checked = false, since checked attribute is only unchecked
                 // when there is no checked attribute
@@ -265,7 +265,7 @@ where
 
             Ok(active_closures)
         }
-        Patch::RemoveAttributes(_node_idx, attributes) => {
+        Patch::RemoveAttributes(_tag, _node_idx, attributes) => {
             for attrib_name in attributes.iter() {
                 node.remove_attribute(attrib_name)?;
                 //TODO: also explicitly deal with value here..
@@ -275,7 +275,7 @@ where
         }
 
         // TODO: Shall we also remove the listener first?
-        Patch::AddEventListener(node_idx, events) => {
+        Patch::AddEventListener(_tag, node_idx, events) => {
             if let Some(program) = program {
                 for event in events.iter() {
                     let callback = event
@@ -298,7 +298,7 @@ where
 
             Ok(active_closures)
         }
-        Patch::RemoveEventListener(_node_idx, _events) => {
+        Patch::RemoveEventListener(_tag, _node_idx, _events) => {
             remove_event_listeners(node, old_closures)?;
             Ok(active_closures)
         }
@@ -306,7 +306,7 @@ where
         // including the associated closures of the descendant of replaced node
         // before it is actully replaced in the DOM
         //
-        Patch::Replace(_node_idx, new_node) => {
+        Patch::Replace(_tag, _node_idx, new_node) => {
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                 DSP,
                 MSG,
@@ -322,7 +322,7 @@ where
         // of the children and indirect children of this node ( so we don't have to manually remove
         // them).
         // The closures of descendant of the children is also removed
-        Patch::TruncateChildren(_node_idx, num_children_remaining) => {
+        Patch::TruncateChildren(_tag, _node_idx, num_children_remaining) => {
             let children = node.child_nodes();
             let child_count = children.length();
 
@@ -347,7 +347,7 @@ where
 
             Ok(active_closures)
         }
-        Patch::AppendChildren(_node_idx, new_nodes) => {
+        Patch::AppendChildren(_tag, _node_idx, new_nodes) => {
             let parent = &node;
             let mut active_closures = HashMap::new();
             for new_node in new_nodes {
@@ -380,7 +380,7 @@ where
         Patch::ChangeText(_node_idx, new_node) => {
             node.set_node_value(Some(&new_node.text));
         }
-        Patch::Replace(_node_idx, new_node) => {
+        Patch::Replace(_tag, _node_idx, new_node) => {
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                 DSP,
                 MSG,
