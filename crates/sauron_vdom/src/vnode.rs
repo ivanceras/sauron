@@ -143,6 +143,14 @@ where
             Node::Text(_) => vec![],
         }
     }
+
+    pub fn tag(&self) -> Option<&T>{
+        if let Some(e) = self.as_element_ref(){
+            Some(&e.tag)
+        }else{
+            None
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]

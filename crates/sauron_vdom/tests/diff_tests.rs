@@ -19,7 +19,7 @@ fn test_replace_node() {
     let diff = diff(&old, &new);
     assert_eq!(
         diff,
-        vec![Patch::Replace(0, &new)],
+        vec![Patch::Replace(&"div", 0, &new)],
         "Should replace the first node"
     );
 }
@@ -62,7 +62,7 @@ fn test_class_changed() {
     let diff = diff(&old, &new);
     assert_eq!(
         diff,
-        vec![Patch::AddAttributes(0, vec![attr("class", "some-class2")])]
+        vec![Patch::AddAttributes(&"div", 0, vec![attr("class", "some-class2")])]
     )
 }
 
@@ -82,7 +82,7 @@ fn test_class_removed() {
     });
 
     let diff = diff(&old, &new);
-    assert_eq!(diff, vec![Patch::RemoveAttributes(0, vec!["class"])])
+    assert_eq!(diff, vec![Patch::RemoveAttributes(&"div", 0, vec!["class"])])
 }
 
 #[test]
@@ -131,6 +131,6 @@ fn add_event() {
     let diff = diff(&old, &new);
     assert_eq!(
         diff,
-        vec![Patch::AddEventListener(0, vec![&on("click", cb)])]
+        vec![Patch::AddEventListener(&"div", 0, vec![&on("click", cb)])]
     )
 }

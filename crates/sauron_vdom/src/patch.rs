@@ -44,22 +44,22 @@ where
     ATT: Clone,
 {
     /// Append a vector of child nodes to a parent node id.
-    AppendChildren(NodeIdx, Vec<&'a Node<T, ATT, EVENT, MSG>>),
+    AppendChildren(&'a T, NodeIdx, Vec<&'a Node<T, ATT, EVENT, MSG>>),
     /// For a `node_i32`, remove all children besides the first `len`
-    TruncateChildren(NodeIdx, usize),
+    TruncateChildren(&'a T, NodeIdx, usize),
     /// Replace a node with another node. This typically happens when a node's tag changes.
     /// ex: <div> becomes <span>
-    Replace(NodeIdx, &'a Node<T, ATT, EVENT, MSG>),
+    Replace(&'a T, NodeIdx, &'a Node<T, ATT, EVENT, MSG>),
     /// Add attributes that the new node has that the old node does not
     /// Note: the attributes is not a reference since attributes of same
     /// name are merged to produce a new unify attribute
-    AddAttributes(NodeIdx, Vec<Attribute<ATT, EVENT, MSG>>),
+    AddAttributes(&'a T, NodeIdx, Vec<Attribute<ATT, EVENT, MSG>>),
     /// Remove attributes that the old node had that the new node doesn't
-    RemoveAttributes(NodeIdx, Vec<ATT>),
+    RemoveAttributes(&'a T, NodeIdx, Vec<ATT>),
     /// Add attributes that the new node has that the old node does not
-    AddEventListener(NodeIdx, Vec<&'a Attribute<ATT, EVENT, MSG>>),
+    AddEventListener(&'a T, NodeIdx, Vec<&'a Attribute<ATT, EVENT, MSG>>),
     /// Remove attributes that the old node had that the new node doesn't
-    RemoveEventListener(NodeIdx, Vec<ATT>),
+    RemoveEventListener(&'a T, NodeIdx, Vec<ATT>),
     /// Change the text of a Text node.
     ChangeText(NodeIdx, &'a Text),
 }
@@ -75,13 +75,13 @@ where
     /// depth first with the root node in the tree having index 0.
     pub fn node_idx(&self) -> usize {
         match self {
-            Patch::AppendChildren(node_idx, _) => *node_idx,
-            Patch::TruncateChildren(node_idx, _) => *node_idx,
-            Patch::Replace(node_idx, _) => *node_idx,
-            Patch::AddAttributes(node_idx, _) => *node_idx,
-            Patch::RemoveAttributes(node_idx, _) => *node_idx,
-            Patch::AddEventListener(node_idx, _) => *node_idx,
-            Patch::RemoveEventListener(node_idx, _) => *node_idx,
+            Patch::AppendChildren(_tag, node_idx, _) => *node_idx,
+            Patch::TruncateChildren(_tag, node_idx, _) => *node_idx,
+            Patch::Replace(_tag, node_idx, _) => *node_idx,
+            Patch::AddAttributes(_tag, node_idx, _) => *node_idx,
+            Patch::RemoveAttributes(_tag, node_idx, _) => *node_idx,
+            Patch::AddEventListener(_tag, node_idx, _) => *node_idx,
+            Patch::RemoveEventListener(_tag, node_idx, _) => *node_idx,
             Patch::ChangeText(node_idx, _) => *node_idx,
         }
     }
