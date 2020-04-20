@@ -41,7 +41,10 @@ where
     }
 
     fn attributes_internal(&self) -> Vec<&Attribute<ATT, EVENT, MSG>> {
-        self.attrs.iter().filter(|attr| !attr.is_event()).collect()
+        self.attrs
+            .iter()
+            .filter(|attr| attr.is_value() || attr.is_func_call())
+            .collect()
     }
 
     pub fn attributes(&self) -> Vec<Attribute<ATT, EVENT, MSG>> {

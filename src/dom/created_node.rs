@@ -123,9 +123,21 @@ impl<T> CreatedNode<T> {
                         )
                         .expect("Set element attribute_ns in create element");
                 } else {
-                    element
-                        .set_attribute(attr.name, &attr.value.to_string())
-                        .expect("Set element attribute in create element");
+                    match attr.name {
+                        "inner_html" => {
+                            element.set_inner_html(&attr.value.to_string())
+                        }
+                        _ => {
+                            element
+                                .set_attribute(
+                                    attr.name,
+                                    &attr.value.to_string(),
+                                )
+                                .expect(
+                                    "Set element attribute in create element",
+                                );
+                        }
+                    }
                 }
             }
         });

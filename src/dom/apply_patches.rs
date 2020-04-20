@@ -229,10 +229,11 @@ where
                 // attr "" is used in checked = false, since checked attribute is only unchecked
                 // when there is no checked attribute
                 if !attr.name.is_empty() {
-                    node.set_attribute(attr.name, &attr.value.to_string())?;
                     // NOTE: set_attribute('value',..) is not enough
                     // value need to explicitly call the set_value in order for the
                     // actual value gets reflected.
+                    //
+                    // TODO: centrarlize this with set_attributes in created_node
                     match attr.name {
                         "value" => {
                             if let Some(input) =
@@ -258,7 +259,17 @@ where
                                 input.set_checked(checked);
                             }
                         }
-                        _ => (),
+                        "inner_html" => {
+                            if let Some(element) = node.dyn_ref::<Element>() {
+                                element.set_inner_html(&attr.value.to_string());
+                            }
+                        }
+                        _ => {
+                            node.set_attribute(
+                                attr.name,
+                                &attr.value.to_string(),
+                            )?;
+                        }
                     }
                 }
             }

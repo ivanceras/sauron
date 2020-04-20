@@ -51,6 +51,7 @@ features = [
     "History",
     "Response",
 	"Location",
+	"ScrollToOptions",
 ]
 
 

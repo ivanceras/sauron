@@ -1,13 +1,13 @@
 use crate::{Cmd, Component, Dispatch};
 use std::fmt::Debug;
 use wasm_bindgen::{closure::Closure, JsCast};
+use web_sys::ScrollToOptions;
 
 /// provides an interface for doing url request, such as fetch
 /// resize events, keyboard event, timeout event
 pub struct Browser;
 
 impl Browser {
-
     /// Creates a Cmd in which the MSG will be emitted
     /// whenever the browser is resized
     pub fn onresize<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
@@ -45,8 +45,9 @@ impl Browser {
                     let msg = cb_clone(hash);
                     program.dispatch(msg);
                 }));
-            crate::window()
-                .set_onhashchange(Some(hashchange_callback.as_ref().unchecked_ref()));
+            crate::window().set_onhashchange(Some(
+                hashchange_callback.as_ref().unchecked_ref(),
+            ));
             hashchange_callback.forget();
         });
         cmd
@@ -67,9 +68,16 @@ impl Browser {
         (window_width as i32, window_height as i32)
     }
 
-    fn get_hash() -> String {
+    pub fn get_hash() -> String {
         let window = crate::window();
         let hash = window.location().hash().expect("must have a hash");
         hash
+    }
+
+    pub fn scroll_to_top() {
+        let mut options = ScrollToOptions::new();
+        options.top(0.0);
+        options.left(0.0);
+        crate::window().scroll_to_with_scroll_to_options(&options);
     }
 }

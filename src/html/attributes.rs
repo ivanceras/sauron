@@ -3,6 +3,7 @@
 use crate::Attribute;
 pub use attribute_macros::*;
 pub use sauron_vdom::builder::attr;
+use sauron_vdom::AttribValue;
 use sauron_vdom::Value;
 
 #[macro_use]
@@ -140,5 +141,20 @@ pub fn checked<MSG>(is_checked: bool) -> Attribute<MSG> {
         attr("checked", "checked")
     } else {
         attr("", "")
+    }
+}
+
+/// set the inner html of this element without comparing in the diff
+/// this always sets the value
+/// This is for optimization purposes
+/// and will lead to some hacks in the implementation
+pub fn inner_html<V, MSG>(inner_html: V) -> Attribute<MSG>
+where
+    V: Into<Value> + Clone,
+{
+    Attribute {
+        name: "inner_html",
+        value: AttribValue::FuncCall(inner_html.into()),
+        namespace: None,
     }
 }
