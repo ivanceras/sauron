@@ -7,9 +7,7 @@ use crate::{
     },
     Node,
 };
-use pulldown_cmark::{
-    Alignment, CodeBlockKind, CowStr, Event, Options, Parser, Tag,
-};
+use pulldown_cmark::{Alignment, CodeBlockKind, Event, Options, Parser, Tag};
 use std::collections::HashMap;
 
 pub fn markdown<MSG>(src: &str) -> Node<MSG> {
@@ -48,8 +46,8 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
             Event::Text(content) => add_child!(text(content)),
             Event::SoftBreak => add_child!(text("\n")),
             Event::HardBreak => add_child!(br(vec![], vec![])),
-            Event::Code(code) => {
-                todo!("rust code");
+            Event::Code(code_str) => {
+                add_child!(code(vec![], vec![text(code_str)]))
             }
             Event::Html(html) => {
                 if let Ok(nodes) = crate::parser::parse_simple(&html) {
@@ -192,6 +190,32 @@ fn make_tag<MSG>(t: Tag, numbers: &mut HashMap<String, usize>) -> Node<MSG> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn source_code() {
+        let md = r#"
+```rust
+    fn main(){
+        println!("Hello world!");
+    }
+```
+        "#;
+        let expected = "<pre>\n    <code class=\"rust\">    fn main(){\n        println!(\"Hello world!\");\n    }\n</code>\n</pre>";
+        let view: Node<()> = markdown(md);
+        println!("view: {}", view.to_string());
+        assert_eq!(expected, view.to_string());
+    }
+
+    #[test]
+    fn code() {
+        let md = r#"
+This is has some `code` and other..
+        "#;
+        let expected = "<p>\n    This is has some \n    <code>code</code>\n     and other..\n</p>";
+        let view: Node<()> = markdown(md);
+        println!("view: {}", view.to_string());
+        assert_eq!(expected, view.to_string());
+    }
 
     #[test]
     fn footnotes() {
