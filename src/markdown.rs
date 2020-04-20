@@ -1,8 +1,6 @@
 use crate::{
     html::{
-        attributes::{
-            checked, class, classes_flag, href, id, src, title, type_,
-        },
+        attributes::{checked, class, href, id, src, title, type_},
         *,
     },
     Node,
@@ -81,44 +79,52 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                 let l = spine.len();
                 assert!(l >= 1);
                 let mut top = spine.pop().unwrap();
-                if let Tag::CodeBlock(_) = tag {
-                    top = pre(vec![], vec![top]);
-                } else if let Tag::Table(aligns) = tag {
-                    if let Some(element) = top.as_element_mut() {
-                        for r in element.children.iter_mut() {
-                            if let Some(r) = r.as_element_mut() {
-                                for (i, c) in r.children.iter_mut().enumerate()
-                                {
-                                    if let Some(tag) = c.as_element_mut() {
-                                        match aligns[i] {
-                                            Alignment::None => {}
-                                            Alignment::Left => tag
-                                                .add_attributes(vec![class(
-                                                    "text-left",
-                                                )]),
-                                            Alignment::Center => tag
-                                                .add_attributes(vec![class(
-                                                    "text-center",
-                                                )]),
-                                            Alignment::Right => tag
-                                                .add_attributes(vec![class(
-                                                    "text-right",
-                                                )]),
+                match tag {
+                    Tag::CodeBlock(_) => {
+                        top = pre(vec![], vec![top]);
+                    }
+                    Tag::Table(aligns) => {
+                        if let Some(element) = top.as_element_mut() {
+                            for r in element.children.iter_mut() {
+                                if let Some(r) = r.as_element_mut() {
+                                    for (i, c) in
+                                        r.children.iter_mut().enumerate()
+                                    {
+                                        if let Some(tag) = c.as_element_mut() {
+                                            match aligns[i] {
+                                                Alignment::None => {}
+                                                Alignment::Left => tag
+                                                    .add_attributes(vec![
+                                                        class("text-left"),
+                                                    ]),
+                                                Alignment::Center => tag
+                                                    .add_attributes(vec![
+                                                        class("text-center"),
+                                                    ]),
+                                                Alignment::Right => tag
+                                                    .add_attributes(vec![
+                                                        class("text-right"),
+                                                    ]),
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                } else if let Tag::TableHead = tag {
-                    if let Some(element) = top.as_element_mut() {
-                        for c in element.children.iter_mut() {
-                            if let Some(tag) = c.as_element_mut() {
-                                tag.tag = "th";
-                                tag.add_attributes(vec![attr("scope", "col")]);
+                    Tag::TableHead => {
+                        if let Some(element) = top.as_element_mut() {
+                            for c in element.children.iter_mut() {
+                                if let Some(tag) = c.as_element_mut() {
+                                    tag.tag = "th";
+                                    tag.add_attributes(vec![attr(
+                                        "scope", "col",
+                                    )]);
+                                }
                             }
                         }
                     }
+                    _ => (),
                 }
                 if l == 1 {
                     elems.push(top);
