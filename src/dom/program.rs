@@ -40,6 +40,8 @@ where
         };
         // call the init of the component
         let cmds: Cmd<APP, MSG> = program.app.borrow().init();
+        // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
+        // listening to events (resize, hashchange)
         cmds.emit(&program);
         program
     }

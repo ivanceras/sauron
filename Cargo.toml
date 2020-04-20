@@ -50,13 +50,14 @@ features = [
     "Window",
     "History",
     "Response",
+	"Location",
 ]
 
 
 [features]
 default = ["with-markdown", "with-dom"]
 measure = []
-with-markdown = ["pulldown-cmark"]
+with-markdown = ["pulldown-cmark", "with-parser"]
 with-parser = ["html5ever", "markup5ever_rcdom"]
 no_request_animation_frame = [] # disable request animation frame
 with-dom = ["wasm-bindgen", "js-sys", "web-sys"]

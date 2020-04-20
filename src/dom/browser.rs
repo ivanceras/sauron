@@ -7,6 +7,9 @@ use wasm_bindgen::{closure::Closure, JsCast};
 pub struct Browser;
 
 impl Browser {
+
+    /// Creates a Cmd in which the MSG will be emitted
+    /// whenever the browser is resized
     pub fn onresize<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
     where
         F: Fn(i32, i32) -> MSG + Clone + 'static,
@@ -28,6 +31,27 @@ impl Browser {
         cmd
     }
 
+    pub fn onhashchange<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
+    where
+        F: Fn(String) -> MSG + Clone + 'static,
+        MSG: 'static,
+        APP: Component<MSG> + 'static,
+    {
+        let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
+            let cb_clone = cb.clone();
+            let hashchange_callback: Closure<dyn Fn(web_sys::Event)> =
+                Closure::wrap(Box::new(move |_| {
+                    let hash = Self::get_hash();
+                    let msg = cb_clone(hash);
+                    program.dispatch(msg);
+                }));
+            crate::window()
+                .set_onhashchange(Some(hashchange_callback.as_ref().unchecked_ref()));
+            hashchange_callback.forget();
+        });
+        cmd
+    }
+
     fn get_size() -> (i32, i32) {
         let window = crate::window();
         let window_width = window
@@ -41,5 +65,11 @@ impl Browser {
             .as_f64()
             .expect("cant convert to f64");
         (window_width as i32, window_height as i32)
+    }
+
+    fn get_hash() -> String {
+        let window = crate::window();
+        let hash = window.location().hash().expect("must have a hash");
+        hash
     }
 }

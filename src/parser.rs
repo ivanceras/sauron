@@ -174,7 +174,7 @@ fn parse<MSG>(html: &str) -> Result<Option<Node<MSG>>, ParseError> {
 }
 
 /// the document is not wrapped with html
-pub(crate) fn parse_simple<MSG>(
+pub fn parse_simple<MSG>(
     html: &str,
 ) -> Result<Vec<Node<MSG>>, ParseError> {
     if let Some(html) = parse(html)? {
