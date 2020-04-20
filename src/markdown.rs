@@ -41,7 +41,9 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
             Event::Start(tag) => {
                 spine.push(make_tag(tag, &mut numbers));
             }
-            Event::Text(content) => add_child!(text(content)),
+            Event::Text(content) => {
+                add_child!(text(content));
+            }
             Event::SoftBreak => add_child!(text("\n")),
             Event::HardBreak => add_child!(br(vec![], vec![])),
             Event::Code(code_str) => {
@@ -50,7 +52,6 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
             Event::Html(html) => {
                 if let Ok(nodes) = crate::parser::parse_simple(&html) {
                     for node in nodes {
-                        println!("adding node..");
                         add_child!(node);
                     }
                 }
@@ -80,7 +81,7 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                 assert!(l >= 1);
                 let mut top = spine.pop().unwrap();
                 match tag {
-                    Tag::CodeBlock(_) => {
+                    Tag::CodeBlock(_codeblock) => {
                         top = pre(vec![], vec![top]);
                     }
                     Tag::Table(aligns) => {
