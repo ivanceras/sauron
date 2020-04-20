@@ -5,7 +5,7 @@ pub trait ToSyntax {
     fn to_syntax(&self, use_macros: bool, indent: usize) -> String;
 }
 
-impl ToSyntax for Node {
+impl<MSG: 'static> ToSyntax for Node<MSG> {
     fn to_syntax(&self, use_macros: bool, indent: usize) -> String {
         match self {
             Node::Text(text) => text.to_syntax(use_macros, indent),
@@ -20,7 +20,7 @@ impl ToSyntax for Text {
     }
 }
 
-impl ToSyntax for Attribute {
+impl<MSG: 'static> ToSyntax for Attribute<MSG> {
     fn to_syntax(&self, use_macros: bool, indent: usize) -> String {
         let mut buffer = String::new();
         let matched_attribute_func =
@@ -50,7 +50,7 @@ impl ToSyntax for Attribute {
     }
 }
 
-impl ToSyntax for AttribValue<Event, ()> {
+impl<MSG: 'static> ToSyntax for AttribValue<Event, MSG> {
     fn to_syntax(&self, _use_macros: bool, _indent: usize) -> String {
         match self.get_value() {
             Some(v_str) => match v_str.as_str() {
@@ -68,7 +68,7 @@ impl ToSyntax for AttribValue<Event, ()> {
     }
 }
 
-impl ToSyntax for Element {
+impl<MSG: 'static> ToSyntax for Element<MSG> {
     fn to_syntax(&self, use_macros: bool, indent: usize) -> String {
         let mut buffer = String::new();
         if use_macros {

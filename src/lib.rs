@@ -1,5 +1,4 @@
-// TODO: remove warnings on js Promise must be used
-#![deny(warnings)]
+//#![deny(warnings)]
 #![deny(clippy::all)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png"

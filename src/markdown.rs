@@ -1,23 +1,32 @@
 use crate::{
     html::{
-        attributes::{class, classes_flag, href, src, title},
+        attributes::{
+            checked, class, classes_flag, href, id, src, title, type_,
+        },
         *,
     },
     Node,
 };
-/// Original author of this code is [Nathan Ringo](https://github.com/remexre)
-/// Source: https://github.com/acmumn/mentoring/blob/master/web-client/src/view/markdown.rs
-use pulldown_cmark::{Alignment, Event, Options, Parser, Tag};
+use pulldown_cmark::{
+    Alignment, CodeBlockKind, CowStr, Event, Options, Parser, Tag,
+};
+use std::collections::HashMap;
 
 pub fn markdown<MSG>(src: &str) -> Node<MSG> {
-    render_markdown(src)
+    let mut elems = render_markdown(src);
+    if elems.len() == 1 {
+        elems.pop().unwrap()
+    } else {
+        div(vec![], elems)
+    }
 }
 
 /// Renders a string of Markdown to HTML with the default options (footnotes
 /// disabled, tables enabled).
-pub fn render_markdown<MSG>(src: &str) -> Node<MSG> {
+pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
     let mut elems = vec![];
     let mut spine = vec![];
+    let mut numbers: HashMap<String, usize> = HashMap::new();
 
     // Add a child to the previous encountered element
     macro_rules! add_child {
@@ -34,10 +43,43 @@ pub fn render_markdown<MSG>(src: &str) -> Node<MSG> {
     for ev in Parser::new_ext(src, Options::all()) {
         match ev {
             Event::Start(tag) => {
-                spine.push(make_tag(tag));
+                spine.push(make_tag(tag, &mut numbers));
+            }
+            Event::Text(content) => add_child!(text(content)),
+            Event::SoftBreak => add_child!(text("\n")),
+            Event::HardBreak => add_child!(br(vec![], vec![])),
+            Event::Code(code) => {
+                todo!("rust code");
+            }
+            Event::Html(html) => {
+                if let Ok(nodes) = crate::parser::parse_simple(&html) {
+                    for node in nodes {
+                        println!("adding node..");
+                        add_child!(node);
+                    }
+                }
+            }
+            Event::FootnoteReference(name) => {
+                let len = numbers.len() + 1;
+                let number = numbers.entry(name.to_string()).or_insert(len);
+                add_child!(sup(
+                    vec![class("footnote-reference")],
+                    vec![a(
+                        vec![href(format!("#{}", name))],
+                        vec![text(number)]
+                    )]
+                ));
+            }
+            Event::Rule => {
+                add_child!(hr(vec![], vec![]));
+            }
+            Event::TaskListMarker(value) => {
+                add_child!(input(
+                    vec![type_("checkbox"), checked(value)],
+                    vec![]
+                ));
             }
             Event::End(tag) => {
-                // TODO Verify stack end.
                 let l = spine.len();
                 assert!(l >= 1);
                 let mut top = spine.pop().unwrap();
@@ -89,29 +131,15 @@ pub fn render_markdown<MSG>(src: &str) -> Node<MSG> {
                         .add_children(vec![top]);
                 }
             }
-            Event::Text(content) => add_child!(text(content)),
-            Event::SoftBreak => add_child!(text("\n")),
-            Event::HardBreak => add_child!(br(vec![], vec![])),
-            Event::InlineHtml(inline) => {
-                //TODO parse the inline html and convert them into sauron html tags
-                println!("inline html: {}", inline);
-            }
-            _ => println!("Unknown event: {:#?}", ev),
         }
     }
-
-    if elems.len() == 1 {
-        elems.pop().unwrap()
-    } else {
-        div(vec![], elems)
-    }
+    elems
 }
 
-fn make_tag<MSG>(t: Tag) -> Node<MSG> {
+fn make_tag<MSG>(t: Tag, numbers: &mut HashMap<String, usize>) -> Node<MSG> {
     match t {
         Tag::Paragraph => p(vec![], vec![]),
-        Tag::Rule => hr(vec![], vec![]),
-        Tag::Header(n) => {
+        Tag::Heading(n) => {
             assert!(n > 0);
             assert!(n < 7);
             match n {
@@ -125,27 +153,22 @@ fn make_tag<MSG>(t: Tag) -> Node<MSG> {
             }
         }
         Tag::BlockQuote => blockquote(vec![class("blockquote")], vec![]),
-        Tag::CodeBlock(lang) => code(
-            vec![classes_flag(vec![
-                ("html-language", lang.as_ref() == "html"),
-                ("rust-language", lang.as_ref() == "rust"),
-                ("java-language", lang.as_ref() == "java"),
-                ("c-language", lang.as_ref() == "c-language"),
-            ])],
-            vec![],
-        ),
+        Tag::CodeBlock(codeblock) => match codeblock {
+            CodeBlockKind::Indented => code(vec![], vec![]),
+            CodeBlockKind::Fenced(fence) => {
+                code(vec![class(fence.to_string())], vec![])
+            }
+        },
         Tag::List(None) => ul(vec![], vec![]),
         Tag::List(Some(1)) => ol(vec![], vec![]),
         Tag::List(Some(ref start)) => ol(vec![attr("start", *start)], vec![]),
         Tag::Item => li(vec![], vec![]),
-        Tag::Table(_) => table(vec![class("table")], vec![]),
-        Tag::TableHead => tr(vec![], vec![]),
+        Tag::Table(_alignment) => table(vec![class("table")], vec![]),
+        Tag::TableHead => th(vec![], vec![]),
         Tag::TableRow => tr(vec![], vec![]),
         Tag::TableCell => td(vec![], vec![]),
         Tag::Emphasis => span(vec![class("font-italic")], vec![]),
         Tag::Strong => span(vec![class("font-weight-bold")], vec![]),
-        // TODO: parse the html block and convert to sauron node
-        Tag::HtmlBlock => div(vec![], vec![]),
         Tag::Strikethrough => s(vec![], vec![]),
         Tag::Link(_, ref _href, ref _title) => a(
             vec![href(_href.to_string()), title(_title.to_string())],
@@ -155,7 +178,14 @@ fn make_tag<MSG>(t: Tag) -> Node<MSG> {
             vec![src(_src.to_string()), title(_title.to_string())],
             vec![],
         ),
-        Tag::FootnoteDefinition(ref _footnote_id) => span(vec![], vec![]),
+        Tag::FootnoteDefinition(name) => {
+            let len = numbers.len() + 1;
+            let number = *numbers.entry(name.to_string()).or_insert(len);
+            div(
+                vec![class("footnote-definition"), id(name.to_string())],
+                vec![sup(vec![class("footnote-label")], vec![text(number)])],
+            )
+        }
     }
 }
 
@@ -164,14 +194,40 @@ mod tests {
     use super::*;
 
     #[test]
+    fn footnotes() {
+        let md = r#"
+### [Footnotes](https://github.com/markdown-it/markdown-it-footnote)
+
+Footnote 1 link[^first].
+
+Footnote 2 link[^second].
+
+Inline footnote^[Text of inline footnote] definition.
+
+Duplicated footnote reference[^second].
+
+[^first]: Footnote **can have markup**
+
+    and multiple paragraphs.
+
+[^second]: Footnote text.
+        "#;
+
+        let expected = "<div>\n    <h3>\n        <a href=\"https://github.com/markdown-it/markdown-it-footnote\" title=\"\">Footnotes</a>\n    </h3>\n    <p>\n        Footnote 1 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#first\">1</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Footnote 2 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Inline footnote^\n        [\n        Text of inline footnote\n        ]\n         definition.\n    </p>\n    <p>\n        Duplicated footnote reference\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <div class=\"footnote-definition\" id=\"first\">\n        <sup class=\"footnote-label\">1</sup>\n        <p>\n            Footnote \n            <span class=\"font-weight-bold\">can have markup</span>\n        </p>\n    </div>\n    <pre>\n        <code>and multiple paragraphs.\n</code>\n    </pre>\n    <div class=\"footnote-definition\" id=\"second\">\n        <sup class=\"footnote-label\">2</sup>\n        <p>Footnote text.</p>\n    </div>\n</div>";
+        let view: Node<()> = markdown(md);
+        println!("view: {}", view.to_string());
+        assert_eq!(expected, view.to_string());
+    }
+
+    #[test]
     fn test_md_with_html() {
         let md = r#"
 [Hello](link.html)
 <img src="img.jpeg"/>"#;
 
         let expected =
-            "<p>\n    <a href=\"link.html\" title=\"\">Hello</a>\n    \n\n</p>";
-        let view: Node<()> = render_markdown(md);
+            "<p>\n    <a href=\"link.html\" title=\"\">Hello</a>\n    \n\n    <img src=\"img.jpeg\"></img>\n</p>";
+        let view: Node<()> = markdown(md);
         assert_eq!(expected, view.to_string())
     }
 
@@ -184,7 +240,7 @@ look like:
   * this one
   * that one
   * the other one"#;
-        let view: Node<()> = render_markdown(md);
+        let view: Node<()> = markdown(md);
 
         let expected = r#"<div>
     <h1>An h1 header</h1>
@@ -205,7 +261,7 @@ look like:
 [link text](http://dev.nodeca.com)
 
 [link with title](http://nodeca.github.io/pica/demo/ "title text!")"#;
-        let view: Node<()> = render_markdown(md);
+        let view: Node<()> = markdown(md);
         let expected = r#"<div>
     <p>
         <a href="http://dev.nodeca.com" title="">link text</a>
@@ -229,14 +285,14 @@ look like:
 | ext    | extension to be used for dest files. |
 }
 "#;
-        let view: Node<()> = render_markdown(md);
+        let view: Node<()> = markdown(md);
         let expected = r#"<div>
     <h2>Tables</h2>
     <table class="table">
-        <tr>
+        <th>
             <th class="text-left" scope="col">Option</th>
             <th class="text-right" scope="col">Description</th>
-        </tr>
+        </th>
         <tr>
             <td class="text-left">data</td>
             <td class="text-right">path to data files to supply the data that will be passed into templates.</td>

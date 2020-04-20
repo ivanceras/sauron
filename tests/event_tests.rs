@@ -178,7 +178,7 @@ fn remove_event_from_truncated_children() {
     let simple_program = simple_program();
     assert_eq!(
         sauron::diff(&old, &new),
-        vec![sauron_vdom::Patch::TruncateChildren(&"div",0, 1)],
+        vec![sauron_vdom::Patch::TruncateChildren(&"div", 0, 1)],
         "Should be a Truncate patch"
     );
     let mut dom_updater =
@@ -219,7 +219,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     let simple_program = simple_program();
     assert_eq!(
         sauron::diff(&old, &new),
-        vec![sauron_vdom::Patch::TruncateChildren(&"div",0, 1)],
+        vec![sauron_vdom::Patch::TruncateChildren(&"div", 0, 1)],
         "Should be a Truncate patch"
     );
     let mut dom_updater =
@@ -248,7 +248,8 @@ fn remove_event_from_replaced_node() {
     let simple_program = simple_program();
     assert_eq!(
         sauron::diff(&old, &new),
-        vec![sauron_vdom::Patch::Replace(&"div",
+        vec![sauron_vdom::Patch::Replace(
+            &"div",
             0,
             &sauron_vdom::Node::Element(sauron_vdom::Element {
                 tag: "p",

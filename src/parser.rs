@@ -15,6 +15,7 @@ use crate::{
     },
     Event,
 };
+use crate::{Attribute, Element, Node};
 use html5ever::{
     local_name, namespace_url, ns, parse_document, parse_fragment,
     tendril::TendrilSink, QualName,
@@ -23,10 +24,6 @@ use markup5ever_rcdom::{Handle, NodeData, RcDom};
 use std::io;
 use thiserror::Error;
 use to_syntax::ToSyntax;
-
-pub(crate) type Node = sauron_vdom::Node<String, String, Event, ()>;
-pub(crate) type Attribute = sauron_vdom::Attribute<String, Event, ()>;
-pub(crate) type Element = sauron_vdom::Element<String, String, Event, ()>;
 
 mod to_syntax;
 
@@ -38,7 +35,7 @@ pub enum ParseError {
     IoError(#[from] io::Error),
 }
 
-fn match_tag(tag: &str) -> Option<String> {
+fn match_tag(tag: &str) -> Option<&'static str> {
     HTML_TAGS
         .iter()
         .chain(HTML_TAGS_NON_COMMON.iter())
@@ -46,64 +43,66 @@ fn match_tag(tag: &str) -> Option<String> {
         .chain(SVG_TAGS.iter())
         .chain(SVG_TAGS_NON_COMMON.iter())
         .find(|item| item.eq_ignore_ascii_case(&tag))
-        .map(|item| item.to_string())
+        .map(|item| *item)
         .or_else(|| {
             SVG_TAGS_SPECIAL
                 .iter()
                 .find(|(_func, item)| item.eq_ignore_ascii_case(&tag))
-                .map(|(func, _item)| func.to_string())
+                .map(|(func, _item)| *func)
         })
 }
 
-fn match_attribute(key: &str) -> Option<String> {
+fn match_attribute(key: &str) -> Option<&'static str> {
     HTML_ATTRS
         .iter()
         .chain(SVG_ATTRS.iter())
-        .find(|att| att.eq_ignore_ascii_case(key))
-        .map(|att| att.to_string())
+        .find(|att| att.eq_ignore_ascii_case(&key))
+        .map(|att| *att)
         .or_else(|| {
             HTML_ATTRS_SPECIAL
                 .iter()
                 .chain(SVG_ATTRS_SPECIAL.iter())
                 .chain(SVG_ATTRS_XLINK.iter())
-                .find(|(_func, att)| att.eq_ignore_ascii_case(key))
-                .map(|(func, _att)| func.to_string())
+                .find(|(_func, att)| att.eq_ignore_ascii_case(&key))
+                .map(|(func, _att)| *func)
         })
 }
 
-fn match_attribute_function(key: &str) -> Option<String> {
+fn match_attribute_function(key: &str) -> Option<&'static str> {
     HTML_ATTRS
         .iter()
         .chain(SVG_ATTRS.iter())
         .find(|att| att.eq_ignore_ascii_case(key))
-        .map(|att| att.to_string())
+        .map(|att| *att)
         .or_else(|| {
             HTML_ATTRS_SPECIAL
                 .iter()
                 .chain(SVG_ATTRS_SPECIAL.iter())
                 .chain(SVG_ATTRS_XLINK.iter())
                 .find(|(func, _att)| func.eq_ignore_ascii_case(key))
-                .map(|(func, _att)| func.to_string())
+                .map(|(func, _att)| *func)
         })
 }
 
-fn extract_attributes(attrs: &Vec<html5ever::Attribute>) -> Vec<Attribute> {
+fn extract_attributes<MSG>(
+    attrs: &Vec<html5ever::Attribute>,
+) -> Vec<Attribute<MSG>> {
     attrs
         .iter()
         .filter_map(|att| {
             let key = att.name.local.to_string();
             let value = att.value.to_string();
             if let Some(attr) = match_attribute(&key) {
-                Some(crate::html::attributes::attr(attr.to_string(), value))
+                Some(crate::html::attributes::attr(attr, value))
             } else {
                 log::warn!("Not a standard html attribute: {}", key);
-                Some(crate::html::attributes::attr(key, value))
+                None
             }
         })
         .collect()
 }
 
-fn process_children(node: &Handle) -> Vec<Node> {
+fn process_children<MSG>(node: &Handle) -> Vec<Node<MSG>> {
     node.children
         .borrow()
         .iter()
@@ -111,7 +110,7 @@ fn process_children(node: &Handle) -> Vec<Node> {
         .collect()
 }
 
-fn process_node(node: &Handle) -> Option<Node> {
+fn process_node<MSG>(node: &Handle) -> Option<Node<MSG>> {
     match &node.data {
         NodeData::Text { ref contents } => {
             let text_content = contents.borrow().to_string();
@@ -152,7 +151,7 @@ fn process_node(node: &Handle) -> Option<Node> {
     }
 }
 
-fn parse(html: &str) -> Result<Option<Node>, ParseError> {
+fn parse<MSG>(html: &str) -> Result<Option<Node<MSG>>, ParseError> {
     let html_start = html.trim_start();
     let parser = if html_start.starts_with("<html")
         || html_start.starts_with("<!DOCTYPE")
@@ -174,13 +173,29 @@ fn parse(html: &str) -> Result<Option<Node>, ParseError> {
     Ok(node)
 }
 
+/// the document is not wrapped with html
+pub(crate) fn parse_simple<MSG>(
+    html: &str,
+) -> Result<Vec<Node<MSG>>, ParseError> {
+    if let Some(html) = parse(html)? {
+        if let Some(element) = html.take_element() {
+            assert_eq!(element.tag, "html");
+            Ok(element.children)
+        } else {
+            Ok(vec![])
+        }
+    } else {
+        Ok(vec![])
+    }
+}
+
 pub fn convert_html_to_syntax(
     html: &str,
     use_macro: bool,
 ) -> Result<String, ParseError> {
     log::info!("input: {}", html);
     println!("input: {}", html);
-    match parse(html) {
+    match parse::<()>(html) {
         Ok(root_node) => {
             if let Some(root_node) = root_node {
                 Ok(root_node.to_syntax(use_macro, 0))
@@ -232,7 +247,7 @@ mod tests {
     </style>
 </head>
 <body style='margin: 0; padding: 0; width: 100%; height: 100%;'>
-  <div data-control-id="10001" id="web-app" style='width: 100%; height: 100%;'>
+  <div id="web-app" style='width: 100%; height: 100%;'>
       #HTML_INSERTED_HERE_BY_SERVER#
   </div>
   <!-- This is a comment -->
@@ -250,7 +265,7 @@ mod tests {
     ")]),
     ]),
     body!([style("margin: 0; padding: 0; width: 100%; height: 100%;"),],[
-        div!([attr("data-control-id",10001),id("web-app"),style("width: 100%; height: 100%;"),],[text("
+        div!([id("web-app"),style("width: 100%; height: 100%;"),],[text("
       #HTML_INSERTED_HERE_BY_SERVER#
   ")]),
     ]),
@@ -277,7 +292,7 @@ mod tests {
 </svg>
 "#;
         let expected = r#"html!([],[
-    svg!([height(400),viewBox("0 0 600 400"),width(600),attr("xlink","http://www.w3.org/1999/xlink"),xmlns("http://www.w3.org/2000/svg"),],[
+    svg!([height(400),viewBox("0 0 600 400"),width(600),xmlns("http://www.w3.org/2000/svg"),],[
         defs!([],[
             filter!([id("shadow"),],[
                 feDropShadow!([dx(2),dy(1),stdDeviation(0.2),],[]),

@@ -144,10 +144,10 @@ where
         }
     }
 
-    pub fn tag(&self) -> Option<&T>{
-        if let Some(e) = self.as_element_ref(){
+    pub fn tag(&self) -> Option<&T> {
+        if let Some(e) = self.as_element_ref() {
             Some(&e.tag)
-        }else{
+        } else {
             None
         }
     }

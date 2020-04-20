@@ -71,7 +71,11 @@ where
 
     // Handle replacing of a node
     if replace {
-        patches.push(Patch::Replace(old.tag().expect("must have a tag"), *cur_node_idx, &new));
+        patches.push(Patch::Replace(
+            old.tag().expect("must have a tag"),
+            *cur_node_idx,
+            &new,
+        ));
         if let Node::Element(old_element_node) = old {
             for child in old_element_node.children.iter() {
                 increment_node_idx_for_children(child, cur_node_idx);
@@ -107,7 +111,11 @@ where
             if new_child_count > old_child_count {
                 let append_patch: Vec<&'a Node<T, ATT, EVENT, MSG>> =
                     new_element.children[old_child_count..].iter().collect();
-                patches.push(Patch::AppendChildren(&old_element.tag, *cur_node_idx, append_patch))
+                patches.push(Patch::AppendChildren(
+                    &old_element.tag,
+                    *cur_node_idx,
+                    append_patch,
+                ))
             }
 
             if new_child_count < old_child_count {
@@ -194,10 +202,18 @@ where
     }
 
     if !add_attributes.is_empty() {
-        patches.push(Patch::AddAttributes(&old_element.tag, *cur_node_idx, add_attributes));
+        patches.push(Patch::AddAttributes(
+            &old_element.tag,
+            *cur_node_idx,
+            add_attributes,
+        ));
     }
     if !remove_attributes.is_empty() {
-        patches.push(Patch::RemoveAttributes(&old_element.tag, *cur_node_idx, remove_attributes));
+        patches.push(Patch::RemoveAttributes(
+            &old_element.tag,
+            *cur_node_idx,
+            remove_attributes,
+        ));
     }
     patches
 }
@@ -236,12 +252,15 @@ where
     }
 
     if !add_event_listener.is_empty() {
-        patches
-            .push(Patch::AddEventListener(&old_element.tag, *cur_node_idx, add_event_listener));
+        patches.push(Patch::AddEventListener(
+            &old_element.tag,
+            *cur_node_idx,
+            add_event_listener,
+        ));
     }
     if !remove_event_listener.is_empty() {
         patches.push(Patch::RemoveEventListener(
-                &old_element.tag,
+            &old_element.tag,
             *cur_node_idx,
             remove_event_listener,
         ));
