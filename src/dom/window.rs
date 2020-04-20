@@ -41,4 +41,8 @@ impl Window {
     }
 
     //TODO: add a function here fn set_timeout_with_callback
+
+    pub fn set_title(title: &str) {
+        crate::document().set_title(title);
+    }
 }
