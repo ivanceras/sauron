@@ -1,4 +1,4 @@
-use crate::{
+use sauron::{
     html::{
         attributes::{checked, class, href, id, src, title, type_},
         *,
@@ -50,7 +50,7 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                 add_child!(code(vec![], vec![text(code_str)]))
             }
             Event::Html(html) => {
-                if let Ok(nodes) = crate::parser::parse_simple(&html) {
+                if let Ok(nodes) = sauron_parse::parse_simple(&html) {
                     for node in nodes {
                         add_child!(node);
                     }

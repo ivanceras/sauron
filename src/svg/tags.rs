@@ -120,7 +120,7 @@ macro_rules! declare_common_svg_tags_and_macro {
 
 
         #[cfg(feature = "with-parser")]
-        pub(crate) const SVG_TAGS: [&'static str; 65] = [ $(stringify!($name),)* ];
+        pub const SVG_TAGS: [&'static str; 65] = [ $(stringify!($name),)* ];
 
     };
 }
@@ -137,7 +137,7 @@ macro_rules! declare_svg_tags_special{
         declare_svg_tags!{ $($name=>$attribute;)*}
 
         #[cfg(feature = "with-parser")]
-        pub(crate) const SVG_TAGS_SPECIAL:[(&'static str,&'static str); 3] = [$((stringify!($name),$attribute),)*];
+        pub const SVG_TAGS_SPECIAL:[(&'static str,&'static str); 3] = [$((stringify!($name),$attribute),)*];
     }
 }
 
@@ -151,7 +151,7 @@ macro_rules! declare_svg_tags_non_common{
         declare_svg_tags!{ $($name;)*}
 
         #[cfg(feature = "with-parser")]
-        pub(crate) const SVG_TAGS_NON_COMMON:[&'static str;6] = [$(stringify!($name),)*];
+        pub const SVG_TAGS_NON_COMMON:[&'static str;6] = [$(stringify!($name),)*];
     }
 }
 

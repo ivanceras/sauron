@@ -1,4 +1,4 @@
-use super::*;
+use sauron::prelude::*;
 use sauron_vdom::{AttribValue, Text};
 
 pub trait ToSyntax {
@@ -24,7 +24,7 @@ impl<MSG: 'static> ToSyntax for Attribute<MSG> {
     fn to_syntax(&self, use_macros: bool, indent: usize) -> String {
         let mut buffer = String::new();
         let matched_attribute_func =
-            match_attribute_function(&self.name).is_some();
+            sauron_parse::match_attribute_function(&self.name).is_some();
         if let Some(_ns) = self.namespace {
             buffer += &format!(
                 r#"xlink_{}({}),"#,
