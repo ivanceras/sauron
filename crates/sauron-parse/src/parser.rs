@@ -14,9 +14,8 @@ use sauron::{
         attributes::{SVG_ATTRS, SVG_ATTRS_SPECIAL, SVG_ATTRS_XLINK},
         tags::{SVG_TAGS, SVG_TAGS_NON_COMMON, SVG_TAGS_SPECIAL},
     },
-    Event,
 };
-use sauron::{Attribute, Element, Node};
+use sauron::{Attribute, Node};
 use html5ever::{
     local_name, namespace_url, ns, parse_document, parse_fragment,
     tendril::TendrilSink, QualName,
