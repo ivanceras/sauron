@@ -1,6 +1,6 @@
 [package]
 name = "sauron"
-version = "0.23.0"
+version = "0.24.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -99,10 +99,4 @@ members = [
     "examples/data-viewer",
 ]
 
-
-
-#[profile.release]
-## Warning: Do not use 'z' it removes a lot of things including the closures
-#opt-level = 's'
-#lto = true
 

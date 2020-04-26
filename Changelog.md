@@ -1,8 +1,13 @@
 # Changelog
 
-# Unreleased
-- **Breaking** Add the tag in patches
+# 0.24.0
+- **Breaking** Add the tag in patches, to give clue to backend on how to handle special tags
 	- This is used in gtk, since widgets in gtk doesn't follow a proper tree nesting as with html
+- **Breaking** Detach `markdown` module into a high-level crate (sauron-md)
+    - Detach `to_syntax` module into a high-level crate (sauron-syntax)
+    - Create `sauron-parse` crate which `sauron-md` and `sauron-syntax` depends on.
+- Add functionality for inner_html which optimizes the performance of client side apps
+- Add a functionality to hook url hashchange event in the browser
 
 # 0.23.0
 - move Cmd and Dispatch from sauron_vdom to sauron

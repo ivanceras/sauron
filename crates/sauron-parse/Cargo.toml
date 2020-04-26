@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sauron = { path = "../../", version = "0.23.0", features = ["with-parser"] }
+sauron = { path = "../../", version = "0.24.0", features = ["with-parser"] }
 html5ever = {version = "0.25.1"}
 markup5ever_rcdom = { version = "0.1.0" }
 thiserror = "1.0"
