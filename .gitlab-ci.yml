@@ -31,7 +31,7 @@ rust-beta:
 
 rust-stable:
   stage: build
-  image: rustlang/rust:stable
+  image: rustlang/rust:1.43.0
   before_script:
       - apt update
       - apt install -y firefox-esr
