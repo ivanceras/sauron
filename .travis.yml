@@ -7,7 +7,8 @@ addons:
 
 rust:
     # Use nightly for now since wasm-bindgen is still only compiling in nightly
-    #- stable
+    - stable
+    - beta
     - nightly
 
 
