@@ -14,3 +14,31 @@ rust-nightly:
     - cargo build --all
     - cargo test --all  --all-features
     - GECKODRIVER=$(pwd)/geckodriver ./test.sh
+
+rust-beta:
+  stage: build
+  image: rustlang/rust:beta
+  before_script:
+      - apt update
+      - apt install -y firefox-esr
+      - curl --retry 5 -LO https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
+      - tar xf geckodriver-v0.24.0-linux64.tar.gz
+      - cargo install wasm-pack
+  script:
+    - cargo build --all
+    - cargo test --all  --all-features
+    - GECKODRIVER=$(pwd)/geckodriver ./test.sh
+
+rust-stable:
+  stage: build
+  image: rustlang/rust:stable
+  before_script:
+      - apt update
+      - apt install -y firefox-esr
+      - curl --retry 5 -LO https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
+      - tar xf geckodriver-v0.24.0-linux64.tar.gz
+      - cargo install wasm-pack
+  script:
+    - cargo build --all
+    - cargo test --all  --all-features
+    - GECKODRIVER=$(pwd)/geckodriver ./test.sh
