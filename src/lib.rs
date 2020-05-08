@@ -140,6 +140,8 @@
 //! - [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet csv data viewer
 //! - [svg_clock](https://ivanceras.github.io/svg_clock/) - A clock drawn using svg and window tick event.
 //! - [svg_graph](https://ivanceras.github.io/svg_graph/) - A simple graph using svg
+//! - [tinki wiki](https://github.com/ivanceras/tinki) - My personal wiki, powering my [github
+//! pages](https://ivanceras.github.io)
 //!
 //! ### Convert html to sauron syntax
 //! [html2sauron](https://ivanceras.github.io/html2sauron/) - A tool to easily convert html into
