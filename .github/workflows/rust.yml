@@ -36,6 +36,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      - name: Install cargo bload
+        run: cargo install cargo-bloat
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
