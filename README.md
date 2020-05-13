@@ -33,10 +33,10 @@
 -- The Harvard Lampoon & [po8](https://www.reddit.com/user/po8/)
 
 
- **Sauron** is an html web framework for building web-apps with the goal of
- closely adhering to [The Elm Architecture](https://guide.elm-lang.org/architecture/), a paragon for elegant design.
+ **Sauron** is an HTML web framework for building web-apps with the goal of
+ closely adhering to [The Elm Architecture](https://guide.elm-lang.org/architecture/), a paragon of elegant design.
 
- As with elm, sauron follows the simplistic design of writing view code.
+ Sauron follow Elm's simplistic design of writing view code.
 
 #### Example
 ```rust
@@ -133,13 +133,13 @@ and the build script for the details.
 
 #### Demo examples
 - [todomvc](https://ivanceras.github.io/todomvc/)
-- [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet csv data viewer
-- [svg_clock](https://ivanceras.github.io/svg_clock/) - A clock drawn using svg and window tick event.
-- [svg_graph](https://ivanceras.github.io/svg_graph/) - A simple graph using svg
+- [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet CSV data viewer
+- [svg_clock](https://ivanceras.github.io/svg_clock/) - A clock drawn using SVG and window tick event.
+- [svg_graph](https://ivanceras.github.io/svg_graph/) - A simple graph using SVG
 - [tinki wiki](https://github.com/ivanceras/tinki) - My personal wiki, powering my [github
 pages](https://ivanceras.github.io)
 
-#### Convert html to sauron syntax
+#### Converting HTML into Sauron's syntax
 [html2sauron](https://ivanceras.github.io/html2sauron/) - A tool to easily convert html into
 sauron node tree for your views.
 
@@ -157,8 +157,5 @@ cargo install basic-http-server
 
 #### Please support this project:
  [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
-
-
-
 
 License: MIT
