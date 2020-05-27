@@ -1,13 +1,18 @@
 //! This module parses literal html returns sauron dom tree
 
+use html5ever::{
+    local_name, namespace_url, ns, parse_document, parse_fragment,
+    tendril::TendrilSink, QualName,
+};
+use markup5ever_rcdom::{Handle, NodeData, RcDom};
 use sauron::{
     html::{
+        attributes,
         attributes::{HTML_ATTRS, HTML_ATTRS_SPECIAL},
         tags::{
             HTML_TAGS, HTML_TAGS_NON_COMMON, HTML_TAGS_WITH_MACRO_NON_COMMON,
         },
         text,
-		attributes,
     },
     sauron_vdom::builder::element,
     svg::{
@@ -16,14 +21,8 @@ use sauron::{
     },
 };
 use sauron::{Attribute, Node};
-use html5ever::{
-    local_name, namespace_url, ns, parse_document, parse_fragment,
-    tendril::TendrilSink, QualName,
-};
-use markup5ever_rcdom::{Handle, NodeData, RcDom};
 use std::io;
 use thiserror::Error;
-
 
 #[derive(Debug, Error)]
 pub enum ParseError {
@@ -154,10 +153,8 @@ pub fn parse<MSG>(html: &str) -> Result<Option<Node<MSG>>, ParseError> {
     let parser = if html_start.starts_with("<html")
         || html_start.starts_with("<!DOCTYPE")
     {
-        println!("using document parser");
         parse_document(RcDom::default(), Default::default())
     } else {
-        println!("using fragment parser");
         parse_fragment(
             RcDom::default(),
             Default::default(),
@@ -184,5 +181,3 @@ pub fn parse_simple<MSG>(html: &str) -> Result<Vec<Node<MSG>>, ParseError> {
         Ok(vec![])
     }
 }
-
-

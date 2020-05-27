@@ -144,9 +144,32 @@ where
         }
     }
 
+    /// returns the tag of this node if it is an element
     pub fn tag(&self) -> Option<&T> {
         if let Some(e) = self.as_element_ref() {
             Some(&e.tag)
+        } else {
+            None
+        }
+    }
+
+    /// returns the text content if it is a text node
+    pub fn text(&self) -> Option<&str> {
+        match self {
+            Node::Text(text) => Some(&text.text),
+            Node::Element(_) => None,
+        }
+    }
+
+    /// returns the text if this node has only one child and is a text.
+    /// includes: h1, h2..h6, p,
+    pub fn only_child_text(&self) -> Option<&str> {
+        if let Some(element) = self.as_element_ref() {
+            if element.is_children_a_node_text() {
+                element.children[0].text()
+            } else {
+                None
+            }
         } else {
             None
         }
