@@ -163,13 +163,9 @@ where
 
     /// returns the text if this node has only one child and is a text.
     /// includes: h1, h2..h6, p,
-    pub fn only_child_text(&self) -> Option<&str> {
+    pub fn eldest_child_text(&self) -> Option<&str> {
         if let Some(element) = self.as_element_ref() {
-            if element.is_children_a_node_text() {
-                element.children[0].text()
-            } else {
-                None
-            }
+            element.eldest_child_text()
         } else {
             None
         }

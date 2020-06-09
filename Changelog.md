@@ -2,7 +2,7 @@
 
 # Unreleased
 - Add a function `Node.text` to return the string of the text element
-- Add a function `Node.only_child_text` to return the string of the only child of this element
+- Add a function `Node.eldest_child_text` to return the string of the only child of this element
 
 # 0.24.0
 - **Breaking** Add the tag in patches, to give clue to backend on how to handle special tags

@@ -165,6 +165,12 @@ where
         }
     }
 
+    /// returns the text if this node has only one child and is a text.
+    /// includes: h1, h2..h6, p,
+    pub fn eldest_child_text(&self) -> Option<&str> {
+        self.children.first().map(|e| e.text()).flatten()
+    }
+
     /// check if the children of this node is only 1 and it is a text node
     pub fn is_children_a_node_text(&self) -> bool {
         self.children.len() == 1 && self.children[0].is_text_node()
