@@ -44,6 +44,15 @@ impl MouseEvent {
         }
     }
 
+    pub fn pressed(x: i32, y: i32) -> Self {
+        MouseEvent {
+            r#type: "mousedown",
+            coordinate: Coordinate::new(x, y),
+            buttons: MouseButton::Left,
+            ..Default::default()
+        }
+    }
+
     pub fn x(&self) -> i32 {
         self.coordinate.x()
     }

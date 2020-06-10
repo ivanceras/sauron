@@ -47,6 +47,9 @@ where
             .collect()
     }
 
+    /// returns the only the attributes of this element
+    /// Note: This does not include the events.
+    /// If you need to access the events, use the `attrs` field directly.
     pub fn attributes(&self) -> Vec<Attribute<ATT, EVENT, MSG>> {
         let names = self.get_attributes_name_and_ns();
         let mut attributes = vec![];
