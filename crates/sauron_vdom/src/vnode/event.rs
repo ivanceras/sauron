@@ -53,6 +53,24 @@ impl MouseEvent {
         }
     }
 
+    pub fn release(x: i32, y: i32) -> Self {
+        MouseEvent {
+            r#type: "mouseup",
+            coordinate: Coordinate::new(x, y),
+            buttons: MouseButton::Left,
+            ..Default::default()
+        }
+    }
+
+    pub fn mousemove(x: i32, y: i32) -> Self {
+        MouseEvent {
+            r#type: "mousemove",
+            coordinate: Coordinate::new(x, y),
+            buttons: MouseButton::Left,
+            ..Default::default()
+        }
+    }
+
     pub fn x(&self) -> i32 {
         self.coordinate.x()
     }
