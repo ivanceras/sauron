@@ -1,3 +1,3 @@
-pub use parser::{parse_simple,parse, ParseError, match_attribute_function};
+pub use parser::{match_attribute_function, parse, parse_simple, ParseError};
 
 mod parser;

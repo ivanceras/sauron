@@ -1,3 +1,4 @@
+use pulldown_cmark::{Alignment, CodeBlockKind, Event, Options, Parser, Tag};
 use sauron::{
     html::{
         attributes::{checked, class, href, id, src, title, type_},
@@ -5,7 +6,6 @@ use sauron::{
     },
     Node,
 };
-use pulldown_cmark::{Alignment, CodeBlockKind, Event, Options, Parser, Tag};
 use std::collections::HashMap;
 
 pub fn markdown<MSG>(src: &str) -> Node<MSG> {

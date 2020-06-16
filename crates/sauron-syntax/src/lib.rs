@@ -1,5 +1,5 @@
-pub use to_syntax::ToSyntax;
 use sauron_parse::ParseError;
+pub use to_syntax::ToSyntax;
 
 mod to_syntax;
 
@@ -41,8 +41,7 @@ mod tests {
     div!([],[text("content2")]),
     div!([],[text("content3")]),
 ])"#;
-        let syntax =
-            html_to_syntax(input, true).expect("must not fail");
+        let syntax = html_to_syntax(input, true).expect("must not fail");
         println!("syntax: {}", syntax);
         assert_eq!(expected, syntax);
     }
@@ -84,8 +83,7 @@ mod tests {
   ")]),
     ]),
 ])"#;
-        let syntax =
-            html_to_syntax(input, true).expect("must not fail");
+        let syntax = html_to_syntax(input, true).expect("must not fail");
         println!("syntax: {}", syntax);
         assert_eq!(expected, syntax);
     }
@@ -118,8 +116,7 @@ mod tests {
         text!([fill("red"),font_family("monospace"),font_size(50),style("filter:url(#shadow);"),width(500),x(20),y(200),],[text("Happy birthday")]),
     ]),
 ])"#;
-        let syntax =
-            html_to_syntax(input, true).expect("must not fail");
+        let syntax = html_to_syntax(input, true).expect("must not fail");
         println!("syntax: {}", syntax);
         assert_eq!(expected, syntax);
     }
