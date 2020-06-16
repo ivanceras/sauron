@@ -28,6 +28,10 @@ where
         }
     }
 
+    pub fn get_children(&self) -> &[Node<T, ATT, EVENT, MSG>] {
+        &self.children
+    }
+
     /// get the attributes that are events
     pub fn events(&self) -> Vec<&Attribute<ATT, EVENT, MSG>> {
         self.attrs.iter().filter(|attr| attr.is_event()).collect()

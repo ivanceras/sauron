@@ -170,6 +170,14 @@ where
             None
         }
     }
+
+    pub fn get_children(&self) -> Option<&[Node<T, ATT, EVENT, MSG>]> {
+        if let Some(element) = self.as_element_ref() {
+            Some(element.get_children())
+        } else {
+            None
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]

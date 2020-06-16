@@ -85,4 +85,17 @@ where
             Patch::ChangeText(node_idx, _) => *node_idx,
         }
     }
+
+    pub fn tag(&self) -> Option<&T> {
+        match self {
+            Patch::AppendChildren(tag, _node_idx, _) => Some(tag),
+            Patch::TruncateChildren(tag, _node_idx, _) => Some(tag),
+            Patch::Replace(tag, _node_idx, _) => Some(tag),
+            Patch::AddAttributes(tag, _node_idx, _) => Some(tag),
+            Patch::RemoveAttributes(tag, _node_idx, _) => Some(tag),
+            Patch::AddEventListener(tag, _node_idx, _) => Some(tag),
+            Patch::RemoveEventListener(tag, _node_idx, _) => Some(tag),
+            Patch::ChangeText(_node_idx, _) => None,
+        }
+    }
 }

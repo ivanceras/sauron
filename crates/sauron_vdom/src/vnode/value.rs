@@ -127,6 +127,18 @@ impl From<&String> for Value {
     }
 }
 
+impl From<&[u8]> for Value {
+    fn from(v: &[u8]) -> Self {
+        Value::Bytes(v.to_vec())
+    }
+}
+
+impl From<&Vec<u8>> for Value {
+    fn from(v: &Vec<u8>) -> Self {
+        Value::Bytes(v.to_owned())
+    }
+}
+
 macro_rules! impl_from {
     ($ty:ty => $variant:ident) => {
         impl From<$ty> for Value {
