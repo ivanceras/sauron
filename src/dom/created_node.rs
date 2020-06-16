@@ -247,7 +247,7 @@ where
         // a more fine grain control and expected results,
         // and for most cases this is what we want. We don't want the containing div of a button
         // also receives that click event.
-        event.stop_propagation();
+        //event.stop_propagation();
         // FIXME: need to allow users control this
         //
         // Notes:
