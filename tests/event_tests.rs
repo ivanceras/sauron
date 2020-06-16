@@ -29,7 +29,7 @@ fn on_input() {
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
             oninput(move |event: sauron_vdom::event::InputEvent| {
-                *text_clone.borrow_mut() = event.value;
+                *text_clone.borrow_mut() = event.value.to_string();
             }),
             value("End Text"),
         ],
@@ -77,7 +77,7 @@ fn added_event() {
             id(elem_id),
             value("End Text"),
             oninput(move |event: sauron_vdom::event::InputEvent| {
-                *text_clone.borrow_mut() = event.value;
+                *text_clone.borrow_mut() = event.value.to_string();
             }),
         ],
         vec![],
@@ -118,7 +118,7 @@ fn remove_event() {
             id(elem_id),
             value("End Text"),
             oninput(move |event: sauron_vdom::event::InputEvent| {
-                *text_clone.borrow_mut() = event.value;
+                *text_clone.borrow_mut() = event.value.to_string();
             }),
         ],
         vec![],

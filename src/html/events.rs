@@ -99,13 +99,9 @@ pub mod mapper {
         let input_event = if let Some(input) =
             target.dyn_ref::<HtmlInputElement>()
         {
-            Some(InputEvent {
-                value: input.value(),
-            })
+            Some(InputEvent::new(input.value()))
         } else if let Some(textarea) = target.dyn_ref::<HtmlTextAreaElement>() {
-            Some(InputEvent {
-                value: textarea.value(),
-            })
+            Some(InputEvent::new(textarea.value()))
         } else {
             None
         };
