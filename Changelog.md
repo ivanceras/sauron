@@ -1,8 +1,11 @@
 # Changelog
 
-# Unreleased
+# 0.25.0
 - Add a function `Node.text` to return the string of the text element
 - Add a function `Node.eldest_child_text` to return the string of the only child of this element
+- Add a function `Node.get_children` to return children of a node
+- Add a utility function `mousemove` and `release` for MouseEvent
+- Remove the call to `stop_propagation` in the add_event_listener processor, since this is handled by the event_mapper.
 
 # 0.24.0
 - **Breaking** Add the tag in patches, to give clue to backend on how to handle special tags
