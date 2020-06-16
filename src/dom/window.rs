@@ -1,7 +1,14 @@
 use crate::{
-    dom::created_node::create_closure_wrap, Attribute, Cmd, Component,
+    dom::created_node::create_closure_wrap,
+    Attribute,
+    Cmd,
+    Component,
 };
-use wasm_bindgen::{self, prelude::*, JsCast};
+use wasm_bindgen::{
+    self,
+    prelude::*,
+    JsCast,
+};
 use web_sys::EventTarget;
 
 pub struct Window;

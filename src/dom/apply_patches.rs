@@ -1,15 +1,32 @@
 use crate::{
     dom::{
         created_node,
-        created_node::{create_closure_wrap, ActiveClosure, CreatedNode},
+        created_node::{
+            create_closure_wrap,
+            ActiveClosure,
+            CreatedNode,
+        },
     },
-    Dispatch, Patch,
+    Dispatch,
+    Patch,
 };
 use js_sys::Function;
-use std::collections::{HashMap, HashSet};
-use wasm_bindgen::{closure::Closure, JsCast, JsValue};
+use std::collections::{
+    HashMap,
+    HashSet,
+};
+use wasm_bindgen::{
+    closure::Closure,
+    JsCast,
+    JsValue,
+};
 use web_sys::{
-    Element, Event, HtmlInputElement, HtmlTextAreaElement, Node, Text,
+    Element,
+    Event,
+    HtmlInputElement,
+    HtmlTextAreaElement,
+    Node,
+    Text,
 };
 
 /// Apply all of the patches to our old root node in order to create the new root node
@@ -398,9 +415,11 @@ where
             >(program, new_node);
             node.replace_with_with_node_1(&created_node.node)?;
         }
-        _other => unreachable!(
-            "Text nodes should only receive ChangeText or Replace patches."
-        ),
+        _other => {
+            unreachable!(
+                "Text nodes should only receive ChangeText or Replace patches."
+            )
+        }
     };
 
     Ok(())

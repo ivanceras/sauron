@@ -1,7 +1,9 @@
+use crate::Value;
+
 /// A container for generic event and the common values
 /// needed for the user.
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Event {
     MouseEvent(MouseEvent),
     KeyEvent(KeyEvent),
@@ -27,7 +29,7 @@ impl From<KeyEvent> for Event {
 }
 
 /// A mouse event contains the (x,y) coordinates, buttons and modifier keys
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct MouseEvent {
     pub r#type: &'static str,
     pub coordinate: Coordinate,
@@ -97,14 +99,16 @@ impl KeyEvent {
     }
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct InputEvent {
-    pub value: String,
+    pub value: Value,
 }
 
 impl InputEvent {
-    pub fn new(value: String) -> Self {
-        InputEvent { value }
+    pub fn new<V: Into<Value>>(value: V) -> Self {
+        InputEvent {
+            value: value.into(),
+        }
     }
 }
 

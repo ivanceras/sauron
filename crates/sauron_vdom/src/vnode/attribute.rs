@@ -69,6 +69,7 @@ where
     pub fn is_value(&self) -> bool {
         self.value.is_value()
     }
+
     pub fn is_func_call(&self) -> bool {
         self.value.is_func_call()
     }
@@ -157,12 +158,14 @@ where
             _ => false,
         }
     }
+
     fn is_event(&self) -> bool {
         match self {
             AttribValue::Callback(_) => true,
             _ => false,
         }
     }
+
     fn is_func_call(&self) -> bool {
         match self {
             AttribValue::FuncCall(_) => true,

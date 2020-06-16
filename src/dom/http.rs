@@ -1,5 +1,14 @@
-use crate::{Callback, Cmd, Component, Dispatch};
-use wasm_bindgen::{closure::Closure, JsCast, JsValue};
+use crate::{
+    Callback,
+    Cmd,
+    Component,
+    Dispatch,
+};
+use wasm_bindgen::{
+    closure::Closure,
+    JsCast,
+    JsValue,
+};
 use web_sys::Response;
 
 pub struct Http;

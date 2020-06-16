@@ -1,4 +1,7 @@
-use wasm_bindgen::{closure::Closure, JsCast};
+use wasm_bindgen::{
+    closure::Closure,
+    JsCast,
+};
 
 pub fn window() -> web_sys::Window {
     web_sys::window().expect("no global `window` exists")

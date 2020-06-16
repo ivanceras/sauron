@@ -1,5 +1,13 @@
-use crate::{dom::dom_updater::DomUpdater, Cmd, Component, Dispatch};
-use std::{cell::RefCell, rc::Rc};
+use crate::{
+    dom::dom_updater::DomUpdater,
+    Cmd,
+    Component,
+    Dispatch,
+};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+};
 #[cfg(not(feature = "no_request_animation_frame"))]
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;

@@ -19,7 +19,13 @@ pub use dom_updater::DomUpdater;
 pub use http::Http;
 pub use program::Program;
 pub use util::{
-    body, document, history, now, performance, request_animation_frame, window,
+    body,
+    document,
+    history,
+    now,
+    performance,
+    request_animation_frame,
+    window,
 };
 pub use window::Window;
 
