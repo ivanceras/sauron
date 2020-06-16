@@ -3,6 +3,11 @@ name = "sauron-parse"
 version = "0.1.1"
 authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
 edition = "2018"
+license = "MIT"
+description = "A library for parsing html syntax"
+repository = "https://github.com/ivanceras/sauron"
+documentation = "https://docs.rs/sauron-parse"
+keywords = ["svg", "html", "parser"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
