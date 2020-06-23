@@ -1,6 +1,12 @@
 use sauron::{
-    html::{attributes::*, events::*, *},
-    Cmd, Component, Node,
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
+    Cmd,
+    Component,
+    Node,
 };
 
 pub struct Model {
@@ -227,7 +233,7 @@ impl Model {
                 id("new-todo"),
                 placeholder("What needs to be done?"),
                 value(self.value.to_string()),
-                oninput(|v: InputEvent| Msg::Update(v.value)),
+                oninput(|v: InputEvent| Msg::Update(v.value.to_string())),
                 onkeypress(|event: KeyEvent| {
                     if event.key == "Enter" {
                         Msg::Add
@@ -289,7 +295,9 @@ fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
                 class("edit"),
                 r#type("text"),
                 value(&entry.description),
-                oninput(|input: InputEvent| Msg::UpdateEdit(input.value)),
+                oninput(|input: InputEvent| {
+                    Msg::UpdateEdit(input.value.to_string())
+                }),
                 onblur(move |_| Msg::Edit(idx)),
                 onkeypress(move |event: KeyEvent| {
                     if event.key == "Enter" {

@@ -1,6 +1,9 @@
 use js_sys::Date;
 use sauron::prelude::*;
-use wasm_bindgen::{self, prelude::*};
+use wasm_bindgen::{
+    self,
+    prelude::*,
+};
 
 pub enum Msg {
     Click,
@@ -79,7 +82,7 @@ impl Component<Msg> for App {
                             [
                                 r#type("text"),
                                 oninput(|event: InputEvent| {
-                                    Msg::ChangeName(event.value)
+                                    Msg::ChangeName(event.value.to_string())
                                 }),
                                 placeholder("John Smith"),
                             ],
@@ -135,7 +138,9 @@ impl Component<Msg> for App {
                                     rows(10),
                                     cols(80),
                                     oninput(|event: InputEvent| {
-                                        Msg::ChangeBiography(event.value)
+                                        Msg::ChangeBiography(
+                                            event.value.to_string(),
+                                        )
                                     }),
                                     placeholder("I'm a..."),
                                 ],
@@ -153,7 +158,7 @@ impl Component<Msg> for App {
                             [
                                 r#type("text"),
                                 onchange(|event: InputEvent| {
-                                    Msg::ChangeThought(event.value)
+                                    Msg::ChangeThought(event.value.to_string())
                                 }),
                                 placeholder("Elephants..."),
                             ],

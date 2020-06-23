@@ -1,7 +1,20 @@
-use crate::{assets, widgets::search_widget, ColumnDef};
+use crate::{
+    assets,
+    widgets::search_widget,
+    ColumnDef,
+};
 use sauron::{
-    html::{attributes::*, events::*, units::*, *},
-    style, Cmd, Component, Node, *,
+    html::{
+        attributes::*,
+        events::*,
+        units::*,
+        *,
+    },
+    style,
+    Cmd,
+    Component,
+    Node,
+    *,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -100,7 +113,9 @@ impl ColumnView {
                     [class("column_view__search")],
                     [search_widget(
                         self.width,
-                        vec![oninput(|input| Msg::ChangeSearch(input.value))],
+                        vec![oninput(|input| {
+                            Msg::ChangeSearch(input.value.to_string())
+                        })],
                     )],
                 ),
             ],
