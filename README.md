@@ -140,8 +140,23 @@ and the build script for the details.
 pages](https://ivanceras.github.io)
 
 #### Converting HTML into Sauron's syntax
+
 [html2sauron](https://ivanceras.github.io/html2sauron/) - A tool to easily convert html into
 sauron node tree for your views.
+
+Note: When writing the view in sauron, just keep in mind that the function name is the element tag
+you are creating and there is 2 arguments for it. The first argument is an array of the attributes of the element
+and the second argument is an array of the children of the element.
+
+Example:
+```rust
+div!([id("container"),class("hero")], [text("Content goes here")])
+```
+`div` macro call is the element tag.
+The 1st argument in the call is an array of attributes for the div element expressed in a
+function call `id` and `class` which are valid attributes for a div.
+The 2nd argument in the call is an array of the children elements, and you can nest as many as
+you like.
 
 #### Prerequisite:
 
