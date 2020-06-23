@@ -1,6 +1,9 @@
 #![deny(warnings)]
 use sauron_vdom::{
-    builder::{attr, on},
+    builder::{
+        attr,
+        on,
+    },
     *,
 };
 

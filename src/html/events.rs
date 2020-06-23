@@ -3,9 +3,17 @@ use log::*;
 use mapper::*;
 
 pub use sauron_vdom::{
-    builder::{on, on_with_extractor},
+    builder::{
+        on,
+        on_with_extractor,
+    },
     event::{
-        Coordinate, InputEvent, KeyEvent, Modifier, MouseButton, MouseEvent,
+        Coordinate,
+        InputEvent,
+        KeyEvent,
+        Modifier,
+        MouseButton,
+        MouseEvent,
     },
     Callback,
 };
@@ -18,10 +26,20 @@ pub mod mapper {
     use log::*;
 
     use sauron_vdom::event::{
-        Coordinate, InputEvent, KeyEvent, Modifier, MouseButton, MouseEvent,
+        Coordinate,
+        InputEvent,
+        KeyEvent,
+        Modifier,
+        MouseButton,
+        MouseEvent,
     };
     use wasm_bindgen::JsCast;
-    use web_sys::{self, EventTarget, HtmlInputElement, HtmlTextAreaElement};
+    use web_sys::{
+        self,
+        EventTarget,
+        HtmlInputElement,
+        HtmlTextAreaElement,
+    };
 
     pub fn mouse_event_mapper(event: crate::Event) -> MouseEvent {
         let mouse: &web_sys::MouseEvent =

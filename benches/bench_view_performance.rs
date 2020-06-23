@@ -1,9 +1,15 @@
 #![feature(test)]
 extern crate test;
-use test::{black_box, Bencher};
+use test::{
+    black_box,
+    Bencher,
+};
 
 use sauron::{
-    html::{attributes::*, *},
+    html::{
+        attributes::*,
+        *,
+    },
     Node,
 };
 

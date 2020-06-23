@@ -1,7 +1,22 @@
-use pulldown_cmark::{Alignment, CodeBlockKind, Event, Options, Parser, Tag};
+use pulldown_cmark::{
+    Alignment,
+    CodeBlockKind,
+    Event,
+    Options,
+    Parser,
+    Tag,
+};
 use sauron::{
     html::{
-        attributes::{checked, class, href, id, src, title, type_},
+        attributes::{
+            checked,
+            class,
+            href,
+            id,
+            src,
+            title,
+            type_,
+        },
         *,
     },
     Node,
@@ -94,18 +109,21 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                                         if let Some(tag) = c.as_element_mut() {
                                             match aligns[i] {
                                                 Alignment::None => {}
-                                                Alignment::Left => tag
-                                                    .add_attributes(vec![
+                                                Alignment::Left => {
+                                                    tag.add_attributes(vec![
                                                         class("text-left"),
-                                                    ]),
-                                                Alignment::Center => tag
-                                                    .add_attributes(vec![
+                                                    ])
+                                                }
+                                                Alignment::Center => {
+                                                    tag.add_attributes(vec![
                                                         class("text-center"),
-                                                    ]),
-                                                Alignment::Right => tag
-                                                    .add_attributes(vec![
+                                                    ])
+                                                }
+                                                Alignment::Right => {
+                                                    tag.add_attributes(vec![
                                                         class("text-right"),
-                                                    ]),
+                                                    ])
+                                                }
                                             }
                                         }
                                     }
@@ -158,12 +176,14 @@ fn make_tag<MSG>(t: Tag, numbers: &mut HashMap<String, usize>) -> Node<MSG> {
             }
         }
         Tag::BlockQuote => blockquote(vec![class("blockquote")], vec![]),
-        Tag::CodeBlock(codeblock) => match codeblock {
-            CodeBlockKind::Indented => code(vec![], vec![]),
-            CodeBlockKind::Fenced(fence) => {
-                code(vec![class(fence.to_string())], vec![])
+        Tag::CodeBlock(codeblock) => {
+            match codeblock {
+                CodeBlockKind::Indented => code(vec![], vec![]),
+                CodeBlockKind::Fenced(fence) => {
+                    code(vec![class(fence.to_string())], vec![])
+                }
             }
-        },
+        }
         Tag::List(None) => ul(vec![], vec![]),
         Tag::List(Some(1)) => ol(vec![], vec![]),
         Tag::List(Some(ref start)) => ol(vec![attr("start", *start)], vec![]),
@@ -175,14 +195,18 @@ fn make_tag<MSG>(t: Tag, numbers: &mut HashMap<String, usize>) -> Node<MSG> {
         Tag::Emphasis => span(vec![class("font-italic")], vec![]),
         Tag::Strong => span(vec![class("font-weight-bold")], vec![]),
         Tag::Strikethrough => s(vec![], vec![]),
-        Tag::Link(_, ref _href, ref _title) => a(
-            vec![href(_href.to_string()), title(_title.to_string())],
-            vec![],
-        ),
-        Tag::Image(_, ref _src, ref _title) => img(
-            vec![src(_src.to_string()), title(_title.to_string())],
-            vec![],
-        ),
+        Tag::Link(_, ref _href, ref _title) => {
+            a(
+                vec![href(_href.to_string()), title(_title.to_string())],
+                vec![],
+            )
+        }
+        Tag::Image(_, ref _src, ref _title) => {
+            img(
+                vec![src(_src.to_string()), title(_title.to_string())],
+                vec![],
+            )
+        }
         Tag::FootnoteDefinition(name) => {
             let len = numbers.len() + 1;
             let number = *numbers.entry(name.to_string()).or_insert(len);

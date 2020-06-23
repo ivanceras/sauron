@@ -1,7 +1,11 @@
 //! Our Patch enum is intentionally kept in it's own file for easy inclusion into
 //! The Percy Book.
 
-use crate::{Attribute, Node, Text};
+use crate::{
+    Attribute,
+    Node,
+    Text,
+};
 
 /// A Patch encodes an operation that modifies a real DOM element.
 ///

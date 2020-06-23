@@ -1,9 +1,17 @@
 #![deny(warnings)]
 use sauron::{
-    html::{attributes::*, events::*, *},
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
     Node,
 };
-use sauron_vdom::{diff, Patch, Text};
+use sauron_vdom::{
+    diff,
+    Patch,
+    Text,
+};
 
 #[test]
 fn change_class_attribute() {

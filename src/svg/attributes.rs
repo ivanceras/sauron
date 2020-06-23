@@ -1,4 +1,7 @@
-pub use sauron_vdom::builder::{attr, attr_ns};
+pub use sauron_vdom::builder::{
+    attr,
+    attr_ns,
+};
 use sauron_vdom::Value;
 
 pub use crate::html::attributes::classes_flag;

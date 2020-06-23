@@ -2,12 +2,25 @@
 pub use error::Error;
 use log::Level;
 pub use restq::{
-    ast::{ddl::DataTypeDef, Column, Table},
-    ColumnDef, DataType, DataValue,
+    ast::{
+        ddl::DataTypeDef,
+        Column,
+        Table,
+    },
+    ColumnDef,
+    DataType,
+    DataValue,
 };
 use sauron::prelude::*;
-use views::{resize_wrapper, DataView, ResizeWrapper};
-use wasm_bindgen::{self, prelude::*};
+use views::{
+    resize_wrapper,
+    DataView,
+    ResizeWrapper,
+};
+use wasm_bindgen::{
+    self,
+    prelude::*,
+};
 
 #[macro_use]
 extern crate log;

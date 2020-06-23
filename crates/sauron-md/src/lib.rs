@@ -1,2 +1,5 @@
-pub use markdown::{markdown, render_markdown};
+pub use markdown::{
+    markdown,
+    render_markdown,
+};
 mod markdown;

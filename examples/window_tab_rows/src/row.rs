@@ -1,9 +1,17 @@
 use sauron::{
-    html::{attributes::*, events::*, *},
-    Component, Node,
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
+    Component,
+    Node,
 };
 
-use crate::field::{self, Field};
+use crate::field::{
+    self,
+    Field,
+};
 
 use sauron::Cmd;
 

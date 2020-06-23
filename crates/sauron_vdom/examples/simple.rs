@@ -1,5 +1,9 @@
 #![deny(warnings)]
-use sauron_vdom::{builder::*, diff, Node};
+use sauron_vdom::{
+    builder::*,
+    diff,
+    Node,
+};
 
 fn main() {
     let old: Node<&'static str, &'static str, (), ()> = element(

@@ -1,15 +1,22 @@
 #![deny(warnings)]
 use sauron::{
     html::{
-        attributes::{id, value},
+        attributes::{
+            id,
+            value,
+        },
         div,
         events::*,
         input,
     },
     test_fixtures::simple_program,
-    DomUpdater, Node,
+    DomUpdater,
+    Node,
 };
-use std::{cell::RefCell, rc::Rc};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+};
 
 use wasm_bindgen_test::*;
 

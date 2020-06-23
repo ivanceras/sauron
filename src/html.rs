@@ -1,5 +1,12 @@
-use crate::{Attribute, Node};
-pub use sauron_vdom::builder::{attr, on, text};
+use crate::{
+    Attribute,
+    Node,
+};
+pub use sauron_vdom::builder::{
+    attr,
+    on,
+    text,
+};
 
 #[macro_use]
 pub mod attributes;

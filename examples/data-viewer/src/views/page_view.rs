@@ -1,15 +1,27 @@
 use crate::{
-    views::{row_view, RowView},
+    views::{
+        row_view,
+        RowView,
+    },
     widgets::selector_box,
 };
-use restq::{ColumnDef, DataValue};
+use restq::{
+    ColumnDef,
+    DataValue,
+};
 use sauron::{
     html::{
-        attributes::{class, key, styles},
+        attributes::{
+            class,
+            key,
+            styles,
+        },
         units::*,
         *,
     },
-    Cmd, Component, Node,
+    Cmd,
+    Component,
+    Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]

@@ -1,5 +1,11 @@
 #![deny(warnings)]
-use sauron::{prelude::*, Cmd, Component, Node, Program};
+use sauron::{
+    prelude::*,
+    Cmd,
+    Component,
+    Node,
+    Program,
+};
 use wasm_bindgen::prelude::*;
 
 #[macro_use]

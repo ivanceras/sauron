@@ -1,4 +1,7 @@
-use sauron_vdom::{builder::attr, Value};
+use sauron_vdom::{
+    builder::attr,
+    Value,
+};
 
 #[macro_export]
 macro_rules! declare_attributes {

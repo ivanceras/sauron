@@ -1,4 +1,8 @@
-pub use sauron_vdom::builder::{attr, element, element_ns};
+pub use sauron_vdom::builder::{
+    attr,
+    element,
+    element_ns,
+};
 
 pub mod attributes;
 pub mod tags;

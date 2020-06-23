@@ -1,6 +1,12 @@
 use sauron::{
-    html::{attributes::*, events::*, *},
-    Cmd, Component, Node,
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
+    Cmd,
+    Component,
+    Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]

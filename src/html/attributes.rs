@@ -3,7 +3,10 @@
 use crate::Attribute;
 pub use attribute_macros::*;
 pub use sauron_vdom::builder::attr;
-use sauron_vdom::{AttribValue, Value};
+use sauron_vdom::{
+    AttribValue,
+    Value,
+};
 
 #[macro_use]
 mod attribute_macros;

@@ -1,7 +1,14 @@
 #![deny(warnings)]
 use sauron::{
-    html::{attributes::*, events::*, *},
-    Cmd, Component, Node, Program,
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
+    Cmd,
+    Component,
+    Node,
+    Program,
 };
 use tab::Tab;
 use wasm_bindgen::prelude::*;

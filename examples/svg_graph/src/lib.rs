@@ -1,6 +1,12 @@
 //#![deny(warnings)]
 use sauron::{
-    html::attributes::*, svg::attributes::*, Cmd, Component, Node, Program, *,
+    html::attributes::*,
+    svg::attributes::*,
+    Cmd,
+    Component,
+    Node,
+    Program,
+    *,
 };
 use wasm_bindgen::prelude::*;
 
