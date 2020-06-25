@@ -1,5 +1,16 @@
+//! Provides struct and functions to create a representation of a virtual node
+//!
 #![deny(warnings)]
 #![deny(clippy::all)]
+#![deny(
+    missing_docs,
+    missing_debug_implementations,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unstable_features,
+    unused_import_braces
+)]
 mod callback;
 mod diff;
 mod patch;

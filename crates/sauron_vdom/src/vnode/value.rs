@@ -5,28 +5,50 @@ use std::fmt;
 /// therefore a need for a storage of these intermediate value is needed
 #[derive(Debug, PartialEq, Clone)]
 pub enum Value {
+    /// bool value
     Bool(bool),
+    /// &'static str value
     Str(&'static str),
+    /// String value
     String(String),
+    /// a vec of values
     Vec(Vec<Value>),
+    /// u8 value
     U8(u8),
+    /// u16 value
     U16(u16),
+    /// u32 value
     U32(u32),
+    /// u64 value
     U64(u64),
+    /// usize value
     Usize(usize),
+    /// u128 value
     U128(u128),
+    /// i8 value
     I8(i8),
+    /// i16 value
     I16(i16),
+    /// i32 value
     I32(i32),
+    /// i64 value
     I64(i64),
+    /// i128 value
     I128(i128),
+    /// isize value
     Isize(isize),
+    /// f32 value
     F32(f32),
+    /// f64 value
     F64(f64),
+    /// bytes value
     Bytes(Vec<u8>),
 }
 
 impl Value {
+    /// returns an &str reference if this value is `Str` or `String` variant
+    /// Note: This doesn't convert other variant into str representation
+    /// Use the `to_string()` for that.
     pub fn as_str(&self) -> Option<&str> {
         match self {
             Value::String(ref v) => Some(&v),
@@ -35,6 +57,7 @@ impl Value {
         }
     }
 
+    /// returns the bool value if this a Bool variant
     pub fn as_bool(&self) -> Option<bool> {
         match self {
             Value::Bool(v) => Some(*v),
@@ -42,6 +65,7 @@ impl Value {
         }
     }
 
+    /// returns the reference to the bytes if this is a `Bytes` variant
     pub fn as_bytes(&self) -> Option<&[u8]> {
         match self {
             Value::Bytes(bytes) => Some(bytes),
@@ -49,6 +73,7 @@ impl Value {
         }
     }
 
+    /// converts to f64 if the variants are numerical representation
     pub fn as_f64(&self) -> Option<f64> {
         match self {
             Value::Bool(_) => None,

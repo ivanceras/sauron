@@ -4,7 +4,9 @@ use sauron_vdom::{
     Text,
 };
 
+/// A trait to convert html string into sauron view syntax
 pub trait ToSyntax {
+    /// convert the html string into sauron view syntax
     fn to_syntax(&self, use_macros: bool, indent: usize) -> String;
 }
 

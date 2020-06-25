@@ -269,7 +269,6 @@ where
                                 node.dyn_ref::<HtmlInputElement>()
                             {
                                 let checked = attr
-                                    .value
                                     .get_value()
                                     .map(|v| v.as_bool())
                                     .flatten()
@@ -307,10 +306,8 @@ where
         Patch::AddEventListener(_tag, node_idx, events) => {
             if let Some(program) = program {
                 for event in events.iter() {
-                    let callback = event
-                        .value
-                        .get_callback()
-                        .expect("expecting a callback");
+                    let callback =
+                        event.get_callback().expect("expecting a callback");
                     let closure_wrap: Closure<dyn FnMut(Event)> =
                         create_closure_wrap(program, callback);
                     let func: &Function = closure_wrap.as_ref().unchecked_ref();

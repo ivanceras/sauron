@@ -64,6 +64,8 @@ where
         Callback::from(func_wrap)
     }
 
+    /// map this callback using another callback such that
+    /// MSG becomes MSG2
     pub fn map_callback<MSG2>(
         self,
         cb: Callback<MSG, MSG2>,

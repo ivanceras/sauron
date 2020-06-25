@@ -6,6 +6,7 @@ use crate::{
     Value,
 };
 
+/// Represents the element of the virtual node
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Element<T, ATT, EVENT, MSG>
 where
@@ -13,9 +14,14 @@ where
     EVENT: 'static,
     ATT: Clone,
 {
+    /// the element tag, such as div, a, button
     pub tag: T,
+    /// attributes for this element
     pub attrs: Vec<Attribute<ATT, EVENT, MSG>>,
+    /// children elements of this element
     pub children: Vec<Node<T, ATT, EVENT, MSG>>,
+    /// namespace of this element,
+    /// svg elements requires namespace to render correcly in the browser
     pub namespace: Option<&'static str>,
 }
 
@@ -25,6 +31,7 @@ where
     MSG: 'static,
     ATT: PartialEq + Ord + ToString + Clone,
 {
+    /// creates an element node with the supplied tag
     pub fn with_tag(tag: T) -> Self {
         Element {
             tag,
@@ -34,6 +41,7 @@ where
         }
     }
 
+    /// returns a refernce to the children of this node
     pub fn get_children(&self) -> &[Node<T, ATT, EVENT, MSG>] {
         &self.children
     }
@@ -43,6 +51,7 @@ where
         self.attrs.iter().filter(|attr| attr.is_event()).collect()
     }
 
+    /// return the event as an attribute which matches the event name.
     pub fn get_event(&self, name: &ATT) -> Option<&Attribute<ATT, EVENT, MSG>> {
         self.events()
             .iter()
@@ -90,6 +99,7 @@ where
             .collect()
     }
 
+    /// returns the unique list attribute names and their corresponding namespace
     fn get_attributes_name_and_ns(&self) -> Vec<(&ATT, Option<&'static str>)>
     where
         ATT: PartialEq + Ord,
@@ -134,16 +144,19 @@ where
         }
     }
 
+    /// add attributes to this element
     #[inline]
     pub fn add_attributes(&mut self, attrs: Vec<Attribute<ATT, EVENT, MSG>>) {
         self.attrs.extend(attrs)
     }
 
+    /// add children virtual node to this element
     #[inline]
     pub fn add_children(&mut self, children: Vec<Node<T, ATT, EVENT, MSG>>) {
         self.children.extend(children);
     }
 
+    /// attach a callback to this element
     #[inline]
     pub fn add_event_listener(&mut self, event: ATT, cb: Callback<EVENT, MSG>) {
         let attr_event = Attribute {

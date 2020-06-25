@@ -1,5 +1,4 @@
-//! Our Patch enum is intentionally kept in it's own file for easy inclusion into
-//! The Percy Book.
+//! contains patches which
 
 use crate::{
     Attribute,
@@ -90,6 +89,7 @@ where
         }
     }
 
+    /// return the tag of this patch
     pub fn tag(&self) -> Option<&T> {
         match self {
             Patch::AppendChildren(tag, _node_idx, _) => Some(tag),

@@ -50,6 +50,7 @@ pub type ActiveClosure =
 
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
+#[derive(Debug)]
 pub struct CreatedNode<T> {
     /// A `Node` or `Element` that was created from a `Node`
     pub node: T,
@@ -175,7 +176,6 @@ impl<T> CreatedNode<T> {
                 for event_attr in velem.events().iter() {
                     let event_str = event_attr.name;
                     let callback = event_attr
-                        .value
                         .get_callback()
                         .expect("expecting a callback");
                     let current_elm: &EventTarget = element

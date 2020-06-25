@@ -1,8 +1,20 @@
+#![deny(
+    missing_docs,
+    missing_debug_implementations,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unstable_features,
+    unused_import_braces
+)]
+//! A utility crate which provides conversion of html text into sauron view syntax
+//!
 use sauron_parse::ParseError;
 pub use to_syntax::ToSyntax;
 
 mod to_syntax;
 
+/// converts html to sauron view syntax
 pub fn html_to_syntax(
     html: &str,
     use_macro: bool,

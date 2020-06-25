@@ -1,3 +1,4 @@
+//! provides utility function for building virtual nodes and attributes
 use crate::{
     vnode::{
         AttribValue,
@@ -49,6 +50,7 @@ where
     element_ns(tag, None, attrs, children)
 }
 
+/// creates an virtual node element with namespace
 #[inline]
 pub fn element_ns<T, ATT, EVENT, MSG>(
     tag: T,

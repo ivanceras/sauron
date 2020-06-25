@@ -5,12 +5,12 @@
 )]
 #![deny(
     missing_docs,
-//    missing_debug_implementations,
-//    missing_copy_implementations,
-//    trivial_casts,
-//    trivial_numeric_casts,
-//    unstable_features,
-//    unused_import_braces
+    missing_debug_implementations,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unstable_features,
+    unused_import_braces
 )]
 //!
 //! [![Latest Version](https://img.shields.io/crates/v/sauron.svg)](https://crates.io/crates/sauron)

@@ -15,6 +15,7 @@ use web_sys::Node;
 /// Holds the app and the dom updater
 /// This is passed into the event listener and the dispatch program
 /// will be called after the event is triggered.
+#[derive(Debug)]
 pub struct Program<APP, MSG>
 where
     MSG: 'static,

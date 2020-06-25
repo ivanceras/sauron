@@ -23,6 +23,7 @@ use sauron::{
 };
 use std::collections::HashMap;
 
+/// parse markdown and return sauron virtual Node
 pub fn markdown<MSG>(src: &str) -> Node<MSG> {
     let mut elems = render_markdown(src);
     if elems.len() == 1 {

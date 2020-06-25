@@ -25,6 +25,7 @@ use web_sys::{
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
+#[derive(Debug)]
 pub struct DomUpdater<DSP, MSG>
 where
     MSG: 'static,

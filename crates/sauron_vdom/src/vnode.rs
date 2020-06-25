@@ -42,7 +42,9 @@ where
     EVENT: 'static,
     ATT: Clone,
 {
+    /// Element variant of a virtual node
     Element(Element<T, ATT, EVENT, MSG>),
+    /// Text variant of a virtual node
     Text(Text),
 }
 
@@ -52,6 +54,7 @@ where
     MSG: 'static,
     ATT: PartialEq + Ord + ToString + Clone,
 {
+    /// map the msg of callback of this element node
     pub fn map_msg<F, MSG2>(self, func: F) -> Node<T, ATT, EVENT, MSG2>
     where
         F: Fn(MSG) -> MSG2 + 'static,
@@ -100,7 +103,7 @@ where
         }
     }
 
-    /// Get a mutable reference to the element
+    /// Get a mutable reference to the element, if this node is an element node
     pub fn as_element_mut(
         &mut self,
     ) -> Option<&mut Element<T, ATT, EVENT, MSG>> {
@@ -110,6 +113,7 @@ where
         }
     }
 
+    /// returns a reference to the element if this is an element node
     pub fn as_element_ref(&self) -> Option<&Element<T, ATT, EVENT, MSG>> {
         match *self {
             Node::Element(ref element) => Some(element),
@@ -174,6 +178,7 @@ where
         }
     }
 
+    /// return the children of this node if it is an element
     pub fn get_children(&self) -> Option<&[Node<T, ATT, EVENT, MSG>]> {
         if let Some(element) = self.as_element_ref() {
             Some(element.get_children())
@@ -183,12 +188,15 @@ where
     }
 }
 
+/// A text virtual node representation
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Text {
+    /// the string content of the text node
     pub text: String,
 }
 
 impl Text {
+    /// create a new text virtual node
     pub fn new<S: Into<String>>(s: S) -> Self {
         Text { text: s.into() }
     }

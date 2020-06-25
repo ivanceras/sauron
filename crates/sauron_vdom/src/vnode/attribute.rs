@@ -4,13 +4,19 @@ use crate::{
 };
 use std::fmt;
 
+/// These are the attributes of an element
 #[derive(Debug, Clone, PartialEq)]
 pub struct Attribute<ATT, EVENT, MSG>
 where
     ATT: Clone,
 {
+    /// the attribute name
     pub name: ATT,
+    /// the attribute value, which could be a simple value, and event or a function call
     pub value: AttribValue<EVENT, MSG>,
+    /// namespace of an attribute.
+    /// This is specifically used by svg attributes
+    /// such as xlink-href
     pub namespace: Option<&'static str>,
 }
 
@@ -18,6 +24,7 @@ impl<ATT, EVENT, MSG> Attribute<ATT, EVENT, MSG>
 where
     ATT: Clone,
 {
+    /// create an attribute from Callback
     pub fn from_callback(name: ATT, cb: Callback<EVENT, MSG>) -> Self {
         Attribute {
             name,
@@ -26,6 +33,7 @@ where
         }
     }
 
+    /// create an attribute from Value type
     pub fn from_value(name: ATT, value: Value) -> Self {
         Attribute {
             name,
@@ -35,6 +43,7 @@ where
     }
 }
 
+/// The value of this attribute with 3 variants
 #[derive(Debug, Clone, PartialEq)]
 pub enum AttribValue<EVENT, MSG> {
     /// normal attribute value
@@ -51,6 +60,7 @@ where
     EVENT: 'static,
     ATT: PartialEq + Ord + ToString + Clone,
 {
+    /// map/transform the callback of this attribute where MSG becomes MSG2
     pub(super) fn map_callback<MSG2>(
         self,
         cb: Callback<MSG, MSG2>,
@@ -65,18 +75,24 @@ where
         }
     }
 
+    /// check whether this attribute is an event listener
+    /// TODO: rename this to is_event_listener
     pub fn is_event(&self) -> bool {
         self.value.is_event()
     }
 
+    /// check whether this attribute is a value
     pub fn is_value(&self) -> bool {
         self.value.is_value()
     }
 
+    /// check whether this attribute is a func call value
+    /// such as `inner_html` etc.
     pub fn is_func_call(&self) -> bool {
         self.value.is_func_call()
     }
 
+    /// transform the callback of this attribute where EVENT becomes EVENT2
     pub fn reform<F, EVENT2>(self, func: F) -> Attribute<ATT, EVENT2, MSG>
     where
         F: Fn(EVENT2) -> EVENT + 'static,
@@ -89,18 +105,22 @@ where
         }
     }
 
+    /// returns a reference to the value of this attribute
     pub fn get_value(&self) -> Option<&Value> {
         self.value.get_value()
     }
 
+    /// returns the reference to the callback of this attribute
     pub fn get_callback(&self) -> Option<&Callback<EVENT, MSG>> {
         self.value.get_callback()
     }
 
+    /// consume the attribute and take the callback
     pub fn take_callback(self) -> Option<Callback<EVENT, MSG>> {
         self.value.take_callback()
     }
 
+    /// create a nice string representation of this attribute
     pub fn to_pretty_string(&self) -> String
     where
         ATT: ToString,
@@ -108,6 +128,7 @@ where
         let mut buffer = String::new();
         if self.is_value() {
             if let Some(_ns) = self.namespace {
+                //TODO: the xlink part of this namespace should be passed by the calling function
                 buffer += &format!(
                     r#"xlink:{}="{}""#,
                     self.name.to_string(),
@@ -176,7 +197,7 @@ where
         }
     }
 
-    pub fn get_callback(&self) -> Option<&Callback<EVENT, MSG>> {
+    pub(crate) fn get_callback(&self) -> Option<&Callback<EVENT, MSG>> {
         match self {
             AttribValue::Value(_) => None,
             AttribValue::FuncCall(_) => None,
@@ -184,7 +205,7 @@ where
         }
     }
 
-    pub fn take_callback(self) -> Option<Callback<EVENT, MSG>> {
+    pub(crate) fn take_callback(self) -> Option<Callback<EVENT, MSG>> {
         match self {
             AttribValue::Value(_) => None,
             AttribValue::FuncCall(_) => None,
@@ -192,6 +213,7 @@ where
         }
     }
 
+    /// returh the value if it is a Value variant
     pub fn get_value(&self) -> Option<&Value> {
         match self {
             AttribValue::Value(value) => Some(value),
