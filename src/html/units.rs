@@ -1,3 +1,4 @@
+//! provides function and macro for html units such as px, %, em, etc.
 use sauron_vdom::Value;
 
 macro_rules! declare_units{
@@ -34,27 +35,43 @@ macro_rules! declare_units{
 
 declare_units! {
 
+    /// pixels (1px = 1/96th of 1in)
+    ///
     /// a helper function which append `px` into a value
     /// Example:
     /// ```ignore
     /// style("width", px(100))
     /// ```
     px;
+    /// 1q is equivalent to 1/40th of 1cm.
     q;
+    /// milimeters
     mm;
+    /// centimeters
     cm;
+    /// points (1pt = 1/72 of 1in)
     pt;
+    /// picas (1pc = 12 pt)
     pc;
+    ///  	Relative to the font-size of the element (2em means 2 times the size of the current font)
     em;
+    /// Relative to the x-height of the current font (rarely used)
     ex;
+    /// Relative to the width of the "0" (zero)
     ch;
+    /// Relative to font-size of the root element
     rem;
+    /// Relative to 1% of the width of the viewport*
     vw;
+    /// Relative to 1% of the height of the viewport*
     vh;
 }
 
 declare_units! {
+    /// inches (1in = 96px = 2.54cm)
     r#in => "in";
+    /// percentage
+    percent => "%";
 }
 
 #[cfg(test)]

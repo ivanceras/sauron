@@ -11,9 +11,12 @@ use wasm_bindgen::{
 };
 use web_sys::EventTarget;
 
+/// Provides access to the Browser window
+#[derive(Copy, Clone, Debug)]
 pub struct Window;
 
 impl Window {
+    /// attach an event listender to the window
     pub fn add_event_listeners<APP, MSG>(
         event_listeners: Vec<Attribute<MSG>>,
     ) -> Cmd<APP, MSG>
@@ -47,8 +50,7 @@ impl Window {
         })
     }
 
-    //TODO: add a function here fn set_timeout_with_callback
-
+    /// set the title of the document
     pub fn set_title(title: &str) {
         crate::document().set_title(title);
     }

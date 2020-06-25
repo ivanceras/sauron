@@ -19,7 +19,9 @@ pub struct Program<APP, MSG>
 where
     MSG: 'static,
 {
+    /// holds the user application
     pub app: Rc<RefCell<APP>>,
+    /// The dom_updater responsible to updating the actual document in the browser
     pub dom_updater: Rc<RefCell<DomUpdater<Self, MSG>>>,
 }
 
@@ -54,14 +56,14 @@ where
         program
     }
 
-    /// Creates an Rc wrapped instance of Program and mount the app view to the
-    /// given root_node
+    /// Creates an Rc wrapped instance of Program and replace the root_node with the app view
     pub fn new_replace_mount(app: APP, root_node: &Node) -> Self {
         let program = Self::new(app, root_node);
         program.start_replace_mount();
         program
     }
 
+    ///  Instantiage an app and append the view to the root_node
     pub fn new_append_to_mount(app: APP, root_node: &Node) -> Self {
         let program = Self::new(app, root_node);
         program.start_append_to_mount();
@@ -141,6 +143,3 @@ where
         self.dispatch_inner(msg)
     }
 }
-
-//TODO: use impl Dispatch for Rc<Program> and change Dispatch trait into using self instead of
-//Rc<Self>

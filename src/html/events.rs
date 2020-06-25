@@ -41,6 +41,7 @@ pub mod mapper {
         HtmlTextAreaElement,
     };
 
+    /// maps browser mouseevent to sauron's MouseEvent
     pub fn mouse_event_mapper(event: crate::Event) -> MouseEvent {
         let mouse: &web_sys::MouseEvent =
             event.0.dyn_ref().expect("Unable to cast to mouse event");
@@ -90,6 +91,7 @@ pub mod mapper {
         }
     }
 
+    /// maps browser keyboard event to sauron KeyEvent
     pub fn keyboard_event_mapper(event: crate::Event) -> KeyEvent {
         if let Some(key_event) = event.0.dyn_ref::<web_sys::KeyboardEvent>() {
             let modifier = Modifier {
@@ -111,6 +113,7 @@ pub mod mapper {
         }
     }
 
+    /// maps html input event to sauron InputEvent
     pub fn input_event_mapper(event: crate::Event) -> InputEvent {
         let target: EventTarget =
             event.0.target().expect("Unable to get event target");
@@ -137,14 +140,19 @@ macro_rules! declare_events {
        )*
      ) => {
         $(
-            $(#[$attr])*
-            #[inline]
-            pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
-                where CB: Fn($ret)-> MSG +'static,
-                      MSG: 'static,
-                {
-                    on_with_extractor(stringify!($event), $mapper, cb)
+
+            doc_comment!{
+                concat!("attach an [",stringify!($name),"](https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/",stringify!($name),") event to the html element"),
+
+                $(#[$attr])*
+                #[inline]
+                pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
+                    where CB: Fn($ret)-> MSG +'static,
+                          MSG: 'static,
+                    {
+                        on_with_extractor(stringify!($event), $mapper, cb)
                 }
+            }
          )*
     };
 
@@ -154,18 +162,22 @@ macro_rules! declare_events {
        )*
      ) => {
         $(
-            $(#[$attr])*
-            #[inline]
-            pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
-                where CB: Fn(()) -> MSG + 'static,
-                      MSG: 'static,
-                {
-                    on_with_extractor(stringify!($event), |_|{}, cb)
+            doc_comment!{
+                concat!("attach an [",stringify!($name),"](https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/",stringify!($name),") event to the html element"),
+                $(#[$attr])*
+                #[inline]
+                pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
+                    where CB: Fn(()) -> MSG + 'static,
+                          MSG: 'static,
+                    {
+                        on_with_extractor(stringify!($event), |_|{}, cb)
                 }
+            }
          )*
     }
 }
 
+/// attach callback to the scroll event
 #[inline]
 pub fn onscroll<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
 where
@@ -183,6 +195,7 @@ where
     on_with_extractor("scroll", webevent_to_scroll_offset, cb)
 }
 
+/// attach callback to the resize event
 pub fn onresize<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
 where
     CB: Fn((i32, i32)) -> MSG + 'static,
@@ -258,7 +271,7 @@ where
 declare_events! {
     onclick : click => MouseEvent => mouse_event_mapper;
     onauxclick : auxclick => MouseEvent => mouse_event_mapper;
-    oncontextmenu : contextmenu => MouseEvent => mouse_event_mapper ;
+    oncontextmenu : contextmenu => MouseEvent => mouse_event_mapper;
     ondblclick  : dblclick => MouseEvent => mouse_event_mapper;
     onmousedown : mousedown => MouseEvent => mouse_event_mapper;
     onmouseenter : mouseenter => MouseEvent => mouse_event_mapper;

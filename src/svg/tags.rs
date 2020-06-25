@@ -1,3 +1,6 @@
+//! Provides macro for creating functions for tags
+//!
+
 macro_rules! declare_svg_tags{
 
     ( $(
@@ -6,13 +9,17 @@ macro_rules! declare_svg_tags{
        )*
      ) => {
         $(
-            $(#[$attr])*
-            #[inline]
-            #[allow(non_snake_case)]
-            pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
-                {
-                    $crate::svg::svg_element(stringify!($name), attrs, children)
+            doc_comment!{
+                concat!("Creates an svg [",stringify!($name),"](/https://developer.mozilla.org/en-US/docs/Web/SVG/Element/",stringify!($name),") element"),
+
+                $(#[$attr])*
+                #[inline]
+                #[allow(non_snake_case)]
+                pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
+                    {
+                        $crate::svg::svg_element(stringify!($name), attrs, children)
                 }
+            }
          )*
     };
 
@@ -22,25 +29,34 @@ macro_rules! declare_svg_tags{
        )*
      ) => {
         $(
-            $(#[$attr])*
-            #[inline]
-            #[allow(non_snake_case)]
-            pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
-                {
-                    $crate::svg::svg_element($tagname, attrs, children)
-                }
+            doc_comment!{
+                concat!("Creates an svg [",$tagname,"](/https://developer.mozilla.org/en-US/docs/Web/SVG/Element/",$tagname,") element"),
+
+                $(#[$attr])*
+                #[inline]
+                #[allow(non_snake_case)]
+                pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
+                    {
+                        $crate::svg::svg_element($tagname, attrs, children)
+                 }
+            }
          )*
     }
 
 }
 
-// declare a tags in a macro
-// Note: The $ dollar sign is explcitly pass to prevent
-// rustc to attempt to expand the inner repetion of the macro
+/// declare an svg tags in a macro
+///
+/// Note: The $ dollar sign is explcitly pass to prevent
+/// rustc to attempt to expand the inner repetion of the macro
 macro_rules! declare_svg_tags_macro {
     (($d:tt) $($name: ident;)*) => {
         $(
 
+        /// name is the supplied ident in `declare_tags_macro`
+        /// This creates an alternative macro call to the tag function
+        /// This has a more cleaner syntax since it removes the need for using vec![]
+        /// for both the attributes and the children
         #[macro_export]
         macro_rules! $name {
 
@@ -120,6 +136,7 @@ macro_rules! declare_common_svg_tags_and_macro {
 
 
         #[cfg(feature = "with-parser")]
+        /// These are the commonly used svg tags such as rect, circle, path, arc, ..etc.
         pub const SVG_TAGS: [&'static str; 65] = [ $(stringify!($name),)* ];
 
     };
@@ -137,6 +154,8 @@ macro_rules! declare_svg_tags_special{
         declare_svg_tags!{ $($name=>$attribute;)*}
 
         #[cfg(feature = "with-parser")]
+        /// These are svg tags which the tags are non proper rust identifier, so they are handled
+        /// differently
         pub const SVG_TAGS_SPECIAL:[(&'static str,&'static str); 3] = [$((stringify!($name),$attribute),)*];
     }
 }
@@ -151,6 +170,8 @@ macro_rules! declare_svg_tags_non_common{
         declare_svg_tags!{ $($name;)*}
 
         #[cfg(feature = "with-parser")]
+        /// These are collection of svg tags that are non commonly used put together in this
+        /// collection so as not to create import conflicts with the common tags
         pub const SVG_TAGS_NON_COMMON:[&'static str;6] = [$(stringify!($name),)*];
     }
 }

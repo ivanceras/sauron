@@ -1,3 +1,4 @@
+//! provides functions for retrieving data using http network request
 use crate::{
     Callback,
     Cmd,
@@ -11,9 +12,13 @@ use wasm_bindgen::{
 };
 use web_sys::Response;
 
+/// Provides functions for doing http network request
+#[derive(Copy, Clone, Debug)]
 pub struct Http;
 
 impl Http {
+    /// fetch text document from the url and decode the result with the supplied
+    /// response_text_decoder function
     pub fn fetch_with_text_response_decoder<DE, CB, OUT, APP, MSG>(
         url: &str,
         response_text_decoder: DE,

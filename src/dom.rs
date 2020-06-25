@@ -1,3 +1,6 @@
+//! This module provides functionalities for
+//! manipulating the actual Document Object Model in the browser
+//!
 pub mod apply_patches;
 mod browser;
 pub mod cmd;
@@ -29,4 +32,5 @@ pub use util::{
 };
 pub use window::Window;
 
+/// alias Cmd to use Program as the APP
 pub type Cmd<APP, MSG> = cmd::Cmd<Program<APP, MSG>, MSG>;

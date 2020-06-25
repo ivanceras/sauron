@@ -1,3 +1,4 @@
+/// a utility function for convenient styling of elements
 #[macro_export]
 macro_rules! style {
     (

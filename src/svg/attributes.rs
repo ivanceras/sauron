@@ -1,3 +1,4 @@
+//! provides functions and macros for building svg attributes
 pub use sauron_vdom::builder::{
     attr,
     attr_ns,
@@ -15,6 +16,7 @@ macro_rules! declare_xlink_attributes {
        )*
      ) => {
         $(
+            /// creates a function where the function name is the attribute name of the svg element
             $(#[$attr])*
             #[inline]
             #[allow(non_snake_case)]
@@ -26,6 +28,7 @@ macro_rules! declare_xlink_attributes {
          )*
 
         #[cfg(feature = "with-parser")]
+        /// Svg attributes with xlink namespace
         pub const SVG_ATTRS_XLINK:[(&'static str,&'static str); 7] = [$((stringify!($name),$attribute),)*];
     }
 }
@@ -41,6 +44,7 @@ macro_rules! declare_svg_attributes{
         declare_attributes!{ $($name;)*}
 
         #[cfg(feature = "with-parser")]
+        /// These are most commonly used svg attributes
         pub const SVG_ATTRS:[&'static str; 168] = [$(stringify!($name),)*];
     }
 }
@@ -54,6 +58,8 @@ macro_rules! declare_svg_attributes_special{
         declare_attributes!{ $($name => $attribute;)*}
 
         #[cfg(feature = "with-parser")]
+        /// These are svg attributes with names that are non proper rust identifier therefore they
+        /// are handled differently. ie: (color-profile, accent-height, etc)
         pub const SVG_ATTRS_SPECIAL:[(&'static str,&'static str); 76] = [$((stringify!($name),$attribute),)*];
     }
 }

@@ -12,6 +12,7 @@ use web_sys::ScrollToOptions;
 
 /// provides an interface for doing url request, such as fetch
 /// resize events, keyboard event, timeout event
+#[derive(Copy, Clone, Debug)]
 pub struct Browser;
 
 impl Browser {
@@ -38,6 +39,8 @@ impl Browser {
         cmd
     }
 
+    /// attached a callback and will be triggered when the hash portion of the window location
+    /// url is changed
     pub fn onhashchange<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
     where
         F: Fn(String) -> MSG + Clone + 'static,
@@ -75,12 +78,15 @@ impl Browser {
         (window_width as i32, window_height as i32)
     }
 
+    /// return the hash part of the browser current url location
+    /// The hash part are the text right after the `#` sign
     pub fn get_hash() -> String {
         let window = crate::window();
         let hash = window.location().hash().expect("must have a hash");
         hash
     }
 
+    /// scroll the browser to the top of the document
     pub fn scroll_to_top() {
         let mut options = ScrollToOptions::new();
         options.top(0.0);

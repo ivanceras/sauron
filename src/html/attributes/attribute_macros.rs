@@ -3,6 +3,12 @@ use sauron_vdom::{
     Value,
 };
 
+/// declare a function with the name corresponds to attribute name for easy usage in html elements
+/// Example:
+/// ```rust,ignore
+/// declare_attributes!{value;}
+/// ```
+/// This will create a function `fn value(){}` which sets the attribute `value` to the element.
 #[macro_export]
 macro_rules! declare_attributes {
     ( $(
@@ -11,14 +17,18 @@ macro_rules! declare_attributes {
        )*
      ) => {
         $(
-            $(#[$attr])*
-            #[inline]
-            #[allow(non_snake_case)]
-            pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
-                where V: Into<Value>,
-                {
-                    attr(stringify!($name), v)
+            doc_comment!{
+                concat!("Creates html [",stringify!($name),"](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/",stringify!($name),") attribute"),
+
+                $(#[$attr])*
+                #[inline]
+                #[allow(non_snake_case)]
+                pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
+                    where V: Into<Value>,
+                    {
+                        attr(stringify!($name), v)
                 }
+            }
          )*
 
     };
@@ -28,14 +38,17 @@ macro_rules! declare_attributes {
        )*
      ) => {
         $(
-            $(#[$attr])*
-            #[inline]
-            #[allow(non_snake_case)]
-            pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
-                where V: Into<Value>,
-                {
-                    attr($attribute, v)
+            doc_comment!{
+                concat!("Creates html [",$attribute,"](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/",$attribute,") attribute"),
+                $(#[$attr])*
+                #[inline]
+                #[allow(non_snake_case)]
+                pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
+                    where V: Into<Value>,
+                    {
+                        attr($attribute, v)
                 }
+             }
          )*
     }
 }
@@ -51,6 +64,7 @@ macro_rules! declare_html_attributes{
         declare_attributes!{ $($name;)*}
 
         #[cfg(feature = "with-parser")]
+        /// These are most commonly used html attributes such as class, id, etc
         pub const HTML_ATTRS:[&'static str; 118] = [$(stringify!($name),)*];
     }
 }
@@ -67,6 +81,8 @@ macro_rules! declare_html_attributes_special{
         declare_attributes!{ $($name => $attribute;)*}
 
         #[cfg(feature = "with-parser")]
+        /// These are html attributes with names that are non proper rust identifier therefore
+        /// handled differently. ie: (for, in)
         pub const HTML_ATTRS_SPECIAL:[(&'static str,&'static str); 12] = [$((stringify!($name),$attribute),)*];
     }
 }

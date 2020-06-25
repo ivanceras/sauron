@@ -1,3 +1,4 @@
+//! provides functionalities related to patching the DOM in the browser.
 use crate::{
     dom::{
         created_node,

@@ -34,6 +34,7 @@ where
     style(style_str)
 }
 
+/// A helper function to build styles by accepting pairs
 pub fn styles_values<'a, MSG, P>(pairs: P) -> Attribute<MSG>
 where
     P: AsRef<[(&'a str, Value)]>,
@@ -138,6 +139,7 @@ where
     attributes
 }
 
+/// set the checked value, used checkbox and radio buttons
 pub fn checked<MSG>(is_checked: bool) -> Attribute<MSG> {
     if is_checked {
         attr("checked", "checked")

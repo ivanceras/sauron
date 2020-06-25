@@ -57,6 +57,7 @@ pub struct CreatedNode<T> {
 }
 
 impl<T> CreatedNode<T> {
+    /// create a simple node with no closure attache
     pub fn without_closures<N: Into<T>>(node: N) -> Self {
         CreatedNode {
             node: node.into(),
@@ -64,10 +65,12 @@ impl<T> CreatedNode<T> {
         }
     }
 
+    /// create a text node
     pub fn create_text_node(text: &sauron_vdom::Text) -> Text {
         crate::document().create_text_node(&text.text)
     }
 
+    /// create an element node
     pub fn create_dom_node<DSP, MSG>(
         program: &DSP,
         vnode: &crate::Node<MSG>,
@@ -198,7 +201,7 @@ impl<T> CreatedNode<T> {
         for child in velem.children.iter() {
             match child {
                 crate::Node::Text(text_node) => {
-                    let current_node = element.as_ref() as &web_sys::Node;
+                    let current_node: &web_sys::Node = element.as_ref();
 
                     // We ensure that the text siblings are patched by preventing the browser from merging
                     // neighboring text nodes. Originally inspired by some of React's work from 2016.
@@ -209,7 +212,7 @@ impl<T> CreatedNode<T> {
                     if previous_node_was_text {
                         let separator = document.create_comment("mordor");
                         current_node
-                            .append_child(separator.as_ref() as &web_sys::Node)
+                            .append_child(separator.as_ref())
                             .expect("Unable to append child");
                     }
 

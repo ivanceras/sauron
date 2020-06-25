@@ -1,3 +1,4 @@
+//! provides functionalities and macro for building html elements
 macro_rules! declare_tags {
     ( $(
          $(#[$attr:meta])*
@@ -5,6 +6,9 @@ macro_rules! declare_tags {
        )*
      ) => {
         $(
+            doc_comment!{
+                concat!("Creates an html [",stringify!($name),"](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/",stringify!($name),") element"),
+
             $(#[$attr])*
             #[inline]
             #[allow(non_snake_case)]
@@ -12,78 +16,92 @@ macro_rules! declare_tags {
                 {
                     $crate::html::html_element(stringify!($name), attrs, children)
                 }
+            }
 
          )*
     }
 }
 
-// declare a tags in a macro
-// Note: The $ dollar sign is explcitly pass to prevent
-// rustc to attempt to expand the inner repetion of the macro
+/// declare an element tag in a macro
+/// This will create a macro which creates an element with the tag name
+/// which matches the function name.
+/// Example:
+/// ```rust,ignore
+/// div!([], [])
+/// ```
+/// is a macro which creates a `div` element tag
+/// This macro is generated using
+/// ```rust,ignore
+/// declare_tags_macro!{div;}
+/// ```
+///
+/// Note: The $ dollar sign is explcitly pass to prevent
+/// rustc to attempt to expand the inner repetion of the macro
 macro_rules! declare_tags_macro {
     (($d:tt) $($name: ident;)*) => {
         $(
 
-        #[macro_export]
-        macro_rules! $name {
+            #[macro_export]
+            /// TODO:
+            macro_rules! $name {
 
-            // 000: no trailing commas
-            ( [$d($att: expr),*], [$d($children: expr),*] ) => {
-                $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-            };
+                // 000: no trailing commas
+                ( [$d($att: expr),*], [$d($children: expr),*] ) => {
+                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
+                };
 
-            ///////////////////////////////////////////////////////////////
-            //
-            // The next code is just the same logic as the first, it is just
-            // here to deal with irregular comma placement
-            //
-            ///////////////////////////////////////////////////////////////
+                ///////////////////////////////////////////////////////////////
+                //
+                // The next code is just the same logic as the first, it is just
+                // here to deal with irregular comma placement
+                //
+                ///////////////////////////////////////////////////////////////
 
-            // 001: trailing commas in params only
-            ( [$d($att: expr),*], [$d($children: expr),*], ) => {
-                $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 010: trailing commas in children only
-            ( [$d($att: expr),*], [$d($children: expr,)*] ) => {
-                $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 011: trailing commas in children and params,
-            ( [$d($att: expr),*], [$d($children: expr,)*], ) => {
-                $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 100: trailing commas in attributes only
-            ( [$d($att: expr,)*], [$d($children: expr),*] ) => {
-                $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 101: trailing commas in attributes and params,
-            ( [$d($att: expr,)*], [$d($children: expr,)*], ) => {
-                $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 110: trailing commas in attributes and children
-            ( [$d($att: expr,)*], [$d($children: expr,)*] ) => {
-                $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 111: trailing commas in attributes, children, params
-            ( [$d($att: expr,)*], [$d($children: expr,)*], ) => {
-                $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-            };
+                // 001: trailing commas in params only
+                ( [$d($att: expr),*], [$d($children: expr),*], ) => {
+                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
+                };
+                // 010: trailing commas in children only
+                ( [$d($att: expr),*], [$d($children: expr,)*] ) => {
+                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
+                };
+                // 011: trailing commas in children and params,
+                ( [$d($att: expr),*], [$d($children: expr,)*], ) => {
+                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
+                };
+                // 100: trailing commas in attributes only
+                ( [$d($att: expr,)*], [$d($children: expr),*] ) => {
+                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
+                };
+                // 101: trailing commas in attributes and params,
+                ( [$d($att: expr,)*], [$d($children: expr,)*], ) => {
+                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
+                };
+                // 110: trailing commas in attributes and children
+                ( [$d($att: expr,)*], [$d($children: expr,)*] ) => {
+                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
+                };
+                // 111: trailing commas in attributes, children, params
+                ( [$d($att: expr,)*], [$d($children: expr,)*], ) => {
+                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
+                };
 
-            /////////////////////////////////////////////////
-            //
-            // Pass through the expression as it was with the old function call
-            //
-            /////////////////////////////////////////////////
+                /////////////////////////////////////////////////
+                //
+                // Pass through the expression as it was with the old function call
+                //
+                /////////////////////////////////////////////////
 
-            // Pass through the div(vec![], vec![])
-            ( $att: expr, $children: expr ) => {
-                $crate::html::$name( $att, $children)
-            };
+                // Pass through the div(vec![], vec![])
+                ( $att: expr, $children: expr ) => {
+                    $crate::html::$name( $att, $children)
+                };
 
-            // Pass through the div!(vec![], vec![],) with trailing comma
-            ( $att: expr, $children: expr, ) => {
-                $crate::html::$name( $att, $children)
-            };
-        }
+                // Pass through the div!(vec![], vec![],) with trailing comma
+                ( $att: expr, $children: expr, ) => {
+                    $crate::html::$name( $att, $children)
+                };
+            }
         )*
     };
 }
@@ -103,6 +121,7 @@ macro_rules! declare_common_tags_and_macro {
         }
 
         #[cfg(feature = "with-parser")]
+        /// These are the comonly used html tags such as div, input, buttons,.. etc
         pub const HTML_TAGS: [&'static str; 112] = [$(stringify!($name),)*];
     };
 }
@@ -127,6 +146,9 @@ macro_rules! declare_tags_non_common{
         declare_tags!{ $($name;)*}
 
         #[cfg(feature = "with-parser")]
+        /// These are html tags which are non commonly used.
+        /// Put together in this collection to avoid import conflicts with the commonly used
+        /// ones.
         pub const HTML_TAGS_NON_COMMON:[&'static str;1] = [$(stringify!($name),)*];
     }
 }
@@ -141,6 +163,9 @@ macro_rules! declare_tags_and_macro_non_common{
         declare_tags_and_macro!{ $($name;)*}
 
         #[cfg(feature = "with-parser")]
+        /// These are html tags with macro which are non commonly used.
+        /// Put together in this collection to avoid import conflicts with the commonly used
+        /// ones.
         pub const HTML_TAGS_WITH_MACRO_NON_COMMON:[&'static str;2] = [$(stringify!($name),)*];
     }
 }

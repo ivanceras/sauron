@@ -3,7 +3,15 @@
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png"
 )]
-
+#![deny(
+    missing_docs,
+//    missing_debug_implementations,
+//    missing_copy_implementations,
+//    trivial_casts,
+//    trivial_numeric_casts,
+//    unstable_features,
+//    unused_import_braces
+)]
 //!
 //! [![Latest Version](https://img.shields.io/crates/v/sauron.svg)](https://crates.io/crates/sauron)
 //! [![Build Status](https://travis-ci.org/ivanceras/sauron.svg?branch=master)](https://travis-ci.org/ivanceras/sauron)
@@ -144,8 +152,23 @@
 //! pages](https://ivanceras.github.io)
 //!
 //! ### Converting HTML into Sauron's syntax
+//!
 //! [html2sauron](https://ivanceras.github.io/html2sauron/) - A tool to easily convert html into
 //! sauron node tree for your views.
+//!
+//! Note: When writing the view in sauron, just keep in mind that the function name is the element tag
+//! you are creating and there is 2 arguments for it. The first argument is an array of the attributes of the element
+//! and the second argument is an array of the children of the element.
+//!
+//! Example:
+//! ```rust,ignore
+//! div!([id("container"),class("hero")], [text("Content goes here")])
+//! ```
+//! `div` macro call is the element tag.
+//! The 1st argument in the call is an array of attributes for the div element expressed in a
+//! function call `id` and `class` which are valid attributes for a div.
+//! The 2nd argument in the call is an array of the children elements, and you can nest as many as
+//! you like.
 //!
 //! ### Prerequisite:
 //!
@@ -164,7 +187,8 @@
 //!
 //!
 //!
-
+#[macro_use]
+extern crate doc_comment;
 use cfg_if::cfg_if;
 
 cfg_if! {if #[cfg(feature = "with-dom")] {
@@ -199,6 +223,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
 }}
 
 #[cfg(feature = "with-dom")]
+/// Map the Event to DomEvent, which are browser events
 pub type Event = DomEvent;
 
 #[cfg(not(feature = "with-dom"))]
@@ -249,8 +274,15 @@ pub mod prelude {
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
 /// App code.
 pub type Node<MSG> = sauron_vdom::Node<&'static str, &'static str, Event, MSG>;
+
+/// Element type with tag and attribute name type set to &'static str
 pub type Element<MSG> =
     sauron_vdom::Element<&'static str, &'static str, Event, MSG>;
+
+/// Patch as result of diffing the current_vdom and the new vdom.
+/// The tag and attribute name types is set to &'static str
 pub type Patch<'a, MSG> =
     sauron_vdom::Patch<'a, &'static str, &'static str, Event, MSG>;
+
+/// Attribute type used in sauron where the type of the Attribute name is &'static str
 pub type Attribute<MSG> = sauron_vdom::Attribute<&'static str, Event, MSG>;
