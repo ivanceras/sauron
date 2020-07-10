@@ -2,7 +2,10 @@ use crate::{
     Callback,
     Value,
 };
-use std::fmt;
+use std::{
+    fmt,
+    fmt::Write,
+};
 
 /// These are the attributes of an element
 #[derive(Debug, Clone, PartialEq)]
@@ -121,25 +124,29 @@ where
     }
 
     /// create a nice string representation of this attribute
-    pub fn to_pretty_string(&self) -> String
+    pub fn render(&self, buffer: &mut dyn Write) -> fmt::Result
     where
         ATT: ToString,
     {
-        let mut buffer = String::new();
         if self.is_value() {
             if let Some(_ns) = self.namespace {
                 //TODO: the xlink part of this namespace should be passed by the calling function
-                buffer += &format!(
+                write!(
+                    buffer,
                     r#"xlink:{}="{}""#,
                     self.name.to_string(),
                     self.value
-                );
+                )?;
             } else {
-                buffer +=
-                    &format!(r#"{}="{}""#, self.name.to_string(), self.value);
+                write!(
+                    buffer,
+                    r#"{}="{}""#,
+                    self.name.to_string(),
+                    self.value
+                )?;
             }
         }
-        buffer
+        Ok(())
     }
 }
 

@@ -1,4 +1,8 @@
-use std::fmt;
+use std::{
+    fmt,
+    fmt::Write,
+};
+
 pub mod builder;
 pub mod event;
 mod value;
@@ -78,13 +82,13 @@ where
         }
     }
 
-    fn to_pretty_string(&self, indent: usize) -> String
+    fn render(&self, buffer: &mut dyn Write, indent: usize) -> fmt::Result
     where
         T: ToString,
     {
         match self {
-            Node::Element(element) => element.to_pretty_string(indent),
-            Node::Text(text) => format!("{}", text),
+            Node::Element(element) => element.render(buffer, indent),
+            Node::Text(text) => write!(buffer, "{}", text),
         }
     }
 
@@ -132,7 +136,8 @@ where
         self
     }
 
-    /// add attributes to the node
+    /// add attributes to the node and returns itself
+    /// this is used in view building
     pub fn add_attributes(
         mut self,
         attributes: Vec<Attribute<ATT, EVENT, MSG>>,
@@ -141,6 +146,16 @@ where
             elm.add_attributes(attributes);
         }
         self
+    }
+
+    /// add attributes using a mutable reference to self
+    pub fn add_attributes_ref_mut(
+        &mut self,
+        attributes: Vec<Attribute<ATT, EVENT, MSG>>,
+    ) {
+        if let Some(elm) = self.as_element_mut() {
+            elm.add_attributes(attributes);
+        }
     }
 
     /// get the attributes of this node
@@ -217,6 +232,7 @@ where
     ATT: PartialEq + Ord + ToString + Clone,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.to_pretty_string(0))
+        self.render(f, 0)?;
+        Ok(())
     }
 }

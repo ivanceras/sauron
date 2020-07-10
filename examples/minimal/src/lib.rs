@@ -28,7 +28,7 @@ impl App {
 impl Component<Msg> for App {
     fn view(&self) -> Node<Msg> {
         div!(
-            [class("some-class"), id("some-id"), attr("data-id", 1),],
+            [class("some-class"), id("some-id"), attr("data-id", 1)],
             [
                 input!(
                     [

@@ -5,6 +5,10 @@ use crate::{
     Node,
     Value,
 };
+use std::{
+    fmt,
+    fmt::Write,
+};
 
 /// Represents the element of the virtual node
 #[derive(Debug, Clone, PartialEq, Default)]
@@ -203,38 +207,39 @@ where
     }
 
     /// make a pretty string representation of this node
-    pub(super) fn to_pretty_string(&self, indent: usize) -> String
+    pub(super) fn render(
+        &self,
+        buffer: &mut dyn Write,
+        indent: usize,
+    ) -> fmt::Result
     where
         T: ToString,
         ATT: ToString,
     {
-        let mut buffer = String::new();
-        buffer += &format!("<{}", self.tag.to_string());
+        write!(buffer, "<{}", self.tag.to_string())?;
 
         for attr in self.attributes().iter() {
-            buffer += &format!(" {}", attr.to_pretty_string());
+            write!(buffer, " ")?;
+            attr.render(buffer)?;
         }
-        buffer += ">";
+        write!(buffer, ">")?;
 
         // do not indent if it is only text child node
         if self.is_children_a_node_text() {
-            buffer += &self.children[0].to_pretty_string(indent);
+            self.children[0].render(buffer, indent)?;
         } else {
             // otherwise print all child nodes with each line and indented
             for child in self.children.iter() {
-                buffer += &format!(
-                    "\n{}{}",
-                    util::indent(indent + 1),
-                    child.to_pretty_string(indent + 1)
-                );
+                write!(buffer, "\n{}", util::indent(indent + 1))?;
+                child.render(buffer, indent + 1)?;
             }
         }
         // do not make a new line it if is only a text child node or it has no child nodes
         if !(self.is_children_a_node_text() || self.children.is_empty()) {
-            buffer += &format!("\n{}", util::indent(indent));
+            write!(buffer, "\n{}", util::indent(indent))?;
         }
-        buffer += &format!("</{}>", self.tag.to_string());
-        buffer
+        write!(buffer, "</{}>", self.tag.to_string())?;
+        Ok(())
     }
 }
 
