@@ -1,6 +1,6 @@
 [package]
 name = "sauron"
-version = "0.25.1"
+version = "0.26.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -15,7 +15,7 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 js-sys = { version = "0.3.19", optional = true }
-sauron_vdom = { path ="crates/sauron_vdom", version = "0.25.0"}
+sauron_vdom = { path ="crates/sauron_vdom", version = "0.26.0"}
 wasm-bindgen = { version = "0.2.54", optional = true }
 lazy_static = "1.3.0"
 log = "0.4.8"

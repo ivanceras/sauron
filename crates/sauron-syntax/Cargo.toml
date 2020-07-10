@@ -1,6 +1,6 @@
 [package]
 name = "sauron-syntax"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -12,7 +12,7 @@ keywords = ["svg", "html", "parser"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sauron = { path = "../../", version = "0.25.0" }
-sauron_vdom = { path ="../sauron_vdom", version = "0.25.0"}
+sauron = { path = "../../", version = "0.26.0" }
+sauron_vdom = { path ="../sauron_vdom", version = "0.26.0"}
 sauron-parse = { path = "../sauron-parse", version = "0.1.0" }
 log = "0.4.8"
