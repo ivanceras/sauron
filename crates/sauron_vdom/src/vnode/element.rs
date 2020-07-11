@@ -154,6 +154,20 @@ where
         self.attrs.extend(attrs)
     }
 
+    /// remove the attributes with this key
+    pub fn remove_attribute(&mut self, key: &ATT) {
+        self.attrs.retain(|att| att.name != *key)
+    }
+
+    /// remove the existing values of this attribute
+    /// and add the new values
+    pub fn set_attributes(&mut self, attrs: Vec<Attribute<ATT, EVENT, MSG>>) {
+        attrs
+            .iter()
+            .for_each(|att| self.remove_attribute(&att.name));
+        self.add_attributes(attrs);
+    }
+
     /// add children virtual node to this element
     #[inline]
     pub fn add_children(&mut self, children: Vec<Node<T, ATT, EVENT, MSG>>) {
