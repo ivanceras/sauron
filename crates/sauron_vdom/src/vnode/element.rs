@@ -1,15 +1,18 @@
 use crate::{
     util,
+    vnode::attribute::Style,
     Attribute,
     Callback,
     Node,
     Value,
 };
 use std::{
+    collections::HashMap,
     fmt,
     fmt::Write,
 };
 
+/// TODO: add styles as a field and will be aggregated with styles attribute
 /// Represents the element of the virtual node
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct Element<T, ATT, EVENT, MSG>
@@ -52,7 +55,10 @@ where
 
     /// get the attributes that are events
     pub fn events(&self) -> Vec<&Attribute<ATT, EVENT, MSG>> {
-        self.attrs.iter().filter(|attr| attr.is_event()).collect()
+        self.attrs
+            .iter()
+            .filter(|attr| attr.is_event_listener())
+            .collect()
     }
 
     /// return the event as an attribute which matches the event name.
@@ -63,6 +69,7 @@ where
             .copied()
     }
 
+    /// return the attributes that are simple value or function call
     fn attributes_internal(&self) -> Vec<&Attribute<ATT, EVENT, MSG>> {
         self.attrs
             .iter()
@@ -101,6 +108,75 @@ where
             .filter(|att| att.name == *key)
             .copied()
             .collect()
+    }
+
+    /// return all the style attributes
+    fn get_styles(&self) -> Vec<&Style<ATT>> {
+        self.attrs
+            .iter()
+            .filter_map(|att| att.get_styles())
+            .flatten()
+            .collect()
+    }
+
+    /// remove from the style attribute if it matches the style name
+    pub fn remove_style(&mut self, style_name: &ATT) {
+        self.attrs.iter_mut().for_each(|att| {
+            att.get_styles_mut()
+                .map(|styles| styles.retain(|style| style.name != *style_name));
+        });
+    }
+
+    /// add a style attribute
+    #[allow(non_snake_case)]
+    pub fn add_style<V: Into<Value>>(
+        &mut self,
+        STYLE_KEY_LITERAL: ATT,
+        style_name: ATT,
+        value: V,
+    ) {
+        let style = Style::new(style_name, value.into());
+        self.attrs
+            .push(Attribute::from_styles(STYLE_KEY_LITERAL, vec![style]));
+    }
+
+    /// remove the previous style and add this new one
+    #[allow(non_snake_case)]
+    pub fn set_style<V: Into<Value>>(
+        &mut self,
+        STYLE_KEY_LITERAL: ATT,
+        style_name: ATT,
+        value: V,
+    ) {
+        self.remove_style(&style_name);
+        self.add_style(STYLE_KEY_LITERAL, style_name, value);
+    }
+
+    /// get all the styles attribute and make a single attribute out of it
+    #[allow(non_snake_case)]
+    pub fn aggregate_styles(
+        &self,
+        STYLE_KEY_LITERAL: ATT,
+    ) -> Attribute<ATT, EVENT, MSG> {
+        let styles = self.get_styles();
+
+        let mut style_names: Vec<&ATT> =
+            styles.iter().map(|style| &style.name).collect();
+        style_names.sort();
+        style_names.dedup();
+
+        let mut map = HashMap::new();
+        for style in styles {
+            map.insert(style.name.to_string(), style.value.clone());
+        }
+
+        let mut new_styles = vec![];
+        for name in style_names {
+            if let Some(value) = map.get(&name.to_string()) {
+                new_styles.push(Style::new(name.clone(), value.clone()))
+            }
+        }
+        Attribute::from_styles(STYLE_KEY_LITERAL, new_styles)
     }
 
     /// returns the unique list attribute names and their corresponding namespace
