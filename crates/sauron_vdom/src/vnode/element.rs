@@ -65,7 +65,7 @@ where
     pub fn get_event(&self, name: &ATT) -> Option<&Attribute<ATT, EVENT, MSG>> {
         self.events()
             .iter()
-            .find(|event| event.name == *name)
+            .find(|event| event.name() == name)
             .copied()
     }
 
@@ -87,7 +87,7 @@ where
             if let Some(value) = self.get_attr_value(&name) {
                 attributes.push(Attribute {
                     namespace,
-                    name: name.clone(),
+                    name: Some(name.clone()),
                     value: value.into(),
                 });
             }
@@ -105,7 +105,7 @@ where
     {
         self.attributes_internal()
             .iter()
-            .filter(|att| att.name == *key)
+            .filter(|att| att.name() == key)
             .copied()
             .collect()
     }
@@ -128,36 +128,19 @@ where
     }
 
     /// add a style attribute
-    #[allow(non_snake_case)]
-    pub fn add_style<V: Into<Value>>(
-        &mut self,
-        STYLE_KEY_LITERAL: ATT,
-        style_name: ATT,
-        value: V,
-    ) {
+    pub fn add_style<V: Into<Value>>(&mut self, style_name: ATT, value: V) {
         let style = Style::new(style_name, value.into());
-        self.attrs
-            .push(Attribute::from_styles(STYLE_KEY_LITERAL, vec![style]));
+        self.attrs.push(Attribute::from_styles(vec![style]));
     }
 
     /// remove the previous style and add this new one
-    #[allow(non_snake_case)]
-    pub fn set_style<V: Into<Value>>(
-        &mut self,
-        STYLE_KEY_LITERAL: ATT,
-        style_name: ATT,
-        value: V,
-    ) {
+    pub fn set_style<V: Into<Value>>(&mut self, style_name: ATT, value: V) {
         self.remove_style(&style_name);
-        self.add_style(STYLE_KEY_LITERAL, style_name, value);
+        self.add_style(style_name, value);
     }
 
     /// get all the styles attribute and make a single attribute out of it
-    #[allow(non_snake_case)]
-    pub fn aggregate_styles(
-        &self,
-        STYLE_KEY_LITERAL: ATT,
-    ) -> Attribute<ATT, EVENT, MSG> {
+    pub fn aggregate_styles(&self) -> Option<Attribute<ATT, EVENT, MSG>> {
         let styles = self.get_styles();
 
         let mut style_names: Vec<&ATT> =
@@ -165,18 +148,22 @@ where
         style_names.sort();
         style_names.dedup();
 
-        let mut map = HashMap::new();
-        for style in styles {
-            map.insert(style.name.to_string(), style.value.clone());
-        }
-
-        let mut new_styles = vec![];
-        for name in style_names {
-            if let Some(value) = map.get(&name.to_string()) {
-                new_styles.push(Style::new(name.clone(), value.clone()))
+        if style_names.is_empty() {
+            None
+        } else {
+            let mut map = HashMap::new();
+            for style in styles {
+                map.insert(style.name.to_string(), style.value.clone());
             }
+
+            let mut new_styles = vec![];
+            for name in style_names {
+                if let Some(value) = map.get(&name.to_string()) {
+                    new_styles.push(Style::new(name.clone(), value.clone()))
+                }
+            }
+            Some(Attribute::from_styles(new_styles))
         }
-        Attribute::from_styles(STYLE_KEY_LITERAL, new_styles)
     }
 
     /// returns the unique list attribute names and their corresponding namespace
@@ -187,7 +174,7 @@ where
         let mut names = self
             .attributes_internal()
             .iter()
-            .map(|att| (&att.name, att.namespace))
+            .map(|att| (att.name(), att.namespace))
             .collect::<Vec<_>>();
         names.sort();
         names.dedup();
@@ -231,8 +218,9 @@ where
     }
 
     /// remove the attributes with this key
+    /// TODO: this doesn't take into consideration the style attribute
     pub fn remove_attribute(&mut self, key: &ATT) {
-        self.attrs.retain(|att| att.name != *key)
+        self.attrs.retain(|att| att.name() != key)
     }
 
     /// remove the existing values of this attribute
@@ -240,7 +228,7 @@ where
     pub fn set_attributes(&mut self, attrs: Vec<Attribute<ATT, EVENT, MSG>>) {
         attrs
             .iter()
-            .for_each(|att| self.remove_attribute(&att.name));
+            .for_each(|att| self.remove_attribute(att.name()));
         self.add_attributes(attrs);
     }
 
@@ -254,7 +242,7 @@ where
     #[inline]
     pub fn add_event_listener(&mut self, event: ATT, cb: Callback<EVENT, MSG>) {
         let attr_event = Attribute {
-            name: event,
+            name: Some(event),
             value: cb.into(),
             namespace: None,
         };
@@ -311,6 +299,10 @@ where
         for attr in self.attributes().iter() {
             write!(buffer, " ")?;
             attr.render(buffer)?;
+        }
+        if let Some(style_attr) = self.aggregate_styles() {
+            write!(buffer, " ")?;
+            style_attr.render(buffer)?;
         }
         write!(buffer, ">")?;
 

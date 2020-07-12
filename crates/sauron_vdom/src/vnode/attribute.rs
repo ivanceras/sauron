@@ -16,8 +16,9 @@ pub struct Attribute<ATT, EVENT, MSG>
 where
     ATT: Clone,
 {
-    /// the attribute name
-    pub name: ATT,
+    /// the attribute name,
+    /// optional since style attribute doesn't need to have an attribute name
+    pub name: Option<ATT>,
     /// the attribute value, which could be a simple value, and event or a function call
     pub value: AttribValue<ATT, EVENT, MSG>,
     /// namespace of an attribute.
@@ -30,10 +31,15 @@ impl<ATT, EVENT, MSG> Attribute<ATT, EVENT, MSG>
 where
     ATT: Clone,
 {
+    /// return the name if it is set, panics if the name is not set
+    pub fn name(&self) -> &ATT {
+        self.name.as_ref().expect("must have a name")
+    }
+
     /// create an attribute from Callback
     pub fn from_callback(name: ATT, cb: Callback<EVENT, MSG>) -> Self {
         Attribute {
-            name,
+            name: Some(name),
             value: cb.into(),
             namespace: None,
         }
@@ -42,20 +48,16 @@ where
     /// create an attribute from Value type
     pub fn from_value(name: ATT, value: Value) -> Self {
         Attribute {
-            name,
+            name: Some(name),
             value: value.into(),
             namespace: None,
         }
     }
 
     /// create an attribute from Vec<Style>
-    #[allow(non_snake_case)]
-    pub fn from_styles(
-        STYLE_KEY_LITERAL: ATT,
-        styles: Vec<Style<ATT>>,
-    ) -> Self {
+    pub fn from_styles(styles: Vec<Style<ATT>>) -> Self {
         Attribute {
-            name: STYLE_KEY_LITERAL,
+            name: None,
             value: styles.into(),
             namespace: None,
         }
@@ -165,20 +167,25 @@ where
         if self.is_value() {
             if let Some(_ns) = self.namespace {
                 //TODO: the xlink part of this namespace should be passed by the calling function
+                //Consideration, in apply patches setting the attribute
+                // has to set only the name, and the xlink namespace is not
+                // included
                 write!(
                     buffer,
                     r#"xlink:{}="{}""#,
-                    self.name.to_string(),
+                    self.name().to_string(),
                     self.value
                 )?;
             } else {
                 write!(
                     buffer,
                     r#"{}="{}""#,
-                    self.name.to_string(),
+                    self.name().to_string(),
                     self.value
                 )?;
             }
+        } else if self.is_style() {
+            write!(buffer, r#"style="{}""#, self.value)?;
         }
         Ok(())
     }

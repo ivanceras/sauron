@@ -157,7 +157,7 @@ where
     V: Into<Value> + Clone,
 {
     Attribute {
-        name: "inner_html",
+        name: Some("inner_html"),
         value: AttribValue::FuncCall(inner_html.into()),
         namespace: None,
     }

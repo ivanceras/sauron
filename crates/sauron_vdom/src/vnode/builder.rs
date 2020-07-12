@@ -103,7 +103,7 @@ where
     ATT: Clone,
 {
     Attribute {
-        name,
+        name: Some(name),
         value: AttribValue::Value(v.into()),
         namespace,
     }
@@ -123,7 +123,7 @@ where
     ATT: Clone,
 {
     Attribute {
-        name,
+        name: Some(name),
         value: AttribValue::Callback(c.into()),
         namespace: None,
     }
@@ -147,7 +147,7 @@ where
     let cb: Callback<EVENT, UDEF> = Callback::from(webevent_to_user_def);
     let cb2: Callback<EVENT, MSG> = cb.map(user_def_to_msg);
     Attribute {
-        name,
+        name: Some(name),
         value: AttribValue::Callback(cb2),
         namespace: None,
     }

@@ -36,4 +36,5 @@ pub use vnode::{
     event,
     AttribValue,
     Attribute,
+    Style,
 };

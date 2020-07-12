@@ -185,8 +185,8 @@ where
     let mut remove_attributes: Vec<ATT> = vec![];
 
     for new_attr in new_element.attributes().iter() {
-        let old_attr_value = old_element.get_attr_value(&new_attr.name);
-        let new_attr_value = new_element.get_attr_value(&new_attr.name);
+        let old_attr_value = old_element.get_attr_value(&new_attr.name());
+        let new_attr_value = new_element.get_attr_value(&new_attr.name());
         if old_attr_value.is_none() || old_attr_value != new_attr_value {
             if let Some(new_attr_value) = new_attr_value {
                 add_attributes.push(Attribute {
@@ -201,11 +201,11 @@ where
     // if this attribute name does not exist anymore
     // to the new element, remove it
     for old_attr in old_element.attributes().iter() {
-        if new_element.get_attr_value(&old_attr.name).is_some() {
+        if new_element.get_attr_value(&old_attr.name()).is_some() {
             // the attribute still exist in the new element
             // and it must have been changed in add_attributes when they differe
         } else {
-            remove_attributes.push(old_attr.name.clone());
+            remove_attributes.push(old_attr.name().clone());
         }
     }
 
@@ -247,15 +247,15 @@ where
         // inside the callback. Comparing the callback is pointless
         // since they are uniquely created at each instantiation of
         // each element on the vdom
-        let old_event = old_element.get_event(&new_event.name);
+        let old_event = old_element.get_event(&new_event.name());
         if old_event.is_none() {
             add_event_listener.push(new_event);
         }
     }
 
     for old_event in old_element.events().iter() {
-        if new_element.get_event(&old_event.name).is_none() {
-            remove_event_listener.push(old_event.name.clone());
+        if new_element.get_event(&old_event.name()).is_none() {
+            remove_event_listener.push(old_event.name().clone());
         }
     }
 

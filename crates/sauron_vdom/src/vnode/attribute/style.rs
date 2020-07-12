@@ -9,7 +9,9 @@ use std::fmt;
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Style<ATT> {
+    /// style name such as border, width, etc
     pub name: ATT,
+    /// value of the style
     pub value: Value,
 }
 

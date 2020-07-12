@@ -14,6 +14,7 @@ pub use value::Value;
 pub use attribute::{
     AttribValue,
     Attribute,
+    Style,
 };
 pub use element::Element;
 

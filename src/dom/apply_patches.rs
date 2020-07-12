@@ -246,13 +246,13 @@ where
             for attr in attributes.iter() {
                 // attr "" is used in checked = false, since checked attribute is only unchecked
                 // when there is no checked attribute
-                if !attr.name.is_empty() {
+                if !attr.name().is_empty() {
                     // NOTE: set_attribute('value',..) is not enough
                     // value need to explicitly call the set_value in order for the
                     // actual value gets reflected.
                     //
                     // TODO: centrarlize this with set_attributes in created_node
-                    match attr.name {
+                    match *attr.name() {
                         "value" => {
                             if let Some(input) =
                                 node.dyn_ref::<HtmlInputElement>()
@@ -283,7 +283,7 @@ where
                         }
                         _ => {
                             node.set_attribute(
-                                attr.name,
+                                attr.name(),
                                 &attr.value.to_string(),
                             )?;
                         }
@@ -311,13 +311,15 @@ where
                     let closure_wrap: Closure<dyn FnMut(Event)> =
                         create_closure_wrap(program, callback);
                     let func: &Function = closure_wrap.as_ref().unchecked_ref();
-                    node.add_event_listener_with_callback(event.name, func)?;
+                    node.add_event_listener_with_callback(event.name(), func)?;
                     let node_id = *node_idx as u32;
                     if let Some(closure) = active_closures.get_mut(&node_id) {
-                        closure.push((event.name, closure_wrap));
+                        closure.push((event.name(), closure_wrap));
                     } else {
-                        active_closures
-                            .insert(node_id, vec![(event.name, closure_wrap)]);
+                        active_closures.insert(
+                            node_id,
+                            vec![(event.name(), closure_wrap)],
+                        );
                     }
                 }
             }
