@@ -65,7 +65,7 @@ macro_rules! declare_html_attributes{
 
         #[cfg(feature = "with-parser")]
         /// These are most commonly used html attributes such as class, id, etc
-        pub const HTML_ATTRS:[&'static str; 118] = [$(stringify!($name),)*];
+        pub const HTML_ATTRS:[&'static str; 117] = [$(stringify!($name),)*];
     }
 }
 
@@ -197,7 +197,6 @@ declare_html_attributes! {
     srcset;
     start;
     step;
-    style;
     summary;
     tabindex;
     target;

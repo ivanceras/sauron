@@ -92,6 +92,10 @@ where
                 });
             }
         }
+        // add the style to the regular attributes
+        if let Some(style_att) = self.aggregate_styles() {
+            attributes.push(style_att);
+        }
         attributes
     }
 
@@ -299,10 +303,6 @@ where
         for attr in self.attributes().iter() {
             write!(buffer, " ")?;
             attr.render(buffer)?;
-        }
-        if let Some(style_attr) = self.aggregate_styles() {
-            write!(buffer, " ")?;
-            style_attr.render(buffer)?;
         }
         write!(buffer, ">")?;
 
