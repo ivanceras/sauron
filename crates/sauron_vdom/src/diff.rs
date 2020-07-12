@@ -184,17 +184,11 @@ where
     let mut add_attributes: Vec<Attribute<ATT, EVENT, MSG>> = vec![];
     let mut remove_attributes: Vec<ATT> = vec![];
 
-    for new_attr in new_element.attributes().iter() {
+    for new_attr in new_element.attributes().into_iter() {
         let old_attr_value = old_element.get_attr_value(&new_attr.name());
         let new_attr_value = new_element.get_attr_value(&new_attr.name());
         if old_attr_value.is_none() || old_attr_value != new_attr_value {
-            if let Some(new_attr_value) = new_attr_value {
-                add_attributes.push(Attribute {
-                    namespace: new_attr.namespace,
-                    name: new_attr.name.clone(),
-                    value: new_attr_value.into(),
-                });
-            }
+            add_attributes.push(new_attr);
         }
     }
 

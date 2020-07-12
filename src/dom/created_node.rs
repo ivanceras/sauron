@@ -133,24 +133,35 @@ impl<T> CreatedNode<T> {
             // attr "" is used in checked = false, since checked attribute is only unchecked
             // when there is no checked attribute
             if !attr.name().is_empty() {
-                if let Some(ref namespace) = attr.namespace {
+                if let Some(ref namespace) = attr.namespace() {
                     element
                         .set_attribute_ns(
                             Some(namespace),
                             attr.name(),
-                            &attr.value.to_string(),
+                            &attr
+                                .get_value()
+                                .map(|v| v.to_string())
+                                .unwrap_or(String::new()),
                         )
                         .expect("Set element attribute_ns in create element");
                 } else {
                     match *attr.name() {
                         "inner_html" => {
-                            element.set_inner_html(&attr.value.to_string())
+                            element.set_inner_html(
+                                &attr
+                                    .get_value()
+                                    .map(|v| v.to_string())
+                                    .unwrap_or(String::new()),
+                            )
                         }
                         _ => {
                             element
                                 .set_attribute(
                                     attr.name(),
-                                    &attr.value.to_string(),
+                                    &attr
+                                        .get_value()
+                                        .map(|v| v.to_string())
+                                        .unwrap_or(String::new()),
                                 )
                                 .expect(
                                     "Set element attribute in create element",

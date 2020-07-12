@@ -254,14 +254,20 @@ where
                     // TODO: centrarlize this with set_attributes in created_node
                     match *attr.name() {
                         "value" => {
+                            let string_value =
+                                if let Some(value) = attr.get_value() {
+                                    value.to_string()
+                                } else {
+                                    String::new()
+                                };
                             if let Some(input) =
                                 node.dyn_ref::<HtmlInputElement>()
                             {
-                                input.set_value(&attr.value.to_string());
+                                input.set_value(&string_value);
                             } else if let Some(textarea) =
                                 node.dyn_ref::<HtmlTextAreaElement>()
                             {
-                                textarea.set_value(&attr.value.to_string());
+                                textarea.set_value(&string_value);
                             }
                         }
                         "checked" => {
@@ -278,13 +284,21 @@ where
                         }
                         "inner_html" => {
                             if let Some(element) = node.dyn_ref::<Element>() {
-                                element.set_inner_html(&attr.value.to_string());
+                                element.set_inner_html(
+                                    &attr
+                                        .get_function_call_value()
+                                        .map(|v| v.to_string())
+                                        .unwrap_or(String::new()),
+                                );
                             }
                         }
                         _ => {
                             node.set_attribute(
                                 attr.name(),
-                                &attr.value.to_string(),
+                                &attr
+                                    .get_value()
+                                    .map(|v| v.to_string())
+                                    .unwrap_or(String::new()),
                             )?;
                         }
                     }

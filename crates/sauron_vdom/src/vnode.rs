@@ -12,13 +12,12 @@ pub use event::Event;
 pub use value::Value;
 
 pub use attribute::{
-    AttribValue,
     Attribute,
     Style,
 };
 pub use element::Element;
 
-mod attribute;
+pub mod attribute;
 mod element;
 
 /// This is the core data structure of the library.

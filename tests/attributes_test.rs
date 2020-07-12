@@ -1,9 +1,6 @@
 #![deny(warnings)]
 use sauron::{
-    sauron_vdom::{
-        AttribValue,
-        Style,
-    },
+    sauron_vdom::Style,
     Attribute,
     Element,
     Node,
@@ -40,20 +37,16 @@ fn test_style_aggregate() {
 
     assert_eq!(
         att,
-        Attribute {
-            name: None,
-            value: AttribValue::Style(vec![
-                Style {
-                    name: "display",
-                    value: Value::Str("flex")
-                },
-                Style {
-                    name: "flex-direction",
-                    value: Value::Str("row")
-                }
-            ]),
-            namespace: None
-        }
+        Attribute::from_styles(vec![
+            Style {
+                name: "display",
+                value: Value::Str("flex")
+            },
+            Style {
+                name: "flex-direction",
+                value: Value::Str("row")
+            }
+        ])
     );
     let node: Node<&'static str> = elm.into();
 

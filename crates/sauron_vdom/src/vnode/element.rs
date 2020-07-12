@@ -73,7 +73,7 @@ where
     fn attributes_internal(&self) -> Vec<&Attribute<ATT, EVENT, MSG>> {
         self.attrs
             .iter()
-            .filter(|attr| attr.is_value() || attr.is_func_call())
+            .filter(|attr| attr.is_value() || attr.is_function_call())
             .collect()
     }
 
@@ -85,11 +85,11 @@ where
         let mut attributes = vec![];
         for (name, namespace) in names {
             if let Some(value) = self.get_attr_value(&name) {
-                attributes.push(Attribute {
+                attributes.push(Attribute::with_namespace(
+                    name.clone(),
+                    value.into(),
                     namespace,
-                    name: Some(name.clone()),
-                    value: value.into(),
-                });
+                ));
             }
         }
         // add the style to the regular attributes
@@ -178,7 +178,7 @@ where
         let mut names = self
             .attributes_internal()
             .iter()
-            .map(|att| (att.name(), att.namespace))
+            .map(|att| (att.name(), att.namespace()))
             .collect::<Vec<_>>();
         names.sort();
         names.dedup();
@@ -201,13 +201,12 @@ where
         attrs: Vec<&Attribute<ATT, EVENT, MSG>>,
     ) -> Value {
         if attrs.len() == 1 {
-            let one_value =
-                attrs[0].value.get_value().expect("Should have a value");
+            let one_value = attrs[0].get_value().expect("Should have a value");
             one_value.clone()
         } else {
             let mut merged_value: Value = Value::Vec(vec![]);
             for att in attrs {
-                if let Some(v) = att.value.get_value() {
+                if let Some(v) = att.get_value() {
                     merged_value.append(v.clone());
                 }
             }
@@ -245,11 +244,7 @@ where
     /// attach a callback to this element
     #[inline]
     pub fn add_event_listener(&mut self, event: ATT, cb: Callback<EVENT, MSG>) {
-        let attr_event = Attribute {
-            name: Some(event),
-            value: cb.into(),
-            namespace: None,
-        };
+        let attr_event = Attribute::from_callback(event, cb);
         self.attrs.push(attr_event);
     }
 

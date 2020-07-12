@@ -4,7 +4,6 @@ use crate::Attribute;
 pub use attribute_macros::*;
 pub use sauron_vdom::builder::attr;
 use sauron_vdom::{
-    AttribValue,
     Style,
     Value,
 };
@@ -163,9 +162,5 @@ pub fn inner_html<V, MSG>(inner_html: V) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
 {
-    Attribute {
-        name: Some("inner_html"),
-        value: AttribValue::FuncCall(inner_html.into()),
-        namespace: None,
-    }
+    Attribute::function_call("inner_html", inner_html.into())
 }

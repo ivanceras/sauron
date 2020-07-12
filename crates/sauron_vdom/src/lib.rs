@@ -24,6 +24,7 @@ pub use diff::{
 };
 pub use patch::Patch;
 pub use vnode::{
+    attribute,
     builder,
     Element,
     Event,
@@ -34,7 +35,6 @@ pub use vnode::{
 
 pub use vnode::{
     event,
-    AttribValue,
     Attribute,
     Style,
 };

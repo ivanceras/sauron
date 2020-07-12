@@ -44,7 +44,10 @@ use sauron::{
     Attribute,
     Node,
 };
-use std::io;
+use std::{
+    fmt,
+    io,
+};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -53,6 +56,8 @@ pub enum ParseError {
     Generic(String),
     #[error("{0}")]
     IoError(#[from] io::Error),
+    #[error("{0}")]
+    FmtError(#[from] fmt::Error),
 }
 
 fn match_tag(tag: &str) -> Option<&'static str> {

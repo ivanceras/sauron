@@ -23,11 +23,11 @@ pub fn html_to_syntax(
     println!("input: {}", html);
     match sauron_parse::parse::<()>(html) {
         Ok(root_node) => {
+            let mut buffer = String::new();
             if let Some(root_node) = root_node {
-                Ok(root_node.to_syntax(use_macro, 0))
-            } else {
-                Ok("".to_string())
+                root_node.to_syntax(&mut buffer, use_macro, 0)?;
             }
+            Ok(buffer)
         }
         Err(e) => {
             log::error!("error: {}", e);
