@@ -29,24 +29,24 @@ impl<MSG: 'static> ToSyntax for Attribute<MSG> {
     fn to_syntax(&self, use_macros: bool, indent: usize) -> String {
         let mut buffer = String::new();
         let matched_attribute_func =
-            sauron_parse::match_attribute_function(&self.name).is_some();
+            sauron_parse::match_attribute_function(&self.name()).is_some();
         if let Some(_ns) = self.namespace {
             buffer += &format!(
                 r#"xlink_{}({}),"#,
-                self.name.to_string(),
+                self.name().to_string(),
                 self.value.to_syntax(use_macros, indent),
             );
         } else {
             if matched_attribute_func {
                 buffer += &format!(
                     r#"{}({}),"#,
-                    self.name.to_string(),
+                    self.name().to_string(),
                     self.value.to_syntax(use_macros, indent)
                 );
             } else {
                 buffer += &format!(
                     r#"attr("{}",{}),"#,
-                    self.name.to_string(),
+                    self.name().to_string(),
                     self.value.to_syntax(use_macros, indent)
                 );
             }
@@ -55,7 +55,7 @@ impl<MSG: 'static> ToSyntax for Attribute<MSG> {
     }
 }
 
-impl<MSG: 'static> ToSyntax for AttribValue<Event, MSG> {
+impl<ATT: ToString, MSG: 'static> ToSyntax for AttribValue<ATT, Event, MSG> {
     fn to_syntax(&self, _use_macros: bool, _indent: usize) -> String {
         match self.get_value() {
             Some(v_str) => {
