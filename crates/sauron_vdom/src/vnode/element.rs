@@ -78,7 +78,7 @@ where
     }
 
     /// returns the only the attributes of this element
-    /// Note: This does not include the events.
+    /// Note: This does not include the event_listeners, function calls, and style
     /// If you need to access the events, use the `attrs` field directly.
     pub fn attributes(&self) -> Vec<Attribute<ATT, EVENT, MSG>> {
         let names = self.get_attributes_name_and_ns();
@@ -91,10 +91,6 @@ where
                     namespace,
                 ));
             }
-        }
-        // add the style to the regular attributes
-        if let Some(style_att) = self.aggregate_styles() {
-            attributes.push(style_att);
         }
         attributes
     }
@@ -298,6 +294,10 @@ where
         for attr in self.attributes().iter() {
             write!(buffer, " ")?;
             attr.render(buffer)?;
+        }
+        if let Some(style_att) = self.aggregate_styles() {
+            write!(buffer, " ")?;
+            style_att.render(buffer)?;
         }
         write!(buffer, ">")?;
 

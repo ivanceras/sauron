@@ -106,7 +106,10 @@ where
             Attribute::Plain(plain) => &plain.name,
             Attribute::EventListener(event, _) => event,
             Attribute::FunctionCall(func, _) => func,
-            Attribute::Style(_) => todo!(), //"style",
+            Attribute::Style(_) => {
+                //"style",
+                panic!("could not return attribute name for style")
+            }
         }
     }
 

@@ -1,8 +1,5 @@
 use sauron::prelude::*;
-use sauron_vdom::{
-    attribute::PlainAttribute,
-    Text,
-};
+use sauron_vdom::Text;
 use std::{
     fmt,
     fmt::Write,
@@ -138,7 +135,7 @@ impl<MSG: 'static> ToSyntax for Element<MSG> {
             for child in self.children.iter() {
                 write!(buffer, "\n{}", sauron_vdom::util::indent(indent + 1),)?;
                 child.to_syntax(buffer, use_macros, indent + 1)?;
-                write!(buffer, ",");
+                write!(buffer, ",")?;
             }
         }
         // do not make a new line it if is only a text child node or it has no child nodes

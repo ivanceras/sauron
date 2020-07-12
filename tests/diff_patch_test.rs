@@ -225,6 +225,65 @@ fn add_attributes() {
 }
 
 #[test]
+fn add_style_attributes() {
+    let old: Node<()> = div(vec![style("display", "block")], vec![]);
+    let new = div(vec![style("display", "none")], vec![]);
+    assert_eq!(
+        diff(&old, &new),
+        vec![Patch::AddAttributes(
+            &"div",
+            0,
+            vec![style("display", "none")]
+        )],
+        "Add attributes",
+    );
+}
+
+#[test]
+fn add_style_attributes_1_change() {
+    let old: Node<()> = div(
+        vec![style("display", "block"), style("position", "absolute")],
+        vec![],
+    );
+    let new = div(
+        vec![style("display", "none"), style("position", "absolute")],
+        vec![],
+    );
+    assert_eq!(
+        diff(&old, &new),
+        vec![Patch::AddAttributes(
+            &"div",
+            0,
+            vec![styles([("display", "none"), ("position", "absolute")])]
+        )],
+    );
+}
+
+#[test]
+fn add_style_attributes_no_changes() {
+    let old: Node<()> = div(
+        vec![style("display", "block"), style("position", "absolute")],
+        vec![],
+    );
+    let new = div(
+        vec![style("display", "block"), style("position", "absolute")],
+        vec![],
+    );
+    assert_eq!(diff(&old, &new), vec![],);
+}
+
+#[test]
+fn remove_style_attributes() {
+    let old: Node<()> = div(vec![style("display", "block")], vec![]);
+    let new = div(vec![], vec![]);
+    assert_eq!(
+        diff(&old, &new),
+        vec![Patch::RemoveAttributes(&"div", 0, vec!["style"])],
+        "Add attributes",
+    );
+}
+
+#[test]
 fn remove_attributes() {
     let old: Node<()> = div(vec![id("hey-there")], vec![]); //{ <div id="hey-there"></div> },
     let new = div(vec![], vec![]); //{ <div> </div> },
