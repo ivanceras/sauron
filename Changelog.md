@@ -1,5 +1,12 @@
 # Changelog
 
+# (Unreleased)
+- restructure Attribute into an enum for special cases, ie: style, function_call, event_listener and plain attribute which makes it more coherent
+
+# 0.26.0
+- Change `to_pretty_string` to `render` with focus on writing to the common buffer.
+    - This is a performance improvement
+
 # 0.25.0
 - Add a function `Node.text` to return the string of the text element
 - Add a function `Node.eldest_child_text` to return the string of the only child of this element
