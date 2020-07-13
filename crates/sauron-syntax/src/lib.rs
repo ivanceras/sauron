@@ -89,8 +89,8 @@ mod tests {
         }
     ")]),
     ]),
-    body!([style("margin: 0; padding: 0; width: 100%; height: 100%;"),],[
-        div!([id("web-app"),style("width: 100%; height: 100%;"),],[text("
+    body!([style("height:100%;margin:0;padding:0;width:100%;"),],[
+        div!([id("web-app"),style("height:100%;width:100%;"),],[text("
       #HTML_INSERTED_HERE_BY_SERVER#
   ")]),
     ]),
@@ -123,9 +123,9 @@ mod tests {
             ]),
         ]),
         image!([height(400),href("data:image/jpeg;base64,/9j/4AAQSkZJRgABA"),width(600),x(0),y(0),],[]),
-        text!([fill("red"),font_family("monospace"),font_size(40),stroke("white"),stroke_width(1),style("filter:url(#shadow);"),x(65),y(55),],[text("John Smith")]),
-        text!([fill("white"),font_family("monospace"),font_size(20),style("filter:url(#shadow);"),x(100),y(100),],[text("10101011")]),
-        text!([fill("red"),font_family("monospace"),font_size(50),style("filter:url(#shadow);"),width(500),x(20),y(200),],[text("Happy birthday")]),
+        text!([fill("red"),font_family("monospace"),font_size(40),stroke("white"),stroke_width(1),x(65),y(55),style("filter:url(#shadow);"),],[text("John Smith")]),
+        text!([fill("white"),font_family("monospace"),font_size(20),x(100),y(100),style("filter:url(#shadow);"),],[text("10101011")]),
+        text!([fill("red"),font_family("monospace"),font_size(50),width(500),x(20),y(200),style("filter:url(#shadow);"),],[text("Happy birthday")]),
     ]),
 ])"#;
         let syntax = html_to_syntax(input, true).expect("must not fail");

@@ -7,6 +7,7 @@ use sauron_vdom::{
     Style,
     Value,
 };
+pub use style_macro::*;
 
 #[macro_use]
 mod attribute_macros;

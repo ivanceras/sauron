@@ -50,9 +50,13 @@ impl<MSG: 'static> ToSyntax for Attribute<MSG> {
         use_macros: bool,
         indent: usize,
     ) -> fmt::Result {
-        let matched_attribute_func =
-            sauron_parse::match_attribute_function(&self.name()).is_some();
-        if let Some(_ns) = self.namespace() {
+        if let Some(style_att) = self.get_styles() {
+            write!(buffer, "style(\"")?;
+            for s_att in style_att {
+                write!(buffer, "{};", s_att)?;
+            }
+            write!(buffer, "\"),")?;
+        } else if let Some(_ns) = self.namespace() {
             if let Some(value) = self.get_value() {
                 write!(buffer, "xlink_{}", self.name().to_string(),)?;
                 write!(buffer, "(")?;
@@ -60,6 +64,8 @@ impl<MSG: 'static> ToSyntax for Attribute<MSG> {
                 write!(buffer, ")")?;
             }
         } else {
+            let matched_attribute_func =
+                sauron_parse::match_attribute_function(&self.name()).is_some();
             if matched_attribute_func {
                 if let Some(value) = self.get_value() {
                     write!(buffer, "{}", self.name().to_string(),)?;
@@ -120,6 +126,9 @@ impl<MSG: 'static> ToSyntax for Element<MSG> {
         for attr in self.attributes().iter() {
             attr.to_syntax(buffer, use_macros, indent)?;
             write!(buffer, ",")?;
+        }
+        if let Some(style_att) = self.aggregate_styles() {
+            style_att.to_syntax(buffer, use_macros, indent)?;
         }
         write!(buffer, "],")?;
         if use_macros {
