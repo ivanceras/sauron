@@ -17,7 +17,7 @@ rust-nightly:
 
 rust-stable:
   stage: build
-  image: rustlang/rust:1.43.0
+  image: rustlang/rust:stable
   before_script:
       - apt update
       - apt install -y firefox-esr
