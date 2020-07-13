@@ -20,6 +20,7 @@ use sauron::{
         attributes::{
             HTML_ATTRS,
             HTML_ATTRS_SPECIAL,
+            HTML_STYLES,
         },
         tags::{
             HTML_TAGS,
@@ -43,8 +44,12 @@ use sauron::{
     },
     Attribute,
     Node,
+    Style,
 };
-use std::io;
+use std::{
+    fmt,
+    io,
+};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -53,6 +58,8 @@ pub enum ParseError {
     Generic(String),
     #[error("{0}")]
     IoError(#[from] io::Error),
+    #[error("{0}")]
+    FmtError(#[from] fmt::Error),
 }
 
 fn match_tag(tag: &str) -> Option<&'static str> {
@@ -88,6 +95,13 @@ fn match_attribute(key: &str) -> Option<&'static str> {
         })
 }
 
+fn match_style_name(key: &str) -> Option<&'static str> {
+    HTML_STYLES
+        .iter()
+        .find(|name| name.eq_ignore_ascii_case(&key))
+        .map(|name| *name)
+}
+
 pub fn match_attribute_function(key: &str) -> Option<&'static str> {
     HTML_ATTRS
         .iter()
@@ -112,7 +126,10 @@ fn extract_attributes<MSG>(
         .filter_map(|att| {
             let key = att.name.local.to_string();
             let value = att.value.to_string();
-            if let Some(attr) = match_attribute(&key) {
+            if key == "style" {
+                let styles = extract_styles(&value);
+                Some(Attribute::from_styles(styles))
+            } else if let Some(attr) = match_attribute(&key) {
                 Some(attributes::attr(attr, value))
             } else {
                 log::warn!("Not a standard html attribute: {}", key);
@@ -120,6 +137,27 @@ fn extract_attributes<MSG>(
             }
         })
         .collect()
+}
+
+/// extract the styles into an arry
+/// example: display:flex; flex-direction: column;
+fn extract_styles(style: &str) -> Vec<Style> {
+    let mut extracted = vec![];
+    println!("processing style: {}", style);
+    let mut single_styles: Vec<&str> = style.split(";").collect();
+    single_styles.retain(|item| !item.trim().is_empty());
+    for single in single_styles {
+        let key_value: Vec<&str> = single.split(":").collect();
+        dbg!(&key_value);
+        assert_eq!(key_value.len(), 2);
+        let key = key_value[0].trim();
+        let value = key_value[1].trim();
+        println!("style   [{}] = [{}]", key, value);
+        if let Some(match_style) = match_style_name(key) {
+            extracted.push(Style::new(match_style, value.to_string().into()));
+        }
+    }
+    extracted
 }
 
 fn process_children<MSG>(node: &Handle) -> Vec<Node<MSG>> {

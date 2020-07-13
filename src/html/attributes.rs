@@ -4,14 +4,23 @@ use crate::Attribute;
 pub use attribute_macros::*;
 pub use sauron_vdom::builder::attr;
 use sauron_vdom::{
-    AttribValue,
+    Style,
     Value,
 };
+pub use style_macro::*;
 
 #[macro_use]
 mod attribute_macros;
 #[macro_use]
 mod style_macro;
+
+/// create a style attribute
+pub fn style<V, MSG>(style_name: &'static str, value: V) -> Attribute<MSG>
+where
+    V: Into<Value> + Clone,
+{
+    Attribute::from_styles(vec![Style::new(style_name, value.into())])
+}
 
 /// A helper function which creates a style attribute by assembling the tuples into a string for the style value.
 /// ```ignore
@@ -21,29 +30,28 @@ mod style_macro;
 /// ```ignore
 /// div([style("display:flex;flex-direction:row;")],[])
 /// ```
-pub fn styles<'a, V, MSG, P>(pairs: P) -> Attribute<MSG>
+pub fn styles<V, MSG, P>(pairs: P) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
-    P: AsRef<[(&'a str, V)]>,
+    P: AsRef<[(&'static str, V)]>,
 {
-    let mut style_str = String::new();
+    let mut styles = vec![];
     for (key, value) in pairs.as_ref() {
-        let value: Value = value.clone().into();
-        style_str.push_str(&format!("{}:{};", key, value.to_string()));
+        styles.push(Style::new(*key, Into::<Value>::into(value.clone())));
     }
-    style(style_str)
+    Attribute::from_styles(styles)
 }
 
 /// A helper function to build styles by accepting pairs
-pub fn styles_values<'a, MSG, P>(pairs: P) -> Attribute<MSG>
+pub fn styles_values<MSG, P>(pairs: P) -> Attribute<MSG>
 where
-    P: AsRef<[(&'a str, Value)]>,
+    P: AsRef<[(&'static str, Value)]>,
 {
-    let mut style_str = String::new();
+    let mut styles = vec![];
     for (key, value) in pairs.as_ref() {
-        style_str.push_str(&format!("{}:{};", key, value.to_string()));
+        styles.push(Style::new(*key, value.clone()));
     }
-    style(style_str)
+    Attribute::from_styles(styles)
 }
 
 /// A helper function which creates a style attribute by assembling only the parts that passed the
@@ -63,14 +71,13 @@ where
     V: Into<Value> + Clone,
     P: AsRef<[(&'static str, V, bool)]>,
 {
-    let mut style_list = Vec::with_capacity(trio.as_ref().len());
+    let mut styles = vec![];
     for (key, value, flag) in trio.as_ref() {
         if *flag {
-            let value: Value = value.clone().into();
-            style_list.push(format!("{}:{};", key, value.to_string()));
+            styles.push(Style::new(*key, Into::<Value>::into(value.clone())));
         }
     }
-    style(style_list.join(""))
+    Attribute::from_styles(styles)
 }
 
 /// ```ignore
@@ -156,9 +163,5 @@ pub fn inner_html<V, MSG>(inner_html: V) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
 {
-    Attribute {
-        name: "inner_html",
-        value: AttribValue::FuncCall(inner_html.into()),
-        namespace: None,
-    }
+    Attribute::function_call("inner_html", inner_html.into())
 }

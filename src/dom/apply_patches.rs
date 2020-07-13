@@ -246,22 +246,28 @@ where
             for attr in attributes.iter() {
                 // attr "" is used in checked = false, since checked attribute is only unchecked
                 // when there is no checked attribute
-                if !attr.name.is_empty() {
+                if !attr.name().is_empty() {
                     // NOTE: set_attribute('value',..) is not enough
                     // value need to explicitly call the set_value in order for the
                     // actual value gets reflected.
                     //
                     // TODO: centrarlize this with set_attributes in created_node
-                    match attr.name {
+                    match *attr.name() {
                         "value" => {
+                            let string_value =
+                                if let Some(value) = attr.get_value() {
+                                    value.to_string()
+                                } else {
+                                    String::new()
+                                };
                             if let Some(input) =
                                 node.dyn_ref::<HtmlInputElement>()
                             {
-                                input.set_value(&attr.value.to_string());
+                                input.set_value(&string_value);
                             } else if let Some(textarea) =
                                 node.dyn_ref::<HtmlTextAreaElement>()
                             {
-                                textarea.set_value(&attr.value.to_string());
+                                textarea.set_value(&string_value);
                             }
                         }
                         "checked" => {
@@ -278,13 +284,21 @@ where
                         }
                         "inner_html" => {
                             if let Some(element) = node.dyn_ref::<Element>() {
-                                element.set_inner_html(&attr.value.to_string());
+                                element.set_inner_html(
+                                    &attr
+                                        .get_function_call_value()
+                                        .map(|v| v.to_string())
+                                        .unwrap_or(String::new()),
+                                );
                             }
                         }
                         _ => {
                             node.set_attribute(
-                                attr.name,
-                                &attr.value.to_string(),
+                                attr.name(),
+                                &attr
+                                    .get_value()
+                                    .map(|v| v.to_string())
+                                    .unwrap_or(String::new()),
                             )?;
                         }
                     }
@@ -311,13 +325,15 @@ where
                     let closure_wrap: Closure<dyn FnMut(Event)> =
                         create_closure_wrap(program, callback);
                     let func: &Function = closure_wrap.as_ref().unchecked_ref();
-                    node.add_event_listener_with_callback(event.name, func)?;
+                    node.add_event_listener_with_callback(event.name(), func)?;
                     let node_id = *node_idx as u32;
                     if let Some(closure) = active_closures.get_mut(&node_id) {
-                        closure.push((event.name, closure_wrap));
+                        closure.push((event.name(), closure_wrap));
                     } else {
-                        active_closures
-                            .insert(node_id, vec![(event.name, closure_wrap)]);
+                        active_closures.insert(
+                            node_id,
+                            vec![(event.name(), closure_wrap)],
+                        );
                     }
                 }
             }

@@ -132,25 +132,36 @@ impl<T> CreatedNode<T> {
         velem.attributes().iter().for_each(|attr| {
             // attr "" is used in checked = false, since checked attribute is only unchecked
             // when there is no checked attribute
-            if !attr.name.is_empty() {
-                if let Some(ref namespace) = attr.namespace {
+            if !attr.name().is_empty() {
+                if let Some(ref namespace) = attr.namespace() {
                     element
                         .set_attribute_ns(
                             Some(namespace),
-                            attr.name,
-                            &attr.value.to_string(),
+                            attr.name(),
+                            &attr
+                                .get_value()
+                                .map(|v| v.to_string())
+                                .unwrap_or(String::new()),
                         )
                         .expect("Set element attribute_ns in create element");
                 } else {
-                    match attr.name {
+                    match *attr.name() {
                         "inner_html" => {
-                            element.set_inner_html(&attr.value.to_string())
+                            element.set_inner_html(
+                                &attr
+                                    .get_value()
+                                    .map(|v| v.to_string())
+                                    .unwrap_or(String::new()),
+                            )
                         }
                         _ => {
                             element
                                 .set_attribute(
-                                    attr.name,
-                                    &attr.value.to_string(),
+                                    attr.name(),
+                                    &attr
+                                        .get_value()
+                                        .map(|v| v.to_string())
+                                        .unwrap_or(String::new()),
                                 )
                                 .expect(
                                     "Set element attribute in create element",
@@ -174,7 +185,7 @@ impl<T> CreatedNode<T> {
 
             if let Some(program) = program {
                 for event_attr in velem.events().iter() {
-                    let event_str = event_attr.name;
+                    let event_str = event_attr.name();
                     let callback = event_attr
                         .get_callback()
                         .expect("expecting a callback");

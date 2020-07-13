@@ -1,9 +1,6 @@
 //! provides utility function for building virtual nodes and attributes
 use crate::{
-    vnode::{
-        AttribValue,
-        Attribute,
-    },
+    vnode::Attribute,
     Callback,
     Element,
     Node,
@@ -102,11 +99,7 @@ where
     V: Into<Value>,
     ATT: Clone,
 {
-    Attribute {
-        name,
-        value: AttribValue::Value(v.into()),
-        namespace,
-    }
+    Attribute::with_namespace(name, v.into(), namespace)
 }
 
 /// Creates a callback object from the function closure
@@ -122,11 +115,7 @@ where
     C: Into<Callback<EVENT, MSG>>,
     ATT: Clone,
 {
-    Attribute {
-        name,
-        value: AttribValue::Callback(c.into()),
-        namespace: None,
-    }
+    Attribute::from_callback(name, c.into())
 }
 
 /// Create an callback event which has a function
@@ -146,9 +135,5 @@ where
 {
     let cb: Callback<EVENT, UDEF> = Callback::from(webevent_to_user_def);
     let cb2: Callback<EVENT, MSG> = cb.map(user_def_to_msg);
-    Attribute {
-        name,
-        value: AttribValue::Callback(cb2),
-        namespace: None,
-    }
+    Attribute::from_callback(name, cb2)
 }

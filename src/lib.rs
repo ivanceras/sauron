@@ -286,3 +286,6 @@ pub type Patch<'a, MSG> =
 
 /// Attribute type used in sauron where the type of the Attribute name is &'static str
 pub type Attribute<MSG> = sauron_vdom::Attribute<&'static str, Event, MSG>;
+
+/// Style with statis str as the style name
+pub type Style = sauron_vdom::Style<&'static str>;

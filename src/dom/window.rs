@@ -30,7 +30,7 @@ impl Window {
                 .expect("unable to cast window to event target");
 
             for event_attr in event_listeners.iter() {
-                let event_str = event_attr.name;
+                let event_str = event_attr.name();
                 let callback =
                     event_attr.get_callback().expect("expecting a callback");
 

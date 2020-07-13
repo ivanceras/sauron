@@ -12,12 +12,12 @@ pub use event::Event;
 pub use value::Value;
 
 pub use attribute::{
-    AttribValue,
     Attribute,
+    Style,
 };
 pub use element::Element;
 
-mod attribute;
+pub mod attribute;
 mod element;
 
 /// This is the core data structure of the library.
@@ -146,6 +146,16 @@ where
             elm.add_attributes(attributes);
         }
         self
+    }
+
+    /// remove the existing attributes and set with the new value
+    pub fn set_attributes_ref_mut(
+        &mut self,
+        attributes: Vec<Attribute<ATT, EVENT, MSG>>,
+    ) {
+        if let Some(elm) = self.as_element_mut() {
+            elm.set_attributes(attributes);
+        }
     }
 
     /// add attributes using a mutable reference to self

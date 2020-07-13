@@ -100,9 +100,10 @@ impl Component<Msg> for Clock {
                     [text!("code")]
                 ),
                 div!(
-                    [style(
-                        "display: flex; align-items: center; flex-direction: column;"
-                    )],
+                    [style("display","flex"),
+                     style("align-items", "center"),
+                     style("flex-direction", "column"),
+                    ],
                     [svg!(
                         [width(400), height(400), viewBox([0, 0, 200, 200])],
                         [
