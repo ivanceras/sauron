@@ -12,15 +12,14 @@ crate-type = ["cdylib"]
 sauron = {path = "../../"}
 console_error_panic_hook = { version = "0.1", optional = true }
 js-sys = "0.3"
-wee_alloc = { version = "0.4.3", optional = true }
-log = "0.4.8"
-console_log = "0.1.2"
-restq = "0.1.0"
-thiserror = "1.0.9"
+wee_alloc = { version = "0.4", optional = true }
+log = "0.4"
+console_log = "0.1"
+restq = "0.1"
+thiserror = "1.0"
 
 [dependencies.wasm-bindgen]
-version = "0.2.33"
-features = ["default", "nightly"]
+version = "0.2"
 
 [dependencies.web-sys]
 version = "0.3"
