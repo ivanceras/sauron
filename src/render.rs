@@ -3,6 +3,7 @@
 //!
 use crate::{
     html::attributes::AttributeValue,
+    Attribute,
     Element,
     Node,
 };
@@ -94,4 +95,27 @@ fn render_attribute_values<MSG>(
         first = false;
     }
     Ok(())
+}
+
+impl<MSG> Render for Attribute<MSG> {
+    fn render(
+        &self,
+        buffer: &mut dyn fmt::Write,
+        _indent: usize,
+    ) -> fmt::Result {
+        match self.value() {
+            AttributeValue::Simple(simple) => {
+                write!(buffer, "{}=\"{}\"", self.name(), simple.to_string())?;
+            }
+            AttributeValue::Style(styles_att) => {
+                write!(buffer, "style=\"")?;
+                for s_att in styles_att {
+                    write!(buffer, "{};", s_att)?;
+                }
+                write!(buffer, "\"")?;
+            }
+            _ => (),
+        }
+        Ok(())
+    }
 }

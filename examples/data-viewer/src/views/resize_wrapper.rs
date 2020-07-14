@@ -65,16 +65,10 @@ impl Component<Msg> for ResizeWrapper {
     fn init(&self) -> Cmd<Self, Msg> {
         let mut cmds = vec![Window::add_event_listeners(vec![
             on_mouseup(|event| {
-                Msg::EndResize(
-                    event.coordinate.client_x,
-                    event.coordinate.client_y,
-                )
+                Msg::EndResize(event.client_x(), event.client_y())
             }),
             on_mousemove(|event| {
-                Msg::MouseMove(
-                    event.coordinate.client_x,
-                    event.coordinate.client_y,
-                )
+                Msg::MouseMove(event.client_x(), event.client_y())
             }),
         ])];
         cmds.push(DataView::init());
@@ -139,8 +133,8 @@ impl Component<Msg> for ResizeWrapper {
                         on_mousedown(|event| {
                             Msg::StartResize(
                                 Grip::Right,
-                                event.coordinate.client_x,
-                                event.coordinate.client_y,
+                                event.client_x(),
+                                event.client_y(),
                             )
                         }),
                     ],
@@ -154,8 +148,8 @@ impl Component<Msg> for ResizeWrapper {
                         on_mousedown(|event| {
                             Msg::StartResize(
                                 Grip::Bottom,
-                                event.coordinate.client_x,
-                                event.coordinate.client_y,
+                                event.client_x(),
+                                event.client_y(),
                             )
                         }),
                     ],
@@ -169,8 +163,8 @@ impl Component<Msg> for ResizeWrapper {
                         on_mousedown(|event| {
                             Msg::StartResize(
                                 Grip::BottomRight,
-                                event.coordinate.client_x,
-                                event.coordinate.client_y,
+                                event.client_x(),
+                                event.client_y(),
                             )
                         }),
                     ],
