@@ -144,15 +144,28 @@ impl<T> CreatedNode<T> {
                         }
                     }
                     _ => {
-                        element
-                            .set_attribute_ns(
-                                attr.namespace().map(|s| *s),
+                        if let Some(ref namespace) = attr.namespace() {
+                            // Warning NOTE: set_attribute_ns should only be called
+                            // when you meant to use a namespace
+                            // using this with None will error in the browser with:
+                            // NamespaceError: An attempt was made to create or change an object in a way which is incorrect with regard to namespaces
+                            element
+                                .set_attribute_ns(
+                                    Some(namespace),
+                                    attr.name(),
+                                    &simple.to_string()
+                                )
+                                .expect("Set element attribute_ns in create element");
+                        } else {
+                            element
+                            .set_attribute(
                                 attr.name(),
                                 &simple.to_string(),
                             )
                             .expect(
                                 "Set element attribute_ns in create element",
                             );
+                        }
                     }
                 }
             }

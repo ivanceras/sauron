@@ -1,9 +1,10 @@
 use sauron::{
+    dom::events::KeyboardEvent,
     html::{
         attributes::*,
-        events::*,
         *,
     },
+    prelude::*,
     Cmd,
     Component,
     Node,
@@ -117,7 +118,7 @@ impl Component<Msg> for Model {
                                         class("toggle-all"),
                                         r#type("checkbox"),
                                         checked(self.is_all_completed()),
-                                        onclick(|_| Msg::ToggleAll),
+                                        on_click(|_| Msg::ToggleAll),
                                     ],
                                     vec![],
                                 ),
@@ -158,7 +159,7 @@ impl Component<Msg> for Model {
                                 button(
                                     vec![
                                         class("clear-completed"),
-                                        onclick(|_| Msg::ClearCompleted),
+                                        on_click(|_| Msg::ClearCompleted),
                                     ],
                                     vec![text(format!(
                                         "Clear completed ({})",
@@ -219,7 +220,7 @@ impl Model {
                         "not-selected"
                     }),
                     href(flt.to_string()),
-                    onclick(move |_| Msg::SetFilter(flt.clone())),
+                    on_click(move |_| Msg::SetFilter(flt.clone())),
                 ],
                 vec![text(filter.to_string())],
             )],
@@ -233,9 +234,9 @@ impl Model {
                 id("new-todo"),
                 placeholder("What needs to be done?"),
                 value(self.value.to_string()),
-                oninput(|v: InputEvent| Msg::Update(v.value.to_string())),
-                onkeypress(|event: KeyEvent| {
-                    if event.key == "Enter" {
+                on_input(|v: InputEvent| Msg::Update(v.value.to_string())),
+                on_keypress(|event: KeyboardEvent| {
+                    if event.key() == "Enter" {
                         Msg::Add
                     } else {
                         Msg::Nope
@@ -266,18 +267,18 @@ fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
                             class("toggle"),
                             r#type("checkbox"),
                             checked(entry.completed),
-                            onclick(move |_| Msg::Toggle(idx)),
+                            on_click(move |_| Msg::Toggle(idx)),
                         ],
                         vec![],
                     ),
                     label(
-                        vec![ondoubleclick(move |_| Msg::ToggleEdit(idx))],
+                        vec![on_doubleclick(move |_| Msg::ToggleEdit(idx))],
                         vec![text(format!("{}", entry.description))],
                     ),
                     button(
                         vec![
                             class("destroy"),
-                            onclick(move |_| Msg::Remove(idx)),
+                            on_click(move |_| Msg::Remove(idx)),
                         ],
                         vec![],
                     ),
@@ -295,12 +296,12 @@ fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
                 class("edit"),
                 r#type("text"),
                 value(&entry.description),
-                oninput(|input: InputEvent| {
+                on_input(|input: InputEvent| {
                     Msg::UpdateEdit(input.value.to_string())
                 }),
-                onblur(move |_| Msg::Edit(idx)),
-                onkeypress(move |event: KeyEvent| {
-                    if event.key == "Enter" {
+                on_blur(move |_| Msg::Edit(idx)),
+                on_keypress(move |event: KeyboardEvent| {
+                    if event.key() == "Enter" {
                         Msg::Edit(idx)
                     } else {
                         Msg::Nope

@@ -130,5 +130,6 @@ impl Component<Msg> for Window {
 
 #[wasm_bindgen(start)]
 pub fn main() {
+    console_error_panic_hook::set_once();
     Program::mount_to_body(Window::new());
 }

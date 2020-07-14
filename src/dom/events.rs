@@ -9,9 +9,12 @@ use crate::{
 use wasm_bindgen::JsCast;
 use web_sys::{
     EventTarget,
-    HashChangeEvent,
     HtmlInputElement,
     HtmlTextAreaElement,
+};
+
+pub use web_sys::{
+    HashChangeEvent,
     KeyboardEvent,
     MouseEvent,
 };

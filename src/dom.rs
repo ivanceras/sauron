@@ -8,7 +8,7 @@ mod component;
 mod created_node;
 mod dispatch;
 mod dom_updater;
-mod events;
+pub mod events;
 mod http;
 mod program;
 pub mod test_fixtures;
