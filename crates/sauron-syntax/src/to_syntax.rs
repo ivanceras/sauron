@@ -141,8 +141,9 @@ impl<MSG: 'static> ToSyntax for Element<MSG> {
                 write!(buffer, ",")?;
             }
         }
-        // do not make a new line it if is only a text child node or it has no child nodes
-        if !(is_first_child_text_node || children.is_empty()) {
+        // only make a new line if the child is not a text child node and if there are more than 1
+        // child
+        if !is_first_child_text_node && !children.is_empty() {
             write!(buffer, "\n{}", "    ".repeat(indent))?;
         }
         write!(buffer, "])")?;
