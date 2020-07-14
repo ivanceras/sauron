@@ -7,7 +7,6 @@ use crate::{
             CreatedNode,
         },
     },
-    prelude::AttributeValue,
     Dispatch,
     Patch,
 };
@@ -22,8 +21,6 @@ use wasm_bindgen::{
 };
 use web_sys::{
     Element,
-    HtmlInputElement,
-    HtmlTextAreaElement,
     Node,
     Text,
 };
@@ -238,72 +235,16 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    let active_closures = ActiveClosure::new();
+    let mut active_closures = ActiveClosure::new();
     match patch {
         Patch::AddAttributes(_tag, _node_idx, attributes) => {
             for attr in attributes.iter() {
-                // attr "" is used in checked = false, since checked attribute is only unchecked
-                // when there is no checked attribute
-                if !attr.name().is_empty() {
-                    // NOTE: set_attribute('value',..) is not enough
-                    // value need to explicitly call the set_value in order for the
-                    // actual value gets reflected.
-                    //
-                    // TODO: centrarlize this with set_attributes in created_node
-                    match *attr.name() {
-                        "value" => {
-                            let string_value = match attr.value() {
-                                AttributeValue::Simple(value) => {
-                                    value.to_string()
-                                }
-                                _ => String::new(),
-                            };
-                            if let Some(input) =
-                                node.dyn_ref::<HtmlInputElement>()
-                            {
-                                input.set_value(&string_value);
-                            } else if let Some(textarea) =
-                                node.dyn_ref::<HtmlTextAreaElement>()
-                            {
-                                textarea.set_value(&string_value);
-                            }
-                        }
-                        "checked" => {
-                            if let Some(input) =
-                                node.dyn_ref::<HtmlInputElement>()
-                            {
-                                let checked = attr
-                                    .value()
-                                    .get_simple()
-                                    .map(|v| v.as_bool())
-                                    .flatten()
-                                    .unwrap_or(false);
-                                input.set_checked(checked);
-                            }
-                        }
-                        "inner_html" => {
-                            if let Some(element) = node.dyn_ref::<Element>() {
-                                element.set_inner_html(
-                                    &attr
-                                        .value()
-                                        .get_function_call_value()
-                                        .map(|v| v.to_string())
-                                        .unwrap_or(String::new()),
-                                );
-                            }
-                        }
-                        _ => {
-                            node.set_attribute(
-                                attr.name(),
-                                &attr
-                                    .value()
-                                    .get_simple()
-                                    .map(|v| v.to_string())
-                                    .unwrap_or(String::new()),
-                            )?;
-                        }
-                    }
-                }
+                CreatedNode::<Node>::set_element_attribute(
+                    program,
+                    &mut active_closures,
+                    node,
+                    attr,
+                )
             }
 
             Ok(active_closures)
