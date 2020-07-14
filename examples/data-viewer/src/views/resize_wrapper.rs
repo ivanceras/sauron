@@ -64,13 +64,13 @@ impl Component<Msg> for ResizeWrapper {
     /// not being triggered
     fn init(&self) -> Cmd<Self, Msg> {
         let mut cmds = vec![Window::add_event_listeners(vec![
-            onmouseup(|event| {
+            on_mouseup(|event| {
                 Msg::EndResize(
                     event.coordinate.client_x,
                     event.coordinate.client_y,
                 )
             }),
-            onmousemove(|event| {
+            on_mousemove(|event| {
                 Msg::MouseMove(
                     event.coordinate.client_x,
                     event.coordinate.client_y,
@@ -136,7 +136,7 @@ impl Component<Msg> for ResizeWrapper {
                         class(
                             "resize_wrapper__resize_grip resize_wrapper__resize_grip--right",
                         ),
-                        onmousedown(|event| {
+                        on_mousedown(|event| {
                             Msg::StartResize(
                                 Grip::Right,
                                 event.coordinate.client_x,
@@ -151,7 +151,7 @@ impl Component<Msg> for ResizeWrapper {
                         class(
                             "resize_wrapper__resize_grip resize_wrapper__resize_grip--bottom",
                         ),
-                        onmousedown(|event| {
+                        on_mousedown(|event| {
                             Msg::StartResize(
                                 Grip::Bottom,
                                 event.coordinate.client_x,
@@ -166,7 +166,7 @@ impl Component<Msg> for ResizeWrapper {
                         class(
                             "resize_wrapper__resize_grip resize_wrapper__resize_grip--bottom_right",
                         ),
-                        onmousedown(|event| {
+                        on_mousedown(|event| {
                             Msg::StartResize(
                                 Grip::BottomRight,
                                 event.coordinate.client_x,

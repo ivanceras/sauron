@@ -31,6 +31,24 @@ where
         })),
     )
 }
+/// attach callback to the scroll event
+pub fn on_scroll<F, MSG>(f: F) -> Attribute<MSG>
+where
+    F: Fn((i32, i32)) -> MSG + 'static,
+    MSG: 'static,
+{
+    mt_dom::attr(
+        "scroll",
+        AttributeValue::from_callback(Callback::from(move |event: Event| {
+            let target = event.target().expect("can't get target");
+            let element: &web_sys::Element =
+                target.dyn_ref().expect("Cant cast to Element");
+            let scroll_top = element.scroll_top();
+            let scroll_left = element.scroll_left();
+            f((scroll_top, scroll_left))
+        })),
+    )
+}
 
 macro_rules! declare_events {
 

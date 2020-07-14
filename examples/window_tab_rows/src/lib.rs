@@ -88,7 +88,7 @@ impl Component<Msg> for Window {
             vec![class("window")],
             vec![
                 button(
-                    vec![onclick(|_| Msg::WindowClick)],
+                    vec![on_click(|_| Msg::WindowClick)],
                     vec![text(format!(
                         "Total window activities: {}",
                         self.window_activities
@@ -104,7 +104,7 @@ impl Component<Msg> for Window {
                                 vec![
                                     class("tablink"),
                                     styles([("background-color", &tab.color)]),
-                                    onclick(move |_| Msg::ActivateTab(index)),
+                                    on_click(move |_| Msg::ActivateTab(index)),
                                 ],
                                 vec![text(&tab.name)],
                             )

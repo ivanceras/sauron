@@ -4,7 +4,7 @@ macro_rules! style {
     (
         $($name:tt => $value:expr;)*
     ) => {
-        $crate::html::attributes::styles_values([$((stringify!($name).trim_matches('"'), Into::<$crate::Value>::into($value))),*])
+        $crate::html::attributes::styles_values([$((stringify!($name).trim_matches('"'), Into::<$crate::html::attributes::Value>::into($value))),*])
     };
 
 }

@@ -4,8 +4,6 @@ use crate::{
     Node,
 };
 pub use mt_dom::{
-    attr,
-    attr_ns,
     element,
     element_ns,
     text,
@@ -15,6 +13,8 @@ pub use mt_dom::{
 pub mod attributes;
 pub mod tags;
 pub mod units;
+
+pub use crate::dom::events;
 
 pub use tags::commons::*;
 

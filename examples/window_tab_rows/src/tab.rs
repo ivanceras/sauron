@@ -77,7 +77,7 @@ impl Component<Msg> for Tab {
             ],
             vec![
                 button(
-                    vec![onclick(|_| Msg::TabClick)],
+                    vec![on_click(|_| Msg::TabClick)],
                     vec![text(format!(
                         "{} is clicked for {} times",
                         self.name, self.tab_clicks

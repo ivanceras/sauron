@@ -55,7 +55,7 @@ impl Component<Msg> for Row {
 
     fn view(&self) -> Node<Msg> {
         div(
-            vec![class("row"), onclick(|_| Msg::RowClick)],
+            vec![class("row"), on_click(|_| Msg::RowClick)],
             vec![
                 text(&self.row_name),
                 input(vec![class("row-selector"), r#type("checkbox")], vec![]),

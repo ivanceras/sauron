@@ -127,16 +127,16 @@ impl DataView {
     pub fn init() -> Cmd<crate::App, crate::AppMsg> {
         debug!("Init in  data view for column resize");
         Window::add_event_listeners(vec![
-            onmouseup(|event| {
+            on_mouseup(|event| {
                 crate::AppMsg::DataViewMsg(Msg::ColumnEndResize(
-                    event.coordinate.client_x,
-                    event.coordinate.client_y,
+                    event.client_x(),
+                    event.client_y(),
                 ))
             }),
-            onmousemove(|event| {
+            on_mousemove(|event| {
                 crate::AppMsg::DataViewMsg(Msg::MouseMove(
-                    event.coordinate.client_x,
-                    event.coordinate.client_y,
+                    event.client_x(),
+                    event.client_y(),
                 ))
             }),
         ])
@@ -393,7 +393,7 @@ impl DataView {
                     vec![
                         class("column_view__grip column_view__grip--right"),
                         styles([("width", px(ColumnView::grip_width()))]),
-                        onmousedown(move |event| {
+                        on_mousedown(move |event| {
                             Msg::ColumnStartResize(
                                 index,
                                 Grip::Right,
@@ -453,7 +453,7 @@ impl DataView {
                     ("width", px(self.calculate_normal_rows_width())),
                     ("height", px(self.calculate_normal_rows_height())),
                 ]),
-                onscroll(Msg::Scrolled),
+                on_scroll(Msg::Scrolled),
             ],
             self.page_views
                 .iter()
