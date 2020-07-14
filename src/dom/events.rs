@@ -19,17 +19,20 @@ pub use web_sys::{
     MouseEvent,
 };
 
+/// an event builder
+pub fn on<F, MSG>(event_name: &'static str, f: F) -> Attribute<MSG>
+where
+    F: Fn(Event) -> MSG + 'static,
+{
+    mt_dom::attr(event_name, AttributeValue::from_callback(Callback::from(f)))
+}
+
 /// on click event
 pub fn on_click<F, MSG>(f: F) -> Attribute<MSG>
 where
     F: Fn(MouseEvent) -> MSG + 'static,
 {
-    mt_dom::attr(
-        "click",
-        AttributeValue::from_callback(Callback::from(move |event: Event| {
-            f(to_mouse_event(event))
-        })),
-    )
+    on("click", move |event: Event| f(to_mouse_event(event)))
 }
 /// attach callback to the scroll event
 pub fn on_scroll<F, MSG>(f: F) -> Attribute<MSG>
@@ -37,17 +40,14 @@ where
     F: Fn((i32, i32)) -> MSG + 'static,
     MSG: 'static,
 {
-    mt_dom::attr(
-        "scroll",
-        AttributeValue::from_callback(Callback::from(move |event: Event| {
-            let target = event.target().expect("can't get target");
-            let element: &web_sys::Element =
-                target.dyn_ref().expect("Cant cast to Element");
-            let scroll_top = element.scroll_top();
-            let scroll_left = element.scroll_left();
-            f((scroll_top, scroll_left))
-        })),
-    )
+    on("scroll", move |event: Event| {
+        let target = event.target().expect("can't get target");
+        let element: &web_sys::Element =
+            target.dyn_ref().expect("Cant cast to Element");
+        let scroll_top = element.scroll_top();
+        let scroll_left = element.scroll_left();
+        f((scroll_top, scroll_left))
+    })
 }
 
 macro_rules! declare_events {
@@ -66,9 +66,9 @@ macro_rules! declare_events {
                     where CB: Fn($ret) -> MSG + 'static,
                           MSG: 'static,
                     {
-                        mt_dom::attr(stringify!($event), AttributeValue::from_callback(Callback::from(move|event:Event|{
+                        on(stringify!($event), move|event:Event|{
                             cb($mapper(event))
-                        })))
+                        })
                 }
             }
          )*

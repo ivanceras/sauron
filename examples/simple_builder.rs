@@ -1,5 +1,6 @@
 #![deny(warnings)]
 use sauron::{
+    diff,
     html::{
         attributes::*,
         events::*,
@@ -7,14 +8,13 @@ use sauron::{
     },
     Node,
 };
-use sauron_vdom::diff;
 
 fn main() {
     let old: Node<()> = div(
         vec![
             class("some-class"),
             id("some-id"),
-            onclick(|_| {
+            on_click(|_| {
                 println!("clicked");
             }),
             attr("data-id", 1),
@@ -28,7 +28,7 @@ fn main() {
         vec![
             class("some-class2"),
             id("some-id2"),
-            onclick(|_| {
+            on_click(|_| {
                 println!("clicked2");
             }),
             attr("data-id", 2),
@@ -38,8 +38,8 @@ fn main() {
         ],
         vec![input(vec![class("client"), r#type("checkbox")], vec![])],
     );
-    println!("{}", old);
-    println!("{}", new);
+    println!("{:#?}", old);
+    println!("{:#?}", new);
     let patches = diff(&old, &new);
     println!("patches: {:#?}", patches);
 }
