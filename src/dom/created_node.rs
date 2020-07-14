@@ -311,8 +311,7 @@ where
         // - calling event.prevent_default() prevent InputEvent to trigger when KeyPressEvent is
         // also one of the event callback
         // event.prevent_default();
-        let cb_event = crate::DomEvent(event);
-        let msg = callback_clone.emit(cb_event);
+        let msg = callback_clone.emit(event);
         program_clone.dispatch(msg);
     }))
 }

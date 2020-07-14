@@ -189,42 +189,14 @@
 //!
 #[macro_use]
 extern crate doc_comment;
-use cfg_if::cfg_if;
 
+use cfg_if::cfg_if;
 cfg_if! {if #[cfg(feature = "with-dom")] {
     pub mod dom;
     pub use dom::*;
-
-    use wasm_bindgen::{
-        JsCast,
-        JsValue,
-    };
-
-    /// This needs wrapping only so that we can implement
-    /// PartialEq for testing purposes
-    #[derive(Clone, Debug)]
-    pub struct DomEvent(pub web_sys::Event);
-
-    impl std::ops::Deref for crate::Event {
-        type Target = web_sys::Event;
-
-        fn deref(&self) -> &Self::Target {
-            &self.0
-        }
-    }
-
-    impl PartialEq for crate::Event {
-        fn eq(&self, other: &Self) -> bool {
-            let js_value: Option<&JsValue> = self.0.dyn_ref();
-            let other_value: Option<&JsValue> = other.0.dyn_ref();
-            js_value == other_value
-        }
-    }
+    /// Map the Event to DomEvent, which are browser events
+    pub type Event = web_sys::Event;
 }}
-
-#[cfg(feature = "with-dom")]
-/// Map the Event to DomEvent, which are browser events
-pub type Event = DomEvent;
 
 #[cfg(not(feature = "with-dom"))]
 pub type Event = ();
@@ -247,6 +219,7 @@ pub mod prelude {
     pub use crate::{
         html::{
             attributes::*,
+            events::*,
             tags::{
                 commons::*,
                 *,

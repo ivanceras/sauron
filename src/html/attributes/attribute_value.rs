@@ -1,8 +1,10 @@
-use crate::prelude::{
-    Callback,
+use crate::{
+    prelude::{
+        Callback,
+        Style,
+        Value,
+    },
     Event,
-    Style,
-    Value,
 };
 
 /// Values of an attribute can be in these variants
@@ -44,6 +46,11 @@ impl<MSG> AttributeValue<MSG> {
     /// create an attribute value from simple value
     pub fn from_value(value: Value) -> Self {
         AttributeValue::Simple(value)
+    }
+
+    /// create an attribute value from callback
+    pub fn from_callback(cb: Callback<Event, MSG>) -> Self {
+        AttributeValue::Callback(cb)
     }
 
     /// create an attribute from a function `name` with arguments `value`
