@@ -13,6 +13,5 @@ keywords = ["svg", "html", "parser"]
 
 [dependencies]
 sauron = { path = "../../", version = "0.26.0" }
-sauron_vdom = { path ="../sauron_vdom", version = "0.26.0"}
 sauron-parse = { path = "../sauron-parse", version = "0.1.0" }
 log = "0.4.8"

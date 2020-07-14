@@ -9,6 +9,7 @@ use pulldown_cmark::{
 use sauron::{
     html::{
         attributes::{
+            attr,
             checked,
             class,
             href,
@@ -102,10 +103,10 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                     }
                     Tag::Table(aligns) => {
                         if let Some(element) = top.as_element_mut() {
-                            for r in element.children.iter_mut() {
+                            for r in element.children_mut() {
                                 if let Some(r) = r.as_element_mut() {
                                     for (i, c) in
-                                        r.children.iter_mut().enumerate()
+                                        r.children_mut().iter_mut().enumerate()
                                     {
                                         if let Some(tag) = c.as_element_mut() {
                                             match aligns[i] {
@@ -134,9 +135,9 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                     }
                     Tag::TableHead => {
                         if let Some(element) = top.as_element_mut() {
-                            for c in element.children.iter_mut() {
+                            for c in element.children_mut() {
                                 if let Some(tag) = c.as_element_mut() {
-                                    tag.tag = "th";
+                                    tag.set_tag("th");
                                     tag.add_attributes(vec![attr(
                                         "scope", "col",
                                     )]);

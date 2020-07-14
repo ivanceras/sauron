@@ -1,5 +1,4 @@
 use sauron::prelude::*;
-use sauron_vdom::Text;
 use std::{
     fmt,
     fmt::Write,
@@ -24,22 +23,11 @@ impl<MSG: 'static> ToSyntax for Node<MSG> {
         indent: usize,
     ) -> fmt::Result {
         match self {
-            Node::Text(text) => text.to_syntax(buffer, use_macros, indent),
+            Node::Text(text) => write!(buffer, "text(\"{}\")", text),
             Node::Element(element) => {
                 element.to_syntax(buffer, use_macros, indent)
             }
         }
-    }
-}
-
-impl ToSyntax for Text {
-    fn to_syntax(
-        &self,
-        buffer: &mut dyn Write,
-        _use_macros: bool,
-        _indent: usize,
-    ) -> fmt::Result {
-        write!(buffer, "text(\"{}\")", self)
     }
 }
 
@@ -50,36 +38,41 @@ impl<MSG: 'static> ToSyntax for Attribute<MSG> {
         use_macros: bool,
         indent: usize,
     ) -> fmt::Result {
-        if let Some(style_att) = self.get_styles() {
-            write!(buffer, "style(\"")?;
-            for s_att in style_att {
-                write!(buffer, "{};", s_att)?;
-            }
-            write!(buffer, "\"),")?;
-        } else if let Some(_ns) = self.namespace() {
-            if let Some(value) = self.get_value() {
-                write!(buffer, "xlink_{}", self.name().to_string(),)?;
-                write!(buffer, "(")?;
-                value.to_syntax(buffer, use_macros, indent)?;
-                write!(buffer, ")")?;
-            }
-        } else {
-            let matched_attribute_func =
-                sauron_parse::match_attribute_function(&self.name()).is_some();
-            if matched_attribute_func {
-                if let Some(value) = self.get_value() {
-                    write!(buffer, "{}", self.name().to_string(),)?;
+        match self.value() {
+            AttributeValue::Simple(simple) => {
+                if let Some(_ns) = self.namespace() {
+                    write!(buffer, "xlink_{}", self.name().to_string(),)?;
                     write!(buffer, "(")?;
-                    value.to_syntax(buffer, use_macros, indent)?;
+                    simple.to_syntax(buffer, use_macros, indent)?;
                     write!(buffer, ")")?;
-                }
-            } else {
-                if let Some(value) = self.get_value() {
-                    write!(buffer, r#"attr("{}","#, self.name().to_string(),)?;
-                    value.to_syntax(buffer, use_macros, indent)?;
-                    write!(buffer, ")")?;
+                } else {
+                    let matched_attribute_func =
+                        sauron_parse::match_attribute_function(&self.name())
+                            .is_some();
+                    if matched_attribute_func {
+                        write!(buffer, "{}", self.name().to_string(),)?;
+                        write!(buffer, "(")?;
+                        simple.to_syntax(buffer, use_macros, indent)?;
+                        write!(buffer, ")")?;
+                    } else {
+                        write!(
+                            buffer,
+                            r#"attr("{}","#,
+                            self.name().to_string(),
+                        )?;
+                        simple.to_syntax(buffer, use_macros, indent)?;
+                        write!(buffer, ")")?;
+                    }
                 }
             }
+            AttributeValue::Style(styles_att) => {
+                write!(buffer, "style(\"")?;
+                for s_att in styles_att {
+                    write!(buffer, "{};", s_att)?;
+                }
+                write!(buffer, "\")")?;
+            }
+            _ => (),
         }
         Ok(())
     }
@@ -114,21 +107,18 @@ impl<MSG: 'static> ToSyntax for Element<MSG> {
         indent: usize,
     ) -> fmt::Result {
         if use_macros {
-            write!(buffer, "{}!(", self.tag.to_string())?;
+            write!(buffer, "{}!(", self.tag())?;
         } else {
-            write!(buffer, "{}(", self.tag.to_string())?;
+            write!(buffer, "{}(", self.tag())?;
         }
         if use_macros {
             write!(buffer, "[")?;
         } else {
             write!(buffer, "vec![")?;
         }
-        for attr in self.attributes().iter() {
+        for attr in self.get_attributes().iter() {
             attr.to_syntax(buffer, use_macros, indent)?;
             write!(buffer, ",")?;
-        }
-        if let Some(style_att) = self.aggregate_styles() {
-            style_att.to_syntax(buffer, use_macros, indent)?;
         }
         write!(buffer, "],")?;
         if use_macros {
@@ -136,20 +126,24 @@ impl<MSG: 'static> ToSyntax for Element<MSG> {
         } else {
             write!(buffer, "vec![")?;
         }
-        // do not indent if it is only text child node
-        if self.is_children_a_node_text() {
-            &self.children[0].to_syntax(buffer, use_macros, indent)?;
+        let children = self.get_children();
+        let first_child = children.get(0);
+        let is_first_child_text_node =
+            first_child.map(|node| node.is_text()).unwrap_or(false);
+
+        if children.len() == 1 && is_first_child_text_node {
+            first_child.unwrap().to_syntax(buffer, use_macros, indent)?;
         } else {
             // otherwise print all child nodes with each line and indented
-            for child in self.children.iter() {
-                write!(buffer, "\n{}", sauron_vdom::util::indent(indent + 1),)?;
+            for child in self.get_children() {
+                write!(buffer, "\n{}", "    ".repeat(indent + 1))?;
                 child.to_syntax(buffer, use_macros, indent + 1)?;
                 write!(buffer, ",")?;
             }
         }
         // do not make a new line it if is only a text child node or it has no child nodes
-        if !(self.is_children_a_node_text() || self.children.is_empty()) {
-            write!(buffer, "\n{}", sauron_vdom::util::indent(indent))?;
+        if !(is_first_child_text_node || children.is_empty()) {
+            write!(buffer, "\n{}", "    ".repeat(indent))?;
         }
         write!(buffer, "])")?;
         Ok(())

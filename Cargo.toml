@@ -87,7 +87,6 @@ harness = false
 
 [workspace]
 members = [
-    "crates/sauron_vdom",
     "crates/sauron-md",
     "crates/sauron-syntax",
     "crates/sauron-parse",
