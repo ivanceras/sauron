@@ -131,7 +131,10 @@ impl<MSG: 'static> ToSyntax for Element<MSG> {
         let is_first_child_text_node =
             first_child.map(|node| node.is_text()).unwrap_or(false);
 
-        if children.len() == 1 && is_first_child_text_node {
+        let is_lone_child_text_node =
+            children.len() == 1 && is_first_child_text_node;
+
+        if is_lone_child_text_node {
             first_child.unwrap().to_syntax(buffer, use_macros, indent)?;
         } else {
             // otherwise print all child nodes with each line and indented
@@ -143,7 +146,7 @@ impl<MSG: 'static> ToSyntax for Element<MSG> {
         }
         // only make a new line if the child is not a text child node and if there are more than 1
         // child
-        if !is_first_child_text_node && !children.is_empty() {
+        if !is_lone_child_text_node && !children.is_empty() {
             write!(buffer, "\n{}", "    ".repeat(indent))?;
         }
         write!(buffer, "])")?;

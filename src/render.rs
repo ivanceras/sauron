@@ -3,7 +3,6 @@
 //!
 use crate::{
     html::attributes::AttributeValue,
-    Attribute,
     Element,
     Node,
 };
@@ -50,8 +49,11 @@ impl<MSG> Render for Element<MSG> {
         let is_first_child_text_node =
             first_child.map(|node| node.is_text()).unwrap_or(false);
 
+        let is_lone_child_text_node =
+            children.len() == 1 && is_first_child_text_node;
+
         // do not indent if it is only text child node
-        if children.len() == 1 && is_first_child_text_node {
+        if is_lone_child_text_node {
             first_child.unwrap().render(buffer, indent)?;
         } else {
             // otherwise print all child nodes with each line and indented
@@ -61,7 +63,7 @@ impl<MSG> Render for Element<MSG> {
             }
         }
         // do not make a new line it if is only a text child node or it has no child nodes
-        if !is_first_child_text_node && !children.is_empty() {
+        if !is_lone_child_text_node && !children.is_empty() {
             write!(buffer, "\n{}", "    ".repeat(indent))?;
         }
         write!(buffer, "</{}>", self.tag())?;
@@ -92,27 +94,4 @@ fn render_attribute_values<MSG>(
         first = false;
     }
     Ok(())
-}
-
-impl<MSG> Render for Attribute<MSG> {
-    fn render(
-        &self,
-        buffer: &mut dyn fmt::Write,
-        _indent: usize,
-    ) -> fmt::Result {
-        match self.value() {
-            AttributeValue::Simple(simple) => {
-                write!(buffer, "{}=\"{}\"", self.name(), simple.to_string())?;
-            }
-            AttributeValue::Style(styles_att) => {
-                write!(buffer, "style=\"")?;
-                for s_att in styles_att {
-                    write!(buffer, "{};", s_att)?;
-                }
-                write!(buffer, "\"")?;
-            }
-            _ => (),
-        }
-        Ok(())
-    }
 }
