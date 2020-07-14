@@ -33,6 +33,7 @@ where
         (self.0)(value.into())
     }
 
+    /// TODO: rename to map_event
     /// Changes input type of the callback to another.
     /// Works like common `map` method but in an opposite direction.
     ///
@@ -49,6 +50,7 @@ where
         Callback::from(func_wrap)
     }
 
+    /// TODO: rename to map_msg
     /// Map the output of this callback to return a different type
     ///
     /// Apply `func` to the callback output
@@ -64,6 +66,7 @@ where
         Callback::from(func_wrap)
     }
 
+    /// TODO: rename to map_msg_with_callback
     /// map this callback using another callback such that
     /// MSG becomes MSG2
     pub fn map_callback<MSG2>(

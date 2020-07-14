@@ -218,8 +218,10 @@ pub use mt_dom;
 pub mod prelude {
     pub use crate::{
         html::{
-            attributes::*,
-            events::*,
+            attributes::{
+                attr,
+                *,
+            },
             tags::{
                 commons::*,
                 *,

@@ -13,8 +13,6 @@ pub use mt_dom::{
 
 #[macro_use]
 pub mod attributes;
-#[cfg(feature = "with-dom")]
-pub mod events;
 pub mod tags;
 pub mod units;
 

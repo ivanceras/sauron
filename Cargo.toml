@@ -35,6 +35,7 @@ features = [
     "HtmlElement",
     "EventTarget",
     "KeyboardEvent",
+    "HashChangeEvent",
     "InputEvent",
     "HtmlCollection",
     "HtmlInputElement",
