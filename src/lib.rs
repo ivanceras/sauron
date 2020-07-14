@@ -5,7 +5,7 @@
 )]
 #![deny(
     missing_docs,
-    missing_debug_implementations,
+    //missing_debug_implementations,
     missing_copy_implementations,
     trivial_casts,
     trivial_numeric_casts,
@@ -235,14 +235,10 @@ pub mod html;
 #[macro_use]
 pub mod svg;
 
-pub use sauron_vdom;
+use mt_dom::diff_with_key;
+use prelude::AttributeValue;
 
-pub use sauron_vdom::{
-    diff,
-    Callback,
-    Text,
-    Value,
-};
+pub use mt_dom;
 
 /// Prelude simplifies the imports from sauron
 /// This imports the necessary functions to build
@@ -265,27 +261,42 @@ pub mod prelude {
         },
         *,
     };
-
-    #[cfg(feature = "with-dom")]
-    pub use crate::html::events::*;
 }
+
+/// namespace type in node, which could be change to an enum
+pub type Namespace = &'static str;
+/// tags are using static str for now, can also be enum tags
+pub type Tag = &'static str;
+/// attribute keys
+pub type AttributeKey = &'static str;
 
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
 /// App code.
-pub type Node<MSG> = sauron_vdom::Node<&'static str, &'static str, Event, MSG>;
+pub type Node<MSG> =
+    mt_dom::Node<Namespace, Tag, AttributeKey, AttributeValue<MSG>>;
 
 /// Element type with tag and attribute name type set to &'static str
 pub type Element<MSG> =
-    sauron_vdom::Element<&'static str, &'static str, Event, MSG>;
+    mt_dom::Element<Namespace, Tag, AttributeKey, AttributeValue<MSG>>;
 
 /// Patch as result of diffing the current_vdom and the new vdom.
 /// The tag and attribute name types is set to &'static str
 pub type Patch<'a, MSG> =
-    sauron_vdom::Patch<'a, &'static str, &'static str, Event, MSG>;
+    mt_dom::Patch<'a, Namespace, Tag, AttributeKey, AttributeValue<MSG>>;
 
 /// Attribute type used in sauron where the type of the Attribute name is &'static str
-pub type Attribute<MSG> = sauron_vdom::Attribute<&'static str, Event, MSG>;
+pub type Attribute<MSG> =
+    mt_dom::Attribute<Namespace, AttributeKey, AttributeValue<MSG>>;
 
-/// Style with statis str as the style name
-pub type Style = sauron_vdom::Style<&'static str>;
+/// This is a sauron html specific functionality
+/// diff 2 nodes with attribute using `&'static str` instead of generic ATT
+pub fn diff<'a, MSG>(
+    old: &'a Node<MSG>,
+    new: &'a Node<MSG>,
+) -> Vec<Patch<'a, MSG>>
+where
+    MSG: 'static,
+{
+    diff_with_key(old, new, &"key")
+}

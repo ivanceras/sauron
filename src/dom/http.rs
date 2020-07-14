@@ -1,6 +1,6 @@
 //! provides functions for retrieving data using http network request
 use crate::{
-    Callback,
+    prelude::Callback,
     Cmd,
     Component,
     Dispatch,

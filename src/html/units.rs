@@ -1,5 +1,5 @@
 //! provides function and macro for html units such as px, %, em, etc.
-use sauron_vdom::Value;
+use crate::prelude::Value;
 
 macro_rules! declare_units{
     (  $(

@@ -2,37 +2,14 @@
 use log::*;
 use mapper::*;
 
-pub use sauron_vdom::{
-    builder::{
-        on,
-        on_with_extractor,
-    },
-    event::{
-        Coordinate,
-        InputEvent,
-        KeyEvent,
-        Modifier,
-        MouseButton,
-        MouseEvent,
-    },
-    Callback,
-};
 use wasm_bindgen::JsCast;
 
 /// TODO: May not be needed if we can use fully generic event, when passed in the callback
 ///
-/// This module convert browser events into sauron_vdom generic event
+/// This module convert browser events into mt_dom generic event
 pub mod mapper {
     use log::*;
 
-    use sauron_vdom::event::{
-        Coordinate,
-        InputEvent,
-        KeyEvent,
-        Modifier,
-        MouseButton,
-        MouseEvent,
-    };
     use wasm_bindgen::JsCast;
     use web_sys::{
         self,

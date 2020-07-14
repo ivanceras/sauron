@@ -1,5 +1,6 @@
 #![deny(warnings)]
 use sauron::{
+    html::attributes::attr,
     prelude::*,
     Cmd,
     Component,

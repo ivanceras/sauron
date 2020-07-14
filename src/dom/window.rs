@@ -31,8 +31,10 @@ impl Window {
 
             for event_attr in event_listeners.iter() {
                 let event_str = event_attr.name();
-                let callback =
-                    event_attr.get_callback().expect("expecting a callback");
+                let callback = event_attr
+                    .value()
+                    .get_callback()
+                    .expect("expecting a callback");
 
                 let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
                     create_closure_wrap(&program, &callback);
