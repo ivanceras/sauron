@@ -75,6 +75,19 @@ macro_rules! declare_events {
     }
 }
 
+macro_rules! declare_html_events{
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident => $event:ident => $mapper:ident => $ret:ty;
+       )*
+     ) => {
+        declare_events!{ $($name => $event => $mapper => $ret;)* }
+
+        /// html events
+        pub const HTML_EVENTS: [&'static str; 27] = [$(stringify!($event),)*];
+    }
+}
+
 /// convert a generic event to MouseEvent
 fn to_mouse_event(event: Event) -> MouseEvent {
     event.dyn_into().expect("Unable to cast to mouse event")
@@ -119,7 +132,7 @@ fn to_input_event(event: Event) -> InputEvent {
 }
 
 // Mouse events
-declare_events! {
+declare_html_events! {
     on_auxclick => auxclick => to_mouse_event => MouseEvent;
     on_contextmenu => contextmenu => to_mouse_event => MouseEvent;
     on_dblclick  => dblclick => to_mouse_event => MouseEvent;

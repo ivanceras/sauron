@@ -7,6 +7,7 @@ use crate::{
             CreatedNode,
         },
     },
+    prelude::AttributeValue,
     Dispatch,
     Patch,
 };
@@ -238,6 +239,8 @@ where
     let mut active_closures = ActiveClosure::new();
     match patch {
         Patch::AddAttributes(_tag, _node_idx, attributes) => {
+            // TODO: will have to aggregate the attributes that has the name
+            // here, since it is not being handled in mt-dom.
             for attr in attributes.iter() {
                 CreatedNode::<Node>::set_element_attribute(
                     program,
@@ -250,9 +253,18 @@ where
             Ok(active_closures)
         }
         Patch::RemoveAttributes(_tag, _node_idx, attributes) => {
-            for attrib_name in attributes.iter() {
-                node.remove_attribute(attrib_name)?;
-                //TODO: also explicitly deal with value here..
+            for attr in attributes.iter() {
+                match attr.value() {
+                    AttributeValue::Simple(_) | AttributeValue::Style(_) => {
+                        node.remove_attribute(attr.name())?;
+                    }
+                    // it is an event listener
+                    AttributeValue::Callback(_) => {
+                        //TODO: remove only the event listener that matches the event name
+                        remove_event_listeners(node, old_closures)?;
+                    }
+                    _ => (),
+                }
             }
 
             Ok(active_closures)

@@ -82,7 +82,7 @@
 //!                         class("client"),
 //!                         type_("button"),
 //!                         value("Click me!"),
-//!                         onclick(|_| {
+//!                         on_click(|_| {
 //!                             trace!("Button is clicked");
 //!                             Msg::Click
 //!                         }),
@@ -206,6 +206,9 @@ pub mod html;
 
 #[macro_use]
 pub mod svg;
+
+pub use render::Render;
+pub mod render;
 
 use mt_dom::diff_with_key;
 use prelude::AttributeValue;

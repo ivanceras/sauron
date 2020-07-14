@@ -23,7 +23,7 @@ where
     V: Into<Value> + Clone,
 {
     mt_dom::attr(
-        style_name,
+        "style",
         AttributeValue::from_styles(vec![Style::new(style_name, value.into())]),
     )
 }

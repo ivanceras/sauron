@@ -100,7 +100,7 @@ fn click_event() {
     let vdiv: Node<()> = div(
         vec![
             id(elem_id),
-            onclick(move |_| {
+            on_click(move |_| {
                 console::log_1(&"clicked event called".into());
                 clicked_clone.set(true);
             }),

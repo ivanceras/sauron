@@ -12,58 +12,44 @@ use sauron::{
     Node,
     Patch,
 };
-use sauron_vdom::{
-    builder::{
-        attr,
-        text,
-    },
-    Callback,
-    Text,
-    Value,
-};
 
 use sauron::Event;
 
 #[test]
 fn test_macros() {
     let html: Node<()> = div!([class("class1"), class("class2")], []);
-    let attrs = html.get_attributes();
+    let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
-    assert_eq!(attrs.len(), 1);
 }
 
 #[test]
 fn test_macros_trailing_commas() {
     let html: Node<()> = div!([class("class1"), class("class2"),], [],);
-    let attrs = html.get_attributes();
+    let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
-    assert_eq!(attrs.len(), 1);
 }
 
 #[test]
 fn test_macros_trailing_commas_in_attributes_only() {
     let html: Node<()> = div!([class("class1"), class("class2")], []);
-    let attrs = html.get_attributes();
+    let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
-    assert_eq!(attrs.len(), 1);
 }
 
 #[test]
 fn test_macros_trailing_commas_in_children_only() {
     let html: Node<()> =
         div!([class("class1"), class("class2")], [text("This is input"),]);
-    let attrs = html.get_attributes();
+    let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
-    assert_eq!(attrs.len(), 1);
 }
 
 #[test]
 fn test_macros_trailing_commas_in_children_and_params() {
     let html: Node<()> =
         div!([class("class1"), class("class2")], [text("This is input"),],);
-    let attrs = html.get_attributes();
+    let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
-    assert_eq!(attrs.len(), 1);
 }
 
 #[test]
@@ -72,9 +58,8 @@ fn test_macros_trailing_commas_in_attribute_and_children() {
         [class("class1"), class("class2"),],
         [text("This is input"),]
     );
-    let attrs = html.get_attributes();
+    let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
-    assert_eq!(attrs.len(), 1);
 }
 
 #[test]
@@ -83,54 +68,52 @@ fn test_macros_with_lines() {
         [class("class1"), class("class2")],
         [input!([], [text("This is an input")])]
     );
-    let attrs = html.get_attributes();
+    let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
-    assert_eq!(attrs.len(), 1);
 }
 
 #[test]
-fn should_merge_classes() {
+fn will_not_merge_multiple_class_calls() {
     let html: Node<()> = div(vec![class("class1"), class("class2")], vec![]);
-    let attrs = html.get_attributes();
+    let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
-    assert_eq!(attrs.len(), 1);
+    assert_eq!(attrs.len(), 2);
     let elm = html.as_element_ref().expect("expecting an element");
-    let classes = elm.get_attr_value(&"class");
-    assert_eq!(classes, Some(Value::from(["class1", "class2"])));
+    let classes = elm.get_attribute_values(&"class");
+    assert_eq!(
+        classes,
+        vec![
+            &AttributeValue::from_value("class1".into()),
+            &AttributeValue::from_value("class2".into())
+        ]
+    );
 }
 
 #[test]
 fn should_merge_classes_flag() {
     let html: Node<()> = div(
-        vec![class("class1"), classes_flag([("class_flag", true)])],
+        vec![classes_flag([("class1", true), ("class_flag", true)])],
         vec![],
     );
-    let attrs = html.get_attributes();
+    let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
     assert_eq!(attrs.len(), 1);
     let elm = html.as_element_ref().expect("expecting an element");
-    let classes = elm.get_attr_value(&"class");
+    let classes = elm.get_attribute_values(&"class");
     assert_eq!(
         classes,
-        Some(Value::from(("class1", "class_flag".to_string())))
+        vec![&AttributeValue::from_value(
+            "class1 class_flag".to_string().into()
+        ),]
     );
 }
 
 #[test]
 fn simple_builder() {
-    let mut div: Element<()> = Element {
-        tag: "div",
-        attrs: vec![],
-        children: vec![],
-        namespace: None,
-    };
+    let mut div: Element<()> = Element::new(None, "div", vec![], vec![]);
     div.add_attributes(vec![attr("class", "some-class")]);
-    let expected: Element<()> = Element {
-        tag: "div",
-        attrs: vec![class("some-class")],
-        children: vec![],
-        namespace: None,
-    };
+    let expected: Element<()> =
+        Element::new(None, "div", vec![class("some-class")], vec![]);
 
     assert_eq!(div, expected);
 }
@@ -140,15 +123,10 @@ fn builder_with_event() {
     let cb = |x: Event| {
         println!("hello! {:?}", x);
     };
-    let callback: Callback<Event, ()> = cb.into();
-    let mut div: Element<()> = Element::with_tag("div");
-    div.add_event_listener("click", callback.clone());
-    let expected: Element<()> = Element {
-        tag: "div",
-        attrs: vec![on("click", callback.clone())],
-        children: vec![],
-        namespace: None,
-    };
+    let mut div: Element<()> = Element::new(None, "div", vec![], vec![]);
+    div.add_attributes(vec![on("click", cb.clone())]);
+    let expected: Element<()> =
+        Element::new(None, "div", vec![on("click", cb)], vec![]);
 
     assert_eq!(
         div, expected,
@@ -158,19 +136,15 @@ fn builder_with_event() {
 
 #[test]
 fn builder_with_children() {
-    let mut div: Element<()> = Element::with_tag("div");
+    let mut div: Element<()> = Element::new(None, "div", vec![], vec![]);
     div.add_attributes(vec![attr("class", "some-class")]);
-    div.add_children(vec![Node::Text(Text {
-        text: "Hello".to_string(),
-    })]);
-    let expected = Element {
-        tag: "div",
-        attrs: vec![class("some-class")],
-        children: vec![Node::Text(Text {
-            text: "Hello".to_string(),
-        })],
-        namespace: None,
-    };
+    div.add_children(vec![Node::Text("Hello".to_string())]);
+    let expected = Element::new(
+        None,
+        "div",
+        vec![class("some-class")],
+        vec![Node::Text("Hello".to_string())],
+    );
 
     assert_eq!(div, expected);
 }
@@ -286,89 +260,58 @@ fn remove_nodes() {
 
 #[test]
 fn add_attributes() {
-    let old: Node<()> = div(vec![], vec![]); //{ <div> </div> },
-    let new = div(vec![id("hello")], vec![]); //{ <div id="hello"> </div> },
+    let old: Node<()> = div(vec![], vec![]);
+    let new = div(vec![id("hello")], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("hello")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
         "Add attributes",
     );
 
-    let old: Node<()> = div(vec![id("foobar")], vec![]); //{ <div id="foobar"> </div> },
-    let new = div(vec![id("hello")], vec![]); //{ <div id="hello"> </div> },
+    let old: Node<()> = div(vec![id("foobar")], vec![]);
+    let new = div(vec![id("hello")], vec![]);
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("hello")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
         "Change attribute",
     );
 }
 
 #[test]
-fn new_different_event_will_replace_what_was_first_set() {
-    let func = |_| {
-        println!("hello");
-    };
-    let hello: Callback<Event, ()> = func.into();
-
-    let old: Node<()> = div(vec![], vec![]);
-    let new: Node<()> = div(vec![on("click", hello.clone())], vec![]);
-    assert_eq!(
-        diff(&old, &new),
-        vec![Patch::AddEventListener(
-            &"div",
-            0,
-            vec![&on("click", hello.clone())]
-        )],
-        "Add event listener",
-    );
-
-    let hello2: Callback<Event, ()> = func.into(); //recreated from the func closure, it will not be equal to the callback since the Rc points to a different address.
-    assert_ne!(hello, hello2, "Same function, different Rc::new()");
-    let old = div(vec![on("click", hello.clone())], vec![]);
-    let new = div(vec![on("click", hello2.clone())], vec![]);
-
-    assert_eq!(
-            diff(&old, &new),
-            vec![],
-            "Even though a new callback is recated from the same closure
-            It will point to a different Rc, which are not equal.
-            However, since comparing the wrapped Fn is just not possible
-            The diffing algorithmn will just leave what was first set as the event listener
-            ",
-        );
-}
-
-#[test]
 fn remove_attributes() {
-    let old: Node<()> = div(vec![id("hey-there")], vec![]); //{ <div id="hey-there"></div> },
-    let new = div(vec![], vec![]); //{ <div> </div> },
+    let old: Node<()> = div(vec![id("hey-there")], vec![]);
+    let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveAttributes(&"div", 0, vec!["id"])],
+        vec![Patch::RemoveAttributes(&"div", 0, vec![&id("hey-there")])],
         "Remove attributes",
     );
 }
 
 #[test]
 fn remove_events() {
-    let old: Node<()> = div(vec![onclick(|_| println!("hi"))], vec![]);
+    let old: Node<()> = div(vec![on_click(|_| println!("hi"))], vec![]);
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveEventListener(&"div", 0, vec!["click"])],
+        vec![Patch::RemoveAttributes(
+            &"div",
+            0,
+            vec![&on_click(|_| println!("hi"))]
+        )],
         "Remove events",
     );
 }
 
 #[test]
 fn change_attribute() {
-    let old: Node<()> = div(vec![id("hey-there")], vec![]); //{ <div id="hey-there"></div> },
-    let new = div(vec![id("changed")], vec![]); //{ <div id="changed"> </div> },
+    let old: Node<()> = div(vec![id("hey-there")], vec![]);
+    let new = div(vec![id("changed")], vec![]);
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("changed")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("changed")])],
         "Add attributes",
     );
 }
@@ -380,7 +323,7 @@ fn replace_text_node() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::ChangeText(0, &Text::new("New"))],
+        vec![Patch::ChangeText(0, "New")],
         "Replace text node",
     );
 }
