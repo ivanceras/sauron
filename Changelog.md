@@ -1,7 +1,10 @@
 # Changelog
 
-# (Unreleased)
-- restructure Attribute into an enum for special cases, ie: style, function_call, event_listener and plain attribute which makes it more coherent
+# 0.27.0
+- change syntax of attribute events which uses `_` after the `on` ie: `on_click` instead of `onclick`
+- Make a special case for style than just a plain attribute
+- Use `mt-dom` crate as replacement to sauron_vdom. `mt-dom` is a very generic virtual-dom crate which doesn't put too much constraints
+     on the types of the member fields
 
 # 0.26.0
 - Change `to_pretty_string` to `render` with focus on writing to the common buffer.

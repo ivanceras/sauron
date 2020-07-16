@@ -18,7 +18,7 @@ pub struct Browser;
 impl Browser {
     /// Creates a Cmd in which the MSG will be emitted
     /// whenever the browser is resized
-    pub fn onresize<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
+    pub fn on_resize<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
     where
         F: Fn(i32, i32) -> MSG + Clone + 'static,
         MSG: PartialEq + Debug + Clone + 'static,
@@ -41,7 +41,7 @@ impl Browser {
 
     /// attached a callback and will be triggered when the hash portion of the window location
     /// url is changed
-    pub fn onhashchange<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
+    pub fn on_hashchange<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
     where
         F: Fn(String) -> MSG + Clone + 'static,
         MSG: 'static,

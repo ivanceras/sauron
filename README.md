@@ -1,3 +1,5 @@
+![Maintenance](https://img.shields.io/badge/maintenance-activly--developed-brightgreen.svg)
+
 # sauron
 
 
@@ -70,7 +72,7 @@ impl Component<Msg> for App {
                         class("client"),
                         type_("button"),
                         value("Click me!"),
-                        onclick(|_| {
+                        on_click(|_| {
                             trace!("Button is clicked");
                             Msg::Click
                         }),
