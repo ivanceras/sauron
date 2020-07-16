@@ -63,6 +63,7 @@ impl AttributeValue {
         }
     }
 
+    /// returns true if this attribute value is a style
     pub fn is_style(&self) -> bool {
         match self {
             AttributeValue::Style(_) => true,

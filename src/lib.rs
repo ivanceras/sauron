@@ -1,17 +1,17 @@
-//#![deny(warnings)]
-//#![deny(clippy::all)]
-//#![doc(
-//    html_logo_url = "https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png"
-//)]
-//#![deny(
-//    missing_docs,
-//    //missing_debug_implementations,
-//    missing_copy_implementations,
-//    trivial_casts,
-//    trivial_numeric_casts,
-//    unstable_features,
-//    unused_import_braces
-//)]
+#![deny(warnings)]
+#![deny(clippy::all)]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png"
+)]
+#![deny(
+    missing_docs,
+    //missing_debug_implementations,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unstable_features,
+    unused_import_braces
+)]
 //!
 //! [![Latest Version](https://img.shields.io/crates/v/sauron.svg)](https://crates.io/crates/sauron)
 //! [![Build Status](https://travis-ci.org/ivanceras/sauron.svg?branch=master)](https://travis-ci.org/ivanceras/sauron)
