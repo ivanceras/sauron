@@ -6,7 +6,6 @@ use sauron::{
         events::*,
         *,
     },
-    Callback,
     Node,
     Patch,
 };
@@ -43,7 +42,7 @@ fn event_remove() {
         vec![Patch::RemoveAttributes(
             &"input",
             0,
-            vec![&on("input", Callback::from(|_| {}))],
+            vec![&on("input", |_| { () })],
         )]
     );
 }

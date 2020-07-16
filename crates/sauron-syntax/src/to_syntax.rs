@@ -1,4 +1,7 @@
-use sauron::prelude::*;
+use sauron::{
+    mt_dom::AttValue,
+    prelude::*,
+};
 use std::{
     fmt,
     fmt::Write,
@@ -39,38 +42,49 @@ impl<MSG: 'static> ToSyntax for Attribute<MSG> {
         indent: usize,
     ) -> fmt::Result {
         match self.value() {
-            AttributeValue::Simple(simple) => {
-                if let Some(_ns) = self.namespace() {
-                    write!(buffer, "xlink_{}", self.name().to_string(),)?;
-                    write!(buffer, "(")?;
-                    simple.to_syntax(buffer, use_macros, indent)?;
-                    write!(buffer, ")")?;
-                } else {
-                    let matched_attribute_func =
-                        sauron_parse::match_attribute_function(&self.name())
-                            .is_some();
-                    if matched_attribute_func {
-                        write!(buffer, "{}", self.name().to_string(),)?;
-                        write!(buffer, "(")?;
-                        simple.to_syntax(buffer, use_macros, indent)?;
-                        write!(buffer, ")")?;
-                    } else {
-                        write!(
-                            buffer,
-                            r#"attr("{}","#,
-                            self.name().to_string(),
-                        )?;
-                        simple.to_syntax(buffer, use_macros, indent)?;
-                        write!(buffer, ")")?;
+            AttValue::Plain(plain) => {
+                match plain {
+                    AttributeValue::Simple(simple) => {
+                        if let Some(_ns) = self.namespace() {
+                            write!(
+                                buffer,
+                                "xlink_{}",
+                                self.name().to_string(),
+                            )?;
+                            write!(buffer, "(")?;
+                            simple.to_syntax(buffer, use_macros, indent)?;
+                            write!(buffer, ")")?;
+                        } else {
+                            let matched_attribute_func =
+                                sauron_parse::match_attribute_function(
+                                    &self.name(),
+                                )
+                                .is_some();
+                            if matched_attribute_func {
+                                write!(buffer, "{}", self.name().to_string(),)?;
+                                write!(buffer, "(")?;
+                                simple.to_syntax(buffer, use_macros, indent)?;
+                                write!(buffer, ")")?;
+                            } else {
+                                write!(
+                                    buffer,
+                                    r#"attr("{}","#,
+                                    self.name().to_string(),
+                                )?;
+                                simple.to_syntax(buffer, use_macros, indent)?;
+                                write!(buffer, ")")?;
+                            }
+                        }
                     }
+                    AttributeValue::Style(styles_att) => {
+                        write!(buffer, "style(\"")?;
+                        for s_att in styles_att {
+                            write!(buffer, "{};", s_att)?;
+                        }
+                        write!(buffer, "\")")?;
+                    }
+                    _ => (),
                 }
-            }
-            AttributeValue::Style(styles_att) => {
-                write!(buffer, "style(\"")?;
-                for s_att in styles_att {
-                    write!(buffer, "{};", s_att)?;
-                }
-                write!(buffer, "\")")?;
             }
             _ => (),
         }

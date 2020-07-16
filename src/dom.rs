@@ -9,7 +9,7 @@ mod created_node;
 mod dispatch;
 mod dom_updater;
 pub mod events;
-//mod http;
+mod http;
 mod program;
 pub mod test_fixtures;
 mod util;
@@ -21,7 +21,7 @@ pub use created_node::CreatedNode;
 pub use dispatch::Dispatch;
 pub use dom_updater::DomUpdater;
 pub use events::*;
-//pub use http::Http;
+pub use http::Http;
 pub use program::Program;
 pub use util::{
     body,
