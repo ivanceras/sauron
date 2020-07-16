@@ -119,16 +119,14 @@ impl fmt::Display for Value {
             Value::Bool(v) => write!(f, "{}", v),
             Value::String(v) => write!(f, "{}", v),
             Value::Str(v) => write!(f, "{}", v),
-            Value::Vec(v) => {
-                write!(
-                    f,
-                    "{}",
-                    v.iter()
-                        .map(ToString::to_string)
-                        .collect::<Vec<String>>()
-                        .join(" ")
-                )
-            }
+            Value::Vec(v) => write!(
+                f,
+                "{}",
+                v.iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            ),
             Value::U8(v) => write!(f, "{}", v),
             Value::U16(v) => write!(f, "{}", v),
             Value::U32(v) => write!(f, "{}", v),
@@ -241,12 +239,8 @@ impl_from!([T; 12]);
 #[cfg(test)]
 mod tests {
     use crate::{
-        html::{
-            attributes::attr,
-            element,
-        },
-        Node,
-        Render,
+        html::{attributes::attr, element},
+        Node, Render,
     };
 
     #[test]
@@ -254,7 +248,7 @@ mod tests {
         let line: Node<()> =
             element("line", vec![attr("stroke-dasharray", (10, 20))], vec![]);
         let mut buffer = String::new();
-        line.render(&mut buffer, 0).unwrap();
+        line.render(&mut buffer).unwrap();
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(
             buffer, expected,
@@ -265,7 +259,7 @@ mod tests {
         let line: Node<()> =
             element("line", vec![attr("transition", ("opacity", 1))], vec![]);
 
-        line.render(&mut buffer2, 0).unwrap();
+        line.render(&mut buffer2).unwrap();
 
         let expected = "<line transition=\"opacity 1\"></line>";
         assert_eq!(
@@ -279,7 +273,7 @@ mod tests {
             vec![],
         );
         let mut buffer3 = String::new();
-        line.render(&mut buffer3, 0).unwrap();
+        line.render(&mut buffer3).unwrap();
         let expected = "<line transition=\"opacity 1 linear\"></line>";
         assert_eq!(
             buffer3, expected,
@@ -293,7 +287,7 @@ mod tests {
         );
 
         let mut buffer4 = String::new();
-        line.render(&mut buffer4, 0).unwrap();
+        line.render(&mut buffer4).unwrap();
 
         let expected = "<line transition=\"opacity 1 linear true\"></line>";
         assert_eq!(
@@ -307,7 +301,7 @@ mod tests {
         let line: Node<()> =
             element("line", vec![attr("stroke-dasharray", [10, 20])], vec![]);
         let mut buffer1 = String::new();
-        line.render(&mut buffer1, 0).unwrap();
+        line.render(&mut buffer1).unwrap();
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(
             buffer1, expected,
@@ -320,7 +314,7 @@ mod tests {
             vec![],
         );
         let mut buffer2 = String::new();
-        line.render(&mut buffer2, 0).unwrap();
+        line.render(&mut buffer2).unwrap();
         let expected = "<line stroke-dasharray=\"10 20 30 40\"></line>";
         assert_eq!(
             buffer2, expected,

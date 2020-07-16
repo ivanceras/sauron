@@ -2,37 +2,42 @@
 //! virtual dom into a writable buffer
 //!
 use crate::{
-    html::attributes::AttributeValue,
-    mt_dom::AttValue,
-    Attribute,
-    Element,
-    Event,
-    Node,
+    html::attributes::AttributeValue, mt_dom::AttValue, Attribute, Element,
+    Event, Node,
 };
 use std::fmt;
 
 /// render node, elements to a writable buffer
 pub trait Render {
+    /// render the node to a writable buffer
+    fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
+        self.render_with_indent(buffer, 0)
+    }
     /// render instance to a writable buffer with indention
-    fn render(&self, buffer: &mut dyn fmt::Write, indent: usize)
-        -> fmt::Result;
+    fn render_with_indent(
+        &self,
+        buffer: &mut dyn fmt::Write,
+        indent: usize,
+    ) -> fmt::Result;
 }
 
 impl<MSG> Render for Node<MSG> {
-    fn render(
+    fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
         indent: usize,
     ) -> fmt::Result {
         match self {
-            Node::Element(element) => element.render(buffer, indent),
+            Node::Element(element) => {
+                element.render_with_indent(buffer, indent)
+            }
             Node::Text(text) => write!(buffer, "{}", text),
         }
     }
 }
 
 impl<MSG> Render for Element<MSG> {
-    fn render(
+    fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
         indent: usize,
@@ -57,12 +62,12 @@ impl<MSG> Render for Element<MSG> {
 
         // do not indent if it is only text child node
         if is_lone_child_text_node {
-            first_child.unwrap().render(buffer, indent)?;
+            first_child.unwrap().render_with_indent(buffer, indent)?;
         } else {
             // otherwise print all child nodes with each line and indented
             for child in self.get_children() {
                 write!(buffer, "\n{}", "    ".repeat(indent + 1))?;
-                child.render(buffer, indent + 1)?;
+                child.render_with_indent(buffer, indent + 1)?;
             }
         }
         // do not make a new line it if is only a text child node or it has no child nodes
@@ -85,7 +90,7 @@ fn render_attribute_values<MSG>(
                 if !first && !attr_value.is_style() {
                     write!(buffer, " ")?;
                 }
-                attr_value.render(buffer, 0)?;
+                attr_value.render_with_indent(buffer, 0)?;
             }
             _ => (),
         }
@@ -95,7 +100,7 @@ fn render_attribute_values<MSG>(
 }
 
 impl<MSG> Render for Attribute<MSG> {
-    fn render(
+    fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
         indent: usize,
@@ -103,7 +108,7 @@ impl<MSG> Render for Attribute<MSG> {
         match self.value() {
             AttValue::Plain(plain) => {
                 write!(buffer, "{}=\"", self.name())?;
-                plain.render(buffer, indent)?;
+                plain.render_with_indent(buffer, indent)?;
                 write!(buffer, "\"")?;
             }
             _ => (),
@@ -113,7 +118,7 @@ impl<MSG> Render for Attribute<MSG> {
 }
 
 impl Render for AttributeValue {
-    fn render(
+    fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
         _index: usize,

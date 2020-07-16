@@ -1,13 +1,7 @@
 #![deny(warnings)]
-use sauron::{
-    Node,
-    Render,
-};
+use sauron::{Node, Render};
 
-use sauron::html::{
-    attributes::*,
-    *,
-};
+use sauron::html::{attributes::*, *};
 #[test]
 fn test_styles() {
     let actual: Node<&'static str> = div(
@@ -15,13 +9,13 @@ fn test_styles() {
         vec![],
     );
     let mut actual_html = String::new();
-    actual.render(&mut actual_html, 0).unwrap();
+    actual.render(&mut actual_html).unwrap();
     let expected: Node<&'static str> = div(
         vec![style("display", "flex"), style("flex-direction", "row")],
         vec![],
     );
     let mut expected_html = String::new();
-    expected.render(&mut expected_html, 0).unwrap();
+    expected.render(&mut expected_html).unwrap();
 
     assert_eq!(actual_html, expected_html);
 }
@@ -33,12 +27,12 @@ fn test_classes() {
         vec![],
     );
     let mut actual_html = String::new();
-    actual.render(&mut actual_html, 0).unwrap();
+    actual.render(&mut actual_html).unwrap();
     let expected: Node<&'static str> =
         div(vec![class("class1 class2 big_blue circular")], vec![]);
 
     let mut expected_html = String::new();
-    expected.render(&mut expected_html, 0).unwrap();
+    expected.render(&mut expected_html).unwrap();
 
     assert_eq!(actual_html, expected_html);
 }
@@ -55,11 +49,11 @@ fn test_classes_flag() {
         vec![],
     );
     let mut actual_html = String::new();
-    actual.render(&mut actual_html, 0).unwrap();
+    actual.render(&mut actual_html).unwrap();
     let expected: Node<&'static str> =
         div(vec![class("class1 big_blue circular")], vec![]);
     let mut expected_html = String::new();
-    expected.render(&mut expected_html, 0).unwrap();
+    expected.render(&mut expected_html).unwrap();
 
     assert_eq!(actual_html, expected_html);
 }
