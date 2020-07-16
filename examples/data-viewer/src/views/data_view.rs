@@ -397,8 +397,8 @@ impl DataView {
                             Msg::ColumnStartResize(
                                 index,
                                 Grip::Right,
-                                event.coordinate.client_x,
-                                event.coordinate.client_y,
+                                event.client_x(),
+                                event.client_y(),
                             )
                         }),
                     ],

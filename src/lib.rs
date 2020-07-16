@@ -1,17 +1,17 @@
-#![deny(warnings)]
-#![deny(clippy::all)]
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png"
-)]
-#![deny(
-    missing_docs,
-    //missing_debug_implementations,
-    missing_copy_implementations,
-    trivial_casts,
-    trivial_numeric_casts,
-    unstable_features,
-    unused_import_braces
-)]
+//#![deny(warnings)]
+//#![deny(clippy::all)]
+//#![doc(
+//    html_logo_url = "https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png"
+//)]
+//#![deny(
+//    missing_docs,
+//    //missing_debug_implementations,
+//    missing_copy_implementations,
+//    trivial_casts,
+//    trivial_numeric_casts,
+//    unstable_features,
+//    unused_import_braces
+//)]
 //!
 //! [![Latest Version](https://img.shields.io/crates/v/sauron.svg)](https://crates.io/crates/sauron)
 //! [![Build Status](https://travis-ci.org/ivanceras/sauron.svg?branch=master)](https://travis-ci.org/ivanceras/sauron)
@@ -207,8 +207,8 @@ pub mod html;
 #[macro_use]
 pub mod svg;
 
-pub use render::Render;
-pub mod render;
+//pub use render::Render;
+//pub mod render;
 
 use mt_dom::diff_with_key;
 use prelude::AttributeValue;
@@ -252,20 +252,23 @@ pub type AttributeKey = &'static str;
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
 /// App code.
 pub type Node<MSG> =
-    mt_dom::Node<Namespace, Tag, AttributeKey, AttributeValue<MSG>>;
+    mt_dom::Node<Namespace, Tag, AttributeKey, AttributeValue, Event, MSG>;
 
 /// Element type with tag and attribute name type set to &'static str
 pub type Element<MSG> =
-    mt_dom::Element<Namespace, Tag, AttributeKey, AttributeValue<MSG>>;
+    mt_dom::Element<Namespace, Tag, AttributeKey, AttributeValue, Event, MSG>;
 
 /// Patch as result of diffing the current_vdom and the new vdom.
 /// The tag and attribute name types is set to &'static str
 pub type Patch<'a, MSG> =
-    mt_dom::Patch<'a, Namespace, Tag, AttributeKey, AttributeValue<MSG>>;
+    mt_dom::Patch<'a, Namespace, Tag, AttributeKey, AttributeValue, Event, MSG>;
 
 /// Attribute type used in sauron where the type of the Attribute name is &'static str
 pub type Attribute<MSG> =
-    mt_dom::Attribute<Namespace, AttributeKey, AttributeValue<MSG>>;
+    mt_dom::Attribute<Namespace, AttributeKey, AttributeValue, Event, MSG>;
+
+/// Callback where Event type is supplied
+pub type Callback<MSG> = mt_dom::Callback<Event, MSG>;
 
 /// This is a sauron html specific functionality
 /// diff 2 nodes with attribute using `&'static str` instead of generic ATT

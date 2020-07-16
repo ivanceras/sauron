@@ -72,8 +72,8 @@ impl<MSG> Render for Element<MSG> {
     }
 }
 
-fn render_attribute_values<MSG>(
-    attr_values: &[&AttributeValue<MSG>],
+fn render_attribute_values(
+    attr_values: &[&AttributeValue],
     buffer: &mut dyn fmt::Write,
 ) -> fmt::Result {
     let mut first = true;

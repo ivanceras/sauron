@@ -7,7 +7,7 @@ use crate::{
             CreatedNode,
         },
     },
-    prelude::AttributeValue,
+    mt_dom::AttValue,
     Dispatch,
     Patch,
 };
@@ -255,15 +255,14 @@ where
         Patch::RemoveAttributes(_tag, _node_idx, attributes) => {
             for attr in attributes.iter() {
                 match attr.value() {
-                    AttributeValue::Simple(_) | AttributeValue::Style(_) => {
+                    AttValue::Plain(_) => {
                         node.remove_attribute(attr.name())?;
                     }
                     // it is an event listener
-                    AttributeValue::Callback(_) => {
+                    AttValue::Callback(_) => {
                         //TODO: remove only the event listener that matches the event name
                         remove_event_listeners(node, old_closures)?;
                     }
-                    _ => (),
                 }
             }
 

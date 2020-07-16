@@ -3,7 +3,6 @@
 use crate::Attribute;
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
-pub use callback::Callback;
 pub use style::Style;
 pub use style_macro::*;
 pub use value::Value;
@@ -13,7 +12,6 @@ mod attribute_macros;
 #[macro_use]
 mod style_macro;
 mod attribute_value;
-mod callback;
 mod style;
 mod value;
 
