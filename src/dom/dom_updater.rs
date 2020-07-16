@@ -2,30 +2,17 @@ use crate::{
     diff,
     dom::{
         apply_patches::patch,
-        created_node::{
-            ActiveClosure,
-            CreatedNode,
-        },
+        created_node::{ActiveClosure, CreatedNode},
+        Dispatch,
     },
-    Dispatch,
 };
-use std::{
-    marker::PhantomData,
-    ops::Deref,
-};
+use std::ops::Deref;
 use wasm_bindgen::JsCast;
-use web_sys::{
-    self,
-    Element,
-    Node,
-};
+use web_sys::{self, Element, Node};
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
-pub struct DomUpdater<DSP, MSG>
-where
-    MSG: 'static,
-{
+pub struct DomUpdater<MSG> {
     current_vdom: crate::Node<MSG>,
     root_node: Node,
 
@@ -34,24 +21,18 @@ where
     /// We keep these around so that they don't get dropped (and thus stop working);
     ///
     pub active_closures: ActiveClosure,
-    _phantom_dsp: PhantomData<DSP>,
 }
 
-impl<DSP, MSG> DomUpdater<DSP, MSG>
-where
-    MSG: 'static,
-    DSP: Clone + Dispatch<MSG> + 'static,
-{
+impl<MSG> DomUpdater<MSG> {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.
     pub fn new(
         current_vdom: crate::Node<MSG>,
         root_node: &Node,
-    ) -> DomUpdater<DSP, MSG> {
+    ) -> DomUpdater<MSG> {
         DomUpdater {
             current_vdom,
             root_node: root_node.clone(),
             active_closures: ActiveClosure::new(),
-            _phantom_dsp: PhantomData,
         }
     }
 
@@ -63,11 +44,19 @@ where
             .map(|(_elm_id, closures)| closures.len())
             .sum()
     }
+}
 
+impl<MSG> DomUpdater<MSG>
+where
+    MSG: 'static,
+{
     /// Mount the current_vdom appending to the actual browser DOM specified in the root_node
     /// This also gets the closures that was created when mounting the vdom to their
     /// actual DOM counterparts.
-    pub fn append_to_mount(&mut self, program: &DSP) {
+    pub fn append_to_mount<DSP>(&mut self, program: &DSP)
+    where
+        DSP: Dispatch<MSG> + Clone + 'static,
+    {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         self.root_node
@@ -80,7 +69,10 @@ where
     /// Mount the current_vdom replacing the actual browser DOM specified in the root_node
     /// This also gets the closures that was created when mounting the vdom to their
     /// actual DOM counterparts.
-    pub fn replace_mount(&mut self, program: &DSP) {
+    pub fn replace_mount<DSP>(&mut self, program: &DSP)
+    where
+        DSP: Dispatch<MSG> + Clone + 'static,
+    {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         let root_element: &Element = self.root_node.unchecked_ref();
@@ -95,11 +87,14 @@ where
     ///
     /// A root `Node` will be created and appended (as a child) to your passed
     /// in mount element.
-    pub fn new_append_to_mount(
+    pub fn new_append_to_mount<DSP>(
         program: &DSP,
         current_vdom: crate::Node<MSG>,
         mount: &Element,
-    ) -> DomUpdater<DSP, MSG> {
+    ) -> DomUpdater<MSG>
+    where
+        DSP: Dispatch<MSG> + Clone + 'static,
+    {
         let mut dom_updater = Self::new(current_vdom, mount);
         dom_updater.append_to_mount(program);
         dom_updater
@@ -109,11 +104,14 @@ where
     ///
     /// A root `Node` will be created and it will replace your passed in mount
     /// element.
-    pub fn new_replace_mount(
+    pub fn new_replace_mount<DSP>(
         program: &DSP,
         current_vdom: crate::Node<MSG>,
         mount: Element,
-    ) -> DomUpdater<DSP, MSG> {
+    ) -> DomUpdater<MSG>
+    where
+        DSP: Dispatch<MSG> + Clone + 'static,
+    {
         let mut dom_updater = Self::new(current_vdom, &mount);
         dom_updater.replace_mount(program);
         dom_updater
@@ -123,7 +121,10 @@ where
     ///
     /// Then use that diff to patch the real DOM in the user's browser so that they are
     /// seeing the latest state of the application.
-    pub fn update_dom(&mut self, program: &DSP, new_vdom: crate::Node<MSG>) {
+    pub fn update_dom<DSP>(&mut self, program: &DSP, new_vdom: crate::Node<MSG>)
+    where
+        DSP: Dispatch<MSG> + Clone + 'static,
+    {
         let patches = diff(&self.current_vdom, &new_vdom);
         let active_closures = patch(
             Some(program),

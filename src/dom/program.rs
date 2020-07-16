@@ -1,18 +1,10 @@
-use crate::{
-    dom::dom_updater::DomUpdater,
-    Cmd,
-    Component,
-    Dispatch,
-};
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use crate::{dom::dom_updater::DomUpdater, Cmd, Component, Dispatch};
+use std::{cell::RefCell, rc::Rc};
 #[cfg(not(feature = "no_request_animation_frame"))]
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;
 
-/// Holds the app and the dom updater
+/// Holds the user App and the dom updater
 /// This is passed into the event listener and the dispatch program
 /// will be called after the event is triggered.
 pub struct Program<APP, MSG>
@@ -20,9 +12,11 @@ where
     MSG: 'static,
 {
     /// holds the user application
+    // Note: This needs to be in Rc<RefCell<_>> to allow interior mutability
+    // from a non-mutable reference
     pub app: Rc<RefCell<APP>>,
     /// The dom_updater responsible to updating the actual document in the browser
-    pub dom_updater: Rc<RefCell<DomUpdater<Self, MSG>>>,
+    pub dom_updater: Rc<RefCell<DomUpdater<MSG>>>,
 }
 
 impl<APP, MSG> Clone for Program<APP, MSG> {
@@ -42,7 +36,7 @@ where
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
     fn new(app: APP, root_node: &Node) -> Self {
-        let dom_updater: DomUpdater<Self, MSG> =
+        let dom_updater: DomUpdater<MSG> =
             DomUpdater::new(app.view(), root_node);
         let program = Program {
             app: Rc::new(RefCell::new(app)),
