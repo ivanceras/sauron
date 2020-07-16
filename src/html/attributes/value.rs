@@ -1,5 +1,6 @@
 use std::fmt;
 
+///TODO: merge this with AttributeValue
 /// Value is an abstraction of the values used in the actual
 /// backend. Html and gtk-rs have different set of compatible values
 /// therefore a need for a storage of these intermediate value is needed

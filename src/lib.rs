@@ -196,6 +196,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use dom::*;
     /// Map the Event to DomEvent, which are browser events
     pub type Event = web_sys::Event;
+    pub use web_sys;
 }}
 
 #[cfg(not(feature = "with-dom"))]
@@ -221,22 +222,12 @@ pub use mt_dom;
 pub mod prelude {
     pub use crate::{
         html::{
-            attributes::{
-                attr,
-                *,
-            },
-            tags::{
-                commons::*,
-                *,
-            },
+            attributes::{attr, *},
+            tags::{commons::*, *},
             units::*,
             *,
         },
-        svg::{
-            attributes::*,
-            tags::commons::*,
-            *,
-        },
+        svg::{attributes::*, tags::commons::*, *},
         *,
     };
 }

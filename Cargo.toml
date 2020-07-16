@@ -102,3 +102,5 @@ members = [
 ]
 
 
+[patch.crates-io]
+mt-dom = { path = "../mt-dom" }
