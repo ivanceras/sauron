@@ -4,6 +4,7 @@ use wasm_bindgen::{
     self,
     prelude::*,
 };
+use web_sys::MouseEvent;
 
 pub enum Msg {
     Click,
@@ -81,7 +82,7 @@ impl Component<Msg> for App {
                         input!(
                             [
                                 r#type("text"),
-                                oninput(|event: InputEvent| {
+                                on_input(|event: InputEvent| {
                                     Msg::ChangeName(event.value.to_string())
                                 }),
                                 placeholder("John Smith"),
@@ -89,7 +90,7 @@ impl Component<Msg> for App {
                             [],
                         ),
                         button!(
-                            [onclick(|event: MouseEvent| {
+                            [on_click(|event: MouseEvent| {
                                 trace!(
                                     "Clicked at ({},{})",
                                     event.x(),
@@ -100,7 +101,7 @@ impl Component<Msg> for App {
                             [text!("Click me!")],
                         ),
                         button!(
-                            [ondblclick(|event: MouseEvent| {
+                            [on_dblclick(|event: MouseEvent| {
                                 trace!(
                                     "Double clicked at ({},{})",
                                     event.x(),
@@ -137,7 +138,7 @@ impl Component<Msg> for App {
                                 [
                                     rows(10),
                                     cols(80),
-                                    oninput(|event: InputEvent| {
+                                    on_input(|event: InputEvent| {
                                         Msg::ChangeBiography(
                                             event.value.to_string(),
                                         )
@@ -157,7 +158,7 @@ impl Component<Msg> for App {
                         input!(
                             [
                                 r#type("text"),
-                                onchange(|event: InputEvent| {
+                                on_change(|event: InputEvent| {
                                     Msg::ChangeThought(event.value.to_string())
                                 }),
                                 placeholder("Elephants..."),

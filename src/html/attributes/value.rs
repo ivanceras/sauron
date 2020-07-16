@@ -241,78 +241,89 @@ impl_from!([T; 12]);
 #[cfg(test)]
 mod tests {
     use crate::{
-        builder::{
-            attr,
+        html::{
+            attributes::attr,
             element,
         },
         Node,
+        Render,
     };
 
     #[test]
     fn tuple_value() {
-        let line: Node<&'static str, &'static str, (), ()> =
+        let line: Node<()> =
             element("line", vec![attr("stroke-dasharray", (10, 20))], vec![]);
+        let mut buffer = String::new();
+        line.render(&mut buffer, 0).unwrap();
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(
-            format!("{}", line),
-            expected,
+            buffer, expected,
             "The value in tuple should be flatten to string"
         );
 
-        let line: Node<&'static str, &'static str, (), ()> =
+        let mut buffer2 = String::new();
+        let line: Node<()> =
             element("line", vec![attr("transition", ("opacity", 1))], vec![]);
+
+        line.render(&mut buffer2, 0).unwrap();
+
         let expected = "<line transition=\"opacity 1\"></line>";
         assert_eq!(
-            format!("{}", line),
-            expected,
+            buffer2, expected,
             "The value in tuple should be flatten to string"
         );
 
-        let line: Node<&'static str, &'static str, (), ()> = element(
+        let line: Node<()> = element(
             "line",
             vec![attr("transition", ("opacity", 1, "linear"))],
             vec![],
         );
+        let mut buffer3 = String::new();
+        line.render(&mut buffer3, 0).unwrap();
         let expected = "<line transition=\"opacity 1 linear\"></line>";
         assert_eq!(
-            format!("{}", line),
-            expected,
+            buffer3, expected,
             "The value in tuple should be flatten to string"
         );
 
-        let line: Node<&'static str, &'static str, (), ()> = element(
+        let line: Node<()> = element(
             "line",
             vec![attr("transition", ("opacity", 1, "linear", true))],
             vec![],
         );
+
+        let mut buffer4 = String::new();
+        line.render(&mut buffer4, 0).unwrap();
+
         let expected = "<line transition=\"opacity 1 linear true\"></line>";
         assert_eq!(
-            format!("{}", line),
-            expected,
+            buffer4, expected,
             "The value in tuple should be flatten to string"
         );
     }
 
     #[test]
     fn array_value() {
-        let line: Node<&'static str, &'static str, (), ()> =
+        let line: Node<()> =
             element("line", vec![attr("stroke-dasharray", [10, 20])], vec![]);
+        let mut buffer1 = String::new();
+        line.render(&mut buffer1, 0).unwrap();
         let expected = "<line stroke-dasharray=\"10 20\"></line>";
         assert_eq!(
-            format!("{}", line),
-            expected,
+            buffer1, expected,
             "The value in array should be flatten to string"
         );
 
-        let line: Node<&'static str, &'static str, (), ()> = element(
+        let line: Node<()> = element(
             "line",
             vec![attr("stroke-dasharray", [10, 20, 30, 40])],
             vec![],
         );
+        let mut buffer2 = String::new();
+        line.render(&mut buffer2, 0).unwrap();
         let expected = "<line stroke-dasharray=\"10 20 30 40\"></line>";
         assert_eq!(
-            format!("{}", line),
-            expected,
+            buffer2, expected,
             "The value in array should be flatten to string"
         );
     }

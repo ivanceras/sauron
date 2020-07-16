@@ -1,17 +1,51 @@
 #![deny(warnings)]
 use sauron::{
+    diff,
     html::{
         attributes::*,
         events::*,
         *,
     },
     Node,
-};
-use sauron_vdom::{
-    diff,
     Patch,
-    Text,
 };
+
+#[test]
+fn event_remove() {
+    let elem_id = "input-remove-event-test";
+
+    let old: Node<()> = input(
+        vec![
+            // On input we'll set our Rc<RefCell<String>> value to the input elements value
+            id(elem_id),
+            value("End Text"),
+            on_input(move |_event: InputEvent| {
+                println!("input event is triggered");
+            }),
+        ],
+        vec![],
+    );
+
+    let new = input(
+        vec![
+            // On input we'll set our Rc<RefCell<String>> value to the input elements value
+            id(elem_id),
+            value("End Text"),
+        ],
+        vec![],
+    );
+    let patch = diff(&old, &new);
+    println!("patch: {:#?}", patch);
+
+    assert_eq!(
+        patch,
+        vec![Patch::RemoveAttributes(
+            &"input",
+            0,
+            vec![&on("input", |_| { () })],
+        )]
+    );
+}
 
 #[test]
 fn change_class_attribute() {
@@ -23,7 +57,7 @@ fn change_class_attribute() {
         vec![Patch::AddAttributes(
             &"div",
             0,
-            vec![class(["class1", "difference_class"])]
+            vec![&class("class1"), &class("difference_class")]
         )],
         "Should add the new attributes"
     );
@@ -86,9 +120,9 @@ fn truncate_children_different_attributes() {
         diff(&old, &new),
         vec![
             Patch::TruncateChildren(&"div", 0, 3),
-            Patch::AddAttributes(&"div", 1, vec![class("class5")]),
-            Patch::AddAttributes(&"div", 2, vec![class("class6")]),
-            Patch::AddAttributes(&"div", 3, vec![class("class7")])
+            Patch::AddAttributes(&"div", 1, vec![&class("class5")]),
+            Patch::AddAttributes(&"div", 2, vec![&class("class6")]),
+            Patch::AddAttributes(&"div", 3, vec![&class("class7")])
         ],
         "Should truncate children"
     );
@@ -210,7 +244,7 @@ fn add_attributes() {
     let new = div(vec![id("hello")], vec![]); //{ <div id="hello"> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("hello")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
         "Add attributes",
     );
 
@@ -219,7 +253,7 @@ fn add_attributes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("hello")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
         "Change attribute",
     );
 }
@@ -233,7 +267,7 @@ fn add_style_attributes() {
         vec![Patch::AddAttributes(
             &"div",
             0,
-            vec![style("display", "none")]
+            vec![&style("display", "none")]
         )],
         "Add attributes",
     );
@@ -254,7 +288,7 @@ fn add_style_attributes_1_change() {
         vec![Patch::AddAttributes(
             &"div",
             0,
-            vec![styles([("display", "none"), ("position", "absolute")])]
+            vec![&style("display", "none"), &style("position", "absolute")]
         )],
     );
 }
@@ -278,29 +312,37 @@ fn remove_style_attributes() {
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveAttributes(&"div", 0, vec!["style"])],
+        vec![Patch::RemoveAttributes(
+            &"div",
+            0,
+            vec![&style("display", "block")]
+        )],
         "Add attributes",
     );
 }
 
 #[test]
 fn remove_attributes() {
-    let old: Node<()> = div(vec![id("hey-there")], vec![]); //{ <div id="hey-there"></div> },
-    let new = div(vec![], vec![]); //{ <div> </div> },
+    let old: Node<()> = div(vec![id("hey-there")], vec![]);
+    let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveAttributes(&"div", 0, vec!["id"])],
+        vec![Patch::RemoveAttributes(&"div", 0, vec![&id("hey-there")])],
         "Remove attributes",
     );
 }
 
 #[test]
 fn remove_events() {
-    let old: Node<()> = div(vec![onclick(|_| println!("hi"))], vec![]);
+    let old: Node<()> = div(vec![on_click(|_| println!("hi"))], vec![]);
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveEventListener(&"div", 0, vec!["click"])],
+        vec![Patch::RemoveAttributes(
+            &"div",
+            0,
+            vec![&on_click(|_| println!("hi"))]
+        )],
         "Remove events",
     );
 }
@@ -312,7 +354,7 @@ fn change_attribute() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("changed")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("changed")])],
         "Add attributes",
     );
 }
@@ -324,7 +366,7 @@ fn replace_text_node() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::ChangeText(0, &Text::new("New"))],
+        vec![Patch::ChangeText(0, "New")],
         "Replace text node",
     );
 }

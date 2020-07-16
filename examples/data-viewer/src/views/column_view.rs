@@ -113,7 +113,7 @@ impl ColumnView {
                     [class("column_view__search")],
                     [search_widget(
                         self.width,
-                        vec![oninput(|input| {
+                        vec![on_input(|input| {
                             Msg::ChangeSearch(input.value.to_string())
                         })],
                     )],

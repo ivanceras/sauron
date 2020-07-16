@@ -100,8 +100,8 @@ impl RowView {
                     ("row_view--modified", self.is_changed()),
                 ]),
                 styles(vec![("height", px(Self::row_height()))]),
-                onclick(|_| Msg::Click),
-                ondblclick(|_| Msg::DoubleClick),
+                on_click(|_| Msg::Click),
+                on_dblclick(|_| Msg::DoubleClick),
             ],
             self.fields
                 .iter()

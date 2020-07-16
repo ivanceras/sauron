@@ -2,24 +2,28 @@
 //!
 use crate::Attribute;
 pub use attribute_macros::*;
-pub use sauron_vdom::builder::attr;
-use sauron_vdom::{
-    Style,
-    Value,
-};
+pub use attribute_value::AttributeValue;
+pub use style::Style;
 pub use style_macro::*;
+pub use value::Value;
 
 #[macro_use]
 mod attribute_macros;
 #[macro_use]
 mod style_macro;
+mod attribute_value;
+mod style;
+mod value;
 
 /// create a style attribute
 pub fn style<V, MSG>(style_name: &'static str, value: V) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
 {
-    Attribute::from_styles(vec![Style::new(style_name, value.into())])
+    mt_dom::attr(
+        "style",
+        AttributeValue::from_styles(vec![Style::new(style_name, value.into())]),
+    )
 }
 
 /// A helper function which creates a style attribute by assembling the tuples into a string for the style value.
@@ -39,7 +43,7 @@ where
     for (key, value) in pairs.as_ref() {
         styles.push(Style::new(*key, Into::<Value>::into(value.clone())));
     }
-    Attribute::from_styles(styles)
+    mt_dom::attr("style", AttributeValue::from_styles(styles))
 }
 
 /// A helper function to build styles by accepting pairs
@@ -51,7 +55,7 @@ where
     for (key, value) in pairs.as_ref() {
         styles.push(Style::new(*key, value.clone()));
     }
-    Attribute::from_styles(styles)
+    mt_dom::attr("style", AttributeValue::from_styles(styles))
 }
 
 /// A helper function which creates a style attribute by assembling only the parts that passed the
@@ -77,7 +81,7 @@ where
             styles.push(Style::new(*key, Into::<Value>::into(value.clone())));
         }
     }
-    Attribute::from_styles(styles)
+    mt_dom::attr("style", AttributeValue::from_styles(styles))
 }
 
 /// ```ignore
@@ -151,7 +155,7 @@ pub fn checked<MSG>(is_checked: bool) -> Attribute<MSG> {
     if is_checked {
         attr("checked", "checked")
     } else {
-        attr("", "")
+        empty_attr()
     }
 }
 
@@ -163,5 +167,17 @@ pub fn inner_html<V, MSG>(inner_html: V) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
 {
-    Attribute::function_call("inner_html", inner_html.into())
+    mt_dom::attr(
+        "inner_html",
+        AttributeValue::function_call(inner_html.into()),
+    )
+}
+
+/// a utility function to convert simple value into attribute
+pub fn attr<MSG, V: Into<Value>>(att: &'static str, v: V) -> Attribute<MSG> {
+    mt_dom::attr(att, AttributeValue::from_value(v.into()))
+}
+
+fn empty_attr<MSG>() -> Attribute<MSG> {
+    mt_dom::attr("", AttributeValue::Empty)
 }

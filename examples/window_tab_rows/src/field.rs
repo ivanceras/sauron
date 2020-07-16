@@ -38,7 +38,7 @@ impl Component<Msg> for Field {
 
     fn view(&self) -> Node<Msg> {
         button(
-            vec![class("field"), onclick(|_| Msg::FieldClick)],
+            vec![class("field"), on_click(|_| Msg::FieldClick)],
             vec![text(format!("{} ({})", self.field_name, self.field_clicks))],
         )
     }

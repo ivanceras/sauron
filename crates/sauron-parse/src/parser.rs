@@ -18,6 +18,8 @@ use sauron::{
     html::{
         attributes,
         attributes::{
+            AttributeValue,
+            Style,
             HTML_ATTRS,
             HTML_ATTRS_SPECIAL,
             HTML_STYLES,
@@ -29,7 +31,8 @@ use sauron::{
         },
         text,
     },
-    sauron_vdom::builder::element,
+    mt_dom,
+    mt_dom::element,
     svg::{
         attributes::{
             SVG_ATTRS,
@@ -44,7 +47,6 @@ use sauron::{
     },
     Attribute,
     Node,
-    Style,
 };
 use std::{
     fmt,
@@ -128,7 +130,7 @@ fn extract_attributes<MSG>(
             let value = att.value.to_string();
             if key == "style" {
                 let styles = extract_styles(&value);
-                Some(Attribute::from_styles(styles))
+                Some(mt_dom::attr("style", AttributeValue::from_styles(styles)))
             } else if let Some(attr) = match_attribute(&key) {
                 Some(attributes::attr(attr, value))
             } else {
@@ -233,8 +235,8 @@ pub fn parse<MSG>(html: &str) -> Result<Option<Node<MSG>>, ParseError> {
 pub fn parse_simple<MSG>(html: &str) -> Result<Vec<Node<MSG>>, ParseError> {
     if let Some(html) = parse(html)? {
         if let Some(element) = html.take_element() {
-            assert_eq!(element.tag, "html");
-            Ok(element.children)
+            assert_eq!(*element.tag(), "html");
+            Ok(element.take_children())
         } else {
             Ok(vec![])
         }

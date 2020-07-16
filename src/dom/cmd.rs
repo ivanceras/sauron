@@ -1,7 +1,7 @@
 //! provides functionalities for commands to be executed by the system, such as
 //! when the application starts or after the application updates.
 //!
-use crate::Callback;
+use crate::mt_dom::Callback;
 use std::marker::PhantomData;
 
 /// Cmd is a command to be executed by the system.

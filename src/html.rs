@@ -3,18 +3,18 @@ use crate::{
     Attribute,
     Node,
 };
-pub use sauron_vdom::builder::{
-    attr,
-    on,
+pub use mt_dom::{
+    element,
+    element_ns,
     text,
 };
 
 #[macro_use]
 pub mod attributes;
-#[cfg(feature = "with-dom")]
-pub mod events;
 pub mod tags;
 pub mod units;
+
+pub use crate::dom::events;
 
 pub use tags::commons::*;
 
@@ -40,7 +40,7 @@ pub fn html_element<MSG>(
     attrs: Vec<Attribute<MSG>>,
     children: Vec<Node<MSG>>,
 ) -> Node<MSG> {
-    sauron_vdom::builder::element(tag, attrs, children)
+    element(tag, attrs, children)
 }
 
 /// creates an html element with the element tag name and namespace
@@ -53,7 +53,7 @@ pub fn html_element_ns<MSG>(
     attrs: Vec<Attribute<MSG>>,
     children: Vec<Node<MSG>>,
 ) -> Node<MSG> {
-    sauron_vdom::builder::element_ns(tag, Some(namespace), attrs, children)
+    element_ns(Some(namespace), tag, attrs, children)
 }
 
 /// creates a text node

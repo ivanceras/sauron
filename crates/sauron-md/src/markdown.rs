@@ -9,6 +9,7 @@ use pulldown_cmark::{
 use sauron::{
     html::{
         attributes::{
+            attr,
             checked,
             class,
             href,
@@ -102,10 +103,10 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                     }
                     Tag::Table(aligns) => {
                         if let Some(element) = top.as_element_mut() {
-                            for r in element.children.iter_mut() {
+                            for r in element.children_mut() {
                                 if let Some(r) = r.as_element_mut() {
                                     for (i, c) in
-                                        r.children.iter_mut().enumerate()
+                                        r.children_mut().iter_mut().enumerate()
                                     {
                                         if let Some(tag) = c.as_element_mut() {
                                             match aligns[i] {
@@ -134,9 +135,9 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                     }
                     Tag::TableHead => {
                         if let Some(element) = top.as_element_mut() {
-                            for c in element.children.iter_mut() {
+                            for c in element.children_mut() {
                                 if let Some(tag) = c.as_element_mut() {
-                                    tag.tag = "th";
+                                    tag.set_tag("th");
                                     tag.add_attributes(vec![attr(
                                         "scope", "col",
                                     )]);
@@ -222,6 +223,7 @@ fn make_tag<MSG>(t: Tag, numbers: &mut HashMap<String, usize>) -> Node<MSG> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use sauron::Render;
 
     #[test]
     fn source_code() {
@@ -234,8 +236,11 @@ mod tests {
         "#;
         let expected = "<pre>\n    <code class=\"rust\">    fn main(){\n        println!(\"Hello world!\");\n    }\n</code>\n</pre>";
         let view: Node<()> = markdown(md);
-        println!("view: {}", view.to_string());
-        assert_eq!(expected, view.to_string());
+
+        let mut buffer = String::new();
+        view.render(&mut buffer, 0).unwrap();
+        println!("view: {}", buffer);
+        assert_eq!(expected, buffer);
     }
 
     #[test]
@@ -245,8 +250,11 @@ This is has some `code` and other..
         "#;
         let expected = "<p>\n    This is has some \n    <code>code</code>\n     and other..\n</p>";
         let view: Node<()> = markdown(md);
-        println!("view: {}", view.to_string());
-        assert_eq!(expected, view.to_string());
+
+        let mut buffer = String::new();
+        view.render(&mut buffer, 0).unwrap();
+        println!("view: {}", buffer);
+        assert_eq!(expected, buffer);
     }
 
     #[test]
@@ -271,8 +279,11 @@ Duplicated footnote reference[^second].
 
         let expected = "<div>\n    <h3>\n        <a href=\"https://github.com/markdown-it/markdown-it-footnote\" title=\"\">Footnotes</a>\n    </h3>\n    <p>\n        Footnote 1 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#first\">1</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Footnote 2 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Inline footnote^\n        [\n        Text of inline footnote\n        ]\n         definition.\n    </p>\n    <p>\n        Duplicated footnote reference\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <div class=\"footnote-definition\" id=\"first\">\n        <sup class=\"footnote-label\">1</sup>\n        <p>\n            Footnote \n            <span class=\"font-weight-bold\">can have markup</span>\n        </p>\n    </div>\n    <pre>\n        <code>and multiple paragraphs.\n</code>\n    </pre>\n    <div class=\"footnote-definition\" id=\"second\">\n        <sup class=\"footnote-label\">2</sup>\n        <p>Footnote text.</p>\n    </div>\n</div>";
         let view: Node<()> = markdown(md);
-        println!("view: {}", view.to_string());
-        assert_eq!(expected, view.to_string());
+
+        let mut buffer = String::new();
+        view.render(&mut buffer, 0).unwrap();
+        println!("view: {}", buffer);
+        assert_eq!(expected, buffer);
     }
 
     #[test]
@@ -284,7 +295,11 @@ Duplicated footnote reference[^second].
         let expected =
             "<p>\n    <a href=\"link.html\" title=\"\">Hello</a>\n    \n\n    <img src=\"img.jpeg\"></img>\n</p>";
         let view: Node<()> = markdown(md);
-        assert_eq!(expected, view.to_string())
+
+        let mut buffer = String::new();
+        view.render(&mut buffer, 0).unwrap();
+        println!("view: {}", buffer);
+        assert_eq!(expected, buffer);
     }
 
     #[test]
@@ -307,8 +322,11 @@ look like:
         <li>the other one</li>
     </ul>
 </div>"#;
-        println!("{}", view.to_string());
-        assert_eq!(expected, view.to_string());
+
+        let mut buffer = String::new();
+        view.render(&mut buffer, 0).unwrap();
+        println!("view: {}", buffer);
+        assert_eq!(expected, buffer);
     }
 
     #[test]
@@ -326,7 +344,11 @@ look like:
         <a href="http://nodeca.github.io/pica/demo/" title="title text!">link with title</a>
     </p>
 </div>"#;
-        assert_eq!(expected, view.to_string());
+
+        let mut buffer = String::new();
+        view.render(&mut buffer, 0).unwrap();
+        println!("view: {}", buffer);
+        assert_eq!(expected, buffer);
     }
 
     #[test]
@@ -346,8 +368,8 @@ look like:
     <h2>Tables</h2>
     <table class="table">
         <th>
-            <th class="text-left" scope="col">Option</th>
-            <th class="text-right" scope="col">Description</th>
+            <th scope="col" class="text-left">Option</th>
+            <th scope="col" class="text-right">Description</th>
         </th>
         <tr>
             <td class="text-left">data</td>
@@ -367,6 +389,10 @@ look like:
         </tr>
     </table>
 </div>"#;
-        assert_eq!(expected, view.to_string());
+
+        let mut buffer = String::new();
+        view.render(&mut buffer, 0).unwrap();
+        println!("view: {}", buffer);
+        assert_eq!(expected, buffer);
     }
 }

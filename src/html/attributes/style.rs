@@ -1,4 +1,4 @@
-use crate::vnode::Value;
+use crate::prelude::Value;
 use std::fmt;
 
 /// css styles
@@ -8,25 +8,22 @@ use std::fmt;
 /// style="..."
 /// ```
 #[derive(Debug, Clone, PartialEq)]
-pub struct Style<ATT> {
+pub struct Style {
     /// style name such as border, width, etc
-    pub name: ATT,
+    pub name: &'static str,
     /// value of the style
     pub value: Value,
 }
 
-impl<ATT> Style<ATT> {
+impl Style {
     /// create a style with name and value
-    pub fn new(name: ATT, value: Value) -> Self {
+    pub fn new(name: &'static str, value: Value) -> Self {
         Style { name, value }
     }
 }
 
-impl<ATT> fmt::Display for Style<ATT>
-where
-    ATT: ToString,
-{
+impl fmt::Display for Style {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}:{}", self.name.to_string(), self.value)
+        write!(f, "{}:{}", self.name, self.value)
     }
 }

@@ -33,13 +33,10 @@ fn patches_dom() {
 
     let document = web_sys::window().unwrap().document().unwrap();
 
-    let sauron_vdom: Node<()> = div(vec![], vec![]);
+    let vdom: Node<()> = div(vec![], vec![]);
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        sauron_vdom,
-        &sauron::body(),
-    );
+    let mut dom_updater =
+        DomUpdater::new_append_to_mount(&simple_program, vdom, &sauron::body());
 
     let new_vdom = div(vec![id("patched")], vec![]); //html! { <div id="patched"></div> };
     dom_updater.update_dom(&simple_program, new_vdom);
@@ -69,7 +66,7 @@ fn updates_active_closure_on_replace() {
     let replace_node = input(
         vec![
             id(elem_id),
-            oninput(move |event: sauron_vdom::event::InputEvent| {
+            on_input(move |event: sauron::html::events::InputEvent| {
                 *text_clone.borrow_mut() = event.value.to_string();
             }),
             value("End Text"),
@@ -86,7 +83,7 @@ fn updates_active_closure_on_replace() {
 
     assert_eq!(&*text.borrow(), "Start Text");
 
-    // After dispatching the oninput event our `text` should have a value of the input elements value.
+    // After dispatching the on_input event our `text` should have a value of the input elements value.
     let input = sauron::document().get_element_by_id(&elem_id).unwrap();
     web_sys::EventTarget::from(input)
         .dispatch_event(&input_event)
@@ -120,7 +117,7 @@ fn updates_active_closures_on_append() {
             vec![input(
                 vec![
                     id(elem_id),
-                    oninput(move |event: sauron_vdom::event::InputEvent| {
+                    on_input(move |event: sauron::html::events::InputEvent| {
                         *text_clone.borrow_mut() = event.value.to_string();
                     }),
                     value("End Text"),
@@ -139,7 +136,7 @@ fn updates_active_closures_on_append() {
 
     assert_eq!(&*text.borrow(), "Start Text");
 
-    // After dispatching the oninput event our `text` should have a value of the input elements value.
+    // After dispatching the on_input event our `text` should have a value of the input elements value.
     let input = sauron::document().get_element_by_id(elem_id).unwrap();
     web_sys::EventTarget::from(input)
         .dispatch_event(&input_event)

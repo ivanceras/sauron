@@ -1,7 +1,8 @@
-use sauron_vdom::{
-    builder::attr,
+use crate::prelude::{
+    AttributeValue,
     Value,
 };
+use mt_dom::attr;
 
 /// declare a function with the name corresponds to attribute name for easy usage in html elements
 /// Example:
@@ -26,7 +27,7 @@ macro_rules! declare_attributes {
                 pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
                     where V: Into<Value>,
                     {
-                        attr(stringify!($name), v)
+                        attr(stringify!($name), AttributeValue::from_value(v.into()))
                 }
             }
          )*
@@ -46,7 +47,7 @@ macro_rules! declare_attributes {
                 pub fn $name<V, MSG>(v: V) -> crate::Attribute<MSG>
                     where V: Into<Value>,
                     {
-                        attr($attribute, v)
+                        attr($attribute, AttributeValue::from_value(v.into()))
                 }
              }
          )*

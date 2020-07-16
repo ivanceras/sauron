@@ -15,13 +15,13 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 js-sys = { version = "0.3.41", optional = true }
-sauron_vdom = { path ="crates/sauron_vdom", version = "0.26.0"}
 wasm-bindgen = { version = "0.2.64", optional = true }
 lazy_static = "1.3.0"
 log = "0.4.8"
 cfg-if = "0.1.10"
 thiserror = "1.0"
 doc-comment = "0.3.3"
+mt-dom = { path = "../mt-dom" }
 
 [dependencies.web-sys]
 version = "0.3.41"
@@ -35,6 +35,7 @@ features = [
     "HtmlElement",
     "EventTarget",
     "KeyboardEvent",
+    "HashChangeEvent",
     "InputEvent",
     "HtmlCollection",
     "HtmlInputElement",
@@ -63,6 +64,7 @@ with-dom = ["wasm-bindgen", "js-sys", "web-sys"]
 [dev-dependencies]
 wasm-bindgen-test = "0.3.14"
 console_error_panic_hook = "0.1.6"
+console_log = "0.1"
 
 [dev-dependencies.web-sys]
 version = "0.3.41"
@@ -86,7 +88,6 @@ harness = false
 
 [workspace]
 members = [
-    "crates/sauron_vdom",
     "crates/sauron-md",
     "crates/sauron-syntax",
     "crates/sauron-parse",

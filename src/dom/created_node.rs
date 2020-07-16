@@ -1,10 +1,15 @@
-use crate::dom::Dispatch;
-use sauron_vdom::{
-    self,
-    Callback,
+use crate::{
+    dom::Dispatch,
+    mt_dom::{
+        AttValue,
+        Callback,
+    },
+    prelude::AttributeValue,
+    Attribute,
 };
 use std::{
     collections::HashMap,
+    fmt::Write,
     sync::Mutex,
 };
 use wasm_bindgen::{
@@ -15,6 +20,8 @@ use web_sys::{
     self,
     Element,
     EventTarget,
+    HtmlInputElement,
+    HtmlTextAreaElement,
     Node,
     Text,
 };
@@ -67,8 +74,8 @@ impl<T> CreatedNode<T> {
     }
 
     /// create a text node
-    pub fn create_text_node(text: &sauron_vdom::Text) -> Text {
-        crate::document().create_text_node(&text.text)
+    pub fn create_text_node(text: &str) -> Text {
+        crate::document().create_text_node(text)
     }
 
     /// create an element node
@@ -105,90 +112,101 @@ impl<T> CreatedNode<T> {
         }
     }
 
-    /// Build a DOM element by recursively creating DOM nodes for this element and it's
-    /// children, it's children's children, etc.
-    pub fn create_element_node<DSP, MSG>(
+    /// set the element attribute
+    pub fn set_element_attribute<DSP, MSG>(
         program: Option<&DSP>,
-        velem: &crate::Element<MSG>,
-    ) -> CreatedNode<Element>
-    where
+        closures: &mut ActiveClosure,
+        element: &Element,
+        attr: &Attribute<MSG>,
+    ) where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        let document = crate::document();
-
-        let element = if let Some(ref namespace) = velem.namespace {
-            document
-                .create_element_ns(Some(namespace), &velem.tag)
-                .expect("Unable to create element")
-        } else {
-            document
-                .create_element(&velem.tag)
-                .expect("Unable to create element")
-        };
-
-        let mut closures = ActiveClosure::new();
-
-        velem.attributes().iter().for_each(|attr| {
-            // attr "" is used in checked = false, since checked attribute is only unchecked
-            // when there is no checked attribute
-            if !attr.name().is_empty() {
-                if let Some(ref namespace) = attr.namespace() {
-                    element
-                        .set_attribute_ns(
-                            Some(namespace),
-                            attr.name(),
-                            &attr
-                                .get_value()
-                                .map(|v| v.to_string())
-                                .unwrap_or(String::new()),
-                        )
-                        .expect("Set element attribute_ns in create element");
-                } else {
-                    match *attr.name() {
-                        "inner_html" => {
-                            element.set_inner_html(
-                                &attr
-                                    .get_value()
-                                    .map(|v| v.to_string())
-                                    .unwrap_or(String::new()),
-                            )
-                        }
-                        _ => {
-                            element
-                                .set_attribute(
+        match attr.value() {
+            AttValue::Plain(attr_value) => {
+                match attr_value {
+                    AttributeValue::Simple(simple) => {
+                        match *attr.name() {
+                            "value" => {
+                                if let Some(input) =
+                                    element.dyn_ref::<HtmlInputElement>()
+                                {
+                                    input.set_value(&simple.to_string());
+                                } else if let Some(textarea) =
+                                    element.dyn_ref::<HtmlTextAreaElement>()
+                                {
+                                    textarea.set_value(&simple.to_string());
+                                }
+                            }
+                            "checked" => {
+                                if let Some(input) =
+                                    element.dyn_ref::<HtmlInputElement>()
+                                {
+                                    let checked =
+                                        simple.as_bool().unwrap_or(false);
+                                    input.set_checked(checked);
+                                }
+                            }
+                            _ => {
+                                if let Some(ref namespace) = attr.namespace() {
+                                    // Warning NOTE: set_attribute_ns should only be called
+                                    // when you meant to use a namespace
+                                    // using this with None will error in the browser with:
+                                    // NamespaceError: An attempt was made to create or change an object in a way which is incorrect with regard to namespaces
+                                    element
+                                .set_attribute_ns(
+                                    Some(namespace),
                                     attr.name(),
-                                    &attr
-                                        .get_value()
-                                        .map(|v| v.to_string())
-                                        .unwrap_or(String::new()),
+                                    &simple.to_string()
                                 )
-                                .expect(
-                                    "Set element attribute in create element",
-                                );
+                                .expect("Set element attribute_ns in create element");
+                                } else {
+                                    element
+                            .set_attribute(
+                                attr.name(),
+                                &simple.to_string(),
+                            )
+                            .expect(
+                                "Set element attribute_ns in create element",
+                            );
+                                }
+                            }
                         }
                     }
+                    AttributeValue::Style(styles) => {
+                        let mut style_str = String::new();
+                        styles.iter().for_each(|s| {
+                            write!(style_str, "{};", s).expect("must write")
+                        });
+
+                        element
+                            .set_attribute("style", &style_str)
+                            .expect("must be able to set style");
+                    }
+                    AttributeValue::FunctionCall(fvalue) => {
+                        match *attr.name() {
+                            "inner_html" => {
+                                element.set_inner_html(&fvalue.to_string())
+                            }
+                            _ => (),
+                        }
+                    }
+                    AttributeValue::Empty => (),
                 }
             }
-        });
+            AttValue::Callback(callback) => {
+                let unique_id = create_unique_identifier();
 
-        if !velem.events().is_empty() {
-            let unique_id = create_unique_identifier();
+                // set the data-sauron_vdom-id this will be read later on
+                // when it's time to remove this element and its closures and event listeners
+                element
+                    .set_attribute(DATA_SAURON_VDOM_ID, &unique_id.to_string())
+                    .expect("Could not set attribute on element");
 
-            // set the data-sauron_vdom-id this will be read later on
-            // when it's time to remove this element and its closures and event listeners
-            element
-                .set_attribute(DATA_SAURON_VDOM_ID, &unique_id.to_string())
-                .expect("Could not set attribute on element");
+                closures.insert(unique_id, vec![]);
 
-            closures.insert(unique_id, vec![]);
-
-            if let Some(program) = program {
-                for event_attr in velem.events().iter() {
-                    let event_str = event_attr.name();
-                    let callback = event_attr
-                        .get_callback()
-                        .expect("expecting a callback");
+                if let Some(program) = program {
+                    let event_str = attr.name();
                     let current_elm: &EventTarget = element
                         .dyn_ref()
                         .expect("unable to cast to event targe");
@@ -207,9 +225,38 @@ impl<T> CreatedNode<T> {
                 }
             }
         }
+    }
+
+    /// Build a DOM element by recursively creating DOM nodes for this element and it's
+    /// children, it's children's children, etc.
+    pub fn create_element_node<DSP, MSG>(
+        program: Option<&DSP>,
+        velem: &crate::Element<MSG>,
+    ) -> CreatedNode<Element>
+    where
+        MSG: 'static,
+        DSP: Clone + Dispatch<MSG> + 'static,
+    {
+        let document = crate::document();
+
+        let element = if let Some(ref namespace) = velem.namespace() {
+            document
+                .create_element_ns(Some(namespace), &velem.tag())
+                .expect("Unable to create element")
+        } else {
+            document
+                .create_element(&velem.tag())
+                .expect("Unable to create element")
+        };
+
+        let mut closures = ActiveClosure::new();
+
+        velem.get_attributes().iter().for_each(|attr| {
+            Self::set_element_attribute(program, &mut closures, &element, attr);
+        });
 
         let mut previous_node_was_text = false;
-        for child in velem.children.iter() {
+        for child in velem.get_children().iter() {
             match child {
                 crate::Node::Text(text_node) => {
                     let current_node: &web_sys::Node = element.as_ref();
@@ -285,8 +332,7 @@ where
         // - calling event.prevent_default() prevent InputEvent to trigger when KeyPressEvent is
         // also one of the event callback
         // event.prevent_default();
-        let cb_event = crate::DomEvent(event);
-        let msg = callback_clone.emit(cb_event);
+        let msg = callback_clone.emit(event);
         program_clone.dispatch(msg);
     }))
 }

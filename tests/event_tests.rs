@@ -8,6 +8,7 @@ use std::rc::Rc;
 use wasm_bindgen_test::*;
 
 use sauron::{
+    diff,
     dom::{
         test_fixtures::simple_program,
         DomUpdater,
@@ -18,6 +19,7 @@ use sauron::{
         *,
     },
     Node,
+    Patch,
 };
 use std::cell::RefCell;
 
@@ -25,7 +27,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 
 // Make sure that we successfully attach an event listener and see it work.
 #[wasm_bindgen_test]
-fn on_input() {
+fn on_input_test() {
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
 
@@ -35,7 +37,7 @@ fn on_input() {
         vec![
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
-            oninput(move |event: sauron_vdom::event::InputEvent| {
+            on_input(move |event: InputEvent| {
                 *text_clone.borrow_mut() = event.value.to_string();
             }),
             value("End Text"),
@@ -54,7 +56,7 @@ fn on_input() {
 
     assert_eq!(&*text.borrow(), "Start Text");
 
-    // After dispatching the oninput event our `text` should have a value of the input elements value.
+    // After dispatching the on_input event our `text` should have a value of the input elements value.
     web_sys::EventTarget::from(input_element)
         .dispatch_event(&input_event)
         .unwrap();
@@ -83,7 +85,7 @@ fn added_event() {
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
             value("End Text"),
-            oninput(move |event: sauron_vdom::event::InputEvent| {
+            on_input(move |event: InputEvent| {
                 *text_clone.borrow_mut() = event.value.to_string();
             }),
         ],
@@ -124,7 +126,7 @@ fn remove_event() {
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
             value("End Text"),
-            oninput(move |event: sauron_vdom::event::InputEvent| {
+            on_input(move |event: InputEvent| {
                 *text_clone.borrow_mut() = event.value.to_string();
             }),
         ],
@@ -139,6 +141,8 @@ fn remove_event() {
         ],
         vec![],
     );
+    let patch = diff(&old, &new);
+    debug!("patch: {:?}", patch);
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
@@ -168,24 +172,24 @@ fn remove_event_from_truncated_children() {
     let old: Node<()> = div(
         vec![],
         vec![
-            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
-            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
-            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
-            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
-            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
+            button(vec![on_click(|_| trace!("Clicked here"))], vec![]),
+            button(vec![on_click(|_| trace!("Clicked here"))], vec![]),
+            button(vec![on_click(|_| trace!("Clicked here"))], vec![]),
+            button(vec![on_click(|_| trace!("Clicked here"))], vec![]),
+            button(vec![on_click(|_| trace!("Clicked here"))], vec![]),
         ],
     );
 
     let new: Node<()> = div(
         vec![],
-        vec![button(vec![onclick(|_| trace!("Clicked here"))], vec![])],
+        vec![button(vec![on_click(|_| trace!("Clicked here"))], vec![])],
     );
 
     let body = sauron::body();
     let simple_program = simple_program();
     assert_eq!(
         sauron::diff(&old, &new),
-        vec![sauron_vdom::Patch::TruncateChildren(&"div", 0, 1)],
+        vec![Patch::TruncateChildren(&"div", 0, 1)],
         "Should be a Truncate patch"
     );
     let mut dom_updater =
@@ -209,24 +213,24 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     let old: Node<()> = div(
         vec![],
         vec![
-            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
-            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
+            button(vec![on_click(|_| trace!("Clicked here"))], vec![]),
+            button(vec![on_click(|_| trace!("Clicked here"))], vec![]),
             button(vec![], vec![]),
             button(vec![], vec![]),
-            button(vec![onclick(|_| trace!("Clicked here"))], vec![]),
+            button(vec![on_click(|_| trace!("Clicked here"))], vec![]),
         ],
     );
 
     let new: Node<()> = div(
         vec![],
-        vec![button(vec![onclick(|_| trace!("Clicked here"))], vec![])],
+        vec![button(vec![on_click(|_| trace!("Clicked here"))], vec![])],
     );
 
     let body = sauron::body();
     let simple_program = simple_program();
     assert_eq!(
         sauron::diff(&old, &new),
-        vec![sauron_vdom::Patch::TruncateChildren(&"div", 0, 1)],
+        vec![Patch::TruncateChildren(&"div", 0, 1)],
         "Should be a Truncate patch"
     );
     let mut dom_updater =
@@ -247,7 +251,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
 
 #[wasm_bindgen_test]
 fn remove_event_from_replaced_node() {
-    let old: Node<()> = div(vec![onclick(|_| trace!("I'm a div"))], vec![]);
+    let old: Node<()> = div(vec![on_click(|_| trace!("I'm a div"))], vec![]);
 
     let new: Node<()> = p(vec![], vec![]);
 
@@ -255,16 +259,7 @@ fn remove_event_from_replaced_node() {
     let simple_program = simple_program();
     assert_eq!(
         sauron::diff(&old, &new),
-        vec![sauron_vdom::Patch::Replace(
-            &"div",
-            0,
-            &sauron_vdom::Node::Element(sauron_vdom::Element {
-                tag: "p",
-                attrs: vec![],
-                children: vec![],
-                namespace: None
-            })
-        )],
+        vec![Patch::Replace(&"div", 0, &p(vec![], vec![]))],
         "Should be a Replace patch"
     );
     let mut dom_updater =

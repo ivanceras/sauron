@@ -131,7 +131,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onclick(|_| Msg::PrimaryClicked),
+                        on_click(|_| Msg::PrimaryClicked),
                     ],
                 )
             }
@@ -144,7 +144,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onclick(|_| Msg::PrimaryClicked),
+                        on_click(|_| Msg::PrimaryClicked),
                     ],
                 )
             }
@@ -167,7 +167,7 @@ impl FieldView {
                         checkbox(
                             false,
                             vec![classes, size, padding],
-                            vec![onchange(|input| {
+                            vec![on_change(|input| {
                                 Msg::CheckedChange(input.value.to_string())
                             })],
                         )
@@ -182,7 +182,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -195,7 +195,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -205,7 +205,7 @@ impl FieldView {
                 checkbox(
                     *v,
                     vec![classes, size, padding],
-                    vec![onchange(|input| {
+                    vec![on_change(|input| {
                         Msg::CheckedChange(input.value.to_string())
                     })],
                 )
@@ -217,7 +217,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -230,7 +230,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -243,7 +243,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -256,7 +256,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -269,7 +269,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -282,7 +282,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -295,7 +295,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -308,7 +308,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -321,7 +321,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -334,7 +334,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -347,7 +347,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],
@@ -360,7 +360,7 @@ impl FieldView {
                         classes,
                         size,
                         padding,
-                        onchange(|input| {
+                        on_change(|input| {
                             Msg::TextChange(input.value.to_string())
                         }),
                     ],

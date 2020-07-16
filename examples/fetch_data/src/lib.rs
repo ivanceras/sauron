@@ -76,7 +76,7 @@ impl Component<Msg> for App {
                                 class("client"),
                                 r#type("button"),
                                 value("Click me!"),
-                                onclick(|_| {
+                                on_click(|_| {
                                     trace!("Button is clicked");
                                     Msg::Click
                                 }),
@@ -130,6 +130,7 @@ impl Component<Msg> for App {
 
 #[wasm_bindgen(start)]
 pub fn main() {
+    console_error_panic_hook::set_once();
     Program::mount_to_body(App::new());
 }
 

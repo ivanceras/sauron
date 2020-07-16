@@ -1,17 +1,17 @@
-#![deny(warnings)]
-#![deny(clippy::all)]
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png"
-)]
-#![deny(
-    missing_docs,
-    missing_debug_implementations,
-    missing_copy_implementations,
-    trivial_casts,
-    trivial_numeric_casts,
-    unstable_features,
-    unused_import_braces
-)]
+//#![deny(warnings)]
+//#![deny(clippy::all)]
+//#![doc(
+//    html_logo_url = "https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png"
+//)]
+//#![deny(
+//    missing_docs,
+//    //missing_debug_implementations,
+//    missing_copy_implementations,
+//    trivial_casts,
+//    trivial_numeric_casts,
+//    unstable_features,
+//    unused_import_braces
+//)]
 //!
 //! [![Latest Version](https://img.shields.io/crates/v/sauron.svg)](https://crates.io/crates/sauron)
 //! [![Build Status](https://travis-ci.org/ivanceras/sauron.svg?branch=master)](https://travis-ci.org/ivanceras/sauron)
@@ -82,7 +82,7 @@
 //!                         class("client"),
 //!                         type_("button"),
 //!                         value("Click me!"),
-//!                         onclick(|_| {
+//!                         on_click(|_| {
 //!                             trace!("Button is clicked");
 //!                             Msg::Click
 //!                         }),
@@ -189,42 +189,14 @@
 //!
 #[macro_use]
 extern crate doc_comment;
-use cfg_if::cfg_if;
 
+use cfg_if::cfg_if;
 cfg_if! {if #[cfg(feature = "with-dom")] {
     pub mod dom;
     pub use dom::*;
-
-    use wasm_bindgen::{
-        JsCast,
-        JsValue,
-    };
-
-    /// This needs wrapping only so that we can implement
-    /// PartialEq for testing purposes
-    #[derive(Clone, Debug)]
-    pub struct DomEvent(pub web_sys::Event);
-
-    impl std::ops::Deref for crate::Event {
-        type Target = web_sys::Event;
-
-        fn deref(&self) -> &Self::Target {
-            &self.0
-        }
-    }
-
-    impl PartialEq for crate::Event {
-        fn eq(&self, other: &Self) -> bool {
-            let js_value: Option<&JsValue> = self.0.dyn_ref();
-            let other_value: Option<&JsValue> = other.0.dyn_ref();
-            js_value == other_value
-        }
-    }
+    /// Map the Event to DomEvent, which are browser events
+    pub type Event = web_sys::Event;
 }}
-
-#[cfg(feature = "with-dom")]
-/// Map the Event to DomEvent, which are browser events
-pub type Event = DomEvent;
 
 #[cfg(not(feature = "with-dom"))]
 pub type Event = ();
@@ -235,14 +207,13 @@ pub mod html;
 #[macro_use]
 pub mod svg;
 
-pub use sauron_vdom;
+pub use render::Render;
+pub mod render;
 
-pub use sauron_vdom::{
-    diff,
-    Callback,
-    Text,
-    Value,
-};
+use mt_dom::diff_with_key;
+use prelude::AttributeValue;
+
+pub use mt_dom;
 
 /// Prelude simplifies the imports from sauron
 /// This imports the necessary functions to build
@@ -250,7 +221,10 @@ pub use sauron_vdom::{
 pub mod prelude {
     pub use crate::{
         html::{
-            attributes::*,
+            attributes::{
+                attr,
+                *,
+            },
             tags::{
                 commons::*,
                 *,
@@ -265,27 +239,45 @@ pub mod prelude {
         },
         *,
     };
-
-    #[cfg(feature = "with-dom")]
-    pub use crate::html::events::*;
 }
+
+/// namespace type in node, which could be change to an enum
+pub type Namespace = &'static str;
+/// tags are using static str for now, can also be enum tags
+pub type Tag = &'static str;
+/// attribute keys
+pub type AttributeKey = &'static str;
 
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
 /// App code.
-pub type Node<MSG> = sauron_vdom::Node<&'static str, &'static str, Event, MSG>;
+pub type Node<MSG> =
+    mt_dom::Node<Namespace, Tag, AttributeKey, AttributeValue, Event, MSG>;
 
 /// Element type with tag and attribute name type set to &'static str
 pub type Element<MSG> =
-    sauron_vdom::Element<&'static str, &'static str, Event, MSG>;
+    mt_dom::Element<Namespace, Tag, AttributeKey, AttributeValue, Event, MSG>;
 
 /// Patch as result of diffing the current_vdom and the new vdom.
 /// The tag and attribute name types is set to &'static str
 pub type Patch<'a, MSG> =
-    sauron_vdom::Patch<'a, &'static str, &'static str, Event, MSG>;
+    mt_dom::Patch<'a, Namespace, Tag, AttributeKey, AttributeValue, Event, MSG>;
 
 /// Attribute type used in sauron where the type of the Attribute name is &'static str
-pub type Attribute<MSG> = sauron_vdom::Attribute<&'static str, Event, MSG>;
+pub type Attribute<MSG> =
+    mt_dom::Attribute<Namespace, AttributeKey, AttributeValue, Event, MSG>;
 
-/// Style with statis str as the style name
-pub type Style = sauron_vdom::Style<&'static str>;
+/// Callback where Event type is supplied
+pub type Callback<MSG> = mt_dom::Callback<Event, MSG>;
+
+/// This is a sauron html specific functionality
+/// diff 2 nodes with attribute using `&'static str` instead of generic ATT
+pub fn diff<'a, MSG>(
+    old: &'a Node<MSG>,
+    new: &'a Node<MSG>,
+) -> Vec<Patch<'a, MSG>>
+where
+    MSG: 'static,
+{
+    diff_with_key(old, new, &"key")
+}

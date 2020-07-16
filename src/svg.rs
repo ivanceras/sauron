@@ -1,5 +1,5 @@
 //! Provides functions and macros to build svg elements
-pub use sauron_vdom::builder::{
+pub use mt_dom::{
     attr,
     element,
     element_ns,

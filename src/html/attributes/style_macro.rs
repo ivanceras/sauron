@@ -4,7 +4,7 @@ macro_rules! style {
     (
         $($name:tt => $value:expr;)*
     ) => {
-        $crate::html::attributes::styles_values([$((stringify!($name).trim_matches('"'), Into::<$crate::Value>::into($value))),*])
+        $crate::html::attributes::styles_values([$((stringify!($name).trim_matches('"'), Into::<$crate::html::attributes::Value>::into($value))),*])
     };
 
 }
@@ -384,9 +384,12 @@ pub const HTML_STYLES: [&'static str; 368] = [
 
 #[cfg(test)]
 mod tests {
-    use crate::html::{
-        units::px,
-        *,
+    use crate::{
+        html::{
+            units::px,
+            *,
+        },
+        Render,
     };
 
     #[test]
@@ -394,7 +397,7 @@ mod tests {
         let mut b1 = String::new();
         let s1: Attribute<()> =
             style! {hello=> "world"; width=> px(10); height=> px(20);};
-        s1.render(&mut b1).unwrap();
+        s1.render(&mut b1, 0).unwrap();
 
         assert_eq!(b1, r#"style="hello:world;width:10px;height:20px;""#);
 
@@ -402,7 +405,7 @@ mod tests {
         width=> px(10); height=> px(20);};
 
         let mut b2 = String::new();
-        s2.render(&mut b2).unwrap();
+        s2.render(&mut b2, 0).unwrap();
         println!("s2: {:#?}", s2);
 
         assert_eq!(
@@ -424,7 +427,7 @@ mod tests {
             "padding-left"=> px(padding_width);
             "padding-right"=> px(padding_width);
         };
-        s3.render(&mut b3).unwrap();
+        s3.render(&mut b3, 0).unwrap();
         assert_eq!(
             b3,
             r#"style="width:101px;padding-left:200px;padding-right:200px;""#

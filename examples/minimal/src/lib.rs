@@ -1,10 +1,8 @@
 #![deny(warnings)]
 use sauron::{
+    html::attributes::attr,
     prelude::*,
-    Cmd,
-    Component,
     Node,
-    Program,
 };
 use wasm_bindgen::prelude::*;
 
@@ -35,7 +33,7 @@ impl Component<Msg> for App {
                         class("client"),
                         type_("button"),
                         value("Click me!"),
-                        onclick(|_| {
+                        on_click(|_| {
                             trace!("Button is clicked");
                             Msg::Click
                         }),

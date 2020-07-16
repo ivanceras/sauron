@@ -3,11 +3,11 @@ use crate::{
     dom::{
         created_node,
         created_node::{
-            create_closure_wrap,
             ActiveClosure,
             CreatedNode,
         },
     },
+    mt_dom::AttValue,
     Dispatch,
     Patch,
 };
@@ -17,15 +17,11 @@ use std::collections::{
     HashSet,
 };
 use wasm_bindgen::{
-    closure::Closure,
     JsCast,
     JsValue,
 };
 use web_sys::{
     Element,
-    Event,
-    HtmlInputElement,
-    HtmlTextAreaElement,
     Node,
     Text,
 };
@@ -243,107 +239,36 @@ where
     let mut active_closures = ActiveClosure::new();
     match patch {
         Patch::AddAttributes(_tag, _node_idx, attributes) => {
+            // TODO: will have to aggregate the attributes that has the name
+            // here, since it is not being handled in mt-dom.
             for attr in attributes.iter() {
-                // attr "" is used in checked = false, since checked attribute is only unchecked
-                // when there is no checked attribute
-                if !attr.name().is_empty() {
-                    // NOTE: set_attribute('value',..) is not enough
-                    // value need to explicitly call the set_value in order for the
-                    // actual value gets reflected.
-                    //
-                    // TODO: centrarlize this with set_attributes in created_node
-                    match *attr.name() {
-                        "value" => {
-                            let string_value =
-                                if let Some(value) = attr.get_value() {
-                                    value.to_string()
-                                } else {
-                                    String::new()
-                                };
-                            if let Some(input) =
-                                node.dyn_ref::<HtmlInputElement>()
-                            {
-                                input.set_value(&string_value);
-                            } else if let Some(textarea) =
-                                node.dyn_ref::<HtmlTextAreaElement>()
-                            {
-                                textarea.set_value(&string_value);
-                            }
-                        }
-                        "checked" => {
-                            if let Some(input) =
-                                node.dyn_ref::<HtmlInputElement>()
-                            {
-                                let checked = attr
-                                    .get_value()
-                                    .map(|v| v.as_bool())
-                                    .flatten()
-                                    .unwrap_or(false);
-                                input.set_checked(checked);
-                            }
-                        }
-                        "inner_html" => {
-                            if let Some(element) = node.dyn_ref::<Element>() {
-                                element.set_inner_html(
-                                    &attr
-                                        .get_function_call_value()
-                                        .map(|v| v.to_string())
-                                        .unwrap_or(String::new()),
-                                );
-                            }
-                        }
-                        _ => {
-                            node.set_attribute(
-                                attr.name(),
-                                &attr
-                                    .get_value()
-                                    .map(|v| v.to_string())
-                                    .unwrap_or(String::new()),
-                            )?;
-                        }
-                    }
-                }
+                CreatedNode::<Node>::set_element_attribute(
+                    program,
+                    &mut active_closures,
+                    node,
+                    attr,
+                )
             }
 
             Ok(active_closures)
         }
         Patch::RemoveAttributes(_tag, _node_idx, attributes) => {
-            for attrib_name in attributes.iter() {
-                node.remove_attribute(attrib_name)?;
-                //TODO: also explicitly deal with value here..
-            }
-
-            Ok(active_closures)
-        }
-
-        // TODO: Shall we also remove the listener first?
-        Patch::AddEventListener(_tag, node_idx, events) => {
-            if let Some(program) = program {
-                for event in events.iter() {
-                    let callback =
-                        event.get_callback().expect("expecting a callback");
-                    let closure_wrap: Closure<dyn FnMut(Event)> =
-                        create_closure_wrap(program, callback);
-                    let func: &Function = closure_wrap.as_ref().unchecked_ref();
-                    node.add_event_listener_with_callback(event.name(), func)?;
-                    let node_id = *node_idx as u32;
-                    if let Some(closure) = active_closures.get_mut(&node_id) {
-                        closure.push((event.name(), closure_wrap));
-                    } else {
-                        active_closures.insert(
-                            node_id,
-                            vec![(event.name(), closure_wrap)],
-                        );
+            for attr in attributes.iter() {
+                match attr.value() {
+                    AttValue::Plain(_) => {
+                        node.remove_attribute(attr.name())?;
+                    }
+                    // it is an event listener
+                    AttValue::Callback(_) => {
+                        //TODO: remove only the event listener that matches the event name
+                        remove_event_listeners(node, old_closures)?;
                     }
                 }
             }
 
             Ok(active_closures)
         }
-        Patch::RemoveEventListener(_tag, _node_idx, _events) => {
-            remove_event_listeners(node, old_closures)?;
-            Ok(active_closures)
-        }
+
         // THis also removes the associated closures and event listeners to the node being replaced
         // including the associated closures of the descendant of replaced node
         // before it is actully replaced in the DOM
@@ -419,8 +344,8 @@ where
     DSP: Clone + Dispatch<MSG> + 'static,
 {
     match patch {
-        Patch::ChangeText(_node_idx, new_node) => {
-            node.set_node_value(Some(&new_node.text));
+        Patch::ChangeText(_node_idx, new_text) => {
+            node.set_node_value(Some(&new_text));
         }
         Patch::Replace(_tag, _node_idx, new_node) => {
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
