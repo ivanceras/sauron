@@ -3,8 +3,10 @@
 //!
 use crate::{
     html::attributes::AttributeValue,
+    mt_dom::AttValue,
     Attribute,
     Element,
+    Event,
     Node,
 };
 use std::fmt;
@@ -72,23 +74,18 @@ impl<MSG> Render for Element<MSG> {
     }
 }
 
-fn render_attribute_values(
-    attr_values: &[&AttributeValue],
+fn render_attribute_values<MSG>(
+    attr_values: &[&AttValue<AttributeValue, Event, MSG>],
     buffer: &mut dyn fmt::Write,
 ) -> fmt::Result {
     let mut first = true;
     for av in attr_values {
         match av {
-            AttributeValue::Simple(simple) => {
-                if !first {
+            AttValue::Plain(attr_value) => {
+                if !first && !attr_value.is_style() {
                     write!(buffer, " ")?;
                 }
-                write!(buffer, "{}", simple.to_string())?;
-            }
-            AttributeValue::Style(styles_att) => {
-                for s_att in styles_att {
-                    write!(buffer, "{};", s_att)?;
-                }
+                attr_value.render(buffer, 0)?;
             }
             _ => (),
         }
@@ -101,18 +98,34 @@ impl<MSG> Render for Attribute<MSG> {
     fn render(
         &self,
         buffer: &mut dyn fmt::Write,
-        _indent: usize,
+        indent: usize,
     ) -> fmt::Result {
         match self.value() {
+            AttValue::Plain(plain) => {
+                write!(buffer, "{}=\"", self.name())?;
+                plain.render(buffer, indent)?;
+                write!(buffer, "\"")?;
+            }
+            _ => (),
+        }
+        Ok(())
+    }
+}
+
+impl Render for AttributeValue {
+    fn render(
+        &self,
+        buffer: &mut dyn fmt::Write,
+        _index: usize,
+    ) -> fmt::Result {
+        match self {
             AttributeValue::Simple(simple) => {
-                write!(buffer, "{}=\"{}\"", self.name(), simple.to_string())?;
+                write!(buffer, "{}", simple.to_string())?;
             }
             AttributeValue::Style(styles_att) => {
-                write!(buffer, "style=\"")?;
                 for s_att in styles_att {
                     write!(buffer, "{};", s_att)?;
                 }
-                write!(buffer, "\"")?;
             }
             _ => (),
         }

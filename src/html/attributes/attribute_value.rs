@@ -62,4 +62,11 @@ impl AttributeValue {
             _ => None,
         }
     }
+
+    pub fn is_style(&self) -> bool {
+        match self {
+            AttributeValue::Style(_) => true,
+            _ => false,
+        }
+    }
 }

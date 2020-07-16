@@ -207,8 +207,8 @@ pub mod html;
 #[macro_use]
 pub mod svg;
 
-//pub use render::Render;
-//pub mod render;
+pub use render::Render;
+pub mod render;
 
 use mt_dom::diff_with_key;
 use prelude::AttributeValue;

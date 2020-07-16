@@ -6,6 +6,7 @@ use sauron::{
         events::*,
         *,
     },
+    Callback,
     Node,
     Patch,
 };
@@ -36,7 +37,15 @@ fn event_remove() {
     );
     let patch = diff(&old, &new);
     println!("patch: {:#?}", patch);
-    panic!();
+
+    assert_eq!(
+        patch,
+        vec![Patch::RemoveAttributes(
+            &"input",
+            0,
+            vec![&on("input", Callback::from(|_| {}))],
+        )]
+    );
 }
 
 #[test]

@@ -8,12 +8,12 @@ use sauron::{
         *,
     },
     input,
+    mt_dom::AttValue,
     Element,
+    Event,
     Node,
     Patch,
 };
-
-use sauron::Event;
 
 #[test]
 fn test_macros() {
@@ -83,8 +83,8 @@ fn will_not_merge_multiple_class_calls() {
     assert_eq!(
         classes,
         vec![
-            &AttributeValue::from_value("class1".into()),
-            &AttributeValue::from_value("class2".into())
+            &AttValue::Plain(AttributeValue::from_value("class1".into())),
+            &AttValue::Plain(AttributeValue::from_value("class2".into()))
         ]
     );
 }
@@ -102,9 +102,9 @@ fn should_merge_classes_flag() {
     let classes = elm.get_attribute_values(&"class");
     assert_eq!(
         classes,
-        vec![&AttributeValue::from_value(
+        vec![&AttValue::Plain(AttributeValue::from_value(
             "class1 class_flag".to_string().into()
-        ),]
+        ))]
     );
 }
 
