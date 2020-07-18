@@ -133,7 +133,6 @@
 //! crate-type = ["cdylib"]
 //! ```
 //!
-//! **Note:** You need to use the nightly compiler with minimum version: rustc 1.37.0-nightly (17e62f77f 2019-07-01)
 //!
 //! Build using
 //! ```sh
@@ -180,7 +179,7 @@
 //! **Warning:** I repeat, You need to use the latest nightly compiler in order for this to work.
 //!
 //! ### Performance:
-//! ![Benchmark](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/perf.png)
+//! ![Benchmark](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron-0.27.png)
 //!
 //! ### Please support this project:
 //!  [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
