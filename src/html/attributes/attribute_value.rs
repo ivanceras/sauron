@@ -1,10 +1,7 @@
-use crate::prelude::{
-    Style,
-    Value,
-};
+use crate::prelude::{Style, Value};
 
 /// Values of an attribute can be in these variants
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum AttributeValue {
     /// an argument value, to be called as parameter, the function is called to the element
     FunctionCall(Value),

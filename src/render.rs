@@ -45,7 +45,6 @@ impl<MSG> Render for Element<MSG> {
         write!(buffer, "<{}", self.tag())?;
 
         for (att_name, attr_values) in self.get_attribute_key_values() {
-            println!("name = {}", att_name);
             write!(buffer, " {}=\"", att_name)?;
             render_attribute_values(&attr_values, buffer)?;
             write!(buffer, "\"")?;

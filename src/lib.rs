@@ -198,6 +198,8 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use web_sys;
 }}
 
+/// When event is not needed, such as just rendering the dom
+/// tree in server side application
 #[cfg(not(feature = "with-dom"))]
 pub type Event = ();
 
