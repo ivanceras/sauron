@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::{Node, Render};
+use sauron::{Attribute, Node, Render};
 
 use sauron::html::{attributes::*, *};
 #[test]
@@ -56,4 +56,61 @@ fn test_classes_flag() {
     expected.render(&mut expected_html).unwrap();
 
     assert_eq!(actual_html, expected_html);
+}
+
+#[test]
+fn will_merge_multiple_class_calls() {
+    let html: Node<()> = div(vec![class("class1"), class("class2")], vec![]);
+    let attrs = html.get_attributes().unwrap();
+    println!("attrs: {:#?}", attrs);
+    assert_eq!(attrs.len(), 2);
+    let elm = html.as_element_ref().expect("expecting an element");
+
+    let classes: Attribute<()> = elm
+        .merge_attributes()
+        .into_iter()
+        .find(|att| att.name() == &"class")
+        .unwrap();
+
+    assert_eq!(
+        classes,
+        Attribute::with_multiple_values(
+            None,
+            "class",
+            vec![
+                AttributeValue::from_value("class1".into()),
+                AttributeValue::from_value("class2".into())
+            ]
+        )
+    );
+}
+
+#[test]
+fn should_merge_classes_flag() {
+    let html: Node<()> = div(
+        vec![classes_flag([("class1", true), ("class2", true)])],
+        vec![],
+    );
+    let attrs = html.get_attributes().unwrap();
+    println!("attrs: {:#?}", attrs);
+    assert_eq!(attrs.len(), 1);
+    let elm = html.as_element_ref().expect("expecting an element");
+
+    let classes: Attribute<()> = elm
+        .merge_attributes()
+        .into_iter()
+        .find(|att| att.name() == &"class")
+        .unwrap();
+
+    assert_eq!(
+        classes,
+        Attribute::with_multiple_values(
+            None,
+            "class",
+            vec![
+                AttributeValue::from_value("class1".to_string().into()),
+                AttributeValue::from_value("class2".to_string().into())
+            ]
+        )
+    );
 }

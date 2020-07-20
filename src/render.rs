@@ -51,6 +51,7 @@ where
         write!(buffer, "<{}", self.tag())?;
 
         for attr in self.merge_attributes() {
+            write!(buffer, " ")?;
             attr.render_with_indent(buffer, indent)?;
         }
         write!(buffer, ">")?;
@@ -88,16 +89,19 @@ impl<MSG> Render for Attribute<MSG> {
         buffer: &mut dyn fmt::Write,
         indent: usize,
     ) -> fmt::Result {
-        for att_value in self.value() {
+        write!(buffer, "{}=\"", self.name())?;
+        for (i, att_value) in self.value().iter().enumerate() {
             match att_value {
                 AttValue::Plain(plain) => {
-                    write!(buffer, "{}=\"", self.name())?;
+                    if i > 0 && !plain.is_style() {
+                        write!(buffer, " ")?;
+                    }
                     plain.render_with_indent(buffer, indent)?;
-                    write!(buffer, "\"")?;
                 }
                 _ => (),
             }
         }
+        write!(buffer, "\"")?;
         Ok(())
     }
 }

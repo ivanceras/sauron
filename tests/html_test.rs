@@ -1,18 +1,8 @@
 #![deny(warnings)]
 use sauron::{
-    diff,
-    div,
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
-    input,
-    mt_dom::AttValue,
-    Element,
-    Event,
-    Node,
-    Patch,
+    diff, div,
+    html::{attributes::*, events::*, *},
+    input, Element, Event, Node, Patch,
 };
 
 #[test]
@@ -70,42 +60,6 @@ fn test_macros_with_lines() {
     );
     let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
-}
-
-#[test]
-fn will_not_merge_multiple_class_calls() {
-    let html: Node<()> = div(vec![class("class1"), class("class2")], vec![]);
-    let attrs = html.get_attributes().unwrap();
-    println!("attrs: {:#?}", attrs);
-    assert_eq!(attrs.len(), 2);
-    let elm = html.as_element_ref().expect("expecting an element");
-    let classes = elm.get_attribute_values(&"class");
-    assert_eq!(
-        classes,
-        vec![
-            &AttValue::Plain(AttributeValue::from_value("class1".into())),
-            &AttValue::Plain(AttributeValue::from_value("class2".into()))
-        ]
-    );
-}
-
-#[test]
-fn should_merge_classes_flag() {
-    let html: Node<()> = div(
-        vec![classes_flag([("class1", true), ("class_flag", true)])],
-        vec![],
-    );
-    let attrs = html.get_attributes().unwrap();
-    println!("attrs: {:#?}", attrs);
-    assert_eq!(attrs.len(), 1);
-    let elm = html.as_element_ref().expect("expecting an element");
-    let classes = elm.get_attribute_values(&"class");
-    assert_eq!(
-        classes,
-        vec![&AttValue::Plain(AttributeValue::from_value(
-            "class1 class_flag".to_string().into()
-        ))]
-    );
 }
 
 #[test]
@@ -264,7 +218,7 @@ fn add_attributes() {
     let new = div(vec![id("hello")], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![id("hello")])],
         "Add attributes",
     );
 
@@ -273,7 +227,7 @@ fn add_attributes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![id("hello")])],
         "Change attribute",
     );
 }
@@ -311,7 +265,7 @@ fn change_attribute() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![&id("changed")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![id("changed")])],
         "Add attributes",
     );
 }
