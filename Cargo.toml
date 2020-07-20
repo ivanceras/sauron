@@ -21,7 +21,7 @@ log = "0.4.8"
 cfg-if = "0.1.10"
 thiserror = "1.0"
 doc-comment = "0.3.3"
-mt-dom = "0.1.0"
+mt-dom = { version = "0.1.0", path = "../mt-dom" }
 
 [dependencies.web-sys]
 version = "0.3.41"

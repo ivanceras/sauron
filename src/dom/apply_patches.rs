@@ -2,29 +2,15 @@
 use crate::{
     dom::{
         created_node,
-        created_node::{
-            ActiveClosure,
-            CreatedNode,
-        },
+        created_node::{ActiveClosure, CreatedNode},
     },
     mt_dom::AttValue,
-    Dispatch,
-    Patch,
+    Dispatch, Patch,
 };
 use js_sys::Function;
-use std::collections::{
-    HashMap,
-    HashSet,
-};
-use wasm_bindgen::{
-    JsCast,
-    JsValue,
-};
-use web_sys::{
-    Element,
-    Node,
-    Text,
-};
+use std::collections::{HashMap, HashSet};
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{Element, Node, Text};
 
 /// Apply all of the patches to our old root node in order to create the new root node
 /// that we desire.
@@ -254,14 +240,16 @@ where
         }
         Patch::RemoveAttributes(_tag, _node_idx, attributes) => {
             for attr in attributes.iter() {
-                match attr.value() {
-                    AttValue::Plain(_) => {
-                        node.remove_attribute(attr.name())?;
-                    }
-                    // it is an event listener
-                    AttValue::Callback(_) => {
-                        //TODO: remove only the event listener that matches the event name
-                        remove_event_listeners(node, old_closures)?;
+                for att_value in attr.value() {
+                    match att_value {
+                        AttValue::Plain(_) => {
+                            node.remove_attribute(attr.name())?;
+                        }
+                        // it is an event listener
+                        AttValue::Callback(_) => {
+                            //TODO: remove only the event listener that matches the event name
+                            remove_event_listeners(node, old_closures)?;
+                        }
                     }
                 }
             }
@@ -354,11 +342,9 @@ where
             >(program, new_node);
             node.replace_with_with_node_1(&created_node.node)?;
         }
-        _other => {
-            unreachable!(
-                "Text nodes should only receive ChangeText or Replace patches."
-            )
-        }
+        _other => unreachable!(
+            "Text nodes should only receive ChangeText or Replace patches."
+        ),
     };
 
     Ok(())

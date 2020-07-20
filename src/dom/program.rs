@@ -19,7 +19,10 @@ where
     pub dom_updater: Rc<RefCell<DomUpdater<MSG>>>,
 }
 
-impl<APP, MSG> Clone for Program<APP, MSG> {
+impl<APP, MSG> Clone for Program<APP, MSG>
+where
+    MSG: 'static,
+{
     fn clone(&self) -> Self {
         Program {
             app: Rc::clone(&self.app),

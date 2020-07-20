@@ -1,28 +1,13 @@
 use crate::{
     dom::Dispatch,
-    mt_dom::{
-        AttValue,
-        Callback,
-    },
+    mt_dom::{AttValue, Callback},
     prelude::AttributeValue,
     Attribute,
 };
-use std::{
-    collections::HashMap,
-    fmt::Write,
-    sync::Mutex,
-};
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-};
+use std::{collections::HashMap, fmt::Write, sync::Mutex};
+use wasm_bindgen::{closure::Closure, JsCast};
 use web_sys::{
-    self,
-    Element,
-    EventTarget,
-    HtmlInputElement,
-    HtmlTextAreaElement,
-    Node,
+    self, Element, EventTarget, HtmlInputElement, HtmlTextAreaElement, Node,
     Text,
 };
 
@@ -122,46 +107,49 @@ impl<T> CreatedNode<T> {
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        match attr.value() {
-            AttValue::Plain(attr_value) => {
-                match attr_value {
-                    AttributeValue::Simple(simple) => {
-                        match *attr.name() {
-                            "value" => {
-                                if let Some(input) =
-                                    element.dyn_ref::<HtmlInputElement>()
-                                {
-                                    input.set_value(&simple.to_string());
-                                } else if let Some(textarea) =
-                                    element.dyn_ref::<HtmlTextAreaElement>()
-                                {
-                                    textarea.set_value(&simple.to_string());
+        for att_value in attr.value() {
+            match att_value {
+                AttValue::Plain(attr_value) => {
+                    match attr_value {
+                        AttributeValue::Simple(simple) => {
+                            match *attr.name() {
+                                "value" => {
+                                    if let Some(input) =
+                                        element.dyn_ref::<HtmlInputElement>()
+                                    {
+                                        input.set_value(&simple.to_string());
+                                    } else if let Some(textarea) =
+                                        element.dyn_ref::<HtmlTextAreaElement>()
+                                    {
+                                        textarea.set_value(&simple.to_string());
+                                    }
                                 }
-                            }
-                            "checked" => {
-                                if let Some(input) =
-                                    element.dyn_ref::<HtmlInputElement>()
-                                {
-                                    let checked =
-                                        simple.as_bool().unwrap_or(false);
-                                    input.set_checked(checked);
+                                "checked" => {
+                                    if let Some(input) =
+                                        element.dyn_ref::<HtmlInputElement>()
+                                    {
+                                        let checked =
+                                            simple.as_bool().unwrap_or(false);
+                                        input.set_checked(checked);
+                                    }
                                 }
-                            }
-                            _ => {
-                                if let Some(ref namespace) = attr.namespace() {
-                                    // Warning NOTE: set_attribute_ns should only be called
-                                    // when you meant to use a namespace
-                                    // using this with None will error in the browser with:
-                                    // NamespaceError: An attempt was made to create or change an object in a way which is incorrect with regard to namespaces
-                                    element
+                                _ => {
+                                    if let Some(ref namespace) =
+                                        attr.namespace()
+                                    {
+                                        // Warning NOTE: set_attribute_ns should only be called
+                                        // when you meant to use a namespace
+                                        // using this with None will error in the browser with:
+                                        // NamespaceError: An attempt was made to create or change an object in a way which is incorrect with regard to namespaces
+                                        element
                                 .set_attribute_ns(
                                     Some(namespace),
                                     attr.name(),
                                     &simple.to_string()
                                 )
                                 .expect("Set element attribute_ns in create element");
-                                } else {
-                                    element
+                                    } else {
+                                        element
                             .set_attribute(
                                 attr.name(),
                                 &simple.to_string(),
@@ -169,59 +157,63 @@ impl<T> CreatedNode<T> {
                             .expect(
                                 "Set element attribute_ns in create element",
                             );
+                                    }
                                 }
                             }
                         }
-                    }
-                    AttributeValue::Style(styles) => {
-                        let mut style_str = String::new();
-                        styles.iter().for_each(|s| {
-                            write!(style_str, "{};", s).expect("must write")
-                        });
+                        AttributeValue::Style(styles) => {
+                            let mut style_str = String::new();
+                            styles.iter().for_each(|s| {
+                                write!(style_str, "{};", s).expect("must write")
+                            });
 
-                        element
-                            .set_attribute("style", &style_str)
-                            .expect("must be able to set style");
-                    }
-                    AttributeValue::FunctionCall(fvalue) => {
-                        match *attr.name() {
-                            "inner_html" => {
-                                element.set_inner_html(&fvalue.to_string())
-                            }
-                            _ => (),
+                            element
+                                .set_attribute("style", &style_str)
+                                .expect("must be able to set style");
                         }
+                        AttributeValue::FunctionCall(fvalue) => {
+                            match *attr.name() {
+                                "inner_html" => {
+                                    element.set_inner_html(&fvalue.to_string())
+                                }
+                                _ => (),
+                            }
+                        }
+                        AttributeValue::Empty => (),
                     }
-                    AttributeValue::Empty => (),
                 }
-            }
-            AttValue::Callback(callback) => {
-                let unique_id = create_unique_identifier();
+                AttValue::Callback(callback) => {
+                    let unique_id = create_unique_identifier();
 
-                // set the data-sauron_vdom-id this will be read later on
-                // when it's time to remove this element and its closures and event listeners
-                element
-                    .set_attribute(DATA_SAURON_VDOM_ID, &unique_id.to_string())
-                    .expect("Could not set attribute on element");
-
-                closures.insert(unique_id, vec![]);
-
-                if let Some(program) = program {
-                    let event_str = attr.name();
-                    let current_elm: &EventTarget = element
-                        .dyn_ref()
-                        .expect("unable to cast to event targe");
-                    let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
-                        create_closure_wrap(program, &callback);
-                    current_elm
-                        .add_event_listener_with_callback(
-                            event_str,
-                            closure_wrap.as_ref().unchecked_ref(),
+                    // set the data-sauron_vdom-id this will be read later on
+                    // when it's time to remove this element and its closures and event listeners
+                    element
+                        .set_attribute(
+                            DATA_SAURON_VDOM_ID,
+                            &unique_id.to_string(),
                         )
-                        .expect("Unable to attached event listener");
-                    closures
-                        .get_mut(&unique_id)
-                        .expect("Unable to get closure")
-                        .push((event_str, closure_wrap));
+                        .expect("Could not set attribute on element");
+
+                    closures.insert(unique_id, vec![]);
+
+                    if let Some(program) = program {
+                        let event_str = attr.name();
+                        let current_elm: &EventTarget = element
+                            .dyn_ref()
+                            .expect("unable to cast to event targe");
+                        let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
+                            create_closure_wrap(program, &callback);
+                        current_elm
+                            .add_event_listener_with_callback(
+                                event_str,
+                                closure_wrap.as_ref().unchecked_ref(),
+                            )
+                            .expect("Unable to attached event listener");
+                        closures
+                            .get_mut(&unique_id)
+                            .expect("Unable to get closure")
+                            .push((event_str, closure_wrap));
+                    }
                 }
             }
         }

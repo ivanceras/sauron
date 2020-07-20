@@ -1,13 +1,6 @@
-use crate::{
-    Cmd,
-    Component,
-    Dispatch,
-};
+use crate::{Cmd, Component, Dispatch};
 use std::fmt::Debug;
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-};
+use wasm_bindgen::{closure::Closure, JsCast};
 use web_sys::ScrollToOptions;
 
 /// provides an interface for doing url request, such as fetch
@@ -21,7 +14,7 @@ impl Browser {
     pub fn on_resize<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
     where
         F: Fn(i32, i32) -> MSG + Clone + 'static,
-        MSG: PartialEq + Debug + Clone + 'static,
+        MSG: 'static,
         APP: Component<MSG> + 'static,
     {
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {

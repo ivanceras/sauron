@@ -1,13 +1,8 @@
 #![deny(warnings)]
 use sauron::{
     diff,
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
-    Node,
-    Patch,
+    html::{attributes::*, events::*, *},
+    Node, Patch,
 };
 
 #[test]
@@ -57,7 +52,7 @@ fn change_class_attribute() {
         vec![Patch::AddAttributes(
             &"div",
             0,
-            vec![&class("class1"), &class("difference_class")]
+            vec![class("class1"), class("difference_class")]
         )],
         "Should add the new attributes"
     );

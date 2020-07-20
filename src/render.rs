@@ -3,7 +3,7 @@
 //!
 use crate::{
     html::attributes::AttributeValue, mt_dom::AttValue, Attribute, Element,
-    Event, Node,
+    Node,
 };
 use std::fmt;
 
@@ -21,7 +21,10 @@ pub trait Render {
     ) -> fmt::Result;
 }
 
-impl<MSG> Render for Node<MSG> {
+impl<MSG> Render for Node<MSG>
+where
+    MSG: Clone,
+{
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
@@ -36,7 +39,10 @@ impl<MSG> Render for Node<MSG> {
     }
 }
 
-impl<MSG> Render for Element<MSG> {
+impl<MSG> Render for Element<MSG>
+where
+    MSG: Clone,
+{
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
@@ -44,10 +50,8 @@ impl<MSG> Render for Element<MSG> {
     ) -> fmt::Result {
         write!(buffer, "<{}", self.tag())?;
 
-        for (att_name, attr_values) in self.get_attribute_key_values() {
-            write!(buffer, " {}=\"", att_name)?;
-            render_attribute_values(&attr_values, buffer)?;
-            write!(buffer, "\"")?;
+        for attr in self.merge_attributes() {
+            attr.render_with_indent(buffer, indent)?;
         }
         write!(buffer, ">")?;
 
@@ -78,39 +82,21 @@ impl<MSG> Render for Element<MSG> {
     }
 }
 
-fn render_attribute_values<MSG>(
-    attr_values: &[&AttValue<AttributeValue, Event, MSG>],
-    buffer: &mut dyn fmt::Write,
-) -> fmt::Result {
-    let mut first = true;
-    for av in attr_values {
-        match av {
-            AttValue::Plain(attr_value) => {
-                if !first && !attr_value.is_style() {
-                    write!(buffer, " ")?;
-                }
-                attr_value.render_with_indent(buffer, 0)?;
-            }
-            _ => (),
-        }
-        first = false;
-    }
-    Ok(())
-}
-
 impl<MSG> Render for Attribute<MSG> {
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
         indent: usize,
     ) -> fmt::Result {
-        match self.value() {
-            AttValue::Plain(plain) => {
-                write!(buffer, "{}=\"", self.name())?;
-                plain.render_with_indent(buffer, indent)?;
-                write!(buffer, "\"")?;
+        for att_value in self.value() {
+            match att_value {
+                AttValue::Plain(plain) => {
+                    write!(buffer, "{}=\"", self.name())?;
+                    plain.render_with_indent(buffer, indent)?;
+                    write!(buffer, "\"")?;
+                }
+                _ => (),
             }
-            _ => (),
         }
         Ok(())
     }

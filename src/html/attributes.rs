@@ -97,10 +97,10 @@ where
     let mut class_list = Vec::with_capacity(pair.as_ref().len());
     for (class, flag) in pair.as_ref() {
         if *flag {
-            class_list.push((*class).to_string());
+            class_list.push(class);
         }
     }
-    class(class_list.join(" "))
+    classes(class_list)
 }
 
 /// a helper function to add multiple classes to a node
@@ -113,14 +113,12 @@ where
     V: ToString,
     C: AsRef<[V]>,
 {
-    class(
-        class_list
-            .as_ref()
-            .iter()
-            .map(|v| v.to_string())
-            .collect::<Vec<_>>()
-            .join(" "),
-    )
+    let class_values: Vec<AttributeValue> = class_list
+        .as_ref()
+        .iter()
+        .map(|v| AttributeValue::from_value(Value::from(v.to_string())))
+        .collect();
+    Attribute::with_multiple_values(None, "class", class_values)
 }
 
 /// A helper function for setting attributes with no values such as checked

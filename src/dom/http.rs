@@ -1,15 +1,7 @@
 //! provides functions for retrieving data using http network request
-use crate::{
-    mt_dom::Callback,
-    Cmd,
-    Component,
-    Dispatch,
-};
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-    JsValue,
-};
+use crate::{mt_dom::Callback, Cmd, Component, Dispatch};
+use std::fmt::Debug;
+use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::Response;
 
 /// Provides functions for doing http network request

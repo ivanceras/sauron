@@ -1,9 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    html::attributes::attr,
-    prelude::*,
-    Node,
-};
+use sauron::{html::attributes::attr, prelude::*, Node};
 use wasm_bindgen::prelude::*;
 
 #[macro_use]
