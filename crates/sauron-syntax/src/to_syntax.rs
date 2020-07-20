@@ -1,11 +1,5 @@
-use sauron::{
-    mt_dom::AttValue,
-    prelude::*,
-};
-use std::{
-    fmt,
-    fmt::Write,
-};
+use sauron::{mt_dom::AttValue, prelude::*};
+use std::{fmt, fmt::Write};
 
 /// A trait to convert html string into sauron view syntax
 pub trait ToSyntax {
@@ -41,9 +35,9 @@ impl<MSG: 'static> ToSyntax for Attribute<MSG> {
         use_macros: bool,
         indent: usize,
     ) -> fmt::Result {
-        match self.value() {
-            AttValue::Plain(plain) => {
-                match plain {
+        for att_value in self.value() {
+            match att_value {
+                AttValue::Plain(plain) => match plain {
                     AttributeValue::Simple(simple) => {
                         if let Some(_ns) = self.namespace() {
                             write!(
@@ -84,9 +78,9 @@ impl<MSG: 'static> ToSyntax for Attribute<MSG> {
                         write!(buffer, "\")")?;
                     }
                     _ => (),
-                }
+                },
+                _ => (),
             }
-            _ => (),
         }
         Ok(())
     }
