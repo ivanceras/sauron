@@ -1,9 +1,10 @@
 # Changelog
 
-# Unreleased
+# 0.28.1
 - Adjusted for changes in mt-dom with performance improvements
 - remove merge_attribute functionality in Element.
--  MSG doesn't need to be clone, just use get_attributes instead of merge_attributes
+- MSG doesn't need to be clone, just use get_attributes instead of merge_attributes
+- A lot of performance improvement due to changes in mt-dom crate
 
 # 0.28.0
 - adjust sauron for changes in mt-dom where there are multiple values in one attribute
