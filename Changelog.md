@@ -1,5 +1,10 @@
 # Changelog
 
+# 0.28.0
+- Adjusted for changes in mt-dom with performance improvements
+- remove merge_attribute functionality in Element.
+-  MSG doesn't need to be clone, just use get_attributes instead of merge_attributes
+
 # 0.27.0
 - change syntax of attribute events which uses `_` after the `on` ie: `on_click` instead of `onclick`
 - Make a special case for style than just a plain attribute
