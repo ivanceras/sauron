@@ -1,6 +1,6 @@
 [package]
 name = "sauron-md"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -12,6 +12,6 @@ keywords = ["md", "sauron", "node"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sauron = { path = "../../", version = "0.27.0" }
-sauron-parse = { path = "../sauron-parse", version = "0.1.0" }
-pulldown-cmark = { version = "0.7.0"}
+sauron = { version = "0.27" }
+sauron-parse = { version = "0.1" }
+pulldown-cmark = { version = "0.7"}
