@@ -10,31 +10,6 @@
 ![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png)
 
 
-> One crate to rule the DOM
->
-> One crate to mind it
->
-> One crate to bring JSON
->
-> And in the Rust code bind it
->
->
->
-> This code, no other, is made by code elves
->
-> Who'd pawn parent process to get it themselves
->
-> Ruler of net troll and mortal and hacker
->
-> This code is a lib crate for Patreon backers
->
-> If trashed or buggy it cannot be remade
->
-> If found send to Ivan, the bandwidth is prepaid
-
--- The Harvard Lampoon & [po8](https://www.reddit.com/user/po8/)
-
-
  **Sauron** is an HTML web framework for building web-apps with the goal of
  closely adhering to [The Elm Architecture](https://guide.elm-lang.org/architecture/), a paragon of elegant design.
 
@@ -169,10 +144,18 @@ cargo install basic-http-server
 **Warning:** I repeat, You need to use the latest nightly compiler in order for this to work.
 
 #### Performance:
+Sauron is one of the fastest.
+
+![Benchmark](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/alt-sauron-0.28.png)
 ![Benchmark](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron-0.27.png)
+
+#### Run the benchmark yourself:
+[Benchmark 1](https://ivanceras.github.io/todo-mvc-bench/)
+[Benchmark 2](https://ivanceras.github.io/todomvc-benchmark/)
 
 #### Please support this project:
  [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
+
 
 
 
