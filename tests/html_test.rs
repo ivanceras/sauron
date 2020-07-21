@@ -218,7 +218,7 @@ fn add_attributes() {
     let new = div(vec![id("hello")], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("hello")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
         "Add attributes",
     );
 
@@ -227,7 +227,7 @@ fn add_attributes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("hello")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
         "Change attribute",
     );
 }
@@ -265,7 +265,7 @@ fn change_attribute() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("changed")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("changed")])],
         "Add attributes",
     );
 }

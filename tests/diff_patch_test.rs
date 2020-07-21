@@ -44,20 +44,22 @@ fn event_remove() {
 
 #[test]
 fn change_class_attribute() {
-    let old: Node<()> = div(vec![class("class1"), class("class2")], vec![]);
+    let old: Node<()> = div(vec![classes(["class1", "class2"])], vec![]);
 
-    let new = div(vec![class("class1"), class("difference_class")], vec![]);
+    let new = div(vec![classes(["class1", "difference_class"])], vec![]);
     assert_eq!(
         diff(&old, &new),
         vec![Patch::AddAttributes(
             &"div",
             0,
-            vec![Attribute::with_multiple_values(
+            vec![&Attribute::with_multiple_values(
                 None,
                 "class",
                 vec![
-                    AttributeValue::from_value("class1".into()),
-                    AttributeValue::from_value("difference_class".into())
+                    AttributeValue::from_value("class1".to_string().into()),
+                    AttributeValue::from_value(
+                        "difference_class".to_string().into()
+                    )
                 ]
             )]
         )],
@@ -122,9 +124,9 @@ fn truncate_children_different_attributes() {
         diff(&old, &new),
         vec![
             Patch::TruncateChildren(&"div", 0, 3),
-            Patch::AddAttributes(&"div", 1, vec![class("class5")]),
-            Patch::AddAttributes(&"div", 2, vec![class("class6")]),
-            Patch::AddAttributes(&"div", 3, vec![class("class7")])
+            Patch::AddAttributes(&"div", 1, vec![&class("class5")]),
+            Patch::AddAttributes(&"div", 2, vec![&class("class6")]),
+            Patch::AddAttributes(&"div", 3, vec![&class("class7")])
         ],
         "Should truncate children"
     );
@@ -246,7 +248,7 @@ fn add_attributes() {
     let new = div(vec![id("hello")], vec![]); //{ <div id="hello"> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("hello")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
         "Add attributes",
     );
 
@@ -255,7 +257,7 @@ fn add_attributes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("hello")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
         "Change attribute",
     );
 }
@@ -269,7 +271,7 @@ fn add_style_attributes() {
         vec![Patch::AddAttributes(
             &"div",
             0,
-            vec![style("display", "none")]
+            vec![&style("display", "none")]
         )],
         "Add attributes",
     );
@@ -278,11 +280,11 @@ fn add_style_attributes() {
 #[test]
 fn add_style_attributes_1_change() {
     let old: Node<()> = div(
-        vec![style("display", "block"), style("position", "absolute")],
+        vec![styles([("display", "block"), ("position", "absolute")])],
         vec![],
     );
     let new = div(
-        vec![style("display", "none"), style("position", "absolute")],
+        vec![styles([("display", "none"), ("position", "absolute")])],
         vec![],
     );
     assert_eq!(
@@ -290,19 +292,13 @@ fn add_style_attributes_1_change() {
         vec![Patch::AddAttributes(
             &"div",
             0,
-            vec![Attribute::with_multiple_values(
+            vec![&Attribute::with_multiple_values(
                 None,
                 "style",
-                vec![
-                    AttributeValue::Style(vec![Style::new(
-                        "display",
-                        "none".into()
-                    )]),
-                    AttributeValue::Style(vec![Style::new(
-                        "position",
-                        "absolute".into()
-                    )])
-                ]
+                vec![AttributeValue::Style(vec![
+                    Style::new("display", "none".into()),
+                    Style::new("position", "absolute".into())
+                ])]
             )]
         )],
     );
@@ -311,11 +307,11 @@ fn add_style_attributes_1_change() {
 #[test]
 fn add_style_attributes_no_changes() {
     let old: Node<()> = div(
-        vec![style("display", "block"), style("position", "absolute")],
+        vec![styles([("display", "block"), ("position", "absolute")])],
         vec![],
     );
     let new = div(
-        vec![style("display", "block"), style("position", "absolute")],
+        vec![styles([("display", "block"), ("position", "absolute")])],
         vec![],
     );
     assert_eq!(diff(&old, &new), vec![],);
@@ -369,7 +365,7 @@ fn change_attribute() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![id("changed")])],
+        vec![Patch::AddAttributes(&"div", 0, vec![&id("changed")])],
         "Add attributes",
     );
 }

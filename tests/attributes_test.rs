@@ -11,9 +11,10 @@ fn test_styles() {
     let mut actual_html = String::new();
     actual.render(&mut actual_html).unwrap();
     let expected: Node<&'static str> = div(
-        vec![style("display", "flex"), style("flex-direction", "row")],
+        vec![attr("style", "display:flex;flex-direction:row;")],
         vec![],
     );
+
     let mut expected_html = String::new();
     expected.render(&mut expected_html).unwrap();
 
@@ -59,27 +60,27 @@ fn test_classes_flag() {
 }
 
 #[test]
-fn will_merge_multiple_class_calls() {
-    let html: Node<()> = div(vec![class("class1"), class("class2")], vec![]);
+fn classes_test() {
+    let html: Node<()> = div(vec![classes(["class1", "class2"])], vec![]);
     let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
-    assert_eq!(attrs.len(), 2);
+    assert_eq!(attrs.len(), 1);
     let elm = html.as_element_ref().expect("expecting an element");
 
-    let classes: Attribute<()> = elm
-        .merge_attributes()
+    let classes: &Attribute<()> = elm
+        .get_attributes()
         .into_iter()
         .find(|att| att.name() == &"class")
         .unwrap();
 
     assert_eq!(
         classes,
-        Attribute::with_multiple_values(
+        &Attribute::with_multiple_values(
             None,
             "class",
             vec![
-                AttributeValue::from_value("class1".into()),
-                AttributeValue::from_value("class2".into())
+                AttributeValue::from_value("class1".to_string().into()),
+                AttributeValue::from_value("class2".to_string().into())
             ]
         )
     );
@@ -96,15 +97,15 @@ fn should_merge_classes_flag() {
     assert_eq!(attrs.len(), 1);
     let elm = html.as_element_ref().expect("expecting an element");
 
-    let classes: Attribute<()> = elm
-        .merge_attributes()
+    let classes: &Attribute<()> = elm
+        .get_attributes()
         .into_iter()
         .find(|att| att.name() == &"class")
         .unwrap();
 
     assert_eq!(
         classes,
-        Attribute::with_multiple_values(
+        &Attribute::with_multiple_values(
             None,
             "class",
             vec![
