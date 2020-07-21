@@ -21,10 +21,7 @@ pub trait Render {
     ) -> fmt::Result;
 }
 
-impl<MSG> Render for Node<MSG>
-where
-    MSG: Clone,
-{
+impl<MSG> Render for Node<MSG> {
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
@@ -39,10 +36,7 @@ where
     }
 }
 
-impl<MSG> Render for Element<MSG>
-where
-    MSG: Clone,
-{
+impl<MSG> Render for Element<MSG> {
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
@@ -50,7 +44,7 @@ where
     ) -> fmt::Result {
         write!(buffer, "<{}", self.tag())?;
 
-        for attr in self.merge_attributes() {
+        for attr in self.get_attributes() {
             write!(buffer, " ")?;
             attr.render_with_indent(buffer, indent)?;
         }
