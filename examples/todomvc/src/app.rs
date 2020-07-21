@@ -1,13 +1,8 @@
 use sauron::{
     dom::events::KeyboardEvent,
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     prelude::*,
-    Cmd,
-    Component,
-    Node,
+    Cmd, Component, Node,
 };
 
 pub struct Model {
@@ -249,15 +244,12 @@ impl Model {
 }
 
 fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
-    let mut class_name = "todo".to_string();
-    if entry.editing {
-        class_name.push_str(" editing");
-    }
-    if entry.completed {
-        class_name.push_str(" completed");
-    }
     li(
-        vec![class(class_name)],
+        vec![classes_flag([
+            ("todo", true),
+            ("editing", entry.editing),
+            ("completed", entry.completed),
+        ])],
         vec![
             div(
                 vec![class("view")],
@@ -290,7 +282,7 @@ fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
 }
 
 fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
-    if entry.editing == true {
+    if entry.editing {
         input(
             vec![
                 class("edit"),
