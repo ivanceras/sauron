@@ -141,8 +141,6 @@ cargo install wasm-pack
 cargo install basic-http-server
 ```
 
-**Warning:** I repeat, You need to use the latest nightly compiler in order for this to work.
-
 #### Performance:
 Sauron is one of the fastest.
 
