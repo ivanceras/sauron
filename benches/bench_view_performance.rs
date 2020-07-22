@@ -50,3 +50,6 @@ fn bench_view_builing_100_nodes_with_100_child_nodes(c: &mut Criterion) {
         })
     });
 }
+
+criterion_group!(benches, bench_view_builing_100_nodes_with_100_child_nodes);
+criterion_main!(benches);
