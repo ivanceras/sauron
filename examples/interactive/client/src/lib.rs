@@ -2,27 +2,14 @@
 #![deny(clippy::all)]
 use console_error_panic_hook;
 use sauron::*;
-use wasm_bindgen::{
-    self,
-    prelude::*,
-    JsCast,
-};
+use wasm_bindgen::{self, prelude::*, JsCast};
 
-use app::{
-    App,
-    Msg,
-};
+use app::{App, Msg};
 
 #[macro_use]
 extern crate log;
 
 mod app;
-
-// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
-// allocator.
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub struct Client {

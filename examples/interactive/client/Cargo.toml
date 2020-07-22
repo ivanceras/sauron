@@ -12,35 +12,11 @@ crate-type = ["cdylib"]
 console_error_panic_hook = "0.1"
 js-sys = "0.3"
 sauron = { path = "../../../" }
-lazy_static = "1.0"
 log = "0.4"
 console_log = "0.1"
-
-# `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
-# compared to the default allocator's ~10K. It is slower than the default
-# allocator, however.
-#
-# Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
 wee_alloc = { version = "0.4", optional = true }
 
 [dependencies.wasm-bindgen]
 version = "0.2"
-
-[dependencies.web-sys]
-version = "0.3"
-features = [
-    "console",
-    "Document",
-    "Element",
-    "Event",
-    "EventTarget",
-    "History",
-    "Location",
-    "Node",
-    "NodeList",
-    "Text",
-    "Window",
-    "HtmlCollection",
-]
 
 

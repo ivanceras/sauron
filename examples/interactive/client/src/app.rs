@@ -1,10 +1,7 @@
 use js_sys::Date;
 use sauron::prelude::*;
-use wasm_bindgen::{
-    self,
-    prelude::*,
-};
-use web_sys::MouseEvent;
+use sauron::web_sys::MouseEvent;
+use wasm_bindgen::{self, prelude::*};
 
 pub enum Msg {
     Click,
