@@ -67,4 +67,12 @@ impl AttributeValue {
             _ => false,
         }
     }
+
+    /// return true if this is a function call
+    pub fn is_function_call(&self) -> bool {
+        match self {
+            AttributeValue::FunctionCall(_) => true,
+            _ => false,
+        }
+    }
 }

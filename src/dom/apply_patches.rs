@@ -225,16 +225,12 @@ where
     let mut active_closures = ActiveClosure::new();
     match patch {
         Patch::AddAttributes(_tag, _node_idx, attributes) => {
-            // TODO: will have to aggregate the attributes that has the name
-            // here, since it is not being handled in mt-dom.
-            for attr in attributes.iter() {
-                CreatedNode::<Node>::set_element_attribute(
-                    program,
-                    &mut active_closures,
-                    node,
-                    attr,
-                )
-            }
+            CreatedNode::<Node>::set_element_attributes(
+                program,
+                &mut active_closures,
+                node,
+                attributes,
+            );
 
             Ok(active_closures)
         }

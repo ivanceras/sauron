@@ -2,7 +2,7 @@ use crate::{
     dom::Dispatch,
     mt_dom::{AttValue, Callback},
     prelude::AttributeValue,
-    Attribute,
+    Attribute, Event,
 };
 use std::{collections::HashMap, fmt::Write, sync::Mutex};
 use wasm_bindgen::{closure::Closure, JsCast};
@@ -97,6 +97,75 @@ impl<T> CreatedNode<T> {
         }
     }
 
+    /// merge the plain values
+    fn merge_plain_attributes_values(
+        attr_values: &[&AttributeValue],
+    ) -> Option<String> {
+        let plain_values: Vec<String> = attr_values
+            .iter()
+            .flat_map(|att_value| match att_value {
+                AttributeValue::Simple(simple) => Some(simple.to_string()),
+                AttributeValue::Style(styles) => {
+                    let mut style_str = String::new();
+                    styles.iter().for_each(|s| {
+                        write!(style_str, "{};", s).expect("must write")
+                    });
+                    Some(style_str)
+                }
+                AttributeValue::FunctionCall(fvalue) => {
+                    Some(fvalue.to_string())
+                }
+                AttributeValue::Empty => None,
+            })
+            .collect();
+        if !plain_values.is_empty() {
+            Some(plain_values.join(" "))
+        } else {
+            None
+        }
+    }
+
+    /// returns (callbacks, plain_attribtues, function_calls)
+    fn partition_callbacks_from_plain_and_func_calls<MSG>(
+        attr: &Attribute<MSG>,
+    ) -> (
+        Vec<&Callback<Event, MSG>>,
+        Vec<&AttributeValue>,
+        Vec<&AttributeValue>,
+    ) {
+        let mut callbacks = vec![];
+        let mut plain_values = vec![];
+        let mut func_values = vec![];
+        for av in attr.value() {
+            match av {
+                AttValue::Plain(plain) => {
+                    if plain.is_function_call() {
+                        func_values.push(plain);
+                    } else {
+                        plain_values.push(plain);
+                    }
+                }
+                AttValue::Callback(cb) => callbacks.push(cb),
+            }
+        }
+        (callbacks, plain_values, func_values)
+    }
+
+    /// set the element attribute
+    pub fn set_element_attributes<DSP, MSG>(
+        program: Option<&DSP>,
+        closures: &mut ActiveClosure,
+        element: &Element,
+        attrs: &[&Attribute<MSG>],
+    ) where
+        MSG: 'static,
+        DSP: Clone + Dispatch<MSG> + 'static,
+    {
+        for att in attrs {
+            Self::set_element_attribute(program, closures, element, att);
+        }
+    }
+
     /// set the element attribute
     pub fn set_element_attribute<DSP, MSG>(
         program: Option<&DSP>,
@@ -107,114 +176,103 @@ impl<T> CreatedNode<T> {
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        for att_value in attr.value() {
-            match att_value {
-                AttValue::Plain(attr_value) => {
-                    match attr_value {
-                        AttributeValue::Simple(simple) => {
-                            match *attr.name() {
-                                "value" => {
-                                    if let Some(input) =
-                                        element.dyn_ref::<HtmlInputElement>()
-                                    {
-                                        input.set_value(&simple.to_string());
-                                    } else if let Some(textarea) =
-                                        element.dyn_ref::<HtmlTextAreaElement>()
-                                    {
-                                        textarea.set_value(&simple.to_string());
-                                    }
-                                }
-                                "checked" => {
-                                    if let Some(input) =
-                                        element.dyn_ref::<HtmlInputElement>()
-                                    {
-                                        let checked =
-                                            simple.as_bool().unwrap_or(false);
-                                        input.set_checked(checked);
-                                    }
-                                }
-                                _ => {
-                                    if let Some(ref namespace) =
-                                        attr.namespace()
-                                    {
-                                        // Warning NOTE: set_attribute_ns should only be called
-                                        // when you meant to use a namespace
-                                        // using this with None will error in the browser with:
-                                        // NamespaceError: An attempt was made to create or change an object in a way which is incorrect with regard to namespaces
-                                        element
-                                .set_attribute_ns(
-                                    Some(namespace),
-                                    attr.name(),
-                                    &simple.to_string()
-                                )
-                                .expect("Set element attribute_ns in create element");
-                                    } else {
-                                        element
-                            .set_attribute(
-                                attr.name(),
-                                &simple.to_string(),
-                            )
+        let (callbacks, plain_values, func_values) =
+            Self::partition_callbacks_from_plain_and_func_calls(attr);
+
+        // set simple values
+        if let Some(merged_plain_values) =
+            Self::merge_plain_attributes_values(&plain_values)
+        {
+            if let Some(ref namespace) = attr.namespace() {
+                // Warning NOTE: set_attribute_ns should only be called
+                // when you meant to use a namespace
+                // using this with None will error in the browser with:
+                // NamespaceError: An attempt was made to create or change an object in a way which is incorrect with regard to namespaces
+                element
+                    .set_attribute_ns(
+                        Some(namespace),
+                        attr.name(),
+                        &merged_plain_values,
+                    )
+                    .expect("Set element attribute_ns in create element");
+            } else {
+                match *attr.name() {
+                    "value" => {
+                        if let Some(input) =
+                            element.dyn_ref::<HtmlInputElement>()
+                        {
+                            input.set_value(&merged_plain_values);
+                        } else if let Some(textarea) =
+                            element.dyn_ref::<HtmlTextAreaElement>()
+                        {
+                            textarea.set_value(&merged_plain_values);
+                        }
+                    }
+                    "checked" => {
+                        if let Some(input) =
+                            element.dyn_ref::<HtmlInputElement>()
+                        {
+                            let checked = plain_values
+                                .first()
+                                .map(|av| {
+                                    av.get_simple()
+                                        .expect("must be a simple value")
+                                })
+                                .map(|v| v.as_bool())
+                                .flatten()
+                                .unwrap_or(false);
+                            input.set_checked(checked);
+                        }
+                    }
+                    _ => {
+                        element
+                            .set_attribute(attr.name(), &merged_plain_values)
                             .expect(
                                 "Set element attribute_ns in create element",
                             );
-                                    }
-                                }
-                            }
-                        }
-                        AttributeValue::Style(styles) => {
-                            let mut style_str = String::new();
-                            styles.iter().for_each(|s| {
-                                write!(style_str, "{};", s).expect("must write")
-                            });
-
-                            element
-                                .set_attribute("style", &style_str)
-                                .expect("must be able to set style");
-                        }
-                        AttributeValue::FunctionCall(fvalue) => {
-                            match *attr.name() {
-                                "inner_html" => {
-                                    element.set_inner_html(&fvalue.to_string())
-                                }
-                                _ => (),
-                            }
-                        }
-                        AttributeValue::Empty => (),
                     }
                 }
-                AttValue::Callback(callback) => {
-                    let unique_id = create_unique_identifier();
+            }
+        }
 
-                    // set the data-sauron_vdom-id this will be read later on
-                    // when it's time to remove this element and its closures and event listeners
-                    element
-                        .set_attribute(
-                            DATA_SAURON_VDOM_ID,
-                            &unique_id.to_string(),
-                        )
-                        .expect("Could not set attribute on element");
+        // do function calls such as set_inner_html
+        if let Some(merged_func_values) =
+            Self::merge_plain_attributes_values(&func_values)
+        {
+            match *attr.name() {
+                "inner_html" => element.set_inner_html(&merged_func_values),
+                _ => (),
+            }
+        }
 
-                    closures.insert(unique_id, vec![]);
+        // add callbacks using add_event_listener
+        for callback in callbacks {
+            let unique_id = create_unique_identifier();
 
-                    if let Some(program) = program {
-                        let event_str = attr.name();
-                        let current_elm: &EventTarget = element
-                            .dyn_ref()
-                            .expect("unable to cast to event targe");
-                        let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
-                            create_closure_wrap(program, &callback);
-                        current_elm
-                            .add_event_listener_with_callback(
-                                event_str,
-                                closure_wrap.as_ref().unchecked_ref(),
-                            )
-                            .expect("Unable to attached event listener");
-                        closures
-                            .get_mut(&unique_id)
-                            .expect("Unable to get closure")
-                            .push((event_str, closure_wrap));
-                    }
-                }
+            // set the data-sauron_vdom-id this will be read later on
+            // when it's time to remove this element and its closures and event listeners
+            element
+                .set_attribute(DATA_SAURON_VDOM_ID, &unique_id.to_string())
+                .expect("Could not set attribute on element");
+
+            closures.insert(unique_id, vec![]);
+
+            if let Some(program) = program {
+                let event_str = attr.name();
+                let current_elm: &EventTarget =
+                    element.dyn_ref().expect("unable to cast to event targe");
+                let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
+                    create_closure_wrap(program, &callback);
+                current_elm
+                    .add_event_listener_with_callback(
+                        event_str,
+                        closure_wrap.as_ref().unchecked_ref(),
+                    )
+                    .expect("Unable to attached event listener");
+                closures
+                    .get_mut(&unique_id)
+                    .expect("Unable to get closure")
+                    .push((event_str, closure_wrap));
             }
         }
     }
@@ -243,9 +301,14 @@ impl<T> CreatedNode<T> {
 
         let mut closures = ActiveClosure::new();
 
-        velem.get_attributes().iter().for_each(|attr| {
-            Self::set_element_attribute(program, &mut closures, &element, attr);
-        });
+        // TODO: attributes can be further merge here so as not to override the previous value
+        // when there are more than 1 attributes of the same name in an element
+        Self::set_element_attributes(
+            program,
+            &mut closures,
+            &element,
+            &velem.get_attributes().iter().collect::<Vec<_>>(),
+        );
 
         let mut previous_node_was_text = false;
         for child in velem.get_children().iter() {
