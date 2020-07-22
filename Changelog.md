@@ -1,5 +1,8 @@
 # Changelog
 
+# 0.28.2
+- merge attributes of the same name first, before applying the attributes to the DOM element
+
 # 0.28.1
 - Adjusted for changes in mt-dom with performance improvements
 - remove merge_attribute functionality in Element.
