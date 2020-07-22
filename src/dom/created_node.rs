@@ -161,8 +161,9 @@ impl<T> CreatedNode<T> {
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
+        let attrs = mt_dom::merge_attributes_of_same_name(attrs);
         for att in attrs {
-            Self::set_element_attribute(program, closures, element, att);
+            Self::set_element_attribute(program, closures, element, &att);
         }
     }
 
