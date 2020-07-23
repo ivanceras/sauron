@@ -94,6 +94,7 @@ members = [
     "examples/minimal",
     "examples/fetch_data",
     "examples/interactive/client",
+    "examples/interactive/server",
     "examples/todomvc",
     "examples/window_tab_rows",
     "examples/svg_clock",
