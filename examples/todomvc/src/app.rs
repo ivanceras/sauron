@@ -92,193 +92,104 @@ impl Component<Msg> for Model {
     }
 
     fn view(&self) -> Node<Msg> {
-        div(
-            vec![class("todomvc-wrapper")],
-            vec![
-                section(
-                    vec![class("todoapp")],
-                    vec![
-                        header(
-                            vec![class("header")],
-                            vec![
-                                h1(vec![], vec![text("todos")]),
-                                self.view_input(),
-                            ],
-                        ),
-                        section(
-                            vec![class("main")],
-                            vec![
-                                input(
-                                    vec![
-                                        class("toggle-all"),
-                                        r#type("checkbox"),
-                                        checked(self.is_all_completed()),
-                                        on_click(|_| Msg::ToggleAll),
-                                    ],
-                                    vec![],
-                                ),
-                                ul(vec![class("todo-list")], {
-                                    self.entries
-                                        .iter()
-                                        .filter(|e| self.filter.fit(e))
-                                        .enumerate()
-                                        .map(view_entry)
-                                        .collect::<Vec<Node<Msg>>>()
-                                }),
-                            ],
-                        ),
-                        footer(
-                            vec![class("footer")],
-                            vec![
-                                span(
-                                    vec![class("todo-count")],
-                                    vec![
-                                        strong(
-                                            vec![],
-                                            vec![text(format!(
-                                                "{}",
-                                                self.total()
-                                            ))],
-                                        ),
-                                        text(" item(s) left"),
-                                    ],
-                                ),
-                                ul(
-                                    vec![class("filters")],
-                                    vec![
-                                        self.view_filter(Filter::All),
-                                        self.view_filter(Filter::Active),
-                                        self.view_filter(Filter::Completed),
-                                    ],
-                                ),
-                                button(
-                                    vec![
-                                        class("clear-completed"),
-                                        on_click(|_| Msg::ClearCompleted),
-                                    ],
-                                    vec![text(format!(
-                                        "Clear completed ({})",
-                                        self.total_completed()
-                                    ))],
-                                ),
-                            ],
-                        ),
-                    ],
-                ),
-                footer(
-                    vec![class("info")],
-                    vec![
-                        p(vec![], vec![text("Double-click to edit a todo")]),
-                        p(
-                            vec![],
-                            vec![
-                                text("Written by "),
-                                a(
-                                    vec![
-                                        href("https://github.com/ivanceras/"),
-                                        target("_blank"),
-                                    ],
-                                    vec![text("Jovansonlee Cesar")],
-                                ),
-                            ],
-                        ),
-                        p(
-                            vec![],
-                            vec![
-                                text("Part of "),
-                                a(
-                                    vec![
-                                        href("http://todomvc.com/"),
-                                        target("_blank"),
-                                    ],
-                                    vec![text("TodoMVC")],
-                                ),
-                            ],
-                        ),
-                    ],
-                ),
-            ],
-        )
+        node! {
+            <div class="todomvc-wrapper">
+                <section class="todoapp">
+                    <header class="header">
+                        <h1>"todos"</h1>
+                        {self.view_input()}
+                    </header>
+                    <section class="main">
+                        <input
+                            class="toggle-all"
+                            r#type="checkbox"
+                            checked={self.is_all_completed()}
+                            on_click={|_| Msg::ToggleAll} />
+                        <ul class="todo-list">
+                            {for (i, e) in self.entries.iter().filter(|e| self.filter.fit(e)).enumerate() {
+                                view_entry(i, e)
+                            }}
+                        </ul>
+                    </section>
+                    <footer class="footer">
+                        <span class="todo-count">
+                            <strong>{text(format!(
+                                "{}",
+                                self.total()
+                            ))}" item(s) left"</strong>
+                        </span>
+                        <ul class="filters">
+                            {self.view_filter(Filter::All)}
+                            {self.view_filter(Filter::Active)}
+                            {self.view_filter(Filter::Completed)}
+                        </ul>
+                        <button class="clear-completed" on_click={|_| Msg::ClearCompleted}>
+                            {text(format!(
+                                "Clear completed ({})",
+                                self.total_completed()
+                            ))}
+                        </button>
+                    </footer>
+                </section>
+                <footer class="info">
+                    <p>"Double-click to edit a todo"</p>
+                    <p>"Written by " <a href="https://github.com/ivanceras/" target="_blank">"Jovansonlee Cesar"</a></p>
+                    <p>"Part of " <a href="http://todomvc.com/" target="_blank">"TodoMVC"</a></p>
+                </footer>
+            </div>
+        }
     }
 }
 
 impl Model {
     fn view_filter(&self, filter: Filter) -> Node<Msg> {
-        let flt = filter.clone();
-        li(
-            vec![],
-            vec![a(
-                vec![
-                    class(if self.filter == flt {
-                        "selected"
-                    } else {
-                        "not-selected"
-                    }),
-                    href(flt.to_string()),
-                    on_click(move |_| Msg::SetFilter(flt.clone())),
-                ],
-                vec![text(filter.to_string())],
-            )],
-        )
+        node! {
+            <li class={if self.filter == filter {
+                "selected"
+            } else {
+                "not-selected"
+            }}
+            href={filter.to_string()}
+            on_click={move |_| Msg::SetFilter(filter)}>
+                {text(filter.to_string())}
+            </li>
+        }
     }
 
     fn view_input(&self) -> Node<Msg> {
-        input(
-            vec![
-                class("new-todo"),
-                id("new-todo"),
-                placeholder("What needs to be done?"),
-                value(self.value.to_string()),
-                on_input(|v: InputEvent| Msg::Update(v.value.to_string())),
-                on_keypress(|event: KeyboardEvent| {
+        node! {
+            <input
+                class="new-todo"
+                id="new-todo"
+                placeholder="What needs to be done?"
+                value={self.value.to_string()}
+                on_input={|v: InputEvent| Msg::Update(v.value.to_string())}
+                on_keypress={|event: KeyboardEvent| {
                     if event.key() == "Enter" {
                         Msg::Add
                     } else {
                         Msg::Nope
                     }
-                }),
-            ],
-            vec![],
-        )
+                }} />
+        }
     }
 }
 
-fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
-    li(
-        vec![classes_flag([
+fn view_entry(idx: usize, entry: &Entry) -> Node<Msg> {
+    node! {
+        <li {classes_flag([
             ("todo", true),
             ("editing", entry.editing),
             ("completed", entry.completed),
-        ])],
-        vec![
-            div(
-                vec![class("view")],
-                vec![
-                    input(
-                        vec![
-                            class("toggle"),
-                            r#type("checkbox"),
-                            checked(entry.completed),
-                            on_click(move |_| Msg::Toggle(idx)),
-                        ],
-                        vec![],
-                    ),
-                    label(
-                        vec![on_doubleclick(move |_| Msg::ToggleEdit(idx))],
-                        vec![text(format!("{}", entry.description))],
-                    ),
-                    button(
-                        vec![
-                            class("destroy"),
-                            on_click(move |_| Msg::Remove(idx)),
-                        ],
-                        vec![],
-                    ),
-                ],
-            ),
-            { view_entry_edit_input((idx, &entry)) },
-        ],
-    )
+        ])}>
+            <div class="view">
+                <input class="toggle" r#type="checkbox" checked={entry.completed} on_click={move |_| Msg::Toggle(idx)} />
+                <label on_doubleclick={move |_| Msg::ToggleEdit(idx)}>{text(entry.description.clone())}</label>
+                <button class="destroy" on_click={move |_| Msg::Remove(idx)} />
+            </div>
+            { view_entry_edit_input((idx, &entry)) }
+        </li>
+    }
 }
 
 fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
@@ -307,7 +218,7 @@ fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
     }
 }
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Filter {
     All,
     Active,
