@@ -1,0 +1,22 @@
+[package]
+name = "sauron-macros"
+version = "0.28.2"
+authors = ["John-John Tedro <udoprog@tedro.se>"]
+license = "MIT"
+description = "An html library for building client side webapps"
+repository = "https://github.com/ivanceras/sauron"
+documentation = "https://docs.rs/sauron"
+readme = "README.md"
+keywords = ["html", "dom", "web"]
+edition = "2018"
+
+[dependencies]
+syn = { version = "1.0.31", features = ["full"] }
+quote = {package = "quote", version = "1.0.3"}
+proc-macro2 = { version = "1.0.10" }
+
+[dev-dependencies]
+sauron = { path = "../..", version = "0.28.2" }
+
+[lib]
+proc-macro = true
