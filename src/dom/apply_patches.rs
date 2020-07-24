@@ -8,6 +8,7 @@ use crate::{
     Dispatch, Patch,
 };
 use js_sys::Function;
+use log::*;
 use std::collections::{HashMap, HashSet};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{Element, Node, Text};
@@ -29,6 +30,7 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
+    debug!("patches: {:#?}", patches);
     let root_node: Node = root_node.into();
 
     // Closure that were added to the DOM during this patch operation.
@@ -189,10 +191,7 @@ fn remove_event_listeners(
     old_closures: &mut ActiveClosure,
 ) -> Result<(), JsValue> {
     let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
-    //crate::log!("all descendatant vdom_id: {:#?}", all_descendant_vdom_id);
     for vdom_id in all_descendant_vdom_id {
-        //crate::log!("Removing listener for vdom_id: {}", vdom_id);
-
         let old_closure = old_closures
             .get(&vdom_id)
             .expect("There is no marked with that vdom_id");
@@ -273,28 +272,27 @@ where
         // of the children and indirect children of this node ( so we don't have to manually remove
         // them).
         // The closures of descendant of the children is also removed
-        Patch::TruncateChildren(_tag, _node_idx, num_children_remaining) => {
-            let children = node.child_nodes();
-            let child_count = children.length();
+        Patch::RemoveChildren(_tag, _node_idx, children_index) => {
+            // we sort the children index, and reverse iterate them
+            // to remove from the last since the DOM children
+            // index is changed when you remove from the first child.
+            // removing from the last, won't change the index of the children of the lower index
+            // range
+            let mut sorted_children_index = children_index.clone();
+            sorted_children_index.sort();
 
-            // We skip over any separators that we placed between two text nodes
-            //   -> `<!--mordor-->`
-            //  and trim all children that come after our new desired `num_children_remaining`
-            //let mut non_separator_children_found = 0;
+            let children_nodes = node.child_nodes();
 
-            let to_be_remove_len =
-                child_count as usize - num_children_remaining;
-            for _index in 0..to_be_remove_len {
-                let last_child = node.last_child().expect("No more last child");
-                let last_element: &Element = last_child.unchecked_ref();
-                remove_event_listeners(last_element, old_closures)?;
+            sorted_children_index.iter().rev().for_each(|child_idx| {
+                let child_node = children_nodes
+                    .item(*child_idx as u32)
+                    .expect("child at this index must exist");
                 // Do not remove comment node
-                if last_child.node_type() == Node::COMMENT_NODE {
-                    continue;
+                if child_node.node_type() != Node::COMMENT_NODE {
+                    node.remove_child(&child_node)
+                        .expect("unable to remove child");
                 }
-                node.remove_child(&last_child)
-                    .expect("Unable to remove last child");
-            }
+            });
 
             Ok(active_closures)
         }
