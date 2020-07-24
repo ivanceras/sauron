@@ -1,44 +1,311 @@
-use sauron::{
-    dom::events::KeyboardEvent,
-    html::{attributes::*, *},
-    prelude::*,
-    Cmd, Component, Node,
-};
+use sauron::html::{attributes::*, *};
+use sauron::*;
 
 pub struct Model {
     entries: Vec<Entry>,
-    filter: Filter,
-    value: String,
-    edit_value: String,
+    visibility: Visibility,
+    field: String,
+    uid: usize,
 }
 
 struct Entry {
     description: String,
     completed: bool,
     editing: bool,
+    id: usize,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub enum Visibility {
+    All,
+    Active,
+    Completed,
 }
 
 pub enum Msg {
+    NoOp,
+    UpdateField(String),
+    EditingEntry(usize),
+    UpdateEntry(usize, String),
     Add,
-    Edit(usize),
-    Update(String),
-    UpdateEdit(String),
-    Remove(usize),
-    SetFilter(Filter),
-    ToggleAll,
-    ToggleEdit(usize),
-    Toggle(usize),
-    ClearCompleted,
-    Nope,
+    Delete(usize),
+    DeleteComplete,
+    Check(usize, bool),
+    CheckAll(bool),
+    ChangeVisibility(Visibility),
+}
+
+fn on_enter<F>(f: F) -> Attribute<Msg>
+where
+    F: Fn() -> Msg + 'static,
+{
+    on_keydown(move |ke| if ke.key_code() == 13 { f() } else { Msg::NoOp })
 }
 
 impl Model {
     pub fn new() -> Self {
         Model {
             entries: vec![],
-            filter: Filter::All,
-            value: "".into(),
-            edit_value: "".into(),
+            visibility: Visibility::All,
+            field: "".into(),
+            uid: 0,
+        }
+    }
+
+    fn view_input(&self) -> Node<Msg> {
+        header(
+            vec![class("header")],
+            vec![
+                h1(vec![], vec![text("todos")]),
+                input(
+                    vec![
+                        class("new-todo"),
+                        id("new-todo"),
+                        placeholder("What needs to be done?"),
+                        autofocus(true),
+                        value(&self.field),
+                        name("newTodo"),
+                        on_input(|input| {
+                            Msg::UpdateField(input.value.to_string())
+                        }),
+                        on_enter(|| Msg::Add),
+                    ],
+                    vec![],
+                ),
+            ],
+        )
+    }
+
+    fn view_entries(&self) -> Node<Msg> {
+        let all_completed = self.entries.iter().all(|entry| entry.completed);
+        section(
+            vec![
+                class("main"),
+                styles([(
+                    "visibility",
+                    if self.entries.is_empty() {
+                        "hidden"
+                    } else {
+                        "visible"
+                    },
+                )]),
+            ],
+            vec![
+                input(
+                    vec![
+                        class("toggle-all"),
+                        type_("checkbox"),
+                        name("toggle"),
+                        checked(all_completed),
+                        on_click(move |_| Msg::CheckAll(!all_completed)),
+                    ],
+                    vec![],
+                ),
+                label(
+                    vec![for_("toggle-all")],
+                    vec![text("Mark all as complete")],
+                ),
+                ul(
+                    vec![class("todo-list")],
+                    self.entries
+                        .iter()
+                        .filter(|entry| match self.visibility {
+                            Visibility::Completed => entry.completed,
+                            Visibility::Active => !entry.completed,
+                            Visibility::All => true,
+                        })
+                        .map(|entry| self.view_entry(entry))
+                        .collect(),
+                ),
+            ],
+        )
+    }
+
+    fn view_entry(&self, entry: &Entry) -> Node<Msg> {
+        let entry_id = entry.id;
+        let entry_completed = entry.completed;
+        let entry_description = entry.description.clone();
+        let entry_editing = entry.editing;
+        li(
+            vec![classes_flag([
+                ("completed", entry_completed),
+                ("editing", entry_editing),
+            ])],
+            vec![
+                div(
+                    vec![class("view")],
+                    vec![
+                        input(
+                            vec![
+                                class("toggle"),
+                                type_("checkbox"),
+                                checked(entry_completed),
+                                on_click(move |_| {
+                                    Msg::Check(entry_id, !entry_completed)
+                                }),
+                            ],
+                            vec![],
+                        ),
+                        label(
+                            vec![on_doubleclick(move |_| {
+                                Msg::EditingEntry(entry_id)
+                            })],
+                            vec![text(&entry_description)],
+                        ),
+                        button(
+                            vec![
+                                class("destroy"),
+                                on_click(move |_| Msg::Delete(entry_id)),
+                            ],
+                            vec![],
+                        ),
+                    ],
+                ),
+                input(
+                    vec![
+                        class("edit"),
+                        value(&entry_description),
+                        name("title"),
+                        id(format!("todo-{}", entry_id)),
+                        key(format!("todo-{}", entry_id)),
+                        on_input(move |input| {
+                            Msg::UpdateEntry(entry_id, input.value.to_string())
+                        }),
+                        on_enter(move || Msg::EditingEntry(entry_id)),
+                    ],
+                    vec![],
+                ),
+            ],
+        )
+    }
+
+    fn view_controls(&self) -> Node<Msg> {
+        let entries_completed = self.entries.iter().fold(0, |acc, entry| {
+            if entry.completed {
+                acc + 1
+            } else {
+                acc
+            }
+        });
+        let entries_left = self.entries.len() - entries_completed;
+
+        footer(
+            vec![class("footer")],
+            vec![
+                self.view_controls_count(entries_left),
+                self.view_controls_filters(),
+                self.view_controls_clear(entries_completed),
+            ],
+        )
+    }
+
+    fn view_controls_count(&self, entries_left: usize) -> Node<Msg> {
+        let item = if entries_left == 1 { " item" } else { " items" };
+        span(
+            vec![class("todo-count")],
+            vec![
+                strong(vec![], vec![text(entries_left)]),
+                text(format!("{} left", item)),
+            ],
+        )
+    }
+
+    fn view_controls_filters(&self) -> Node<Msg> {
+        ul(
+            vec![class("filters")],
+            vec![
+                self.visibility_swap(Visibility::All),
+                text(" "),
+                self.visibility_swap(Visibility::Active),
+                text(" "),
+                self.visibility_swap(Visibility::Completed),
+            ],
+        )
+    }
+
+    fn visibility_swap(&self, visibility: Visibility) -> Node<Msg> {
+        let visibility_uri = visibility.to_uri();
+        let visibility_str = visibility.to_string();
+        let is_selected = visibility == self.visibility;
+        li(
+            vec![on_click(move |_| Msg::ChangeVisibility(visibility.clone()))],
+            vec![a(
+                vec![
+                    href(visibility_uri),
+                    classes_flag([("selected", is_selected)]),
+                ],
+                vec![text(visibility_str)],
+            )],
+        )
+    }
+
+    fn view_controls_clear(&self, entries_completed: usize) -> Node<Msg> {
+        button(
+            vec![
+                class("clear-completed"),
+                hidden(entries_completed == 0),
+                on_click(|_| Msg::DeleteComplete),
+            ],
+            vec![text(format!("Clear completed ({})", entries_completed))],
+        )
+    }
+
+    fn info_footer(&self) -> Node<Msg> {
+        footer(
+            vec![class("info")],
+            vec![
+                p(vec![], vec![text("Double-click to edit a todo")]),
+                p(
+                    vec![],
+                    vec![
+                        text("Written by "),
+                        a(
+                            vec![href("https://github.com/ivanceras")],
+                            vec![text("Jovansonlee Cesar")],
+                        ),
+                    ],
+                ),
+                p(
+                    vec![],
+                    vec![
+                        text("Part of "),
+                        a(
+                            vec![href("http://todomvc.com")],
+                            vec![text("TodoMVC")],
+                        ),
+                    ],
+                ),
+            ],
+        )
+    }
+}
+
+impl Entry {
+    fn new(description: &str, id: usize) -> Self {
+        Entry {
+            description: description.to_string(),
+            completed: false,
+            editing: false,
+            id,
+        }
+    }
+}
+impl Visibility {
+    fn to_uri(&self) -> String {
+        match self {
+            Visibility::All => "#/".to_string(),
+            Visibility::Active => "#/active".to_string(),
+            Visibility::Completed => "#/completed".to_string(),
+        }
+    }
+}
+
+impl ToString for Visibility {
+    fn to_string(&self) -> String {
+        match self {
+            Visibility::All => "All".to_string(),
+            Visibility::Active => "Active".to_string(),
+            Visibility::Completed => "Completed".to_string(),
         }
     }
 }
@@ -46,51 +313,65 @@ impl Model {
 impl Component<Msg> for Model {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
+            Msg::NoOp => Cmd::none(),
             Msg::Add => {
-                let entry = Entry {
-                    description: self.value.clone(),
-                    completed: false,
-                    editing: false,
-                };
-                self.entries.push(entry);
-                self.value = "".to_string();
+                if !self.field.is_empty() {
+                    self.entries.push(Entry::new(&self.field, self.uid));
+                    self.uid += 1;
+                    self.field = "".into();
+                }
+                Cmd::none()
             }
-            Msg::Edit(idx) => {
-                let edit_value = self.edit_value.clone();
-                self.complete_edit(idx, edit_value);
-                self.edit_value = "".to_string();
+            Msg::UpdateField(field) => {
+                self.field = field;
+                Cmd::none()
             }
-            Msg::Update(val) => {
-                self.value = val;
+            Msg::EditingEntry(id) => {
+                self.entries.iter_mut().for_each(|entry| {
+                    if entry.id == id {
+                        entry.editing = true;
+                    } else {
+                        entry.editing = false;
+                    }
+                });
+                Cmd::none()
             }
-            Msg::UpdateEdit(val) => {
-                self.edit_value = val;
+            Msg::UpdateEntry(id, new_desc) => {
+                self.entries.iter_mut().for_each(|entry| {
+                    if entry.id == id {
+                        entry.description = new_desc.clone();
+                    }
+                });
+                Cmd::none()
             }
-            Msg::Remove(idx) => {
-                self.remove(idx);
+            Msg::Delete(id) => {
+                self.entries.retain(|entry| entry.id != id);
+                Cmd::none()
             }
-            Msg::SetFilter(filter) => {
-                self.filter = filter;
+            Msg::DeleteComplete => {
+                self.entries.retain(|entry| !entry.completed);
+                Cmd::none()
             }
-            Msg::ToggleEdit(idx) => {
-                self.edit_value = self.entries[idx].description.clone();
-                self.toggle_edit(idx);
+            Msg::Check(id, is_completed) => {
+                self.entries.iter_mut().for_each(|entry| {
+                    if entry.id == id {
+                        entry.completed = is_completed;
+                    }
+                });
+                Cmd::none()
             }
-            Msg::ToggleAll => {
-                let status = !self.is_all_completed();
-                self.toggle_all(status);
+            Msg::CheckAll(is_completed) => {
+                self.entries
+                    .iter_mut()
+                    .for_each(|entry| entry.completed = is_completed);
+                Cmd::none()
             }
-            Msg::Toggle(idx) => {
-                self.toggle(idx);
+            Msg::ChangeVisibility(visibility) => {
+                self.visibility = visibility;
+                Cmd::none()
             }
-            Msg::ClearCompleted => {
-                self.clear_completed();
-            }
-            Msg::Nope => {}
         }
-        Cmd::none()
     }
-
     fn view(&self) -> Node<Msg> {
         div(
             vec![class("todomvc-wrapper")],
@@ -98,331 +379,13 @@ impl Component<Msg> for Model {
                 section(
                     vec![class("todoapp")],
                     vec![
-                        header(
-                            vec![class("header")],
-                            vec![
-                                h1(vec![], vec![text("todos")]),
-                                self.view_input(),
-                            ],
-                        ),
-                        section(
-                            vec![class("main")],
-                            vec![
-                                input(
-                                    vec![
-                                        class("toggle-all"),
-                                        r#type("checkbox"),
-                                        checked(self.is_all_completed()),
-                                        on_click(|_| Msg::ToggleAll),
-                                    ],
-                                    vec![],
-                                ),
-                                ul(vec![class("todo-list")], {
-                                    self.entries
-                                        .iter()
-                                        .filter(|e| self.filter.fit(e))
-                                        .enumerate()
-                                        .map(view_entry)
-                                        .collect::<Vec<Node<Msg>>>()
-                                }),
-                            ],
-                        ),
-                        footer(
-                            vec![class("footer")],
-                            vec![
-                                span(
-                                    vec![class("todo-count")],
-                                    vec![
-                                        strong(
-                                            vec![],
-                                            vec![text(format!(
-                                                "{}",
-                                                self.total()
-                                            ))],
-                                        ),
-                                        text(" item(s) left"),
-                                    ],
-                                ),
-                                ul(
-                                    vec![class("filters")],
-                                    vec![
-                                        self.view_filter(Filter::All),
-                                        self.view_filter(Filter::Active),
-                                        self.view_filter(Filter::Completed),
-                                    ],
-                                ),
-                                button(
-                                    vec![
-                                        class("clear-completed"),
-                                        on_click(|_| Msg::ClearCompleted),
-                                    ],
-                                    vec![text(format!(
-                                        "Clear completed ({})",
-                                        self.total_completed()
-                                    ))],
-                                ),
-                            ],
-                        ),
+                        self.view_input(),
+                        self.view_entries(),
+                        self.view_controls(),
                     ],
                 ),
-                footer(
-                    vec![class("info")],
-                    vec![
-                        p(vec![], vec![text("Double-click to edit a todo")]),
-                        p(
-                            vec![],
-                            vec![
-                                text("Written by "),
-                                a(
-                                    vec![
-                                        href("https://github.com/ivanceras/"),
-                                        target("_blank"),
-                                    ],
-                                    vec![text("Jovansonlee Cesar")],
-                                ),
-                            ],
-                        ),
-                        p(
-                            vec![],
-                            vec![
-                                text("Part of "),
-                                a(
-                                    vec![
-                                        href("http://todomvc.com/"),
-                                        target("_blank"),
-                                    ],
-                                    vec![text("TodoMVC")],
-                                ),
-                            ],
-                        ),
-                    ],
-                ),
+                self.info_footer(),
             ],
         )
-    }
-}
-
-impl Model {
-    fn view_filter(&self, filter: Filter) -> Node<Msg> {
-        let flt = filter.clone();
-        li(
-            vec![],
-            vec![a(
-                vec![
-                    class(if self.filter == flt {
-                        "selected"
-                    } else {
-                        "not-selected"
-                    }),
-                    href(flt.to_string()),
-                    on_click(move |_| Msg::SetFilter(flt.clone())),
-                ],
-                vec![text(filter.to_string())],
-            )],
-        )
-    }
-
-    fn view_input(&self) -> Node<Msg> {
-        input(
-            vec![
-                class("new-todo"),
-                id("new-todo"),
-                placeholder("What needs to be done?"),
-                value(self.value.to_string()),
-                on_input(|v: InputEvent| Msg::Update(v.value.to_string())),
-                on_keypress(|event: KeyboardEvent| {
-                    if event.key() == "Enter" {
-                        Msg::Add
-                    } else {
-                        Msg::Nope
-                    }
-                }),
-            ],
-            vec![],
-        )
-    }
-}
-
-fn view_entry((idx, entry): (usize, &Entry)) -> Node<Msg> {
-    li(
-        vec![classes_flag([
-            ("todo", true),
-            ("editing", entry.editing),
-            ("completed", entry.completed),
-        ])],
-        vec![
-            div(
-                vec![class("view")],
-                vec![
-                    input(
-                        vec![
-                            class("toggle"),
-                            r#type("checkbox"),
-                            checked(entry.completed),
-                            on_click(move |_| Msg::Toggle(idx)),
-                        ],
-                        vec![],
-                    ),
-                    label(
-                        vec![on_doubleclick(move |_| Msg::ToggleEdit(idx))],
-                        vec![text(format!("{}", entry.description))],
-                    ),
-                    button(
-                        vec![
-                            class("destroy"),
-                            on_click(move |_| Msg::Remove(idx)),
-                        ],
-                        vec![],
-                    ),
-                ],
-            ),
-            { view_entry_edit_input((idx, &entry)) },
-        ],
-    )
-}
-
-fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
-    if entry.editing {
-        input(
-            vec![
-                class("edit"),
-                r#type("text"),
-                value(&entry.description),
-                on_input(|input: InputEvent| {
-                    Msg::UpdateEdit(input.value.to_string())
-                }),
-                on_blur(move |_| Msg::Edit(idx)),
-                on_keypress(move |event: KeyboardEvent| {
-                    if event.key() == "Enter" {
-                        Msg::Edit(idx)
-                    } else {
-                        Msg::Nope
-                    }
-                }),
-            ],
-            vec![],
-        )
-    } else {
-        input(vec![r#type("hidden")], vec![])
-    }
-}
-
-#[derive(Clone, PartialEq, Debug)]
-pub enum Filter {
-    All,
-    Active,
-    Completed,
-}
-
-impl ToString for Filter {
-    fn to_string(&self) -> String {
-        match *self {
-            Filter::All => "#/".to_string(),
-            Filter::Active => "#/active".to_string(),
-            Filter::Completed => "#/completed".to_string(),
-        }
-    }
-}
-
-impl Filter {
-    fn fit(&self, entry: &Entry) -> bool {
-        match *self {
-            Filter::All => true,
-            Filter::Active => !entry.completed,
-            Filter::Completed => entry.completed,
-        }
-    }
-}
-
-impl Model {
-    fn total(&self) -> usize {
-        self.entries.len()
-    }
-
-    fn total_completed(&self) -> usize {
-        self.entries
-            .iter()
-            .filter(|e| Filter::Completed.fit(e))
-            .count()
-    }
-
-    fn is_all_completed(&self) -> bool {
-        let mut filtered_iter = self
-            .entries
-            .iter()
-            .filter(|e| self.filter.fit(e))
-            .peekable();
-
-        if filtered_iter.peek().is_none() {
-            return false;
-        }
-
-        filtered_iter.all(|e| e.completed)
-    }
-
-    fn toggle_all(&mut self, value: bool) {
-        for entry in self.entries.iter_mut() {
-            if self.filter.fit(entry) {
-                entry.completed = value;
-            }
-        }
-    }
-
-    fn clear_completed(&mut self) {
-        let entries = self
-            .entries
-            .drain(..)
-            .filter(|e| Filter::Active.fit(e))
-            .collect();
-        self.entries = entries;
-    }
-
-    fn toggle(&mut self, idx: usize) {
-        let filter = self.filter.clone();
-        let mut entries = self
-            .entries
-            .iter_mut()
-            .filter(|e| filter.fit(e))
-            .collect::<Vec<_>>();
-        let entry = entries.get_mut(idx).unwrap();
-        entry.completed = !entry.completed;
-    }
-
-    fn toggle_edit(&mut self, idx: usize) {
-        let filter = self.filter.clone();
-        let mut entries = self
-            .entries
-            .iter_mut()
-            .filter(|e| filter.fit(e))
-            .collect::<Vec<_>>();
-        let entry = entries.get_mut(idx).unwrap();
-        entry.editing = !entry.editing;
-    }
-
-    fn complete_edit(&mut self, idx: usize, val: String) {
-        let filter = self.filter.clone();
-        let mut entries = self
-            .entries
-            .iter_mut()
-            .filter(|e| filter.fit(e))
-            .collect::<Vec<_>>();
-        let entry = entries.get_mut(idx).unwrap();
-        entry.description = val;
-        entry.editing = !entry.editing;
-    }
-
-    fn remove(&mut self, idx: usize) {
-        let idx = {
-            let filter = self.filter.clone();
-            let entries = self
-                .entries
-                .iter()
-                .enumerate()
-                .filter(|&(_, e)| filter.fit(e))
-                .collect::<Vec<_>>();
-            let &(idx, _) = entries.get(idx).unwrap();
-            idx
-        };
-        self.entries.remove(idx);
     }
 }

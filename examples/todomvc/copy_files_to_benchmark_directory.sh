@@ -1,6 +1,8 @@
 
 cp -r index.html style.css pkg ../../../todomvc-perf-comparison/todomvc-benchmark/todomvc/sauron/
 
+rm ../../../todomvc-perf-comparison/todomvc-benchmark/todomvc/sauron/pkg/.gitignore
+
 
 cp -r index.html style.css pkg ../../../todo-mvc-bench/frameworks/sauron/
 
