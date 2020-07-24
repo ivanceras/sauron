@@ -223,6 +223,26 @@ where
 {
     let mut active_closures = ActiveClosure::new();
     match patch {
+        Patch::InsertChildren(_tag, _node_idx, child_idx, new_children) => {
+            let parent = &node;
+            let children_nodes = parent.child_nodes();
+            let mut active_closures = HashMap::new();
+            for new_child in new_children {
+                let created_node = CreatedNode::<Node>::create_dom_node_opt::<
+                    DSP,
+                    MSG,
+                >(program, &new_child);
+                let next_sibling = children_nodes
+                    .item(*child_idx as u32)
+                    .expect("next item must exist");
+
+                parent
+                    .insert_before(&created_node.node, Some(&next_sibling))?;
+                active_closures.extend(created_node.closures);
+            }
+
+            Ok(active_closures)
+        }
         Patch::AddAttributes(_tag, _node_idx, attributes) => {
             CreatedNode::<Node>::set_element_attributes(
                 program,
@@ -283,7 +303,7 @@ where
 
             let children_nodes = node.child_nodes();
 
-            sorted_children_index.iter().rev().for_each(|child_idx| {
+            for child_idx in sorted_children_index.iter().rev() {
                 let child_node = children_nodes
                     .item(*child_idx as u32)
                     .expect("child at this index must exist");
@@ -291,8 +311,11 @@ where
                 if child_node.node_type() != Node::COMMENT_NODE {
                     node.remove_child(&child_node)
                         .expect("unable to remove child");
+
+                    let child_element: &Element = child_node.unchecked_ref();
+                    remove_event_listeners(&child_element, old_closures)?;
                 }
-            });
+            }
 
             Ok(active_closures)
         }

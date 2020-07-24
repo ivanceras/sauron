@@ -160,7 +160,7 @@ fn remove_nodes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::TruncateChildren(&"div", 0, 0)],
+        vec![Patch::RemoveChildren(&"div", 0, vec![0, 1])],
         "Remove all child nodes at and after child sibling index 1",
     );
 
@@ -185,8 +185,8 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::TruncateChildren(&"div", 0, 1),
-            Patch::TruncateChildren(&"span", 1, 1)
+            Patch::RemoveChildren(&"div", 0, vec![1]),
+            Patch::RemoveChildren(&"span", 1, vec![1])
         ],
         "Remove a child and a grandchild node",
     );
@@ -205,7 +205,7 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::TruncateChildren(&"b", 1, 1),
+            Patch::RemoveChildren(&"b", 1, vec![1]),
             Patch::Replace(&"b", 4, &i(vec![], vec![])),
         ],
         "Removing child and change next node after parent",
@@ -279,19 +279,5 @@ fn replace_text_node() {
         diff(&old, &new),
         vec![Patch::ChangeText(0, "New")],
         "Replace text node",
-    );
-}
-
-// Initially motivated by having two elements where all that changed was an event listener
-// because right now we don't patch event listeners. So.. until we have a solution
-// for that we can just give them different keys to force a replace.
-#[test]
-fn replace_if_different_keys() {
-    let old: Node<()> = div(vec![key(1)], vec![]); //{ <div key="1"> </div> },
-    let new = div(vec![key(2)], vec![]); //{ <div key="2"> </div> },
-    assert_eq!(
-        diff(&old, &new),
-        vec![Patch::Replace(&"div", 0, &div(vec![key(2)], vec![]))],
-        "If two nodes have different keys always generate a full replace.",
     );
 }

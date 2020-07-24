@@ -108,4 +108,5 @@ exclude = [
 
 
 [patch.crates-io]
+#mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "keyed-elements" }
 mt-dom = { path = "../mt-dom" }
