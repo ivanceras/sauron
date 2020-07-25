@@ -127,10 +127,13 @@ impl Model {
         let entry_description = entry.description.clone();
         let entry_editing = entry.editing;
         li(
-            vec![classes_flag([
-                ("completed", entry_completed),
-                ("editing", entry_editing),
-            ])],
+            vec![
+                classes_flag([
+                    ("completed", entry_completed),
+                    ("editing", entry_editing),
+                ]),
+                key(format!("todo-{}", entry_id)),
+            ],
             vec![
                 div(
                     vec![class("view")],
@@ -167,7 +170,6 @@ impl Model {
                         value(&entry_description),
                         name("title"),
                         id(format!("todo-{}", entry_id)),
-                        key(format!("todo-{}", entry_id)),
                         on_input(move |input| {
                             Msg::UpdateEntry(entry_id, input.value.to_string())
                         }),
