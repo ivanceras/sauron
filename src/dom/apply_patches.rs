@@ -349,7 +349,6 @@ where
                 let child_node = children_nodes
                     .item(*child_idx as u32)
                     .expect("child at this index must exist");
-                trace!("got the child node to be erased;: {:?}", child_node);
                 // Do not remove comment node
                 if child_node.node_type() != Node::COMMENT_NODE {
                     node.remove_child(&child_node)
@@ -358,6 +357,13 @@ where
                     if child_node.node_type() != Node::TEXT_NODE {
                         let child_element: &Element =
                             child_node.unchecked_ref();
+
+                        trace!(
+                            "got the child node to be erased: {}",
+                            child_element.tag_name()
+                        );
+
+                        trace!("containing: {}", child_element.inner_html());
                         trace!("casted to element: {:?}", child_element);
                         remove_event_listeners(&child_element, old_closures)?;
                     }
