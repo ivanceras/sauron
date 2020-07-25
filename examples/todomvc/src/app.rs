@@ -132,15 +132,16 @@ impl Model {
                     ("completed", entry_completed),
                     ("editing", entry_editing),
                 ]),
-                key(format!("todo-{}", entry_id)),
+                key(format!("todo-li-{}", entry_id)),
             ],
             vec![
                 div(
-                    vec![class("view")],
+                    vec![class("view"), key(format!("todo-view-{}", entry_id))],
                     vec![
                         input(
                             vec![
                                 class("toggle"),
+                                key(format!("todo-input-{}", entry_id)),
                                 type_("checkbox"),
                                 checked(entry_completed),
                                 on_click(move |_| {
@@ -217,9 +218,7 @@ impl Model {
             vec![class("filters")],
             vec![
                 self.visibility_swap(Visibility::All),
-                text(" "),
                 self.visibility_swap(Visibility::Active),
-                text(" "),
                 self.visibility_swap(Visibility::Completed),
             ],
         )

@@ -9,7 +9,7 @@ use crate::{
 };
 use js_sys::Function;
 use log::*;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{Element, Node, Text};
 
@@ -23,15 +23,16 @@ pub fn patch<N, DSP, MSG>(
     program: Option<&DSP>,
     root_node: N,
     old_closures: &mut ActiveClosure,
-    patches: &[Patch<MSG>],
+    patches: Vec<Patch<MSG>>,
 ) -> Result<ActiveClosure, JsValue>
 where
     N: Into<Node>,
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    debug!("patches: {:#?}", patches);
     let root_node: Node = root_node.into();
+
+    debug!("patches: {:#?}", patches);
 
     // Closure that were added to the DOM during this patch operation.
     let mut active_closures = HashMap::new();
@@ -39,9 +40,9 @@ where
     // finding the nodes to be patched before hand, instead of calling it
     // in every patch loop.
     let (element_nodes_to_patch, text_nodes_to_patch) =
-        find_nodes(root_node, patches);
+        find_nodes(root_node, &patches);
 
-    for patch in patches {
+    for patch in patches.iter() {
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = element_nodes_to_patch.get(&patch_node_idx) {
@@ -71,43 +72,63 @@ where
 /// Instead of finding the nodes each time in the patching process.
 /// We find them before hand so as not to keep calling this function for each and every element to
 /// be patched.
+///
+/// This is also IMPORTANT such that changes to the Dom tree
+/// such as removal and insertion of nodes
+/// will not change to NodeIdx we need to find, since
+/// we already get a reference to these nodes prior to applying any of the patches.
 fn find_nodes<MSG>(
     root_node: Node,
     patches: &[Patch<MSG>],
 ) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
     let mut cur_node_idx = 0;
-    let mut nodes_to_find = HashSet::new();
+    let mut nodes_to_find = HashMap::new();
 
     for patch in patches {
-        nodes_to_find.insert(patch.node_idx());
+        nodes_to_find.insert(patch.node_idx(), patch.tag());
     }
+    debug!("nodes to find: {:#?}", nodes_to_find);
 
     find_nodes_recursive(root_node, &mut cur_node_idx, &nodes_to_find)
 }
 
 /// find the html nodes recursively
 fn find_nodes_recursive(
-    root_node: Node,
+    node: Node,
     cur_node_idx: &mut usize,
-    nodes_to_find: &HashSet<usize>,
+    nodes_to_find: &HashMap<usize, Option<&&'static str>>,
 ) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
     let mut element_nodes_to_patch = HashMap::new();
     let mut text_nodes_to_patch = HashMap::new();
 
     // We use child_nodes() instead of children() because children() ignores text nodes
-    let children = root_node.child_nodes();
+    let children = node.child_nodes();
     let child_node_count = children.length();
 
     // If the root node matches, mark it for patching
-    if nodes_to_find.get(&cur_node_idx).is_some() {
-        match root_node.node_type() {
+    if let Some(tag) = nodes_to_find.get(&cur_node_idx) {
+        debug!("vdom tag: {:?} at cur_node_idx: {}", tag, cur_node_idx);
+        match node.node_type() {
             Node::ELEMENT_NODE => {
-                element_nodes_to_patch
-                    .insert(*cur_node_idx, root_node.unchecked_into());
+                let element: Element = node.unchecked_into();
+                trace!(
+                    "got something: {} at {}",
+                    element.tag_name(),
+                    cur_node_idx
+                );
+                /*
+                let vtag = tag.expect("must have a tag here");
+                assert_eq!(
+                    element.tag_name().to_uppercase(),
+                    vtag.to_uppercase()
+                );
+                */
+
+                element_nodes_to_patch.insert(*cur_node_idx, element);
             }
             Node::TEXT_NODE => {
                 text_nodes_to_patch
-                    .insert(*cur_node_idx, root_node.unchecked_into());
+                    .insert(*cur_node_idx, node.unchecked_into());
             }
             other => unimplemented!("Unsupported root node type: {}", other),
         }
@@ -222,18 +243,32 @@ where
     DSP: Clone + Dispatch<MSG> + 'static,
 {
     let mut active_closures = ActiveClosure::new();
+
+    debug!("incomping element patch: {:#?}", patch);
+    debug!("patching element: {}", node.tag_name(),);
+
+    if let Some(vtag) = patch.tag() {
+        trace!("great, we are expecting a tag, got tag: {}", vtag);
+    } else {
+        warn!("Expecting a tag, but got none");
+        warn!("Must have found the wrong node..");
+    }
+
+    //let vtag = *patch.tag().expect("must have a tag");
+    //assert_eq!(node.tag_name().to_uppercase(), vtag.to_uppercase());
+
     match patch {
         Patch::InsertChildren(_tag, _node_idx, child_idx, new_children) => {
             let parent = &node;
             let children_nodes = parent.child_nodes();
             let mut active_closures = HashMap::new();
             for new_child in new_children {
-                let created_node = CreatedNode::<Node>::create_dom_node_opt::<
-                    DSP,
-                    MSG,
-                >(program, &new_child);
+                let created_node =
+                    CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
+                        program, &new_child, &mut None,
+                    );
                 let next_sibling = children_nodes
-                    .item(*child_idx as u32)
+                    .item((*child_idx) as u32)
                     .expect("next item must exist");
 
                 parent
@@ -249,6 +284,7 @@ where
                 &mut active_closures,
                 node,
                 attributes,
+                &mut None,
             );
 
             Ok(active_closures)
@@ -280,7 +316,7 @@ where
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                 DSP,
                 MSG,
-            >(program, new_node);
+            >(program, new_node, &mut None);
             remove_event_listeners(&node, old_closures)?;
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
@@ -293,6 +329,11 @@ where
         // them).
         // The closures of descendant of the children is also removed
         Patch::RemoveChildren(_tag, _node_idx, children_index) => {
+            trace!(
+                "Removing children: [{:?}] at node: {:?}",
+                _node_idx,
+                children_index
+            );
             // we sort the children index, and reverse iterate them
             // to remove from the last since the DOM children
             // index is changed when you remove from the first child.
@@ -302,18 +343,24 @@ where
             sorted_children_index.sort();
 
             let children_nodes = node.child_nodes();
+            trace!("There are {} children", children_nodes.length());
 
             for child_idx in sorted_children_index.iter().rev() {
                 let child_node = children_nodes
                     .item(*child_idx as u32)
                     .expect("child at this index must exist");
+                trace!("got the child node to be erased;: {:?}", child_node);
                 // Do not remove comment node
                 if child_node.node_type() != Node::COMMENT_NODE {
                     node.remove_child(&child_node)
                         .expect("unable to remove child");
 
-                    let child_element: &Element = child_node.unchecked_ref();
-                    remove_event_listeners(&child_element, old_closures)?;
+                    if child_node.node_type() != Node::TEXT_NODE {
+                        let child_element: &Element =
+                            child_node.unchecked_ref();
+                        trace!("casted to element: {:?}", child_element);
+                        remove_event_listeners(&child_element, old_closures)?;
+                    }
                 }
             }
 
@@ -323,10 +370,10 @@ where
             let parent = &node;
             let mut active_closures = HashMap::new();
             for new_node in new_nodes {
-                let created_node = CreatedNode::<Node>::create_dom_node_opt::<
-                    DSP,
-                    MSG,
-                >(program, &new_node);
+                let created_node =
+                    CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
+                        program, &new_node, &mut None,
+                    );
                 parent.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }
@@ -348,15 +395,22 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
+    debug!(
+        "applying a text patch for : {} ",
+        node.whole_text().expect("must get the text")
+    );
+    debug!("with patch {:#?}", patch);
+
     match patch {
         Patch::ChangeText(_node_idx, new_text) => {
+            println!("patching text node: {:?}", node);
             node.set_node_value(Some(&new_text));
         }
         Patch::Replace(_tag, _node_idx, new_node) => {
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                 DSP,
                 MSG,
-            >(program, new_node);
+            >(program, new_node, &mut None);
             node.replace_with_with_node_1(&created_node.node)?;
         }
         _other => unreachable!(

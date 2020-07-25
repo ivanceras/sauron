@@ -67,12 +67,13 @@ impl<T> CreatedNode<T> {
     pub fn create_dom_node<DSP, MSG>(
         program: &DSP,
         vnode: &crate::Node<MSG>,
+        node_idx: &mut Option<usize>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        Self::create_dom_node_opt(Some(program), vnode)
+        Self::create_dom_node_opt(Some(program), vnode, node_idx)
     }
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
@@ -80,6 +81,7 @@ impl<T> CreatedNode<T> {
     pub fn create_dom_node_opt<DSP, MSG>(
         program: Option<&DSP>,
         vnode: &crate::Node<MSG>,
+        node_idx: &mut Option<usize>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
@@ -91,7 +93,8 @@ impl<T> CreatedNode<T> {
             }
             crate::Node::Element(element_node) => {
                 let created_element: CreatedNode<Node> =
-                    Self::create_element_node(program, element_node).into();
+                    Self::create_element_node(program, element_node, node_idx)
+                        .into();
                 created_element
             }
         }
@@ -157,13 +160,16 @@ impl<T> CreatedNode<T> {
         closures: &mut ActiveClosure,
         element: &Element,
         attrs: &[&Attribute<MSG>],
+        node_idx: &mut Option<usize>,
     ) where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         let attrs = mt_dom::merge_attributes_of_same_name(attrs);
         for att in attrs {
-            Self::set_element_attribute(program, closures, element, &att);
+            Self::set_element_attribute(
+                program, closures, element, &att, node_idx,
+            );
         }
     }
 
@@ -173,6 +179,7 @@ impl<T> CreatedNode<T> {
         closures: &mut ActiveClosure,
         element: &Element,
         attr: &Attribute<MSG>,
+        node_idx: &mut Option<usize>,
     ) where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
@@ -228,9 +235,18 @@ impl<T> CreatedNode<T> {
                     _ => {
                         element
                             .set_attribute(attr.name(), &merged_plain_values)
-                            .expect(
-                                "Set element attribute_ns in create element",
-                            );
+                            .expect("Set element attribute in create element");
+
+                        if let Some(node_idx) = node_idx {
+                            element
+                                .set_attribute(
+                                    "node_idx",
+                                    &node_idx.to_string(),
+                                )
+                                .expect(
+                                    "Set element node_idx in create element",
+                                );
+                        }
                     }
                 }
             }
@@ -283,6 +299,7 @@ impl<T> CreatedNode<T> {
     pub fn create_element_node<DSP, MSG>(
         program: Option<&DSP>,
         velem: &crate::Element<MSG>,
+        node_idx: &mut Option<usize>,
     ) -> CreatedNode<Element>
     where
         MSG: 'static,
@@ -309,10 +326,13 @@ impl<T> CreatedNode<T> {
             &mut closures,
             &element,
             &velem.get_attributes().iter().collect::<Vec<_>>(),
+            node_idx,
         );
 
         let mut previous_node_was_text = false;
         for child in velem.get_children().iter() {
+            node_idx.as_mut().map(|v| *v += 1);
+
             match child {
                 crate::Node::Text(text_node) => {
                     let current_node: &web_sys::Node = element.as_ref();
@@ -339,8 +359,11 @@ impl<T> CreatedNode<T> {
                 crate::Node::Element(element_node) => {
                     previous_node_was_text = false;
 
-                    let child =
-                        Self::create_element_node(program, element_node);
+                    let child = Self::create_element_node(
+                        program,
+                        element_node,
+                        node_idx,
+                    );
                     let child_elem: Element = child.node;
                     closures.extend(child.closures);
 

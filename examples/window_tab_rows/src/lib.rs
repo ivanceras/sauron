@@ -1,14 +1,7 @@
 #![deny(warnings)]
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
-    Cmd,
-    Component,
-    Node,
-    Program,
+    html::{attributes::*, events::*, *},
+    Cmd, Component, Node, Program,
 };
 use tab::Tab;
 use wasm_bindgen::prelude::*;
@@ -130,6 +123,7 @@ impl Component<Msg> for Window {
 
 #[wasm_bindgen(start)]
 pub fn main() {
+    console_log::init_with_level(log::Level::Trace).unwrap();
     console_error_panic_hook::set_once();
     Program::mount_to_body(Window::new());
 }
