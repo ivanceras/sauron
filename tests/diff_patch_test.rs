@@ -398,3 +398,39 @@ fn different_key_will_be_removed_and_create_a_new_one() {
         "If two nodes have different keys always generate a full replace.",
     );
 }
+
+#[test]
+fn text_changed_in_keyed_elements() {
+    let old: Node<()> = main(
+        vec![class("test4")],
+        vec![section(
+            vec![class("todo")],
+            vec![
+                article(vec![key(1)], vec![text("item1")]),
+                article(vec![key(2)], vec![text("item2")]),
+                article(vec![key(3)], vec![text("item3")]),
+            ],
+        )],
+    );
+
+    // we remove the key1
+    let update1: Node<()> = main(
+        vec![class("test4")],
+        vec![section(
+            vec![class("todo")],
+            vec![
+                article(vec![key(2)], vec![text("item2")]),
+                article(vec![key(3)], vec![text("item3 with changes")]),
+            ],
+        )],
+    );
+
+    let patch = diff(&old, &update1);
+    assert_eq!(
+        patch,
+        vec![
+            Patch::ChangeText(7, "item3 with changes"),
+            Patch::RemoveChildren(&"section", 1, vec![0])
+        ]
+    );
+}
