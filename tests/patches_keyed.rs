@@ -340,6 +340,7 @@ fn mixed_keyed_and_non_keyed_elements() {
         <article key=\"2\" node_idx=\"4\">item2</article>\
         <article key=\"3\" node_idx=\"6\">item3 with changes</article>\
         </section>\
+        <footer>2 items left</footer>\
         </main>";
 
     assert_eq!(expected1, container.outer_html());
