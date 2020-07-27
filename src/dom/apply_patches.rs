@@ -8,7 +8,6 @@ use crate::{
     Dispatch, Patch,
 };
 use js_sys::Function;
-use log::*;
 use std::collections::HashMap;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{Element, Node, Text};
@@ -31,8 +30,6 @@ where
     DSP: Clone + Dispatch<MSG> + 'static,
 {
     let root_node: Node = root_node.into();
-
-    debug!("patches: {:#?}", patches);
 
     // Closure that were added to the DOM during this patch operation.
     let mut active_closures = HashMap::new();
@@ -87,7 +84,6 @@ fn find_nodes<MSG>(
     for patch in patches {
         nodes_to_find.insert(patch.node_idx(), patch.tag());
     }
-    debug!("nodes to find: {:#?}", nodes_to_find);
 
     find_nodes_recursive(root_node, &mut cur_node_idx, &nodes_to_find)
 }
@@ -107,22 +103,14 @@ fn find_nodes_recursive(
 
     // If the root node matches, mark it for patching
     if let Some(tag) = nodes_to_find.get(&cur_node_idx) {
-        debug!("vdom tag: {:?} at cur_node_idx: {}", tag, cur_node_idx);
         match node.node_type() {
             Node::ELEMENT_NODE => {
                 let element: Element = node.unchecked_into();
-                trace!(
-                    "got something: {} at {}",
-                    element.tag_name(),
-                    cur_node_idx
-                );
-                /*
                 let vtag = tag.expect("must have a tag here");
                 assert_eq!(
                     element.tag_name().to_uppercase(),
                     vtag.to_uppercase()
                 );
-                */
 
                 element_nodes_to_patch.insert(*cur_node_idx, element);
             }
@@ -244,18 +232,8 @@ where
 {
     let mut active_closures = ActiveClosure::new();
 
-    debug!("incomping element patch: {:#?}", patch);
-    debug!("patching element: {}", node.tag_name(),);
-
-    if let Some(vtag) = patch.tag() {
-        trace!("great, we are expecting a tag, got tag: {}", vtag);
-    } else {
-        warn!("Expecting a tag, but got none");
-        warn!("Must have found the wrong node..");
-    }
-
-    //let vtag = *patch.tag().expect("must have a tag");
-    //assert_eq!(node.tag_name().to_uppercase(), vtag.to_uppercase());
+    let vtag = *patch.tag().expect("must have a tag");
+    assert_eq!(node.tag_name().to_uppercase(), vtag.to_uppercase());
 
     match patch {
         Patch::InsertChildren(_tag, _node_idx, child_idx, new_children) => {
@@ -329,11 +307,6 @@ where
         // them).
         // The closures of descendant of the children is also removed
         Patch::RemoveChildren(_tag, _node_idx, children_index) => {
-            trace!(
-                "Removing children: [{:?}] at node: {:?}",
-                _node_idx,
-                children_index
-            );
             // we sort the children index, and reverse iterate them
             // to remove from the last since the DOM children
             // index is changed when you remove from the first child.
@@ -343,7 +316,6 @@ where
             sorted_children_index.sort();
 
             let children_nodes = node.child_nodes();
-            trace!("There are {} children", children_nodes.length());
 
             for child_idx in sorted_children_index.iter().rev() {
                 let child_node = children_nodes
@@ -358,13 +330,6 @@ where
                         let child_element: &Element =
                             child_node.unchecked_ref();
 
-                        trace!(
-                            "got the child node to be erased: {}",
-                            child_element.tag_name()
-                        );
-
-                        trace!("containing: {}", child_element.inner_html());
-                        trace!("casted to element: {:?}", child_element);
                         remove_event_listeners(&child_element, old_closures)?;
                     }
                 }
@@ -401,12 +366,6 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    debug!(
-        "applying a text patch for : {} ",
-        node.whole_text().expect("must get the text")
-    );
-    debug!("with patch {:#?}", patch);
-
     match patch {
         Patch::ChangeText(_node_idx, new_text) => {
             println!("patching text node: {:?}", node);
