@@ -185,8 +185,8 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
+            Patch::RemoveChildren(&"span", 1, vec![1]),
             Patch::RemoveChildren(&"div", 0, vec![1]),
-            Patch::RemoveChildren(&"span", 1, vec![1])
         ],
         "Remove a child and a grandchild node",
     );

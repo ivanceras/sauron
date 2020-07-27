@@ -123,10 +123,10 @@ fn truncate_children_different_attributes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::RemoveChildren(&"div", 0, vec![3, 4, 5, 6]),
             Patch::AddAttributes(&"div", 1, vec![&class("class5")]),
             Patch::AddAttributes(&"div", 2, vec![&class("class6")]),
-            Patch::AddAttributes(&"div", 3, vec![&class("class7")])
+            Patch::AddAttributes(&"div", 3, vec![&class("class7")]),
+            Patch::RemoveChildren(&"div", 0, vec![3, 4, 5, 6]),
         ],
         "Should truncate children"
     );
@@ -149,7 +149,10 @@ fn replace_node() {
         vec![Patch::Replace(&"b", 1, &strong(vec![], vec![]))],
         "Replace a child node"
     );
+}
 
+#[test]
+fn replace_node2() {
     let old: Node<()> =
         div(vec![], vec![b(vec![], vec![text("1")]), b(vec![], vec![])]);
     let new = div(vec![], vec![i(vec![], vec![text("1")]), i(vec![], vec![])]);
@@ -215,8 +218,8 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
+            Patch::RemoveChildren(&"span", 1, vec![1]),
             Patch::RemoveChildren(&"div", 0, vec![1]),
-            Patch::RemoveChildren(&"span", 1, vec![1])
         ],
         "Remove a child and a grandchild node",
     );

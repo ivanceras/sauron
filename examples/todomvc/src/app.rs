@@ -136,12 +136,11 @@ impl Model {
             ],
             vec![
                 div(
-                    vec![class("view"), key(format!("todo-view-{}", entry_id))],
+                    vec![class("view")],
                     vec![
                         input(
                             vec![
                                 class("toggle"),
-                                key(format!("todo-input-{}", entry_id)),
                                 type_("checkbox"),
                                 checked(entry_completed),
                                 on_click(move |_| {
