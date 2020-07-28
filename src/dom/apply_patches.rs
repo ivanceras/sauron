@@ -223,6 +223,41 @@ fn remove_event_listeners(
     Ok(())
 }
 
+/// remove the event listener which matches the given event name
+fn remove_event_listener_with_name(
+    event_name: &'static str,
+    node: &Element,
+    old_closures: &mut ActiveClosure,
+) -> Result<(), JsValue> {
+    let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
+    log::debug!("all_descendant_vdom_id: {:?}", all_descendant_vdom_id);
+    for vdom_id in all_descendant_vdom_id {
+        if let Some(old_closure) = old_closures.get_mut(&vdom_id) {
+            for (event, oc) in old_closure.iter() {
+                if *event == event_name {
+                    let func: &Function = oc.as_ref().unchecked_ref();
+                    node.remove_event_listener_with_callback(event, func)?;
+                }
+            }
+
+            old_closure.retain(|(event, _oc)| *event != event_name);
+
+            // remove closure active_closure in dom_updater to free up memory
+            if old_closure.is_empty() {
+                old_closures
+                    .remove(&vdom_id)
+                    .expect("Unable to remove old closure");
+            }
+        } else {
+            log::warn!(
+                "There is no closure marked with that vdom_id: {}",
+                vdom_id
+            );
+        }
+    }
+    Ok(())
+}
+
 /// apply a the patch to this element node.
 /// and return the ActiveClosure that may be attached to that element
 fn apply_element_patch<DSP, MSG>(
@@ -280,8 +315,11 @@ where
                         }
                         // it is an event listener
                         AttValue::Callback(_) => {
-                            //TODO: remove only the event listener that matches the event name
-                            remove_event_listeners(node, old_closures)?;
+                            remove_event_listener_with_name(
+                                attr.name(),
+                                node,
+                                old_closures,
+                            )?;
                         }
                     }
                 }
