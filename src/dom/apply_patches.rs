@@ -246,10 +246,10 @@ where
             let children_nodes = parent.child_nodes();
             let mut active_closures = HashMap::new();
             for new_child in new_children {
-                let created_node =
-                    CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                        program, &new_child, &mut None,
-                    );
+                let created_node = CreatedNode::<Node>::create_dom_node_opt::<
+                    DSP,
+                    MSG,
+                >(program, &new_child);
                 let next_sibling = children_nodes
                     .item((*child_idx) as u32)
                     .expect("next item must exist");
@@ -267,7 +267,6 @@ where
                 &mut active_closures,
                 node,
                 attributes,
-                &mut None,
             );
 
             Ok(active_closures)
@@ -299,7 +298,7 @@ where
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                 DSP,
                 MSG,
-            >(program, new_node, &mut None);
+            >(program, new_node);
             remove_event_listeners(&node, old_closures)?;
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
@@ -346,10 +345,10 @@ where
             let parent = &node;
             let mut active_closures = HashMap::new();
             for new_node in new_nodes {
-                let created_node =
-                    CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                        program, &new_node, &mut None,
-                    );
+                let created_node = CreatedNode::<Node>::create_dom_node_opt::<
+                    DSP,
+                    MSG,
+                >(program, &new_node);
                 parent.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }
@@ -380,7 +379,7 @@ where
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                 DSP,
                 MSG,
-            >(program, new_node, &mut None);
+            >(program, new_node);
             node.replace_with_with_node_1(&created_node.node)?;
         }
         _other => unreachable!(

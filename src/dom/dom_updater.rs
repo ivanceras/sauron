@@ -58,11 +58,7 @@ where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
         let created_node: CreatedNode<Node> =
-            CreatedNode::<Node>::create_dom_node(
-                program,
-                &self.current_vdom,
-                &mut Some(0),
-            );
+            CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         self.root_node
             .append_child(&created_node.node)
             .expect("Could not append child to mount");
@@ -78,11 +74,7 @@ where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
         let created_node: CreatedNode<Node> =
-            CreatedNode::<Node>::create_dom_node(
-                program,
-                &self.current_vdom,
-                &mut Some(0),
-            );
+            CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
         let root_element: &Element = self.root_node.unchecked_ref();
         root_element
             .replace_with_with_node_1(&created_node.node)
