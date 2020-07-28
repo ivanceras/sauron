@@ -102,9 +102,6 @@ members = [
     "examples/svg_graph",
     "examples/data-viewer",
 ]
-exclude = [
-    "examples/todomvc-orig",
-]
 
 
 [patch.crates-io]
