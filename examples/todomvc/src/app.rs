@@ -4,7 +4,9 @@ use sauron::{
     prelude::*,
     Cmd, Component, Node,
 };
+use serde_derive::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct Model {
     entries: Vec<Entry>,
     visibility: Visibility,
@@ -12,11 +14,19 @@ pub struct Model {
     uid: usize,
 }
 
+#[derive(Serialize, Deserialize)]
 struct Entry {
     description: String,
     completed: bool,
     editing: bool,
     id: usize,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub enum Visibility {
+    All,
+    Active,
+    Completed,
 }
 
 pub enum Msg {
@@ -93,6 +103,7 @@ impl Component<Msg> for Model {
             }
             Msg::NoOp => {}
         }
+        self.save_to_storage();
         Cmd::none()
     }
 
@@ -126,7 +137,7 @@ impl Entry {
 }
 
 impl Model {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Model {
             entries: vec![],
             visibility: Visibility::All,
@@ -350,13 +361,35 @@ impl Model {
             ],
         )
     }
-}
 
-#[derive(Clone, PartialEq, Debug)]
-pub enum Visibility {
-    All,
-    Active,
-    Completed,
+    fn save_to_storage(&self) {
+        let window = web_sys::window().expect("no global `window` exists");
+        let local_storage = window.local_storage();
+        if let Ok(Some(local_storage)) = local_storage {
+            let json_data =
+                serde_json::to_string(&self).expect("must serialize data");
+            if let Err(err) =
+                local_storage.set_item("todomvc::data", &json_data)
+            {
+                log::error!("Could not write to local storage, {:?}", err);
+            }
+        }
+    }
+
+    pub fn get_from_storage() -> Self {
+        let window = web_sys::window().expect("no global `window` exists");
+        let local_storage = window.local_storage();
+
+        if let Ok(Some(local_storage)) = local_storage {
+            if let Ok(Some(s)) = local_storage.get_item("todomvc::data") {
+                serde_json::from_str(&s).ok().unwrap_or(Self::new())
+            } else {
+                Self::new()
+            }
+        } else {
+            Self::new()
+        }
+    }
 }
 
 impl ToString for Visibility {
