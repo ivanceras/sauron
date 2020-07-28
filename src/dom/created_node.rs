@@ -226,10 +226,11 @@ impl<T> CreatedNode<T> {
                                     av.get_simple()
                                         .expect("must be a simple value")
                                 })
-                                .map(|v| v.as_bool())
-                                .flatten()
-                                .unwrap_or(false);
-                            input.set_checked(checked);
+                                .unwrap()
+                                .to_string();
+                            if !checked.is_empty() {
+                                input.set_checked(true);
+                            }
                         }
                     }
                     _ => {

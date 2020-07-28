@@ -29,6 +29,7 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
+    log::debug!("patches: {:#?}", patches);
     let root_node: Node = root_node.into();
 
     // Closure that were added to the DOM during this patch operation.
@@ -200,20 +201,24 @@ fn remove_event_listeners(
     old_closures: &mut ActiveClosure,
 ) -> Result<(), JsValue> {
     let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
+    log::debug!("all_descendant_vdom_id: {:?}", all_descendant_vdom_id);
     for vdom_id in all_descendant_vdom_id {
-        let old_closure = old_closures
-            .get(&vdom_id)
-            .expect("There is no marked with that vdom_id");
+        if let Some(old_closure) = old_closures.get(&vdom_id) {
+            for (event, oc) in old_closure.iter() {
+                let func: &Function = oc.as_ref().unchecked_ref();
+                node.remove_event_listener_with_callback(event, func)?;
+            }
 
-        for (event, oc) in old_closure.iter() {
-            let func: &Function = oc.as_ref().unchecked_ref();
-            node.remove_event_listener_with_callback(event, func)?;
+            // remove closure active_closure in dom_updater to free up memory
+            old_closures
+                .remove(&vdom_id)
+                .expect("Unable to remove old closure");
+        } else {
+            log::warn!(
+                "There is no closure marked with that vdom_id: {}",
+                vdom_id
+            );
         }
-
-        // remove closure active_closure in dom_updater to free up memory
-        old_closures
-            .remove(&vdom_id)
-            .expect("Unable to remove old closure");
     }
     Ok(())
 }
