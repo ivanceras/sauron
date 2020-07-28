@@ -42,10 +42,10 @@ fn node_mounted_properly() {
         .expect("must not error")
         .expect("must exist");
 
-    let expected_outer = "<main class=\"container1\" node_idx=\"0\">\
-        <section class=\"todo\" node_idx=\"1\">\
-        <article key=\"1\" node_idx=\"2\">item1</article>\
-        <article key=\"2\" node_idx=\"4\">item2</article>\
+    let expected_outer = "<main class=\"container1\">\
+        <section class=\"todo\">\
+        <article key=\"1\">item1</article>\
+        <article key=\"2\">item2</article>\
         </section>\
         </main>";
 
@@ -93,10 +93,10 @@ fn node_patched_properly() {
         .expect("must not error")
         .expect("must exist");
 
-    let expected = "<main class=\"container2\" node_idx=\"0\">\
-        <section class=\"todo\" node_idx=\"1\">\
-        <article key=\"1\" node_idx=\"2\">item1</article>\
-        <article key=\"2\" node_idx=\"4\">item2</article>\
+    let expected = "<main class=\"container2\">\
+        <section class=\"todo\">\
+        <article key=\"1\">item1</article>\
+        <article key=\"2\">item2</article>\
         </section>\
         </main>";
 
@@ -109,9 +109,9 @@ fn node_patched_properly() {
         .expect("must not error")
         .expect("must exist");
 
-    let expected1 = "<main class=\"container2\" node_idx=\"0\">\
-        <section class=\"todo\" node_idx=\"1\">\
-        <article key=\"1\" node_idx=\"2\">item1</article>\
+    let expected1 = "<main class=\"container2\">\
+        <section class=\"todo\">\
+        <article key=\"1\">item1</article>\
         </section>\
         </main>";
 
@@ -163,11 +163,11 @@ fn node_patched_properly_remove_from_start() {
         .expect("must not error")
         .expect("must exist");
 
-    let expected = "<main class=\"test3\" node_idx=\"0\">\
-        <section class=\"todo\" node_idx=\"1\">\
-        <article key=\"1\" node_idx=\"2\">item1</article>\
-        <article key=\"2\" node_idx=\"4\">item2</article>\
-        <article key=\"3\" node_idx=\"6\">item3</article>\
+    let expected = "<main class=\"test3\">\
+        <section class=\"todo\">\
+        <article key=\"1\">item1</article>\
+        <article key=\"2\">item2</article>\
+        <article key=\"3\">item3</article>\
         </section>\
         </main>";
 
@@ -180,10 +180,10 @@ fn node_patched_properly_remove_from_start() {
         .expect("must not error")
         .expect("must exist");
 
-    let expected1 = "<main class=\"test3\" node_idx=\"0\">\
-        <section class=\"todo\" node_idx=\"1\">\
-        <article key=\"2\" node_idx=\"4\">item2</article>\
-        <article key=\"3\" node_idx=\"6\">item3</article>\
+    let expected1 = "<main class=\"test3\">\
+        <section class=\"todo\">\
+        <article key=\"2\">item2</article>\
+        <article key=\"3\">item3</article>\
         </section>\
         </main>";
 
@@ -235,11 +235,11 @@ fn node_patched_properly_text_changed() {
         .expect("must not error")
         .expect("must exist");
 
-    let expected = "<main class=\"test4\" node_idx=\"0\">\
-        <section class=\"todo\" node_idx=\"1\">\
-        <article key=\"1\" node_idx=\"2\">item1</article>\
-        <article key=\"2\" node_idx=\"4\">item2</article>\
-        <article key=\"3\" node_idx=\"6\">item3</article>\
+    let expected = "<main class=\"test4\">\
+        <section class=\"todo\">\
+        <article key=\"1\">item1</article>\
+        <article key=\"2\">item2</article>\
+        <article key=\"3\">item3</article>\
         </section>\
         </main>";
 
@@ -252,10 +252,10 @@ fn node_patched_properly_text_changed() {
         .expect("must not error")
         .expect("must exist");
 
-    let expected1 = "<main class=\"test4\" node_idx=\"0\">\
-        <section class=\"todo\" node_idx=\"1\">\
-        <article key=\"2\" node_idx=\"4\">item2</article>\
-        <article key=\"3\" node_idx=\"6\">item3 with changes</article>\
+    let expected1 = "<main class=\"test4\">\
+        <section class=\"todo\">\
+        <article key=\"2\">item2</article>\
+        <article key=\"3\">item3 with changes</article>\
         </section>\
         </main>";
 
@@ -315,11 +315,11 @@ fn mixed_keyed_and_non_keyed_elements() {
         .expect("must not error")
         .expect("must exist");
 
-    let expected = "<main class=\"test5\" node_idx=\"0\">\
-        <section class=\"todo\" node_idx=\"1\">\
-        <article key=\"1\" node_idx=\"2\">item1</article>\
-        <article key=\"2\" node_idx=\"4\">item2</article>\
-        <article key=\"3\" node_idx=\"6\">item3</article>\
+    let expected = "<main class=\"test5\">\
+        <section class=\"todo\">\
+        <article key=\"1\">item1</article>\
+        <article key=\"2\">item2</article>\
+        <article key=\"3\">item3</article>\
         </section>\
         <footer>3 items left</footer>\
         </main>";
@@ -335,10 +335,10 @@ fn mixed_keyed_and_non_keyed_elements() {
         .expect("must exist");
     debug!("after update: {}", container.outer_html());
 
-    let expected1 = "<main class=\"test5\" node_idx=\"0\">\
-        <section class=\"todo\" node_idx=\"1\">\
-        <article key=\"2\" node_idx=\"4\">item2</article>\
-        <article key=\"3\" node_idx=\"6\">item3 with changes</article>\
+    let expected1 = "<main class=\"test5\">\
+        <section class=\"todo\">\
+        <article key=\"2\">item2</article>\
+        <article key=\"3\">item3 with changes</article>\
         </section>\
         <footer>2 items left</footer>\
         </main>";
