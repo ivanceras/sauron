@@ -56,7 +56,8 @@ impl Browser {
         cmd
     }
 
-    fn get_size() -> (i32, i32) {
+    /// return the size of the browser at this moment
+    pub fn get_size() -> (i32, i32) {
         let window = crate::window();
         let window_width = window
             .inner_width()
