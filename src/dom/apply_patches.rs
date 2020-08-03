@@ -29,7 +29,7 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    //log::debug!("patches: {:#?}", patches);
+    log::warn!("patches: {:#?}", patches);
     let root_node: Node = root_node.into();
 
     // Closure that were added to the DOM during this patch operation.

@@ -437,3 +437,34 @@ fn text_changed_in_keyed_elements() {
         ]
     );
 }
+
+#[test]
+fn multiple_style_calls() {
+    let old: Node<&'static str> = div(
+        vec![
+            styles_flag([
+                ("font-family", "monospace", true),
+                ("user-select", "none", false),
+            ]),
+            styles([("display", "flex")]),
+        ],
+        vec![],
+    );
+    let new: Node<&'static str> = div(
+        vec![style("font-family", "monospace1"), style("display", "flex")],
+        vec![],
+    );
+    let patches = diff(&old, &new);
+    println!("patches: {:#?}", patches);
+    assert_eq!(
+        patches,
+        vec![Patch::AddAttributes(
+            &"div",
+            0,
+            vec![
+                &style("font-family", "monospace1"),
+                &style("display", "flex")
+            ]
+        )]
+    );
+}

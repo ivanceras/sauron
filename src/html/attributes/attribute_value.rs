@@ -68,6 +68,14 @@ impl AttributeValue {
         }
     }
 
+    /// return the styles if the attribute value is a style
+    pub fn as_style(&self) -> Option<&Vec<Style>> {
+        match self {
+            AttributeValue::Style(styles) => Some(styles),
+            _ => None,
+        }
+    }
+
     /// return true if this is a function call
     pub fn is_function_call(&self) -> bool {
         match self {

@@ -60,6 +60,49 @@ fn test_classes_flag() {
 }
 
 #[test]
+fn test_styles_flag() {
+    let actual: Node<&'static str> = div(
+        vec![styles_flag([
+            ("font-family", "monospace", true),
+            ("user-select", "none", false),
+        ])],
+        vec![],
+    );
+    let mut actual_html = String::new();
+    actual.render(&mut actual_html).unwrap();
+    let expected: Node<&'static str> =
+        div(vec![style("font-family", "monospace")], vec![]);
+    let mut expected_html = String::new();
+    expected.render(&mut expected_html).unwrap();
+
+    assert_eq!(actual_html, expected_html);
+}
+
+#[test]
+fn test_styles_and_styles_flag() {
+    let actual: Node<&'static str> = div(
+        vec![
+            styles_flag([
+                ("font-family", "monospace", true),
+                ("user-select", "none", false),
+            ]),
+            styles([("display", "flex")]),
+        ],
+        vec![],
+    );
+    let mut actual_html = String::new();
+    actual.render(&mut actual_html).unwrap();
+    let expected: Node<&'static str> = div(
+        vec![style("font-family", "monospace"), style("display", "flex")],
+        vec![],
+    );
+    let mut expected_html = String::new();
+    expected.render(&mut expected_html).unwrap();
+
+    assert_eq!(actual_html, expected_html);
+}
+
+#[test]
 fn classes_test() {
     let html: Node<()> = div(vec![classes(["class1", "class2"])], vec![]);
     let attrs = html.get_attributes().unwrap();
