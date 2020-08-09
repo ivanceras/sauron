@@ -4,336 +4,410 @@ use sauron::{
     prelude::*,
     Cmd, Component, Node,
 };
+use serde_derive::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct Model {
     entries: Vec<Entry>,
-    filter: Filter,
+    visibility: Visibility,
     value: String,
-    edit_value: String,
+    uid: usize,
 }
 
+#[derive(Serialize, Deserialize)]
 struct Entry {
     description: String,
     completed: bool,
     editing: bool,
+    id: usize,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+pub enum Visibility {
+    All,
+    Active,
+    Completed,
 }
 
 pub enum Msg {
     Add,
-    Edit(usize),
+    EditingEntry(usize, bool),
     Update(String),
-    UpdateEdit(String),
-    Remove(usize),
-    SetFilter(Filter),
+    UpdateEntry(usize, String),
+    Delete(usize),
+    ChangeVisibility(Visibility),
     ToggleAll,
     ToggleEdit(usize),
     Toggle(usize),
     ClearCompleted,
-    Nope,
-}
-
-impl Model {
-    pub fn new() -> Self {
-        Model {
-            entries: vec![],
-            filter: Filter::All,
-            value: "".into(),
-            edit_value: "".into(),
-        }
-    }
+    NoOp,
 }
 
 impl Component<Msg> for Model {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Add => {
-                let entry = Entry {
-                    description: self.value.clone(),
-                    completed: false,
-                    editing: false,
-                };
-                self.entries.push(entry);
+                self.entries.push(Entry::new(&self.value, self.uid));
+                self.uid += 1;
                 self.value = "".to_string();
             }
-            Msg::Edit(idx) => {
-                let edit_value = self.edit_value.clone();
-                self.complete_edit(idx, edit_value);
-                self.edit_value = "".to_string();
+            Msg::EditingEntry(id, is_editing) => {
+                self.entries.iter_mut().for_each(|entry| {
+                    if entry.id == id {
+                        entry.editing = is_editing;
+                    }
+                });
             }
             Msg::Update(val) => {
                 self.value = val;
             }
-            Msg::UpdateEdit(val) => {
-                self.edit_value = val;
+            Msg::UpdateEntry(id, new_description) => {
+                self.entries.iter_mut().for_each(|entry| {
+                    if entry.id == id {
+                        entry.description = new_description.clone();
+                    }
+                });
             }
-            Msg::Remove(idx) => {
-                self.remove(idx);
+            Msg::Delete(id) => {
+                self.entries.retain(|entry| entry.id != id);
             }
-            Msg::SetFilter(filter) => {
-                self.filter = filter;
+            Msg::ChangeVisibility(visibility) => {
+                self.visibility = visibility;
             }
-            Msg::ToggleEdit(idx) => {
-                self.edit_value = self.entries[idx].description.clone();
-                self.toggle_edit(idx);
+            Msg::ToggleEdit(id) => {
+                self.entries.iter_mut().for_each(|entry| {
+                    if entry.id == id {
+                        entry.editing = !entry.editing;
+                    }
+                });
             }
             Msg::ToggleAll => {
-                let status = !self.is_all_completed();
-                self.toggle_all(status);
+                let is_all_completed = !self.is_all_completed();
+                self.entries
+                    .iter_mut()
+                    .for_each(|entry| entry.completed = is_all_completed);
             }
-            Msg::Toggle(idx) => {
-                self.toggle(idx);
+            Msg::Toggle(id) => {
+                self.entries.iter_mut().for_each(|entry| {
+                    if entry.id == id {
+                        entry.completed = !entry.completed;
+                        debug!(
+                            "Toggle entry: {} to {}",
+                            entry.id, entry.completed,
+                        );
+                    }
+                });
             }
             Msg::ClearCompleted => {
-                self.clear_completed();
+                self.entries.retain(|entry| !entry.completed);
             }
-            Msg::Nope => {}
+            Msg::NoOp => {}
         }
+        self.save_to_storage();
         Cmd::none()
     }
 
     fn view(&self) -> Node<Msg> {
-        node! {
-            <div class="todomvc-wrapper">
-                <section class="todoapp">
-                    <header class="header">
-                        <h1>"todos"</h1>
-                        {self.view_input()}
-                    </header>
-                    <section class="main">
-                        <input
-                            class="toggle-all"
-                            r#type="checkbox"
-                            checked={self.is_all_completed()}
-                            on_click={|_| Msg::ToggleAll} />
-                        <ul class="todo-list">
-                            {for (i, e) in self.entries.iter().filter(|e| self.filter.fit(e)).enumerate() {
-                                view_entry(i, e)
-                            }}
-                        </ul>
-                    </section>
-                    <footer class="footer">
-                        <span class="todo-count">
-                            <strong>{text(format!(
-                                "{}",
-                                self.total()
-                            ))}" item(s) left"</strong>
-                        </span>
-                        <ul class="filters">
-                            {self.view_filter(Filter::All)}
-                            {self.view_filter(Filter::Active)}
-                            {self.view_filter(Filter::Completed)}
-                        </ul>
-                        <button class="clear-completed" on_click={|_| Msg::ClearCompleted}>
-                            {text(format!(
-                                "Clear completed ({})",
-                                self.total_completed()
-                            ))}
-                        </button>
-                    </footer>
-                </section>
-                <footer class="info">
-                    <p>"Double-click to edit a todo"</p>
-                    <p>"Written by " <a href="https://github.com/ivanceras/" target="_blank">"Jovansonlee Cesar"</a></p>
-                    <p>"Part of " <a href="http://todomvc.com/" target="_blank">"TodoMVC"</a></p>
-                </footer>
-            </div>
-        }
-    }
-}
-
-impl Model {
-    fn view_filter(&self, filter: Filter) -> Node<Msg> {
-        node! {
-            <li class={if self.filter == filter {
-                "selected"
-            } else {
-                "not-selected"
-            }}
-            href={filter.to_string()}
-            on_click={move |_| Msg::SetFilter(filter)}>
-                {text(filter.to_string())}
-            </li>
-        }
-    }
-
-    fn view_input(&self) -> Node<Msg> {
-        node! {
-            <input
-                class="new-todo"
-                id="new-todo"
-                placeholder="What needs to be done?"
-                value={self.value.to_string()}
-                on_input={|v: InputEvent| Msg::Update(v.value.to_string())}
-                on_keypress={|event: KeyboardEvent| {
-                    if event.key() == "Enter" {
-                        Msg::Add
-                    } else {
-                        Msg::Nope
-                    }
-                }} />
-        }
-    }
-}
-
-fn view_entry(idx: usize, entry: &Entry) -> Node<Msg> {
-    node! {
-        <li {classes_flag([
-            ("todo", true),
-            ("editing", entry.editing),
-            ("completed", entry.completed),
-        ])}>
-            <div class="view">
-                <input class="toggle" r#type="checkbox" checked={entry.completed} on_click={move |_| Msg::Toggle(idx)} />
-                <label on_doubleclick={move |_| Msg::ToggleEdit(idx)}>{text(entry.description.clone())}</label>
-                <button class="destroy" on_click={move |_| Msg::Remove(idx)} />
-            </div>
-            { view_entry_edit_input((idx, &entry)) }
-        </li>
-    }
-}
-
-fn view_entry_edit_input((idx, entry): (usize, &Entry)) -> Node<Msg> {
-    if entry.editing {
-        input(
+        div(
+            vec![class("todomvc-wrapper")],
             vec![
-                class("edit"),
-                r#type("text"),
-                value(&entry.description),
-                on_input(|input: InputEvent| {
-                    Msg::UpdateEdit(input.value.to_string())
-                }),
-                on_blur(move |_| Msg::Edit(idx)),
-                on_keypress(move |event: KeyboardEvent| {
-                    if event.key() == "Enter" {
-                        Msg::Edit(idx)
-                    } else {
-                        Msg::Nope
-                    }
-                }),
+                section(
+                    vec![class("todoapp")],
+                    vec![
+                        self.view_input(),
+                        self.view_entries(),
+                        self.view_controls(),
+                    ],
+                ),
+                self.info_footer(),
             ],
-            vec![],
         )
-    } else {
-        input(vec![r#type("hidden")], vec![])
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum Filter {
-    All,
-    Active,
-    Completed,
-}
-
-impl ToString for Filter {
-    fn to_string(&self) -> String {
-        match *self {
-            Filter::All => "#/".to_string(),
-            Filter::Active => "#/active".to_string(),
-            Filter::Completed => "#/completed".to_string(),
-        }
-    }
-}
-
-impl Filter {
-    fn fit(&self, entry: &Entry) -> bool {
-        match *self {
-            Filter::All => true,
-            Filter::Active => !entry.completed,
-            Filter::Completed => entry.completed,
+impl Entry {
+    fn new(description: &str, id: usize) -> Self {
+        Entry {
+            description: description.to_string(),
+            completed: false,
+            editing: false,
+            id,
         }
     }
 }
 
 impl Model {
-    fn total(&self) -> usize {
-        self.entries.len()
-    }
-
-    fn total_completed(&self) -> usize {
-        self.entries
-            .iter()
-            .filter(|e| Filter::Completed.fit(e))
-            .count()
+    fn new() -> Self {
+        Model {
+            entries: vec![],
+            visibility: Visibility::All,
+            value: "".into(),
+            uid: 0,
+        }
     }
 
     fn is_all_completed(&self) -> bool {
-        let mut filtered_iter = self
-            .entries
-            .iter()
-            .filter(|e| self.filter.fit(e))
-            .peekable();
-
-        if filtered_iter.peek().is_none() {
-            return false;
-        }
-
-        filtered_iter.all(|e| e.completed)
+        self.entries.iter().all(|entry| entry.completed)
+    }
+    fn view_entries(&self) -> Node<Msg> {
+        section(
+            vec![class("main")],
+            vec![
+                input(
+                    vec![
+                        class("toggle-all"),
+                        r#type("checkbox"),
+                        checked(self.is_all_completed()),
+                        on_click(|_| Msg::ToggleAll),
+                    ],
+                    vec![],
+                ),
+                ul(vec![class("todo-list")], {
+                    self.entries
+                        .iter()
+                        .filter(|entry| match self.visibility {
+                            Visibility::All => true,
+                            Visibility::Active => !entry.completed,
+                            Visibility::Completed => entry.completed,
+                        })
+                        .map(|entry| self.view_entry(entry))
+                        .collect::<Vec<Node<Msg>>>()
+                }),
+            ],
+        )
     }
 
-    fn toggle_all(&mut self, value: bool) {
-        for entry in self.entries.iter_mut() {
-            if self.filter.fit(entry) {
-                entry.completed = value;
+    fn view_filter(&self, visibility: Visibility) -> Node<Msg> {
+        let visibility_str = visibility.to_string();
+        li(
+            vec![],
+            vec![a(
+                vec![
+                    class(if self.visibility == visibility {
+                        "selected"
+                    } else {
+                        "not-selected"
+                    }),
+                    href(visibility.to_uri()),
+                    on_click(move |_| {
+                        Msg::ChangeVisibility(visibility.clone())
+                    }),
+                ],
+                vec![text(visibility_str)],
+            )],
+        )
+    }
+
+    fn view_input(&self) -> Node<Msg> {
+        header(
+            vec![class("header")],
+            vec![
+                h1(vec![], vec![text("todos")]),
+                input(
+                    vec![
+                        class("new-todo"),
+                        id("new-todo"),
+                        placeholder("What needs to be done?"),
+                        autofocus(true),
+                        value(self.value.to_string()),
+                        on_input(|v: InputEvent| {
+                            Msg::Update(v.value.to_string())
+                        }),
+                        on_keypress(|event: KeyboardEvent| {
+                            if event.key() == "Enter" {
+                                Msg::Add
+                            } else {
+                                Msg::NoOp
+                            }
+                        }),
+                    ],
+                    vec![],
+                ),
+            ],
+        )
+    }
+
+    fn view_entry(&self, entry: &Entry) -> Node<Msg> {
+        let mut class_name = "todo".to_string();
+        if entry.editing {
+            class_name.push_str(" editing");
+        }
+        if entry.completed {
+            class_name.push_str(" completed");
+        }
+        let entry_id = entry.id;
+        li(
+            vec![class(class_name), key(format!("todo-{}", entry.id))],
+            vec![
+                div(
+                    vec![class("view")],
+                    vec![
+                        input(
+                            vec![
+                                class("toggle"),
+                                r#type("checkbox"),
+                                checked(entry.completed),
+                                on_click(move |_| Msg::Toggle(entry_id)),
+                            ],
+                            vec![],
+                        ),
+                        label(
+                            vec![on_doubleclick(move |_| {
+                                Msg::ToggleEdit(entry_id)
+                            })],
+                            vec![text(format!("{}", entry.description))],
+                        ),
+                        button(
+                            vec![
+                                class("destroy"),
+                                on_click(move |_| Msg::Delete(entry_id)),
+                            ],
+                            vec![],
+                        ),
+                    ],
+                ),
+                input(
+                    vec![
+                        class("edit"),
+                        r#type("text"),
+                        hidden(!entry.editing),
+                        value(&entry.description),
+                        on_input(move |input: InputEvent| {
+                            Msg::UpdateEntry(entry_id, input.value.to_string())
+                        }),
+                        on_blur(move |_| Msg::EditingEntry(entry_id, false)),
+                        on_keypress(move |event: KeyboardEvent| {
+                            if event.key_code() == 13 {
+                                Msg::EditingEntry(entry_id, false)
+                            } else {
+                                Msg::NoOp
+                            }
+                        }),
+                    ],
+                    vec![],
+                ),
+            ],
+        )
+    }
+
+    fn view_controls(&self) -> Node<Msg> {
+        let entries_completed =
+            self.entries.iter().filter(|entry| entry.completed).count();
+
+        let entries_left = self.entries.len() - entries_completed;
+        let item = if entries_left == 1 { " item" } else { " items" };
+
+        footer(
+            vec![class("footer")],
+            vec![
+                span(
+                    vec![class("todo-count")],
+                    vec![
+                        strong(vec![], vec![text(entries_left)]),
+                        text(format!(" {} left", item)),
+                    ],
+                ),
+                ul(
+                    vec![class("filters")],
+                    vec![
+                        self.view_filter(Visibility::All),
+                        self.view_filter(Visibility::Active),
+                        self.view_filter(Visibility::Completed),
+                    ],
+                ),
+                button(
+                    vec![
+                        class("clear-completed"),
+                        hidden(entries_completed == 0),
+                        on_click(|_| Msg::ClearCompleted),
+                    ],
+                    vec![text(format!(
+                        "Clear completed ({})",
+                        entries_completed
+                    ))],
+                ),
+            ],
+        )
+    }
+
+    fn info_footer(&self) -> Node<Msg> {
+        footer(
+            vec![class("info")],
+            vec![
+                p(vec![], vec![text("Double-click to edit a todo")]),
+                p(
+                    vec![],
+                    vec![
+                        text("Written by "),
+                        a(
+                            vec![
+                                href("https://github.com/ivanceras/"),
+                                target("_blank"),
+                            ],
+                            vec![text("Jovansonlee Cesar")],
+                        ),
+                    ],
+                ),
+                p(
+                    vec![],
+                    vec![
+                        text("Part of "),
+                        a(
+                            vec![href("http://todomvc.com/"), target("_blank")],
+                            vec![text("TodoMVC")],
+                        ),
+                    ],
+                ),
+            ],
+        )
+    }
+
+    fn save_to_storage(&self) {
+        let window = web_sys::window().expect("no global `window` exists");
+        let local_storage = window.local_storage();
+        if let Ok(Some(local_storage)) = local_storage {
+            let json_data =
+                serde_json::to_string(&self).expect("must serialize data");
+            if let Err(err) =
+                local_storage.set_item("todomvc::data", &json_data)
+            {
+                log::error!("Could not write to local storage, {:?}", err);
             }
         }
     }
 
-    fn clear_completed(&mut self) {
-        let entries = self
-            .entries
-            .drain(..)
-            .filter(|e| Filter::Active.fit(e))
-            .collect();
-        self.entries = entries;
-    }
+    pub fn get_from_storage() -> Self {
+        let window = web_sys::window().expect("no global `window` exists");
+        let local_storage = window.local_storage();
 
-    fn toggle(&mut self, idx: usize) {
-        let filter = self.filter.clone();
-        let mut entries = self
-            .entries
-            .iter_mut()
-            .filter(|e| filter.fit(e))
-            .collect::<Vec<_>>();
-        let entry = entries.get_mut(idx).unwrap();
-        entry.completed = !entry.completed;
+        if let Ok(Some(local_storage)) = local_storage {
+            if let Ok(Some(s)) = local_storage.get_item("todomvc::data") {
+                serde_json::from_str(&s).ok().unwrap_or(Self::new())
+            } else {
+                Self::new()
+            }
+        } else {
+            Self::new()
+        }
     }
+}
 
-    fn toggle_edit(&mut self, idx: usize) {
-        let filter = self.filter.clone();
-        let mut entries = self
-            .entries
-            .iter_mut()
-            .filter(|e| filter.fit(e))
-            .collect::<Vec<_>>();
-        let entry = entries.get_mut(idx).unwrap();
-        entry.editing = !entry.editing;
+impl ToString for Visibility {
+    fn to_string(&self) -> String {
+        match self {
+            Visibility::All => "All".to_string(),
+            Visibility::Active => "Active".to_string(),
+            Visibility::Completed => "Completed".to_string(),
+        }
     }
+}
 
-    fn complete_edit(&mut self, idx: usize, val: String) {
-        let filter = self.filter.clone();
-        let mut entries = self
-            .entries
-            .iter_mut()
-            .filter(|e| filter.fit(e))
-            .collect::<Vec<_>>();
-        let entry = entries.get_mut(idx).unwrap();
-        entry.description = val;
-        entry.editing = !entry.editing;
-    }
-
-    fn remove(&mut self, idx: usize) {
-        let idx = {
-            let filter = self.filter.clone();
-            let entries = self
-                .entries
-                .iter()
-                .enumerate()
-                .filter(|&(_, e)| filter.fit(e))
-                .collect::<Vec<_>>();
-            let &(idx, _) = entries.get(idx).unwrap();
-            idx
-        };
-        self.entries.remove(idx);
+impl Visibility {
+    fn to_uri(&self) -> String {
+        match self {
+            Visibility::All => "#/".to_string(),
+            Visibility::Active => "#/active".to_string(),
+            Visibility::Completed => "#/completed".to_string(),
+        }
     }
 }

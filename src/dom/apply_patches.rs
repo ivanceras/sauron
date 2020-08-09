@@ -8,7 +8,7 @@ use crate::{
     Dispatch, Patch,
 };
 use js_sys::Function;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{Element, Node, Text};
 
@@ -22,13 +22,14 @@ pub fn patch<N, DSP, MSG>(
     program: Option<&DSP>,
     root_node: N,
     old_closures: &mut ActiveClosure,
-    patches: &[Patch<MSG>],
+    patches: Vec<Patch<MSG>>,
 ) -> Result<ActiveClosure, JsValue>
 where
     N: Into<Node>,
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
+    log::warn!("patches: {:#?}", patches);
     let root_node: Node = root_node.into();
 
     // Closure that were added to the DOM during this patch operation.
@@ -37,9 +38,9 @@ where
     // finding the nodes to be patched before hand, instead of calling it
     // in every patch loop.
     let (element_nodes_to_patch, text_nodes_to_patch) =
-        find_nodes(root_node, patches);
+        find_nodes(root_node, &patches);
 
-    for patch in patches {
+    for patch in patches.iter() {
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = element_nodes_to_patch.get(&patch_node_idx) {
@@ -69,15 +70,20 @@ where
 /// Instead of finding the nodes each time in the patching process.
 /// We find them before hand so as not to keep calling this function for each and every element to
 /// be patched.
+///
+/// This is also IMPORTANT such that changes to the Dom tree
+/// such as removal and insertion of nodes
+/// will not change to NodeIdx we need to find, since
+/// we already get a reference to these nodes prior to applying any of the patches.
 fn find_nodes<MSG>(
     root_node: Node,
     patches: &[Patch<MSG>],
 ) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
     let mut cur_node_idx = 0;
-    let mut nodes_to_find = HashSet::new();
+    let mut nodes_to_find = HashMap::new();
 
     for patch in patches {
-        nodes_to_find.insert(patch.node_idx());
+        nodes_to_find.insert(patch.node_idx(), patch.tag());
     }
 
     find_nodes_recursive(root_node, &mut cur_node_idx, &nodes_to_find)
@@ -85,27 +91,33 @@ fn find_nodes<MSG>(
 
 /// find the html nodes recursively
 fn find_nodes_recursive(
-    root_node: Node,
+    node: Node,
     cur_node_idx: &mut usize,
-    nodes_to_find: &HashSet<usize>,
+    nodes_to_find: &HashMap<usize, Option<&&'static str>>,
 ) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
     let mut element_nodes_to_patch = HashMap::new();
     let mut text_nodes_to_patch = HashMap::new();
 
     // We use child_nodes() instead of children() because children() ignores text nodes
-    let children = root_node.child_nodes();
+    let children = node.child_nodes();
     let child_node_count = children.length();
 
     // If the root node matches, mark it for patching
-    if nodes_to_find.get(&cur_node_idx).is_some() {
-        match root_node.node_type() {
+    if let Some(tag) = nodes_to_find.get(&cur_node_idx) {
+        match node.node_type() {
             Node::ELEMENT_NODE => {
-                element_nodes_to_patch
-                    .insert(*cur_node_idx, root_node.unchecked_into());
+                let element: Element = node.unchecked_into();
+                let vtag = tag.expect("must have a tag here");
+                assert_eq!(
+                    element.tag_name().to_uppercase(),
+                    vtag.to_uppercase()
+                );
+
+                element_nodes_to_patch.insert(*cur_node_idx, element);
             }
             Node::TEXT_NODE => {
                 text_nodes_to_patch
-                    .insert(*cur_node_idx, root_node.unchecked_into());
+                    .insert(*cur_node_idx, node.unchecked_into());
             }
             other => unimplemented!("Unsupported root node type: {}", other),
         }
@@ -189,23 +201,59 @@ fn remove_event_listeners(
     old_closures: &mut ActiveClosure,
 ) -> Result<(), JsValue> {
     let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
-    //crate::log!("all descendatant vdom_id: {:#?}", all_descendant_vdom_id);
+    log::debug!("all_descendant_vdom_id: {:?}", all_descendant_vdom_id);
     for vdom_id in all_descendant_vdom_id {
-        //crate::log!("Removing listener for vdom_id: {}", vdom_id);
+        if let Some(old_closure) = old_closures.get(&vdom_id) {
+            for (event, oc) in old_closure.iter() {
+                let func: &Function = oc.as_ref().unchecked_ref();
+                node.remove_event_listener_with_callback(event, func)?;
+            }
 
-        let old_closure = old_closures
-            .get(&vdom_id)
-            .expect("There is no marked with that vdom_id");
-
-        for (event, oc) in old_closure.iter() {
-            let func: &Function = oc.as_ref().unchecked_ref();
-            node.remove_event_listener_with_callback(event, func)?;
+            // remove closure active_closure in dom_updater to free up memory
+            old_closures
+                .remove(&vdom_id)
+                .expect("Unable to remove old closure");
+        } else {
+            log::warn!(
+                "There is no closure marked with that vdom_id: {}",
+                vdom_id
+            );
         }
+    }
+    Ok(())
+}
 
-        // remove closure active_closure in dom_updater to free up memory
-        old_closures
-            .remove(&vdom_id)
-            .expect("Unable to remove old closure");
+/// remove the event listener which matches the given event name
+fn remove_event_listener_with_name(
+    event_name: &'static str,
+    node: &Element,
+    old_closures: &mut ActiveClosure,
+) -> Result<(), JsValue> {
+    let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
+    log::debug!("all_descendant_vdom_id: {:?}", all_descendant_vdom_id);
+    for vdom_id in all_descendant_vdom_id {
+        if let Some(old_closure) = old_closures.get_mut(&vdom_id) {
+            for (event, oc) in old_closure.iter() {
+                if *event == event_name {
+                    let func: &Function = oc.as_ref().unchecked_ref();
+                    node.remove_event_listener_with_callback(event, func)?;
+                }
+            }
+
+            old_closure.retain(|(event, _oc)| *event != event_name);
+
+            // remove closure active_closure in dom_updater to free up memory
+            if old_closure.is_empty() {
+                old_closures
+                    .remove(&vdom_id)
+                    .expect("Unable to remove old closure");
+            }
+        } else {
+            log::warn!(
+                "There is no closure marked with that vdom_id: {}",
+                vdom_id
+            );
+        }
     }
     Ok(())
 }
@@ -223,7 +271,31 @@ where
     DSP: Clone + Dispatch<MSG> + 'static,
 {
     let mut active_closures = ActiveClosure::new();
+
+    let vtag = *patch.tag().expect("must have a tag");
+    assert_eq!(node.tag_name().to_uppercase(), vtag.to_uppercase());
+
     match patch {
+        Patch::InsertChildren(_tag, _node_idx, child_idx, new_children) => {
+            let parent = &node;
+            let children_nodes = parent.child_nodes();
+            let mut active_closures = HashMap::new();
+            for new_child in new_children {
+                let created_node = CreatedNode::<Node>::create_dom_node_opt::<
+                    DSP,
+                    MSG,
+                >(program, &new_child);
+                let next_sibling = children_nodes
+                    .item((*child_idx) as u32)
+                    .expect("next item must exist");
+
+                parent
+                    .insert_before(&created_node.node, Some(&next_sibling))?;
+                active_closures.extend(created_node.closures);
+            }
+
+            Ok(active_closures)
+        }
         Patch::AddAttributes(_tag, _node_idx, attributes) => {
             CreatedNode::<Node>::set_element_attributes(
                 program,
@@ -243,8 +315,11 @@ where
                         }
                         // it is an event listener
                         AttValue::Callback(_) => {
-                            //TODO: remove only the event listener that matches the event name
-                            remove_event_listeners(node, old_closures)?;
+                            remove_event_listener_with_name(
+                                attr.name(),
+                                node,
+                                old_closures,
+                            )?;
                         }
                     }
                 }
@@ -273,27 +348,33 @@ where
         // of the children and indirect children of this node ( so we don't have to manually remove
         // them).
         // The closures of descendant of the children is also removed
-        Patch::TruncateChildren(_tag, _node_idx, num_children_remaining) => {
-            let children = node.child_nodes();
-            let child_count = children.length();
+        Patch::RemoveChildren(_tag, _node_idx, children_index) => {
+            // we sort the children index, and reverse iterate them
+            // to remove from the last since the DOM children
+            // index is changed when you remove from the first child.
+            // removing from the last, won't change the index of the children of the lower index
+            // range
+            let mut sorted_children_index = children_index.clone();
+            sorted_children_index.sort();
 
-            // We skip over any separators that we placed between two text nodes
-            //   -> `<!--mordor-->`
-            //  and trim all children that come after our new desired `num_children_remaining`
-            //let mut non_separator_children_found = 0;
+            let children_nodes = node.child_nodes();
 
-            let to_be_remove_len =
-                child_count as usize - num_children_remaining;
-            for _index in 0..to_be_remove_len {
-                let last_child = node.last_child().expect("No more last child");
-                let last_element: &Element = last_child.unchecked_ref();
-                remove_event_listeners(last_element, old_closures)?;
+            for child_idx in sorted_children_index.iter().rev() {
+                let child_node = children_nodes
+                    .item(*child_idx as u32)
+                    .expect("child at this index must exist");
                 // Do not remove comment node
-                if last_child.node_type() == Node::COMMENT_NODE {
-                    continue;
+                if child_node.node_type() != Node::COMMENT_NODE {
+                    node.remove_child(&child_node)
+                        .expect("unable to remove child");
+
+                    if child_node.node_type() != Node::TEXT_NODE {
+                        let child_element: &Element =
+                            child_node.unchecked_ref();
+
+                        remove_event_listeners(&child_element, old_closures)?;
+                    }
                 }
-                node.remove_child(&last_child)
-                    .expect("Unable to remove last child");
             }
 
             Ok(active_closures)
@@ -329,6 +410,7 @@ where
 {
     match patch {
         Patch::ChangeText(_node_idx, new_text) => {
+            println!("patching text node: {:?}", node);
             node.set_node_value(Some(&new_text));
         }
         Patch::Replace(_tag, _node_idx, new_node) => {

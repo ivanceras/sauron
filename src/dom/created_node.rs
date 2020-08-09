@@ -219,18 +219,17 @@ impl<T> CreatedNode<T> {
                                     av.get_simple()
                                         .expect("must be a simple value")
                                 })
-                                .map(|v| v.as_bool())
-                                .flatten()
-                                .unwrap_or(false);
-                            input.set_checked(checked);
+                                .unwrap()
+                                .to_string();
+                            if !checked.is_empty() {
+                                input.set_checked(true);
+                            }
                         }
                     }
                     _ => {
                         element
                             .set_attribute(attr.name(), &merged_plain_values)
-                            .expect(
-                                "Set element attribute_ns in create element",
-                            );
+                            .expect("Set element attribute in create element");
                     }
                 }
             }

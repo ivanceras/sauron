@@ -92,7 +92,7 @@ fn truncate_children() {
     );
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::TruncateChildren(&"div", 0, 3)],
+        vec![Patch::RemoveChildren(&"div", 0, vec![3, 4, 5, 6])],
         "Should truncate children"
     );
 }
@@ -123,10 +123,10 @@ fn truncate_children_different_attributes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::TruncateChildren(&"div", 0, 3),
             Patch::AddAttributes(&"div", 1, vec![&class("class5")]),
             Patch::AddAttributes(&"div", 2, vec![&class("class6")]),
-            Patch::AddAttributes(&"div", 3, vec![&class("class7")])
+            Patch::AddAttributes(&"div", 3, vec![&class("class7")]),
+            Patch::RemoveChildren(&"div", 0, vec![3, 4, 5, 6]),
         ],
         "Should truncate children"
     );
@@ -149,7 +149,10 @@ fn replace_node() {
         vec![Patch::Replace(&"b", 1, &strong(vec![], vec![]))],
         "Replace a child node"
     );
+}
 
+#[test]
+fn replace_node2() {
     let old: Node<()> =
         div(vec![], vec![b(vec![], vec![text("1")]), b(vec![], vec![])]);
     let new = div(vec![], vec![i(vec![], vec![text("1")]), i(vec![], vec![])]);
@@ -189,7 +192,7 @@ fn remove_nodes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::TruncateChildren(&"div", 0, 0)],
+        vec![Patch::RemoveChildren(&"div", 0, vec![0, 1])],
         "Remove all child nodes at and after child sibling index 1",
     );
 
@@ -215,8 +218,8 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::TruncateChildren(&"div", 0, 1),
-            Patch::TruncateChildren(&"span", 1, 1)
+            Patch::RemoveChildren(&"span", 1, vec![1]),
+            Patch::RemoveChildren(&"div", 0, vec![1]),
         ],
         "Remove a child and a grandchild node",
     );
@@ -235,7 +238,7 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::TruncateChildren(&"b", 1, 1),
+            Patch::RemoveChildren(&"b", 1, vec![1]),
             Patch::Replace(&"b", 4, &i(vec![], vec![])),
         ],
         "Removing child and change next node after parent",
@@ -382,16 +385,86 @@ fn replace_text_node() {
     );
 }
 
-// Initially motivated by having two elements where all that changed was an event listener
-// because right now we don't patch event listeners. So.. until we have a solution
-// for that we can just give them different keys to force a replace.
+// the element with keys could have event listeners (which are not comparable)
+// To be safe, just remove non-matching old keyed element and re-create an element for the non-matching keyed
+// new element
 #[test]
-fn replace_if_different_keys() {
-    let old: Node<()> = div(vec![key(1)], vec![]); //{ <div key="1"> </div> },
-    let new = div(vec![key(2)], vec![]); //{ <div key="2"> </div> },
+fn different_key_will_be_removed_and_create_a_new_one() {
+    let old: Node<()> = main(vec![], vec![div(vec![key(1)], vec![])]);
+    let new = main(vec![], vec![div(vec![key(2)], vec![])]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::Replace(&"div", 0, &div(vec![key(2)], vec![]))],
+        vec![
+            Patch::RemoveChildren(&"main", 0, vec![0]),
+            Patch::AppendChildren(&"main", 0, vec![&div(vec![key(2)], vec![])]),
+        ],
         "If two nodes have different keys always generate a full replace.",
+    );
+}
+
+#[test]
+fn text_changed_in_keyed_elements() {
+    let old: Node<()> = main(
+        vec![class("test4")],
+        vec![section(
+            vec![class("todo")],
+            vec![
+                article(vec![key(1)], vec![text("item1")]),
+                article(vec![key(2)], vec![text("item2")]),
+                article(vec![key(3)], vec![text("item3")]),
+            ],
+        )],
+    );
+
+    // we remove the key1
+    let update1: Node<()> = main(
+        vec![class("test4")],
+        vec![section(
+            vec![class("todo")],
+            vec![
+                article(vec![key(2)], vec![text("item2")]),
+                article(vec![key(3)], vec![text("item3 with changes")]),
+            ],
+        )],
+    );
+
+    let patch = diff(&old, &update1);
+    assert_eq!(
+        patch,
+        vec![
+            Patch::ChangeText(7, "item3 with changes"),
+            Patch::RemoveChildren(&"section", 1, vec![0])
+        ]
+    );
+}
+
+#[test]
+fn multiple_style_calls() {
+    let old: Node<&'static str> = div(
+        vec![
+            styles_flag([
+                ("font-family", "monospace", true),
+                ("user-select", "none", false),
+            ]),
+            styles([("display", "flex")]),
+        ],
+        vec![],
+    );
+    let new: Node<&'static str> = div(
+        vec![style("font-family", "monospace1"), style("display", "flex")],
+        vec![],
+    );
+    let patches = diff(&old, &new);
+    println!("patches: {:#?}", patches);
+    assert_eq!(
+        patches,
+        vec![Patch::AddAttributes(
+            &"div",
+            0,
+            vec![
+                &style("font-family", "monospace1"),
+                &style("display", "flex")
+            ]
+        )]
     );
 }

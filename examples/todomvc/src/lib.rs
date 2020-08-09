@@ -20,5 +20,5 @@ pub fn main() {
         console_error_panic_hook::set_once();
     }
     trace!("in main!");
-    Program::mount_to_body(Model::new());
+    Program::mount_to_body(Model::get_from_storage());
 }

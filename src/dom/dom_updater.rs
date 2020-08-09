@@ -130,7 +130,7 @@ where
             Some(program),
             self.root_node.clone(),
             &mut self.active_closures,
-            &patches,
+            patches,
         )
         .expect("Error in patching the dom");
         self.active_closures.extend(active_closures);

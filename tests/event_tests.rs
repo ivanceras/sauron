@@ -9,17 +9,9 @@ use wasm_bindgen_test::*;
 
 use sauron::{
     diff,
-    dom::{
-        test_fixtures::simple_program,
-        DomUpdater,
-    },
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
-    Node,
-    Patch,
+    dom::{test_fixtures::simple_program, DomUpdater},
+    html::{attributes::*, events::*, *},
+    Node, Patch,
 };
 use std::cell::RefCell;
 
@@ -189,7 +181,7 @@ fn remove_event_from_truncated_children() {
     let simple_program = simple_program();
     assert_eq!(
         sauron::diff(&old, &new),
-        vec![Patch::TruncateChildren(&"div", 0, 1)],
+        vec![Patch::RemoveChildren(&"div", 0, vec![1, 2, 3, 4])],
         "Should be a Truncate patch"
     );
     let mut dom_updater =
@@ -230,7 +222,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     let simple_program = simple_program();
     assert_eq!(
         sauron::diff(&old, &new),
-        vec![Patch::TruncateChildren(&"div", 0, 1)],
+        vec![Patch::RemoveChildren(&"div", 0, vec![1, 2, 3, 4])],
         "Should be a Truncate patch"
     );
     let mut dom_updater =

@@ -1,5 +1,14 @@
 # Changelog
 
+# 0.29.0
+- Fix the todomvc with a new rewrite and storage support
+- Update the todomvc app using keyed elements
+- Fix set_checked when setting attributes for checkboxes, radio buttons
+- Implement code for InsertChildren patches since Patch is changed in `mt-dom`
+- Use the keyed-elements diffing in mt-dom, this will ensure that the elements with the callback will be matched with the same callback
+- TruncateChildren is replaced with RemoveChildren in mt-dom, this provide a more flexible patches
+- Add an example of server-side rendering using warp
+
 # 0.28.2
 - merge attributes of the same name first, before applying the attributes to the DOM element
 

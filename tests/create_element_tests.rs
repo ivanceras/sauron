@@ -1,40 +1,20 @@
 #![deny(warnings)]
 use sauron::{
     dom::CreatedNode,
-    html::{
-        attributes::*,
-        div,
-        events::*,
-    },
+    html::{attributes::*, div, events::*},
     svg::{
-        attributes::{
-            cx,
-            cy,
-            r,
-            xmlns,
-        },
-        circle,
-        svg,
+        attributes::{cx, cy, r, xmlns},
+        circle, svg,
     },
     *,
 };
-use std::{
-    cell::Cell,
-    rc::Rc,
-};
+use std::{cell::Cell, rc::Rc};
 
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 
-use sauron::{
-    test_fixtures::simple_program,
-    Node,
-};
-use web_sys::{
-    console,
-    Element,
-    EventTarget,
-};
+use sauron::{test_fixtures::simple_program, Node};
+use web_sys::{console, Element, EventTarget};
 
 wasm_bindgen_test_configure!(run_in_browser);
 
