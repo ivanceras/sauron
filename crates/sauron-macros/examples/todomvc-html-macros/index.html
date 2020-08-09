@@ -1,0 +1,15 @@
+
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <title>Sauron • TodoMVC</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <script src='pkg/todomvc_html_macros.js'></script>
+    <script type=module>
+        wasm_bindgen('pkg/todomvc_html_macros_bg.wasm')
+            .catch(console.error);
+    </script>
+  </body>
+</html>

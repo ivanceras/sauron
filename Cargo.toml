@@ -94,6 +94,7 @@ members = [
     "crates/sauron-syntax",
     "crates/sauron-parse",
     "crates/sauron-macros",
+    "crates/sauron-macros/examples/todomvc-html-macros",
     "examples/minimal",
     "examples/fetch_data",
     "examples/interactive/client",
