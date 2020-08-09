@@ -108,20 +108,16 @@ impl Component<Msg> for Model {
     }
 
     fn view(&self) -> Node<Msg> {
-        div(
-            vec![class("todomvc-wrapper")],
-            vec![
-                section(
-                    vec![class("todoapp")],
-                    vec![
-                        self.view_input(),
-                        self.view_entries(),
-                        self.view_controls(),
-                    ],
-                ),
-                self.info_footer(),
-            ],
-        )
+        node! {
+            <div class="todomvc-wrapper">
+                    <section class="todoapp">
+                        {self.view_input()}
+                        {self.view_entries()}
+                        {self.view_controls()}
+                    </section>
+                    {self.info_footer()}
+            </div>
+        }
     }
 }
 
@@ -149,6 +145,7 @@ impl Model {
     fn is_all_completed(&self) -> bool {
         self.entries.iter().all(|entry| entry.completed)
     }
+
     fn view_entries(&self) -> Node<Msg> {
         section(
             vec![class("main")],
@@ -163,6 +160,8 @@ impl Model {
                     vec![],
                 ),
                 ul(vec![class("todo-list")], {
+                    //TODO: node! is limited to only 1 node return in each `{}` expression
+                    //TODO: can not convert this part to node_macro
                     self.entries
                         .iter()
                         .filter(|entry| match self.visibility {
@@ -179,52 +178,46 @@ impl Model {
 
     fn view_filter(&self, visibility: Visibility) -> Node<Msg> {
         let visibility_str = visibility.to_string();
-        li(
-            vec![],
-            vec![a(
-                vec![
-                    class(if self.visibility == visibility {
+        node! {
+            <li>
+                <a class={if self.visibility == visibility {
                         "selected"
                     } else {
                         "not-selected"
-                    }),
-                    href(visibility.to_uri()),
-                    on_click(move |_| {
+                    }}
+                    href={visibility.to_uri()}
+                    on_click={move |_| {
                         Msg::ChangeVisibility(visibility.clone())
-                    }),
-                ],
-                vec![text(visibility_str)],
-            )],
-        )
+                    }}>
+                    {text(visibility_str)}
+                </a>
+            </li>
+        }
     }
 
     fn view_input(&self) -> Node<Msg> {
-        header(
-            vec![class("header")],
-            vec![
-                h1(vec![], vec![text("todos")]),
-                input(
-                    vec![
-                        class("new-todo"),
-                        id("new-todo"),
-                        placeholder("What needs to be done?"),
-                        autofocus(true),
-                        value(self.value.to_string()),
-                        on_input(|v: InputEvent| {
+        node! {
+            <header class="header">
+                <h1>{text("todos")}</h1>
+                <input
+                        class="new-todo"
+                        id="new-todo"
+                        placeholder="What needs to be done?"
+                        autofocus=true
+                        value={self.value.to_string()}
+                        on_input={|v: InputEvent| {
                             Msg::Update(v.value.to_string())
-                        }),
-                        on_keypress(|event: KeyboardEvent| {
+                        }}
+                        on_keypress={|event: KeyboardEvent| {
                             if event.key() == "Enter" {
                                 Msg::Add
                             } else {
                                 Msg::NoOp
                             }
-                        }),
-                    ],
-                    vec![],
-                ),
-            ],
-        )
+                        }}
+                />
+            </header>
+        }
     }
 
     fn view_entry(&self, entry: &Entry) -> Node<Msg> {
@@ -236,58 +229,42 @@ impl Model {
             class_name.push_str(" completed");
         }
         let entry_id = entry.id;
-        li(
-            vec![class(class_name), key(format!("todo-{}", entry.id))],
-            vec![
-                div(
-                    vec![class("view")],
-                    vec![
-                        input(
-                            vec![
-                                class("toggle"),
-                                r#type("checkbox"),
-                                checked(entry.completed),
-                                on_click(move |_| Msg::Toggle(entry_id)),
-                            ],
-                            vec![],
-                        ),
-                        label(
-                            vec![on_doubleclick(move |_| {
-                                Msg::ToggleEdit(entry_id)
-                            })],
-                            vec![text(format!("{}", entry.description))],
-                        ),
-                        button(
-                            vec![
-                                class("destroy"),
-                                on_click(move |_| Msg::Delete(entry_id)),
-                            ],
-                            vec![],
-                        ),
-                    ],
-                ),
-                input(
-                    vec![
-                        class("edit"),
-                        r#type("text"),
-                        hidden(!entry.editing),
-                        value(&entry.description),
-                        on_input(move |input: InputEvent| {
+
+        node! {
+            <li class={class_name} key={format!("todo-{}", entry.id)}>
+                  <div class="view">
+                       <input class="toggle"
+                           type_="checkbox"
+                           checked={entry.completed}
+                           on_click={move |_| Msg::Toggle(entry_id)}
+                       />
+                       <label on_doubleclick={move |_| {
+                               Msg::ToggleEdit(entry_id)
+                           }}>
+                           {text(format!("{}", entry.description))}
+                       </label>
+                       <button class="destroy"
+                             on_click={move |_| Msg::Delete(entry_id)}>
+                       </button>
+                    </div>
+                    <input class="edit"
+                        type_="text"
+                        hidden={!entry.editing}
+                        value={&entry.description}
+                        on_input={move |input: InputEvent| {
                             Msg::UpdateEntry(entry_id, input.value.to_string())
-                        }),
-                        on_blur(move |_| Msg::EditingEntry(entry_id, false)),
-                        on_keypress(move |event: KeyboardEvent| {
+                        }}
+                        on_blur={move |_| Msg::EditingEntry(entry_id, false)}
+                        on_keypress={move |event: KeyboardEvent| {
                             if event.key_code() == 13 {
                                 Msg::EditingEntry(entry_id, false)
                             } else {
                                 Msg::NoOp
                             }
-                        }),
-                    ],
-                    vec![],
-                ),
-            ],
-        )
+                        }}
+                    />
+            </li>
+        }
     }
 
     fn view_controls(&self) -> Node<Msg> {
@@ -297,69 +274,48 @@ impl Model {
         let entries_left = self.entries.len() - entries_completed;
         let item = if entries_left == 1 { " item" } else { " items" };
 
-        footer(
-            vec![class("footer")],
-            vec![
-                span(
-                    vec![class("todo-count")],
-                    vec![
-                        strong(vec![], vec![text(entries_left)]),
-                        text(format!(" {} left", item)),
-                    ],
-                ),
-                ul(
-                    vec![class("filters")],
-                    vec![
-                        self.view_filter(Visibility::All),
-                        self.view_filter(Visibility::Active),
-                        self.view_filter(Visibility::Completed),
-                    ],
-                ),
-                button(
-                    vec![
-                        class("clear-completed"),
-                        hidden(entries_completed == 0),
-                        on_click(|_| Msg::ClearCompleted),
-                    ],
-                    vec![text(format!(
-                        "Clear completed ({})",
-                        entries_completed
-                    ))],
-                ),
-            ],
-        )
+        node! {
+            <footer class="footer">
+                    <span class="todo-count">
+                        <strong>{text(entries_left)}</strong>
+                        {text(format!(" {} left", item))}
+                    </span>
+                    <ul class="filters">
+                        {self.view_filter(Visibility::All)}
+                        {self.view_filter(Visibility::Active)}
+                        {self.view_filter(Visibility::Completed)}
+                    </ul>
+                    <button class="clear-completed"
+                            hidden={entries_completed == 0}
+                            on_click={|_| Msg::ClearCompleted}>
+                        {text(format!(
+                            "Clear completed ({})",
+                            entries_completed
+                        ))}
+                    </button>
+            </footer>
+        }
     }
 
     fn info_footer(&self) -> Node<Msg> {
-        footer(
-            vec![class("info")],
-            vec![
-                p(vec![], vec![text("Double-click to edit a todo")]),
-                p(
-                    vec![],
-                    vec![
-                        text("Written by "),
-                        a(
-                            vec![
-                                href("https://github.com/ivanceras/"),
-                                target("_blank"),
-                            ],
-                            vec![text("Jovansonlee Cesar")],
-                        ),
-                    ],
-                ),
-                p(
-                    vec![],
-                    vec![
-                        text("Part of "),
-                        a(
-                            vec![href("http://todomvc.com/"), target("_blank")],
-                            vec![text("TodoMVC")],
-                        ),
-                    ],
-                ),
-            ],
-        )
+        node! {
+            <footer class="info">
+                <p>{text("Double-click to edit a todo")}</p>
+                <p>
+                    {text("Written by ")}
+                    <a href="https://github.com/ivanceras/"
+                       target="_blank">
+                        {text("Jovansonlee Cesar")}
+                    </a>
+                </p>
+                <p>
+                    {text("Part of ")}
+                    <a href="http://todomvc.com/" target="_blank">
+                        {text("TodoMVC")}
+                    </a>
+                </p>
+            </footer>
+        }
     }
 
     fn save_to_storage(&self) {
