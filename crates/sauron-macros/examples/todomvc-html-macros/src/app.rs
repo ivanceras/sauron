@@ -1,8 +1,5 @@
 use sauron::{
-    dom::events::KeyboardEvent,
-    html::{attributes::*, *},
-    prelude::*,
-    Cmd, Component, Node,
+    dom::events::KeyboardEvent, html::*, prelude::*, Cmd, Component, Node,
 };
 use serde_derive::{Deserialize, Serialize};
 
@@ -22,7 +19,7 @@ struct Entry {
     id: usize,
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
 pub enum Visibility {
     All,
     Active,
@@ -147,37 +144,34 @@ impl Model {
     }
 
     fn view_entries(&self) -> Node<Msg> {
-        section(
-            vec![class("main")],
-            vec![
-                input(
-                    vec![
-                        class("toggle-all"),
-                        r#type("checkbox"),
-                        checked(self.is_all_completed()),
-                        on_click(|_| Msg::ToggleAll),
-                    ],
-                    vec![],
-                ),
-                ul(vec![class("todo-list")], {
-                    //TODO: node! is limited to only 1 node return in each `{}` expression
-                    //TODO: can not convert this part to node_macro
-                    self.entries
-                        .iter()
-                        .filter(|entry| match self.visibility {
-                            Visibility::All => true,
-                            Visibility::Active => !entry.completed,
-                            Visibility::Completed => entry.completed,
-                        })
-                        .map(|entry| self.view_entry(entry))
-                        .collect::<Vec<Node<Msg>>>()
-                }),
-            ],
-        )
+        let entries = self
+            .entries
+            .iter()
+            .filter(|entry| match self.visibility {
+                Visibility::All => true,
+                Visibility::Active => !entry.completed,
+                Visibility::Completed => entry.completed,
+            })
+            .collect::<Vec<_>>();
+
+        node! {
+            <section class="main">
+                <input
+                        class="toggle-all"
+                        type_="checkbox"
+                        checked={self.is_all_completed()}
+                        on_click={|_| Msg::ToggleAll}
+                />
+                <ul class="todo-list">
+                    {for entry in entries{
+                        self.view_entry(entry)
+                    }}
+                </ul>
+            </section>
+        }
     }
 
     fn view_filter(&self, visibility: Visibility) -> Node<Msg> {
-        let visibility_str = visibility.to_string();
         node! {
             <li>
                 <a class={if self.visibility == visibility {
@@ -187,9 +181,9 @@ impl Model {
                     }}
                     href={visibility.to_uri()}
                     on_click={move |_| {
-                        Msg::ChangeVisibility(visibility.clone())
+                        Msg::ChangeVisibility(visibility)
                     }}>
-                    {text(visibility_str)}
+                    {text(visibility.to_string())}
                 </a>
             </li>
         }
