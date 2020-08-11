@@ -1,9 +1,6 @@
 #![deny(warnings)]
-use sauron::{html::attributes::attr, prelude::*, Node};
-use wasm_bindgen::prelude::*;
-
-#[macro_use]
-extern crate log;
+use log::*;
+use sauron::prelude::*;
 
 pub enum Msg {
     Click,

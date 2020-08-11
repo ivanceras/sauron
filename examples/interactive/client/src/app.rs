@@ -1,7 +1,7 @@
+#![deny(warnings)]
 use js_sys::Date;
 use sauron::prelude::*;
 use sauron::web_sys::MouseEvent;
-use wasm_bindgen::{self, prelude::*};
 
 pub enum Msg {
     Click,

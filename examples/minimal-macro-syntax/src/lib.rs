@@ -1,11 +1,8 @@
 #![deny(warnings)]
-use sauron::node;
-use sauron::{html::attributes::attr, prelude::*, Node};
-use wasm_bindgen::prelude::*;
+use log::*;
+use sauron::prelude::*;
 
-#[macro_use]
-extern crate log;
-
+#[derive(Debug)]
 pub enum Msg {
     Click,
 }
@@ -43,6 +40,7 @@ impl Component<Msg> for App {
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+        trace!("App is updating with msg: {:?}", msg);
         match msg {
             Msg::Click => self.click_count += 1,
         }

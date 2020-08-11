@@ -1,9 +1,6 @@
-//#![deny(warnings)]
-use sauron::{
-    html::attributes::*, html::*, svg::attributes::*, svg::*, Cmd, Component,
-    Node, Program, *,
-};
-use wasm_bindgen::prelude::*;
+#![deny(warnings)]
+use sauron::html::attributes::style;
+use sauron::prelude::*;
 
 extern crate log;
 

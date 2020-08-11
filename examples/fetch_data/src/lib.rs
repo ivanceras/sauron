@@ -1,7 +1,6 @@
 #![deny(warnings)]
 use sauron::prelude::*;
 use serde::Deserialize;
-use wasm_bindgen::prelude::*;
 
 #[macro_use]
 extern crate log;

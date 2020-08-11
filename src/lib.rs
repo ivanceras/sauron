@@ -167,25 +167,17 @@
     unused_import_braces
 )]
 
-pub use sauron_core;
-pub use sauron_core::diff;
-pub use sauron_core::html;
-pub use sauron_core::html::units;
-pub use sauron_core::mt_dom;
-pub use sauron_core::mt_dom::diff_with_key;
-pub use sauron_core::prelude::AttributeValue;
-pub use sauron_core::svg;
-pub use sauron_core::Attribute;
-pub use sauron_core::Callback;
-pub use sauron_core::Element;
-pub use sauron_core::Node;
-pub use sauron_core::Patch;
-pub use sauron_core::Render;
-pub use sauron_node_macro::node;
-
 pub use sauron_core::dom;
 pub use sauron_core::dom::*;
-pub use sauron_core::prelude;
+
+/// reexport prelude from sauron core
+pub mod prelude {
+    pub use sauron_core::prelude::*;
+    pub use sauron_node_macro::node;
+}
+pub use sauron_core::{
+    diff, html, Attribute, Callback, Element, Node, Patch, Render,
+};
 
 // reexport web_sys crate
 pub use sauron_core::web_sys;

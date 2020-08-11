@@ -1,25 +1,4 @@
-use sauron::{
-    html::{
-        attributes::{
-            height,
-            width,
-        },
-        units::*,
-    },
-    svg::{
-        attributes::{
-            d,
-            enable_background,
-            fill,
-            points,
-            version,
-            viewBox,
-            xmlns,
-        },
-        *,
-    },
-    Node,
-};
+use sauron::prelude::*;
 
 #[allow(unused)]
 pub fn svg_table_icon<MSG>() -> Node<MSG>

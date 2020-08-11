@@ -29,15 +29,14 @@ pub type Event = ();
 
 #[macro_use]
 pub mod html;
-
 #[macro_use]
 pub mod svg;
-
-pub use render::Render;
 mod render;
 
+pub use render::Render;
+
+use html::attributes::AttributeValue;
 use mt_dom::diff_with_key;
-use prelude::AttributeValue;
 
 pub use mt_dom;
 
@@ -55,6 +54,10 @@ pub mod prelude {
         svg::{attributes::*, tags::commons::*, *},
         *,
     };
+    #[cfg(feature = "with-dom")]
+    pub use wasm_bindgen::prelude::*;
+    #[cfg(feature = "with-dom")]
+    pub use web_sys;
 }
 
 /// namespace type in node, which could be change to an enum
