@@ -5,6 +5,7 @@
 - Restructure the project to have the code code of sauron in a crate `sauron-core`.
     This paves a way to introduce modules which depends on the core functionality of sauron and then will be re-exported as part of the sauron package.
     Example: `sauron-markdown`
+- Reexport `sauron_markdown` in `sauron`. can be used as `sauron::markdown`
 - dom internal: Remove only the event listener which match the event_name from the ActiveClosure
 
 # 0.29.0

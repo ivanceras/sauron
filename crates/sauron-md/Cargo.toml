@@ -1,5 +1,5 @@
 [package]
-name = "sauron-md"
+name = "sauron-markdown"
 version = "0.1.4"
 authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
 edition = "2018"

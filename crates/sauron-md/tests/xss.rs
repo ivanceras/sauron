@@ -5,7 +5,7 @@ fn anchor() {
     let md = r#"
 <a name="n" href="javascript:alert('xss')">*you*</a>
 "#;
-    let view: Node<()> = sauron_md::markdown(md);
+    let view: Node<()> = sauron_markdown::markdown(md);
     let mut buffer = String::new();
     view.render(&mut buffer).unwrap();
     println!("view: {}", buffer);
@@ -24,7 +24,7 @@ fn blockqupte_xss() {
 > hello<a name="n"
 > href="javascript:alert('xss')">*you*</a>
 "#;
-    let view: Node<()> = sauron_md::markdown(md);
+    let view: Node<()> = sauron_markdown::markdown(md);
     let mut buffer = String::new();
     view.render(&mut buffer).unwrap();
     println!("view: {}", buffer);

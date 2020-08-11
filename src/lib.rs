@@ -179,8 +179,12 @@ pub use sauron_core::{
     diff, html, Attribute, Callback, Element, Node, Patch, Render,
 };
 
+#[cfg(feature = "with-node-macro")]
 pub use sauron_node_macro::node;
 // reexport web_sys crate
 pub use sauron_core::web_sys;
 // reexport wasm_bindgen crate
 pub use sauron_core::wasm_bindgen;
+// reexport sauron_markdown
+#[cfg(feature = "with-markdown")]
+pub use sauron_markdown::markdown;
