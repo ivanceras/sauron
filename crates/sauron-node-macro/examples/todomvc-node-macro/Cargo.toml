@@ -1,6 +1,6 @@
 
 [package]
-name = "todomvc-html-macros"
+name = "todomvc-node-macro"
 version = "0.1.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
