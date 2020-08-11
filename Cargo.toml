@@ -34,7 +34,6 @@ log = "0.4"
 members = [
     "crates/sauron-core",
     "crates/sauron-md",
-    "crates/sauron-syntax",
     "crates/sauron-parse",
     "crates/sauron-node-macro",
     "examples/minimal",
