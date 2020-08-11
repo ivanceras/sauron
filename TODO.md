@@ -7,6 +7,7 @@
  - [ ] Loosen the lifetime requirement of the `Fn` inside `Callback` from `'static` to a generic one eg: `'c`
  - [ ] Deprecate the tag macro since it complicates the conflict in reexporting the functions
      - ie: `style!` as a tag, `style!` macro for attributes, `style` as attribute call.
+ - [ ] Change the README example to use the node macro syntax
 
 ## Features
 - [ ] Storage service (May not be needed since the user can directly use web-sys)
