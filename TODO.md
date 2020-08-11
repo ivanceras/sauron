@@ -23,3 +23,9 @@
 - [X] `with-markdown`
     - [X] Add sanitation to markdown parser, use `ammonia` crate
     - [X] expose the `sauron-md` as `sauron::markdown` module, behind a feature flag
+
+## Performance
+- [ ] Fix the reported issues with benchmarks
+- [ ] Create a new benchmark for the js-comprehensive-benchmark suite
+    - [link](https://github.com/krausest/js-framework-benchmark)
+
