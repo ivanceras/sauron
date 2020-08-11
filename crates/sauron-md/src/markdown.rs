@@ -51,6 +51,9 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                 add_child!(code(vec![], vec![text(code_str)]))
             }
             Event::Html(html) => {
+                //TODO: add sanitation and whitelist here to
+                //remove xss, javascript, and other malicious html code
+                //embedded
                 if let Ok(nodes) = sauron_parse::parse_simple(&html) {
                     for node in nodes {
                         add_child!(node);
