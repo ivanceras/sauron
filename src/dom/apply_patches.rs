@@ -29,7 +29,6 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    log::warn!("patches: {:#?}", patches);
     let root_node: Node = root_node.into();
 
     // Closure that were added to the DOM during this patch operation.
@@ -201,7 +200,6 @@ fn remove_event_listeners(
     old_closures: &mut ActiveClosure,
 ) -> Result<(), JsValue> {
     let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
-    log::debug!("all_descendant_vdom_id: {:?}", all_descendant_vdom_id);
     for vdom_id in all_descendant_vdom_id {
         if let Some(old_closure) = old_closures.get(&vdom_id) {
             for (event, oc) in old_closure.iter() {
@@ -230,7 +228,6 @@ fn remove_event_listener_with_name(
     old_closures: &mut ActiveClosure,
 ) -> Result<(), JsValue> {
     let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
-    log::debug!("all_descendant_vdom_id: {:?}", all_descendant_vdom_id);
     for vdom_id in all_descendant_vdom_id {
         if let Some(old_closure) = old_closures.get_mut(&vdom_id) {
             for (event, oc) in old_closure.iter() {

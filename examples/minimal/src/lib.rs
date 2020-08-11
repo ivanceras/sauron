@@ -21,24 +21,33 @@ impl App {
 
 impl Component<Msg> for App {
     fn view(&self) -> Node<Msg> {
-        div!(
-            [class("some-class"), id("some-id"), attr("data-id", 1),],
+        main!(
+            [],
             [
-                input!(
+                h1!([], [text("Minimal example")]),
+                div!(
+                    [class("some-class"), id("some-id"), attr("data-id", 1),],
                     [
-                        class("client"),
-                        type_("button"),
-                        value("Click me!"),
-                        key(1),
-                        on_click(|_| {
-                            trace!("Button is clicked");
-                            Msg::Click
-                        }),
-                    ],
-                    []
-                ),
-                div!([], [text(format!("Clicked: {}", self.click_count))]),
-                input!([type_("text"), value(self.click_count)], [])
+                        input!(
+                            [
+                                class("client"),
+                                type_("button"),
+                                value("Click me!"),
+                                key(1),
+                                on_click(|_| {
+                                    trace!("Button is clicked");
+                                    Msg::Click
+                                }),
+                            ],
+                            []
+                        ),
+                        div!(
+                            [],
+                            [text(format!("Clicked: {}", self.click_count))]
+                        ),
+                        input!([type_("text"), value(self.click_count)], [])
+                    ]
+                )
             ]
         )
     }
