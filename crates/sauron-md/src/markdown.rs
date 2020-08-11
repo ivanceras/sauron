@@ -43,17 +43,17 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                 spine.push(make_tag(tag, &mut numbers));
             }
             Event::Text(content) => {
+                let content = ammonia::clean(&*content);
                 add_child!(text(content));
             }
             Event::SoftBreak => add_child!(text("\n")),
             Event::HardBreak => add_child!(br(vec![], vec![])),
             Event::Code(code_str) => {
+                let code_str = ammonia::clean(&*code_str);
                 add_child!(code(vec![], vec![text(code_str)]))
             }
             Event::Html(html) => {
-                //TODO: add sanitation and whitelist here to
-                //remove xss, javascript, and other malicious html code
-                //embedded
+                let html = ammonia::clean(&html);
                 if let Ok(nodes) = sauron_parse::parse_simple(&html) {
                     for node in nodes {
                         add_child!(node);

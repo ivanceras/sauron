@@ -18,5 +18,5 @@
     - [ ] `with-ssr` when used in server-side rendering, mutually exlusive to `with-dom`
     - [ ] `no_request_animation_frame` this should be additive
 - [ ] `with-markdown`
-    - [ ] Add sanitation to markdown parser, use `ammonia` crate
+    - [X] Add sanitation to markdown parser, use `ammonia` crate
     - [ ] expose the `sauron-md` as `sauron::markdown` module
