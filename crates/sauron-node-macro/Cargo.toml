@@ -1,5 +1,5 @@
 [package]
-name = "sauron-macros"
+name = "sauron-node-macro"
 version = "0.28.2"
 authors = ["John-John Tedro <udoprog@tedro.se>"]
 license = "MIT"

@@ -171,7 +171,7 @@
 #[macro_use]
 extern crate doc_comment;
 
-pub use sauron_macros::node;
+pub use sauron_node_macro::node;
 
 use cfg_if::cfg_if;
 cfg_if! {if #[cfg(feature = "with-dom")] {
