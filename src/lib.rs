@@ -153,12 +153,12 @@
 //!
 //!
 //!
-//#![deny(warnings)]
-#![deny(clippy::all)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png"
 )]
+#![deny(clippy::all)]
 #![deny(
+    warnings,
     missing_docs,
     missing_copy_implementations,
     trivial_casts,
@@ -167,7 +167,6 @@
     unused_import_braces
 )]
 
-#[macro_use]
 pub use sauron_core;
 pub use sauron_core::diff;
 pub use sauron_core::html;
@@ -175,13 +174,13 @@ pub use sauron_core::html::units;
 pub use sauron_core::mt_dom;
 pub use sauron_core::mt_dom::diff_with_key;
 pub use sauron_core::prelude::AttributeValue;
-pub use sauron_core::render::Render;
 pub use sauron_core::svg;
 pub use sauron_core::Attribute;
 pub use sauron_core::Callback;
 pub use sauron_core::Element;
 pub use sauron_core::Node;
 pub use sauron_core::Patch;
+pub use sauron_core::Render;
 pub use sauron_node_macro::node;
 
 pub use sauron_core::dom;

@@ -1,4 +1,5 @@
 #![deny(
+    warnings,
     missing_docs,
     missing_copy_implementations,
     trivial_casts,
@@ -27,15 +28,13 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
 pub type Event = ();
 
 #[macro_use]
-#[macro_export]
 pub mod html;
 
 #[macro_use]
-#[macro_export]
 pub mod svg;
 
 pub use render::Render;
-pub mod render;
+mod render;
 
 use mt_dom::diff_with_key;
 use prelude::AttributeValue;

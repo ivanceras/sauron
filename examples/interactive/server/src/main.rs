@@ -1,11 +1,10 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 use chrono::Local;
 use sauron::html::{attributes::*, *};
 use sauron::*;
 use serde_derive::{Deserialize, Serialize};
-use std::collections::HashMap;
 use warp::{
-    http::{Response, StatusCode},
+    http::{Response},
     Filter,
 };
 
