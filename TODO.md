@@ -8,6 +8,7 @@
  - [ ] Deprecate the tag macro since it complicates the conflict in reexporting the functions
      - ie: `style!` as a tag, `style!` macro for attributes, `style` as attribute call.
  - [ ] Change the README example to use the node macro syntax
+     - rename the old `minimal` to `minimal-alt` and use the `node-macro-syntax` in `minimal` example
  - [X] Move `sauron-syntax` into `html2sauron` project
 
 

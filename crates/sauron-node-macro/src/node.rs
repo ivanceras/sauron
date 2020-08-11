@@ -1,22 +1,9 @@
-use proc_macro2::{
-    Span,
-    TokenStream,
-};
+use proc_macro2::{Span, TokenStream};
 use quote::ToTokens;
 use syn::{
     ext::IdentExt as _,
-    parse::{
-        Parse,
-        ParseStream,
-    },
-    token,
-    Error,
-    Expr,
-    ExprForLoop,
-    Ident,
-    Lit,
-    LitStr,
-    Token,
+    parse::{Parse, ParseStream},
+    token, Error, Expr, ExprForLoop, Ident, Lit, LitStr, Token,
 };
 
 pub(super) struct Node {

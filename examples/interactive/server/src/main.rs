@@ -3,10 +3,7 @@ use chrono::Local;
 use sauron::html::{attributes::*, *};
 use sauron::*;
 use serde_derive::{Deserialize, Serialize};
-use warp::{
-    http::{Response},
-    Filter,
-};
+use warp::{http::Response, Filter};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct FormData {
@@ -24,10 +21,13 @@ fn view(form_data: Option<FormData>) -> Node<()> {
             method("GET"),
             class("some-class"),
             id("some-id"),
-            attr("form_data-id", 1)
+            attr("form_data-id", 1),
         ],
         vec![
-            div(vec![id("current-time")], vec![text(format!("Today is {}", date_str))]),
+            div(
+                vec![id("current-time")],
+                vec![text(format!("Today is {}", date_str))],
+            ),
             div(
                 vec![],
                 vec![
@@ -50,7 +50,7 @@ fn view(form_data: Option<FormData>) -> Node<()> {
             div(
                 vec![],
                 vec![
-                    p(vec![], vec![text("Tell us something about yourself:")],),
+                    p(vec![], vec![text("Tell us something about yourself:")]),
                     div(
                         vec![],
                         vec![textarea(
@@ -64,10 +64,13 @@ fn view(form_data: Option<FormData>) -> Node<()> {
                         )],
                     ),
                     if let Some(form_data) = &form_data {
-                        p(vec![], vec![text(format!("{}", form_data.biography))])
+                        p(
+                            vec![],
+                            vec![text(format!("{}", form_data.biography))],
+                        )
                     } else {
                         text("")
-                    }
+                    },
                 ],
             ),
             div(
@@ -90,7 +93,7 @@ fn view(form_data: Option<FormData>) -> Node<()> {
                         }
                     } else {
                         text("")
-                    }
+                    },
                 ],
             ),
             input(vec![type_("submit"), value("Submit")], vec![]),

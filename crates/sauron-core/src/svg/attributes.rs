@@ -1,12 +1,6 @@
 //! provides functions and macros for building svg attributes
-use crate::prelude::{
-    AttributeValue,
-    Value,
-};
-use mt_dom::{
-    attr,
-    attr_ns,
-};
+use crate::prelude::{AttributeValue, Value};
+use mt_dom::{attr, attr_ns};
 
 pub(in crate) const XLINK_NAMESPACE: &str = "http://www.w3.org/1999/xlink";
 
