@@ -1,5 +1,6 @@
 use sauron::{
-    dom::events::KeyboardEvent, html::*, node, prelude::*, Cmd, Component, Node,
+    dom::events::KeyboardEvent, html::*, prelude::node, prelude::*, Cmd,
+    Component, Node,
 };
 use serde_derive::{Deserialize, Serialize};
 
