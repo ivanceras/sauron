@@ -17,11 +17,10 @@
 
 #### Example
 ```rust
-use sauron::prelude::*;
-use wasm_bindgen::prelude::*;
 use log::*;
+use sauron::prelude::*;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug)]
 pub enum Msg {
     Click,
 }
@@ -37,45 +36,44 @@ impl App {
 }
 
 impl Component<Msg> for App {
-
     fn view(&self) -> Node<Msg> {
-        div!(
-            [class("some-class"), id("some-id"), attr("data-id", 1)],
-            [
-                input!(
-                    [
-                        class("client"),
-                        type_("button"),
-                        value("Click me!"),
-                        on_click(|_| {
-                            trace!("Button is clicked");
-                            Msg::Click
-                        }),
-                    ],
-                    [],
-                ),
-                text!("Clicked: {}", self.click_count),
-            ],
-        )
-    }
-
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-        trace!("App is updating from msg: {:?}", msg);
-        match msg {
-            Msg::Click => {
-                self.click_count += 1;
-                Cmd::none()
-            }
+        node! {
+            <main>
+                <h1>"Minimal example"</h1>
+                <div class="some-class" id="some-id" {attr("data-id", 1)}>
+                    <input class="client"
+                            type_="button"
+                            value="Click me!"
+                            key=1
+                            on_click={|_| {
+                                trace!("Button is clicked");
+                                Msg::Click
+                            }}
+                    />
+                    <div>{text(format!("Clicked: {}", self.click_count))}</div>
+                    <input type_="text" value={self.click_count}/>
+                </div>
+            </main>
         }
     }
 
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+        trace!("App is updating with msg: {:?}", msg);
+        match msg {
+            Msg::Click => self.click_count += 1,
+        }
+        Cmd::none()
+    }
 }
 
 #[wasm_bindgen(start)]
 pub fn main() {
+    console_log::init_with_level(log::Level::Trace).unwrap();
+    console_error_panic_hook::set_once();
     Program::mount_to_body(App::new());
 }
 ```
+
 index.html
 ```html
 <html>
@@ -94,8 +92,21 @@ index.html
 ```
 In Cargo.toml, specify the crate-type to be `cdylib`
 ```toml
+
+[package]
+name = "minimal"
+version = "0.1.0"
+edition = "2018"
+
 [lib]
 crate-type = ["cdylib"]
+
+
+[dependencies]
+sauron = "0.29"
+console_error_panic_hook = { version = "0.1"}
+log = "0.4"
+console_log = "0.1"
 ```
 
 
@@ -119,20 +130,6 @@ pages](https://ivanceras.github.io)
 
 [html2sauron](https://ivanceras.github.io/html2sauron/) - A tool to easily convert html into
 sauron node tree for your views.
-
-Note: When writing the view in sauron, just keep in mind that the function name is the element tag
-you are creating and there is 2 arguments for it. The first argument is an array of the attributes of the element
-and the second argument is an array of the children of the element.
-
-Example:
-```rust
-div!([id("container"),class("hero")], [text("Content goes here")])
-```
-`div` macro call is the element tag.
-The 1st argument in the call is an array of attributes for the div element expressed in a
-function call `id` and `class` which are valid attributes for a div.
-The 2nd argument in the call is an array of the children elements, and you can nest as many as
-you like.
 
 #### Prerequisite:
 
