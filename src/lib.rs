@@ -179,6 +179,7 @@ pub use sauron_core::{
     diff, html, Attribute, Callback, Element, Node, Patch, Render,
 };
 
+pub use sauron_node_macro::node;
 // reexport web_sys crate
 pub use sauron_core::web_sys;
 // reexport wasm_bindgen crate
