@@ -8,6 +8,8 @@
  - [ ] Deprecate the tag macro since it complicates the conflict in reexporting the functions
      - ie: `style!` as a tag, `style!` macro for attributes, `style` as attribute call.
  - [ ] Change the README example to use the node macro syntax
+ - [ ] Move `sauron-syntax` into `html2sauron` project
+
 
 ## Features
 - [ ] Storage service (May not be needed since the user can directly use web-sys)
@@ -17,6 +19,6 @@
     - [ ] `with-dom` when used in client-side, default
     - [ ] `with-ssr` when used in server-side rendering, mutually exlusive to `with-dom`
     - [ ] `no_request_animation_frame` this should be additive
-- [ ] `with-markdown`
+- [X] `with-markdown`
     - [X] Add sanitation to markdown parser, use `ammonia` crate
-    - [ ] expose the `sauron-md` as `sauron::markdown` module
+    - [X] expose the `sauron-md` as `sauron::markdown` module, behind a feature flag

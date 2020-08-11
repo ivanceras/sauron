@@ -1,5 +1,5 @@
 use log::*;
-use sauron::{
+use sauron_core::{
     html::{attributes::*, events::*, *},
     test_fixtures::simple_program,
     *,
@@ -34,8 +34,11 @@ fn node_mounted_properly() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &sauron::body());
+    let mut dom_updater = DomUpdater::new_append_to_mount(
+        &simple_program,
+        old,
+        &sauron_core::body(),
+    );
 
     let container = document
         .query_selector(".container1")
@@ -85,8 +88,11 @@ fn node_patched_properly() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &sauron::body());
+    let mut dom_updater = DomUpdater::new_append_to_mount(
+        &simple_program,
+        old,
+        &sauron_core::body(),
+    );
 
     let container = document
         .query_selector(".container2")
@@ -155,8 +161,11 @@ fn node_patched_properly_remove_from_start() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &sauron::body());
+    let mut dom_updater = DomUpdater::new_append_to_mount(
+        &simple_program,
+        old,
+        &sauron_core::body(),
+    );
 
     let container = document
         .query_selector(".test3")
@@ -227,8 +236,11 @@ fn node_patched_properly_text_changed() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &sauron::body());
+    let mut dom_updater = DomUpdater::new_append_to_mount(
+        &simple_program,
+        old,
+        &sauron_core::body(),
+    );
 
     let container = document
         .query_selector(".test4")
@@ -307,8 +319,11 @@ fn mixed_keyed_and_non_keyed_elements() {
     debug!("old html: {}", old_html);
 
     let simple_program = simple_program();
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &sauron::body());
+    let mut dom_updater = DomUpdater::new_append_to_mount(
+        &simple_program,
+        old,
+        &sauron_core::body(),
+    );
 
     let container = document
         .query_selector(".test5")

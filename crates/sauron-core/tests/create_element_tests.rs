@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::{
+use sauron_core::{
     dom::CreatedNode,
     html::{attributes::*, div, events::*},
     svg::{
@@ -13,7 +13,7 @@ use std::{cell::Cell, rc::Rc};
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
 
-use sauron::{test_fixtures::simple_program, Node};
+use sauron_core::{test_fixtures::simple_program, Node};
 use web_sys::{console, Element, EventTarget};
 
 wasm_bindgen_test_configure!(run_in_browser);

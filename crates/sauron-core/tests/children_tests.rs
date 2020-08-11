@@ -1,12 +1,7 @@
 #![deny(warnings)]
-use sauron::{
-    svg::{
-        attributes::*,
-        tags::line,
-        *,
-    },
-    Node,
-    *,
+use sauron_core::{
+    svg::{attributes::*, tags::line, *},
+    Node, *,
 };
 
 #[test]

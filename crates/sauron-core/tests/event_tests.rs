@@ -7,7 +7,7 @@ extern crate web_sys;
 use std::rc::Rc;
 use wasm_bindgen_test::*;
 
-use sauron::{
+use sauron_core::{
     diff,
     dom::{test_fixtures::simple_program, DomUpdater},
     html::{attributes::*, events::*, *},
@@ -39,12 +39,13 @@ fn on_input_test() {
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
-    let body = sauron::body();
+    let body = sauron_core::body();
     let simple_program = simple_program();
     let _dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, input, &body);
 
-    let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
+    let input_element =
+        sauron_core::document().get_element_by_id(&elem_id).unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 
@@ -86,14 +87,15 @@ fn added_event() {
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
-    let body = sauron::body();
+    let body = sauron_core::body();
     let simple_program = simple_program();
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);
     // update to new dom with no event attached
     dom_updater.update_dom(&simple_program, new);
 
-    let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
+    let input_element =
+        sauron_core::document().get_element_by_id(&elem_id).unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 
@@ -138,14 +140,15 @@ fn remove_event() {
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
-    let body = sauron::body();
+    let body = sauron_core::body();
     let simple_program = simple_program();
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);
     // update to new dom with no event attached
     dom_updater.update_dom(&simple_program, new);
 
-    let input_element = sauron::document().get_element_by_id(&elem_id).unwrap();
+    let input_element =
+        sauron_core::document().get_element_by_id(&elem_id).unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 
@@ -177,10 +180,10 @@ fn remove_event_from_truncated_children() {
         vec![button(vec![on_click(|_| trace!("Clicked here"))], vec![])],
     );
 
-    let body = sauron::body();
+    let body = sauron_core::body();
     let simple_program = simple_program();
     assert_eq!(
-        sauron::diff(&old, &new),
+        sauron_core::diff(&old, &new),
         vec![Patch::RemoveChildren(&"div", 0, vec![1, 2, 3, 4])],
         "Should be a Truncate patch"
     );
@@ -218,10 +221,10 @@ fn remove_event_from_truncated_children_some_with_no_events() {
         vec![button(vec![on_click(|_| trace!("Clicked here"))], vec![])],
     );
 
-    let body = sauron::body();
+    let body = sauron_core::body();
     let simple_program = simple_program();
     assert_eq!(
-        sauron::diff(&old, &new),
+        sauron_core::diff(&old, &new),
         vec![Patch::RemoveChildren(&"div", 0, vec![1, 2, 3, 4])],
         "Should be a Truncate patch"
     );
@@ -247,10 +250,10 @@ fn remove_event_from_replaced_node() {
 
     let new: Node<()> = p(vec![], vec![]);
 
-    let body = sauron::body();
+    let body = sauron_core::body();
     let simple_program = simple_program();
     assert_eq!(
-        sauron::diff(&old, &new),
+        sauron_core::diff(&old, &new),
         vec![Patch::Replace(&"div", 0, &p(vec![], vec![]))],
         "Should be a Replace patch"
     );

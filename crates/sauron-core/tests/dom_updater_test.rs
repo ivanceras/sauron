@@ -1,22 +1,15 @@
 #![deny(warnings)]
-use sauron::{
+use sauron_core::{
     html::{
-        attributes::{
-            id,
-            value,
-        },
+        attributes::{id, value},
         div,
         events::*,
         input,
     },
     test_fixtures::simple_program,
-    DomUpdater,
-    Node,
+    DomUpdater, Node,
 };
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use std::{cell::RefCell, rc::Rc};
 
 use wasm_bindgen_test::*;
 
@@ -35,8 +28,11 @@ fn patches_dom() {
 
     let vdom: Node<()> = div(vec![], vec![]);
     let simple_program = simple_program();
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, vdom, &sauron::body());
+    let mut dom_updater = DomUpdater::new_append_to_mount(
+        &simple_program,
+        vdom,
+        &sauron_core::body(),
+    );
 
     let new_vdom = div(vec![id("patched")], vec![]); //html! { <div id="patched"></div> };
     dom_updater.update_dom(&simple_program, new_vdom);
@@ -51,7 +47,7 @@ fn patches_dom() {
 fn updates_active_closure_on_replace() {
     console_error_panic_hook::set_once();
 
-    let body = sauron::body();
+    let body = sauron_core::body();
 
     let simple_program = simple_program();
     let old = div(vec![], vec![]);
@@ -66,7 +62,7 @@ fn updates_active_closure_on_replace() {
     let replace_node = input(
         vec![
             id(elem_id),
-            on_input(move |event: sauron::html::events::InputEvent| {
+            on_input(move |event: sauron_core::html::events::InputEvent| {
                 *text_clone.borrow_mut() = event.value.to_string();
             }),
             value("End Text"),
@@ -84,7 +80,7 @@ fn updates_active_closure_on_replace() {
     assert_eq!(&*text.borrow(), "Start Text");
 
     // After dispatching the on_input event our `text` should have a value of the input elements value.
-    let input = sauron::document().get_element_by_id(&elem_id).unwrap();
+    let input = sauron_core::document().get_element_by_id(&elem_id).unwrap();
     web_sys::EventTarget::from(input)
         .dispatch_event(&input_event)
         .unwrap();
@@ -99,7 +95,7 @@ fn updates_active_closure_on_replace() {
 fn updates_active_closures_on_append() {
     console_error_panic_hook::set_once();
 
-    let body = sauron::body();
+    let body = sauron_core::body();
 
     let old = div(vec![], vec![]);
     let simple_program = simple_program();
@@ -117,9 +113,11 @@ fn updates_active_closures_on_append() {
             vec![input(
                 vec![
                     id(elem_id),
-                    on_input(move |event: sauron::html::events::InputEvent| {
-                        *text_clone.borrow_mut() = event.value.to_string();
-                    }),
+                    on_input(
+                        move |event: sauron_core::html::events::InputEvent| {
+                            *text_clone.borrow_mut() = event.value.to_string();
+                        },
+                    ),
                     value("End Text"),
                 ],
                 vec![],
@@ -137,7 +135,7 @@ fn updates_active_closures_on_append() {
     assert_eq!(&*text.borrow(), "Start Text");
 
     // After dispatching the on_input event our `text` should have a value of the input elements value.
-    let input = sauron::document().get_element_by_id(elem_id).unwrap();
+    let input = sauron_core::document().get_element_by_id(elem_id).unwrap();
     web_sys::EventTarget::from(input)
         .dispatch_event(&input_event)
         .unwrap();

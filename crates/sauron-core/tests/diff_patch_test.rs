@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::{
+use sauron_core::{
     diff,
     html::{attributes::*, events::*, *},
     Attribute, Node, Patch,
