@@ -5,7 +5,9 @@
 #![deny(clippy::all)]
 use console_error_panic_hook;
 use js_sys::Date;
-use sauron::{html::attributes::*, svg::attributes::*, Cmd, Node, *};
+use sauron::{
+    html::attributes::*, html::*, svg::attributes::*, svg::*, Cmd, Node, *,
+};
 use wasm_bindgen::{self, prelude::*, JsCast};
 #[macro_use]
 extern crate log;
@@ -56,9 +58,9 @@ impl Component<Msg> for Clock {
     }
 
     fn view(&self) -> Node<Msg> {
-        let circle = circle!(
-            [cx(100), cy(100), r(98), fill("none"), stroke("#1a202c")],
-            []
+        let circle = circle(
+            vec![cx(100), cy(100), r(98), fill("none"), stroke("#1a202c")],
+            vec![],
         );
 
         let hand = |rotate: f64,
@@ -95,25 +97,25 @@ impl Component<Msg> for Clock {
         let hour_rotate =
             90.0 + ((ms / 1000.0 / 60.0 / 60.0) % 12.0) * 360.0 / 12.0;
 
-        article!(
-            [],
-            [
-                h2!(
-                    [],
-                    [text!("Sauron clock demonstrating svg dom manipulation")]
+        article(
+            vec![],
+            vec![
+                h2(
+                    vec![],
+                    vec![text("Sauron clock demonstrating svg dom manipulation")]
                 ),
-                a!(
-                    [html::attributes::href(
+                a(
+                    vec![href(
                         "https://github.com/ivanceras/sauron/tree/master/examples/svg_clock"
                     )],
-                    [text!("code")]
+                    vec![text("code")]
                 ),
-                div!(
-                    [style("display","flex"),
+                div(
+                    vec![style("display","flex"),
                      style("align-items", "center"),
                      style("flex-direction", "column"),
                     ],
-                    [svg!(
+                    vec![svg!(
                         [width(400), height(400), viewBox([0, 0, 200, 200])],
                         [
                             circle,

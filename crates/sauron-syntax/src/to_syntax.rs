@@ -1,4 +1,4 @@
-use sauron::{mt_dom::AttValue, prelude::*};
+use sauron_core::{mt_dom::AttValue, prelude::*};
 use std::{fmt, fmt::Write};
 
 /// A trait to convert html string into sauron view syntax

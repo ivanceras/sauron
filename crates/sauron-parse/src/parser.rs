@@ -5,7 +5,7 @@ use html5ever::{
     tendril::TendrilSink, QualName,
 };
 use markup5ever_rcdom::{Handle, NodeData, RcDom};
-use sauron::{
+use sauron_core::{
     html::{
         attributes,
         attributes::{

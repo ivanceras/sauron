@@ -19,82 +19,82 @@ pub struct FormData {
 fn view(form_data: Option<FormData>) -> Node<()> {
     println!("in view  with form_data: {:#?}", form_data);
     let date_str: String = Local::now().to_string();
-    form!(
-        [
+    form(
+        vec![
             action("/submission"),
             method("GET"),
             class("some-class"),
             id("some-id"),
             attr("form_data-id", 1)
         ],
-        [
-            div!([id("current-time")], [text!("Today is {}", date_str)],),
-            div!(
-                [],
-                [
-                    text!("Your name is: "),
-                    input!(
-                        [
+        vec![
+            div(vec![id("current-time")], vec![text(format!("Today is {}", date_str))]),
+            div(
+                vec![],
+                vec![
+                    text("Your name is: "),
+                    input(
+                        vec![
                             name("name"),
                             r#type("text"),
                             placeholder("John Smith"),
                         ],
-                        [],
+                        vec![],
                     ),
                 ],
             ),
             if let Some(form_data) = &form_data {
-                p!([], [text!("Hello {}!", form_data.name),],)
+                p(vec![], vec![text(format!("Hello {}!", form_data.name))])
             } else {
-                text!("")
+                text("")
             },
-            div!(
-                [],
-                [
-                    p!([], [text!("Tell us something about yourself:")],),
-                    div!(
-                        [],
-                        [textarea!(
-                            [
+            div(
+                vec![],
+                vec![
+                    p(vec![], vec![text("Tell us something about yourself:")],),
+                    div(
+                        vec![],
+                        vec![textarea(
+                            vec![
                                 name("biography"),
                                 rows(10),
                                 cols(80),
                                 placeholder("I'm a..."),
                             ],
-                            [],
+                            vec![],
                         )],
                     ),
                     if let Some(form_data) = &form_data {
-                        p!([], [text!("{}", form_data.biography)])
+                        p(vec![], vec![text(format!("{}", form_data.biography))])
                     } else {
-                        text!("")
+                        text("")
                     }
                 ],
             ),
-            div!(
-                [],
-                [
-                    text!("What are you thinking right now?"),
-                    input!(
-                        [
+            div(
+                vec![],
+                vec![
+                    text("What are you thinking right now?"),
+                    input(
+                        vec![
                             name("thought"),
                             r#type("text"),
                             placeholder("Elephants..."),
                         ],
-                        [],
+                        vec![],
                     ),
                     if let Some(form_data) = &form_data {
                         if let Some(thought) = &form_data.thought {
-                            text!("Hmmn {}... Interesting.", thought)
+                            text(format!("Hmmn {}... Interesting.", thought))
                         } else {
-                            text!("")
+                            text("")
                         }
                     } else {
-                        text!("")
+                        text("")
                     }
                 ],
             ),
-            input!([type_("submit"), value("Submit")], [],),
+            input(vec![type_("submit"), value("Submit")], vec![]),
         ],
     )
 }

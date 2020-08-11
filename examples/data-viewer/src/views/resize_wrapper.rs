@@ -1,19 +1,8 @@
-use crate::views::{
-    data_view,
-    DataView,
-};
+use crate::views::{data_view, DataView};
 
 use sauron::{
-    html::{
-        attributes::class,
-        events::*,
-        *,
-    },
-    Cmd,
-    Component,
-    Node,
-    Window,
-    *,
+    html::{attributes::class, events::*, *},
+    Cmd, Component, Node, Window, *,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -170,11 +159,11 @@ impl Component<Msg> for ResizeWrapper {
                     ],
                     vec![],
                 ),
-                a!(
-                    [html::attributes::href(
+                a(
+                    vec![html::attributes::href(
                         "https://github.com/ivanceras/sauron/tree/master/examples/data-viewer/"
                     )],
-                    [text!("code")]
+                    vec![text("code")]
                 ),
             ],
         )

@@ -12,7 +12,7 @@ keywords = ["svg", "html", "parser"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sauron = { version = "0.29", features = ["with-parser"], path = "../../" }
+sauron-core = { version = "0.29", features = ["with-parser"], path = "../sauron-core" }
 html5ever = {version = "0.25"}
 markup5ever_rcdom = { version = "0.1" }
 thiserror = "1.0"

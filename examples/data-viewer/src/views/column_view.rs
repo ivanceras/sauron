@@ -1,20 +1,7 @@
-use crate::{
-    assets,
-    widgets::search_widget,
-    ColumnDef,
-};
+use crate::{assets, widgets::search_widget, ColumnDef};
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        units::*,
-        *,
-    },
-    style,
-    Cmd,
-    Component,
-    Node,
-    *,
+    html::{attributes::*, events::*, units::*, *},
+    Cmd, Component, Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -76,42 +63,42 @@ impl ColumnView {
             controls_width = 0;
         }
         let self_width = self.width;
-        div!(
-            [
+        div(
+            vec![
                 class("column_view__controls flex-column"),
                 classes_flag([(
                     "column_view__controls--frozen",
                     self.is_frozen,
                 )]),
-                style! {
-                    height => px(self.height);
-                    width => px(controls_width);
-                },
+                styles([
+                    ("height", px(self.height)),
+                    ("width", px(controls_width)),
+                ]),
             ],
-            [
-                div!(
-                    [
+            vec![
+                div(
+                    vec![
                         class("column_controls flex-row"),
-                        style! {
-                            width => px(self_width);
-                            "padding-left" => px(Self::side_padding_width());
-                            "padding-right" => px(Self::side_padding_width());
-                        },
+                        styles([
+                            ("width", px(self_width)),
+                            ("padding-left", px(Self::side_padding_width())),
+                            ("padding-right", px(Self::side_padding_width())),
+                        ]),
                     ],
-                    [
-                        div!(
-                            [class("column_controls__column_name")],
-                            [text(&self.column.column.name)],
+                    vec![
+                        div(
+                            vec![class("column_controls__column_name")],
+                            vec![text(&self.column.column.name)],
                         ),
-                        div!(
-                            [class("column_controls__sort_btn")],
-                            [assets::sort_btn_asc(18, 18, "#888")],
+                        div(
+                            vec![class("column_controls__sort_btn")],
+                            vec![assets::sort_btn_asc(18, 18, "#888")],
                         ),
                     ],
                 ),
-                div!(
-                    [class("column_view__search")],
-                    [search_widget(
+                div(
+                    vec![class("column_view__search")],
+                    vec![search_widget(
                         self.width,
                         vec![on_input(|input| {
                             Msg::ChangeSearch(input.value.to_string())

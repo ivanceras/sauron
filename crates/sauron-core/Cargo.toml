@@ -1,0 +1,88 @@
+[package]
+name = "sauron-core"
+version = "0.29.0"
+authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
+license = "MIT"
+description = "An html library for building client side webapps"
+repository = "https://github.com/ivanceras/sauron"
+documentation = "https://docs.rs/sauron"
+readme = "README.md"
+keywords = ["html", "dom", "web"]
+edition = "2018"
+
+[badges]
+maintenance = { status = "actively-developed" }
+
+[dependencies]
+js-sys = { version = "0.3", optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+lazy_static = "1.3.0"
+log = "0.4"
+cfg-if = "0.1"
+thiserror = "1.0"
+doc-comment = "0.3"
+mt-dom = { version = "0.3"}
+console_log = { version = "0.1", optional = true }
+
+[dependencies.web-sys]
+version = "0.3"
+optional = true
+features = [
+    "Comment",
+    "console",
+    "Document",
+    "Element",
+    "Event",
+    "HtmlElement",
+    "EventTarget",
+    "KeyboardEvent",
+    "HashChangeEvent",
+    "InputEvent",
+    "HtmlCollection",
+    "HtmlInputElement",
+    "HtmlTextAreaElement",
+    "MouseEvent",
+    "Node",
+    "NodeList",
+    "Text",
+    "CharacterData",
+    "Performance",
+    "Window",
+    "History",
+    "Response",
+	"Location",
+	"ScrollToOptions",
+]
+
+
+[features]
+default = ["with-dom"]
+with-parser = [] #enumerates html tags and attributes
+measure = []
+no_request_animation_frame = [] # disable request animation frame
+with-dom = ["wasm-bindgen", "js-sys", "web-sys", "console_log"]
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+console_error_panic_hook = "0.1"
+console_log = "0.1"
+
+[dev-dependencies.web-sys]
+version = "0.3"
+features = [
+    "DomTokenList",
+    "HtmlInputElement",
+    "Event",
+    "MouseEvent",
+    "InputEvent",
+    "console",
+    "Performance",
+]
+
+[dev-dependencies.criterion]
+version = "0.3"
+
+[[bench]]
+name = "nodes_benchmark"
+harness = false
+

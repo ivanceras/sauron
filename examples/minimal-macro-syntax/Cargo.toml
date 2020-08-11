@@ -1,6 +1,6 @@
 
 [package]
-name = "svg_graph"
+name = "minimal-macro-syntax"
 version = "0.1.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
@@ -10,10 +10,9 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = { path = "../../" }
+sauron = { path = "../../"}
 wasm-bindgen = "0.2"
 console_error_panic_hook = { version = "0.1"}
-wee_alloc = { version = "0.4.3", optional = true }
 log = "0.4"
 console_log = "0.1"
 

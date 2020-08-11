@@ -1,5 +1,5 @@
 use pulldown_cmark::{Alignment, CodeBlockKind, Event, Options, Parser, Tag};
-use sauron::{
+use sauron_core::{
     html::{
         attributes::{attr, checked, class, href, id, src, title, type_},
         *,
@@ -198,7 +198,7 @@ fn make_tag<MSG>(t: Tag, numbers: &mut HashMap<String, usize>) -> Node<MSG> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use sauron::Render;
+    use sauron_core::Render;
 
     #[test]
     fn source_code() {

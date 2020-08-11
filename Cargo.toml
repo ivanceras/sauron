@@ -15,87 +15,24 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 sauron-node-macro = { version = "0.29.0", path = "crates/sauron-node-macro" }
-js-sys = { version = "0.3", optional = true }
-wasm-bindgen = { version = "0.2", optional = true }
-lazy_static = "1.3.0"
-log = "0.4"
+sauron-core = { version = "0.29.0", path = "crates/sauron-core" }
 cfg-if = "0.1"
-thiserror = "1.0"
-doc-comment = "0.3"
-mt-dom = { version = "0.3"}
-console_log = { version = "0.1", optional = true }
-
-[dependencies.web-sys]
-version = "0.3"
-optional = true
-features = [
-    "Comment",
-    "console",
-    "Document",
-    "Element",
-    "Event",
-    "HtmlElement",
-    "EventTarget",
-    "KeyboardEvent",
-    "HashChangeEvent",
-    "InputEvent",
-    "HtmlCollection",
-    "HtmlInputElement",
-    "HtmlTextAreaElement",
-    "MouseEvent",
-    "Node",
-    "NodeList",
-    "Text",
-    "CharacterData",
-    "Performance",
-    "Window",
-    "History",
-    "Response",
-	"Location",
-	"ScrollToOptions",
-]
-
-
-[features]
-default = ["with-dom"]
-with-parser = [] #enumerates html tags and attributes
-measure = []
-no_request_animation_frame = [] # disable request animation frame
-with-dom = ["wasm-bindgen", "js-sys", "web-sys", "console_log"]
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3"
-console_error_panic_hook = "0.1"
-console_log = "0.1"
+log = "0.4"
 
-[dev-dependencies.web-sys]
-version = "0.3"
-features = [
-    "DomTokenList",
-    "HtmlInputElement",
-    "Event",
-    "MouseEvent",
-    "InputEvent",
-    "console",
-    "Performance",
-]
-
-[dev-dependencies.criterion]
-version = "0.3"
-
-[[bench]]
-name = "nodes_benchmark"
-harness = false
 
 
 [workspace]
 members = [
+    "crates/sauron-core",
     "crates/sauron-md",
     "crates/sauron-syntax",
     "crates/sauron-parse",
     "crates/sauron-node-macro",
     "crates/sauron-node-macro/examples/todomvc-node-macro",
     "examples/minimal",
+    "examples/minimal-macro-syntax",
     "examples/fetch_data",
     "examples/interactive/client",
     "examples/interactive/server",

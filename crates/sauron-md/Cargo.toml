@@ -12,6 +12,6 @@ keywords = ["md", "sauron", "node"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sauron = { version = "0.29", path = "../../" }
+sauron-core = { version = "0.29", path = "../sauron-core" }
 sauron-parse = { version = "0.1", path = "../sauron-parse" }
 pulldown-cmark = { version = "0.7"}
