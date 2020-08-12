@@ -23,6 +23,7 @@
 - [X] `with-markdown`
     - [X] Add sanitation to markdown parser, use `ammonia` crate
     - [X] expose the `sauron-md` as `sauron::markdown` module, behind a feature flag
+- [ ] Add example using markdown
 
 ## Performance
 - [ ] Fix the reported issues with benchmarks

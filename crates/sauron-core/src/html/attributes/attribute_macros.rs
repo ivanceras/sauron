@@ -63,7 +63,7 @@ macro_rules! declare_html_attributes{
 
         #[cfg(feature = "with-parser")]
         /// These are most commonly used html attributes such as class, id, etc
-        pub const HTML_ATTRS:[&'static str; 117] = [$(stringify!($name),)*];
+        pub const HTML_ATTRS:[&'static str; 116] = [$(stringify!($name),)*];
     }
 }
 
@@ -124,7 +124,6 @@ declare_html_attributes! {
     defer;
     dir;
     dirname;
-    disabled;
     download;
     draggable;
     dropzone;

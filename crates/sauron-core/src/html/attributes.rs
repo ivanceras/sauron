@@ -157,6 +157,15 @@ pub fn checked<MSG>(is_checked: bool) -> Attribute<MSG> {
     }
 }
 
+/// set whether an element is disabled or not
+pub fn disabled<MSG>(is_disabled: bool) -> Attribute<MSG> {
+    if is_disabled {
+        attr("disabled", "true")
+    } else {
+        empty_attr()
+    }
+}
+
 /// set the inner html of this element without comparing in the diff
 /// this always sets the value
 /// This is for optimization purposes

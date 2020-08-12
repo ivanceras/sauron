@@ -5,14 +5,17 @@ use serde::Deserialize;
 #[macro_use]
 extern crate log;
 
+const DATA_URL: &'static str = "https://reqres.in/api/users";
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
-    Click,
+    NextPage,
+    PrevPage,
     ReceivedData(Result<Data, JsValue>),
 }
 
 pub struct App {
-    click_count: u32,
+    page: u32,
     data: Data,
 }
 
@@ -37,26 +40,29 @@ pub struct User {
 impl App {
     pub fn new() -> Self {
         App {
-            click_count: 0,
+            page: 1,
             data: Data::default(),
         }
+    }
+
+    fn fetch_page(&self) -> Cmd<Self, Msg> {
+        let url = format!("{}?page={}", DATA_URL, self.page);
+        Http::fetch_with_text_response_decoder(
+            &url,
+            |v: String| {
+                let data: Result<Data, _> = serde_json::from_str(&v);
+                trace!("data: {:#?}", data);
+                data.expect("Error deserializing data")
+            },
+            Msg::ReceivedData,
+        )
     }
 }
 
 impl Component<Msg> for App {
     fn init(&self) -> Cmd<Self, Msg> {
         console_log::init_with_level(log::Level::Trace).unwrap();
-        let url = "https://reqres.in/api/users";
-        let data_decoder = |v: String| {
-            let data: Result<Data, _> = serde_json::from_str(&v);
-            trace!("data: {:#?}", data);
-            data.expect("Error deserializing data")
-        };
-        Http::fetch_with_text_response_decoder(
-            url,
-            data_decoder,
-            Msg::ReceivedData,
-        )
+        self.fetch_page()
     }
 
     fn view(&self) -> Node<Msg> {
@@ -74,15 +80,16 @@ impl Component<Msg> for App {
                             vec![
                                 class("client"),
                                 r#type("button"),
-                                value("Click me!"),
+                                disabled(self.page >= 2),
+                                value("Next Page"),
                                 on_click(|_| {
                                     trace!("Button is clicked");
-                                    Msg::Click
+                                    Msg::NextPage
                                 }),
                             ],
                             vec![],
                         ),
-                        text(format!("Clicked: {}", self.click_count)),
+                        text(format!("Page: {}", self.page)),
                     ],
                 ),
                 div(vec![], vec![]).add_children(
@@ -108,6 +115,19 @@ impl Component<Msg> for App {
                         })
                         .collect(),
                 ),
+                input(
+                    vec![
+                        class("client"),
+                        r#type("button"),
+                        disabled(self.page <= 1),
+                        value("Prev Page"),
+                        on_click(|_| {
+                            trace!("Button is clicked");
+                            Msg::PrevPage
+                        }),
+                    ],
+                    vec![],
+                ),
             ],
         )
     }
@@ -115,15 +135,27 @@ impl Component<Msg> for App {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         trace!("App is updating from msg: {:?}", msg);
         match msg {
-            Msg::Click => self.click_count += 1,
+            Msg::NextPage => {
+                if self.page < 2 {
+                    self.page += 1;
+                }
+                self.fetch_page()
+            }
+            Msg::PrevPage => {
+                if self.page > 1 {
+                    self.page -= 1;
+                }
+                self.fetch_page()
+            }
             Msg::ReceivedData(Ok(data)) => {
                 self.data = data;
+                Cmd::none()
             }
             Msg::ReceivedData(Err(js_value)) => {
                 trace!("Error fetching users! {:#?}", js_value);
+                Cmd::none()
             }
         }
-        Cmd::none()
     }
 }
 
