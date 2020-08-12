@@ -17,6 +17,7 @@ pub enum Msg {
 pub struct App {
     page: u32,
     data: Data,
+    error: Option<String>,
 }
 
 #[derive(Deserialize, Debug, PartialEq, Clone, Default)]
@@ -42,6 +43,7 @@ impl App {
         App {
             page: 1,
             data: Data::default(),
+            error: None,
         }
     }
 
@@ -128,6 +130,14 @@ impl Component<Msg> for App {
                         })
                         .collect(),
                 ),
+                footer(
+                    vec![class("error")],
+                    vec![if let Some(error) = &self.error {
+                        text(error)
+                    } else {
+                        text!("")
+                    }],
+                ),
             ],
         )
     }
@@ -153,6 +163,10 @@ impl Component<Msg> for App {
             }
             Msg::ReceivedData(Err(js_value)) => {
                 trace!("Error fetching users! {:#?}", js_value);
+                self.error = Some(format!(
+                    "There was an error fetching the page: {:?}",
+                    js_value
+                ));
                 Cmd::none()
             }
         }
