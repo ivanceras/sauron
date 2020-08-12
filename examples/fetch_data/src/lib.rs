@@ -78,10 +78,24 @@ impl Component<Msg> for App {
                     vec![
                         input(
                             vec![
-                                class("client"),
+                                class("prev_page"),
+                                r#type("button"),
+                                disabled(self.page <= 1),
+                                value("<< Prev Page"),
+                                on_click(|_| {
+                                    trace!("Button is clicked");
+                                    Msg::PrevPage
+                                }),
+                            ],
+                            vec![],
+                        ),
+                        text(format!("Page: {}", self.page)),
+                        input(
+                            vec![
+                                class("next_page"),
                                 r#type("button"),
                                 disabled(self.page >= 2),
-                                value("Next Page"),
+                                value("Next Page >>"),
                                 on_click(|_| {
                                     trace!("Button is clicked");
                                     Msg::NextPage
@@ -89,7 +103,6 @@ impl Component<Msg> for App {
                             ],
                             vec![],
                         ),
-                        text(format!("Page: {}", self.page)),
                     ],
                 ),
                 div(vec![], vec![]).add_children(
@@ -114,19 +127,6 @@ impl Component<Msg> for App {
                             )
                         })
                         .collect(),
-                ),
-                input(
-                    vec![
-                        class("client"),
-                        r#type("button"),
-                        disabled(self.page <= 1),
-                        value("Prev Page"),
-                        on_click(|_| {
-                            trace!("Button is clicked");
-                            Msg::PrevPage
-                        }),
-                    ],
-                    vec![],
                 ),
             ],
         )
