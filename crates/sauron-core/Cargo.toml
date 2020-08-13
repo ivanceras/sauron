@@ -58,7 +58,7 @@ features = [
 [features]
 default = ["with-dom"]
 with-parser = [] #enumerates html tags and attributes
-measure = []
+with-measure = []
 no_request_animation_frame = [] # disable request animation frame
 with-dom = ["wasm-bindgen", "js-sys", "web-sys", "console_log"]
 
