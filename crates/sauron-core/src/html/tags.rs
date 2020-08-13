@@ -22,102 +22,12 @@ macro_rules! declare_tags {
     }
 }
 
-/// declare an element tag in a macro
-/// This will create a macro which creates an element with the tag name
-/// which matches the function name.
-/// Example:
-/// ```rust,ignore
-/// div!([], [])
-/// ```
-/// is a macro which creates a `div` element tag
-/// This macro is generated using
-/// ```rust,ignore
-/// declare_tags_macro!{div;}
-/// ```
-///
-/// Note: The $ dollar sign is explcitly pass to prevent
-/// rustc to attempt to expand the inner repetion of the macro
-macro_rules! declare_tags_macro {
-    (($d:tt) $($name: ident;)*) => {
-        $(
-
-            #[macro_export]
-            /// TODO:
-            macro_rules! $name {
-
-                // 000: no trailing commas
-                ( [$d($att: expr),*], [$d($children: expr),*] ) => {
-                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-                };
-
-                ///////////////////////////////////////////////////////////////
-                //
-                // The next code is just the same logic as the first, it is just
-                // here to deal with irregular comma placement
-                //
-                ///////////////////////////////////////////////////////////////
-
-                // 001: trailing commas in params only
-                ( [$d($att: expr),*], [$d($children: expr),*], ) => {
-                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-                };
-                // 010: trailing commas in children only
-                ( [$d($att: expr),*], [$d($children: expr,)*] ) => {
-                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-                };
-                // 011: trailing commas in children and params,
-                ( [$d($att: expr),*], [$d($children: expr,)*], ) => {
-                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-                };
-                // 100: trailing commas in attributes only
-                ( [$d($att: expr,)*], [$d($children: expr),*] ) => {
-                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-                };
-                // 101: trailing commas in attributes and params,
-                ( [$d($att: expr,)*], [$d($children: expr,)*], ) => {
-                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-                };
-                // 110: trailing commas in attributes and children
-                ( [$d($att: expr,)*], [$d($children: expr,)*] ) => {
-                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-                };
-                // 111: trailing commas in attributes, children, params
-                ( [$d($att: expr,)*], [$d($children: expr,)*], ) => {
-                    $crate::html::$name(vec![$d($att),*], vec![$d($children),*])
-                };
-
-                /////////////////////////////////////////////////
-                //
-                // Pass through the expression as it was with the old function call
-                //
-                /////////////////////////////////////////////////
-
-                // Pass through the div(vec![], vec![])
-                ( $att: expr, $children: expr ) => {
-                    $crate::html::$name( $att, $children)
-                };
-
-                // Pass through the div!(vec![], vec![],) with trailing comma
-                ( $att: expr, $children: expr, ) => {
-                    $crate::html::$name( $att, $children)
-                };
-            }
-        )*
-    };
-}
-
 macro_rules! declare_common_tags_and_macro {
     ($($(#[$attr:meta])* $name:ident;)*) => {
 
         pub(crate) mod commons {
             declare_tags! { $($name;)* }
 
-            pub(crate) mod macros{
-                // we passed `$` which is the $d:tt in declare_tags_macro
-                // passing the `$` token is needed so as to prevent the called macro from unrolling
-                // it.
-                declare_tags_macro! {($) $($name;)* }
-            }
         }
 
         #[cfg(feature = "with-parser")]
@@ -130,8 +40,6 @@ macro_rules! declare_tags_and_macro {
     ($($(#[$attr:meta])* $name:ident;)*) => {
 
         declare_tags! { $($name;)* }
-
-        declare_tags_macro! {($) $($name;)* }
 
     };
 }

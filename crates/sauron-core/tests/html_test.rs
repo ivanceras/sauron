@@ -1,52 +1,52 @@
 #![deny(warnings)]
-use sauron_core::{
-    diff, div,
-    html::{attributes::*, events::*, *},
-    input, Element, Event, Node, Patch,
-};
+use sauron_core::prelude::*;
 
 #[test]
 fn test_macros() {
-    let html: Node<()> = div!([class("class1"), class("class2")], []);
+    let html: Node<()> = div(vec![class("class1"), class("class2")], vec![]);
     let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
 }
 
 #[test]
 fn test_macros_trailing_commas() {
-    let html: Node<()> = div!([class("class1"), class("class2"),], [],);
+    let html: Node<()> = div(vec![class("class1"), class("class2")], vec![]);
     let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
 }
 
 #[test]
 fn test_macros_trailing_commas_in_attributes_only() {
-    let html: Node<()> = div!([class("class1"), class("class2")], []);
+    let html: Node<()> = div(vec![class("class1"), class("class2")], vec![]);
     let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
 }
 
 #[test]
 fn test_macros_trailing_commas_in_children_only() {
-    let html: Node<()> =
-        div!([class("class1"), class("class2")], [text("This is input"),]);
+    let html: Node<()> = div(
+        vec![class("class1"), class("class2")],
+        vec![text("This is input")],
+    );
     let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
 }
 
 #[test]
 fn test_macros_trailing_commas_in_children_and_params() {
-    let html: Node<()> =
-        div!([class("class1"), class("class2")], [text("This is input"),],);
+    let html: Node<()> = div(
+        vec![class("class1"), class("class2")],
+        vec![text("This is input")],
+    );
     let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
 }
 
 #[test]
 fn test_macros_trailing_commas_in_attribute_and_children() {
-    let html: Node<()> = div!(
-        [class("class1"), class("class2"),],
-        [text("This is input"),]
+    let html: Node<()> = div(
+        vec![class("class1"), class("class2")],
+        vec![text("This is input")],
     );
     let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);
@@ -54,9 +54,9 @@ fn test_macros_trailing_commas_in_attribute_and_children() {
 
 #[test]
 fn test_macros_with_lines() {
-    let html: Node<()> = div!(
-        [class("class1"), class("class2")],
-        [input!([], [text("This is an input")])]
+    let html: Node<()> = div(
+        vec![class("class1"), class("class2")],
+        vec![input(vec![], vec![text("This is an input")])],
     );
     let attrs = html.get_attributes().unwrap();
     println!("attrs: {:#?}", attrs);

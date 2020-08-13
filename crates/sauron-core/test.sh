@@ -1,7 +1,6 @@
 #!/bin/bash
 
-cargo test --all --no-default-features
-cargo test --all --all-features
+cargo test
 
 # Install wasm-pack if it isn't installed yet
 if ! type wasm-pack > /dev/null; then

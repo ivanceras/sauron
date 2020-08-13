@@ -68,26 +68,29 @@ impl Component<Msg> for App {
             .date
             .to_locale_string("en-GB", &JsValue::undefined())
             .into();
-        div!(
-            [class("some-class"), id("some-id"), attr("data-id", 1)],
-            [
-                div!([id("current-time")], [text!("Today is {}", date_str)],),
-                div!(
-                    [],
-                    [
-                        text!("Your name is: "),
-                        input!(
-                            [
+        div(
+            vec![class("some-class"), id("some-id"), attr("data-id", 1)],
+            vec![
+                div(
+                    vec![id("current-time")],
+                    vec![text!("Today is {}", date_str)],
+                ),
+                div(
+                    vec![],
+                    vec![
+                        text("Your name is: "),
+                        input(
+                            vec![
                                 r#type("text"),
                                 on_input(|event: InputEvent| {
                                     Msg::ChangeName(event.value.to_string())
                                 }),
                                 placeholder("John Smith"),
                             ],
-                            [],
+                            vec![],
                         ),
-                        button!(
-                            [on_click(|event: MouseEvent| {
+                        button(
+                            vec![on_click(|event: MouseEvent| {
                                 trace!(
                                     "Clicked at ({},{})",
                                     event.x(),
@@ -95,10 +98,10 @@ impl Component<Msg> for App {
                                 );
                                 Msg::Click
                             })],
-                            [text!("Click me!")],
+                            vec![text!("Click me!")],
                         ),
-                        button!(
-                            [on_dblclick(|event: MouseEvent| {
+                        button(
+                            vec![on_dblclick(|event: MouseEvent| {
                                 trace!(
                                     "Double clicked at ({},{})",
                                     event.x(),
@@ -106,13 +109,13 @@ impl Component<Msg> for App {
                                 );
                                 Msg::DoubleClick
                             })],
-                            [text!("DoubleClicks {}", self.double_clicks)],
+                            vec![text!("DoubleClicks {}", self.double_clicks)],
                         ),
                     ],
                 ),
-                p!(
-                    [],
-                    [
+                p(
+                    vec![],
+                    vec![
                         text!("Hello {}!", self.name),
                         if self.click_count > 0 {
                             text!(
@@ -121,18 +124,21 @@ impl Component<Msg> for App {
                                 if self.click_count > 1 { "s" } else { "" }
                             )
                         } else {
-                            span!([], [])
+                            span(vec![], vec![])
                         },
                     ],
                 ),
-                div!(
-                    [],
-                    [
-                        p!([], [text!("Tell us something about yourself:")],),
-                        div!(
-                            [],
-                            [textarea!(
-                                [
+                div(
+                    vec![],
+                    vec![
+                        p(
+                            vec![],
+                            vec![text!("Tell us something about yourself:")],
+                        ),
+                        div(
+                            vec![],
+                            vec![textarea(
+                                vec![
                                     rows(10),
                                     cols(80),
                                     on_input(|event: InputEvent| {
@@ -142,30 +148,30 @@ impl Component<Msg> for App {
                                     }),
                                     placeholder("I'm a..."),
                                 ],
-                                [],
+                                vec![],
                             )],
                         ),
-                        p!([], [text!("{}", self.biography)]),
+                        p(vec![], vec![text!("{}", self.biography)]),
                     ],
                 ),
-                div!(
-                    [],
-                    [
-                        text!("What are you thinking right now?"),
-                        input!(
-                            [
-                                r#type("text"),
+                div(
+                    vec![],
+                    vec![
+                        text("What are you thinking right now?"),
+                        input(
+                            vec![
+                                type_("text"),
                                 on_change(|event: InputEvent| {
                                     Msg::ChangeThought(event.value.to_string())
                                 }),
                                 placeholder("Elephants..."),
                             ],
-                            [],
+                            vec![],
                         ),
                         if let Some(thought) = &self.thought {
-                            text!("Hmmn {}... Interesting.", thought)
+                            text(format!("Hmmn {}... Interesting.", thought))
                         } else {
-                            span!([], [])
+                            span(vec![], vec![])
                         },
                     ],
                 ),

@@ -163,25 +163,26 @@
     unstable_features,
     unused_import_braces
 )]
+use cfg_if::cfg_if;
 
-pub use sauron_core::dom;
-pub use sauron_core::dom::*;
+cfg_if! {if #[cfg(feature = "with-dom")] {
+    pub use sauron_core::dom;
+    pub use sauron_core::dom::*;
+    pub use sauron_core::web_sys;
+    pub use sauron_core::wasm_bindgen;
+}}
 
 /// reexport prelude from sauron core
 pub mod prelude {
     pub use sauron_core::prelude::*;
+    #[cfg(feature = "with-node-macro")]
     pub use sauron_node_macro::node;
 }
 pub use sauron_core::{
     diff, html, Attribute, Callback, Element, Node, Patch, Render,
 };
 
-#[cfg(feature = "with-node-macro")]
-pub use sauron_node_macro::node;
-// reexport web_sys crate
-pub use sauron_core::web_sys;
-// reexport wasm_bindgen crate
-pub use sauron_core::wasm_bindgen;
-// reexport sauron_markdown
 #[cfg(feature = "with-markdown")]
 pub use sauron_markdown::markdown;
+#[cfg(feature = "with-node-macro")]
+pub use sauron_node_macro::node;

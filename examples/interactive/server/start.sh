@@ -1,0 +1,3 @@
+set -v
+
+cargo run

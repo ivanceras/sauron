@@ -18,15 +18,19 @@ impl App {
 
 impl Component<Msg> for App {
     fn view(&self) -> Node<Msg> {
-        main!(
-            [],
-            [
-                h1!([], [text("Minimal example")]),
-                div!(
-                    [class("some-class"), id("some-id"), attr("data-id", 1),],
-                    [
-                        input!(
-                            [
+        sauron::html::main(
+            vec![],
+            vec![
+                h1(vec![], vec![text("Minimal example")]),
+                div(
+                    vec![
+                        class("some-class"),
+                        id("some-id"),
+                        attr("data-id", 1),
+                    ],
+                    vec![
+                        input(
+                            vec![
                                 class("client"),
                                 type_("button"),
                                 value("Click me!"),
@@ -36,16 +40,22 @@ impl Component<Msg> for App {
                                     Msg::Click
                                 }),
                             ],
-                            []
+                            vec![],
                         ),
-                        div!(
-                            [],
-                            [text(format!("Clicked: {}", self.click_count))]
+                        div(
+                            vec![],
+                            vec![text(format!(
+                                "Clicked: {}",
+                                self.click_count
+                            ))],
                         ),
-                        input!([type_("text"), value(self.click_count)], [])
-                    ]
-                )
-            ]
+                        input(
+                            vec![type_("text"), value(self.click_count)],
+                            vec![],
+                        ),
+                    ],
+                ),
+            ],
         )
     }
 
