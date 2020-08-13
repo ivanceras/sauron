@@ -161,6 +161,10 @@ mod node;
 /// ```
 ///
 /// [Node]: https://docs.rs/sauron/0/sauron/type.Node.html
+///
+/// Note: `node!` macro is used since it is not an html tag
+/// while most other framework uses `html!` macro, this prevents
+/// the library to have collision with the `html` tag, when used as tag macro
 #[proc_macro]
 pub fn node(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let node = syn::parse_macro_input!(input as node::Node);

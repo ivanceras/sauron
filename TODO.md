@@ -5,7 +5,7 @@
  - [X] Rework the dumb patch taking the advantage of feature gating the dom capability.
  - [ ] Add documentation to functions
  - [ ] Loosen the lifetime requirement of the `Fn` inside `Callback` from `'static` to a generic one eg: `'c`
- - [ ] Deprecate the tag macro since it complicates the conflict in reexporting the functions
+ - [X] Deprecate the tag macro since it complicates the conflict in reexporting the functions
      - ie: `style!` as a tag, `style!` macro for attributes, `style` as attribute call.
  - [ ] Change the README example to use the node macro syntax
      - rename the old `minimal` to `minimal-alt` and use the `node-macro-syntax` in `minimal` example
