@@ -23,3 +23,6 @@ serde_json = "1.0"
 [dependencies.web-sys]
 version = "0.3"
 features = ["Storage"]
+
+[features]
+with-measure = ["sauron/with-measure"]

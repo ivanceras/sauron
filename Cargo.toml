@@ -16,12 +16,13 @@ maintenance = { status = "actively-developed" }
 [dependencies]
 sauron-core = { version = "0.29.0", path = "crates/sauron-core", default-features = false }
 sauron-node-macro = { version = "0.29.0", path = "crates/sauron-node-macro", optional = true }
-sauron-markdown = { version = "0.1", path = "crates/sauron-md", optional = true }
+sauron-markdown = { version = "0.1", path = "crates/sauron-markdown", optional = true }
 cfg-if = "0.1"
 
 [features]
 default = ["with-dom", "with-node-macro"]
 with-dom = ["sauron-core/with-dom"]
+with-measure = ["sauron-core/with-measure"]
 with-node-macro = ["sauron-node-macro"]
 with-markdown = ["sauron-markdown"]
 
@@ -35,7 +36,7 @@ log = "0.4"
 [workspace]
 members = [
     "crates/sauron-core",
-    "crates/sauron-md",
+    "crates/sauron-markdown",
     "crates/sauron-parse",
     "crates/sauron-node-macro",
     "examples/minimal",
