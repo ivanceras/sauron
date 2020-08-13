@@ -121,8 +121,8 @@ and the build script for the details.
 #### Demo examples
 - [todomvc](https://ivanceras.github.io/todomvc/)
 - [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet CSV data viewer
-- [svg_clock](https://ivanceras.github.io/svg_clock/) - A clock drawn using SVG and window tick event.
-- [svg_graph](https://ivanceras.github.io/svg_graph/) - A simple graph using SVG
+- [svg-clock](https://ivanceras.github.io/svg-clock/) - A clock drawn using SVG and window tick event.
+- [svg-graph](https://ivanceras.github.io/svg-graph/) - A simple graph using SVG
 - [tinki wiki](https://github.com/ivanceras/tinki) - My personal wiki, powering my [github
 pages](https://ivanceras.github.io)
 
