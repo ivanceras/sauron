@@ -10,12 +10,18 @@
  - [ ] Change the README example to use the node macro syntax
      - rename the old `minimal` to `minimal-alt` and use the `node-macro-syntax` in `minimal` example
  - [X] Move `sauron-syntax` into `html2sauron` project
+ - [ ] Expose Cmd,Component outside of `with-dom` feature gate
+     - This would allow a total isomorphic app reusing the components
+     - [ ] Make an equivalent for Program(client-side updater) for use in server-side
+        - ie: ServerRender, where Msg could be passed as a data to hydrate the view (template) before sending to the client
 
 
 ## Features
-- [ ] Storage service (May not be needed since the user can directly use web-sys)
+- [X] Storage service (May not be needed since the user can directly use web-sys)
+    - [X] using wasm-bindgen directly will remove the need for Storage service wrapper
 - [X] Fetch service
-- [ ] Url change service
+- [X] Url change service
+    - using wasm-bindgen directly eliminates the need for Url change service wrapper
 - [ ] re-think about the `sauron-core` features:
     - [ ] `with-dom` when used in client-side, default
     - [ ] `with-ssr` when used in server-side rendering, mutually exlusive to `with-dom`
@@ -25,8 +31,9 @@
     - [X] expose the `sauron-md` as `sauron::markdown` module, behind a feature flag
 - [ ] Add example using markdown
 
+
 ## Performance
 - [ ] Fix the reported issues with benchmarks
 - [ ] Create a new benchmark for the js-comprehensive-benchmark suite
     - [link](https://github.com/krausest/js-framework-benchmark)
-
+- [ ] Use Weak pointer for program instead of Rc where strong reference is not needed.
