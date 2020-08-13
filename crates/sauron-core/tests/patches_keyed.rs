@@ -34,7 +34,7 @@ fn node_mounted_properly() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
+    let dom_updater = DomUpdater::new_append_to_mount(
         &simple_program,
         old,
         &sauron_core::body(),
@@ -83,6 +83,7 @@ fn node_patched_properly() {
     );
 
     let patches = diff(&old, &update1);
+    assert_eq!(patches, vec![Patch::RemoveChildren(&"section", 1, vec![1])]);
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -156,6 +157,8 @@ fn node_patched_properly_remove_from_start() {
     );
 
     let patches = diff(&old, &update1);
+
+    assert_eq!(patches, vec![Patch::RemoveChildren(&"section", 1, vec![0])]);
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -231,6 +234,14 @@ fn node_patched_properly_text_changed() {
     );
 
     let patches = diff(&old, &update1);
+
+    assert_eq!(
+        patches,
+        vec![
+            Patch::ChangeText(7, "item3 with changes"),
+            Patch::RemoveChildren(&"section", 1, vec![0])
+        ]
+    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -313,6 +324,14 @@ fn mixed_keyed_and_non_keyed_elements() {
 
     let patches = diff(&old, &update1);
     debug!("patches: {:#?}", patches);
+    assert_eq!(
+        patches,
+        vec![
+            Patch::ChangeText(7, "item3 with changes"),
+            Patch::RemoveChildren(&"section", 1, vec![0]),
+            Patch::ChangeText(9, "2 items left")
+        ]
+    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
