@@ -40,14 +40,14 @@ members = [
     "crates/sauron-node-macro",
     "examples/minimal",
     "examples/minimal-macro-syntax",
-    "examples/fetch_data",
+    "examples/fetch-data",
     "examples/interactive/client",
     "examples/interactive/server",
     "examples/todomvc",
     "examples/todomvc-macro-syntax",
-    "examples/window_tab_rows",
-    "examples/svg_clock",
-    "examples/svg_graph",
+    "examples/window-tab-rows",
+    "examples/svg-clock",
+    "examples/svg-graph",
     "examples/data-viewer",
 ]
 

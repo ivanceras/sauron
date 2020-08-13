@@ -1,5 +1,6 @@
+
 [package]
-name = "window_tab_rows"
+name = "svg-graph"
 version = "0.1.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
@@ -12,7 +13,7 @@ crate-type = ["cdylib"]
 sauron = { path = "../../" }
 wasm-bindgen = "0.2"
 console_error_panic_hook = { version = "0.1"}
-wee_alloc = { version = "0.4", optional = true }
+wee_alloc = { version = "0.4.3", optional = true }
 log = "0.4"
 console_log = "0.1"
 

@@ -106,7 +106,7 @@ impl Component<Msg> for Clock {
                 ),
                 a(
                     vec![href(
-                        "https://github.com/ivanceras/sauron/tree/master/examples/svg_clock"
+                        "https://github.com/ivanceras/sauron/tree/master/examples/svg-clock"
                     )],
                     vec![text("code")]
                 ),

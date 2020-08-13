@@ -291,7 +291,7 @@ impl Component<Msg> for App {
                 ),
                 svg::tags::a(
                     vec![href(
-                        "https://github.com/ivanceras/sauron/blob/master/examples/svg_graph/src/lib.rs"
+                        "https://github.com/ivanceras/sauron/blob/master/examples/svg-graph/src/lib.rs"
                     )],
                     vec![svg::tags::text(
                         vec![x(400), y(480), style("fill","blue")],
