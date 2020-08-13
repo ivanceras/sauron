@@ -12,7 +12,7 @@ fi
 
 wasm-pack build --target no-modules --release -- --features "wee_alloc"
 
-dest_dir="../../../ivanceras.github.io/svg_clock"
+dest_dir="../../../ivanceras.github.io/svg-clock"
 
 mkdir -p $dest_dir;
 
