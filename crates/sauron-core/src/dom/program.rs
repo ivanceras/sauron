@@ -1,6 +1,6 @@
 use crate::{dom::dom_updater::DomUpdater, Cmd, Component, Dispatch};
 use std::{cell::RefCell, rc::Rc};
-#[cfg(not(feature = "no_request_animation_frame"))]
+#[cfg(feature = "with-request-animation-frame")]
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;
 
@@ -124,7 +124,7 @@ where
     MSG: 'static,
     APP: Component<MSG> + 'static,
 {
-    #[cfg(not(feature = "no_request_animation_frame"))]
+    #[cfg(feature = "with-request-animation-frame")]
     fn dispatch(&self, msg: MSG) {
         let program_clone = self.clone();
         let closure_raf: Closure<dyn FnMut() + 'static> =
@@ -135,7 +135,7 @@ where
         closure_raf.forget();
     }
 
-    #[cfg(feature = "no_request_animation_frame")]
+    #[cfg(not(feature = "with-request-animation-frame"))]
     fn dispatch(&self, msg: MSG) {
         self.dispatch_inner(msg)
     }

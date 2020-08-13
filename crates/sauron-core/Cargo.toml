@@ -56,10 +56,10 @@ features = [
 
 
 [features]
-default = ["with-dom"]
+default = ["with-dom", "with-request-animation-frame"]
 with-parser = [] #enumerates html tags and attributes
 with-measure = []
-no_request_animation_frame = [] # disable request animation frame
+with-request-animation-frame = [] # enable the use of request-animation-frame in calling dispatch
 with-dom = ["wasm-bindgen", "js-sys", "web-sys", "console_log"]
 
 [dev-dependencies]

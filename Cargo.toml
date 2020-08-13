@@ -20,8 +20,9 @@ sauron-markdown = { version = "0.1", path = "crates/sauron-markdown", optional =
 cfg-if = "0.1"
 
 [features]
-default = ["with-dom", "with-node-macro"]
+default = ["with-dom", "with-node-macro", "with-request-animation-frame"]
 with-dom = ["sauron-core/with-dom"]
+with-request-animation-frame = ["sauron-core/with-request-animation-frame"]
 with-measure = ["sauron-core/with-measure"]
 with-node-macro = ["sauron-node-macro"]
 with-markdown = ["sauron-markdown"]

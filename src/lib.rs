@@ -170,6 +170,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use sauron_core::dom::*;
     pub use sauron_core::web_sys;
     pub use sauron_core::wasm_bindgen;
+    pub use sauron_core::{Component, Cmd, Program};
 }}
 
 /// reexport prelude from sauron core
@@ -179,7 +180,7 @@ pub mod prelude {
     pub use sauron_node_macro::node;
 }
 pub use sauron_core::{
-    diff, html, Attribute, Callback, Component, Element, Node, Patch, Render,
+    diff, html, Attribute, Callback, Element, Node, Patch, Render,
 };
 
 #[cfg(feature = "with-markdown")]
