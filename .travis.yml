@@ -19,6 +19,7 @@ intstall:
     # Install geckodriver
     - curl --retry 5 -LO https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
     - tar xf geckodriver-v0.24.0-linux64.tar.gz
+    - apt install -y firefox-geckodriver
     - cargo install wasm-pack
 
 script:
