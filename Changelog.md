@@ -1,6 +1,10 @@
 # Changelog
 
 # Unreleased
+- refactor `Cmd` to not use the `Callback`.
+    - remove the need for `MSG` and `PhantomData` in Cmd.
+- change the `no_request_animation_frame`feature flag to `with-request-animation-frame` to be additive and is enabled by default
+- change the `measure` feature flag to `with-measure`.
 - Introduce a `node!` macro syntax which allows users to write view code which resembles html syntax.
 - Restructure the project to have the code code of sauron in a crate `sauron-core`.
     This paves a way to introduce modules which depends on the core functionality of sauron and then will be re-exported as part of the sauron package.

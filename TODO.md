@@ -14,6 +14,7 @@
      - This would allow a total isomorphic app reusing the components
      - [ ] Make an equivalent for Program(client-side updater) for use in server-side
         - ie: ServerRender, where Msg could be passed as a data to hydrate the view (template) before sending to the client
+ - [ ] Fix the render function where attributes of the same name not merged
 
 
 ## Features

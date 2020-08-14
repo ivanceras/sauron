@@ -44,6 +44,7 @@ impl<MSG> Render for Element<MSG> {
     ) -> fmt::Result {
         write!(buffer, "<{}", self.tag())?;
 
+        // TODO: merge attributes with the same name first
         for attr in self.get_attributes() {
             write!(buffer, " ")?;
             attr.render_with_indent(buffer, indent)?;
