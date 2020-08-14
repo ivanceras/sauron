@@ -29,4 +29,4 @@ pub use util::{
 pub use window::Window;
 
 /// alias Cmd to use Program as the APP
-pub type Cmd<APP, MSG> = cmd::Cmd<Program<APP, MSG>, MSG>;
+pub type Cmd<APP, MSG> = cmd::Cmd<Program<APP, MSG>>;

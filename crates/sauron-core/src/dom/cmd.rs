@@ -1,7 +1,6 @@
 //! provides functionalities for commands to be executed by the system, such as
 //! when the application starts or after the application updates.
 //!
-use std::marker::PhantomData;
 use std::rc::Rc;
 
 /// Cmd is a command to be executed by the system.
@@ -10,11 +9,10 @@ use std::rc::Rc;
 /// Cmd required a DSP object which is the Program as an argument
 /// The emit function is called with the program argument.
 /// The callback is supplied with the program an is then executed/emitted.
-pub struct Cmd<DSP, MSG>(pub Vec<Rc<dyn Fn(DSP)>>, PhantomData<MSG>);
+pub struct Cmd<DSP>(pub Vec<Rc<dyn Fn(DSP)>>);
 
-impl<DSP, MSG> Cmd<DSP, MSG>
+impl<DSP> Cmd<DSP>
 where
-    MSG: 'static,
     DSP: Clone + 'static,
 {
     /// creates a new Cmd from a function
@@ -22,7 +20,7 @@ where
     where
         F: Fn(DSP) + 'static,
     {
-        Cmd(vec![Rc::new(f)], PhantomData)
+        Cmd(vec![Rc::new(f)])
     }
 
     /// creates a unified Cmd which batches all the other Cmds in one.
@@ -31,12 +29,12 @@ where
         for cmd in cmds {
             callbacks.extend(cmd.0);
         }
-        Cmd(callbacks, PhantomData)
+        Cmd(callbacks)
     }
 
     /// A Cmd with no callback, similar to NoOp.
     pub fn none() -> Self {
-        Cmd(vec![], PhantomData)
+        Cmd(vec![])
     }
 
     /// Executes the Cmd
