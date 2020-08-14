@@ -18,6 +18,7 @@ intstall:
     - curl --retry 5 -LO https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
     - unzip chromedriver_linux64.zip
     # Install geckodriver
+    - sudo apt install -y firefox-geckodriver
     - curl --retry 5 -LO https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
     - tar xf geckodriver-v0.24.0-linux64.tar.gz
     - cargo install wasm-pack
