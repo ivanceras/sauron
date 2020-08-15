@@ -45,82 +45,6 @@ macro_rules! declare_svg_tags{
 
 }
 
-/// declare an svg tags in a macro
-///
-/// Note: The $ dollar sign is explcitly pass to prevent
-/// rustc to attempt to expand the inner repetion of the macro
-macro_rules! declare_svg_tags_macro {
-    (($d:tt) $($name: ident;)*) => {
-        $(
-
-        /// name is the supplied ident in `declare_tags_macro`
-        /// This creates an alternative macro call to the tag function
-        /// This has a more cleaner syntax since it removes the need for using vec![]
-        /// for both the attributes and the children
-        #[macro_export]
-        macro_rules! $name {
-
-            // 000: no trailing commas
-            ( [$d($att: expr),*], [$d($children: expr),*] ) => {
-                $crate::svg::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-
-            ///////////////////////////////////////////////////////////////
-            //
-            // The next code is just the same logic as the first, it is just
-            // here to deal with irregular comma placement
-            //
-            ///////////////////////////////////////////////////////////////
-
-            // 001: trailing commas in params only
-            ( [$d($att: expr),*], [$d($children: expr),*], ) => {
-                $crate::svg::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 010: trailing commas in children only
-            ( [$d($att: expr),*], [$d($children: expr,)*] ) => {
-                $crate::svg::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 011: trailing commas in children and params,
-            ( [$d($att: expr),*], [$d($children: expr,)*], ) => {
-                $crate::svg::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 100: trailing commas in attributes only
-            ( [$d($att: expr,)*], [$d($children: expr),*] ) => {
-                $crate::svg::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 101: trailing commas in attributes and params,
-            ( [$d($att: expr,)*], [$d($children: expr,)*], ) => {
-                $crate::svg::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 110: trailing commas in attributes and children
-            ( [$d($att: expr,)*], [$d($children: expr,)*] ) => {
-                $crate::svg::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-            // 111: trailing commas in attributes, children, params
-            ( [$d($att: expr,)*], [$d($children: expr,)*], ) => {
-                $crate::svg::$name(vec![$d($att),*], vec![$d($children),*])
-            };
-
-            /////////////////////////////////////////////////
-            //
-            // Pass through the expression as it was with the old function call
-            //
-            /////////////////////////////////////////////////
-
-            // Pass through the div(vec![], vec![])
-            ( $att: expr, $children: expr ) => {
-                $crate::svg::$name( $att, $children)
-            };
-
-            // Pass through the div!(vec![], vec![],) with trailing comma
-            ( $att: expr, $children: expr, ) => {
-                $crate::svg::$name( $att, $children)
-            };
-        }
-        )*
-    };
-}
-
 /// declare common svg tags that is not in conflict with the html tags
 /// at the same time this also fills the SVG_TAGS const with all the svg tags
 macro_rules! declare_common_svg_tags_and_macro {
@@ -128,10 +52,6 @@ macro_rules! declare_common_svg_tags_and_macro {
 
         pub(crate) mod commons {
             declare_svg_tags! { $($name;)* }
-
-            pub(crate) mod macros{
-                declare_svg_tags_macro! {($) $($name;)* }
-            }
         }
 
 
