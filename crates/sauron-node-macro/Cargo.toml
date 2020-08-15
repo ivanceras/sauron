@@ -1,6 +1,6 @@
 [package]
 name = "sauron-node-macro"
-version = "0.29.0"
+version = "0.30.0"
 authors = ["John-John Tedro <udoprog@tedro.se>"]
 license = "MIT"
 description = "An html library for building client side webapps"
