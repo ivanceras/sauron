@@ -105,7 +105,7 @@
 //! sauron = "0.29"
 //! console_error_panic_hook = { version = "0.1"}
 //! log = "0.4"
-//! console_log = "0.1"
+//! console_log = {version ="0.2", features = ["color"]}
 //! ```
 //!
 //!

@@ -29,7 +29,7 @@ with-markdown = ["sauron-markdown"]
 
 [dev-dependencies]
 console_error_panic_hook = "0.1"
-console_log = "0.1"
+console_log = {version ="0.2", features = ["color"]}
 log = "0.4"
 
 
@@ -55,5 +55,5 @@ members = [
 
 
 [patch.crates-io]
-mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
+#mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
 #mt-dom = { path = "../mt-dom" }

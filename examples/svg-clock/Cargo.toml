@@ -14,7 +14,7 @@ js-sys = "0.3"
 sauron = { path = "../../" }
 lazy_static = "1.0"
 log = "0.4"
-console_log = "0.1"
+console_log = "0.2"
 
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. It is slower than the default

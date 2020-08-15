@@ -21,8 +21,8 @@ log = "0.4"
 cfg-if = "0.1"
 thiserror = "1.0"
 doc-comment = "0.3"
-mt-dom = { version = "0.3"}
-console_log = { version = "0.1", optional = true }
+mt-dom = { version = "0.4"}
+console_log = { version = "0.2", optional = true, features = ["color"] }
 
 [dependencies.web-sys]
 version = "0.3"
@@ -65,7 +65,7 @@ with-dom = ["wasm-bindgen", "js-sys", "web-sys", "console_log"]
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
 console_error_panic_hook = "0.1"
-console_log = "0.1"
+console_log = "0.2"
 
 [dev-dependencies.web-sys]
 version = "0.3"
