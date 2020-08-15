@@ -17,8 +17,11 @@
 
 #### Example
 ```rust
-use log::*;
+use log::trace;
+use sauron::html::attributes::attr;
+use sauron::html::text;
 use sauron::prelude::*;
+use sauron::{Cmd, Component, Node, Program};
 
 #[derive(Debug)]
 pub enum Msg {
