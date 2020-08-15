@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+## 0.30.0
 - refactor `Cmd` to not use the `Callback`.
     - remove the need for `MSG` and `PhantomData` in Cmd.
 - change the `no_request_animation_frame`feature flag to `with-request-animation-frame` to be additive and is enabled by default
@@ -12,7 +12,7 @@
 - Reexport `sauron_markdown` in `sauron`. can be used as `sauron::markdown`
 - dom internal: Remove only the event listener which match the event_name from the ActiveClosure
 
-# 0.29.0
+## 0.29.0
 - Fix the todomvc with a new rewrite and storage support
 - Update the todomvc app using keyed elements
 - Fix set_checked when setting attributes for checkboxes, radio buttons
@@ -21,36 +21,36 @@
 - TruncateChildren is replaced with RemoveChildren in mt-dom, this provide a more flexible patches
 - Add an example of server-side rendering using warp
 
-# 0.28.2
+## 0.28.2
 - merge attributes of the same name first, before applying the attributes to the DOM element
 
-# 0.28.1
+## 0.28.1
 - Adjusted for changes in mt-dom with performance improvements
 - remove merge_attribute functionality in Element.
 - MSG doesn't need to be clone, just use get_attributes instead of merge_attributes
 - A lot of performance improvement due to changes in mt-dom crate
 
-# 0.28.0
+## 0.28.0
 - adjust sauron for changes in mt-dom where there are multiple values in one attribute
 
-# 0.27.0
+## 0.27.0
 - change syntax of attribute events which uses `_` after the `on` ie: `on_click` instead of `onclick`
 - Make a special case for style than just a plain attribute
 - Use `mt-dom` crate as replacement to sauron_vdom. `mt-dom` is a very generic virtual-dom crate which doesn't put too much constraints
      on the types of the member fields
 
-# 0.26.0
+## 0.26.0
 - Change `to_pretty_string` to `render` with focus on writing to the common buffer.
     - This is a performance improvement
 
-# 0.25.0
+## 0.25.0
 - Add a function `Node.text` to return the string of the text element
 - Add a function `Node.eldest_child_text` to return the string of the only child of this element
 - Add a function `Node.get_children` to return children of a node
 - Add a utility function `mousemove` and `release` for MouseEvent
 - Remove the call to `stop_propagation` in the add_event_listener processor, since this is handled by the event_mapper.
 
-# 0.24.0
+## 0.24.0
 - **Breaking** Add the tag in patches, to give clue to backend on how to handle special tags
 	- This is used in gtk, since widgets in gtk doesn't follow a proper tree nesting as with html
 - **Breaking** Detach `markdown` module into a high-level crate (sauron-md)
@@ -59,19 +59,19 @@
 - Add functionality for inner_html which optimizes the performance of client side apps
 - Add a functionality to hook url hashchange event in the browser
 
-# 0.23.0
+## 0.23.0
 - move Cmd and Dispatch from sauron_vdom to sauron
 - Simplify the use Dispatch without the need for Rc
 
 
-# 0.22.2
+## 0.22.2
 - Export `sauron_vdom::diff::diff_with_key`
 - Add function `take_callback` to consume attribute and get the callback
 
-# 0.22.1
+## 0.22.1
 - Only expose html::events in prelude when 'with-dom' feature is enabled
 
-# 0.22.0
+## 0.22.0
 - Make use of prelude to simpilfy imports in sauron
 - Add feature to parse html and convert it into sauron view syntax code.
 - Add link to [html2sauron](https://ivanceras.github.io/html2sauron/) tool in the docs
@@ -80,12 +80,12 @@
 - Improve the svg_clock example to make the subsecond update to the subsecond by ticking at every 20ms
 - Add cargo deny configuration
 
-# 0.21.1
+## 0.21.1
  - Add a help function classes which joins an array of string into a space class
  - Use criterion in benchmarks
  - Add data-viewer as an example
 
-# 0.21.0
+## 0.21.0
  - add Window as a global object to let components easily attached events to the window
  - add style! macro for a nicer html style attribute syntax
  - **Breaking Change** remove tag style from the macro export, as it conflicts with the style attribute macro, which is more common
@@ -93,11 +93,11 @@
  - implement creating an attribute that has namespace, such as xlink:href in embededd svg image
  - fix error in svg_graph example
 
-# 0.20.3
+## 0.20.3
  - expose `onclick_with`, `onclick_stop_propagation`, `onclick_prevent_default`, `onclick_prevent_all` which allows developers
    control on the behavior of the event of a DOM element.
 
-# 0.20.2
+## 0.20.2
  - Enable doubleclick event
  - improve and modularize shell scripts
  - Fix errors in the todomvc benchmark
@@ -105,10 +105,10 @@
  - Enable calling to event.prevent_default() to allow both oninput and keypress event play nicely together, as used in the todomvc example
  - Add svg_graph example
 
-# 0.20.1
+## 0.20.1
  - bumped up to see logo in docs.rs
 
-# 0.20.0
+## 0.20.0
  - Add macro based syntax to provide a cleaner syntax in writing the view:
     ## Old syntax:
     ```rust
@@ -173,21 +173,21 @@
  - Constraint the generic Type: `F` to be 'static in Callback, instead of the return generic type
  - Fix attributes helper functions: (`styles`, `styles_flag`, `classes`, `classes_flag`, `attrs_flag`) should not require MSG to be clone
 
-# 0.11.1
+## 0.11.1
  - attributes helper functions such as (styles, classes, etc) should not require MSG to be Clone.
 
-# 0.11.0
+## 0.11.0
  - Add underscores on html tags and attribtues(`type`,`for`, `async`, `loop`) that are also special keywords in rust.
     Now, you can use `type_("text")` as an alternative to `r#type("text")`
  - rename as_element -> as_element_mut,  children -> add_children
  - Add `dumb_patch` for patching the dom without involving the callbacks.
  - Expose to `html::tag` module for the uncommon html tags which conflicts with common html attributes such as `style`, `title`.
 
-# 0.10.1
+## 0.10.1
  - implemented removing the associated closures of elements that has been removed from the DOM including the removed element descendants.
 
 
-# 0.10.0
+## 0.10.0
  - performance improvement on node tree building
  - using vec![] as the argumemts for attributes and children, this changes the syntax a lot
     - The original array based syntax is still preserved by using the `html_array` module. This however has performance penalty
@@ -196,12 +196,12 @@
  - add units utility functions
  - Remove requirement for Msg to have any Clone,Debug,PartialEq
 
-# 0.7.1
+## 0.7.1
  - Add initial implementation for markdown handling
  - Add history function get history object
  - events now prevents defaults and stop propagation
 
-# 0.7.0
+## 0.7.0
 - Added an initial implementation for Http for fetching data which returns a Cmd
 - Added Examples usage of Http fetch
 - Added Browser for listening to browser resize event which returns a Cmd
@@ -210,7 +210,7 @@
 - Change the update method in Component to return Cmd<Self,Msg> in update method
 
 
-# 0.6.0
+## 0.6.0
 - Refactor sauron_vdom::Event to cater general usecase for mouse, keyboard and input event
 - Events such as onclick, onkeypress, and oninput are now supplied with: MouseEvent, KeyEvent, and InputEvent
     accordingly, therefore no additional matching/unwrapping code is neccessary on the users code.
@@ -236,7 +236,7 @@
      since svg elements needs to be created with svg namespace in the DOM.
 
 
-# 0.5.0
+## 0.5.0
 - Use &'static str type for Node's attribute name, event name and namespace.
 - Add helper function `styles` which allows users to write style properties easily.
 - Add helper function `styles_flag` which allows users to write even more granular style properties.
@@ -246,7 +246,7 @@
 - Add `map` functionality which lets user embed subcomponents view into the parent component by mapping the callbacks
     with a wrapped MSG variant from the parent.
 
-# 0.4.0
+## 0.4.0
 - Added the complete list of svg/html attributes.
 - Separate the uncommon html tags into html_extract module. These includes `style`, which conflicts with the
 commonly used `style` attributes.

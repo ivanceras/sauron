@@ -106,7 +106,7 @@ crate-type = ["cdylib"]
 
 
 [dependencies]
-sauron = "0.29"
+sauron = "0.30"
 console_error_panic_hook = { version = "0.1"}
 log = "0.4"
 console_log = {version ="0.2", features = ["color"]}
