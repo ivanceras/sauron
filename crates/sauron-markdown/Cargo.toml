@@ -6,7 +6,7 @@ edition = "2018"
 license = "MIT"
 description = "A library for parsing markdown into sauron node"
 repository = "https://github.com/ivanceras/sauron"
-documentation = "https://docs.rs/sauron-md"
+documentation = "https://docs.rs/sauron-markdown"
 keywords = ["md", "sauron", "node"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
