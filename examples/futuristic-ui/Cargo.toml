@@ -1,0 +1,15 @@
+[package]
+name = "futuristic-ui"
+version = "0.1.0"
+authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+sauron = { path = "../../"}
+console_error_panic_hook = "0.1"
+log = "0.4"
+console_log = { version = "0.2", features = ["color"] }
+web-sys = { version = "0.3", features = ["HtmlAudioElement"] }

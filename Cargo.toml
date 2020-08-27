@@ -43,6 +43,7 @@ members = [
     "examples/minimal",
     "examples/minimal-macro-syntax",
     "examples/fetch-data",
+    "examples/futuristic-ui",
     "examples/interactive/client",
     "examples/interactive/server",
     "examples/todomvc",
