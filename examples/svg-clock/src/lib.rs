@@ -115,9 +115,9 @@ impl Component<Msg> for Clock {
                      style("align-items", "center"),
                      style("flex-direction", "column"),
                     ],
-                    vec![svg!(
-                        [width(400), height(400), viewBox([0, 0, 200, 200])],
-                        [
+                    vec![svg(
+                        vec![width(400), height(400), viewBox([0, 0, 200, 200])],
+                        vec![
                             circle,
                             hand(subsecond_rotate, "#e2e8f0", 10, 90),
                             hand(hour_rotate, "#2d3748", 4, 50),
