@@ -14,8 +14,13 @@ where
         Cmd::none()
     }
 
+    /// optionally a component can specify it's own css style
+    fn style(&self) -> Vec<String> {
+        vec![]
+    }
+
     /// Called each time an action is triggered from the view
-    fn update(&mut self, msg: MSG) -> Cmd<Self, MSG>
+    fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>
     where
         Self: Sized + 'static;
 

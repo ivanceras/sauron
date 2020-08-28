@@ -47,6 +47,9 @@ where
         };
         // call the init of the component
         let cmds: Cmd<APP, MSG> = program.app.borrow().init();
+        for style in program.app.borrow().style() {
+            Self::inject_style(&style);
+        }
         // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
         // listening to events (resize, hashchange)
         cmds.emit(&program);
@@ -114,6 +117,20 @@ where
             let t4 = crate::now();
             log::trace!("dom update took: {}ms", t4 - t3);
         };
+    }
+
+    fn inject_style(style: &str) {
+        log::trace!("injecting style: {}", style);
+        use wasm_bindgen::JsCast;
+
+        let document = crate::document();
+        let html_style = document
+            .create_element("style")
+            .expect("must be able to create style element");
+        let html_style: web_sys::Node = html_style.unchecked_into();
+        html_style.set_text_content(Some(style));
+        let head = document.head().expect("must have a head");
+        head.append_child(&html_style).expect("must append style");
     }
 }
 

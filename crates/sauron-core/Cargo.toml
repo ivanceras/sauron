@@ -39,6 +39,8 @@ features = [
     "HashChangeEvent",
     "InputEvent",
     "HtmlCollection",
+    "HtmlElement",
+    "HtmlHeadElement",
     "HtmlInputElement",
     "HtmlTextAreaElement",
     "MouseEvent",
