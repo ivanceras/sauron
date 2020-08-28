@@ -1,4 +1,5 @@
-#![deny(warnings)]
+//#![deny(warnings)]
+use frame::Frame;
 use sauron::html::attributes::{class, id, style};
 use sauron::html::events::on_click;
 use sauron::html::{div, text};
@@ -6,30 +7,46 @@ use sauron::prelude::*;
 use sauron::{Cmd, Component, Node, Program};
 use web_sys::HtmlAudioElement;
 
+mod frame;
+
 pub enum Msg {
     ToggleShow,
+    FrameMsg(frame::Msg),
 }
 
 pub struct App {
     show: bool,
+    frame: Frame,
 }
 
 impl App {
     pub fn new() -> Self {
-        App { show: true }
-    }
-
-    fn play_sound(&self) {
-        let audio = HtmlAudioElement::new_with_src("/sounds/deploy.mp3")
-            .expect("must not fail");
-        let _ = audio.play().expect("must play");
+        App {
+            show: true,
+            frame: Frame::new(),
+        }
     }
 }
 
 impl Component<Msg> for App {
     fn init(&self) -> Cmd<Self, Msg> {
-        self.play_sound();
         Cmd::none()
+    }
+
+    fn style(&self) -> Vec<String> {
+        vec![r#"
+        .container {
+            color: #26dafd;
+            font-size: 21px;
+            line-height: 1.5;
+            font-family: "Titillium Web", "sans-serif";
+            margin: 100px;
+        }
+        "#
+        .to_string()]
+        .into_iter()
+        .chain(self.frame.style().into_iter())
+        .collect()
     }
 
     fn view(&self) -> Node<Msg> {
@@ -39,20 +56,16 @@ impl Component<Msg> for App {
                 div(
                     vec![class("container")],
                     vec![
-                        div(vec![classes_flag([("frame",true), ("hide", !self.show)]),id("frame1"),],vec![
-                            div(vec![class("border border-anim border-left")],vec![]),
-                            div(vec![class("border border-anim border-right")],vec![]),
-                            div(vec![class("border border-anim border-top")],vec![]),
-                            div(vec![class("border border-anim border-bottom")],vec![]),
-                            div(vec![class("corner corner-anim corner__top-left")],vec![]),
-                            div(vec![class("corner corner-anim corner__bottom-left")],vec![]),
-                            div(vec![class("corner corner-anim corner__top-right")],vec![]),
-                            div(vec![class("corner corner-anim corner__bottom-right")],vec![]),
-                            div(vec![class("frame-text frame-text-anim")],vec![
-                                div(vec![styles([("padding", "20px 40px"), ("font-size", "32px")])],vec![text("FutureosTech")]),
-                            ]),
-                        ]),
-                        button(vec![on_click(|_|Msg::ToggleShow),style("margin-top","20px")],vec![text("Toggle")]),
+                        self.frame
+                            .view()
+                            .map_msg(|frame_msg| Msg::FrameMsg(frame_msg)),
+                        button(
+                            vec![
+                                on_click(|_| Msg::ToggleShow),
+                                style("margin-top", "20px"),
+                            ],
+                            vec![text("Toggle")],
+                        ),
                     ],
                 ),
                 footer(
@@ -69,8 +82,10 @@ impl Component<Msg> for App {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::ToggleShow => {
-                self.show = !self.show;
-                self.play_sound();
+                self.frame.update(frame::Msg::ToggleShow);
+            }
+            Msg::FrameMsg(frame_msg) => {
+                self.frame.update(frame_msg);
             }
         }
         Cmd::none()

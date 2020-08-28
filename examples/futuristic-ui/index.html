@@ -6,173 +6,40 @@
         body {
             font-family: "Fira Sans", "Courier New", Courier,"Lucida Sans Typewriter","Lucida Typewriter",monospace;
         }
+        body {
+            background-color: #000000;
+            font-family: arial;
+            color: #ffffff;
+        }
 
-    .frame {
-        display: block;
-        padding: 1px;
-        position: relative;
-    }
-
-    .border {
-        border-color: #029dbb;
-        box-shadow: 0 0 4px rgba(2,157,187,0.65);
-    }
-
-    .hide .border {
-      height: 0;
-      width: 0;
-    }
-
-    .border-left {
-        top: 50%;
-        left: 0;
-        height: 100%;
-        transform: translate(0, -50%);
-        border-width: 0 0 0 1px;
-    }
-
-
-    .border-anim {
-        z-index: 1;
-        opacity: 1;
-        position: absolute;
-        transition: all 250ms ease-in;
-        border-style: solid;
-    }
-
-    .border-right {
-        top: 50%;
-        right: 0;
-        height: 100%;
-        transform: translate(0, -50%);
-        border-width: 0 0 0 1px;
-    }
-
-
-    .border-top {
-        top: 0;
-        left: 50%;
-        width: 100%;
-        transform: translate(-50%, 0);
-        border-width: 1px 0 0 0;
-    }
-
-
-    .border-bottom {
-        left: 50%;
-        width: 100%;
-        bottom: 0;
-        transform: translate(-50%, 0);
-        border-width: 1px 0 0 0;
-    }
-
-
-    .corner {
-        width: 24px;
-        height: 24px;
-        border-color: #26dafd;
-        box-shadow: 0 0 4px -2px rgba(38,218,253,0.65);
-    }
-
-    .hide .corner{
-        width: 0;
-        height: 0;
-        opacity: 0;
-    }
-
-    .corner-anim {
-        z-index: 2;
-        opacity: 1;
-        position: absolute;
-        transition: all 250ms ease-in;
-        border-style: solid;
-    }
-
-    .corner__top-left {
-        left: -2px;
-        top: -2px;
-        border-width: 2px 0 0 2px;
-    }
-
-
-    .corner__bottom-left {
-        left: -2px;
-        bottom: -2px;
-        border-width: 0 0 2px 2px;
-    }
-
-
-    .corner__top-right {
-        right: -2px;
-        top: -2px;
-        border-width: 2px 2px 0 0;
-    }
-
-
-    .corner__bottom-right {
-        right: -2px;
-        bottom: -2px;
-        border-width: 0 2px 2px 0;
-    }
-
-
-    .frame-text {
-        background-color: rgba(4,35,41,0.65);
-    }
-
-    .hide .frame-text {
-        background-color: transparent;
-    }
-
-    .frame-text-anim {
-        z-index: 3;
-        display: block;
-        position: relative;
-        overflow: hidden;
-        transition: background-color 250ms ease-in;
-    }
-
-    .container {
-        color: #26dafd;
-        font-size: 21px;
-        line-height: 1.5;
-        font-family: "Titillium Web", "sans-serif";
-        margin: 100px;
-    }
-
-     body {
-        background-color: #000000;
-        font-family: arial;
-    }
-
-    @font-face {
-      font-family: 'Titillium Web';
-      font-style: normal;
-      font-weight: 400;
-      src: local('Titillium Web Regular'), local('TitilliumWeb-Regular'), url(https://fonts.gstatic.com/s/titilliumweb/v8/NaPecZTIAOhVxoMyOr9n_E7fdM3mDbRS.woff2) format('woff2');
-      unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
-    }
-    @font-face {
-      font-family: 'Titillium Web';
-      font-style: normal;
-      font-weight: 400;
-      src: local('Titillium Web Regular'), local('TitilliumWeb-Regular'), url(https://fonts.gstatic.com/s/titilliumweb/v8/NaPecZTIAOhVxoMyOr9n_E7fdMPmDQ.woff2) format('woff2');
-      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-    }
-    @font-face {
-      font-family: 'Titillium Web';
-      font-style: normal;
-      font-weight: 600;
-      src: local('Titillium Web SemiBold'), local('TitilliumWeb-SemiBold'), url(https://fonts.gstatic.com/s/titilliumweb/v8/NaPDcZTIAOhVxoMyOr9n_E7ffBzCGIVzY4SY.woff2) format('woff2');
-      unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
-    }
-    @font-face {
-      font-family: 'Titillium Web';
-      font-style: normal;
-      font-weight: 600;
-      src: local('Titillium Web SemiBold'), local('TitilliumWeb-SemiBold'), url(https://fonts.gstatic.com/s/titilliumweb/v8/NaPDcZTIAOhVxoMyOr9n_E7ffBzCGItzYw.woff2) format('woff2');
-      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-    }
+        @font-face {
+          font-family: 'Titillium Web';
+          font-style: normal;
+          font-weight: 400;
+          src: local('Titillium Web Regular'), local('TitilliumWeb-Regular'), url(https://fonts.gstatic.com/s/titilliumweb/v8/NaPecZTIAOhVxoMyOr9n_E7fdM3mDbRS.woff2) format('woff2');
+          unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+        }
+        @font-face {
+          font-family: 'Titillium Web';
+          font-style: normal;
+          font-weight: 400;
+          src: local('Titillium Web Regular'), local('TitilliumWeb-Regular'), url(https://fonts.gstatic.com/s/titilliumweb/v8/NaPecZTIAOhVxoMyOr9n_E7fdMPmDQ.woff2) format('woff2');
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+        @font-face {
+          font-family: 'Titillium Web';
+          font-style: normal;
+          font-weight: 600;
+          src: local('Titillium Web SemiBold'), local('TitilliumWeb-SemiBold'), url(https://fonts.gstatic.com/s/titilliumweb/v8/NaPDcZTIAOhVxoMyOr9n_E7ffBzCGIVzY4SY.woff2) format('woff2');
+          unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+        }
+        @font-face {
+          font-family: 'Titillium Web';
+          font-style: normal;
+          font-weight: 600;
+          src: local('Titillium Web SemiBold'), local('TitilliumWeb-SemiBold'), url(https://fonts.gstatic.com/s/titilliumweb/v8/NaPDcZTIAOhVxoMyOr9n_E7ffBzCGItzYw.woff2) format('woff2');
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
     </style>
   </head>
   <body>
