@@ -6,16 +6,17 @@ use sauron::{Cmd, Component, Node, Program};
 use web_sys::HtmlAudioElement;
 
 pub enum Msg {
-    ToggleShow,
+    Click,
+    HighlightEnd,
 }
 
 pub struct FuiButton {
-    show: bool,
+    click: bool,
 }
 
 impl FuiButton {
     pub fn new() -> Self {
-        FuiButton { show: true }
+        FuiButton { click: false }
     }
 
     fn play_sound(&self) {
@@ -182,15 +183,38 @@ impl Component<Msg> for FuiButton {
             vertical-align: middle;
         }
 
+
+        .fui_button__highlight{
+              z-index: 1;
+              position: absolute;
+              left: 0;
+              right: 0;
+              top: 0;
+              bottom: 0;
+              background-color: transparent;
+              opacity: 0;
+        }
+
+        .click .fui_button__highlight{
+            opacity: 1;
+            background-color: #029dbb
+        }
+
+        .fui_button__highlight-anim{
+            transition: all 50ms ease-out;
+        }
         "#
         .to_string()]
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
-            Msg::ToggleShow => {
-                self.show = !self.show;
+            Msg::Click => {
                 self.play_sound();
+                self.click = true;
+            }
+            Msg::HighlightEnd => {
+                self.click = false;
             }
         }
         Cmd::none()
@@ -199,8 +223,8 @@ impl Component<Msg> for FuiButton {
     fn view(&self) -> Node<Msg> {
         div(
             vec![
-                classes_flag([("fui_button", true)]),
-                id("frame1"),
+                class("fui_button"),
+                classes_flag([("click",self.click)]),
             ],
             vec![
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-left")], vec![]),
@@ -220,17 +244,27 @@ impl Component<Msg> for FuiButton {
                     vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__bottom-right")],
                     vec![],
                 ),
-                div(
-                    vec![class("fui_button-text fui_button-text-anim")],
+                div(vec![class("fui_button__wrap")],
                     vec![
-                        button(
+                        div(
+                            vec![class("fui_button-text fui_button-text-anim")],
                             vec![
-                                class("fui_button__button fui_button__button-anim"),
-                                on_click(|_|Msg::ToggleShow)
+                                button(
+                                    vec![
+                                        class("fui_button__button fui_button__button-anim"),
+                                        on_click(|_|Msg::Click)
+                                    ],
+                                    vec![self.child()]
+                                )
                             ],
-                            vec![self.child()]
+                        ),
+                        div(vec![
+                            class("fui_button__highlight fui_button__highlight-anim"),
+                            on_transitionend(|_|Msg::HighlightEnd),
+                            ],
+                            vec![]
                         )
-                    ],
+                    ]
                 ),
             ],
         )

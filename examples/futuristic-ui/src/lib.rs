@@ -98,7 +98,6 @@ impl Component<Msg> for App {
         match msg {
             Msg::ToggleShow => {
                 self.frame.update(frame::Msg::ToggleShow);
-                self.fui_button.update(fui_button::Msg::ToggleShow);
             }
             Msg::FrameMsg(frame_msg) => {
                 self.frame.update(frame_msg);
