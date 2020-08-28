@@ -6,10 +6,12 @@ use sauron::html::events::on_click;
 use sauron::html::{div, text};
 use sauron::prelude::*;
 use sauron::{Cmd, Component, Node, Program};
+use spinner::Spinner;
 use web_sys::HtmlAudioElement;
 
 mod frame;
 mod fui_button;
+mod spinner;
 
 pub enum Msg {
     ToggleShow,
@@ -21,6 +23,7 @@ pub struct App {
     show: bool,
     frame: Frame,
     fui_button: FuiButton,
+    spinner: Spinner<Msg>,
 }
 
 impl App {
@@ -29,6 +32,7 @@ impl App {
             show: true,
             frame: Frame::new(),
             fui_button: FuiButton::new(),
+            spinner: Spinner::new(),
         }
     }
 }
@@ -52,6 +56,7 @@ impl Component<Msg> for App {
         .into_iter()
         .chain(self.frame.style().into_iter())
         .chain(self.fui_button.style().into_iter())
+        .chain(self.spinner.style().into_iter())
         .collect()
     }
 
@@ -81,6 +86,7 @@ impl Component<Msg> for App {
                             vec![text("Toggle")],
                         ),
                         self.fui_button.view().map_msg(Msg::FuiButtonMsg),
+                        self.spinner.view(),
                     ],
                 ),
                 footer(
