@@ -1,5 +1,6 @@
 //#![deny(warnings)]
 use frame::Frame;
+use fui_button::FuiButton;
 use sauron::html::attributes::{class, id, style};
 use sauron::html::events::on_click;
 use sauron::html::{div, text};
@@ -8,15 +9,18 @@ use sauron::{Cmd, Component, Node, Program};
 use web_sys::HtmlAudioElement;
 
 mod frame;
+mod fui_button;
 
 pub enum Msg {
     ToggleShow,
     FrameMsg(frame::Msg),
+    FuiButtonMsg(fui_button::Msg),
 }
 
 pub struct App {
     show: bool,
     frame: Frame,
+    fui_button: FuiButton,
 }
 
 impl App {
@@ -24,6 +28,7 @@ impl App {
         App {
             show: true,
             frame: Frame::new(),
+            fui_button: FuiButton::new(),
         }
     }
 }
@@ -46,6 +51,7 @@ impl Component<Msg> for App {
         .to_string()]
         .into_iter()
         .chain(self.frame.style().into_iter())
+        .chain(self.fui_button.style().into_iter())
         .collect()
     }
 
@@ -59,13 +65,22 @@ impl Component<Msg> for App {
                         self.frame
                             .view()
                             .map_msg(|frame_msg| Msg::FrameMsg(frame_msg)),
+                        div(
+                            vec![
+                                style("width", px(100)),
+                                style("height", px(20)),
+                            ],
+                            vec![],
+                        ),
                         button(
                             vec![
                                 on_click(|_| Msg::ToggleShow),
-                                style("margin-top", "20px"),
+                                style("margin", "20px"),
+                                style("display", "block"),
                             ],
                             vec![text("Toggle")],
                         ),
+                        self.fui_button.view().map_msg(Msg::FuiButtonMsg),
                     ],
                 ),
                 footer(
@@ -83,9 +98,13 @@ impl Component<Msg> for App {
         match msg {
             Msg::ToggleShow => {
                 self.frame.update(frame::Msg::ToggleShow);
+                self.fui_button.update(fui_button::Msg::ToggleShow);
             }
             Msg::FrameMsg(frame_msg) => {
                 self.frame.update(frame_msg);
+            }
+            Msg::FuiButtonMsg(fui_btn_msg) => {
+                self.fui_button.update(fui_btn_msg);
             }
         }
         Cmd::none()

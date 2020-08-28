@@ -7,33 +7,29 @@ use web_sys::HtmlAudioElement;
 
 pub enum Msg {
     ToggleShow,
-    TransitionEnd,
 }
 
-pub struct Frame {
+pub struct FuiButton {
     show: bool,
 }
 
-impl Frame {
+impl FuiButton {
     pub fn new() -> Self {
-        Frame { show: true }
+        FuiButton { show: true }
     }
 
     fn play_sound(&self) {
-        let audio = HtmlAudioElement::new_with_src("/sounds/deploy.mp3")
+        let audio = HtmlAudioElement::new_with_src("/sounds/click.mp3")
             .expect("must not fail");
         let _ = audio.play().expect("must play");
     }
 
     fn child(&self) -> Node<Msg> {
-        div(
-            vec![styles([("padding", "20px 40px"), ("font-size", "32px")])],
-            vec![text("FutureosTech")],
-        )
+        text("Fui Button")
     }
 }
 
-impl Component<Msg> for Frame {
+impl Component<Msg> for FuiButton {
     fn init(&self) -> Cmd<Self, Msg> {
         self.play_sound();
         Cmd::none()
@@ -41,23 +37,23 @@ impl Component<Msg> for Frame {
 
     fn style(&self) -> Vec<String> {
         vec![r#"
-        .frame {
-            display: block;
+        .fui_button {
+            display: inline-block;
             padding: 1px;
             position: relative;
         }
 
-        .border {
+        .fui_button__border {
             border-color: #029dbb;
             box-shadow: 0 0 4px rgba(2,157,187,0.65);
         }
 
-        .hide .border {
+        .hide .fui_button__border {
           height: 0;
           width: 0;
         }
 
-        .border-left {
+        .fui_button__border-left {
             top: 50%;
             left: 0;
             height: 100%;
@@ -66,7 +62,7 @@ impl Component<Msg> for Frame {
         }
 
 
-        .border-anim {
+        .fui_button__border-anim {
             z-index: 1;
             opacity: 1;
             position: absolute;
@@ -74,7 +70,7 @@ impl Component<Msg> for Frame {
             border-style: solid;
         }
 
-        .border-right {
+        .fui_button__border-right {
             top: 50%;
             right: 0;
             height: 100%;
@@ -83,7 +79,7 @@ impl Component<Msg> for Frame {
         }
 
 
-        .border-top {
+        .fui_button__border-top {
             top: 0;
             left: 50%;
             width: 100%;
@@ -92,7 +88,7 @@ impl Component<Msg> for Frame {
         }
 
 
-        .border-bottom {
+        .fui_button__border-bottom {
             left: 50%;
             width: 100%;
             bottom: 0;
@@ -101,20 +97,20 @@ impl Component<Msg> for Frame {
         }
 
 
-        .corner {
+        .fui_button__corner {
             width: 24px;
             height: 24px;
             border-color: #26dafd;
             box-shadow: 0 0 4px -2px rgba(38,218,253,0.65);
         }
 
-        .hide .corner{
+        .hide .fui_button__corner{
             width: 0;
             height: 0;
             opacity: 0;
         }
 
-        .corner-anim {
+        .fui_button__corner-anim {
             z-index: 2;
             opacity: 1;
             position: absolute;
@@ -122,48 +118,68 @@ impl Component<Msg> for Frame {
             border-style: solid;
         }
 
-        .corner__top-left {
+        .fui_button_corner__top-left {
             left: -2px;
             top: -2px;
             border-width: 2px 0 0 2px;
         }
 
 
-        .corner__bottom-left {
+        .fui_button_corner__bottom-left {
             left: -2px;
             bottom: -2px;
             border-width: 0 0 2px 2px;
         }
 
 
-        .corner__top-right {
+        .fui_button_corner__top-right {
             right: -2px;
             top: -2px;
             border-width: 2px 2px 0 0;
         }
 
 
-        .corner__bottom-right {
+        .fui_button_corner__bottom-right {
             right: -2px;
             bottom: -2px;
             border-width: 0 2px 2px 0;
         }
 
 
-        .frame-text {
+        .fui_button-text {
             background-color: rgba(4,35,41,0.65);
         }
 
-        .hide .frame-text {
+        .hide .fui_button-text {
             background-color: transparent;
         }
 
-        .frame-text-anim {
+        .fui_button-text-anim {
             z-index: 3;
             display: block;
             position: relative;
             overflow: hidden;
             transition: background-color 250ms ease-in;
+        }
+
+        .fui_button__button {
+            color: #acf9fb;
+            cursor: pointer;
+        }
+        .fui_button__button-anim {
+            margin: 0;
+            border: none;
+            z-index: 2;
+            display: inline-block;
+            padding: 10px 20px;
+            outline: none;
+            position: relative;
+            font-size: 15.75px;
+            background: transparent;
+            transition: all 250ms ease-out;
+            line-height: 1;
+            user-select: none;
+            vertical-align: middle;
         }
 
         "#
@@ -176,9 +192,6 @@ impl Component<Msg> for Frame {
                 self.show = !self.show;
                 self.play_sound();
             }
-            Msg::TransitionEnd => {
-                log::trace!("animation end..");
-            }
         }
         Cmd::none()
     }
@@ -186,36 +199,38 @@ impl Component<Msg> for Frame {
     fn view(&self) -> Node<Msg> {
         div(
             vec![
-                classes_flag([("frame", true), ("hide", !self.show)]),
+                classes_flag([("fui_button", true)]),
                 id("frame1"),
             ],
             vec![
+                div(vec![class("fui_button__border fui_button__border-anim fui_button__border-left")], vec![]),
+                div(vec![class("fui_button__border fui_button__border-anim fui_button__border-right")], vec![]),
+                div(vec![class("fui_button__border fui_button__border-anim fui_button__border-top")], vec![]),
+                div(vec![class("fui_button__border fui_button__border-anim fui_button__border-bottom")], vec![]),
+                div(vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__top-left")], vec![]),
                 div(
+                    vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__bottom-left")],
+                    vec![],
+                ),
+                div(
+                    vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__top-right")],
+                    vec![],
+                ),
+                div(
+                    vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__bottom-right")],
+                    vec![],
+                ),
+                div(
+                    vec![class("fui_button-text fui_button-text-anim")],
                     vec![
-                        class("border border-anim border-left"),
-                        on_transitionend(|_| Msg::TransitionEnd),
+                        button(
+                            vec![
+                                class("fui_button__button fui_button__button-anim"),
+                                on_click(|_|Msg::ToggleShow)
+                            ],
+                            vec![self.child()]
+                        )
                     ],
-                    vec![],
-                ),
-                div(vec![class("border border-anim border-right")], vec![]),
-                div(vec![class("border border-anim border-top")], vec![]),
-                div(vec![class("border border-anim border-bottom")], vec![]),
-                div(vec![class("corner corner-anim corner__top-left")], vec![]),
-                div(
-                    vec![class("corner corner-anim corner__bottom-left")],
-                    vec![],
-                ),
-                div(
-                    vec![class("corner corner-anim corner__top-right")],
-                    vec![],
-                ),
-                div(
-                    vec![class("corner corner-anim corner__bottom-right")],
-                    vec![],
-                ),
-                div(
-                    vec![class("frame-text frame-text-anim")],
-                    vec![self.child()],
                 ),
             ],
         )
