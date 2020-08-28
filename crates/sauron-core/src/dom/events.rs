@@ -1,22 +1,11 @@
 //! https://developer.mozilla.org/en-US/docs/Web/Events
 
-use crate::{
-    Attribute,
-    Callback,
-    Event,
-};
+use crate::{Attribute, Callback, Event};
 use wasm_bindgen::JsCast;
-use web_sys::{
-    EventTarget,
-    HtmlInputElement,
-    HtmlTextAreaElement,
-};
-
 pub use web_sys::{
-    HashChangeEvent,
-    KeyboardEvent,
-    MouseEvent,
+    AnimationEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TransitionEvent,
 };
+use web_sys::{EventTarget, HtmlInputElement, HtmlTextAreaElement};
 
 /// an event builder
 pub fn on<F, MSG>(event_name: &'static str, f: F) -> Attribute<MSG>
@@ -83,7 +72,7 @@ macro_rules! declare_html_events{
         declare_events!{ $($name => $event => $mapper => $ret;)* }
 
         /// html events
-        pub const HTML_EVENTS: [&'static str; 27] = [$(stringify!($event),)*];
+        pub const HTML_EVENTS: [&'static str; 29] = [$(stringify!($event),)*];
     }
 }
 
@@ -94,6 +83,16 @@ fn to_mouse_event(event: Event) -> MouseEvent {
 
 fn to_keyboard_event(event: Event) -> KeyboardEvent {
     event.dyn_into().expect("unable to cast to keyboard event")
+}
+
+fn to_animation_event(event: Event) -> AnimationEvent {
+    event.dyn_into().expect("unable to cast to animation event")
+}
+
+fn to_transition_event(event: Event) -> TransitionEvent {
+    event
+        .dyn_into()
+        .expect("unable to cast to transition event")
 }
 
 fn as_is(event: Event) -> Event {
@@ -133,6 +132,8 @@ fn to_input_event(event: Event) -> InputEvent {
 // Mouse events
 declare_html_events! {
     on_auxclick => auxclick => to_mouse_event => MouseEvent;
+    on_animationend => animationend => to_animation_event => AnimationEvent;
+    on_transitionend => transitionend => to_transition_event => TransitionEvent;
     on_contextmenu => contextmenu => to_mouse_event => MouseEvent;
     on_dblclick  => dblclick => to_mouse_event => MouseEvent;
     on_mousedown => mousedown => to_mouse_event => MouseEvent;

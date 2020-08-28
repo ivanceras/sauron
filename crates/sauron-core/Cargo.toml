@@ -28,6 +28,7 @@ console_log = { version = "0.2", optional = true, features = ["color"] }
 version = "0.3"
 optional = true
 features = [
+    "AnimationEvent",
     "Comment",
     "console",
     "Document",
@@ -47,6 +48,7 @@ features = [
     "Node",
     "NodeList",
     "Text",
+    "TransitionEvent",
     "CharacterData",
     "Performance",
     "Window",

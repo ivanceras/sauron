@@ -120,7 +120,6 @@ where
     }
 
     fn inject_style(style: &str) {
-        log::trace!("injecting style: {}", style);
         use wasm_bindgen::JsCast;
 
         let document = crate::document();
