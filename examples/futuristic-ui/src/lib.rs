@@ -8,15 +8,20 @@ use sauron::prelude::*;
 use sauron::{Cmd, Component, Node, Program};
 use spinner::Spinner;
 use web_sys::HtmlAudioElement;
+use words::Words;
 
 mod frame;
 mod fui_button;
 mod spinner;
+mod words;
 
 pub enum Msg {
     ToggleShow,
     FrameMsg(frame::Msg),
     FuiButtonMsg(fui_button::Msg),
+    WordsMsg(Box<words::Msg<Self>>),
+    AnimateWords,
+    NoOp,
 }
 
 pub struct App {
@@ -24,6 +29,7 @@ pub struct App {
     frame: Frame,
     fui_button: FuiButton,
     spinner: Spinner<Msg>,
+    words: Words<Msg>,
 }
 
 impl App {
@@ -33,6 +39,7 @@ impl App {
             frame: Frame::new(),
             fui_button: FuiButton::new(),
             spinner: Spinner::new(),
+            words: Words::new(),
         }
     }
 }
@@ -51,12 +58,18 @@ impl Component<Msg> for App {
             font-family: "Titillium Web", "sans-serif";
             margin: 100px;
         }
+        .container ::selection {
+            color: #021114;
+            text-shadow: none;
+            background-color: #26dafd;
+        }
         "#
         .to_string()]
         .into_iter()
         .chain(self.frame.style().into_iter())
         .chain(self.fui_button.style().into_iter())
         .chain(self.spinner.style().into_iter())
+        .chain(self.words.style().into_iter())
         .collect()
     }
 
@@ -87,6 +100,17 @@ impl Component<Msg> for App {
                         ),
                         self.fui_button.view().map_msg(Msg::FuiButtonMsg),
                         self.spinner.view(),
+                        self.words.view().map_msg(|words_msg| {
+                            Msg::WordsMsg(Box::new(words_msg))
+                        }),
+                        button(
+                            vec![
+                                on_click(|_| Msg::AnimateWords),
+                                style("margin", "20px"),
+                                style("display", "block"),
+                            ],
+                            vec![text("Animate words")],
+                        ),
                     ],
                 ),
                 footer(
@@ -104,15 +128,31 @@ impl Component<Msg> for App {
         match msg {
             Msg::ToggleShow => {
                 self.frame.update(frame::Msg::ToggleShow);
+                Cmd::none()
             }
             Msg::FrameMsg(frame_msg) => {
                 self.frame.update(frame_msg);
+                Cmd::none()
             }
             Msg::FuiButtonMsg(fui_btn_msg) => {
                 self.fui_button.update(fui_btn_msg);
+                Cmd::none()
             }
+            Msg::WordsMsg(word_msg) => {
+                log::trace!("animating words..");
+                {
+                    self.words.update(*word_msg);
+                    log::trace!("got a cmd..");
+                }
+                Cmd::none()
+            }
+            Msg::AnimateWords => {
+                let cmd = self.words.update(words::Msg::AnimateIn);
+                log::trace!("got a returned cmd from animate words");
+                Cmd::none()
+            }
+            Msg::NoOp => Cmd::none(),
         }
-        Cmd::none()
     }
 }
 
