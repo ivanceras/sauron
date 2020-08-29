@@ -16,6 +16,16 @@
         - ie: ServerRender, where Msg could be passed as a data to hydrate the view (template) before sending to the client
  - [ ] Fix the render function where attributes of the same name not merged
 
+## Internal
+- [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`
+        ie: `Cmd<ChildApp, ChildMsg>` to `Cmd<App, Msg>`
+        This is needed since `Cmd` from `update` function of sub components
+        are not dispatched in the program. Only the top level
+        component `Cmd` can be dispatched
+    - [ ] Find a way to map `Program<APP,MSG>` to `Program<APP2,MSG2>`
+- [ ] Merge `Program` and `DomUpdater`
+
+
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
