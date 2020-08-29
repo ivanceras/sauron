@@ -4,16 +4,18 @@
 extern crate log;
 extern crate wasm_bindgen_test;
 extern crate web_sys;
-use std::rc::Rc;
-use wasm_bindgen_test::*;
-
 use sauron_core::{
     diff,
-    dom::{test_fixtures::simple_program, DomUpdater},
+    dom::DomUpdater,
     html::{attributes::*, events::*, *},
     Node, Patch,
 };
 use std::cell::RefCell;
+use std::rc::Rc;
+use test_fixtures::simple_program;
+use wasm_bindgen_test::*;
+
+mod test_fixtures;
 
 wasm_bindgen_test_configure!(run_in_browser);
 

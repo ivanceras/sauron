@@ -1,14 +1,14 @@
 use log::*;
 use sauron_core::{
     html::{attributes::*, events::*, *},
-    test_fixtures::simple_program,
     *,
 };
 use std::{cell::RefCell, rc::Rc};
-
+use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
-
 use web_sys::InputEvent;
+
+mod test_fixtures;
 
 wasm_bindgen_test_configure!(run_in_browser);
 

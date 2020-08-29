@@ -24,6 +24,9 @@
         component `Cmd` can be dispatched
     - [ ] Find a way to map `Program<APP,MSG>` to `Program<APP2,MSG2>`
 - [ ] Merge `Program` and `DomUpdater`
+- [ ] Change the `'static` of trait implementation by specifying the lifetime
+        - ref: https://stackoverflow.com/questions/52187644/lifetime-must-be-valid-for-the-static-lifetime-so-that-the-types-are-compatible
+- [X] Get rid of test_fixtures and move it to test directory
 
 
 

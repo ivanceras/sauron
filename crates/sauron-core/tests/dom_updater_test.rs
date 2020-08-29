@@ -6,14 +6,14 @@ use sauron_core::{
         events::*,
         input,
     },
-    test_fixtures::simple_program,
     DomUpdater, Node,
 };
 use std::{cell::RefCell, rc::Rc};
-
+use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
-
 use web_sys::InputEvent;
+
+mod test_fixtures;
 
 wasm_bindgen_test_configure!(run_in_browser);
 

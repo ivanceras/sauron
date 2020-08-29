@@ -1,4 +1,5 @@
 #![deny(warnings)]
+use sauron_core::Node;
 use sauron_core::{
     dom::CreatedNode,
     html::{attributes::*, div, events::*},
@@ -9,12 +10,12 @@ use sauron_core::{
     *,
 };
 use std::{cell::Cell, rc::Rc};
-
+use test_fixtures::simple_program;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
-
-use sauron_core::{test_fixtures::simple_program, Node};
 use web_sys::{console, Element, EventTarget};
+
+mod test_fixtures;
 
 wasm_bindgen_test_configure!(run_in_browser);
 

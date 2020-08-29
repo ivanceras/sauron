@@ -11,7 +11,6 @@ mod dom_updater;
 pub mod events;
 mod http;
 mod program;
-pub mod test_fixtures;
 mod util;
 mod window;
 

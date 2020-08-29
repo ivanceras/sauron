@@ -2,17 +2,8 @@
 //! This is a simple component which just barely comply to being a component
 //! use for doing component tests
 //!
-use crate::{
-    html::div,
-    Cmd,
-    Component,
-    Program,
-};
 use log::*;
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use sauron_core::{body, html::div, Cmd, Component, Node, Program};
 
 /// This is a simple component for the puprpose of testing
 #[derive(Copy, Clone, Debug)]
@@ -24,17 +15,12 @@ impl Component<()> for SimpleComponent {
         Cmd::none()
     }
 
-    fn view(&self) -> crate::Node<()> {
+    fn view(&self) -> Node<()> {
         div(vec![], vec![])
     }
 }
 
-/// creates the SimpleComponent wraped in Rc and RefCell
-pub fn simple_component() -> Rc<RefCell<SimpleComponent>> {
-    Rc::new(RefCell::new(SimpleComponent))
-}
-
 /// creates a program from SimpleComponent
 pub fn simple_program() -> Program<SimpleComponent, ()> {
-    Program::new_append_to_mount(SimpleComponent, &crate::body())
+    Program::new_append_to_mount(SimpleComponent, &body())
 }
