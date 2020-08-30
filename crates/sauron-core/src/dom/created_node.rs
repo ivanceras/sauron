@@ -4,6 +4,7 @@ use crate::{
     prelude::AttributeValue,
     Attribute, Event,
 };
+use std::ops::Deref;
 use std::{collections::HashMap, fmt::Write, sync::Mutex};
 use wasm_bindgen::{closure::Closure, JsCast};
 use web_sys::{
@@ -390,4 +391,21 @@ where
         let msg = callback_clone.emit(event);
         program_clone.dispatch(msg);
     }))
+}
+
+impl From<CreatedNode<Element>> for CreatedNode<Node> {
+    fn from(other: CreatedNode<Element>) -> CreatedNode<Node> {
+        CreatedNode {
+            node: other.node.into(),
+            closures: other.closures,
+        }
+    }
+}
+
+impl<T> Deref for CreatedNode<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.node
+    }
 }

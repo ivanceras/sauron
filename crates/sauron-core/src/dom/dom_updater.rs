@@ -6,7 +6,6 @@ use crate::{
         Dispatch,
     },
 };
-use std::ops::Deref;
 use wasm_bindgen::JsCast;
 use web_sys::{self, Element, Node};
 
@@ -135,30 +134,5 @@ where
         .expect("Error in patching the dom");
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
-    }
-
-    /// Return the root node of your application, the highest ancestor of all other nodes in
-    /// your real DOM tree.
-    pub fn root_node(&self) -> Node {
-        // Note that we're cloning the `web_sys::Node`, not the DOM element.
-        // So we're effectively cloning a pointer here, which is fast.
-        self.root_node.clone()
-    }
-}
-
-impl From<CreatedNode<Element>> for CreatedNode<Node> {
-    fn from(other: CreatedNode<Element>) -> CreatedNode<Node> {
-        CreatedNode {
-            node: other.node.into(),
-            closures: other.closures,
-        }
-    }
-}
-
-impl<T> Deref for CreatedNode<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.node
     }
 }
