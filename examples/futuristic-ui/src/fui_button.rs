@@ -39,7 +39,7 @@ where
     }
 
     fn play_sound(&self) {
-        let audio = HtmlAudioElement::new_with_src("/sounds/click.mp3")
+        let audio = HtmlAudioElement::new_with_src("sounds/click.mp3")
             .expect("must not fail");
         let _ = audio.play().expect("must play");
     }
