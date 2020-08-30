@@ -1,2 +1,9 @@
+#!/bin/bash
 
-cp -r index.html sounds ../ivanceras.github.io/futuristic/
+set -v
+
+dest="../../../ivanceras.github.io/futuristic-ui/"
+
+mkdir -p "$dest"
+
+cp -r index.html sounds pkg "$dest"
