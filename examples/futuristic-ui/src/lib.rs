@@ -18,7 +18,7 @@ mod words;
 pub enum Msg {
     ReAnimateFrame,
     FrameMsg(frame::Msg),
-    FuiButtonMsg(fui_button::Msg),
+    FuiButtonMsg(Box<fui_button::Msg<Self>>),
     WordsMsg(Box<words::Msg<Self>>),
     ReanimateWords,
     ReanimateAll,
@@ -28,17 +28,20 @@ pub enum Msg {
 pub struct App {
     show: bool,
     frame: Frame,
-    fui_button: FuiButton,
+    fui_button: FuiButton<Msg>,
     spinner: Spinner<Msg>,
     words: Words<Msg>,
 }
 
 impl App {
     pub fn new() -> Self {
+        let mut fui_button = FuiButton::<Msg>::new();
+        fui_button.add_event_listeners(vec![on_click(|_| Msg::ReanimateAll)]);
+
         App {
             show: true,
             frame: Frame::new(),
-            fui_button: FuiButton::new(),
+            fui_button,
             spinner: Spinner::new(),
             words: Words::new(),
         }
@@ -106,7 +109,9 @@ impl Component<Msg> for App {
                             ],
                             vec![],
                         ),
-                        self.fui_button.view().map_msg(Msg::FuiButtonMsg),
+                        self.fui_button.view().map_msg(|fbtn_msg| {
+                            Msg::FuiButtonMsg(Box::new(fbtn_msg))
+                        }),
                         button(
                             vec![
                                 on_click(|_| Msg::ReanimateWords),
@@ -136,7 +141,7 @@ impl Component<Msg> for App {
                 footer(
                     vec![],
                     vec![a(
-                        vec![href("https://github.com/ivanceras/futureostech")],
+                        vec![href("https://github.com/ivanceras/sauron/tree/master/examples/futuristic-ui/")],
                         vec![text("code")],
                     )],
                 ),
@@ -151,8 +156,7 @@ impl Component<Msg> for App {
             }
             Msg::FrameMsg(frame_msg) => self.frame.update_external(frame_msg),
             Msg::FuiButtonMsg(fui_btn_msg) => {
-                self.fui_button.update(fui_btn_msg);
-                Cmd::none()
+                self.fui_button.update(*fui_btn_msg)
             }
             Msg::WordsMsg(word_msg) => {
                 log::trace!("animating words..");
@@ -161,7 +165,10 @@ impl Component<Msg> for App {
             Msg::ReanimateWords => {
                 self.words.update_external(words::Msg::AnimateIn)
             }
-            Msg::ReanimateAll => Self::reanimate_all(),
+            Msg::ReanimateAll => {
+                log::debug!("Reanimating...");
+                Self::reanimate_all()
+            }
             Msg::NoOp => Cmd::none(),
         }
     }

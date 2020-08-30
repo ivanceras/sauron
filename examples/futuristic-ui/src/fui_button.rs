@@ -5,18 +5,37 @@ use sauron::prelude::*;
 use sauron::{Cmd, Component, Node, Program};
 use web_sys::HtmlAudioElement;
 
-pub enum Msg {
+pub enum Msg<PMSG> {
     Click,
     HighlightEnd,
+    ParamMsg(PMSG),
 }
 
-pub struct FuiButton {
+pub struct FuiButton<PMSG> {
     click: bool,
+    event_listeners: Vec<Attribute<Msg<PMSG>>>,
 }
 
-impl FuiButton {
+impl<PMSG> FuiButton<PMSG>
+where
+    PMSG: 'static,
+{
     pub fn new() -> Self {
-        FuiButton { click: false }
+        FuiButton {
+            click: false,
+            event_listeners: vec![],
+        }
+    }
+
+    pub fn add_event_listeners(
+        &mut self,
+        event_listeners: Vec<Attribute<PMSG>>,
+    ) {
+        for ev in event_listeners {
+            log::trace!("adding event listeners.. {:?}", ev);
+            let mapped_ev = ev.map_msg(|pmsg| Msg::ParamMsg(pmsg));
+            self.event_listeners.push(mapped_ev);
+        }
     }
 
     fn play_sound(&self) {
@@ -25,7 +44,7 @@ impl FuiButton {
         let _ = audio.play().expect("must play");
     }
 
-    fn child(&self) -> Node<Msg> {
+    fn child(&self) -> Node<Msg<PMSG>> {
         text("Fui Button")
     }
 
@@ -200,20 +219,34 @@ impl FuiButton {
         .to_string()]
     }
 
-    pub fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    pub fn update(&mut self, msg: Msg<PMSG>) -> Cmd<crate::App, crate::Msg> {
         match msg {
             Msg::Click => {
                 self.play_sound();
                 self.click = true;
+                Cmd::none()
             }
             Msg::HighlightEnd => {
                 self.click = false;
+                Cmd::none()
+            }
+            Msg::ParamMsg(pmsg) => {
+                log::trace!("executing param msg..");
+
+                // TODO: ISSUE:
+                // expected enum `Msg`, found type parameter `PMSG`
+                // |
+                //    = note: expected struct `sauron::cmd::Cmd<sauron::Program<App, Msg>>`
+                //               found struct `sauron::cmd::Cmd<sauron::Program<_, PMSG>>`
+                //Cmd::new(|program| program.dispatch(pmsg))
+                //
+                // hardcoding from crate Msg for now, so non-reusable for now
+                Cmd::new(|program| program.dispatch(crate::Msg::ReanimateAll))
             }
         }
-        Cmd::none()
     }
 
-    pub fn view(&self) -> Node<Msg> {
+    pub fn view(&self) -> Node<Msg<PMSG>> {
         div(
             vec![
                 class("fui_button"),
@@ -248,7 +281,7 @@ impl FuiButton {
                                         on_click(|_|Msg::Click)
                                     ],
                                     vec![self.child()]
-                                )
+                                ).add_attributes(self.event_listeners.clone())
                             ],
                         ),
                         div(vec![
