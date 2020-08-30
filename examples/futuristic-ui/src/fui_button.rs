@@ -28,15 +28,8 @@ impl FuiButton {
     fn child(&self) -> Node<Msg> {
         text("Fui Button")
     }
-}
 
-impl Component<Msg> for FuiButton {
-    fn init(&self) -> Cmd<Self, Msg> {
-        self.play_sound();
-        Cmd::none()
-    }
-
-    fn style(&self) -> Vec<String> {
+    pub fn style(&self) -> Vec<String> {
         vec![r#"
         .fui_button {
             display: inline-block;
@@ -207,7 +200,7 @@ impl Component<Msg> for FuiButton {
         .to_string()]
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    pub fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Click => {
                 self.play_sound();
@@ -220,7 +213,7 @@ impl Component<Msg> for FuiButton {
         Cmd::none()
     }
 
-    fn view(&self) -> Node<Msg> {
+    pub fn view(&self) -> Node<Msg> {
         div(
             vec![
                 class("fui_button"),

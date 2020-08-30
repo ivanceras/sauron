@@ -16,11 +16,12 @@ mod spinner;
 mod words;
 
 pub enum Msg {
-    ToggleShow,
+    ReAnimateFrame,
     FrameMsg(frame::Msg),
     FuiButtonMsg(fui_button::Msg),
     WordsMsg(Box<words::Msg<Self>>),
-    AnimateWords,
+    ReanimateWords,
+    ReanimateAll,
     NoOp,
 }
 
@@ -42,11 +43,18 @@ impl App {
             words: Words::new(),
         }
     }
+
+    fn reanimate_all() -> Cmd<Self, Msg> {
+        Cmd::new(|program| {
+            program.dispatch(Msg::WordsMsg(Box::new(words::Msg::AnimateIn)));
+            program.dispatch(Msg::ReAnimateFrame);
+        })
+    }
 }
 
 impl Component<Msg> for App {
     fn init(&self) -> Cmd<Self, Msg> {
-        Cmd::none()
+        Self::reanimate_all()
     }
 
     fn style(&self) -> Vec<String> {
@@ -80,6 +88,14 @@ impl Component<Msg> for App {
                 div(
                     vec![class("container")],
                     vec![
+                        button(
+                            vec![
+                                on_click(|_| Msg::ReAnimateFrame),
+                                style("margin", "20px"),
+                                style("display", "block"),
+                            ],
+                            vec![text("Animate Frame")],
+                        ),
                         self.frame
                             .view()
                             .map_msg(|frame_msg| Msg::FrameMsg(frame_msg)),
@@ -90,26 +106,30 @@ impl Component<Msg> for App {
                             ],
                             vec![],
                         ),
-                        button(
-                            vec![
-                                on_click(|_| Msg::ToggleShow),
-                                style("margin", "20px"),
-                                style("display", "block"),
-                            ],
-                            vec![text("Toggle")],
-                        ),
                         self.fui_button.view().map_msg(Msg::FuiButtonMsg),
-                        self.spinner.view(),
-                        self.words.view().map_msg(|words_msg| {
-                            Msg::WordsMsg(Box::new(words_msg))
-                        }),
                         button(
                             vec![
-                                on_click(|_| Msg::AnimateWords),
+                                on_click(|_| Msg::ReanimateWords),
                                 style("margin", "20px"),
                                 style("display", "block"),
                             ],
                             vec![text("Animate words")],
+                        ),
+                        p(
+                            vec![styles([
+                                ("position", "relative"),
+                                ("display", "inline-block"),
+                            ])],
+                            vec![self.words.view()],
+                        ),
+                        self.spinner.view(),
+                        button(
+                            vec![
+                                on_click(|_| Msg::ReanimateAll),
+                                style("margin", "20px"),
+                                style("display", "block"),
+                            ],
+                            vec![text("Reanimate All")],
                         ),
                     ],
                 ),
@@ -126,31 +146,22 @@ impl Component<Msg> for App {
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
-            Msg::ToggleShow => {
-                self.frame.update(frame::Msg::ToggleShow);
-                Cmd::none()
+            Msg::ReAnimateFrame => {
+                self.frame.update_external(frame::Msg::TriggerAnimation)
             }
-            Msg::FrameMsg(frame_msg) => {
-                self.frame.update(frame_msg);
-                Cmd::none()
-            }
+            Msg::FrameMsg(frame_msg) => self.frame.update_external(frame_msg),
             Msg::FuiButtonMsg(fui_btn_msg) => {
                 self.fui_button.update(fui_btn_msg);
                 Cmd::none()
             }
             Msg::WordsMsg(word_msg) => {
                 log::trace!("animating words..");
-                {
-                    self.words.update(*word_msg);
-                    log::trace!("got a cmd..");
-                }
-                Cmd::none()
+                self.words.update_external(*word_msg)
             }
-            Msg::AnimateWords => {
-                let cmd = self.words.update(words::Msg::AnimateIn);
-                log::trace!("got a returned cmd from animate words");
-                Cmd::none()
+            Msg::ReanimateWords => {
+                self.words.update_external(words::Msg::AnimateIn)
             }
+            Msg::ReanimateAll => Self::reanimate_all(),
             Msg::NoOp => Cmd::none(),
         }
     }

@@ -8,6 +8,7 @@ use web_sys::HtmlAudioElement;
 
 pub enum Msg<MSG> {
     AnimateIn,
+    StopAnimation,
     NextAnimation(bool, String, f64, f64),
     ParamMsg(MSG),
 }
@@ -36,17 +37,17 @@ impl<MSG> Words<MSG> {
         let _ = audio.play().expect("must play");
     }
 
-    pub fn animate_in(&mut self) -> Cmd<Self, Msg<MSG>> {
+    pub fn animate_in(&mut self) -> Cmd<crate::App, crate::Msg> {
         self.play_sound();
         self.start_animation(true)
     }
 
-    fn stop_animation(&mut self) -> Cmd<Self, Msg<MSG>> {
+    fn stop_animation(&mut self) -> Cmd<crate::App, crate::Msg> {
         self.animating = false;
         Cmd::none()
     }
 
-    fn start_animation(&mut self, is_in: bool) -> Cmd<Self, Msg<MSG>> {
+    fn start_animation(&mut self, is_in: bool) -> Cmd<crate::App, crate::Msg> {
         use wasm_bindgen::JsCast;
 
         let text_len = self.child.len();
@@ -69,12 +70,9 @@ impl<MSG> Words<MSG> {
 
         log::trace!("returning a cmd for next animation..");
         Cmd::new(move |program| {
-            program.dispatch(Msg::NextAnimation(
-                is_in,
-                child_text.clone(),
-                start,
-                duration,
-            ))
+            program.dispatch(crate::Msg::WordsMsg(Box::new(
+                Msg::NextAnimation(is_in, child_text.clone(), start, duration),
+            )))
         })
     }
 
@@ -84,7 +82,7 @@ impl<MSG> Words<MSG> {
         child_text: String,
         start: f64,
         duration: f64,
-    ) -> Cmd<Self, Msg<MSG>> {
+    ) -> Cmd<crate::App, crate::Msg> {
         let timestamp = crate::dom::now();
         let text_len = child_text.len();
 
@@ -114,26 +112,56 @@ impl<MSG> Words<MSG> {
 
         if continue_animation {
             log::trace!("continue animation");
-            self.next_animation(is_in, child_text, start, duration)
+            Cmd::new(move |program| {
+                program.dispatch(crate::Msg::WordsMsg(Box::new(
+                    Msg::NextAnimation(
+                        is_in,
+                        child_text.clone(),
+                        start,
+                        duration,
+                    ),
+                )))
+            })
         } else {
             log::trace!("stop the animation");
-            self.stop_animation()
+            Cmd::new(move |program| {
+                program.dispatch(crate::Msg::WordsMsg(Box::new(
+                    Msg::StopAnimation,
+                )))
+            })
         }
     }
-}
 
-impl<MSG> Component<Msg<MSG>> for Words<MSG>
-where
-    MSG: 'static,
-{
-    fn style(&self) -> Vec<String> {
+    pub fn update_external(
+        &mut self,
+        msg: Msg<MSG>,
+    ) -> Cmd<crate::App, crate::Msg> {
+        log::trace!("words updating..");
+        match msg {
+            Msg::AnimateIn => {
+                log::trace!("animate in started...");
+                self.animate_in()
+            }
+            Msg::StopAnimation => {
+                log::trace!("words stop_animation..");
+                self.stop_animation();
+                Cmd::none()
+            }
+            Msg::NextAnimation(is_in, child_text, start, duration) => {
+                log::trace!("next animationg executed..");
+                self.next_animation(is_in, child_text, start, duration)
+            }
+            Msg::ParamMsg(msg) => Cmd::none(),
+        }
+    }
+
+    pub fn style(&self) -> Vec<String> {
         vec![r#"
             .words {
                 display: inline-block;
                 position: relative;
             }
 
-        /*
             .text {
               position: absolute;
               left: 0;
@@ -143,7 +171,6 @@ where
               display: inline-block;
               opacity: 0;
             }
-        */
 
             .blink {
               position: relative;
@@ -178,27 +205,16 @@ where
         .to_string()]
     }
 
-    fn update(&mut self, msg: Msg<MSG>) -> Cmd<Self, Msg<MSG>> {
-        log::trace!("words updating..");
-        match msg {
-            Msg::AnimateIn => {
-                log::trace!("animate in started...");
-                self.animate_in()
-            }
-            Msg::NextAnimation(is_in, child_text, start, duration) => {
-                log::trace!("next animationg executed..");
-                self.next_animation(is_in, child_text, start, duration)
-            }
-            Msg::ParamMsg(msg) => Cmd::none(),
-        }
-    }
-    fn view(&self) -> Node<Msg<MSG>> {
+    pub fn view(&self) -> Node<MSG> {
         div(
             vec![],
             vec![span(
-                vec![class("words"), classes_flag([("animating", true)])],
                 vec![
-                    //span(vec![class("children")], vec![text(&self.child)]),
+                    class("words"),
+                    classes_flag([("animating", self.animating)]),
+                ],
+                vec![
+                    span(vec![class("children")], vec![text(&self.child)]),
                     view_if(
                         true,
                         span(

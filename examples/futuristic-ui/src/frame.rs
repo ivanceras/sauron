@@ -7,16 +7,18 @@ use web_sys::HtmlAudioElement;
 
 pub enum Msg {
     ToggleShow,
+    TriggerAnimation,
+    NextAnimation,
     TransitionEnd,
 }
 
 pub struct Frame {
-    show: bool,
+    hide: bool,
 }
 
 impl Frame {
     pub fn new() -> Self {
-        Frame { show: true }
+        Frame { hide: true }
     }
 
     fn play_sound(&self) {
@@ -30,6 +32,50 @@ impl Frame {
             vec![styles([("padding", "20px 40px"), ("font-size", "32px")])],
             vec![text("FutureosTech")],
         )
+    }
+
+    pub fn update_external(&mut self, msg: Msg) -> Cmd<crate::App, crate::Msg> {
+        match msg {
+            Msg::ToggleShow => {
+                self.hide = !self.hide;
+                self.play_sound();
+                Cmd::none()
+            }
+            // we hide the borders then have delayed timeout
+            // call before showing it using a Cmd with timed closure
+            Msg::TriggerAnimation => {
+                use sauron::wasm_bindgen::JsCast;
+                log::trace!("frame: animate in..");
+                self.hide = true;
+                Cmd::new(|program| {
+                    let timed_closure: Closure<dyn Fn()> =
+                        Closure::wrap(Box::new(move || {
+                            program.dispatch(crate::Msg::FrameMsg(
+                                Msg::NextAnimation,
+                            ));
+                        }));
+
+                    web_sys::window()
+                        .expect("no global `window` exists")
+                        .set_timeout_with_callback_and_timeout_and_arguments_0(
+                            timed_closure.as_ref().unchecked_ref(),
+                            200,
+                        )
+                        .expect("Unable to start interval");
+                    timed_closure.forget();
+                })
+            }
+            Msg::NextAnimation => {
+                log::trace!("frame: animate out..");
+                self.play_sound();
+                self.hide = false;
+                Cmd::none()
+            }
+            Msg::TransitionEnd => {
+                log::trace!("animation end..");
+                Cmd::none()
+            }
+        }
     }
 }
 
@@ -171,22 +217,13 @@ impl Component<Msg> for Frame {
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-        match msg {
-            Msg::ToggleShow => {
-                self.show = !self.show;
-                self.play_sound();
-            }
-            Msg::TransitionEnd => {
-                log::trace!("animation end..");
-            }
-        }
         Cmd::none()
     }
 
     fn view(&self) -> Node<Msg> {
         div(
             vec![
-                classes_flag([("frame", true), ("hide", !self.show)]),
+                classes_flag([("frame", true), ("hide", self.hide)]),
                 id("frame1"),
             ],
             vec![
