@@ -123,6 +123,8 @@ and the build script for the details.
 
 #### Demo examples
 - [todomvc](https://ivanceras.github.io/todomvc/)
+- [futuristic-ui](https://ivanceras.github.io/futuristic-ui/) - A demo of futuristic-ui
+showcasing animation, transition and timed Component update.
 - [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet CSV data viewer
 - [svg-clock](https://ivanceras.github.io/svg-clock/) - A clock drawn using SVG and window tick event.
 - [svg-graph](https://ivanceras.github.io/svg-graph/) - A simple graph using SVG
