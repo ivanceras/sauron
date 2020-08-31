@@ -57,7 +57,7 @@ impl<MSG> Paragraph<MSG> {
 
         let interval = 1_000.0 / 60.0;
         let real_duration = interval * text_len as f64;
-        let timeout = 250.0;
+        let timeout = 500.0;
         let duration = real_duration.min(timeout);
         let start = crate::dom::now();
 
@@ -131,10 +131,7 @@ impl<MSG> Paragraph<MSG> {
         }
     }
 
-    pub fn update_external(
-        &mut self,
-        msg: Msg<MSG>,
-    ) -> Cmd<crate::App, crate::Msg> {
+    pub fn update(&mut self, msg: Msg<MSG>) -> Cmd<crate::App, crate::Msg> {
         log::trace!("words updating..");
         match msg {
             Msg::AnimateIn => {

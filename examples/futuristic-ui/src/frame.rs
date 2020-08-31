@@ -38,7 +38,7 @@ impl Frame {
         )
     }
 
-    pub fn update_external(&mut self, msg: Msg) -> Cmd<crate::App, crate::Msg> {
+    pub fn update(&mut self, msg: Msg) -> Cmd<crate::App, crate::Msg> {
         match msg {
             Msg::ToggleShow => {
                 self.hide = !self.hide;

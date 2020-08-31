@@ -44,7 +44,13 @@ impl App {
             FuiButton::<Msg>::new_with_label("Skewed button");
         skewed_fui_button.skewed(true);
 
-        let paragraph_content = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, amet cupiditate laboriosam sunt libero aliquam, consequatur alias ducimus adipisci nesciunt odit? Odio tenetur et itaque suscipit atque officiis debitis qui. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, amet cupiditate laboriosam sunt libero aliquam, consequatur alias ducimus adipisci nesciunt odit? Odio tenetur et itaque suscipit atque officiis debitis qui. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, amet cupiditate laboriosam sunt libero aliquam, consequatur alias ducimus adipisci nesciunt odit? Odio tenetur et itaque suscipit atque officiis debitis qui.";
+        let paragraph_content = "This is an experimental demo showcasing usage of sauron[0] Component lifecycle to work alongside
+        css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.
+
+        Sauron is a light-weight web framework designed to have you write least amount of code possible.
+
+        [0]: https://github.com/ivanceras/sauron
+        ";
 
         App {
             show: true,
@@ -170,9 +176,9 @@ impl Component<Msg> for App {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::ReAnimateFrame => {
-                self.frame.update_external(frame::Msg::TriggerAnimation)
+                self.frame.update(frame::Msg::TriggerAnimation)
             }
-            Msg::FrameMsg(frame_msg) => self.frame.update_external(frame_msg),
+            Msg::FrameMsg(frame_msg) => self.frame.update(frame_msg),
             Msg::FuiButtonMsg(fui_btn_msg) => {
                 self.fui_button.update(*fui_btn_msg)
             }
@@ -181,10 +187,10 @@ impl Component<Msg> for App {
             }
             Msg::ParagraphMsg(word_msg) => {
                 log::trace!("animating paragraph..");
-                self.paragraph.update_external(*word_msg)
+                self.paragraph.update(*word_msg)
             }
             Msg::ReanimateParagraph => {
-                self.paragraph.update_external(paragraph::Msg::AnimateIn)
+                self.paragraph.update(paragraph::Msg::AnimateIn)
             }
             Msg::ReanimateAll => {
                 log::debug!("Reanimating...");
