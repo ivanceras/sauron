@@ -15,6 +15,8 @@ pub struct FuiButton<PMSG> {
     label: String,
     click: bool,
     skewed: bool,
+    /// whether to use the green color
+    use_green: bool,
     event_listeners: Vec<Attribute<Msg<PMSG>>>,
 }
 
@@ -27,12 +29,17 @@ where
             label: label.to_string(),
             click: false,
             skewed: false,
+            use_green: false,
             event_listeners: vec![],
         }
     }
 
     pub fn skewed(&mut self, skewed: bool) {
         self.skewed = skewed;
+    }
+
+    pub fn use_green(&mut self, use_green: bool) {
+        self.use_green = use_green;
     }
 
     pub fn add_event_listeners(
@@ -67,6 +74,11 @@ where
         .fui_button__border {
             border-color: #029dbb;
             box-shadow: 0 0 4px rgba(2,157,187,0.65);
+        }
+
+        .green .fui_button__border {
+            border-color: #090;
+            box-shadow: 0 0 4px rgba(0,153,0,0.65);
         }
 
         .hide .fui_button__border {
@@ -123,6 +135,11 @@ where
             height: 24px;
             border-color: #26dafd;
             box-shadow: 0 0 4px -2px rgba(38,218,253,0.65);
+        }
+
+        .green .fui_button__corner {
+            border-color: #090;
+            box-shadow: 0 0 4px rgba(0,153,0,0.65);
         }
 
         .hide .fui_button__corner{
@@ -188,6 +205,10 @@ where
             cursor: pointer;
         }
 
+        .green .fui_button__button {
+            color: #090;
+        }
+
         .skewed .fui_button__button{
             transform: skewX(45deg);
         }
@@ -222,6 +243,10 @@ where
         .click .fui_button__highlight{
             opacity: 1;
             background-color: #029dbb
+        }
+
+        .green .fui_button__highlight {
+            background-color: #090;
         }
 
         .fui_button__highlight-anim{
@@ -262,7 +287,7 @@ where
         div(
             vec![
                 class("fui_button"),
-                classes_flag([("click",self.click), ("skewed", self.skewed)]),
+                classes_flag([("click",self.click), ("skewed", self.skewed), ("green", self.use_green)]),
             ],
             vec![
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-left")], vec![]),

@@ -20,6 +20,7 @@ pub enum Msg {
     FrameMsg(frame::Msg),
     FuiButtonMsg(Box<fui_button::Msg<Self>>),
     SkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
+    GreenFuiButtonMsg(Box<fui_button::Msg<Self>>),
     ParagraphMsg(Box<paragraph::Msg<Self>>),
     ReanimateParagraph,
     ReanimateAll,
@@ -31,6 +32,7 @@ pub struct App {
     frame: Frame,
     fui_button: FuiButton<Msg>,
     skewed_fui_button: FuiButton<Msg>,
+    green_fui_button: FuiButton<Msg>,
     spinner: Spinner<Msg>,
     paragraph: Paragraph<Msg>,
 }
@@ -43,6 +45,10 @@ impl App {
         let mut skewed_fui_button =
             FuiButton::<Msg>::new_with_label("Skewed button");
         skewed_fui_button.skewed(true);
+
+        let mut green_fui_button =
+            FuiButton::<Msg>::new_with_label("Cyberpunk");
+        green_fui_button.use_green(true);
 
         let paragraph_content = "This is an experimental demo showcasing usage of sauron[0] Component lifecycle to work alongside
         css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.
@@ -57,6 +63,7 @@ impl App {
             frame: Frame::new_with_content("Retro Futuristic UI in rust"),
             fui_button,
             skewed_fui_button,
+            green_fui_button,
             spinner: Spinner::new(),
             paragraph: Paragraph::new_with_content(paragraph_content),
         }
@@ -129,11 +136,15 @@ impl Component<Msg> for App {
                         self.fui_button.view().map_msg(|fbtn_msg| {
                             Msg::FuiButtonMsg(Box::new(fbtn_msg))
                         }),
+                        span(vec![style("margin", "0 5px")], vec![]),
+                        self.green_fui_button.view().map_msg(|fbtn_msg| {
+                            Msg::GreenFuiButtonMsg(Box::new(fbtn_msg))
+                        }),
                         span(vec![style("margin", "0 40px")],
                             vec![
                                 self.skewed_fui_button.view().map_msg(|fbtn_msg| {
                                     Msg::SkewedFuiButtonMsg(Box::new(fbtn_msg))
-                                })
+                                }),
                             ]
                         ),
                         button(
@@ -184,6 +195,9 @@ impl Component<Msg> for App {
             }
             Msg::SkewedFuiButtonMsg(fui_btn_msg) => {
                 self.skewed_fui_button.update(*fui_btn_msg)
+            }
+            Msg::GreenFuiButtonMsg(fui_btn_msg) => {
+                self.green_fui_button.update(*fui_btn_msg)
             }
             Msg::ParagraphMsg(word_msg) => {
                 log::trace!("animating paragraph..");
