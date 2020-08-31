@@ -84,7 +84,7 @@ impl Component<Msg> for App {
             font-size: 21px;
             line-height: 1.5;
             font-family: "Titillium Web", "sans-serif";
-            margin: 100px;
+            margin: auto;
         }
         .container ::selection {
             color: #021114;
