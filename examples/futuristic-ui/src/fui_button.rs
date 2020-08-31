@@ -12,6 +12,7 @@ pub enum Msg<PMSG> {
 }
 
 pub struct FuiButton<PMSG> {
+    label: String,
     click: bool,
     skewed: bool,
     event_listeners: Vec<Attribute<Msg<PMSG>>>,
@@ -21,8 +22,9 @@ impl<PMSG> FuiButton<PMSG>
 where
     PMSG: 'static,
 {
-    pub fn new() -> Self {
+    pub fn new_with_label(label: &str) -> Self {
         FuiButton {
+            label: label.to_string(),
             click: false,
             skewed: false,
             event_listeners: vec![],
@@ -48,10 +50,6 @@ where
         let audio = HtmlAudioElement::new_with_src("sounds/click.mp3")
             .expect("must not fail");
         let _ = audio.play().expect("must play");
-    }
-
-    fn child(&self) -> Node<Msg<PMSG>> {
-        text("Fui Button")
     }
 
     pub fn style(&self) -> Vec<String> {
@@ -294,7 +292,7 @@ where
                                         class("fui_button__button fui_button__button-anim"),
                                         on_click(|_|Msg::Click)
                                     ],
-                                    vec![self.child()]
+                                    vec![text(&self.label)]
                                 ).add_attributes(self.event_listeners.clone())
                             ],
                         ),

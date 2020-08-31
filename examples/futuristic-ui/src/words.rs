@@ -21,10 +21,9 @@ pub struct Words<MSG> {
 }
 
 impl<MSG> Words<MSG> {
-    pub fn new() -> Self {
-        let text = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, amet cupiditate laboriosam sunt libero aliquam, consequatur alias ducimus adipisci nesciunt odit? Odio tenetur et itaque suscipit atque officiis debitis qui. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, amet cupiditate laboriosam sunt libero aliquam, consequatur alias ducimus adipisci nesciunt odit? Odio tenetur et itaque suscipit atque officiis debitis qui. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, amet cupiditate laboriosam sunt libero aliquam, consequatur alias ducimus adipisci nesciunt odit? Odio tenetur et itaque suscipit atque officiis debitis qui.".to_string();
+    pub fn new_with_content(content: &str) -> Self {
         Words {
-            child: text.clone(),
+            child: content.to_string(),
             text: "".to_string(),
             animating: false,
             _phantom: PhantomData,

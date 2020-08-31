@@ -37,19 +37,22 @@ pub struct App {
 
 impl App {
     pub fn new() -> Self {
-        let mut fui_button = FuiButton::<Msg>::new();
+        let mut fui_button = FuiButton::<Msg>::new_with_label("Reanimate All");
         fui_button.add_event_listeners(vec![on_click(|_| Msg::ReanimateAll)]);
 
-        let mut skewed_fui_button = FuiButton::<Msg>::new();
+        let mut skewed_fui_button =
+            FuiButton::<Msg>::new_with_label("Skewed button");
         skewed_fui_button.skewed(true);
+
+        let paragraph_content = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, amet cupiditate laboriosam sunt libero aliquam, consequatur alias ducimus adipisci nesciunt odit? Odio tenetur et itaque suscipit atque officiis debitis qui. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, amet cupiditate laboriosam sunt libero aliquam, consequatur alias ducimus adipisci nesciunt odit? Odio tenetur et itaque suscipit atque officiis debitis qui. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, amet cupiditate laboriosam sunt libero aliquam, consequatur alias ducimus adipisci nesciunt odit? Odio tenetur et itaque suscipit atque officiis debitis qui.";
 
         App {
             show: true,
-            frame: Frame::new(),
+            frame: Frame::new_with_content("Retro Futuristic UI in rust"),
             fui_button,
             skewed_fui_button,
             spinner: Spinner::new(),
-            words: Words::new(),
+            words: Words::new_with_content(paragraph_content),
         }
     }
 

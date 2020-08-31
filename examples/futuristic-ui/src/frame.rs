@@ -14,11 +14,15 @@ pub enum Msg {
 
 pub struct Frame {
     hide: bool,
+    content: String,
 }
 
 impl Frame {
-    pub fn new() -> Self {
-        Frame { hide: true }
+    pub fn new_with_content(content: &str) -> Self {
+        Frame {
+            hide: true,
+            content: content.to_string(),
+        }
     }
 
     fn play_sound(&self) {
@@ -30,7 +34,7 @@ impl Frame {
     fn child(&self) -> Node<Msg> {
         div(
             vec![styles([("padding", "20px 40px"), ("font-size", "32px")])],
-            vec![text("FutureosTech")],
+            vec![text(&self.content)],
         )
     }
 
