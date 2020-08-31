@@ -81,15 +81,8 @@ impl Frame {
             }
         }
     }
-}
 
-impl Component<Msg> for Frame {
-    fn init(&self) -> Cmd<Self, Msg> {
-        self.play_sound();
-        Cmd::none()
-    }
-
-    fn style(&self) -> Vec<String> {
+    pub fn style(&self) -> Vec<String> {
         vec![r#"
         .frame {
             display: block;
@@ -220,11 +213,7 @@ impl Component<Msg> for Frame {
         .to_string()]
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-        Cmd::none()
-    }
-
-    fn view(&self) -> Node<Msg> {
+    pub fn view(&self) -> Node<Msg> {
         div(
             vec![
                 classes_flag([("frame", true), ("hide", self.hide)]),

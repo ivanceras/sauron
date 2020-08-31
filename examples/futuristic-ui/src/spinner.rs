@@ -16,13 +16,8 @@ impl<MSG> Spinner<MSG> {
             _phantom: PhantomData,
         }
     }
-}
 
-impl<MSG> Component<MSG> for Spinner<MSG>
-where
-    MSG: 'static,
-{
-    fn style(&self) -> Vec<String> {
+    pub fn style(&self) -> Vec<String> {
         vec![r#"
 
             .spinner {
@@ -101,11 +96,7 @@ where
         .to_string()]
     }
 
-    fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
-        Cmd::none()
-    }
-
-    fn view(&self) -> Node<MSG> {
+    pub fn view(&self) -> Node<MSG> {
         div(
             vec![],
             vec![div(
