@@ -13,6 +13,7 @@ pub enum Msg<PMSG> {
 
 pub struct FuiButton<PMSG> {
     click: bool,
+    skewed: bool,
     event_listeners: Vec<Attribute<Msg<PMSG>>>,
 }
 
@@ -23,8 +24,13 @@ where
     pub fn new() -> Self {
         FuiButton {
             click: false,
+            skewed: false,
             event_listeners: vec![],
         }
+    }
+
+    pub fn skewed(&mut self, skewed: bool) {
+        self.skewed = skewed;
     }
 
     pub fn add_event_listeners(
@@ -54,6 +60,10 @@ where
             display: inline-block;
             padding: 1px;
             position: relative;
+        }
+
+        .skewed.fui_button {
+            transform: skewX(-45deg);
         }
 
         .fui_button__border {
@@ -179,6 +189,10 @@ where
             color: #acf9fb;
             cursor: pointer;
         }
+
+        .skewed .fui_button__button{
+            transform: skewX(45deg);
+        }
         .fui_button__button-anim {
             margin: 0;
             border: none;
@@ -250,7 +264,7 @@ where
         div(
             vec![
                 class("fui_button"),
-                classes_flag([("click",self.click)]),
+                classes_flag([("click",self.click), ("skewed", self.skewed)]),
             ],
             vec![
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-left")], vec![]),

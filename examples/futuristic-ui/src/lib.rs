@@ -19,6 +19,7 @@ pub enum Msg {
     ReAnimateFrame,
     FrameMsg(frame::Msg),
     FuiButtonMsg(Box<fui_button::Msg<Self>>),
+    SkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
     WordsMsg(Box<words::Msg<Self>>),
     ReanimateWords,
     ReanimateAll,
@@ -29,6 +30,7 @@ pub struct App {
     show: bool,
     frame: Frame,
     fui_button: FuiButton<Msg>,
+    skewed_fui_button: FuiButton<Msg>,
     spinner: Spinner<Msg>,
     words: Words<Msg>,
 }
@@ -38,10 +40,14 @@ impl App {
         let mut fui_button = FuiButton::<Msg>::new();
         fui_button.add_event_listeners(vec![on_click(|_| Msg::ReanimateAll)]);
 
+        let mut skewed_fui_button = FuiButton::<Msg>::new();
+        skewed_fui_button.skewed(true);
+
         App {
             show: true,
             frame: Frame::new(),
             fui_button,
+            skewed_fui_button,
             spinner: Spinner::new(),
             words: Words::new(),
         }
@@ -112,6 +118,13 @@ impl Component<Msg> for App {
                         self.fui_button.view().map_msg(|fbtn_msg| {
                             Msg::FuiButtonMsg(Box::new(fbtn_msg))
                         }),
+                        span(vec![style("margin", "0 40px")],
+                            vec![
+                                self.skewed_fui_button.view().map_msg(|fbtn_msg| {
+                                    Msg::SkewedFuiButtonMsg(Box::new(fbtn_msg))
+                                })
+                            ]
+                        ),
                         button(
                             vec![
                                 on_click(|_| Msg::ReanimateWords),
@@ -157,6 +170,9 @@ impl Component<Msg> for App {
             Msg::FrameMsg(frame_msg) => self.frame.update_external(frame_msg),
             Msg::FuiButtonMsg(fui_btn_msg) => {
                 self.fui_button.update(*fui_btn_msg)
+            }
+            Msg::SkewedFuiButtonMsg(fui_btn_msg) => {
+                self.skewed_fui_button.update(*fui_btn_msg)
             }
             Msg::WordsMsg(word_msg) => {
                 log::trace!("animating words..");
