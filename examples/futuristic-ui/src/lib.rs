@@ -1,6 +1,7 @@
 //#![deny(warnings)]
 use frame::Frame;
 use fui_button::FuiButton;
+use paragraph::Paragraph;
 use sauron::html::attributes::{class, id, style};
 use sauron::html::events::on_click;
 use sauron::html::{div, text};
@@ -8,20 +9,19 @@ use sauron::prelude::*;
 use sauron::{Cmd, Component, Node, Program};
 use spinner::Spinner;
 use web_sys::HtmlAudioElement;
-use words::Words;
 
 mod frame;
 mod fui_button;
+mod paragraph;
 mod spinner;
-mod words;
 
 pub enum Msg {
     ReAnimateFrame,
     FrameMsg(frame::Msg),
     FuiButtonMsg(Box<fui_button::Msg<Self>>),
     SkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
-    WordsMsg(Box<words::Msg<Self>>),
-    ReanimateWords,
+    ParagraphMsg(Box<paragraph::Msg<Self>>),
+    ReanimateParagraph,
     ReanimateAll,
     NoOp,
 }
@@ -32,7 +32,7 @@ pub struct App {
     fui_button: FuiButton<Msg>,
     skewed_fui_button: FuiButton<Msg>,
     spinner: Spinner<Msg>,
-    words: Words<Msg>,
+    paragraph: Paragraph<Msg>,
 }
 
 impl App {
@@ -52,13 +52,15 @@ impl App {
             fui_button,
             skewed_fui_button,
             spinner: Spinner::new(),
-            words: Words::new_with_content(paragraph_content),
+            paragraph: Paragraph::new_with_content(paragraph_content),
         }
     }
 
     fn reanimate_all() -> Cmd<Self, Msg> {
         Cmd::new(|program| {
-            program.dispatch(Msg::WordsMsg(Box::new(words::Msg::AnimateIn)));
+            program.dispatch(Msg::ParagraphMsg(Box::new(
+                paragraph::Msg::AnimateIn,
+            )));
             program.dispatch(Msg::ReAnimateFrame);
         })
     }
@@ -89,7 +91,7 @@ impl Component<Msg> for App {
         .chain(self.frame.style().into_iter())
         .chain(self.fui_button.style().into_iter())
         .chain(self.spinner.style().into_iter())
-        .chain(self.words.style().into_iter())
+        .chain(self.paragraph.style().into_iter())
         .collect()
     }
 
@@ -130,18 +132,18 @@ impl Component<Msg> for App {
                         ),
                         button(
                             vec![
-                                on_click(|_| Msg::ReanimateWords),
+                                on_click(|_| Msg::ReanimateParagraph),
                                 style("margin", "20px"),
                                 style("display", "block"),
                             ],
-                            vec![text("Animate words")],
+                            vec![text("Animate paragraph")],
                         ),
                         p(
                             vec![styles([
                                 ("position", "relative"),
                                 ("display", "inline-block"),
                             ])],
-                            vec![self.words.view()],
+                            vec![self.paragraph.view()],
                         ),
                         self.spinner.view(),
                         button(
@@ -177,12 +179,12 @@ impl Component<Msg> for App {
             Msg::SkewedFuiButtonMsg(fui_btn_msg) => {
                 self.skewed_fui_button.update(*fui_btn_msg)
             }
-            Msg::WordsMsg(word_msg) => {
-                log::trace!("animating words..");
-                self.words.update_external(*word_msg)
+            Msg::ParagraphMsg(word_msg) => {
+                log::trace!("animating paragraph..");
+                self.paragraph.update_external(*word_msg)
             }
-            Msg::ReanimateWords => {
-                self.words.update_external(words::Msg::AnimateIn)
+            Msg::ReanimateParagraph => {
+                self.paragraph.update_external(paragraph::Msg::AnimateIn)
             }
             Msg::ReanimateAll => {
                 log::debug!("Reanimating...");

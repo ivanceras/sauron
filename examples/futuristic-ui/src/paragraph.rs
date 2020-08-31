@@ -13,16 +13,16 @@ pub enum Msg<MSG> {
     ParamMsg(MSG),
 }
 
-pub struct Words<MSG> {
+pub struct Paragraph<MSG> {
     _phantom: PhantomData<MSG>,
     child: String,
     text: String,
     animating: bool,
 }
 
-impl<MSG> Words<MSG> {
+impl<MSG> Paragraph<MSG> {
     pub fn new_with_content(content: &str) -> Self {
-        Words {
+        Paragraph {
             child: content.to_string(),
             text: "".to_string(),
             animating: false,
@@ -69,7 +69,7 @@ impl<MSG> Words<MSG> {
 
         log::trace!("returning a cmd for next animation..");
         Cmd::new(move |program| {
-            program.dispatch(crate::Msg::WordsMsg(Box::new(
+            program.dispatch(crate::Msg::ParagraphMsg(Box::new(
                 Msg::NextAnimation(is_in, child_text.clone(), start, duration),
             )))
         })
@@ -112,7 +112,7 @@ impl<MSG> Words<MSG> {
         if continue_animation {
             log::trace!("continue animation");
             Cmd::new(move |program| {
-                program.dispatch(crate::Msg::WordsMsg(Box::new(
+                program.dispatch(crate::Msg::ParagraphMsg(Box::new(
                     Msg::NextAnimation(
                         is_in,
                         child_text.clone(),
@@ -124,7 +124,7 @@ impl<MSG> Words<MSG> {
         } else {
             log::trace!("stop the animation");
             Cmd::new(move |program| {
-                program.dispatch(crate::Msg::WordsMsg(Box::new(
+                program.dispatch(crate::Msg::ParagraphMsg(Box::new(
                     Msg::StopAnimation,
                 )))
             })
