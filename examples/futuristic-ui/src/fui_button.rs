@@ -69,6 +69,7 @@ where
 
         .skewed.fui_button {
             transform: skewX(-45deg);
+            transform-origin: bottom left;
         }
 
         .fui_button__border {
