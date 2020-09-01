@@ -75,10 +75,15 @@ where
         let corner_box_shadow_color = "rgba(38,218,253,0.65)";
         let green_corner_box_shadow_color = "rgba(0,153,0,0.65)";
         let border_border_color = "#029dbb";
+        let corner_color = "#26dafd";
+        let green_corner_color = "#3f3";
         // color when button highlights upon clicking
         let click_highlight_color = "#029dbb";
+        let green_click_highlight_color = "#090";
         // wrapping the actual button
-        let button_text_color = "rgba(4,35,41,0.65)";
+        let button_wrap_text_color = "rgba(4,35,41,0.65)";
+        let button_text_color = "#acf9fb";
+        let green_button_text_color = "#9f9";
 
         vec![format!(
             r#"
@@ -86,7 +91,7 @@ where
             display: inline-block;
             padding: 1px;
             position: relative;
-            margin: 0 3px;
+            margin: 4px 4px;
         }}
 
         .skewed.fui_button {{
@@ -156,12 +161,12 @@ where
         .fui_button__corner {{
             width: 24px;
             height: 24px;
-            border-color: #26dafd;
+            border-color: {corner_color};
             box-shadow: 0 0 4px -2px {corner_box_shadow_color};
         }}
 
         .green .fui_button__corner {{
-            border-color: #090;
+            border-color: {green_corner_color};
             box-shadow: 0 0 4px {green_corner_box_shadow_color};
         }}
 
@@ -208,7 +213,7 @@ where
 
 
         .fui_button-text {{
-            background-color: {button_text_color};
+            background-color: {button_wrap_text_color};
         }}
 
         .hide .fui_button-text {{
@@ -224,12 +229,12 @@ where
         }}
 
         .fui_button__button {{
-            color: #acf9fb;
+            color: {button_text_color};
             cursor: pointer;
         }}
 
         .green .fui_button__button {{
-            color: #090;
+            color: {green_button_text_color};
         }}
 
         .skewed .fui_button__button {{
@@ -270,7 +275,7 @@ where
         }}
 
         .green .fui_button__highlight {{
-            background-color: #090;
+            background-color: {green_click_highlight_color};
         }}
 
         .fui_button__highlight-anim {{
@@ -282,8 +287,13 @@ where
             corner_box_shadow_color = corner_box_shadow_color,
             green_corner_box_shadow_color = green_corner_box_shadow_color,
             border_border_color = border_border_color,
+            corner_color = corner_color,
+            green_corner_color = green_corner_color,
             click_highlight_color = click_highlight_color,
+            button_wrap_text_color = button_wrap_text_color,
             button_text_color = button_text_color,
+            green_button_text_color = green_button_text_color,
+            green_click_highlight_color = green_click_highlight_color,
         )]
     }
 

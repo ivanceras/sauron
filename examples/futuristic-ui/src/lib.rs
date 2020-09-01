@@ -1,6 +1,7 @@
 //#![deny(warnings)]
 use frame::Frame;
 use fui_button::FuiButton;
+use header::Header;
 use paragraph::Paragraph;
 use sauron::html::attributes::{class, id, style};
 use sauron::html::events::on_click;
@@ -12,12 +13,15 @@ use web_sys::HtmlAudioElement;
 
 mod frame;
 mod fui_button;
+mod header;
 mod paragraph;
 mod spinner;
 
 pub enum Msg {
     ReAnimateFrame,
+    ReAnimateHeader,
     FrameMsg(frame::Msg),
+    HeaderMsg(header::Msg),
     FuiButtonMsg(Box<fui_button::Msg<Self>>),
     SimpleFuiButtonMsg(Box<fui_button::Msg<Self>>),
     SkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
@@ -31,6 +35,7 @@ pub enum Msg {
 
 pub struct App {
     show: bool,
+    header: Header,
     frame: Frame,
     fui_button: FuiButton<Msg>,
     simple_fui_button: FuiButton<Msg>,
@@ -74,6 +79,7 @@ impl App {
         App {
             show: true,
             frame: Frame::new_with_content("Retro Futuristic UI in rust"),
+            header: Header::new_with_content("Header"),
             fui_button,
             simple_fui_button,
             skewed_fui_button,
@@ -90,6 +96,7 @@ impl App {
                 paragraph::Msg::AnimateIn,
             )));
             program.dispatch(Msg::ReAnimateFrame);
+            program.dispatch(Msg::HeaderMsg(header::Msg::TriggerAnimation));
         })
     }
 }
@@ -120,6 +127,7 @@ impl Component<Msg> for App {
         "#
         .to_string()]
         .into_iter()
+        .chain(self.header.style().into_iter())
         .chain(self.frame.style().into_iter())
         .chain(self.fui_button.style().into_iter())
         .chain(self.spinner.style().into_iter())
@@ -134,6 +142,15 @@ impl Component<Msg> for App {
                 div(
                     vec![class("container")],
                     vec![
+                        button(
+                            vec![
+                                on_click(|_| Msg::ReAnimateHeader),
+                                style("margin", "20px"),
+                                style("display", "block"),
+                            ],
+                            vec![text("Animate Header")],
+                        ),
+                        self.header.view().map_msg(Msg::HeaderMsg),
                         button(
                             vec![
                                 on_click(|_| Msg::ReAnimateFrame),
@@ -211,7 +228,11 @@ impl Component<Msg> for App {
             Msg::ReAnimateFrame => {
                 self.frame.update(frame::Msg::TriggerAnimation)
             }
+            Msg::ReAnimateHeader => {
+                self.header.update(header::Msg::TriggerAnimation)
+            }
             Msg::FrameMsg(frame_msg) => self.frame.update(frame_msg),
+            Msg::HeaderMsg(header_msg) => self.header.update(header_msg),
             Msg::FuiButtonMsg(fui_btn_msg) => {
                 self.fui_button.update(*fui_btn_msg)
             }
