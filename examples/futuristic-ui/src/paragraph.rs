@@ -212,7 +212,7 @@ impl<MSG> Paragraph<MSG> {
                 vec![
                     span(vec![class("children")], vec![text(&self.child)]),
                     view_if(
-                        true,
+                        self.animating,
                         span(
                             vec![class("text")],
                             vec![
