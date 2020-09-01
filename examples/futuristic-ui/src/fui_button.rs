@@ -17,6 +17,8 @@ pub struct FuiButton<PMSG> {
     skewed: bool,
     /// whether to use the green color
     use_green: bool,
+    /// has corners
+    has_corners: bool,
     event_listeners: Vec<Attribute<Msg<PMSG>>>,
 }
 
@@ -30,6 +32,7 @@ where
             click: false,
             skewed: false,
             use_green: false,
+            has_corners: true,
             event_listeners: vec![],
         }
     }
@@ -40,6 +43,10 @@ where
 
     pub fn use_green(&mut self, use_green: bool) {
         self.use_green = use_green;
+    }
+
+    pub fn has_corners(&mut self, has_corners: bool) {
+        self.has_corners = has_corners;
     }
 
     pub fn add_event_listeners(
@@ -60,12 +67,17 @@ where
     }
 
     pub fn style(&self) -> Vec<String> {
+        // border box shadow
         let border_box_shadow_color = "rgba(2,157,187,0.65)";
+        // TODO: rename `green` to `alt`
         let green_border_box_shadow_color = "rgba(0,153,0,0.65)";
+        // corner box shadow
         let corner_box_shadow_color = "rgba(38,218,253,0.65)";
         let green_corner_box_shadow_color = "rgba(0,153,0,0.65)";
         let border_border_color = "#029dbb";
+        // color when button highlights upon clicking
         let click_highlight_color = "#029dbb";
+        // wrapping the actual button
         let button_text_color = "rgba(4,35,41,0.65)";
 
         vec![format!(
@@ -74,6 +86,7 @@ where
             display: inline-block;
             padding: 1px;
             position: relative;
+            margin: 0 3px;
         }}
 
         .skewed.fui_button {{
@@ -312,18 +325,26 @@ where
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-right")], vec![]),
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-top")], vec![]),
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-bottom")], vec![]),
-                div(vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__top-left")], vec![]),
-                div(
-                    vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__bottom-left")],
-                    vec![],
+                view_if(self.has_corners,
+                    div(vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__top-left")], vec![])
                 ),
-                div(
-                    vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__top-right")],
-                    vec![],
+                view_if(self.has_corners,
+                    div(
+                        vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__bottom-left")],
+                        vec![],
+                    )
                 ),
-                div(
-                    vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__bottom-right")],
-                    vec![],
+                view_if(self.has_corners,
+                    div(
+                        vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__top-right")],
+                        vec![],
+                    )
+                ),
+                view_if(self.has_corners,
+                    div(
+                        vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__bottom-right")],
+                        vec![],
+                    )
                 ),
                 div(vec![class("fui_button__wrap")],
                     vec![

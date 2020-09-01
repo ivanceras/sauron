@@ -19,7 +19,9 @@ pub enum Msg {
     ReAnimateFrame,
     FrameMsg(frame::Msg),
     FuiButtonMsg(Box<fui_button::Msg<Self>>),
+    SimpleFuiButtonMsg(Box<fui_button::Msg<Self>>),
     SkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
+    SimpleSkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
     GreenFuiButtonMsg(Box<fui_button::Msg<Self>>),
     ParagraphMsg(Box<paragraph::Msg<Self>>),
     ReanimateParagraph,
@@ -31,7 +33,9 @@ pub struct App {
     show: bool,
     frame: Frame,
     fui_button: FuiButton<Msg>,
+    simple_fui_button: FuiButton<Msg>,
     skewed_fui_button: FuiButton<Msg>,
+    simple_skewed_fui_button: FuiButton<Msg>,
     green_fui_button: FuiButton<Msg>,
     spinner: Spinner<Msg>,
     paragraph: Paragraph<Msg>,
@@ -42,9 +46,18 @@ impl App {
         let mut fui_button = FuiButton::<Msg>::new_with_label("Reanimate All");
         fui_button.add_event_listeners(vec![on_click(|_| Msg::ReanimateAll)]);
 
+        let mut simple_fui_button = FuiButton::<Msg>::new_with_label("Simple");
+        simple_fui_button.has_corners(false);
+
         let mut skewed_fui_button =
             FuiButton::<Msg>::new_with_label("Skewed button");
         skewed_fui_button.skewed(true);
+        skewed_fui_button.has_corners(true);
+
+        let mut simple_skewed_fui_button =
+            FuiButton::<Msg>::new_with_label("Skewed simple");
+        simple_skewed_fui_button.skewed(true);
+        simple_skewed_fui_button.has_corners(false);
 
         let mut green_fui_button =
             FuiButton::<Msg>::new_with_label("Cyberpunk");
@@ -62,7 +75,9 @@ impl App {
             show: true,
             frame: Frame::new_with_content("Retro Futuristic UI in rust"),
             fui_button,
+            simple_fui_button,
             skewed_fui_button,
+            simple_skewed_fui_button,
             green_fui_button,
             spinner: Spinner::new(),
             paragraph: Paragraph::new_with_content(paragraph_content),
@@ -97,6 +112,10 @@ impl Component<Msg> for App {
             color: #021114;
             text-shadow: none;
             background-color: #26dafd;
+        }
+
+        .futuristic-buttons {
+            display: flex;
         }
         "#
         .to_string()]
@@ -133,20 +152,23 @@ impl Component<Msg> for App {
                             ],
                             vec![],
                         ),
-                        self.fui_button.view().map_msg(|fbtn_msg| {
-                            Msg::FuiButtonMsg(Box::new(fbtn_msg))
-                        }),
-                        span(vec![style("margin", "0 5px")], vec![]),
-                        self.green_fui_button.view().map_msg(|fbtn_msg| {
-                            Msg::GreenFuiButtonMsg(Box::new(fbtn_msg))
-                        }),
-                        span(vec![style("margin", "0 40px")],
-                            vec![
-                                self.skewed_fui_button.view().map_msg(|fbtn_msg| {
-                                    Msg::SkewedFuiButtonMsg(Box::new(fbtn_msg))
-                                }),
-                            ]
-                        ),
+                        div(vec![class("futuristic-buttons")], vec![
+                            self.fui_button.view().map_msg(|fbtn_msg| {
+                                Msg::FuiButtonMsg(Box::new(fbtn_msg))
+                            }),
+                            self.simple_fui_button.view().map_msg(|fbtn_msg| {
+                                Msg::SimpleFuiButtonMsg(Box::new(fbtn_msg))
+                            }),
+                            self.green_fui_button.view().map_msg(|fbtn_msg| {
+                                Msg::GreenFuiButtonMsg(Box::new(fbtn_msg))
+                            }),
+                            self.skewed_fui_button.view().map_msg(|fbtn_msg| {
+                                Msg::SkewedFuiButtonMsg(Box::new(fbtn_msg))
+                            }),
+                            self.simple_skewed_fui_button.view().map_msg(|fbtn_msg| {
+                                Msg::SimpleSkewedFuiButtonMsg(Box::new(fbtn_msg))
+                            }),
+                        ]),
                         button(
                             vec![
                                 on_click(|_| Msg::ReanimateParagraph),
@@ -193,8 +215,14 @@ impl Component<Msg> for App {
             Msg::FuiButtonMsg(fui_btn_msg) => {
                 self.fui_button.update(*fui_btn_msg)
             }
+            Msg::SimpleFuiButtonMsg(fui_btn_msg) => {
+                self.simple_fui_button.update(*fui_btn_msg)
+            }
             Msg::SkewedFuiButtonMsg(fui_btn_msg) => {
                 self.skewed_fui_button.update(*fui_btn_msg)
+            }
+            Msg::SimpleSkewedFuiButtonMsg(fui_btn_msg) => {
+                self.simple_skewed_fui_button.update(*fui_btn_msg)
             }
             Msg::GreenFuiButtonMsg(fui_btn_msg) => {
                 self.green_fui_button.update(*fui_btn_msg)
