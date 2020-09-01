@@ -60,160 +60,170 @@ where
     }
 
     pub fn style(&self) -> Vec<String> {
-        vec![r#"
-        .fui_button {
+        let border_box_shadow_color = "rgba(2,157,187,0.65)";
+        let green_border_box_shadow_color = "rgba(0,153,0,0.65)";
+        let corner_box_shadow_color = "rgba(38,218,253,0.65)";
+        let green_corner_box_shadow_color = "rgba(0,153,0,0.65)";
+        let border_border_color = "#029dbb";
+        let click_highlight_color = "#029dbb";
+        let button_text_color = "rgba(4,35,41,0.65)";
+
+        vec![format!(
+            r#"
+        .fui_button {{
             display: inline-block;
             padding: 1px;
             position: relative;
-        }
+        }}
 
-        .skewed.fui_button {
+        .skewed.fui_button {{
             transform: skewX(-45deg);
             transform-origin: bottom left;
-        }
+        }}
 
-        .fui_button__border {
-            border-color: #029dbb;
-            box-shadow: 0 0 4px rgba(2,157,187,0.65);
-        }
+        .fui_button__border {{
+            border-color: {border_border_color};
+            box-shadow: 0 0 4px {border_box_shadow_color};
+        }}
 
-        .green .fui_button__border {
+        .green .fui_button__border {{
             border-color: #090;
-            box-shadow: 0 0 4px rgba(0,153,0,0.65);
-        }
+            box-shadow: 0 0 4px {green_border_box_shadow_color};
+        }}
 
-        .hide .fui_button__border {
+        .hide .fui_button__border {{
           height: 0;
           width: 0;
-        }
+        }}
 
-        .fui_button__border-left {
+        .fui_button__border-left {{
             top: 50%;
             left: 0;
             height: 100%;
             transform: translate(0, -50%);
             border-width: 0 0 0 1px;
-        }
+        }}
 
 
-        .fui_button__border-anim {
+        .fui_button__border-anim {{
             z-index: 1;
             opacity: 1;
             position: absolute;
             transition: all 250ms ease-in;
             border-style: solid;
-        }
+        }}
 
-        .fui_button__border-right {
+        .fui_button__border-right {{
             top: 50%;
             right: 0;
             height: 100%;
             transform: translate(0, -50%);
             border-width: 0 0 0 1px;
-        }
+        }}
 
 
-        .fui_button__border-top {
+        .fui_button__border-top {{
             top: 0;
             left: 50%;
             width: 100%;
             transform: translate(-50%, 0);
             border-width: 1px 0 0 0;
-        }
+        }}
 
 
-        .fui_button__border-bottom {
+        .fui_button__border-bottom {{
             left: 50%;
             width: 100%;
             bottom: 0;
             transform: translate(-50%, 0);
             border-width: 1px 0 0 0;
-        }
+        }}
 
 
-        .fui_button__corner {
+        .fui_button__corner {{
             width: 24px;
             height: 24px;
             border-color: #26dafd;
-            box-shadow: 0 0 4px -2px rgba(38,218,253,0.65);
-        }
+            box-shadow: 0 0 4px -2px {corner_box_shadow_color};
+        }}
 
-        .green .fui_button__corner {
+        .green .fui_button__corner {{
             border-color: #090;
-            box-shadow: 0 0 4px rgba(0,153,0,0.65);
-        }
+            box-shadow: 0 0 4px {green_corner_box_shadow_color};
+        }}
 
-        .hide .fui_button__corner{
+        .hide .fui_button__corner {{
             width: 0;
             height: 0;
             opacity: 0;
-        }
+        }}
 
-        .fui_button__corner-anim {
+        .fui_button__corner-anim {{
             z-index: 2;
             opacity: 1;
             position: absolute;
             transition: all 250ms ease-in;
             border-style: solid;
-        }
+        }}
 
-        .fui_button_corner__top-left {
+        .fui_button_corner__top-left {{
             left: -2px;
             top: -2px;
             border-width: 2px 0 0 2px;
-        }
+        }}
 
 
-        .fui_button_corner__bottom-left {
+        .fui_button_corner__bottom-left {{
             left: -2px;
             bottom: -2px;
             border-width: 0 0 2px 2px;
-        }
+        }}
 
 
-        .fui_button_corner__top-right {
+        .fui_button_corner__top-right {{
             right: -2px;
             top: -2px;
             border-width: 2px 2px 0 0;
-        }
+        }}
 
 
-        .fui_button_corner__bottom-right {
+        .fui_button_corner__bottom-right {{
             right: -2px;
             bottom: -2px;
             border-width: 0 2px 2px 0;
-        }
+        }}
 
 
-        .fui_button-text {
-            background-color: rgba(4,35,41,0.65);
-        }
+        .fui_button-text {{
+            background-color: {button_text_color};
+        }}
 
-        .hide .fui_button-text {
+        .hide .fui_button-text {{
             background-color: transparent;
-        }
+        }}
 
-        .fui_button-text-anim {
+        .fui_button-text-anim {{
             z-index: 3;
             display: block;
             position: relative;
             overflow: hidden;
             transition: background-color 250ms ease-in;
-        }
+        }}
 
-        .fui_button__button {
+        .fui_button__button {{
             color: #acf9fb;
             cursor: pointer;
-        }
+        }}
 
-        .green .fui_button__button {
+        .green .fui_button__button {{
             color: #090;
-        }
+        }}
 
-        .skewed .fui_button__button{
+        .skewed .fui_button__button {{
             transform: skewX(45deg);
-        }
-        .fui_button__button-anim {
+        }}
+
+        .fui_button__button-anim {{
             margin: 0;
             border: none;
             z-index: 2;
@@ -227,10 +237,10 @@ where
             line-height: 1;
             user-select: none;
             vertical-align: middle;
-        }
+        }}
 
 
-        .fui_button__highlight{
+        .fui_button__highlight {{
               z-index: 1;
               position: absolute;
               left: 0;
@@ -239,22 +249,29 @@ where
               bottom: 0;
               background-color: transparent;
               opacity: 0;
-        }
+        }}
 
-        .click .fui_button__highlight{
+        .click .fui_button__highlight {{
             opacity: 1;
-            background-color: #029dbb
-        }
+            background-color: {click_highlight_color}
+        }}
 
-        .green .fui_button__highlight {
+        .green .fui_button__highlight {{
             background-color: #090;
-        }
+        }}
 
-        .fui_button__highlight-anim{
+        .fui_button__highlight-anim {{
             transition: all 50ms ease-out;
-        }
-        "#
-        .to_string()]
+        }}
+        "#,
+            border_box_shadow_color = border_box_shadow_color,
+            green_border_box_shadow_color = green_border_box_shadow_color,
+            corner_box_shadow_color = corner_box_shadow_color,
+            green_corner_box_shadow_color = green_corner_box_shadow_color,
+            border_border_color = border_border_color,
+            click_highlight_color = click_highlight_color,
+            button_text_color = button_text_color,
+        )]
     }
 
     pub fn update(&mut self, msg: Msg<PMSG>) -> Cmd<crate::App, crate::Msg> {
