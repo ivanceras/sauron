@@ -4,7 +4,7 @@ set -v
 
 ./bootstrap.sh
 
-wasm-pack build --target no-modules --release -- --features "with-request-animation-frame"
+wasm-pack build --target web --release -- --features "with-request-animation-frame"
 
 ./copy_files_to_benchmark_directory.sh
 

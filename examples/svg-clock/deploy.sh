@@ -10,7 +10,7 @@ if ! type basic-http-server > /dev/null; then
     cargo install basic-http-server
 fi
 
-wasm-pack build --target no-modules --release -- --features "wee_alloc"
+wasm-pack build --target web --release -- --features "wee_alloc"
 
 dest_dir="../../../ivanceras.github.io/svg-clock"
 

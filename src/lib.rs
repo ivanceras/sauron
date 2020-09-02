@@ -81,10 +81,9 @@
 //!     <title>Minimal sauron app</title>
 //!   </head>
 //!   <body>
-//!     <script src='pkg/minimal.js'></script>
 //!     <script type=module>
-//!         window.wasm_bindgen('pkg/minimal_bg.wasm')
-//!             .catch(console.error);
+//!         import init from './pkg/minimal.js';
+//!         init().catch(console.error);
 //!     </script>
 //!   </body>
 //! </html>
@@ -111,7 +110,7 @@
 //!
 //! Build using
 //! ```sh
-//! $> wasm-pack build --target no-modules
+//! $> wasm-pack build --target web --release
 //! ```
 //! Look at the [examples](https://github.com/ivanceras/sauron/tree/master/examples)
 //! and the build script for the details.

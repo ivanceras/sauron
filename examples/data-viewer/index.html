@@ -10,14 +10,13 @@
     <title>Data viewer</title>
 </head>
 <body style='margin: 0; padding: 0; width: 100%; height: 100%;'>
-  <script src='pkg/data_viewer.js'></script>
   <script type=module>
-        const { initialize } = wasm_bindgen;
-        async function run() {
-            await wasm_bindgen('pkg/data_viewer_bg.wasm');
+    import init,{initialize} from './pkg/data_viewer.js';
+        async function start() {
+            await init().catch(console.error);
             initialize(window.initial_state);
         }
-        run();
+        start();
   </script>
   <script>
       window.initial_state = '#INITIAL_STATE_JSON#'

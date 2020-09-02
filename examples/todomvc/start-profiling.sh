@@ -4,7 +4,7 @@ set -v
 
 ./bootstrap.sh
 
-wasm-pack build --target no-modules --profiling -- --features "with-measure"
+wasm-pack build --target web --profiling -- --features "with-measure"
 
 
 ./copy_files_to_benchmark_directory.sh

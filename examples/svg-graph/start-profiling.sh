@@ -4,6 +4,6 @@ set -v
 
 . ./bootstrap.sh
 
-wasm-pack build --target no-modules --profiling
+wasm-pack build --target web --profiling
 
 basic-http-server ./ -a 0.0.0.0:4001

@@ -10,6 +10,6 @@ if ! type basic-http-server > /dev/null; then
     cargo install basic-http-server
 fi
 
-wasm-pack build --target no-modules
+wasm-pack build --target web
 
 basic-http-server ./ -a 0.0.0.0:5002

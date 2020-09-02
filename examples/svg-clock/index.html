@@ -21,10 +21,9 @@
     </style>
 </head>
 <body>
-  <script src='pkg/svg_clock.js'></script>
   <script type="module">
-      wasm_bindgen('pkg/svg_clock_bg.wasm')
-            .catch(console.error);
+     import init from './pkg/svg_clock.js';
+     init().catch(console.error);
   </script>
 </body>
 </html>
