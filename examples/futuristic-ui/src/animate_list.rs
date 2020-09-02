@@ -55,7 +55,6 @@ where
                 li(vec![], vec![text("List 8")]),
                 li(vec![], vec![text("List 9")]),
                 li(vec![], vec![text("List 10")]),
-                /*
                 li(vec![], vec![text("List 11")]),
                 li(vec![], vec![text("List 12")]),
                 li(vec![], vec![text("List 13")]),
@@ -66,7 +65,6 @@ where
                 li(vec![], vec![text("List 18")]),
                 li(vec![], vec![text("List 19")]),
                 li(vec![], vec![text("List 20")]),
-                */
             ],
         )
     }
@@ -100,7 +98,7 @@ where
         let real_duration = interval * content_len as f64;
         let timeout = 500.0;
         //let duration = real_duration.min(timeout);
-        let duration = 5000.0;
+        let duration = 500.0;
         let start = crate::dom::now();
 
         self.animating = true;
@@ -189,12 +187,12 @@ where
                     Node::Text(txt) => {
                         let txt_len = txt.len();
                         let truncate_len = std::cmp::min(
-                            txt_len as i32,
-                            (node_idx_limit as i32 - *node_idx as i32),
+                            txt_len,
+                            (node_idx_limit - *node_idx),
                         );
 
-                        let start = 0 as usize;
-                        let end = truncate_len as usize;
+                        let start = 0;
+                        let end = truncate_len;
 
                         log::trace!("txt_len: {}, node_idx: {}, node_idx_limit: {}, truncate_len: {},", txt_len, node_idx, node_idx_limit, truncate_len);
                         let truncated_txt = &txt[start..end];
