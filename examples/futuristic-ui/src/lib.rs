@@ -110,6 +110,9 @@ impl App {
             )));
             program.dispatch(Msg::ReAnimateFrame);
             program.dispatch(Msg::HeaderMsg(header::Msg::TriggerAnimation));
+            program.dispatch(Msg::AnimateListMsg(Box::new(
+                animate_list::Msg::AnimateIn,
+            )));
         })
     }
 }

@@ -114,8 +114,7 @@ where
         let interval = 1_000.0 / 60.0;
         let real_duration = interval * content_len as f64;
         let timeout = 500.0;
-        //let duration = real_duration.min(timeout);
-        let duration = 5000.0;
+        let duration = real_duration.min(timeout);
         let start = crate::dom::now();
 
         self.animating = true;
@@ -356,7 +355,7 @@ where
               width: 0;
               height: 0;
               display: inline-block;
-              animation: words_blink-anim 250ms step-end infinite;
+              animation: animate_list_blink-anim 250ms step-end infinite;
             }
 
             .animating .animate_list_children {
@@ -367,7 +366,7 @@ where
                 opacity: 1;
             }
 
-            @keyframes words_blink-anim {
+            @keyframes animate_list_blink-anim {
               0%, 100% {
                 color: transparent;
               }
