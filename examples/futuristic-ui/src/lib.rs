@@ -1,4 +1,5 @@
 //#![deny(warnings)]
+use animate_list::AnimateList;
 use frame::Frame;
 use fui_button::FuiButton;
 use header::Header;
@@ -11,12 +12,14 @@ use sauron::{Cmd, Component, Node, Program};
 use spinner::Spinner;
 use web_sys::HtmlAudioElement;
 
+mod animate_list;
 mod frame;
 mod fui_button;
 mod header;
 mod paragraph;
 mod spinner;
 
+#[derive(Clone)]
 pub enum Msg {
     ReAnimateFrame,
     ReAnimateHeader,
@@ -29,7 +32,9 @@ pub enum Msg {
     GreenFuiButtonMsg(Box<fui_button::Msg<Self>>),
     DisabledFuiButtonMsg(Box<fui_button::Msg<Self>>),
     ParagraphMsg(Box<paragraph::Msg<Self>>),
+    AnimateListMsg(Box<animate_list::Msg<Self>>),
     ReanimateParagraph,
+    ReanimateList,
     ReanimateAll,
     NoOp,
 }
@@ -46,6 +51,7 @@ pub struct App {
     disabled_fui_button: FuiButton<Msg>,
     spinner: Spinner<Msg>,
     paragraph: Paragraph<Msg>,
+    animate_list: AnimateList<Msg>,
 }
 
 impl App {
@@ -93,6 +99,7 @@ impl App {
             disabled_fui_button,
             spinner: Spinner::new(),
             paragraph: Paragraph::new_with_content(paragraph_content),
+            animate_list: AnimateList::new(),
         }
     }
 
@@ -138,6 +145,7 @@ impl Component<Msg> for App {
         .chain(self.fui_button.style().into_iter())
         .chain(self.spinner.style().into_iter())
         .chain(self.paragraph.style().into_iter())
+        .chain(self.animate_list.style().into_iter())
         .collect()
     }
 
@@ -210,6 +218,18 @@ impl Component<Msg> for App {
                             ])],
                             vec![self.paragraph.view()],
                         ),
+                        p(
+                            vec![],
+                            vec![self.animate_list.view()],
+                        ),
+                        button(
+                            vec![
+                                on_click(|_| Msg::ReanimateList),
+                                style("margin", "20px"),
+                                style("display", "block"),
+                            ],
+                            vec![text("Animate List")],
+                        ),
                         self.spinner.view(),
                         button(
                             vec![
@@ -260,12 +280,19 @@ impl Component<Msg> for App {
             Msg::DisabledFuiButtonMsg(fui_btn_msg) => {
                 self.disabled_fui_button.update(*fui_btn_msg)
             }
-            Msg::ParagraphMsg(word_msg) => {
+            Msg::ParagraphMsg(paragraph_msg) => {
                 log::trace!("animating paragraph..");
-                self.paragraph.update(*word_msg)
+                self.paragraph.update(*paragraph_msg)
+            }
+            Msg::AnimateListMsg(animate_list_msg) => {
+                log::trace!("animating paragraph..");
+                self.animate_list.update(*animate_list_msg)
             }
             Msg::ReanimateParagraph => {
                 self.paragraph.update(paragraph::Msg::AnimateIn)
+            }
+            Msg::ReanimateList => {
+                self.animate_list.update(animate_list::Msg::AnimateIn)
             }
             Msg::ReanimateAll => {
                 log::debug!("Reanimating...");

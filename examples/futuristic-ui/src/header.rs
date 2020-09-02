@@ -5,6 +5,7 @@ use sauron::prelude::*;
 use sauron::{Cmd, Component, Node, Program};
 use web_sys::HtmlAudioElement;
 
+#[derive(Clone)]
 pub enum Msg {
     ToggleShow,
     TriggerAnimation,

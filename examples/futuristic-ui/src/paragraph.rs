@@ -6,6 +6,7 @@ use sauron::{Cmd, Component, Node, Program};
 use std::marker::PhantomData;
 use web_sys::HtmlAudioElement;
 
+#[derive(Clone)]
 pub enum Msg<MSG> {
     AnimateIn,
     StopAnimation,
@@ -181,11 +182,11 @@ impl<MSG> Paragraph<MSG> {
             }
 
             .animating .children {
-                opacity: 0
+                opacity: 0;
              }
 
             .animating .text {
-                opacity: 1
+                opacity: 1;
             }
 
             @keyframes words_blink-anim {

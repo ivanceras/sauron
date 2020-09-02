@@ -6,6 +6,7 @@ use sauron::{Cmd, Component, Node, Program};
 use std::marker::PhantomData;
 use web_sys::HtmlAudioElement;
 
+#[derive(Clone)]
 pub struct Spinner<MSG> {
     _phantom: PhantomData<MSG>,
 }
