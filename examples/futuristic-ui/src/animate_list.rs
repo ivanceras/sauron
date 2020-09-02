@@ -38,8 +38,7 @@ where
             vec![],
             vec![
                 p(vec![], vec![
-                    a(vec![href("https://github.com/ivanceras/sauron")], vec![text(long_txt.clone())]),
-                    div(vec![],vec![text("it looks like the anchro text is not animated")]),
+                    a(vec![href("https://github.com/ivanceras/sauron")], vec![text("Link here")]),
                     img(vec![styles([("width","600px"),("height", "auto"),("display","block")]),src("img/space.jpg")], vec![]),
                 ]),
                 li(vec![], vec![text(long_txt.clone())]),
@@ -51,6 +50,38 @@ where
                         li(vec![], vec![text("Not too long txt here... trying to see if it is correctly animated")]),
                     ],
                 ),
+                div(vec![],vec![
+                    table(vec![],vec![
+                        thead(vec![],vec![
+                            tr(vec![],vec![
+                                th(vec![],vec![text("Prop name")]),
+                                th(vec![],vec![text("Type")]),
+                                th(vec![],vec![text("Default")]),
+                                th(vec![],vec![text("Description")]),
+                            ]),
+                        ]),
+                        tbody(vec![],vec![
+                            tr(vec![],vec![
+                                td(vec![],vec![text("name")]),
+                                td(vec![],vec![text("string")]),
+                                td(vec![],vec![text("''")]),
+                                td(vec![],vec![text("The base name of the component")]),
+                            ]),
+                            tr(vec![],vec![
+                                td(vec![],vec![text("age")]),
+                                td(vec![],vec![text("number")]),
+                                td(vec![],vec![text("0")]),
+                                td(vec![],vec![text("The age of the component")]),
+                            ]),
+                            tr(vec![],vec![
+                                td(vec![],vec![text("married")]),
+                                td(vec![],vec![text("bool")]),
+                                td(vec![],vec![text("false")]),
+                                td(vec![],vec![text("If the component is married")]),
+                            ]),
+                        ]),
+                    ]),
+                ])
             ],
         )
     }
@@ -148,26 +179,51 @@ where
                 match child_src {
                     Node::Element(element) => {
                         if *node_idx < node_idx_limit {
-                            *node_idx += 1;
                             let child_src_tag = element.tag();
-                            let child_src_attr = element.get_attributes();
-                            let child_clone = html_element(
-                                child_src_tag,
-                                child_src_attr.to_vec(),
-                                vec![],
-                            );
+                            match *child_src_tag {
+                                // add everything row by row,
+                                // since the default behavior is adding cell by cell, which has an ugly
+                                // sliding effect
+                                "tr" => {
+                                    Self::node_count_recursive(
+                                        child_src, node_idx,
+                                    );
+                                    dest.add_children_ref_mut(vec![
+                                        child_src.clone()
+                                    ]);
+                                }
+                                // tags other than tr
+                                _ => {
+                                    *node_idx += 1;
+                                    let child_src_attr =
+                                        element.get_attributes();
+                                    // dont include the children on this clone
+                                    let child_clone = html_element(
+                                        child_src_tag,
+                                        child_src_attr.to_vec(),
+                                        vec![],
+                                    );
+                                    //TODO: add a skip mechanism here to add the element right away
+                                    //including it's children and increment the node_idx to the remaining
+                                    //tree leaf count of the element
+                                    // This is needed for <table> element, to avoid wobly animation
+                                    // where columns seems to be flying from the left
 
-                            dest.add_children_ref_mut(vec![child_clone]);
-                            let dest_children = dest
-                                .children_mut()
-                                .expect("must have a dest children");
+                                    dest.add_children_ref_mut(vec![
+                                        child_clone,
+                                    ]);
+                                    let dest_children = dest
+                                        .children_mut()
+                                        .expect("must have a dest children");
 
-                            Self::include_node_recursive(
-                                &mut dest_children[index],
-                                child_src,
-                                node_idx_limit,
-                                node_idx,
-                            );
+                                    Self::include_node_recursive(
+                                        &mut dest_children[index],
+                                        child_src,
+                                        node_idx_limit,
+                                        node_idx,
+                                    );
+                                }
+                            }
                         }
                     }
                     Node::Text(txt) => {
