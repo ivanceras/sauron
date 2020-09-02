@@ -34,37 +34,23 @@ where
 
     fn children(&self) -> Node<MSG> {
         let long_txt = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam scelerisque purus faucibus urna venenatis, a elementum diam laoreet. Fusce eget enim justo. Pellentesque cursus metus elit, ut porttitor eros iaculis sit amet. Quisque varius felis id turpis iaculis, et viverra enim pulvinar. Curabitur vel lacus interdum, molestie purus ut, pretium nibh. Mauris commodo dolor magna, eget dignissim mauris semper vitae. Ut viverra nec ex quis semper. Sed sit amet tincidunt mauris. Mauris in imperdiet ipsum. Praesent pretium tortor ut felis posuere, sed lacinia nunc pretium. Morbi et felis nec neque accumsan tincidunt. In hac habitasse platea dictumst. Nulla sit amet elit sed purus posuere placerat ut quis metus. Etiam mattis interdum dui at ornare. Nunc sit amet venenatis lorem, sed eleifend mauris. Pellentesque eros sem, fermentum vel lacus at, congue rhoncus elit. ";
-        ul(
+        div(
             vec![],
             vec![
+                p(vec![], vec![
+                    a(vec![href("https://github.com/ivanceras/sauron")], vec![text(long_txt.clone())]),
+                    div(vec![],vec![text("it looks like the anchro text is not animated")]),
+                    img(vec![styles([("width","600px"),("height", "auto"),("display","block")]),src("img/space.jpg")], vec![]),
+                ]),
                 li(vec![], vec![text(long_txt.clone())]),
                 li(vec![], vec![text("List 2")]),
-                li(vec![], vec![text("List 3")]),
-                li(vec![], vec![text("List 4")]),
                 ul(
                     vec![],
                     vec![
-                        li(vec![], vec![text("SubList 1")]),
-                        li(vec![], vec![text("SubList 2")]),
                         li(vec![], vec![text("SubList 3")]),
                         li(vec![], vec![text("Not too long txt here... trying to see if it is correctly animated")]),
                     ],
                 ),
-                li(vec![], vec![text("List 6")]),
-                li(vec![], vec![text("List 7")]),
-                li(vec![], vec![text("List 8")]),
-                li(vec![], vec![text("List 9")]),
-                li(vec![], vec![text("List 10")]),
-                li(vec![], vec![text("List 11")]),
-                li(vec![], vec![text("List 12")]),
-                li(vec![], vec![text("List 13")]),
-                li(vec![], vec![text("List 14")]),
-                li(vec![], vec![text("List 15")]),
-                li(vec![], vec![text("List 16")]),
-                li(vec![], vec![text("List 17")]),
-                li(vec![], vec![text("List 18")]),
-                li(vec![], vec![text("List 19")]),
-                li(vec![], vec![text("List 20")]),
             ],
         )
     }
@@ -98,7 +84,7 @@ where
         let real_duration = interval * content_len as f64;
         let timeout = 500.0;
         //let duration = real_duration.min(timeout);
-        let duration = 500.0;
+        let duration = 5000.0;
         let start = crate::dom::now();
 
         self.animating = true;
@@ -198,6 +184,13 @@ where
                         let truncated_txt = &txt[start..end];
                         let text_node = Node::Text(truncated_txt.to_string());
                         dest.add_children_ref_mut(vec![text_node]);
+                        // we append the blinking character to the end of the text
+                        // here, and only when this node has not yet finish animating..
+                        if truncate_len < txt_len {
+                            let blink =
+                                span(vec![class("blink")], vec![text("█")]);
+                            dest.add_children_ref_mut(vec![blink]);
+                        }
                         *node_idx += txt_len;
                     }
                 };
@@ -348,19 +341,16 @@ where
                         self.animating,
                         span(
                             vec![class("animated_layer_wrapper")],
-                            vec![
-                                span(
-                                    vec![class("animated_layer")],
-                                    if let Some(animated_layer) =
-                                        &self.animated_layer
-                                    {
-                                        vec![animated_layer.clone()]
-                                    } else {
-                                        vec![]
-                                    },
-                                ),
-                                span(vec![class("blink")], vec![text("█")]),
-                            ],
+                            vec![span(
+                                vec![class("animated_layer")],
+                                if let Some(animated_layer) =
+                                    &self.animated_layer
+                                {
+                                    vec![animated_layer.clone()]
+                                } else {
+                                    vec![]
+                                },
+                            )],
                         ),
                     ),
                 ],
