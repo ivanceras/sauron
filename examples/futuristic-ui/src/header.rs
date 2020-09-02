@@ -32,7 +32,7 @@ impl Header {
     }
 
     fn child(&self) -> Node<Msg> {
-        div(vec![], vec![text(&self.content)])
+        h1(vec![], vec![text(&self.content)])
     }
 
     pub fn update(&mut self, msg: Msg) -> Cmd<crate::App, crate::Msg> {
@@ -87,6 +87,19 @@ impl Header {
             position: relative;
         }
 
+        .header {
+            color: #26dafd;
+            font-size: 21px;
+            line-height: 1.5;
+            font-family: "Titillium Web", "sans-serif";
+        }
+
+        .header h1 {
+            padding: 0 0;
+            margin: 0 4px;
+        }
+
+
         .header__border {
             border-color: #029dbb;
             box-shadow: 0 0 4px rgba(2,157,187,0.65);
@@ -114,17 +127,13 @@ impl Header {
             border-width: 4px 0 0 0;
         }
 
-        .header-text{
-            font-size: 32px;
-            padding: 10px 0;
-        }
-
         .header-text-anim {
-            z-index: 3;
-            display: block;
-            position: relative;
-            overflow: hidden;
-            transition: background-color 250ms ease-in;
+            color: #a1ecfb;
+            transition: color 250ms ease-out;
+            font-family: "Electrolize", "sans-serif";
+            font-weight: bold;
+            text-shadow: 0 0 4px rgba(161,236,251,0.65);
+            text-transform: uppercase;
         }
 
         "#
@@ -132,7 +141,7 @@ impl Header {
     }
 
     pub fn view(&self) -> Node<Msg> {
-        div(
+        header(
             vec![classes_flag([("header", true), ("hide", self.hide)])],
             vec![
                 div(

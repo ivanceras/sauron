@@ -19,6 +19,7 @@ pub struct FuiButton<PMSG> {
     use_green: bool,
     /// has corners
     has_corners: bool,
+    disabled: bool,
     event_listeners: Vec<Attribute<Msg<PMSG>>>,
 }
 
@@ -33,6 +34,7 @@ where
             skewed: false,
             use_green: false,
             has_corners: true,
+            disabled: false,
             event_listeners: vec![],
         }
     }
@@ -47,6 +49,11 @@ where
 
     pub fn has_corners(&mut self, has_corners: bool) {
         self.has_corners = has_corners;
+    }
+
+    pub fn disabled(&mut self, disabled: bool) {
+        self.disabled = disabled;
+        self.has_corners(false);
     }
 
     pub fn add_event_listeners(
@@ -69,21 +76,27 @@ where
     pub fn style(&self) -> Vec<String> {
         // border box shadow
         let border_box_shadow_color = "rgba(2,157,187,0.65)";
-        // TODO: rename `green` to `alt`
-        let green_border_box_shadow_color = "rgba(0,153,0,0.65)";
         // corner box shadow
         let corner_box_shadow_color = "rgba(38,218,253,0.65)";
-        let green_corner_box_shadow_color = "rgba(0,153,0,0.65)";
         let border_border_color = "#029dbb";
         let corner_color = "#26dafd";
-        let green_corner_color = "#3f3";
         // color when button highlights upon clicking
         let click_highlight_color = "#029dbb";
-        let green_click_highlight_color = "#090";
         // wrapping the actual button
         let button_wrap_text_color = "rgba(4,35,41,0.65)";
         let button_text_color = "#acf9fb";
-        let green_button_text_color = "#9f9";
+        // TODO: rename `green` to `alt`
+        let green_border_color = "#090";
+        let green_corner_color = "#0f0";
+        let green_click_highlight_color = "#090";
+        let green_button_text_color = "#0f0";
+        let green_border_box_shadow_color = "rgba(0,153,0,0.65)";
+        let green_corner_box_shadow_color = "rgba(0,255,0,0.65)";
+        let disabled_border_color = "#666";
+        let disabled_corner_color = "#999";
+        let disabled_corner_box_shadow_color = "rgba(153,153,153,0.65)";
+        let disabled_border_box_shadow_color = "rgba(102,102,102,0.65)";
+        let disabled_button_text_color = "#999";
 
         vec![format!(
             r#"
@@ -105,8 +118,13 @@ where
         }}
 
         .green .fui_button__border {{
-            border-color: #090;
+            border-color: {green_border_color};
             box-shadow: 0 0 4px {green_border_box_shadow_color};
+        }}
+
+        .disabled .fui_button__border {{
+            border-color: {disabled_border_color};
+            box-shadow: 0 0 4px {disabled_border_box_shadow_color};
         }}
 
         .hide .fui_button__border {{
@@ -159,8 +177,8 @@ where
 
 
         .fui_button__corner {{
-            width: 24px;
-            height: 24px;
+            width: 8px;
+            height: 8px;
             border-color: {corner_color};
             box-shadow: 0 0 4px -2px {corner_box_shadow_color};
         }}
@@ -168,6 +186,11 @@ where
         .green .fui_button__corner {{
             border-color: {green_corner_color};
             box-shadow: 0 0 4px {green_corner_box_shadow_color};
+        }}
+
+        .disabled .fui_button__corner {{
+            border-color: {disabled_corner_color};
+            box-shadow: 0 0 4px {disabled_corner_box_shadow_color};
         }}
 
         .hide .fui_button__corner {{
@@ -237,6 +260,11 @@ where
             color: {green_button_text_color};
         }}
 
+        .disabled .fui_button__button {{
+            color: {disabled_button_text_color};
+            cursor: auto;
+        }}
+
         .skewed .fui_button__button {{
             transform: skewX(45deg);
         }}
@@ -282,18 +310,27 @@ where
             transition: all 50ms ease-out;
         }}
         "#,
+            //default colors
             border_box_shadow_color = border_box_shadow_color,
-            green_border_box_shadow_color = green_border_box_shadow_color,
             corner_box_shadow_color = corner_box_shadow_color,
-            green_corner_box_shadow_color = green_corner_box_shadow_color,
             border_border_color = border_border_color,
             corner_color = corner_color,
-            green_corner_color = green_corner_color,
             click_highlight_color = click_highlight_color,
             button_wrap_text_color = button_wrap_text_color,
             button_text_color = button_text_color,
+            // green
+            green_border_color = green_border_color,
+            green_corner_color = green_corner_color,
             green_button_text_color = green_button_text_color,
             green_click_highlight_color = green_click_highlight_color,
+            green_border_box_shadow_color = green_border_box_shadow_color,
+            green_corner_box_shadow_color = green_corner_box_shadow_color,
+            // disabled
+            disabled_corner_color = disabled_corner_color,
+            disabled_border_color = disabled_border_color,
+            disabled_button_text_color = disabled_button_text_color,
+            disabled_corner_box_shadow_color = disabled_corner_box_shadow_color,
+            disabled_border_box_shadow_color = disabled_border_box_shadow_color,
         )]
     }
 
@@ -328,7 +365,12 @@ where
         div(
             vec![
                 class("fui_button"),
-                classes_flag([("click",self.click), ("skewed", self.skewed), ("green", self.use_green)]),
+                classes_flag([
+                    ("click",self.click),
+                    ("skewed", self.skewed),
+                    ("green", self.use_green),
+                    ("disabled", self.disabled),
+                ]),
             ],
             vec![
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-left")], vec![]),
@@ -364,6 +406,7 @@ where
                                 button(
                                     vec![
                                         class("fui_button__button fui_button__button-anim"),
+                                        disabled(self.disabled),
                                         on_click(|_|Msg::Click)
                                     ],
                                     vec![text(&self.label)]
