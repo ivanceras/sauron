@@ -132,14 +132,14 @@ impl<MSG> Paragraph<MSG> {
     }
 
     pub fn update(&mut self, msg: Msg<MSG>) -> Cmd<crate::App, crate::Msg> {
-        log::trace!("words updating..");
+        log::trace!("paragraph updating..");
         match msg {
             Msg::AnimateIn => {
                 log::trace!("animate in started...");
                 self.animate_in()
             }
             Msg::StopAnimation => {
-                log::trace!("words stop_animation..");
+                log::trace!("paragraph stop_animation..");
                 self.stop_animation();
                 Cmd::none()
             }
@@ -153,7 +153,7 @@ impl<MSG> Paragraph<MSG> {
 
     pub fn style(&self) -> Vec<String> {
         vec![r#"
-            .words {
+            .paragraph {
                 display: inline-block;
                 position: relative;
             }
@@ -206,7 +206,7 @@ impl<MSG> Paragraph<MSG> {
             vec![],
             vec![span(
                 vec![
-                    class("words"),
+                    class("paragraph"),
                     classes_flag([("animating", self.animating)]),
                 ],
                 vec![
