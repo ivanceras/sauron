@@ -33,10 +33,11 @@ where
     }
 
     fn children(&self) -> Node<MSG> {
+        let long_txt = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam scelerisque purus faucibus urna venenatis, a elementum diam laoreet. Fusce eget enim justo. Pellentesque cursus metus elit, ut porttitor eros iaculis sit amet. Quisque varius felis id turpis iaculis, et viverra enim pulvinar. Curabitur vel lacus interdum, molestie purus ut, pretium nibh. Mauris commodo dolor magna, eget dignissim mauris semper vitae. Ut viverra nec ex quis semper. Sed sit amet tincidunt mauris. Mauris in imperdiet ipsum. Praesent pretium tortor ut felis posuere, sed lacinia nunc pretium. Morbi et felis nec neque accumsan tincidunt. In hac habitasse platea dictumst. Nulla sit amet elit sed purus posuere placerat ut quis metus. Etiam mattis interdum dui at ornare. Nunc sit amet venenatis lorem, sed eleifend mauris. Pellentesque eros sem, fermentum vel lacus at, congue rhoncus elit. ";
         ul(
             vec![],
             vec![
-                li(vec![], vec![text("List 1")]),
+                li(vec![], vec![text(long_txt.clone())]),
                 li(vec![], vec![text("List 2")]),
                 li(vec![], vec![text("List 3")]),
                 li(vec![], vec![text("List 4")]),
@@ -46,7 +47,7 @@ where
                         li(vec![], vec![text("SubList 1")]),
                         li(vec![], vec![text("SubList 2")]),
                         li(vec![], vec![text("SubList 3")]),
-                        li(vec![], vec![text("SubList 4")]),
+                        li(vec![], vec![text("Not too long txt here... trying to see if it is correctly animated")]),
                     ],
                 ),
                 li(vec![], vec![text("List 6")]),
@@ -99,7 +100,7 @@ where
         let real_duration = interval * content_len as f64;
         let timeout = 500.0;
         //let duration = real_duration.min(timeout);
-        let duration = 3000.0;
+        let duration = 5000.0;
         let start = crate::dom::now();
 
         self.animating = true;
@@ -126,8 +127,15 @@ where
     fn node_count_recursive(node: &Node<MSG>, node_idx: &mut usize) {
         if let Some(children) = node.get_children() {
             for child in children {
-                *node_idx += 1;
-                Self::node_count_recursive(child, node_idx);
+                match child {
+                    Node::Element(child_element) => {
+                        *node_idx += 1;
+                        Self::node_count_recursive(child, node_idx);
+                    }
+                    Node::Text(txt) => {
+                        *node_idx += txt.len();
+                    }
+                }
             }
         }
     }
@@ -153,34 +161,48 @@ where
     ) {
         if let Some(children_src) = src.get_children() {
             for (index, child_src) in children_src.iter().enumerate() {
-                *node_idx += 1;
-                if *node_idx < node_idx_limit {
-                    let dest_child =
-                        if let Some(element) = child_src.as_element_ref() {
-                            let child_src_tag =
-                                child_src.tag().expect("must have a tag");
-                            let child_src_attr = child_src
-                                .get_attributes()
-                                .expect("must have attributes");
-                            html_element(
+                match child_src {
+                    Node::Element(element) => {
+                        if *node_idx < node_idx_limit {
+                            *node_idx += 1;
+                            let child_src_tag = element.tag();
+                            let child_src_attr = element.get_attributes();
+                            let child_clone = html_element(
                                 child_src_tag,
                                 child_src_attr.to_vec(),
                                 vec![],
-                            )
-                        } else {
-                            child_src.clone()
-                        };
+                            );
 
-                    dest.add_children_ref_mut(vec![dest_child]);
-                    let dest_children =
-                        dest.children_mut().expect("must have a dest children");
-                    Self::include_node_recursive(
-                        &mut dest_children[index],
-                        child_src,
-                        node_idx_limit,
-                        node_idx,
-                    );
-                }
+                            dest.add_children_ref_mut(vec![child_clone]);
+                            let dest_children = dest
+                                .children_mut()
+                                .expect("must have a dest children");
+
+                            Self::include_node_recursive(
+                                &mut dest_children[index],
+                                child_src,
+                                node_idx_limit,
+                                node_idx,
+                            );
+                        }
+                    }
+                    Node::Text(txt) => {
+                        let txt_len = txt.len();
+                        let truncate_len = std::cmp::min(
+                            txt_len as i32,
+                            (node_idx_limit as i32 - *node_idx as i32),
+                        );
+
+                        let start = 0 as usize;
+                        let end = truncate_len as usize;
+
+                        log::trace!("txt_len: {}, node_idx: {}, node_idx_limit: {}, truncate_len: {},", txt_len, node_idx, node_idx_limit, truncate_len);
+                        let truncated_txt = &txt[start..end];
+                        let text_node = Node::Text(truncated_txt.to_string());
+                        dest.add_children_ref_mut(vec![text_node]);
+                        *node_idx += txt_len;
+                    }
+                };
             }
         }
     }
@@ -211,8 +233,6 @@ where
 
         log::trace!("new_length: {}", new_length);
 
-        let node_idx = std::cmp::min(new_length, content_len);
-
         let children = self.children();
         let tag = children.tag().expect("must have a tag");
         let attributes =
@@ -221,7 +241,7 @@ where
         let mut dest: Node<MSG> =
             html_element(tag, attributes.to_vec(), vec![]);
 
-        Self::include_node(&mut dest, &self.children(), node_idx);
+        Self::include_node(&mut dest, &self.children(), new_length);
         self.animated_layer = Some(dest);
 
         let continue_animation = if is_in {
