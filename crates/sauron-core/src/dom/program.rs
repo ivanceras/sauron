@@ -90,6 +90,17 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&self, msg: MSG) {
+        log::trace!(
+            "app strong count: {}, weak count: {}",
+            Rc::strong_count(&self.app),
+            Rc::weak_count(&self.app)
+        );
+
+        log::trace!(
+            "updater strong count: {}, weak count: {}",
+            Rc::strong_count(&self.dom_updater),
+            Rc::weak_count(&self.dom_updater)
+        );
         #[cfg(feature = "with-measure")]
         let t1 = crate::now();
         // update the app and emit the cmd returned from the update
