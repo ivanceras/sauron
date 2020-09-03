@@ -17,6 +17,7 @@ pub enum Msg<MSG> {
 pub struct AnimateList<MSG> {
     _phantom: PhantomData<MSG>,
     animated_layer: Option<Node<MSG>>,
+    children: Node<MSG>,
     animating: bool,
 }
 
@@ -24,66 +25,17 @@ impl<MSG> AnimateList<MSG>
 where
     MSG: Clone,
 {
-    pub fn new() -> Self {
+    pub fn new_with_content(children: Node<MSG>) -> Self {
         AnimateList {
             animating: false,
             animated_layer: None,
+            children,
             _phantom: PhantomData,
         }
     }
 
     fn children(&self) -> Node<MSG> {
-        let long_txt = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam scelerisque purus faucibus urna venenatis, a elementum diam laoreet. Fusce eget enim justo. Pellentesque cursus metus elit, ut porttitor eros iaculis sit amet. Quisque varius felis id turpis iaculis, et viverra enim pulvinar. Curabitur vel lacus interdum, molestie purus ut, pretium nibh. Mauris commodo dolor magna, eget dignissim mauris semper vitae. Ut viverra nec ex quis semper. Sed sit amet tincidunt mauris. Mauris in imperdiet ipsum. Praesent pretium tortor ut felis posuere, sed lacinia nunc pretium. Morbi et felis nec neque accumsan tincidunt. In hac habitasse platea dictumst. Nulla sit amet elit sed purus posuere placerat ut quis metus. Etiam mattis interdum dui at ornare. Nunc sit amet venenatis lorem, sed eleifend mauris. Pellentesque eros sem, fermentum vel lacus at, congue rhoncus elit. ";
-        div(
-            vec![],
-            vec![
-                p(vec![], vec![
-                    a(vec![href("https://github.com/ivanceras/sauron")], vec![text("Link here")]),
-                    img(vec![styles([("width","600px"),("height", "auto"),("display","block")]),src("img/space.jpg")], vec![]),
-                ]),
-                li(vec![], vec![text(long_txt.clone())]),
-                li(vec![], vec![text("List 2")]),
-                ul(
-                    vec![],
-                    vec![
-                        li(vec![], vec![text("SubList 3")]),
-                        li(vec![], vec![text("Not too long txt here... trying to see if it is correctly animated")]),
-                    ],
-                ),
-                div(vec![],vec![
-                    table(vec![],vec![
-                        thead(vec![],vec![
-                            tr(vec![],vec![
-                                th(vec![],vec![text("Prop name")]),
-                                th(vec![],vec![text("Type")]),
-                                th(vec![],vec![text("Default")]),
-                                th(vec![],vec![text("Description")]),
-                            ]),
-                        ]),
-                        tbody(vec![],vec![
-                            tr(vec![],vec![
-                                td(vec![],vec![text("name")]),
-                                td(vec![],vec![text("string")]),
-                                td(vec![],vec![text("''")]),
-                                td(vec![],vec![text("The base name of the component")]),
-                            ]),
-                            tr(vec![],vec![
-                                td(vec![],vec![text("age")]),
-                                td(vec![],vec![text("number")]),
-                                td(vec![],vec![text("0")]),
-                                td(vec![],vec![text("The age of the component")]),
-                            ]),
-                            tr(vec![],vec![
-                                td(vec![],vec![text("married")]),
-                                td(vec![],vec![text("bool")]),
-                                td(vec![],vec![text("false")]),
-                                td(vec![],vec![text("If the component is married")]),
-                            ]),
-                        ]),
-                    ]),
-                ])
-            ],
-        )
+        self.children.clone()
     }
 
     fn play_sound(&self) {
@@ -138,6 +90,7 @@ where
     }
 
     /// recursively count the number of elements on this node tree
+    /// 1 count for each character and each element
     fn node_count_recursive(node: &Node<MSG>, node_idx: &mut usize) {
         if let Some(children) = node.get_children() {
             for child in children {
