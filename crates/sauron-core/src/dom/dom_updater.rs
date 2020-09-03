@@ -56,11 +56,25 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
+        self.mount(program, false);
+    }
+
+    fn mount<DSP>(&mut self, program: &DSP, replace: bool)
+    where
+        DSP: Dispatch<MSG> + Clone + 'static,
+    {
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
-        self.root_node
-            .append_child(&created_node.node)
-            .expect("Could not append child to mount");
+        if replace {
+            let root_element: &Element = self.root_node.unchecked_ref();
+            root_element
+                .replace_with_with_node_1(&created_node.node)
+                .expect("Could not append child to mount");
+        } else {
+            self.root_node
+                .append_child(&created_node.node)
+                .expect("Could not append child to mount");
+        }
         self.root_node = created_node.node;
         self.active_closures = created_node.closures;
     }
@@ -72,14 +86,7 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
-        let created_node: CreatedNode<Node> =
-            CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
-        let root_element: &Element = self.root_node.unchecked_ref();
-        root_element
-            .replace_with_with_node_1(&created_node.node)
-            .expect("Could not append child to mount");
-        self.root_node = created_node.node;
-        self.active_closures = created_node.closures;
+        self.mount(program, true);
     }
 
     /// Create a new `DomUpdater`.
