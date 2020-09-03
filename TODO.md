@@ -32,7 +32,8 @@
 - [ ] Change the `'static` of trait implementation by specifying the lifetime
         - ref: https://stackoverflow.com/questions/52187644/lifetime-must-be-valid-for-the-static-lifetime-so-that-the-types-are-compatible
 - [X] Get rid of test_fixtures and move it to test directory
-- [ ]
+- [ ] Make each component have a reference to the root dom where it is mounted.
+    - This will make local state changes to the component easier to do, as opposed to diffing the whole DOM tree.
 
 
 
