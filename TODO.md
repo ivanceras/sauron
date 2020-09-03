@@ -5,6 +5,7 @@
  - [X] Rework the dumb patch taking the advantage of feature gating the dom capability.
  - [ ] Add documentation to functions
  - [ ] Loosen the lifetime requirement of the `Fn` inside `Callback` from `'static` to a generic one eg: `'c`
+     - [X] Done in `mt-dom` branch: non-static-lifetime
  - [X] Deprecate the tag macro since it complicates the conflict in reexporting the functions
      - ie: `style!` as a tag, `style!` macro for attributes, `style` as attribute call.
  - [ ] Change the README example to use the node macro syntax
@@ -23,10 +24,15 @@
         are not dispatched in the program. Only the top level
         component `Cmd` can be dispatched
     - [ ] Find a way to map `Program<APP,MSG>` to `Program<APP2,MSG2>`
+        - [X] map `DomUpdater<MSG>` to `DomUpdater<MSG2>`
+        - Issue mapping fields of Program that are in `Rc<RefCell>` seems not that simple
+            as the Rc value of dom_updater is to be borrowed and will have a borrow checker issue
 - [ ] Merge `Program` and `DomUpdater`
+    - Issue: DomUpdater has multiple fields, which would then be wrap with `Rc<RefCell>` individually
 - [ ] Change the `'static` of trait implementation by specifying the lifetime
         - ref: https://stackoverflow.com/questions/52187644/lifetime-must-be-valid-for-the-static-lifetime-so-that-the-types-are-compatible
 - [X] Get rid of test_fixtures and move it to test directory
+- [ ]
 
 
 
@@ -39,7 +45,8 @@
 - [ ] re-think about the `sauron-core` features:
     - [ ] `with-dom` when used in client-side, default
     - [ ] `with-ssr` when used in server-side rendering, mutually exlusive to `with-dom`
-    - [ ] `no_request_animation_frame` this should be additive
+    - [X] `no_request_animation_frame` this should be additive
+        -  crate is now using `with-request-animation` feature
 - [X] `with-markdown`
     - [X] Add sanitation to markdown parser, use `ammonia` crate
     - [X] expose the `sauron-md` as `sauron::markdown` module, behind a feature flag
