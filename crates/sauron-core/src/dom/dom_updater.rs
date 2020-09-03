@@ -26,11 +26,11 @@ impl<MSG> DomUpdater<MSG> {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.
     pub fn new(
         current_vdom: crate::Node<MSG>,
-        root_node: &Node,
+        mount: &Node,
     ) -> DomUpdater<MSG> {
         DomUpdater {
             current_vdom,
-            root_node: root_node.clone(),
+            root_node: mount.clone(),
             active_closures: ActiveClosure::new(),
         }
     }
@@ -159,5 +159,13 @@ where
             root_node,
             active_closures,
         }
+    }
+
+    /// Return the root node of your application, the highest ancestor of all other nodes in
+    /// your real DOM tree.
+    pub fn root_node(&self) -> Node {
+        // Note that we're cloning the `web_sys::Node`, not the DOM element.
+        // So we're effectively cloning a pointer here, which is fast.
+        self.root_node.clone()
     }
 }

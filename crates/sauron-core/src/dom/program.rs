@@ -45,21 +45,32 @@ where
             app: Rc::new(RefCell::new(app)),
             dom_updater: Rc::new(RefCell::new(dom_updater)),
         };
-        // call the init of the component
-        let cmds: Cmd<APP, MSG> = program.app.borrow().init();
-        for style in program.app.borrow().style() {
+        program
+    }
+
+    /// executed after the program has been mounted
+    fn after_mounted(&self) {
+        for style in self.app.borrow().style() {
             Self::inject_style(&style);
         }
+        // call the init of the component
+        let cmds: Cmd<APP, MSG> = self.app.borrow().init();
         // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
         // listening to events (resize, hashchange)
-        cmds.emit(&program);
-        program
+        cmds.emit(&self);
+    }
+
+    /// get the real DOM node where this app is mounted to.
+    #[allow(unused)]
+    fn root_node(&self) -> web_sys::Node {
+        self.dom_updater.borrow().root_node()
     }
 
     /// Creates an Rc wrapped instance of Program and replace the root_node with the app view
     pub fn new_replace_mount(app: APP, root_node: &Node) -> Self {
         let program = Self::new(app, root_node);
         program.start_replace_mount();
+        program.after_mounted();
         program
     }
 
@@ -67,6 +78,7 @@ where
     pub fn new_append_to_mount(app: APP, root_node: &Node) -> Self {
         let program = Self::new(app, root_node);
         program.start_append_to_mount();
+        program.after_mounted();
         program
     }
 
@@ -90,17 +102,6 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&self, msg: MSG) {
-        log::trace!(
-            "app strong count: {}, weak count: {}",
-            Rc::strong_count(&self.app),
-            Rc::weak_count(&self.app)
-        );
-
-        log::trace!(
-            "updater strong count: {}, weak count: {}",
-            Rc::strong_count(&self.dom_updater),
-            Rc::weak_count(&self.dom_updater)
-        );
         #[cfg(feature = "with-measure")]
         let t1 = crate::now();
         // update the app and emit the cmd returned from the update
