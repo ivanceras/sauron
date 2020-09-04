@@ -24,7 +24,7 @@ pub struct Header {
 impl Header {
     pub fn new_with_content(content: &str) -> Self {
         Header {
-            hide: true,
+            hide: false,
             content: content.to_string(),
         }
     }

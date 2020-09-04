@@ -23,7 +23,7 @@ pub struct Frame {
 impl Frame {
     pub fn new_with_content(content: &str) -> Self {
         Frame {
-            hide: true,
+            hide: false,
             content: content.to_string(),
         }
     }
