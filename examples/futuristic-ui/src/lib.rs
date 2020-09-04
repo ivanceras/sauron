@@ -362,24 +362,45 @@ impl Component<Msg> for App {
                 }
             }
             Msg::SimpleFuiButtonMsg(fui_btn_msg) => {
-                self.simple_fui_button.update(*fui_btn_msg);
-                Cmd::none()
+                if let Some(pmsg) = self.simple_fui_button.update(*fui_btn_msg)
+                {
+                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
+                } else {
+                    Cmd::none()
+                }
             }
             Msg::SkewedFuiButtonMsg(fui_btn_msg) => {
-                self.skewed_fui_button.update(*fui_btn_msg);
-                Cmd::none()
+                if let Some(pmsg) = self.skewed_fui_button.update(*fui_btn_msg)
+                {
+                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
+                } else {
+                    Cmd::none()
+                }
             }
             Msg::SimpleSkewedFuiButtonMsg(fui_btn_msg) => {
-                self.simple_skewed_fui_button.update(*fui_btn_msg);
-                Cmd::none()
+                if let Some(pmsg) =
+                    self.simple_skewed_fui_button.update(*fui_btn_msg)
+                {
+                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
+                } else {
+                    Cmd::none()
+                }
             }
             Msg::GreenFuiButtonMsg(fui_btn_msg) => {
-                self.green_fui_button.update(*fui_btn_msg);
-                Cmd::none()
+                if let Some(pmsg) = self.green_fui_button.update(*fui_btn_msg) {
+                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
+                } else {
+                    Cmd::none()
+                }
             }
             Msg::DisabledFuiButtonMsg(fui_btn_msg) => {
-                self.disabled_fui_button.update(*fui_btn_msg);
-                Cmd::none()
+                if let Some(pmsg) =
+                    self.disabled_fui_button.update(*fui_btn_msg)
+                {
+                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
+                } else {
+                    Cmd::none()
+                }
             }
             Msg::AnimateListMsg(animate_list_msg) => {
                 log::trace!("animating animate_list..");
