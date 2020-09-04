@@ -16,9 +16,10 @@ use sauron::{
     Node,
     Program,
 };
+use std::fmt;
 use web_sys::HtmlAudioElement;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Msg<PMSG> {
     Click,
     HighlightEnd,
@@ -313,29 +314,21 @@ where
         vec![css]
     }
 
-    pub fn update(&mut self, msg: Msg<PMSG>) -> Cmd<crate::App, crate::Msg> {
+    pub fn update(&mut self, msg: Msg<PMSG>) -> Option<PMSG> {
         match msg {
             Msg::Click => {
                 self.play_sound();
                 self.click = true;
-                Cmd::none()
+                None
             }
             Msg::HighlightEnd => {
                 self.click = false;
-                Cmd::none()
+                None
             }
             Msg::ParamMsg(pmsg) => {
-                log::trace!("executing param msg..");
-
-                // TODO: ISSUE:
-                // expected enum `Msg`, found type parameter `PMSG`
-                // |
-                //    = note: expected struct `sauron::cmd::Cmd<sauron::Program<App, Msg>>`
-                //               found struct `sauron::cmd::Cmd<sauron::Program<_, PMSG>>`
-                //Cmd::new(|program| program.dispatch(pmsg))
-                //
-                // hardcoding from crate Msg for now, so non-reusable for now
-                Cmd::new(|program| program.dispatch(crate::Msg::ReanimateAll))
+                // we return a parent msg, this is meant to be executed in the calling
+                // component
+                Some(pmsg)
             }
         }
     }

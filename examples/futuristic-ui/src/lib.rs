@@ -31,7 +31,7 @@ mod header;
 mod paragraph;
 mod spinner;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Msg {
     ReAnimateFrame,
     ReAnimateHeader,
@@ -345,36 +345,50 @@ impl Component<Msg> for App {
             Msg::FrameMsg(frame_msg) => self.frame.update(frame_msg),
             Msg::HeaderMsg(header_msg) => self.header.update(header_msg),
             Msg::FuiButtonMsg(fui_btn_msg) => {
-                self.fui_button.update(*fui_btn_msg)
+                if let Some(pmsg) = self.fui_button.update(*fui_btn_msg) {
+                    log::warn!("got the btn msg here: {:?}", pmsg);
+                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
+                } else {
+                    Cmd::none()
+                }
             }
             Msg::SimpleFuiButtonMsg(fui_btn_msg) => {
-                self.simple_fui_button.update(*fui_btn_msg)
+                self.simple_fui_button.update(*fui_btn_msg);
+                Cmd::none()
             }
             Msg::SkewedFuiButtonMsg(fui_btn_msg) => {
-                self.skewed_fui_button.update(*fui_btn_msg)
+                self.skewed_fui_button.update(*fui_btn_msg);
+                Cmd::none()
             }
             Msg::SimpleSkewedFuiButtonMsg(fui_btn_msg) => {
-                self.simple_skewed_fui_button.update(*fui_btn_msg)
+                self.simple_skewed_fui_button.update(*fui_btn_msg);
+                Cmd::none()
             }
             Msg::GreenFuiButtonMsg(fui_btn_msg) => {
-                self.green_fui_button.update(*fui_btn_msg)
+                self.green_fui_button.update(*fui_btn_msg);
+                Cmd::none()
             }
             Msg::DisabledFuiButtonMsg(fui_btn_msg) => {
-                self.disabled_fui_button.update(*fui_btn_msg)
+                self.disabled_fui_button.update(*fui_btn_msg);
+                Cmd::none()
             }
             Msg::ParagraphMsg(paragraph_msg) => {
                 log::trace!("animating paragraph..");
-                self.paragraph.update(*paragraph_msg)
+                self.paragraph.update(*paragraph_msg);
+                Cmd::none()
             }
             Msg::AnimateListMsg(animate_list_msg) => {
                 log::trace!("animating paragraph..");
-                self.animate_list.update(*animate_list_msg)
+                self.animate_list.update(*animate_list_msg);
+                Cmd::none()
             }
             Msg::ReanimateParagraph => {
-                self.paragraph.update(paragraph::Msg::AnimateIn)
+                self.paragraph.update(paragraph::Msg::AnimateIn);
+                Cmd::none()
             }
             Msg::ReanimateList => {
-                self.animate_list.update(animate_list::Msg::AnimateIn)
+                self.animate_list.update(animate_list::Msg::AnimateIn);
+                Cmd::none()
             }
             Msg::ReanimateAll => {
                 log::debug!("Reanimating...");

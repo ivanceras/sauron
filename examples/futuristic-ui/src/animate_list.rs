@@ -1,12 +1,24 @@
-use sauron::html::attributes::{class, id, style};
-use sauron::html::events::on_click;
-use sauron::html::{div, text};
-use sauron::prelude::*;
-use sauron::{Cmd, Component, Node, Program};
+use sauron::{
+    html::{
+        attributes::{
+            class,
+            id,
+            style,
+        },
+        div,
+        events::on_click,
+        text,
+    },
+    prelude::*,
+    Cmd,
+    Component,
+    Node,
+    Program,
+};
 use std::marker::PhantomData;
 use web_sys::HtmlAudioElement;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Msg<MSG> {
     AnimateIn,
     StopAnimation,
