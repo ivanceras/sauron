@@ -3,7 +3,6 @@ use animate_list::AnimateList;
 use frame::Frame;
 use fui_button::FuiButton;
 use header::Header;
-use paragraph::Paragraph;
 use sauron::{
     html::{
         attributes::{
@@ -28,7 +27,6 @@ mod animate_list;
 mod frame;
 mod fui_button;
 mod header;
-mod paragraph;
 mod spinner;
 
 #[derive(Clone, Debug)]
@@ -43,9 +41,7 @@ pub enum Msg {
     SimpleSkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
     GreenFuiButtonMsg(Box<fui_button::Msg<Self>>),
     DisabledFuiButtonMsg(Box<fui_button::Msg<Self>>),
-    ParagraphMsg(Box<paragraph::Msg<Self>>),
     AnimateListMsg(Box<animate_list::Msg<Self>>),
-    ReanimateParagraph,
     ReanimateList,
     ReanimateAll,
     NoOp,
@@ -62,7 +58,6 @@ pub struct App {
     green_fui_button: FuiButton<Msg>,
     disabled_fui_button: FuiButton<Msg>,
     spinner: Spinner<Msg>,
-    paragraph: Paragraph<Msg>,
     animate_list: AnimateList<Msg>,
 }
 
@@ -110,7 +105,6 @@ impl App {
             green_fui_button,
             disabled_fui_button,
             spinner: Spinner::new(),
-            paragraph: Paragraph::new_with_content(paragraph_content),
             animate_list: AnimateList::new_with_content(
                 Self::animate_list_content(),
             ),
@@ -176,9 +170,6 @@ impl App {
 
     fn reanimate_all() -> Cmd<Self, Msg> {
         Cmd::new(|program| {
-            program.dispatch(Msg::ParagraphMsg(Box::new(
-                paragraph::Msg::AnimateIn,
-            )));
             program.dispatch(Msg::ReAnimateFrame);
             program.dispatch(Msg::HeaderMsg(header::Msg::TriggerAnimation));
             program.dispatch(Msg::AnimateListMsg(Box::new(
@@ -218,7 +209,6 @@ impl Component<Msg> for App {
         .chain(self.frame.style().into_iter())
         .chain(self.fui_button.style().into_iter())
         .chain(self.spinner.style().into_iter())
-        .chain(self.paragraph.style().into_iter())
         .chain(self.animate_list.style().into_iter())
         .collect()
     }
@@ -277,21 +267,6 @@ impl Component<Msg> for App {
                                 Msg::SimpleSkewedFuiButtonMsg(Box::new(fbtn_msg))
                             }),
                         ]),
-                        button(
-                            vec![
-                                on_click(|_| Msg::ReanimateParagraph),
-                                style("margin", "20px"),
-                                style("display", "block"),
-                            ],
-                            vec![text("Animate paragraph")],
-                        ),
-                        p(
-                            vec![styles([
-                                ("position", "relative"),
-                                ("display", "inline-block"),
-                            ])],
-                            vec![self.paragraph.view()],
-                        ),
                         button(
                             vec![
                                 on_click(|_| Msg::ReanimateList),
@@ -372,18 +347,9 @@ impl Component<Msg> for App {
                 self.disabled_fui_button.update(*fui_btn_msg);
                 Cmd::none()
             }
-            Msg::ParagraphMsg(paragraph_msg) => {
-                log::trace!("animating paragraph..");
-                self.paragraph.update(*paragraph_msg);
-                Cmd::none()
-            }
             Msg::AnimateListMsg(animate_list_msg) => {
                 log::trace!("animating paragraph..");
                 self.animate_list.update(*animate_list_msg);
-                Cmd::none()
-            }
-            Msg::ReanimateParagraph => {
-                self.paragraph.update(paragraph::Msg::AnimateIn);
                 Cmd::none()
             }
             Msg::ReanimateList => {
