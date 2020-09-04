@@ -68,8 +68,11 @@ impl App {
         let mut fui_button = FuiButton::<Msg>::new_with_label("Reanimate All");
         fui_button.add_event_listeners(vec![on_click(|_| Msg::ReanimateAll)]);
 
-        let mut simple_fui_button = FuiButton::<Msg>::new_with_label("Simple");
+        let mut simple_fui_button =
+            FuiButton::<Msg>::new_with_label("Reanimate Paragraph");
         simple_fui_button.has_corners(false);
+        simple_fui_button
+            .add_event_listeners(vec![on_click(|_| Msg::ReAnimateParagraph)]);
 
         let mut skewed_fui_button =
             FuiButton::<Msg>::new_with_label("Skewed button");
@@ -87,7 +90,8 @@ impl App {
         let mut disabled_fui_button =
             FuiButton::<Msg>::new_with_label("Disabled");
         disabled_fui_button.disabled(true);
-        let paragraph_content = "This is an experimental demo showcasing usage of sauron Component lifecycle to work alongside
+        let paragraph_content = "This is an experimental demo showcasing usage of [Sauron](https://github.com/ivanceras/sauron)
+                    Component lifecycle to work alongside
                     css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.
                     Sauron is a light-weight web framework designed to have you write least amount of code possible.";
 
@@ -170,7 +174,7 @@ impl App {
         Cmd::new(|program| {
             program.dispatch(Msg::ReAnimateFrame);
             program.dispatch(Msg::ReAnimateHeader);
-            program.dispatch(Msg::ReAnimateParagraph);
+            //program.dispatch(Msg::ReAnimateParagraph);
             program.dispatch(Msg::ReAnimateList);
         })
     }

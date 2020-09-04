@@ -186,21 +186,24 @@ where
                             0
                         };
 
-                        let start = 0;
-                        let end = truncate_len;
+                        if truncate_len > 0 {
+                            let start = 0;
+                            let end = truncate_len;
 
-                        log::trace!("txt_len: {}, node_idx: {}, node_idx_limit: {}, truncate_len: {},", txt_len, node_idx, node_idx_limit, truncate_len);
-                        let truncated_txt = &txt[start..end];
-                        let text_node = Node::Text(truncated_txt.to_string());
-                        dest.add_children_ref_mut(vec![text_node]);
-                        // we append the blinking character to the end of the text
-                        // here, and only when this node has not yet finish animating..
-                        if truncate_len < txt_len {
-                            let blink =
-                                span(vec![class("blink")], vec![text("█")]);
-                            dest.add_children_ref_mut(vec![blink]);
+                            log::trace!("txt_len: {}, node_idx: {}, node_idx_limit: {}, truncate_len: {},", txt_len, node_idx, node_idx_limit, truncate_len);
+                            let truncated_txt = &txt[start..end];
+                            let text_node =
+                                Node::Text(truncated_txt.to_string());
+                            dest.add_children_ref_mut(vec![text_node]);
+                            // we append the blinking character to the end of the text
+                            // here, and only when this node has not yet finish animating..
+                            if truncate_len < txt_len {
+                                let blink =
+                                    span(vec![class("blink")], vec![text("█")]);
+                                dest.add_children_ref_mut(vec![blink]);
+                            }
                         }
-                        *node_idx += txt_len;
+                        *node_idx += truncate_len;
                     }
                 };
             }
