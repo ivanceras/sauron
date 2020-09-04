@@ -182,7 +182,8 @@ impl App {
 
 impl Component<Msg> for App {
     fn init(&self) -> Cmd<Self, Msg> {
-        Self::reanimate_all()
+        //Self::reanimate_all()
+        Cmd::none()
     }
 
     fn style(&self) -> Vec<String> {
@@ -364,6 +365,7 @@ impl Component<Msg> for App {
             Msg::SimpleFuiButtonMsg(fui_btn_msg) => {
                 if let Some(pmsg) = self.simple_fui_button.update(*fui_btn_msg)
                 {
+                    log::trace!("gpt simple btn msg: {:?}", pmsg);
                     Cmd::new(move |program| program.dispatch(pmsg.clone()))
                 } else {
                     Cmd::none()
@@ -431,6 +433,7 @@ impl Component<Msg> for App {
             }
             Msg::ParagraphMsg(para_msg) => {
                 if let Some(para_msg) = self.paragraph.update(para_msg) {
+                    log::debug!("paragraph msg: {:?}", para_msg);
                     Cmd::new(move |program| {
                         program.dispatch(Msg::ParagraphMsg(para_msg.clone()));
                     })

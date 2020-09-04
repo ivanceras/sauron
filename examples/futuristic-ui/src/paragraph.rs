@@ -31,18 +31,22 @@ where
 {
     pub fn new_with_markdown(md: &str) -> Self {
         Paragraph {
-            animated_list: AnimateList::new_with_content(sauron::markdown(md)),
+            animated_list: AnimateList::new_with_content(text(md)),
         }
     }
 
     pub fn update(&mut self, msg: Msg) -> Option<Msg> {
         match msg {
             Msg::AnimateIn => {
-                self.animated_list
-                    .update(animate_list::Msg::AnimateIn)
-                    .map(Msg::AnimateListMsg)
+                log::trace!("in paragraph animate in");
+                let amsg =
+                    self.animated_list.update(animate_list::Msg::AnimateIn);
+
+                log::trace!("got some asmg: {:?}", amsg);
+                amsg.map(Msg::AnimateListMsg)
             }
             Msg::AnimateListMsg(amsg) => {
+                log::trace!("in paragraph animate list msg");
                 self.animated_list.update(amsg).map(Msg::AnimateListMsg)
             }
         }

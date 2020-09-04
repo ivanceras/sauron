@@ -57,6 +57,8 @@ where
     fn start_animation(&mut self, is_in: bool) -> Option<Msg> {
         let content_len = Self::node_count(&self.children());
 
+        log::trace!("content len: {}", content_len);
+
         if content_len == 0 {
             return None;
         }
@@ -86,16 +88,16 @@ where
     /// recursively count the number of elements on this node tree
     /// 1 count for each character and each element
     fn node_count_recursive(node: &Node<MSG>, node_idx: &mut usize) {
-        if let Some(children) = node.get_children() {
-            for child in children {
-                match child {
-                    Node::Element(_) => {
-                        Self::node_count_recursive(child, node_idx);
-                    }
-                    Node::Text(txt) => {
-                        *node_idx += txt.len();
-                    }
+        match node {
+            Node::Element(element) => {
+                log::trace!("an element..");
+                for child in element.children.iter() {
+                    Self::node_count_recursive(child, node_idx);
                 }
+            }
+            Node::Text(txt) => {
+                log::trace!("text");
+                *node_idx += txt.len();
             }
         }
     }
@@ -119,91 +121,69 @@ where
         node_idx_limit: usize,
         node_idx: &mut usize,
     ) {
-        if let Some(children_src) = src.get_children() {
-            for (index, child_src) in children_src.iter().enumerate() {
-                match child_src {
-                    Node::Element(element) => {
-                        if *node_idx < node_idx_limit {
-                            let child_src_tag = element.tag();
-                            match *child_src_tag {
-                                // add everything row by row,
-                                // since the default behavior is adding cell by cell, which has an ugly
-                                // sliding effect
-                                "tr" => {
-                                    Self::node_count_recursive(
-                                        child_src, node_idx,
-                                    );
-                                    dest.add_children_ref_mut(vec![
-                                        child_src.clone()
-                                    ]);
-                                }
-                                // tags other than tr
-                                _ => {
-                                    let child_src_attr =
-                                        element.get_attributes();
-                                    // dont include the children on this clone
-                                    let child_clone = html_element(
-                                        child_src_tag,
-                                        child_src_attr.to_vec(),
-                                        vec![],
-                                    );
-                                    //TODO: add a skip mechanism here to add the element right away
-                                    //including it's children and increment the node_idx to the remaining
-                                    //tree leaf count of the element
-                                    // This is needed for <table> element, to avoid wobly animation
-                                    // where columns seems to be flying from the left
+        match src {
+            Node::Element(element) => {
+                if *node_idx < node_idx_limit {
+                    let shallow_src = html_element(
+                        element.tag,
+                        element.attrs.clone(),
+                        vec![],
+                    );
+                    dest.add_children_ref_mut(vec![shallow_src]);
 
-                                    dest.add_children_ref_mut(vec![
-                                        child_clone,
-                                    ]);
-                                    let dest_children = dest
-                                        .children_mut()
-                                        .expect("must have a dest children");
+                    let last_index = dest
+                        .as_element_ref()
+                        .expect("this is an element")
+                        .children
+                        .len()
+                        - 1;
 
-                                    Self::include_node_recursive(
-                                        &mut dest_children[index],
-                                        child_src,
-                                        node_idx_limit,
-                                        node_idx,
-                                    );
-                                }
-                            }
-                        }
-                    }
-                    Node::Text(txt) => {
-                        let txt_len = txt.len();
-                        log::trace!(
-                            "txt_len: {}, node_idx: {}, node_idx_limit: {}",
-                            txt_len,
+                    let mut just_added_child = &mut dest
+                        .children_mut()
+                        .expect("must have children, since just added 1")
+                        .get_mut(last_index)
+                        .expect("must get the last child");
+
+                    for child in element.children.iter() {
+                        Self::include_node_recursive(
+                            &mut just_added_child,
+                            child,
+                            node_idx_limit,
                             node_idx,
-                            node_idx_limit
                         );
-                        let truncate_len = if node_idx_limit > *node_idx {
-                            std::cmp::min(txt_len, node_idx_limit - *node_idx)
-                        } else {
-                            0
-                        };
-
-                        if truncate_len > 0 {
-                            let start = 0;
-                            let end = truncate_len;
-
-                            log::trace!("txt_len: {}, node_idx: {}, node_idx_limit: {}, truncate_len: {},", txt_len, node_idx, node_idx_limit, truncate_len);
-                            let truncated_txt = &txt[start..end];
-                            let text_node =
-                                Node::Text(truncated_txt.to_string());
-                            dest.add_children_ref_mut(vec![text_node]);
-                            // we append the blinking character to the end of the text
-                            // here, and only when this node has not yet finish animating..
-                            if truncate_len < txt_len {
-                                let blink =
-                                    span(vec![class("blink")], vec![text("█")]);
-                                dest.add_children_ref_mut(vec![blink]);
-                            }
-                        }
-                        *node_idx += truncate_len;
                     }
+                }
+            }
+            Node::Text(txt) => {
+                let txt_len = txt.len();
+                log::trace!(
+                    "txt_len: {}, node_idx: {}, node_idx_limit: {}",
+                    txt_len,
+                    node_idx,
+                    node_idx_limit
+                );
+                let truncate_len = if node_idx_limit > *node_idx {
+                    std::cmp::min(txt_len, node_idx_limit - *node_idx)
+                } else {
+                    0
                 };
+
+                if truncate_len > 0 {
+                    let start = 0;
+                    let end = truncate_len;
+
+                    log::trace!("txt_len: {}, node_idx: {}, node_idx_limit: {}, truncate_len: {},", txt_len, node_idx, node_idx_limit, truncate_len);
+                    let truncated_txt = &txt[start..end];
+                    let text_node = Node::Text(truncated_txt.to_string());
+                    dest.add_children_ref_mut(vec![text_node]);
+                    // we append the blinking character to the end of the text
+                    // here, and only when this node has not yet finish animating..
+                    if truncate_len < txt_len {
+                        let blink = span(vec![class("blink")], vec![text("█")]);
+                        dest.add_children_ref_mut(vec![blink]);
+                    }
+                }
+                *node_idx += truncate_len;
             }
         }
     }
@@ -234,13 +214,7 @@ where
 
         log::trace!("new_length: {}", new_length);
 
-        let children = self.children();
-        let tag = children.tag().expect("must have a tag");
-        let attributes =
-            children.get_attributes().expect("must have attributes");
-
-        let mut dest: Node<MSG> =
-            html_element(tag, attributes.to_vec(), vec![]);
+        let mut dest: Node<MSG> = div(vec![], vec![]);
 
         Self::include_node(&mut dest, &self.children(), new_length);
         self.animated_layer = Some(dest);
