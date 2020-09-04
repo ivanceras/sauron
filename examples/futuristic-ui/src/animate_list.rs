@@ -7,7 +7,6 @@ use sauron::{
     prelude::*,
     Node,
 };
-use std::marker::PhantomData;
 use web_sys::HtmlAudioElement;
 
 #[derive(Clone, Debug)]
@@ -18,7 +17,6 @@ pub enum Msg {
 }
 
 pub struct AnimateList<MSG> {
-    _phantom: PhantomData<MSG>,
     animated_layer: Option<Node<MSG>>,
     children: Node<MSG>,
     animating: bool,
@@ -33,7 +31,6 @@ where
             animating: false,
             animated_layer: None,
             children,
-            _phantom: PhantomData,
         }
     }
 
