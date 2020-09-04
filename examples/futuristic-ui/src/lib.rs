@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 use animate_list::AnimateList;
 use frame::Frame;
 use fui_button::FuiButton;
@@ -7,7 +7,6 @@ use sauron::{
     html::{
         attributes::{
             class,
-            id,
             style,
         },
         div,
@@ -21,7 +20,6 @@ use sauron::{
     Program,
 };
 use spinner::Spinner;
-use web_sys::HtmlAudioElement;
 
 mod animate_list;
 mod frame;
@@ -48,7 +46,6 @@ pub enum Msg {
 }
 
 pub struct App {
-    show: bool,
     header: Header,
     frame: Frame,
     fui_button: FuiButton<Msg>,
@@ -86,16 +83,7 @@ impl App {
             FuiButton::<Msg>::new_with_label("Disabled");
         disabled_fui_button.disabled(true);
 
-        let paragraph_content = "This is an experimental demo showcasing usage of sauron[0] Component lifecycle to work alongside
-        css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.
-
-        Sauron is a light-weight web framework designed to have you write least amount of code possible.
-
-        [0]: https://github.com/ivanceras/sauron
-        ";
-
         App {
-            show: true,
             frame: Frame::new_with_content("Retro Futuristic UI in rust"),
             header: Header::new_with_content("Header"),
             fui_button,

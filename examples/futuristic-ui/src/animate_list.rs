@@ -1,19 +1,11 @@
 use sauron::{
     html::{
-        attributes::{
-            class,
-            id,
-            style,
-        },
+        attributes::class,
         div,
-        events::on_click,
         text,
     },
     prelude::*,
-    Cmd,
-    Component,
     Node,
-    Program,
 };
 use std::marker::PhantomData;
 use web_sys::HtmlAudioElement;
@@ -67,8 +59,6 @@ where
     }
 
     fn start_animation(&mut self, is_in: bool) -> Option<Msg<MSG>> {
-        use wasm_bindgen::JsCast;
-
         let content_len = Self::node_count(&self.children());
 
         if content_len == 0 {
@@ -103,7 +93,7 @@ where
         if let Some(children) = node.get_children() {
             for child in children {
                 match child {
-                    Node::Element(child_element) => {
+                    Node::Element(_) => {
                         *node_idx += 1;
                         Self::node_count_recursive(child, node_idx);
                     }
@@ -188,10 +178,8 @@ where
                     }
                     Node::Text(txt) => {
                         let txt_len = txt.len();
-                        let truncate_len = std::cmp::min(
-                            txt_len,
-                            (node_idx_limit - *node_idx),
-                        );
+                        let truncate_len =
+                            std::cmp::min(txt_len, node_idx_limit - *node_idx);
 
                         let start = 0;
                         let end = truncate_len;
@@ -282,7 +270,7 @@ where
                 log::trace!("next animationg executed..");
                 self.next_animation(is_in, start, duration)
             }
-            Msg::ParamMsg(msg) => None,
+            Msg::ParamMsg(_) => None,
         }
     }
 

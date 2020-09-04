@@ -1,10 +1,15 @@
-use sauron::html::attributes::{class, id, style};
-use sauron::html::events::on_click;
-use sauron::html::{div, text};
-use sauron::prelude::*;
-use sauron::{Cmd, Component, Node, Program};
+use sauron::{
+    html::{
+        attributes::{
+            class,
+            style,
+        },
+        div,
+    },
+    prelude::*,
+    Node,
+};
 use std::marker::PhantomData;
-use web_sys::HtmlAudioElement;
 
 #[derive(Clone)]
 pub struct Spinner<MSG> {

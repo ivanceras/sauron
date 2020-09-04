@@ -1,22 +1,14 @@
 use sauron::{
     html::{
-        attributes::{
-            class,
-            id,
-            style,
-        },
+        attributes::class,
         div,
         events::on_click,
         text,
     },
     jss,
     prelude::*,
-    Cmd,
-    Component,
     Node,
-    Program,
 };
-use std::fmt;
 use web_sys::HtmlAudioElement;
 
 #[derive(Clone, Debug)]

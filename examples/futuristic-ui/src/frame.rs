@@ -1,19 +1,11 @@
 use sauron::{
     html::{
-        attributes::{
-            class,
-            id,
-            style,
-        },
+        attributes::class,
         div,
-        events::on_click,
         text,
     },
     prelude::*,
-    Cmd,
-    Component,
     Node,
-    Program,
 };
 use web_sys::HtmlAudioElement;
 
