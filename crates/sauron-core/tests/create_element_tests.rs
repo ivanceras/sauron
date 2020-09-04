@@ -1,3 +1,4 @@
+#![cfg(target_arch = "wasm32")]
 #![deny(warnings)]
 use sauron_core::Node;
 use sauron_core::{
