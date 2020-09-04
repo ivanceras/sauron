@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.31.0
+- (**breaking**) Improved `style!` macro by using json as the syntax
+- Added `jss!` macro which parses `json` and convert them to `css`
+- Invocation  the `init` method of `Component` will be done
+    after the `Component` has been mounted into the DOM.
+- Unified base code of `append_to_mount` and `replace_mount` in `DomUpdater`
+- Added `map_msg` function for mapping `DomUpdater` to a different `MSG`
+- Fix all the example project's start scripts and `index.html` load script to get rid of errors from webkit based browser
+    -  Modified scripts to use `--target web` and import module to fix problems in safari
+- Get rid of test_fixtures and move it to the test directory
+- use `span(vec![],vec![])` instead of `text("")` in `view_if(bool,..)` when the
+    flag evaluates to false
+- Add support for `transitionend` and `animationend` event
+- Add initial support for `style` in `Component`
+- Remove the deprecated svg tag macro that should have been removed together with the html tag macro
+
 ## 0.30.0
 - refactor `Cmd` to not use the `Callback`.
     - remove the need for `MSG` and `PhantomData` in Cmd.
