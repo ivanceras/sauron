@@ -174,8 +174,17 @@ where
                     }
                     Node::Text(txt) => {
                         let txt_len = txt.len();
-                        let truncate_len =
-                            std::cmp::min(txt_len, node_idx_limit - *node_idx);
+                        log::trace!(
+                            "txt_len: {}, node_idx: {}, node_idx_limit: {}",
+                            txt_len,
+                            node_idx,
+                            node_idx_limit
+                        );
+                        let truncate_len = if node_idx_limit > *node_idx {
+                            std::cmp::min(txt_len, node_idx_limit - *node_idx)
+                        } else {
+                            0
+                        };
 
                         let start = 0;
                         let end = truncate_len;

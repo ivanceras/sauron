@@ -1,8 +1,9 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 use animate_list::AnimateList;
 use frame::Frame;
 use fui_button::FuiButton;
 use header::Header;
+use paragraph::Paragraph;
 use sauron::{
     html::{
         attributes::{
@@ -25,14 +26,18 @@ mod animate_list;
 mod frame;
 mod fui_button;
 mod header;
+mod paragraph;
 mod spinner;
 
 #[derive(Clone, Debug)]
 pub enum Msg {
     ReAnimateFrame,
     ReAnimateHeader,
+    ReAnimateParagraph,
+    ReAnimateList,
     FrameMsg(frame::Msg),
     HeaderMsg(header::Msg),
+    ParagraphMsg(paragraph::Msg),
     FuiButtonMsg(Box<fui_button::Msg<Self>>),
     SimpleFuiButtonMsg(Box<fui_button::Msg<Self>>),
     SkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
@@ -40,7 +45,6 @@ pub enum Msg {
     GreenFuiButtonMsg(Box<fui_button::Msg<Self>>),
     DisabledFuiButtonMsg(Box<fui_button::Msg<Self>>),
     AnimateListMsg(Box<animate_list::Msg>),
-    ReAnimateList,
     ReanimateAll,
     NoOp,
 }
@@ -48,6 +52,7 @@ pub enum Msg {
 pub struct App {
     header: Header,
     frame: Frame,
+    paragraph: Paragraph<Msg>,
     fui_button: FuiButton<Msg>,
     simple_fui_button: FuiButton<Msg>,
     skewed_fui_button: FuiButton<Msg>,
@@ -82,10 +87,14 @@ impl App {
         let mut disabled_fui_button =
             FuiButton::<Msg>::new_with_label("Disabled");
         disabled_fui_button.disabled(true);
+        let paragraph_content = "This is an experimental demo showcasing usage of sauron Component lifecycle to work alongside
+                    css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.
+                    Sauron is a light-weight web framework designed to have you write least amount of code possible.";
 
         App {
             frame: Frame::new_with_content("Retro Futuristic UI in rust"),
             header: Header::new_with_content("Header"),
+            paragraph: Paragraph::new_with_markdown(paragraph_content),
             fui_button,
             simple_fui_button,
             skewed_fui_button,
@@ -161,6 +170,7 @@ impl App {
         Cmd::new(|program| {
             program.dispatch(Msg::ReAnimateFrame);
             program.dispatch(Msg::ReAnimateHeader);
+            program.dispatch(Msg::ReAnimateParagraph);
             program.dispatch(Msg::ReAnimateList);
         })
     }
@@ -254,6 +264,7 @@ impl Component<Msg> for App {
                                 Msg::SimpleSkewedFuiButtonMsg(Box::new(fbtn_msg))
                             }),
                         ]),
+                        self.paragraph.view(),
                         button(
                             vec![
                                 on_click(|_| Msg::ReAnimateList),
@@ -367,7 +378,7 @@ impl Component<Msg> for App {
                 Cmd::none()
             }
             Msg::AnimateListMsg(animate_list_msg) => {
-                log::trace!("animating paragraph..");
+                log::trace!("animating animate_list..");
                 if let Some(animate_list_msg) =
                     self.animate_list.update(*animate_list_msg)
                 {
@@ -388,6 +399,26 @@ impl Component<Msg> for App {
                         program.dispatch(Msg::AnimateListMsg(Box::new(
                             animate_list_msg.clone(),
                         )))
+                    })
+                } else {
+                    Cmd::none()
+                }
+            }
+            Msg::ParagraphMsg(para_msg) => {
+                if let Some(para_msg) = self.paragraph.update(para_msg) {
+                    Cmd::new(move |program| {
+                        program.dispatch(Msg::ParagraphMsg(para_msg.clone()));
+                    })
+                } else {
+                    Cmd::none()
+                }
+            }
+            Msg::ReAnimateParagraph => {
+                if let Some(para_msg) =
+                    self.paragraph.update(paragraph::Msg::AnimateIn)
+                {
+                    Cmd::new(move |program| {
+                        program.dispatch(Msg::ParagraphMsg(para_msg.clone()));
                     })
                 } else {
                     Cmd::none()
