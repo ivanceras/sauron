@@ -55,7 +55,7 @@ where
     }
 
     fn start_animation(&mut self, is_in: bool) -> Option<Msg> {
-        let content_len = Self::node_count(&self.children());
+        let content_len = Self::node_count_chars(&self.children());
 
         log::trace!("content len: {}", content_len);
 
@@ -79,51 +79,45 @@ where
     }
 
     /// count the number of elements on this node tree
-    fn node_count(node: &Node<MSG>) -> usize {
-        let mut node_idx = 0;
-        Self::node_count_recursive(node, &mut node_idx);
-        node_idx
+    fn node_count_chars(node: &Node<MSG>) -> usize {
+        let mut current_cnt = 0;
+        Self::node_count_chars_recursive(node, &mut current_cnt);
+        current_cnt
     }
 
     /// recursively count the number of elements on this node tree
     /// 1 count for each character and each element
-    fn node_count_recursive(node: &Node<MSG>, node_idx: &mut usize) {
+    fn node_count_chars_recursive(node: &Node<MSG>, current_cnt: &mut usize) {
         match node {
             Node::Element(element) => {
-                log::trace!("an element..");
                 for child in element.children.iter() {
-                    Self::node_count_recursive(child, node_idx);
+                    Self::node_count_chars_recursive(child, current_cnt);
                 }
             }
             Node::Text(txt) => {
-                log::trace!("text");
-                *node_idx += txt.len();
+                *current_cnt += txt.len();
             }
         }
     }
 
     /// include the the element from the src to dest
-    /// as long as its node_idx is less than the node_idx_limit
-    fn include_node(
-        dest: &mut Node<MSG>,
-        src: &Node<MSG>,
-        node_idx_limit: usize,
-    ) {
-        let mut node_idx = 0;
-        Self::include_node_recursive(dest, src, node_idx_limit, &mut node_idx);
+    /// as long as its current_cnt is less than the chars_limit
+    fn include_node(dest: &mut Node<MSG>, src: &Node<MSG>, chars_limit: usize) {
+        let mut current_cnt = 0;
+        Self::include_node_recursive(dest, src, chars_limit, &mut current_cnt);
     }
 
     /// recursively include the element from src to dest
-    /// until all of the node_idx that is lesser than node_idx_limit is added.
+    /// until all of the current_cnt that is lesser than chars_limit is added.
     fn include_node_recursive(
         dest: &mut Node<MSG>,
         src: &Node<MSG>,
-        node_idx_limit: usize,
-        node_idx: &mut usize,
+        chars_limit: usize,
+        current_cnt: &mut usize,
     ) {
         match src {
             Node::Element(element) => {
-                if *node_idx < node_idx_limit {
+                if *current_cnt < chars_limit {
                     let shallow_src = html_element(
                         element.tag,
                         element.attrs.clone(),
@@ -148,8 +142,8 @@ where
                         Self::include_node_recursive(
                             &mut just_added_child,
                             child,
-                            node_idx_limit,
-                            node_idx,
+                            chars_limit,
+                            current_cnt,
                         );
                     }
                 }
@@ -157,13 +151,13 @@ where
             Node::Text(txt) => {
                 let txt_len = txt.len();
                 log::trace!(
-                    "txt_len: {}, node_idx: {}, node_idx_limit: {}",
+                    "txt_len: {}, current_cnt: {}, chars_limit: {}",
                     txt_len,
-                    node_idx,
-                    node_idx_limit
+                    current_cnt,
+                    chars_limit
                 );
-                let truncate_len = if node_idx_limit > *node_idx {
-                    std::cmp::min(txt_len, node_idx_limit - *node_idx)
+                let truncate_len = if chars_limit > *current_cnt {
+                    std::cmp::min(txt_len, chars_limit - *current_cnt)
                 } else {
                     0
                 };
@@ -172,7 +166,7 @@ where
                     let start = 0;
                     let end = truncate_len;
 
-                    log::trace!("txt_len: {}, node_idx: {}, node_idx_limit: {}, truncate_len: {},", txt_len, node_idx, node_idx_limit, truncate_len);
+                    log::trace!("txt_len: {}, current_cnt: {}, chars_limit: {}, truncate_len: {},", txt_len, current_cnt, chars_limit, truncate_len);
                     let truncated_txt = &txt[start..end];
                     let text_node = Node::Text(truncated_txt.to_string());
                     dest.add_children_ref_mut(vec![text_node]);
@@ -183,7 +177,7 @@ where
                         dest.add_children_ref_mut(vec![blink]);
                     }
                 }
-                *node_idx += truncate_len;
+                *current_cnt += truncate_len;
             }
         }
     }
@@ -196,7 +190,7 @@ where
     ) -> Option<Msg> {
         let timestamp = crate::dom::now();
 
-        let content_len = Self::node_count(&self.children());
+        let content_len = Self::node_count_chars(&self.children());
         log::trace!("content_len: {}", content_len);
 
         let mut anim_progress = (timestamp - start).max(0.0);
