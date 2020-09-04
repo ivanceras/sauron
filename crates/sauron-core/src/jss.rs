@@ -22,7 +22,7 @@ macro_rules! jss {
                                 serde_json::Value::String(s) => s.to_string(),
                                 serde_json::Value::Number(v) => v.to_string(),
                                 serde_json::Value::Bool(v) => v.to_string(),
-                                _ => "".to_string(),
+                                _ => panic!("supported values are String, Number or Bool only"),
                             };
                             buffer += &format!("    {}: {};\n", prop, value_str);
                         }
@@ -37,13 +37,6 @@ macro_rules! jss {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
-    #[test]
-    fn test() {
-        assert_eq!("background-color", backgroundColor);
-    }
-
     #[test]
     fn test_jss() {
         let css = jss!({

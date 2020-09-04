@@ -16,6 +16,8 @@
      - [ ] Make an equivalent for Program(client-side updater) for use in server-side
         - ie: ServerRender, where Msg could be passed as a data to hydrate the view (template) before sending to the client
  - [ ] Fix the render function where attributes of the same name not merged
+ - [ ] Change type of tag, attribute_name, style keys from `&'static str` to `&'a str`
+     - This will remove the need for hardcode HTML_STYLES lookup, which could be a performance penalty
 
 ## Internal
 - [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`

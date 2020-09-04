@@ -1,16 +1,50 @@
 /// a utility function for convenient styling of elements
 #[macro_export]
 macro_rules! style {
-    (
-        $($name:tt => $value:expr;)*
-    ) => {
-        $crate::html::attributes::styles_values([$((stringify!($name).trim_matches('"'), Into::<$crate::html::attributes::Value>::into($value))),*])
-    };
+    ($($tokens:tt)+) => {
+        {
+            let json = serde_json::json!({$($tokens)*});
+            println!("json: {}", json.to_string());
+            let mut styles = vec![];
+            if let Some(style_properties) = json.as_object(){
+                for (prop,p_value) in style_properties.iter(){
+                    //TODO: change the type of style name to &'a str, so we don't
+                    //have to lookup the &'static str equivalent
+                    let style_name = $crate::html::attributes::HTML_STYLES
+                        .iter()
+                        .find(|name| name == &prop)
+                        .map(|name| *name)
+                        .expect("style name must be valid");
 
+                    let value = match p_value{
+                        serde_json::Value::String(s) => $crate::html::attributes::Value::String(s.to_string()),
+                        serde_json::Value::Number(v) => {
+                            if let Some(i64_value) = v.as_i64(){
+                                $crate::html::attributes::Value::I64(i64_value)
+                            }else if let Some(f64_value) = v.as_f64(){
+                                $crate::html::attributes::Value::F64(f64_value)
+                            }else{
+                                unreachable!("should either be i64 or f64")
+                            }
+                        }
+                        serde_json::Value::Bool(v) => $crate::html::attributes::Value::Bool(*v),
+                        _ => panic!("supported values are String, Number or Bool only"),
+                    };
+                    println!("value: {}", value);
+                    styles.push($crate::html::attributes::style::Style::new(style_name, value));
+
+                }
+            }
+            $crate::mt_dom::attr(
+                "style",
+                $crate::html::attributes::AttributeValue::from_styles(styles),
+            )
+        }
+    };
 }
 
 /// HTML style names
-#[cfg(feature = "with-parser")]
+//#[cfg(feature = "with-parser")]
 pub const HTML_STYLES: [&'static str; 368] = [
     "align-content",
     "align-items",
@@ -390,16 +424,34 @@ mod tests {
     };
 
     #[test]
-    fn test_style_values() {
+    fn test_style_json() {
         let mut b1 = String::new();
-        let s1: Attribute<()> =
-            style! {hello=> "world"; width=> px(10); height=> px(20);};
+        let s1: Attribute<()> = style! {
+            "background-color": "green",
+            "border": "1px solid green",
+        };
+
         s1.render(&mut b1).unwrap();
 
-        assert_eq!(b1, r#"style="hello:world;width:10px;height:20px;""#);
+        assert_eq!(
+            b1,
+            r#"style="background-color:green;border:1px solid green;""#
+        );
+    }
 
-        let s2: Attribute<()> = style! {"background-color"=> "red";
-        width=> px(10); height=> px(20);};
+    #[test]
+    fn test_style_values() {
+        let mut b1 = String::new();
+        let s1: Attribute<()> = style! {"width": px(10), "height" : px(20)};
+        s1.render(&mut b1).unwrap();
+
+        assert_eq!(b1, r#"style="width:10px;height:20px;""#);
+
+        let s2: Attribute<()> = style! {
+            "background-color":"red",
+            "width": px(10),
+            "height": px(20),
+        };
 
         let mut b2 = String::new();
         s2.render(&mut b2).unwrap();
@@ -420,9 +472,9 @@ mod tests {
         let mut b3 = String::new();
 
         let s3: Attribute<()> = style! {
-            width=> px(data.width);
-            "padding-left"=> px(padding_width);
-            "padding-right"=> px(padding_width);
+            "width": px(data.width),
+            "padding-left": px(padding_width),
+            "padding-right": px(padding_width),
         };
         s3.render(&mut b3).unwrap();
         assert_eq!(
