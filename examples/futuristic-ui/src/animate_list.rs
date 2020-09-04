@@ -90,7 +90,6 @@ where
             for child in children {
                 match child {
                     Node::Element(_) => {
-                        *node_idx += 1;
                         Self::node_count_recursive(child, node_idx);
                     }
                     Node::Text(txt) => {
@@ -140,7 +139,6 @@ where
                                 }
                                 // tags other than tr
                                 _ => {
-                                    *node_idx += 1;
                                     let child_src_attr =
                                         element.get_attributes();
                                     // dont include the children on this clone
