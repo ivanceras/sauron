@@ -11,11 +11,10 @@ use std::marker::PhantomData;
 use web_sys::HtmlAudioElement;
 
 #[derive(Clone, Debug)]
-pub enum Msg<MSG> {
+pub enum Msg {
     AnimateIn,
     StopAnimation,
     NextAnimation(bool, f64, f64),
-    ParamMsg(MSG),
 }
 
 pub struct AnimateList<MSG> {
@@ -48,17 +47,17 @@ where
         let _ = audio.play().expect("must play");
     }
 
-    pub fn animate_in(&mut self) -> Option<Msg<MSG>> {
+    pub fn animate_in(&mut self) -> Option<Msg> {
         self.play_sound();
         self.start_animation(true)
     }
 
-    fn stop_animation(&mut self) -> Option<Msg<MSG>> {
+    fn stop_animation(&mut self) -> Option<Msg> {
         self.animating = false;
         None
     }
 
-    fn start_animation(&mut self, is_in: bool) -> Option<Msg<MSG>> {
+    fn start_animation(&mut self, is_in: bool) -> Option<Msg> {
         let content_len = Self::node_count(&self.children());
 
         if content_len == 0 {
@@ -207,7 +206,7 @@ where
         is_in: bool,
         start: f64,
         duration: f64,
-    ) -> Option<Msg<MSG>> {
+    ) -> Option<Msg> {
         let timestamp = crate::dom::now();
 
         let content_len = Self::node_count(&self.children());
@@ -254,7 +253,7 @@ where
         }
     }
 
-    pub fn update(&mut self, msg: Msg<MSG>) -> Option<Msg<MSG>> {
+    pub fn update(&mut self, msg: Msg) -> Option<Msg> {
         log::trace!("animate_list updating..");
         match msg {
             Msg::AnimateIn => {
@@ -270,7 +269,6 @@ where
                 log::trace!("next animationg executed..");
                 self.next_animation(is_in, start, duration)
             }
-            Msg::ParamMsg(_) => None,
         }
     }
 

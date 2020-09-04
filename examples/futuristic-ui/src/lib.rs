@@ -39,7 +39,7 @@ pub enum Msg {
     SimpleSkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
     GreenFuiButtonMsg(Box<fui_button::Msg<Self>>),
     DisabledFuiButtonMsg(Box<fui_button::Msg<Self>>),
-    AnimateListMsg(Box<animate_list::Msg<Self>>),
+    AnimateListMsg(Box<animate_list::Msg>),
     ReAnimateList,
     ReanimateAll,
     NoOp,
