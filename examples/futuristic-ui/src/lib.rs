@@ -42,7 +42,7 @@ pub enum Msg {
     GreenFuiButtonMsg(Box<fui_button::Msg<Self>>),
     DisabledFuiButtonMsg(Box<fui_button::Msg<Self>>),
     AnimateListMsg(Box<animate_list::Msg<Self>>),
-    ReanimateList,
+    ReAnimateList,
     ReanimateAll,
     NoOp,
 }
@@ -171,10 +171,8 @@ impl App {
     fn reanimate_all() -> Cmd<Self, Msg> {
         Cmd::new(|program| {
             program.dispatch(Msg::ReAnimateFrame);
-            program.dispatch(Msg::HeaderMsg(header::Msg::AnimateIn));
-            program.dispatch(Msg::AnimateListMsg(Box::new(
-                animate_list::Msg::AnimateIn,
-            )));
+            program.dispatch(Msg::ReAnimateHeader);
+            program.dispatch(Msg::ReAnimateList);
         })
     }
 }
@@ -269,7 +267,7 @@ impl Component<Msg> for App {
                         ]),
                         button(
                             vec![
-                                on_click(|_| Msg::ReanimateList),
+                                on_click(|_| Msg::ReAnimateList),
                                 style("margin", "20px"),
                                 style("display", "block"),
                             ],
@@ -281,7 +279,7 @@ impl Component<Msg> for App {
                         ),
                         button(
                             vec![
-                                on_click(|_| Msg::ReanimateList),
+                                on_click(|_| Msg::ReAnimateList),
                                 style("margin", "20px"),
                                 style("display", "block"),
                             ],
@@ -393,7 +391,7 @@ impl Component<Msg> for App {
                     Cmd::none()
                 }
             }
-            Msg::ReanimateList => {
+            Msg::ReAnimateList => {
                 if let Some(animate_list_msg) =
                     self.animate_list.update(animate_list::Msg::AnimateIn)
                 {
