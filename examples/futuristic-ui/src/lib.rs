@@ -116,6 +116,7 @@ impl App {
         div(
             vec![],
             vec![
+                button(vec![on_click(|_|Msg::ReAnimateFrame)], vec![text("Inside AnimateList")]),
                 p(vec![], vec![
                     text("This is an experimental demo showcasing usage of sauron[0] Component lifecycle to work alongside
                     css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.
