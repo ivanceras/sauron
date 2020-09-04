@@ -31,7 +31,7 @@ where
 {
     pub fn new_with_markdown(md: &str) -> Self {
         Paragraph {
-            animated_list: AnimateList::new_with_content(text(md)),
+            animated_list: AnimateList::new_with_content(sauron::markdown(md)),
         }
     }
 
