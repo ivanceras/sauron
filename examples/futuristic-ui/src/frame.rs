@@ -108,6 +108,10 @@ impl Frame {
             box-shadow: 0 0 4px rgba(2,157,187,0.65);
         }
 
+        .hide{
+            opacity: 0;
+        }
+
         .hide .border {
           height: 0;
           width: 0;
