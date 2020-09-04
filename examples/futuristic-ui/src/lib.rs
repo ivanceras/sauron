@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 use animate_list::AnimateList;
 use frame::Frame;
 use fui_button::FuiButton;
@@ -117,7 +117,7 @@ impl App {
         div(
             vec![],
             vec![
-                button(vec![on_click(|_|Msg::ReAnimateFrame)], vec![text("Inside AnimateList")]),
+                button(vec![on_click(|_|Msg::ReAnimateFrame)], vec![text("Animate Frame")]),
                 p(vec![], vec![
                     text("This is an experimental demo showcasing usage of sauron[0] Component lifecycle to work alongside
                     css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.
@@ -174,7 +174,7 @@ impl App {
         Cmd::new(|program| {
             program.dispatch(Msg::ReAnimateFrame);
             program.dispatch(Msg::ReAnimateHeader);
-            //program.dispatch(Msg::ReAnimateParagraph);
+            program.dispatch(Msg::ReAnimateParagraph);
             program.dispatch(Msg::ReAnimateList);
         })
     }
@@ -182,8 +182,7 @@ impl App {
 
 impl Component<Msg> for App {
     fn init(&self) -> Cmd<Self, Msg> {
-        //Self::reanimate_all()
-        Cmd::none()
+        Self::reanimate_all()
     }
 
     fn style(&self) -> Vec<String> {
@@ -356,7 +355,6 @@ impl Component<Msg> for App {
             }
             Msg::FuiButtonMsg(fui_btn_msg) => {
                 if let Some(pmsg) = self.fui_button.update(*fui_btn_msg) {
-                    log::warn!("got the btn msg here: {:?}", pmsg);
                     Cmd::new(move |program| program.dispatch(pmsg.clone()))
                 } else {
                     Cmd::none()
@@ -365,7 +363,6 @@ impl Component<Msg> for App {
             Msg::SimpleFuiButtonMsg(fui_btn_msg) => {
                 if let Some(pmsg) = self.simple_fui_button.update(*fui_btn_msg)
                 {
-                    log::trace!("gpt simple btn msg: {:?}", pmsg);
                     Cmd::new(move |program| program.dispatch(pmsg.clone()))
                 } else {
                     Cmd::none()
@@ -405,7 +402,6 @@ impl Component<Msg> for App {
                 }
             }
             Msg::AnimateListMsg(animate_list_msg) => {
-                log::trace!("animating animate_list..");
                 if let Some(animate_list_msg) =
                     self.animate_list.update(*animate_list_msg)
                 {
@@ -433,7 +429,6 @@ impl Component<Msg> for App {
             }
             Msg::ParagraphMsg(para_msg) => {
                 if let Some(para_msg) = self.paragraph.update(para_msg) {
-                    log::debug!("paragraph msg: {:?}", para_msg);
                     Cmd::new(move |program| {
                         program.dispatch(Msg::ParagraphMsg(para_msg.clone()));
                     })
@@ -452,10 +447,7 @@ impl Component<Msg> for App {
                     Cmd::none()
                 }
             }
-            Msg::ReanimateAll => {
-                log::debug!("Reanimating...");
-                Self::reanimate_all()
-            }
+            Msg::ReanimateAll => Self::reanimate_all(),
             Msg::NoOp => Cmd::none(),
         }
     }

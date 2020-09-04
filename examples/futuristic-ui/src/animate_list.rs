@@ -57,8 +57,6 @@ where
     fn start_animation(&mut self, is_in: bool) -> Option<Msg> {
         let content_len = Self::node_count_chars(&self.children());
 
-        log::trace!("content len: {}", content_len);
-
         if content_len == 0 {
             return None;
         }
@@ -74,7 +72,6 @@ where
             self.animated_layer = None;
         }
 
-        log::trace!("returning a cmd for next animation..");
         Some(Msg::NextAnimation(is_in, start, duration))
     }
 
@@ -150,12 +147,6 @@ where
             }
             Node::Text(txt) => {
                 let txt_len = txt.len();
-                log::trace!(
-                    "txt_len: {}, current_cnt: {}, chars_limit: {}",
-                    txt_len,
-                    current_cnt,
-                    chars_limit
-                );
                 let truncate_len = if chars_limit > *current_cnt {
                     std::cmp::min(txt_len, chars_limit - *current_cnt)
                 } else {
@@ -166,7 +157,6 @@ where
                     let start = 0;
                     let end = truncate_len;
 
-                    log::trace!("txt_len: {}, current_cnt: {}, chars_limit: {}, truncate_len: {},", txt_len, current_cnt, chars_limit, truncate_len);
                     let truncated_txt = &txt[start..end];
                     let text_node = Node::Text(truncated_txt.to_string());
                     dest.add_children_ref_mut(vec![text_node]);
@@ -191,22 +181,14 @@ where
         let timestamp = crate::dom::now();
 
         let content_len = Self::node_count_chars(&self.children());
-        log::trace!("content_len: {}", content_len);
 
         let mut anim_progress = (timestamp - start).max(0.0);
         if !is_in {
             anim_progress = duration - anim_progress;
         }
 
-        log::trace!("duration: {}", duration);
-        log::trace!("timestamp: {}", timestamp);
-        log::debug!("content_len: {}", content_len);
-        log::debug!("animation progress: {}", anim_progress);
-
         let new_length =
             (anim_progress * content_len as f64 / duration).round() as usize;
-
-        log::trace!("new_length: {}", new_length);
 
         let mut dest: Node<MSG> = div(vec![], vec![]);
 
@@ -220,28 +202,20 @@ where
         };
 
         if continue_animation {
-            log::trace!("continue animation");
             Some(Msg::NextAnimation(is_in, start, duration))
         } else {
-            log::trace!("stop the animation");
             Some(Msg::StopAnimation)
         }
     }
 
     pub fn update(&mut self, msg: Msg) -> Option<Msg> {
-        log::trace!("animate_list updating..");
         match msg {
-            Msg::AnimateIn => {
-                log::trace!("animate in started...");
-                self.animate_in()
-            }
+            Msg::AnimateIn => self.animate_in(),
             Msg::StopAnimation => {
-                log::trace!("animate_list stop_animation..");
                 self.stop_animation();
                 None
             }
             Msg::NextAnimation(is_in, start, duration) => {
-                log::trace!("next animationg executed..");
                 self.next_animation(is_in, start, duration)
             }
         }

@@ -68,7 +68,6 @@ where
         event_listeners: Vec<Attribute<PMSG>>,
     ) {
         for ev in event_listeners {
-            log::trace!("adding event listeners.. {:?}", ev);
             let mapped_ev = ev.map_msg(|pmsg| Msg::ParamMsg(pmsg));
             self.event_listeners.push(mapped_ev);
         }

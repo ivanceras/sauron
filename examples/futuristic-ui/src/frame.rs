@@ -44,24 +44,20 @@ impl Frame {
     pub fn update(&mut self, msg: Msg) -> Option<Msg> {
         match msg {
             Msg::AnimateIn => {
-                log::trace!("frame animate in started...");
                 self.hide = true;
                 self.start_animation()
             }
             Msg::StopAnimation => {
-                log::trace!("frame  stop_animation..");
                 self.hide = false;
                 None
             }
             Msg::NextAnimation(start, duration) => {
-                log::trace!("next animationg executed..");
                 self.next_animation(start, duration)
             }
         }
     }
 
     fn start_animation(&mut self) -> Option<Msg> {
-        log::trace!("header starting animation");
         let duration = 200.0;
         let start = crate::dom::now();
         self.play_sound();
@@ -70,16 +66,11 @@ impl Frame {
 
     fn next_animation(&mut self, start: f64, duration: f64) -> Option<Msg> {
         let timestamp = crate::dom::now();
-        log::trace!("header next animation: started: {}, duration: {}, timestamp now: {}",start,duration,timestamp);
         let elapsed = timestamp - start;
-        log::trace!("elapsed time: {}", elapsed);
         let continue_animation = elapsed < duration;
-        log::trace!("continue animation: {}", continue_animation);
         if continue_animation {
-            log::trace!("header continue animation");
             Some(Msg::NextAnimation(start, duration))
         } else {
-            log::trace!("header stop the animation");
             Some(Msg::StopAnimation)
         }
     }

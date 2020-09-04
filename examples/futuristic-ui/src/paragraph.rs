@@ -3,16 +3,9 @@ use crate::{
     AnimateList,
 };
 use sauron::{
-    html::{
-        attributes::class,
-        div,
-        text,
-    },
     prelude::*,
     Node,
 };
-use std::marker::PhantomData;
-use web_sys::HtmlAudioElement;
 
 #[derive(Clone, Debug)]
 pub enum Msg {
@@ -38,15 +31,12 @@ where
     pub fn update(&mut self, msg: Msg) -> Option<Msg> {
         match msg {
             Msg::AnimateIn => {
-                log::trace!("in paragraph animate in");
                 let amsg =
                     self.animated_list.update(animate_list::Msg::AnimateIn);
 
-                log::trace!("got some asmg: {:?}", amsg);
                 amsg.map(Msg::AnimateListMsg)
             }
             Msg::AnimateListMsg(amsg) => {
-                log::trace!("in paragraph animate list msg");
                 self.animated_list.update(amsg).map(Msg::AnimateListMsg)
             }
         }
