@@ -349,12 +349,30 @@ impl Component<Msg> for App {
             }
             Msg::AnimateListMsg(animate_list_msg) => {
                 log::trace!("animating paragraph..");
-                self.animate_list.update(*animate_list_msg);
-                Cmd::none()
+                if let Some(animate_list_msg) =
+                    self.animate_list.update(*animate_list_msg)
+                {
+                    Cmd::new(move |program| {
+                        program.dispatch(Msg::AnimateListMsg(Box::new(
+                            animate_list_msg.clone(),
+                        )))
+                    })
+                } else {
+                    Cmd::none()
+                }
             }
             Msg::ReanimateList => {
-                self.animate_list.update(animate_list::Msg::AnimateIn);
-                Cmd::none()
+                if let Some(animate_list_msg) =
+                    self.animate_list.update(animate_list::Msg::AnimateIn)
+                {
+                    Cmd::new(move |program| {
+                        program.dispatch(Msg::AnimateListMsg(Box::new(
+                            animate_list_msg.clone(),
+                        )))
+                    })
+                } else {
+                    Cmd::none()
+                }
             }
             Msg::ReanimateAll => {
                 log::debug!("Reanimating...");

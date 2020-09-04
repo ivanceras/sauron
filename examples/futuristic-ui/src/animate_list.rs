@@ -56,23 +56,23 @@ where
         let _ = audio.play().expect("must play");
     }
 
-    pub fn animate_in(&mut self) -> Cmd<crate::App, crate::Msg> {
+    pub fn animate_in(&mut self) -> Option<Msg<MSG>> {
         self.play_sound();
         self.start_animation(true)
     }
 
-    fn stop_animation(&mut self) -> Cmd<crate::App, crate::Msg> {
+    fn stop_animation(&mut self) -> Option<Msg<MSG>> {
         self.animating = false;
-        Cmd::none()
+        None
     }
 
-    fn start_animation(&mut self, is_in: bool) -> Cmd<crate::App, crate::Msg> {
+    fn start_animation(&mut self, is_in: bool) -> Option<Msg<MSG>> {
         use wasm_bindgen::JsCast;
 
         let content_len = Self::node_count(&self.children());
 
         if content_len == 0 {
-            return Cmd::none();
+            return None;
         }
 
         let interval = 1_000.0 / 60.0;
@@ -87,11 +87,7 @@ where
         }
 
         log::trace!("returning a cmd for next animation..");
-        Cmd::new(move |program| {
-            program.dispatch(crate::Msg::AnimateListMsg(Box::new(
-                Msg::NextAnimation(is_in, start, duration),
-            )))
-        })
+        Some(Msg::NextAnimation(is_in, start, duration))
     }
 
     /// count the number of elements on this node tree
@@ -223,7 +219,7 @@ where
         is_in: bool,
         start: f64,
         duration: f64,
-    ) -> Cmd<crate::App, crate::Msg> {
+    ) -> Option<Msg<MSG>> {
         let timestamp = crate::dom::now();
 
         let content_len = Self::node_count(&self.children());
@@ -263,22 +259,14 @@ where
 
         if continue_animation {
             log::trace!("continue animation");
-            Cmd::new(move |program| {
-                program.dispatch(crate::Msg::AnimateListMsg(Box::new(
-                    Msg::NextAnimation(is_in, start, duration),
-                )))
-            })
+            Some(Msg::NextAnimation(is_in, start, duration))
         } else {
             log::trace!("stop the animation");
-            Cmd::new(move |program| {
-                program.dispatch(crate::Msg::AnimateListMsg(Box::new(
-                    Msg::StopAnimation,
-                )))
-            })
+            Some(Msg::StopAnimation)
         }
     }
 
-    pub fn update(&mut self, msg: Msg<MSG>) -> Cmd<crate::App, crate::Msg> {
+    pub fn update(&mut self, msg: Msg<MSG>) -> Option<Msg<MSG>> {
         log::trace!("animate_list updating..");
         match msg {
             Msg::AnimateIn => {
@@ -288,13 +276,13 @@ where
             Msg::StopAnimation => {
                 log::trace!("animate_list stop_animation..");
                 self.stop_animation();
-                Cmd::none()
+                None
             }
             Msg::NextAnimation(is_in, start, duration) => {
                 log::trace!("next animationg executed..");
                 self.next_animation(is_in, start, duration)
             }
-            Msg::ParamMsg(msg) => Cmd::none(),
+            Msg::ParamMsg(msg) => None,
         }
     }
 
