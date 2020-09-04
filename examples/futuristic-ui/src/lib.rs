@@ -4,12 +4,23 @@ use frame::Frame;
 use fui_button::FuiButton;
 use header::Header;
 use paragraph::Paragraph;
-use sauron::html::attributes::{class, id, style};
-use sauron::html::events::on_click;
-use sauron::html::{div, text};
-use sauron::markdown;
-use sauron::prelude::*;
-use sauron::{Cmd, Component, Node, Program};
+use sauron::{
+    html::{
+        attributes::{
+            class,
+            id,
+            style,
+        },
+        div,
+        events::on_click,
+        text,
+    },
+    prelude::*,
+    Cmd,
+    Component,
+    Node,
+    Program,
+};
 use spinner::Spinner;
 use web_sys::HtmlAudioElement;
 

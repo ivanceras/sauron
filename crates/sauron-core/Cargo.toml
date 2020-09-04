@@ -23,6 +23,7 @@ thiserror = "1.0"
 doc-comment = "0.3"
 mt-dom = { version = "0.4"}
 console_log = { version = "0.2", optional = true, features = ["color"] }
+serde_json = { version = "1", features = ["preserve_order"] }
 
 [dependencies.web-sys]
 version = "0.3"

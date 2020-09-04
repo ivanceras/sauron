@@ -1,8 +1,21 @@
-use sauron::html::attributes::{class, id, style};
-use sauron::html::events::on_click;
-use sauron::html::{div, text};
-use sauron::prelude::*;
-use sauron::{Cmd, Component, Node, Program};
+use sauron::{
+    html::{
+        attributes::{
+            class,
+            id,
+            style,
+        },
+        div,
+        events::on_click,
+        text,
+    },
+    jss,
+    prelude::*,
+    Cmd,
+    Component,
+    Node,
+    Program,
+};
 use web_sys::HtmlAudioElement;
 
 #[derive(Clone)]
@@ -75,18 +88,13 @@ where
     }
 
     pub fn style(&self) -> Vec<String> {
-        // border box shadow
         let border_box_shadow_color = "rgba(2,157,187,0.65)";
-        // corner box shadow
         let corner_box_shadow_color = "rgba(38,218,253,0.65)";
         let border_border_color = "#029dbb";
         let corner_color = "#26dafd";
-        // color when button highlights upon clicking
         let click_highlight_color = "#029dbb";
-        // wrapping the actual button
         let button_wrap_text_color = "rgba(4,35,41,0.65)";
         let button_text_color = "#acf9fb";
-        // TODO: rename `green` to `alt`
         let green_border_color = "#090";
         let green_corner_color = "#0f0";
         let green_click_highlight_color = "#090";
@@ -99,240 +107,210 @@ where
         let disabled_border_box_shadow_color = "rgba(102,102,102,0.65)";
         let disabled_button_text_color = "#999";
 
-        vec![format!(
-            r#"
-        .fui_button {{
-            display: inline-block;
-            padding: 1px;
-            position: relative;
-            margin: 4px 4px;
-        }}
+        let css = jss!({
+            ".fui_button": {
+                "display": "inline-block",
+                "padding": "1px",
+                "position": "relative",
+                "margin": "4px 4px"
+            },
 
-        .skewed.fui_button {{
-            transform: skewX(-45deg);
-            transform-origin: bottom left;
-        }}
+            ".skewed.fui_button": {
+                "transform": "skewX(-45deg)",
+                "transform-origin": "bottom left",
+            },
 
-        .fui_button__border {{
-            border-color: {border_border_color};
-            box-shadow: 0 0 4px {border_box_shadow_color};
-        }}
+            ".fui_button__border": {
+                "border-color": border_border_color,
+                "box-shadow": format!("0 0 4px {}",border_box_shadow_color),
+            },
 
-        .green .fui_button__border {{
-            border-color: {green_border_color};
-            box-shadow: 0 0 4px {green_border_box_shadow_color};
-        }}
+            ".green .fui_button__border": {
+                "border-color": green_border_color,
+                "box-shadow": format!("0 0 4px {}",green_border_box_shadow_color),
+            },
 
-        .disabled .fui_button__border {{
-            border-color: {disabled_border_color};
-            box-shadow: 0 0 4px {disabled_border_box_shadow_color};
-        }}
+            ".disabled .fui_button__border": {
+                "border-color": disabled_border_color,
+                "box-shadow": format!("0 0 4px {}",disabled_border_box_shadow_color),
+            },
 
-        .hide .fui_button__border {{
-          height: 0;
-          width: 0;
-        }}
+            ".hide .fui_button__border": {
+                "height": 0,
+                "width": 0,
+            },
 
-        .fui_button__border-left {{
-            top: 50%;
-            left: 0;
-            height: 100%;
-            transform: translate(0, -50%);
-            border-width: 0 0 0 1px;
-        }}
+            ".fui_button__border-left": {
+                "top": "50%",
+                "left": 0,
+                "height": "100%",
+                "transform": "translate(0, -50%)",
+                "border-width": "0 0 0 1px",
+            },
 
+            ".fui_button__border-anim": {
+                "z-index": 1,
+                "opacity": 1,
+                "position": "absolute",
+                "transition": "all 250ms ease-in",
+                "border-style": "solid",
+            },
 
-        .fui_button__border-anim {{
-            z-index: 1;
-            opacity: 1;
-            position: absolute;
-            transition: all 250ms ease-in;
-            border-style: solid;
-        }}
+            ".fui_button__border-right": {
+                "top": "50%",
+                "right": 0,
+                "height": "100%",
+                "transform": "translate(0, -50%)",
+                "border-width": "0 0 0 1px",
+            },
 
-        .fui_button__border-right {{
-            top: 50%;
-            right: 0;
-            height: 100%;
-            transform: translate(0, -50%);
-            border-width: 0 0 0 1px;
-        }}
+            ".fui_button__border-top": {
+                "top": 0,
+                "left": "50%",
+                "width": "100%",
+                "transform": "translate(-50%, 0)",
+                "border-width": "1px 0 0 0",
+            },
 
+            ".fui_button__border-bottom": {
+                "left": "50%",
+                "width": "100%",
+                "bottom": 0,
+                "transform": "translate(-50%, 0)",
+                "border-width": "1px 0 0 0",
+            },
 
-        .fui_button__border-top {{
-            top: 0;
-            left: 50%;
-            width: 100%;
-            transform: translate(-50%, 0);
-            border-width: 1px 0 0 0;
-        }}
+            ".fui_button__corner": {
+                "width": "8px",
+                "height": "8px",
+                "border-color": corner_color,
+                "box-shadow": format!("0 0 4px -2px {}",corner_box_shadow_color),
+            },
 
+            ".green .fui_button__corner": {
+                "border-color": green_corner_color,
+                "box-shadow": format!("0 0 4px {}",green_corner_box_shadow_color),
+            },
 
-        .fui_button__border-bottom {{
-            left: 50%;
-            width: 100%;
-            bottom: 0;
-            transform: translate(-50%, 0);
-            border-width: 1px 0 0 0;
-        }}
+            ".disabled .fui_button__corner": {
+                "border-color": disabled_corner_color,
+                "box-shadow": format!("0 0 4px {}",disabled_corner_box_shadow_color),
+            },
 
+            ".hide .fui_button__corner": {
+                "width": 0,
+                "height": 0,
+                "opacity": 0,
+            },
 
-        .fui_button__corner {{
-            width: 8px;
-            height: 8px;
-            border-color: {corner_color};
-            box-shadow: 0 0 4px -2px {corner_box_shadow_color};
-        }}
+            ".fui_button__corner-anim": {
+                "z-index": 2,
+                "opacity": 1,
+                "position": "absolute",
+                "transition": "all 250ms ease-in",
+                "border-style": "solid",
+            },
 
-        .green .fui_button__corner {{
-            border-color: {green_corner_color};
-            box-shadow: 0 0 4px {green_corner_box_shadow_color};
-        }}
+            ".fui_button_corner__top-left": {
+                "left": "-2px",
+                "top": "-2px",
+                "border-width": "2px 0 0 2px",
+            },
 
-        .disabled .fui_button__corner {{
-            border-color: {disabled_corner_color};
-            box-shadow: 0 0 4px {disabled_corner_box_shadow_color};
-        }}
+            ".fui_button_corner__bottom-left": {
+                "left": "-2px",
+                "bottom": "-2px",
+                "border-width": "0 0 2px 2px",
+            },
 
-        .hide .fui_button__corner {{
-            width: 0;
-            height: 0;
-            opacity: 0;
-        }}
+            ".fui_button_corner__top-right": {
+                "right": "-2px",
+                "top": "-2px",
+                "border-width": "2px 2px 0 0",
+            },
 
-        .fui_button__corner-anim {{
-            z-index: 2;
-            opacity: 1;
-            position: absolute;
-            transition: all 250ms ease-in;
-            border-style: solid;
-        }}
+            ".fui_button_corner__bottom-right": {
+                "right": "-2px",
+                "bottom": "-2px",
+                "border-width": "0 2px 2px 0",
+            },
 
-        .fui_button_corner__top-left {{
-            left: -2px;
-            top: -2px;
-            border-width: 2px 0 0 2px;
-        }}
+            ".fui_button-text": {
+                "background-color": button_wrap_text_color,
+            },
 
+            ".hide .fui_button-text": {
+                "background-color": "transparent",
+            },
 
-        .fui_button_corner__bottom-left {{
-            left: -2px;
-            bottom: -2px;
-            border-width: 0 0 2px 2px;
-        }}
+            ".fui_button-text-anim": {
+                "z-index": 3,
+                "display": "block",
+                "position": "relative",
+                "overflow": "hidden",
+                "transition": "background-color 250ms ease-in",
+            },
 
+            ".fui_button__button": {
+                "color": button_text_color,
+                "cursor": "pointer"
+            },
 
-        .fui_button_corner__top-right {{
-            right: -2px;
-            top: -2px;
-            border-width: 2px 2px 0 0;
-        }}
+            ".green .fui_button__button": {
+                "color": green_button_text_color,
+            },
 
+            ".disabled .fui_button__button": {
+                "color": disabled_button_text_color,
+                "cursor": "auto",
+            },
 
-        .fui_button_corner__bottom-right {{
-            right: -2px;
-            bottom: -2px;
-            border-width: 0 2px 2px 0;
-        }}
+            ".skewed .fui_button__button": {
+                "transform": "skewX(45deg)",
+            },
 
+            ".fui_button__button-anim": {
+                "margin": 0,
+                "border": "none",
+                "z-index": 2,
+                "display": "inline-block",
+                "padding": "10px 20px",
+                "outline": "none",
+                "position": "relative",
+                "font-size": "15.75px",
+                "background": "transparent",
+                "transition": "all 250ms ease-out",
+                "line-height": 1,
+                "user-select": "none",
+                "vertical-align": "middle",
+            },
 
-        .fui_button-text {{
-            background-color: {button_wrap_text_color};
-        }}
+            ".fui_button__highlight": {
+                  "z-index": 1,
+                  "position": "absolute",
+                  "left": 0,
+                  "right": 0,
+                  "top": 0,
+                  "bottom": 0,
+                  "background-color": "transparent",
+                  "opacity": 0,
+            },
 
-        .hide .fui_button-text {{
-            background-color: transparent;
-        }}
+            ".click .fui_button__highlight": {
+                "opacity": 1,
+                "background-color": click_highlight_color,
+            },
 
-        .fui_button-text-anim {{
-            z-index: 3;
-            display: block;
-            position: relative;
-            overflow: hidden;
-            transition: background-color 250ms ease-in;
-        }}
+            ".green .fui_button__highlight": {
+                "background-color": green_click_highlight_color,
+            },
 
-        .fui_button__button {{
-            color: {button_text_color};
-            cursor: pointer;
-        }}
+            ".fui_button__highlight-anim": {
+                "transition": "all 50ms ease-out",
+            }
+        });
 
-        .green .fui_button__button {{
-            color: {green_button_text_color};
-        }}
-
-        .disabled .fui_button__button {{
-            color: {disabled_button_text_color};
-            cursor: auto;
-        }}
-
-        .skewed .fui_button__button {{
-            transform: skewX(45deg);
-        }}
-
-        .fui_button__button-anim {{
-            margin: 0;
-            border: none;
-            z-index: 2;
-            display: inline-block;
-            padding: 10px 20px;
-            outline: none;
-            position: relative;
-            font-size: 15.75px;
-            background: transparent;
-            transition: all 250ms ease-out;
-            line-height: 1;
-            user-select: none;
-            vertical-align: middle;
-        }}
-
-
-        .fui_button__highlight {{
-              z-index: 1;
-              position: absolute;
-              left: 0;
-              right: 0;
-              top: 0;
-              bottom: 0;
-              background-color: transparent;
-              opacity: 0;
-        }}
-
-        .click .fui_button__highlight {{
-            opacity: 1;
-            background-color: {click_highlight_color}
-        }}
-
-        .green .fui_button__highlight {{
-            background-color: {green_click_highlight_color};
-        }}
-
-        .fui_button__highlight-anim {{
-            transition: all 50ms ease-out;
-        }}
-        "#,
-            //default colors
-            border_box_shadow_color = border_box_shadow_color,
-            corner_box_shadow_color = corner_box_shadow_color,
-            border_border_color = border_border_color,
-            corner_color = corner_color,
-            click_highlight_color = click_highlight_color,
-            button_wrap_text_color = button_wrap_text_color,
-            button_text_color = button_text_color,
-            // green
-            green_border_color = green_border_color,
-            green_corner_color = green_corner_color,
-            green_button_text_color = green_button_text_color,
-            green_click_highlight_color = green_click_highlight_color,
-            green_border_box_shadow_color = green_border_box_shadow_color,
-            green_corner_box_shadow_color = green_corner_box_shadow_color,
-            // disabled
-            disabled_corner_color = disabled_corner_color,
-            disabled_border_color = disabled_border_color,
-            disabled_button_text_color = disabled_button_text_color,
-            disabled_corner_box_shadow_color = disabled_corner_box_shadow_color,
-            disabled_border_box_shadow_color = disabled_border_box_shadow_color,
-        )]
+        vec![css]
     }
 
     pub fn update(&mut self, msg: Msg<PMSG>) -> Cmd<crate::App, crate::Msg> {

@@ -31,6 +31,8 @@ pub type Event = ();
 pub mod html;
 #[macro_use]
 pub mod svg;
+#[macro_use]
+pub mod jss;
 mod render;
 
 pub use render::Render;
