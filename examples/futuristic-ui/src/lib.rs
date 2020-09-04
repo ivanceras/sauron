@@ -171,7 +171,7 @@ impl App {
     fn reanimate_all() -> Cmd<Self, Msg> {
         Cmd::new(|program| {
             program.dispatch(Msg::ReAnimateFrame);
-            program.dispatch(Msg::HeaderMsg(header::Msg::TriggerAnimation));
+            program.dispatch(Msg::HeaderMsg(header::Msg::AnimateIn));
             program.dispatch(Msg::AnimateListMsg(Box::new(
                 animate_list::Msg::AnimateIn,
             )));
@@ -311,14 +311,46 @@ impl Component<Msg> for App {
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
-            Msg::ReAnimateFrame => {
-                self.frame.update(frame::Msg::TriggerAnimation)
-            }
             Msg::ReAnimateHeader => {
-                self.header.update(header::Msg::TriggerAnimation)
+                if let Some(header_msg) =
+                    self.header.update(header::Msg::AnimateIn)
+                {
+                    Cmd::new(move |program| {
+                        program.dispatch(Msg::HeaderMsg(header_msg.clone()))
+                    })
+                } else {
+                    Cmd::none()
+                }
             }
-            Msg::FrameMsg(frame_msg) => self.frame.update(frame_msg),
-            Msg::HeaderMsg(header_msg) => self.header.update(header_msg),
+            Msg::HeaderMsg(header_msg) => {
+                if let Some(header_msg) = self.header.update(header_msg) {
+                    Cmd::new(move |program| {
+                        program.dispatch(Msg::HeaderMsg(header_msg.clone()))
+                    })
+                } else {
+                    Cmd::none()
+                }
+            }
+            Msg::ReAnimateFrame => {
+                if let Some(frame_msg) =
+                    self.frame.update(frame::Msg::AnimateIn)
+                {
+                    Cmd::new(move |program| {
+                        program.dispatch(Msg::FrameMsg(frame_msg.clone()))
+                    })
+                } else {
+                    Cmd::none()
+                }
+            }
+            Msg::FrameMsg(frame_msg) => {
+                if let Some(frame_msg) = self.frame.update(frame_msg) {
+                    Cmd::new(move |program| {
+                        program.dispatch(Msg::FrameMsg(frame_msg.clone()))
+                    })
+                } else {
+                    Cmd::none()
+                }
+            }
             Msg::FuiButtonMsg(fui_btn_msg) => {
                 if let Some(pmsg) = self.fui_button.update(*fui_btn_msg) {
                     log::warn!("got the btn msg here: {:?}", pmsg);

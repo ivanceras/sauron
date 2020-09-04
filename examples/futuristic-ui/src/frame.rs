@@ -19,12 +19,10 @@ use web_sys::HtmlAudioElement;
 
 #[derive(Clone, Debug)]
 pub enum Msg {
-    ToggleShow,
-    TriggerAnimation,
-    NextAnimation,
-    TransitionEnd,
+    AnimateIn,
+    StopAnimation,
+    NextAnimation(f64, f64),
 }
-
 pub struct Frame {
     hide: bool,
     content: String,
@@ -51,47 +49,46 @@ impl Frame {
         )
     }
 
-    pub fn update(&mut self, msg: Msg) -> Cmd<crate::App, crate::Msg> {
+    pub fn update(&mut self, msg: Msg) -> Option<Msg> {
         match msg {
-            Msg::ToggleShow => {
-                self.hide = !self.hide;
-                self.play_sound();
-                Cmd::none()
-            }
-            // we hide the borders then have delayed timeout
-            // call before showing it using a Cmd with timed closure
-            Msg::TriggerAnimation => {
-                use sauron::wasm_bindgen::JsCast;
-                log::trace!("frame: animate in..");
+            Msg::AnimateIn => {
+                log::trace!("frame animate in started...");
                 self.hide = true;
-                Cmd::new(|program| {
-                    let timed_closure: Closure<dyn Fn()> =
-                        Closure::wrap(Box::new(move || {
-                            program.dispatch(crate::Msg::FrameMsg(
-                                Msg::NextAnimation,
-                            ));
-                        }));
-
-                    web_sys::window()
-                        .expect("no global `window` exists")
-                        .set_timeout_with_callback_and_timeout_and_arguments_0(
-                            timed_closure.as_ref().unchecked_ref(),
-                            200,
-                        )
-                        .expect("Unable to start interval");
-                    timed_closure.forget();
-                })
+                self.start_animation()
             }
-            Msg::NextAnimation => {
-                log::trace!("frame: animate out..");
-                self.play_sound();
+            Msg::StopAnimation => {
+                log::trace!("frame  stop_animation..");
                 self.hide = false;
-                Cmd::none()
+                None
             }
-            Msg::TransitionEnd => {
-                log::trace!("animation end..");
-                Cmd::none()
+            Msg::NextAnimation(start, duration) => {
+                log::trace!("next animationg executed..");
+                self.next_animation(start, duration)
             }
+        }
+    }
+
+    fn start_animation(&mut self) -> Option<Msg> {
+        log::trace!("header starting animation");
+        let duration = 200.0;
+        let start = crate::dom::now();
+        self.play_sound();
+        Some(Msg::NextAnimation(start, duration))
+    }
+
+    fn next_animation(&mut self, start: f64, duration: f64) -> Option<Msg> {
+        let timestamp = crate::dom::now();
+        log::trace!("header next animation: started: {}, duration: {}, timestamp now: {}",start,duration,timestamp);
+        let elapsed = timestamp - start;
+        log::trace!("elapsed time: {}", elapsed);
+        let continue_animation = elapsed < duration;
+        log::trace!("continue animation: {}", continue_animation);
+        if continue_animation {
+            log::trace!("header continue animation");
+            Some(Msg::NextAnimation(start, duration))
+        } else {
+            log::trace!("header stop the animation");
+            Some(Msg::StopAnimation)
         }
     }
 
@@ -101,6 +98,7 @@ impl Frame {
             display: block;
             padding: 1px;
             position: relative;
+            opacity: 1;
         }
 
         .border {
@@ -234,13 +232,7 @@ impl Frame {
         div(
             vec![classes_flag([("frame", true), ("hide", self.hide)])],
             vec![
-                div(
-                    vec![
-                        class("border border-anim border-left"),
-                        on_transitionend(|_| Msg::TransitionEnd),
-                    ],
-                    vec![],
-                ),
+                div(vec![class("border border-anim border-left")], vec![]),
                 div(vec![class("border border-anim border-right")], vec![]),
                 div(vec![class("border border-anim border-top")], vec![]),
                 div(vec![class("border border-anim border-bottom")], vec![]),
