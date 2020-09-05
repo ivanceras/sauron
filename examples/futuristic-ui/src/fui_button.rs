@@ -29,6 +29,8 @@ pub struct FuiButton<PMSG> {
     use_alt: bool,
     /// has corners
     has_corners: bool,
+    /// enable/disable hover effect
+    has_hover: bool,
     disabled: bool,
     event_listeners: Vec<Attribute<Msg<PMSG>>>,
 }
@@ -45,6 +47,7 @@ where
             skewed: false,
             use_alt: false,
             has_corners: true,
+            has_hover: true,
             disabled: false,
             event_listeners: vec![],
         }
@@ -65,6 +68,11 @@ where
     pub fn disabled(&mut self, disabled: bool) {
         self.disabled = disabled;
         self.has_corners(false);
+        self.has_hover(false);
+    }
+
+    pub fn has_hover(&mut self, has_hover: bool) {
+        self.has_hover = has_hover;
     }
 
     pub fn add_event_listeners(
@@ -121,12 +129,13 @@ where
                 "box-shadow": format!("0 0 4px {}",border_box_shadow_color),
             },
 
-            ".fui_button__decorator": {
+            // hover button
+            ".fui_button__hover": {
                 "border-color": border_border_color,
                 "box-shadow": format!("0 0 4px {}",border_box_shadow_color),
             },
 
-            ".fui_button__decorator-bottom": {
+            ".fui_button__hover-bottom": {
                 "width": 0,
                 "left": "50%",
                 "bottom": "2px",
@@ -134,11 +143,16 @@ where
                 "border-width": "4px 0 0 0",
             },
 
-            ".hover .fui_button__decorator": {
+            ".alt .fui_button__hover": {
+                "border-color": alt_border_color,
+                "box-shadow": format!("0 0 4px {}",alt_border_box_shadow_color),
+            },
+
+            ".hover .fui_button__hover": {
                 "width": "96%",
             },
 
-            ".fui_button__decorator-anim": {
+            ".fui_button__hover-anim": {
                 "z-index": 1,
                 "opacity": 1,
                 "position": "absolute",
@@ -342,11 +356,15 @@ where
                 None
             }
             Msg::HoverIn => {
-                self.hover = true;
+                if self.has_hover {
+                    self.hover = true;
+                }
                 None
             }
             Msg::HoverOut => {
-                self.hover = false;
+                if self.has_hover {
+                    self.hover = false;
+                }
                 None
             }
             Msg::HighlightEnd => {
@@ -366,7 +384,7 @@ where
             vec![
                 class("fui_button"),
                 classes_flag([
-                    ("click",self.click),
+                    ("click", self.click),
                     ("hover", self.hover),
                     ("skewed", self.skewed),
                     ("alt", self.use_alt),
@@ -374,8 +392,10 @@ where
                 ]),
             ],
             vec![
-                // decorators
-                div(vec![class("fui_button__decorator fui_button__decorator-anim fui_button__decorator-bottom")], vec![]),
+                // hover
+                view_if(self.has_hover,
+                    div(vec![class("fui_button__hover fui_button__hover-anim fui_button__hover-bottom")], vec![]),
+                ),
                 //borders
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-bottom")], vec![]),
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-left")], vec![]),
