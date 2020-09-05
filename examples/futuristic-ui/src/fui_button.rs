@@ -129,7 +129,7 @@ where
                 "box-shadow": format!("0 0 4px {}",border_box_shadow_color),
             },
 
-            // hover button
+            // HOVER at the lower  part of the button
             ".fui_button__hover": {
                 "border-color": border_border_color,
                 "box-shadow": format!("0 0 4px {}",border_box_shadow_color),

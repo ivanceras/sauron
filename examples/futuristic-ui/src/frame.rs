@@ -9,6 +9,8 @@ use sauron::{
 };
 use web_sys::HtmlAudioElement;
 
+const COMPONENT_NAME: &str = "frame";
+
 #[derive(Clone, Debug)]
 pub enum Msg {
     AnimateIn,
@@ -76,166 +78,166 @@ impl Frame {
     }
 
     pub fn style(&self) -> Vec<String> {
-        vec![r#"
-        .frame {
-            display: block;
-            padding: 1px;
-            position: relative;
-            opacity: 1;
-        }
+        let ns = |selector_classes| {
+            jss::selector_namespaced(COMPONENT_NAME, selector_classes)
+        };
 
-        .border {
-            border-color: #029dbb;
-            box-shadow: 0 0 4px rgba(2,157,187,0.65);
-        }
+        let css = jss!({
+            ns(""): {
+                "display": "block",
+                "padding": "1px",
+                "position": "relative",
+                "opacity": 1,
+            },
 
-        .hide{
-            opacity: 0;
-        }
+            ns("border"): {
+                "border-color": "#029dbb",
+                "box-shadow": "0 0 4px rgba(2,157,187,0.65)",
+            },
 
-        .hide .border {
-          height: 0;
-          width: 0;
-        }
+            ns("hide"): {
+                "opacity": 0,
+            },
 
-        .border-left {
-            top: 50%;
-            left: 0;
-            height: 100%;
-            transform: translate(0, -50%);
-            border-width: 0 0 0 1px;
-        }
+            ns("hide border"): {
+                "height": 0,
+                "width": 0,
+            },
 
+            ns("border-left"): {
+                "top": "50%",
+                "left": 0,
+                "height": "100%",
+                "transform": "translate(0, -50%)",
+                "border-width": "0 0 0 1px",
+            },
 
-        .border-anim {
-            z-index: 1;
-            opacity: 1;
-            position: absolute;
-            transition: all 250ms ease-in;
-            border-style: solid;
-        }
+            ns("border-anim"): {
+                "z-index": 1,
+                "opacity": 1,
+                "position": "absolute",
+                "transition": "all 250ms ease-in",
+                "border-style": "solid",
+            },
 
-        .border-right {
-            top: 50%;
-            right: 0;
-            height: 100%;
-            transform: translate(0, -50%);
-            border-width: 0 0 0 1px;
-        }
+            ns("border-right"): {
+                "top": "50%",
+                "right": 0,
+                "height": "100%",
+                "transform": "translate(0, -50%)",
+                "border-width": "0 0 0 1px",
+            },
 
+            ns("border-top"): {
+                "top": 0,
+                "left": "50%",
+                "width": "100%",
+                "transform": "translate(-50%, 0)",
+                "border-width": "1px 0 0 0",
+            },
 
-        .border-top {
-            top: 0;
-            left: 50%;
-            width: 100%;
-            transform: translate(-50%, 0);
-            border-width: 1px 0 0 0;
-        }
+            ns("border-bottom"): {
+                "left": "50%",
+                "width": "100%",
+                "bottom": 0,
+                "transform": "translate(-50%, 0)",
+                "border-width": "1px 0 0 0",
+            },
 
+            ns("corner"): {
+                "width": "24px",
+                "height": "24px",
+                "border-color": "#26dafd",
+                "box-shadow": "0 0 4px -2px rgba(38,218,253,0.65)",
+            },
 
-        .border-bottom {
-            left: 50%;
-            width: 100%;
-            bottom: 0;
-            transform: translate(-50%, 0);
-            border-width: 1px 0 0 0;
-        }
+            ns("hide corner"): {
+                "width": 0,
+                "height": 0,
+                "opacity": 0,
+            },
 
+            ns("corner-anim"): {
+                "z-index": 2,
+                "opacity": 1,
+                "position": "absolute",
+                "transition": "all 250ms ease-in",
+                "border-style": "solid",
+            },
 
-        .corner {
-            width: 24px;
-            height: 24px;
-            border-color: #26dafd;
-            box-shadow: 0 0 4px -2px rgba(38,218,253,0.65);
-        }
+            ns("corner__top-left"): {
+                "left": "-2px",
+                "top": "-2px",
+                "border-width": "2px 0 0 2px",
+            },
 
-        .hide .corner{
-            width: 0;
-            height: 0;
-            opacity: 0;
-        }
+            ns("corner__bottom-left"): {
+                "left": "-2px",
+                "bottom": "-2px",
+                "border-width": "0 0 2px 2px",
+            },
 
-        .corner-anim {
-            z-index: 2;
-            opacity: 1;
-            position: absolute;
-            transition: all 250ms ease-in;
-            border-style: solid;
-        }
+            ns("corner__top-right"): {
+                "right": "-2px",
+                "top": "-2px",
+                "border-width": "2px 2px 0 0",
+            },
 
-        .corner__top-left {
-            left: -2px;
-            top: -2px;
-            border-width: 2px 0 0 2px;
-        }
+            ns("corner__bottom-right"): {
+                "right": "-2px",
+                "bottom": "-2px",
+                "border-width": "0 2px 2px 0",
+            },
 
+            ns("text"): {
+                "background-color": "rgba(4,35,41,0.65)",
+            },
 
-        .corner__bottom-left {
-            left: -2px;
-            bottom: -2px;
-            border-width: 0 0 2px 2px;
-        }
+            ns("hide text"): {
+                "background-color": "transparent",
+            },
 
+            ns("text-anim"): {
+                "z-index": 3,
+                "display": "block",
+                "position": "relative",
+                "overflow": "hidden",
+                "transition": "background-color 250ms ease-in",
+            },
 
-        .corner__top-right {
-            right: -2px;
-            top: -2px;
-            border-width: 2px 2px 0 0;
-        }
+        });
 
-
-        .corner__bottom-right {
-            right: -2px;
-            bottom: -2px;
-            border-width: 0 2px 2px 0;
-        }
-
-
-        .frame-text {
-            background-color: rgba(4,35,41,0.65);
-        }
-
-        .hide .frame-text {
-            background-color: transparent;
-        }
-
-        .frame-text-anim {
-            z-index: 3;
-            display: block;
-            position: relative;
-            overflow: hidden;
-            transition: background-color 250ms ease-in;
-        }
-
-        "#
-        .to_string()]
+        vec![css]
     }
 
     pub fn view(&self) -> Node<Msg> {
+        let class_ns =
+            |class_names| jss::class_namespaced(COMPONENT_NAME, class_names);
+
         div(
-            vec![classes_flag([("frame", true), ("hide", self.hide)])],
+            vec![class_ns(""), classes_flag([("frame__hide", self.hide)])],
             vec![
-                div(vec![class("border border-anim border-left")], vec![]),
-                div(vec![class("border border-anim border-right")], vec![]),
-                div(vec![class("border border-anim border-top")], vec![]),
-                div(vec![class("border border-anim border-bottom")], vec![]),
-                div(vec![class("corner corner-anim corner__top-left")], vec![]),
+                div(vec![class_ns("border border-anim border-left")], vec![]),
+                div(vec![class_ns("border border-anim border-right")], vec![]),
+                div(vec![class_ns("border border-anim border-top")], vec![]),
+                div(vec![class_ns("border border-anim border-bottom")], vec![]),
                 div(
-                    vec![class("corner corner-anim corner__bottom-left")],
+                    vec![class_ns("corner corner-anim corner__top-left")],
                     vec![],
                 ),
                 div(
-                    vec![class("corner corner-anim corner__top-right")],
+                    vec![class_ns("corner corner-anim corner__bottom-left")],
                     vec![],
                 ),
                 div(
-                    vec![class("corner corner-anim corner__bottom-right")],
+                    vec![class_ns("corner corner-anim corner__top-right")],
                     vec![],
                 ),
                 div(
-                    vec![class("frame-text frame-text-anim")],
-                    vec![self.child()],
+                    vec![class_ns("corner corner-anim corner__bottom-right")],
+                    vec![],
                 ),
+                div(vec![class_ns("text text-anim")], vec![self.child()]),
             ],
         )
     }
