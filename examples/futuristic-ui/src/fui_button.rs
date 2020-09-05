@@ -14,6 +14,8 @@ use web_sys::HtmlAudioElement;
 #[derive(Clone, Debug)]
 pub enum Msg<PMSG> {
     Click,
+    HoverIn,
+    HoverOut,
     HighlightEnd,
     ParamMsg(PMSG),
 }
@@ -21,6 +23,7 @@ pub enum Msg<PMSG> {
 pub struct FuiButton<PMSG> {
     label: String,
     click: bool,
+    hover: bool,
     skewed: bool,
     /// whether to use the green color
     use_green: bool,
@@ -38,6 +41,7 @@ where
         FuiButton {
             label: label.to_string(),
             click: false,
+            hover: false,
             skewed: false,
             use_green: false,
             has_corners: true,
@@ -115,6 +119,31 @@ where
             ".fui_button__border": {
                 "border-color": border_border_color,
                 "box-shadow": format!("0 0 4px {}",border_box_shadow_color),
+            },
+
+            ".fui_button__decorator": {
+                "border-color": border_border_color,
+                "box-shadow": format!("0 0 4px {}",border_box_shadow_color),
+            },
+
+            ".fui_button__decorator-bottom": {
+                "width": 0,
+                "left": "50%",
+                "bottom": "2px",
+                "transform": "translate(-50%, 0)",
+                "border-width": "4px 0 0 0",
+            },
+
+            ".hover .fui_button__decorator": {
+                "width": "96%",
+            },
+
+            ".fui_button__decorator-anim": {
+                "z-index": 1,
+                "opacity": 1,
+                "position": "absolute",
+                "transition": "width 100ms ease-in",
+                "border-style": "solid",
             },
 
             ".green .fui_button__border": {
@@ -312,6 +341,14 @@ where
                 self.click = true;
                 None
             }
+            Msg::HoverIn => {
+                self.hover = true;
+                None
+            }
+            Msg::HoverOut => {
+                self.hover = false;
+                None
+            }
             Msg::HighlightEnd => {
                 self.click = false;
                 None
@@ -330,16 +367,22 @@ where
                 class("fui_button"),
                 classes_flag([
                     ("click",self.click),
+                    ("hover", self.hover),
                     ("skewed", self.skewed),
                     ("green", self.use_green),
                     ("disabled", self.disabled),
                 ]),
             ],
             vec![
+                // decorators
+                div(vec![class("fui_button__decorator fui_button__decorator-anim fui_button__decorator-bottom")], vec![]),
+                //borders
+                div(vec![class("fui_button__border fui_button__border-anim fui_button__border-bottom")], vec![]),
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-left")], vec![]),
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-right")], vec![]),
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-top")], vec![]),
                 div(vec![class("fui_button__border fui_button__border-anim fui_button__border-bottom")], vec![]),
+                // corners
                 view_if(self.has_corners,
                     div(vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__top-left")], vec![])
                 ),
@@ -370,7 +413,9 @@ where
                                     vec![
                                         class("fui_button__button fui_button__button-anim"),
                                         disabled(self.disabled),
-                                        on_click(|_|Msg::Click)
+                                        on_click(|_|Msg::Click),
+                                        on_mouseover(|_|Msg::HoverIn),
+                                        on_mouseout(|_|Msg::HoverOut),
                                     ],
                                     vec![text(&self.label)]
                                 ).add_attributes(self.event_listeners.clone())

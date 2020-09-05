@@ -1,4 +1,5 @@
-#![deny(warnings)]
+//#![deny(warnings)]
+#![recursion_limit = "256"]
 use animate_list::AnimateList;
 use frame::Frame;
 use fui_button::FuiButton;
@@ -268,7 +269,7 @@ impl Component<Msg> for App {
                                 Msg::SimpleSkewedFuiButtonMsg(Box::new(fbtn_msg))
                             }),
                         ]),
-                        self.paragraph.view(),
+                        //self.paragraph.view(),
                         button(
                             vec![
                                 on_click(|_| Msg::ReAnimateList),
