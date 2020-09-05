@@ -7,4 +7,7 @@
 - [X] add support for header bar
 - [X] take inspiration from https://robertsspaceindustries.com/starmap/ for some other controls
     - button with slanted highlights to the sides and bottom
+- [ ] Convert the string styles into jss
+- [ ] Add more style to button such as showing hightlight bar in the bottom, top, left, or right
+- [ ] Support for scoped style
 
