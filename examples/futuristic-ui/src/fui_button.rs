@@ -25,8 +25,8 @@ pub struct FuiButton<PMSG> {
     click: bool,
     hover: bool,
     skewed: bool,
-    /// whether to use the green color
-    use_green: bool,
+    /// whether to use the alt color
+    use_alt: bool,
     /// has corners
     has_corners: bool,
     disabled: bool,
@@ -43,7 +43,7 @@ where
             click: false,
             hover: false,
             skewed: false,
-            use_green: false,
+            use_alt: false,
             has_corners: true,
             disabled: false,
             event_listeners: vec![],
@@ -54,8 +54,8 @@ where
         self.skewed = skewed;
     }
 
-    pub fn use_green(&mut self, use_green: bool) {
-        self.use_green = use_green;
+    pub fn use_alt(&mut self, use_alt: bool) {
+        self.use_alt = use_alt;
     }
 
     pub fn has_corners(&mut self, has_corners: bool) {
@@ -91,12 +91,12 @@ where
         let click_highlight_color = "#029dbb";
         let button_wrap_text_color = "rgba(4,35,41,0.65)";
         let button_text_color = "#acf9fb";
-        let green_border_color = "#090";
-        let green_corner_color = "#0f0";
-        let green_click_highlight_color = "#090";
-        let green_button_text_color = "#0f0";
-        let green_border_box_shadow_color = "rgba(0,153,0,0.65)";
-        let green_corner_box_shadow_color = "rgba(0,255,0,0.65)";
+        let alt_border_color = "#090";
+        let alt_corner_color = "#0f0";
+        let alt_click_highlight_color = "#090";
+        let alt_button_text_color = "#0f0";
+        let alt_border_box_shadow_color = "rgba(0,153,0,0.65)";
+        let alt_corner_box_shadow_color = "rgba(0,255,0,0.65)";
         let disabled_border_color = "#666";
         let disabled_corner_color = "#999";
         let disabled_corner_box_shadow_color = "rgba(153,153,153,0.65)";
@@ -146,9 +146,9 @@ where
                 "border-style": "solid",
             },
 
-            ".green .fui_button__border": {
-                "border-color": green_border_color,
-                "box-shadow": format!("0 0 4px {}",green_border_box_shadow_color),
+            ".alt .fui_button__border": {
+                "border-color": alt_border_color,
+                "box-shadow": format!("0 0 4px {}",alt_border_box_shadow_color),
             },
 
             ".disabled .fui_button__border": {
@@ -208,9 +208,9 @@ where
                 "box-shadow": format!("0 0 4px -2px {}",corner_box_shadow_color),
             },
 
-            ".green .fui_button__corner": {
-                "border-color": green_corner_color,
-                "box-shadow": format!("0 0 4px {}",green_corner_box_shadow_color),
+            ".alt .fui_button__corner": {
+                "border-color": alt_corner_color,
+                "box-shadow": format!("0 0 4px {}",alt_corner_box_shadow_color),
             },
 
             ".disabled .fui_button__corner": {
@@ -277,8 +277,8 @@ where
                 "cursor": "pointer"
             },
 
-            ".green .fui_button__button": {
-                "color": green_button_text_color,
+            ".alt .fui_button__button": {
+                "color": alt_button_text_color,
             },
 
             ".disabled .fui_button__button": {
@@ -322,8 +322,8 @@ where
                 "background-color": click_highlight_color,
             },
 
-            ".green .fui_button__highlight": {
-                "background-color": green_click_highlight_color,
+            ".alt .fui_button__highlight": {
+                "background-color": alt_click_highlight_color,
             },
 
             ".fui_button__highlight-anim": {
@@ -369,7 +369,7 @@ where
                     ("click",self.click),
                     ("hover", self.hover),
                     ("skewed", self.skewed),
-                    ("green", self.use_green),
+                    ("alt", self.use_alt),
                     ("disabled", self.disabled),
                 ]),
             ],

@@ -43,7 +43,7 @@ pub enum Msg {
     SimpleFuiButtonMsg(Box<fui_button::Msg<Self>>),
     SkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
     SimpleSkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
-    GreenFuiButtonMsg(Box<fui_button::Msg<Self>>),
+    AltFuiButtonMsg(Box<fui_button::Msg<Self>>),
     DisabledFuiButtonMsg(Box<fui_button::Msg<Self>>),
     AnimateListMsg(Box<animate_list::Msg>),
     ReanimateAll,
@@ -58,7 +58,7 @@ pub struct App {
     simple_fui_button: FuiButton<Msg>,
     skewed_fui_button: FuiButton<Msg>,
     simple_skewed_fui_button: FuiButton<Msg>,
-    green_fui_button: FuiButton<Msg>,
+    alt_fui_button: FuiButton<Msg>,
     disabled_fui_button: FuiButton<Msg>,
     spinner: Spinner<Msg>,
     animate_list: AnimateList<Msg>,
@@ -85,8 +85,8 @@ impl App {
         simple_skewed_fui_button.skewed(true);
         simple_skewed_fui_button.has_corners(false);
 
-        let mut green_fui_button = FuiButton::<Msg>::new_with_label("Sci-fi");
-        green_fui_button.use_green(true);
+        let mut alt_fui_button = FuiButton::<Msg>::new_with_label("Sci-fi");
+        alt_fui_button.use_alt(true);
 
         let mut disabled_fui_button =
             FuiButton::<Msg>::new_with_label("Disabled");
@@ -104,7 +104,7 @@ impl App {
             simple_fui_button,
             skewed_fui_button,
             simple_skewed_fui_button,
-            green_fui_button,
+            alt_fui_button,
             disabled_fui_button,
             spinner: Spinner::new(),
             animate_list: AnimateList::new_with_content(
@@ -256,8 +256,8 @@ impl Component<Msg> for App {
                             self.simple_fui_button.view().map_msg(|fbtn_msg| {
                                 Msg::SimpleFuiButtonMsg(Box::new(fbtn_msg))
                             }),
-                            self.green_fui_button.view().map_msg(|fbtn_msg| {
-                                Msg::GreenFuiButtonMsg(Box::new(fbtn_msg))
+                            self.alt_fui_button.view().map_msg(|fbtn_msg| {
+                                Msg::AltFuiButtonMsg(Box::new(fbtn_msg))
                             }),
                             self.disabled_fui_button.view().map_msg(|fbtn_msg| {
                                 Msg::DisabledFuiButtonMsg(Box::new(fbtn_msg))
@@ -386,8 +386,8 @@ impl Component<Msg> for App {
                     Cmd::none()
                 }
             }
-            Msg::GreenFuiButtonMsg(fui_btn_msg) => {
-                if let Some(pmsg) = self.green_fui_button.update(*fui_btn_msg) {
+            Msg::AltFuiButtonMsg(fui_btn_msg) => {
+                if let Some(pmsg) = self.alt_fui_button.update(*fui_btn_msg) {
                     Cmd::new(move |program| program.dispatch(pmsg.clone()))
                 } else {
                     Cmd::none()
