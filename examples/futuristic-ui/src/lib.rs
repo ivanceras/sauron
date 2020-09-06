@@ -1,4 +1,4 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 #![recursion_limit = "256"]
 use animate_list::AnimateList;
 use frame::Frame;
