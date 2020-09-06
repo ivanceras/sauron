@@ -3,11 +3,15 @@
         - for each node that contains text, increment the text length based on the number of characters in the text content
         - if the node does not contain text, increment by one.
             - The animation for element node is appending that node to the parent.
-- [ ] centralize the color in a root css
+- [X] centralize the color in a root css
+    - Added Theme module
 - [X] add support for header bar
 - [X] take inspiration from https://robertsspaceindustries.com/starmap/ for some other controls
     - button with slanted highlights to the sides and bottom
-- [ ] Convert the string styles into jss
-- [ ] Add more style to button such as showing hightlight bar in the bottom, top, left, or right
-- [ ] Support for scoped style
+- [X] Convert the string styles into jss
+- [X] Add more style to button such as showing hightlight bar in the bottom, top, left, or right
+    - [X] Add a hover highlight at the bottom
+- [X] Support for scoped style
+    - This is done by prepending namespace to the selectors and class names used in the component
+- [ ] Fix issued with Paragraph throwing a runtime error and panics.
 

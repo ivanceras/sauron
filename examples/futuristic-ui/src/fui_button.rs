@@ -406,15 +406,11 @@ where
                 None
             }
             Msg::HoverIn => {
-                if self.has_hover {
-                    self.hover = true;
-                }
+                self.hover = true;
                 None
             }
             Msg::HoverOut => {
-                if self.has_hover {
-                    self.hover = false;
-                }
+                self.hover = false;
                 None
             }
             Msg::HighlightEnd => {
@@ -447,9 +443,16 @@ where
                     ("hovered", self.hover),
                     ("skewed", self.skewed),
                     ("alt", self.use_alt),
+                    // setting this will also disable the div, therefore will not activate the
+                    // events on it
                     ("disabled", self.disabled),
                 ]),
+                // normally click should be attached to the actual button element
                 on_click(|_| Msg::Click),
+                // the mouseover events are attached here since the hover element z-index is
+                // higher than the actual button, which will cause a janky animation
+                // when the mouse is triggering alt hover in and out, since covered by the hover
+                // layer effect
                 on_mouseover(|_| Msg::HoverIn),
                 on_mouseout(|_| Msg::HoverOut),
             ],

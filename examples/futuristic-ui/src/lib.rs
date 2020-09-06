@@ -193,7 +193,7 @@ impl Component<Msg> for App {
     }
 
     fn style(&self) -> Vec<String> {
-        vec![r#"
+        let mut root = vec![r#"
         .container {
             color: #26dafd;
             font-size: 21px;
@@ -211,14 +211,17 @@ impl Component<Msg> for App {
             display: flex;
         }
         "#
-        .to_string()]
-        .into_iter()
-        .chain(self.header.style().into_iter())
-        .chain(self.frame.style().into_iter())
-        .chain(self.fui_button.style().into_iter())
-        .chain(self.spinner.style().into_iter())
-        .chain(self.animate_list.style().into_iter())
-        .collect()
+        .to_string()];
+
+        root.extend(vec![
+            self.header.style().join("\n"),
+            self.frame.style().join("\n"),
+            self.fui_button.style().join("\n"),
+            self.animate_list.style().join("\n"),
+            self.spinner.style().join("\n"),
+        ]);
+
+        root
     }
 
     fn view(&self) -> Node<Msg> {
