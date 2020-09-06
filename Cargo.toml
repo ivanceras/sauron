@@ -16,16 +16,20 @@ maintenance = { status = "actively-developed" }
 [dependencies]
 sauron-core = { version = "0.31.0", path = "crates/sauron-core", default-features = false }
 sauron-node-macro = { version = "0.30.0", path = "crates/sauron-node-macro", optional = true }
-sauron-markdown = { version = "0.1", path = "crates/sauron-markdown", optional = true }
+sauron-markdown = { version = "0.1", path = "crates/sauron-markdown", optional = true, default-features = false }
 cfg-if = "0.1"
 
 [features]
 default = ["with-dom", "with-node-macro", "with-request-animation-frame"]
 with-dom = ["sauron-core/with-dom"]
+# request-animation-frame should be ON all the time, otherwise
+# your webapp will have a very poor UI responsiveness
 with-request-animation-frame = ["sauron-core/with-request-animation-frame"]
 with-measure = ["sauron-core/with-measure"]
 with-node-macro = ["sauron-node-macro"]
-with-markdown = ["sauron-markdown"]
+with-markdown = ["sauron-markdown/include-html"]
+# light weight markdown, html are inserted as text node
+with-lite-markdown = ["sauron-markdown"]
 
 [dev-dependencies]
 console_error_panic_hook = "0.1"

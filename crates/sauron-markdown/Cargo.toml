@@ -13,6 +13,10 @@ keywords = ["md", "sauron", "node"]
 
 [dependencies]
 sauron-core = { version = "0.31", path = "../sauron-core" }
-sauron-parse = { version = "0.1", path = "../sauron-parse" }
+sauron-parse = { version = "0.1", path = "../sauron-parse", optional = true }
 pulldown-cmark = { version = "0.7"}
 ammonia = "3"
+
+[features]
+default = ["include-html"]
+include-html = ["sauron-parse"]

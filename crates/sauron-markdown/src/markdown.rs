@@ -52,6 +52,10 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                 let code_str = ammonia::clean(&*code_str);
                 add_child!(code(vec![], vec![text(code_str)]))
             }
+            // Warning: this use the `sauron-parse`
+            // in which it used `html5ever` to parse the html
+            // which contributes a lot to the wasm binary size
+            #[cfg(feature = "include-html")]
             Event::Html(html) => {
                 let html = ammonia::clean(&html);
                 if let Ok(nodes) = sauron_parse::parse_simple(&html) {
@@ -59,6 +63,11 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                         add_child!(node);
                     }
                 }
+            }
+            // saves wasm size, by not including the html parser
+            #[cfg(not(feature = "include-html"))]
+            Event::Html(html) => {
+                add_child!(text(html));
             }
             Event::FootnoteReference(name) => {
                 let len = numbers.len() + 1;

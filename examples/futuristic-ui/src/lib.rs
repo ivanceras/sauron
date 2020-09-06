@@ -203,7 +203,8 @@ impl App {
 
 impl Component<Msg> for App {
     fn init(&self) -> Cmd<Self, Msg> {
-        Self::reanimate_all()
+        //Self::reanimate_all()
+        Cmd::none()
     }
 
     fn style(&self) -> Vec<String> {
