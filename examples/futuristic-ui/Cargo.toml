@@ -8,9 +8,15 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = { path = "../../", features = ["with-markdown"]}
-console_error_panic_hook = "0.1"
+#sauron = { path = "../../", features = ["with-markdown"]}
+sauron = { path = "../../"}
 log = "0.4"
 console_log = { version = "0.2", features = ["color"] }
 web-sys = { version = "0.3", features = ["HtmlAudioElement"] }
 serde_json = { version = "1", features = ["preserve_order"] }
+console_error_panic_hook = { version = "0.1", optional = true }
+wee_alloc = { version = "0.4", optional = true }
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"

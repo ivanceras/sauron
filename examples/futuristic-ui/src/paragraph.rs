@@ -24,7 +24,8 @@ where
 {
     pub fn new_with_markdown(md: &str) -> Self {
         Paragraph {
-            animated_list: AnimateList::new_with_content(sauron::markdown(md)),
+            //animated_list: AnimateList::new_with_content(sauron::markdown(md)),
+            animated_list: AnimateList::new_with_content(text(md)),
         }
     }
 
@@ -42,6 +43,7 @@ where
         }
     }
 
+    #[allow(unused)]
     pub fn view(&self) -> Node<MSG> {
         p(vec![], vec![self.animated_list.view()])
     }

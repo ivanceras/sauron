@@ -5,12 +5,10 @@ use crate::{
 use sauron::{
     html::{
         attributes::{
-            class,
             empty_attr,
             title,
         },
         div,
-        text,
     },
     prelude::*,
     Node,
@@ -51,6 +49,9 @@ impl Image {
     }
 
     pub fn view(&self) -> Node<Msg> {
-        self.frame.view().map_msg(Msg::FrameMsg)
+        div(
+            vec![class(COMPONENT_NAME)],
+            vec![self.frame.view().map_msg(Msg::FrameMsg)],
+        )
     }
 }

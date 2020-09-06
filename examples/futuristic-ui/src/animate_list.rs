@@ -1,3 +1,4 @@
+use crate::sounds;
 use sauron::{
     html::{
         attributes::class,
@@ -17,6 +18,7 @@ pub enum Msg {
 }
 
 pub struct AnimateList<MSG> {
+    audio: HtmlAudioElement,
     animated_layer: Option<Node<MSG>>,
     children: Node<MSG>,
     animating: bool,
@@ -28,6 +30,7 @@ where
 {
     pub fn new_with_content(children: Node<MSG>) -> Self {
         AnimateList {
+            audio: sounds::preload("sounds/typing.mp3"),
             animating: false,
             animated_layer: None,
             children,
@@ -38,14 +41,8 @@ where
         self.children.clone()
     }
 
-    fn play_sound(&self) {
-        let audio = HtmlAudioElement::new_with_src("sounds/typing.mp3")
-            .expect("must not fail");
-        let _ = audio.play().expect("must play");
-    }
-
     pub fn animate_in(&mut self) -> Option<Msg> {
-        self.play_sound();
+        sounds::play(&self.audio);
         self.start_animation(true)
     }
 

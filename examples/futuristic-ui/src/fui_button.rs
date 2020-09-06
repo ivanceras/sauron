@@ -1,3 +1,4 @@
+use crate::sounds;
 use sauron::{
     html::{
         attributes::class,
@@ -23,6 +24,7 @@ pub enum Msg<PMSG> {
 }
 
 pub struct FuiButton<PMSG> {
+    audio: HtmlAudioElement,
     label: String,
     click: bool,
     hover: bool,
@@ -45,6 +47,7 @@ where
 {
     pub fn new_with_label(label: &str) -> Self {
         FuiButton {
+            audio: sounds::preload("sounds/click.mp3"),
             label: label.to_string(),
             click: false,
             hover: false,
@@ -101,12 +104,6 @@ where
             let mapped_ev = ev.map_msg(|pmsg| Msg::ParamMsg(pmsg));
             self.event_listeners.push(mapped_ev);
         }
-    }
-
-    fn play_sound(&self) {
-        let audio = HtmlAudioElement::new_with_src("sounds/click.mp3")
-            .expect("must not fail");
-        let _ = audio.play().expect("must play");
     }
 
     pub fn style(&self) -> Vec<String> {
@@ -401,7 +398,7 @@ where
     pub fn update(&mut self, msg: Msg<PMSG>) -> Option<PMSG> {
         match msg {
             Msg::Click => {
-                self.play_sound();
+                sounds::play(&self.audio);
                 self.click = true;
                 None
             }

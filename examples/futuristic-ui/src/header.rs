@@ -1,3 +1,4 @@
+use crate::sounds;
 use sauron::{
     html::{
         attributes::class,
@@ -17,6 +18,7 @@ pub enum Msg {
 }
 
 pub struct Header {
+    audio: HtmlAudioElement,
     hide: bool,
     content: String,
 }
@@ -24,15 +26,10 @@ pub struct Header {
 impl Header {
     pub fn new_with_content(content: &str) -> Self {
         Header {
+            audio: sounds::preload("sounds/deploy.mp3"),
             hide: false,
             content: content.to_string(),
         }
-    }
-
-    fn play_sound(&self) {
-        let audio = HtmlAudioElement::new_with_src("sounds/deploy.mp3")
-            .expect("must not fail");
-        let _ = audio.play().expect("must play");
     }
 
     fn child(&self) -> Node<Msg> {
@@ -58,7 +55,7 @@ impl Header {
     fn start_animation(&mut self) -> Option<Msg> {
         let duration = 200.0;
         let start = crate::dom::now();
-        self.play_sound();
+        sounds::play(&self.audio);
         Some(Msg::NextAnimation(start, duration))
     }
 

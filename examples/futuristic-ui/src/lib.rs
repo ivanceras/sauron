@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 #![recursion_limit = "256"]
 use animate_list::AnimateList;
 use frame::Frame;
@@ -31,6 +31,7 @@ mod fui_button;
 mod header;
 mod image;
 mod paragraph;
+pub mod sounds;
 mod spinner;
 mod theme;
 
@@ -486,9 +487,14 @@ impl Component<Msg> for App {
     }
 }
 
+#[cfg(feature = "wee_alloc")]
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 #[wasm_bindgen(start)]
 pub fn main() {
     console_log::init_with_level(log::Level::Trace).unwrap();
+    #[cfg(feature = "console_error_panic_hook")]
     console_error_panic_hook::set_once();
     Program::mount_to_body(App::new());
 }
