@@ -60,6 +60,7 @@ macro_rules! jss {
 
 }
 
+/// TODO: use a real css-parser for this
 /// prepend a namespace to the selector classes,
 /// It does not affect element selector
 /// example:
