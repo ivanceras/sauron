@@ -70,6 +70,7 @@ impl App {
     pub fn new() -> Self {
         let mut fui_button = FuiButton::<Msg>::new_with_label("Reanimate All");
         fui_button.add_event_listeners(vec![on_click(|_| Msg::ReanimateAll)]);
+        fui_button.has_hover(true);
 
         let mut simple_fui_button =
             FuiButton::<Msg>::new_with_label("Reanimate Paragraph");
@@ -82,6 +83,7 @@ impl App {
         skewed_fui_button.skewed(true);
         skewed_fui_button.has_corners(true);
         skewed_fui_button.expand_corners(true);
+        skewed_fui_button.has_hover(true);
 
         let mut simple_skewed_fui_button =
             FuiButton::<Msg>::new_with_label("Skewed simple");

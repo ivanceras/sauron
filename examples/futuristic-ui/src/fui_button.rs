@@ -51,7 +51,7 @@ where
             skewed: false,
             use_alt: false,
             has_corners: true,
-            has_hover: true,
+            has_hover: false,
             expand_corners: false,
             disabled: false,
             event_listeners: vec![],
@@ -87,6 +87,8 @@ where
         self.expand_corners = expand_corners_on_hover;
     }
 
+    /// whether or not to enable hover expect
+    /// default: false
     pub fn has_hover(&mut self, has_hover: bool) {
         self.has_hover = has_hover;
     }
@@ -135,7 +137,7 @@ where
                 "border-style": "solid",
             },
 
-            ".hovered .hover": {
+            ".has_hover.hovered .hover": {
                 "width": "96%",
             },
 
@@ -441,6 +443,7 @@ where
                 classes_ns_flag([
                     ("clicked", self.click),
                     ("expand_corners", self.expand_corners),
+                    ("has_hover", self.has_hover),
                     ("hovered", self.hover),
                     ("skewed", self.skewed),
                     ("alt", self.use_alt),
