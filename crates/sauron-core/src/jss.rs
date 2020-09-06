@@ -74,6 +74,9 @@ macro_rules! jss {
 /// );
 ///
 /// assert_eq!(".frame__hide button", selector_namespaced("frame", ".hide button"));
+/// assert_eq!(".frame__expand_corners,.frame__hovered", selector_namespaced("frame", ".expand_corners,.hovered"));
+/// assert_eq!(".frame__expand_corners,.frame__hovered button .frame__highlight", selector_namespaced("frame", ".expand_corners,.hovered button .highlight"));
+/// assert_eq!(".frame__expand_corners.frame__hovered button .frame__highlight", selector_namespaced("frame", ".expand_corners.hovered button .highlight"));
 /// ```
 pub fn selector_namespaced(
     namespace: impl ToString,
@@ -91,7 +94,21 @@ pub fn selector_namespaced(
             .map(|part| {
                 let part = part.trim();
                 if part.starts_with(".") {
-                    format!(".{}__{}", namespace, part.trim_start_matches("."))
+                    let class_name = part.trim_start_matches(".");
+                    class_name
+                        .split(",")
+                        .map(|cs_class| {
+                            let cs_class = cs_class.trim_start_matches(".");
+                            cs_class
+                                .split(".")
+                                .map(|dot_class| {
+                                    format!(".{}__{}", namespace, dot_class)
+                                })
+                                .collect::<Vec<_>>()
+                                .join("")
+                        })
+                        .collect::<Vec<_>>()
+                        .join(",")
                 } else {
                     format!("{}", part)
                 }
