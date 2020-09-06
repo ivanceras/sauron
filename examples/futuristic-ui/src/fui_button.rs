@@ -230,7 +230,7 @@ where
             },
 
             ".button_wrap": {
-                "background-color": base.button_wrap_text_color,
+                "background-color": base.content_background_color,
                 "z-index": 3,
                 "display": "block",
                 "position": "relative",
@@ -293,7 +293,7 @@ where
             },
 
             ".alt .button_wrap": {
-                "background-color": alt.button_wrap_text_color,
+                "background-color": alt.content_background_color,
             },
 
             ".alt .button": {
@@ -340,7 +340,7 @@ where
             },
 
             ".disabled .button_wrap": {
-                "background-color": disabled.button_wrap_text_color,
+                "background-color": disabled.content_background_color,
             },
 
             ".disabled .button": {

@@ -5,7 +5,7 @@ pub struct Theme<'a> {
     pub corner_color: &'a str,
     pub border_shadow: &'a str,
     pub corner_shadow: &'a str,
-    pub button_wrap_text_color: &'a str,
+    pub content_background_color: &'a str,
     pub button_text_color: &'a str,
     pub highlight_color: &'a str,
 }
@@ -20,7 +20,7 @@ impl<'a> Theme<'a> {
             corner_color: "#26dafd",
             border_shadow: "rgba(2,157,187,0.65)",
             corner_shadow: "rgba(38,218,253,0.65)",
-            button_wrap_text_color: "rgba(4,35,41,0.65)",
+            content_background_color: "rgba(4,35,41,0.65)",
             button_text_color: "#acf9fb",
             highlight_color: "#029dbb",
         }
@@ -35,7 +35,7 @@ impl<'a> Theme<'a> {
             button_text_color: "#0f0",
             border_shadow: "rgba(0,153,0,0.65)",
             corner_shadow: "rgba(0,255,0,0.65)",
-            button_wrap_text_color: "rgba(10,50,10,0.65)",
+            content_background_color: "rgba(10,50,10,0.65)",
             highlight_color: "#090",
         }
     }
@@ -49,7 +49,7 @@ impl<'a> Theme<'a> {
             corner_shadow: "rgba(153,153,153,0.65)",
             border_shadow: "rgba(102,102,102,0.65)",
             button_text_color: "#999",
-            button_wrap_text_color: "rgba(20,20,20,0.65)",
+            content_background_color: "rgba(20,20,20,0.65)",
             highlight_color: "#fff",
         }
     }
