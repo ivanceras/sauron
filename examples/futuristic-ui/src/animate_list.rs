@@ -264,24 +264,26 @@ where
         .to_string()]
     }
 
+    // Note: opacity: 0 on span will have no effect on webkit browser
+    // however, it has an effect on firefox
     pub fn view(&self) -> Node<MSG> {
         div(
             vec![],
-            vec![span(
+            vec![div(
                 vec![
                     class("animate_list"),
                     classes_flag([("animating", self.animating)]),
                 ],
                 vec![
-                    span(
+                    div(
                         vec![class("animate_list_children")],
                         vec![self.children()],
                     ),
                     view_if(
                         self.animating,
-                        span(
+                        div(
                             vec![class("animated_layer_wrapper")],
-                            vec![span(
+                            vec![div(
                                 vec![class("animated_layer")],
                                 if let Some(animated_layer) =
                                     &self.animated_layer
