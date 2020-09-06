@@ -21,6 +21,7 @@ css-colors = "1"
 [dev-dependencies]
 #for parsing hex color into rgb, don't get mix with css-colors with a `s`
 css-color = "0.1.1"
+color_processing = "0.6.0"
 
 [features]
 with-lite-markdown = ["sauron/with-lite-markdown"]
