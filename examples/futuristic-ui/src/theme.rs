@@ -130,6 +130,10 @@ mod test {
 
         assert_eq!(base, rgba(38, 218, 253, 1.0));
 
+        let grey = base.greyscale();
+        println!("grey: {}", grey);
+        assert_eq!(grey, rgba(146, 146, 146, 1.0));
+
         let lighter = base.lighten(percent(20));
         println!("lighter: {}", lighter);
         assert_eq!(lighter, rgba(140, 235, 254, 1.00));
@@ -182,6 +186,10 @@ mod test {
 
         assert_eq!(base, rgba(0, 255, 0, 1.0));
 
+        let grey = base.greyscale();
+        println!("grey: {}", grey);
+        assert_eq!(grey, rgba(128, 128, 128, 1.0));
+
         let lighter = base.lighten(percent(20));
         println!("lighter: {}", lighter);
         assert_eq!(lighter, rgba(103, 255, 103, 1.00));
@@ -189,5 +197,23 @@ mod test {
         let dark = base.darken(percent(20));
         println!("dark: {}", dark);
         assert_eq!(dark, rgba(0, 154, 0, 1.00));
+    }
+
+    #[test]
+    fn test_color_processing() {
+        use color_processing::Color;
+        let hex = "#26dafd";
+        let base = Color::new_string(hex).unwrap();
+
+        println!("base: {}", base.to_rgb_string());
+        assert_eq!(base.to_rgb_string(), "rgb(38, 218, 253)");
+
+        let brighten = base.brighten(0.2);
+        println!("brighten: {}", brighten.to_rgb_string());
+        assert_eq!(brighten.to_rgb_string(), "rgb(59, 228, 255)");
+
+        let darken = base.darken(0.2);
+        println!("darken: {}", darken.to_rgb_string());
+        assert_eq!(darken.to_rgb_string(), "rgb(0, 208, 243)");
     }
 }
