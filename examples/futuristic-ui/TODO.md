@@ -14,6 +14,8 @@
 - [X] Support for scoped style
     - This is done by prepending namespace to the selectors and class names used in the component
 - [ ] Fix issued with Paragraph throwing a runtime error and panics.
+- [X] Fix issue with webkit not displaying the animation list
+    - webkit does not affect opacity:0 to span
 - [ ] Make the futuristic button be in array with permutation of fui_button flag features
-- [ ] Make an image component by using the Frame which wraps the img element
+- [X] Make an image component by using the Frame which wraps the img element
 
