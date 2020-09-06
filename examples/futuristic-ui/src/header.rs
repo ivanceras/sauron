@@ -10,6 +10,8 @@ use sauron::{
 };
 use web_sys::HtmlAudioElement;
 
+const COMPONENT_NAME: &str = "header";
+
 #[derive(Clone, Debug)]
 pub enum Msg {
     AnimateIn,
@@ -71,84 +73,79 @@ impl Header {
     }
 
     pub fn style(&self) -> Vec<String> {
-        vec![r#"
-        .header {
-            display: block;
-            padding: 1px;
-            position: relative;
-            opacity: 1;
-        }
+        let css = jss_ns!(COMPONENT_NAME, {
+            ".": {
+                "display": "block",
+                "padding": "1px",
+                "position": "relative",
+                "opacity": 1,
+                "color": "#26dafd",
+                "font-size": "21px",
+                "line-height": 1.5,
+                "font-family": "\"Titillium Web\", \"sans-serif\"",
+            },
 
-        .hide .header{
-            opacity: 0;
-        }
+            ".hide": {
+                "opacity": 0,
+            },
 
-        .header {
-            color: #26dafd;
-            font-size: 21px;
-            line-height: 1.5;
-            font-family: "Titillium Web", "sans-serif";
-        }
+            ".header h1": {
+                "padding": "0 0",
+                "margin": "0 4px",
+            },
 
-        .header h1 {
-            padding: 0 0;
-            margin: 0 4px;
-        }
+            ".border": {
+                "border-color": "#029dbb",
+                "box-shadow": "0 0 4px rgba(2,157,187,0.65)",
+                "z-index": 1,
+                "opacity": 1,
+                "position": "absolute",
+                "transition": "all 250ms ease-in",
+                "border-style": "solid",
+            },
 
+            ".hide .border": {
+              "height": 0,
+              "width": 0,
+            },
 
-        .header__border {
-            border-color: #029dbb;
-            box-shadow: 0 0 4px rgba(2,157,187,0.65);
-        }
+            ".border-bottom": {
+                "left": "50%",
+                "width": "100%",
+                "bottom": 0,
+                "transform": "translate(-50%, 0)",
+                "border-width": "4px 0 0 0",
+            },
 
-        .hide .header__border {
-          height: 0;
-          width: 0;
-        }
+            ".text-anim": {
+                "color": "#a1ecfb",
+                "transition": "color 250ms ease-out",
+                "font-family": "\"Electrolize\", \"sans-serif\"",
+                "font-weight": "bold",
+                "text-shadow": "0 0 4px rgba(161,236,251,0.65)",
+                "text-transform": "uppercase",
+            },
 
+        });
 
-        .header__border-anim {
-            z-index: 1;
-            opacity: 1;
-            position: absolute;
-            transition: all 250ms ease-in;
-            border-style: solid;
-        }
-
-        .header__border-bottom {
-            left: 50%;
-            width: 100%;
-            bottom: 0;
-            transform: translate(-50%, 0);
-            border-width: 4px 0 0 0;
-        }
-
-        .header-text-anim {
-            color: #a1ecfb;
-            transition: color 250ms ease-out;
-            font-family: "Electrolize", "sans-serif";
-            font-weight: bold;
-            text-shadow: 0 0 4px rgba(161,236,251,0.65);
-            text-transform: uppercase;
-        }
-
-        "#
-        .to_string()]
+        vec![css]
     }
 
     pub fn view(&self) -> Node<Msg> {
+        let class_ns =
+            |class_names| jss::class_namespaced(COMPONENT_NAME, class_names);
+
+        let classes_ns_flag = |class_name_flags| {
+            jss::classes_namespaced_flag(COMPONENT_NAME, class_name_flags)
+        };
         header(
-            vec![class("header"), classes_flag([("hide", self.hide)])],
             vec![
-                div(
-                    vec![class("header-text header-text-anim")],
-                    vec![self.child()],
-                ),
-                div(vec![
-                        class("header__border header__border-anim header__border-bottom"),
-                    ],
-                    vec![],
-                ),
+                class(COMPONENT_NAME),
+                classes_ns_flag([("hide", self.hide)]),
+            ],
+            vec![
+                div(vec![class_ns("text text-anim")], vec![self.child()]),
+                div(vec![class_ns("border border-bottom")], vec![]),
             ],
         )
     }
