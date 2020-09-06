@@ -94,28 +94,31 @@ where
     }
 
     pub fn style(&self) -> Vec<String> {
-        let border_box_shadow_color = "rgba(2,157,187,0.65)";
-        let corner_box_shadow_color = "rgba(38,218,253,0.65)";
-        let border_border_color = "#029dbb";
+        let border_color = "#029dbb";
         let corner_color = "#26dafd";
-        let click_highlight_color = "#029dbb";
+        let border_shadow = "rgba(2,157,187,0.65)";
+        let corner_shadow = "rgba(38,218,253,0.65)";
         let button_wrap_text_color = "rgba(4,35,41,0.65)";
         let button_text_color = "#acf9fb";
 
+        let highlight_color = "#029dbb";
+
         let alt_border_color = "#090";
         let alt_corner_color = "#0f0";
-        let alt_click_highlight_color = "#090";
+        let alt_highlight_color = "#090";
         let alt_button_text_color = "#0f0";
-        let alt_border_box_shadow_color = "rgba(0,153,0,0.65)";
-        let alt_corner_box_shadow_color = "rgba(0,255,0,0.65)";
+        let alt_border_shadow = "rgba(0,153,0,0.65)";
+        let alt_corner_shadow = "rgba(0,255,0,0.65)";
 
         let disabled_border_color = "#666";
         let disabled_corner_color = "#999";
-        let disabled_corner_box_shadow_color = "rgba(153,153,153,0.65)";
-        let disabled_border_box_shadow_color = "rgba(102,102,102,0.65)";
+        let disabled_corner_shadow = "rgba(153,153,153,0.65)";
+        let disabled_border_shadow = "rgba(102,102,102,0.65)";
         let disabled_button_text_color = "#999";
 
         let base_css = jss_ns!(COMPONENT_NAME, {
+
+            // the ROOT component style
             ".": {
                 "display": "inline-block",
                 "padding": "1px",
@@ -124,25 +127,20 @@ where
             },
 
 
-            ".border": {
-                "border-color": border_border_color,
-                "box-shadow": format!("0 0 4px {}",border_box_shadow_color),
-                "z-index": 1,
-                "opacity": 1,
-                "position": "absolute",
-                "transition": "all 250ms ease-in",
-                "border-style": "solid",
-            },
 
             // HOVER at the lower  part of the button
             ".hover": {
-                "border-color": border_border_color,
-                "box-shadow": format!("0 0 4px {}",border_box_shadow_color),
+                "border-color": border_color,
+                "box-shadow": format!("0 0 4px {}",border_shadow),
                 "z-index": 1,
                 "opacity": 1,
                 "position": "absolute",
                 "transition": "width 100ms ease-in",
                 "border-style": "solid",
+            },
+
+            ".hovered .hover": {
+                "width": "96%",
             },
 
             ".hover-bottom": {
@@ -151,6 +149,18 @@ where
                 "bottom": "2px",
                 "transform": "translate(-50%, 0)",
                 "border-width": "4px 0 0 0",
+            },
+
+
+            // BORDERS these are styled divs wrapping the buttons
+            ".border": {
+                "border-color": border_color,
+                "box-shadow": format!("0 0 4px {}",border_shadow),
+                "z-index": 1,
+                "opacity": 1,
+                "position": "absolute",
+                "transition": "all 250ms ease-in",
+                "border-style": "solid",
             },
 
 
@@ -186,11 +196,12 @@ where
                 "border-width": "1px 0 0 0",
             },
 
+            // CORNERS - the fancy divs which clips the button
             ".corner": {
                 "width": "8px",
                 "height": "8px",
                 "border-color": corner_color,
-                "box-shadow": format!("0 0 4px -2px {}",corner_box_shadow_color),
+                "box-shadow": format!("0 0 4px -2px {}",corner_shadow),
                 "z-index": 2,
                 "opacity": 1,
                 "position": "absolute",
@@ -231,6 +242,7 @@ where
                 "transition": "background-color 250ms ease-in",
             },
 
+            // The actual button
             ".button": {
                 "color": button_text_color,
                 "cursor": "pointer",
@@ -249,6 +261,7 @@ where
                 "vertical-align": "middle",
             },
 
+            // highlight when clicked and fades out shortly
             ".highlight": {
                   "z-index": 1,
                   "position": "absolute",
@@ -256,28 +269,31 @@ where
                   "right": 0,
                   "top": 0,
                   "bottom": 0,
-                  "background-color": "transparent",
+                  "background-color": highlight_color,
                   "opacity": 0,
                   "transition": "all 50ms ease-out",
             },
 
+            ".clicked .highlight": {
+                "opacity": 1,
+            },
 
         });
 
         let alt_css = jss_ns!(COMPONENT_NAME, {
             ".alt .hover": {
                 "border-color": alt_border_color,
-                "box-shadow": format!("0 0 4px {}",alt_border_box_shadow_color),
+                "box-shadow": format!("0 0 4px {}",alt_border_shadow),
             },
 
             ".alt .border": {
                 "border-color": alt_border_color,
-                "box-shadow": format!("0 0 4px {}",alt_border_box_shadow_color),
+                "box-shadow": format!("0 0 4px {}",alt_border_shadow),
             },
 
             ".alt .corner": {
                 "border-color": alt_corner_color,
-                "box-shadow": format!("0 0 4px {}",alt_corner_box_shadow_color),
+                "box-shadow": format!("0 0 4px {}",alt_corner_shadow),
             },
 
             ".alt .button": {
@@ -286,7 +302,7 @@ where
 
 
             ".alt .highlight": {
-                "background-color": alt_click_highlight_color,
+                "background-color": alt_highlight_color,
             },
         });
 
@@ -305,12 +321,12 @@ where
         let disabled_css = jss_ns!(COMPONENT_NAME,{
             ".disabled .border": {
                 "border-color": disabled_border_color,
-                "box-shadow": format!("0 0 4px {}",disabled_border_box_shadow_color),
+                "box-shadow": format!("0 0 4px {}",disabled_border_shadow),
             },
 
             ".disabled .corner": {
                 "border-color": disabled_corner_color,
-                "box-shadow": format!("0 0 4px {}",disabled_corner_box_shadow_color),
+                "box-shadow": format!("0 0 4px {}",disabled_corner_shadow),
             },
 
             ".disabled .button": {
@@ -321,27 +337,7 @@ where
 
         });
 
-        let clicked_css = jss_ns!(COMPONENT_NAME,{
-            ".clicked .highlight": {
-                "opacity": 1,
-                "background-color": click_highlight_color,
-            },
-        });
-
-        let hovered_css = jss_ns!(COMPONENT_NAME,{
-            ".hovered .hover": {
-                "width": "96%",
-            },
-        });
-
-        vec![
-            base_css,
-            alt_css,
-            skewed_css,
-            disabled_css,
-            clicked_css,
-            hovered_css,
-        ]
+        vec![base_css, alt_css, skewed_css, disabled_css]
     }
 
     pub fn update(&mut self, msg: Msg<PMSG>) -> Option<PMSG> {
