@@ -4,6 +4,7 @@ use animate_list::AnimateList;
 use frame::Frame;
 use fui_button::FuiButton;
 use header::Header;
+use image::Image;
 use paragraph::Paragraph;
 use sauron::{
     html::{
@@ -28,6 +29,7 @@ mod animate_list;
 mod frame;
 mod fui_button;
 mod header;
+mod image;
 mod paragraph;
 mod spinner;
 mod theme;
@@ -48,6 +50,7 @@ pub enum Msg {
     AltFuiButtonMsg(Box<fui_button::Msg<Self>>),
     DisabledFuiButtonMsg(Box<fui_button::Msg<Self>>),
     AnimateListMsg(Box<animate_list::Msg>),
+    ImageMsg(image::Msg),
     ReanimateAll,
     NoOp,
 }
@@ -64,6 +67,7 @@ pub struct App {
     disabled_fui_button: FuiButton<Msg>,
     spinner: Spinner<Msg>,
     animate_list: AnimateList<Msg>,
+    image: Image,
 }
 
 impl App {
@@ -102,8 +106,13 @@ impl App {
                     css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.
                     Sauron is a light-weight web framework designed to have you write least amount of code possible.";
 
+        let frame_content = div(
+            vec![styles([("padding", "20px 40px"), ("font-size", "32px")])],
+            vec![text("Retro Futuristic UI in rust")],
+        );
+
         App {
-            frame: Frame::new_with_content("Retro Futuristic UI in rust"),
+            frame: Frame::new_with_content(frame_content),
             header: Header::new_with_content("Header"),
             paragraph: Paragraph::new_with_markdown(paragraph_content),
             fui_button,
@@ -115,6 +124,10 @@ impl App {
             spinner: Spinner::new(),
             animate_list: AnimateList::new_with_content(
                 Self::animate_list_content(),
+            ),
+            image: Image::new(
+                "img/space.jpg",
+                Some("Space as seen from space"),
             ),
         }
     }
@@ -300,6 +313,7 @@ impl Component<Msg> for App {
                             vec![text("Animate List")],
                         ),
                         self.spinner.view(),
+                        self.image.view().map_msg(Msg::ImageMsg),
                         button(
                             vec![
                                 on_click(|_| Msg::ReanimateAll),
@@ -441,6 +455,15 @@ impl Component<Msg> for App {
                 if let Some(para_msg) = self.paragraph.update(para_msg) {
                     Cmd::new(move |program| {
                         program.dispatch(Msg::ParagraphMsg(para_msg.clone()));
+                    })
+                } else {
+                    Cmd::none()
+                }
+            }
+            Msg::ImageMsg(img_msg) => {
+                if let Some(img_msg) = self.image.update(img_msg) {
+                    Cmd::new(move |program| {
+                        program.dispatch(Msg::ImageMsg(img_msg.clone()));
                     })
                 } else {
                     Cmd::none()

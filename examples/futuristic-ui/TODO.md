@@ -15,4 +15,5 @@
     - This is done by prepending namespace to the selectors and class names used in the component
 - [ ] Fix issued with Paragraph throwing a runtime error and panics.
 - [ ] Make the futuristic button be in array with permutation of fui_button flag features
+- [ ] Make an image component by using the Frame which wraps the img element
 

@@ -22,29 +22,16 @@ pub enum Msg {
 pub struct Frame {
     hide: bool,
     hover: bool,
-    content: String,
+    content: Node<Msg>,
 }
 
 impl Frame {
-    pub fn new_with_content(content: &str) -> Self {
+    pub fn new_with_content(content: Node<Msg>) -> Self {
         Frame {
             hide: false,
             hover: false,
-            content: content.to_string(),
+            content,
         }
-    }
-
-    fn play_sound(&self) {
-        let audio = HtmlAudioElement::new_with_src("sounds/deploy.mp3")
-            .expect("must not fail");
-        let _ = audio.play().expect("must play");
-    }
-
-    fn child(&self) -> Node<Msg> {
-        div(
-            vec![styles([("padding", "20px 40px"), ("font-size", "32px")])],
-            vec![text(&self.content)],
-        )
     }
 
     pub fn update(&mut self, msg: Msg) -> Option<Msg> {
@@ -69,6 +56,12 @@ impl Frame {
                 self.next_animation(start, duration)
             }
         }
+    }
+
+    fn play_sound(&self) {
+        let audio = HtmlAudioElement::new_with_src("sounds/deploy.mp3")
+            .expect("must not fail");
+        let _ = audio.play().expect("must play");
     }
 
     fn start_animation(&mut self) -> Option<Msg> {
@@ -272,7 +265,7 @@ impl Frame {
                 div(vec![class_ns("corner corner__bottom-left")], vec![]),
                 div(vec![class_ns("corner corner__top-right")], vec![]),
                 div(vec![class_ns("corner corner__bottom-right")], vec![]),
-                div(vec![class_ns("content")], vec![self.child()]),
+                div(vec![class_ns("content")], vec![self.content.clone()]),
             ],
         )
     }
