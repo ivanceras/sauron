@@ -186,6 +186,22 @@ pub fn attr<MSG, V: Into<Value>>(att: &'static str, v: V) -> Attribute<MSG> {
     mt_dom::attr(att, AttributeValue::from_value(v.into()))
 }
 
-fn empty_attr<MSG>() -> Attribute<MSG> {
+/// a utility function to return create an empty attr, useful for cases where branch expression
+/// need to return an attribute which otherwise it can not produce
+/// example:
+/// ```rust
+/// use sauron_core::html::attributes::{title,empty_attr};
+/// use sauron_core::Attribute;
+///
+/// let img_title = Some("this is the image");
+/// let result: Attribute<()> = if let Some(img_title) = img_title{
+///     title(img_title)
+/// }
+/// else{
+///     empty_attr()
+/// };
+/// assert_eq!(title("this is the image"), result);
+/// ```
+pub fn empty_attr<MSG>() -> Attribute<MSG> {
     mt_dom::attr("", AttributeValue::Empty)
 }
