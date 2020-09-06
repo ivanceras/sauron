@@ -229,7 +229,7 @@ where
                 "border-width": "0 2px 2px 0",
             },
 
-            ".text": {
+            ".button_wrap": {
                 "background-color": base.button_wrap_text_color,
                 "z-index": 3,
                 "display": "block",
@@ -292,7 +292,7 @@ where
                 "box-shadow": format!("0 0 4px {}",alt.corner_shadow),
             },
 
-            ".alt .text": {
+            ".alt .button_wrap": {
                 "background-color": alt.button_wrap_text_color,
             },
 
@@ -339,7 +339,7 @@ where
                 "cursor": "auto",
             },
 
-            ".disabled .text": {
+            ".disabled .button_wrap": {
                 "background-color": disabled.button_wrap_text_color,
             },
 
@@ -480,10 +480,10 @@ where
                     div(vec![class_ns("corner corner__bottom-right")], vec![]),
                 ),
                 div(
-                    vec![class_ns("wrap")],
+                    vec![],
                     vec![
                         div(
-                            vec![class_ns("text")],
+                            vec![class_ns("button_wrap")],
                             vec![button(
                                 vec![
                                     class_ns("button"),
