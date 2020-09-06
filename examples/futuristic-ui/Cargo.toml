@@ -15,6 +15,12 @@ web-sys = { version = "0.3", features = ["HtmlAudioElement"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 console_error_panic_hook = { version = "0.1", optional = true }
 wee_alloc = { version = "0.4", optional = true }
+# for using lighten, and darken when calculating theme colors
+css-colors = "1"
+
+[dev-dependencies]
+#for parsing hex color into rgb, don't get mix with css-colors with a `s`
+css-color = "0.1.1"
 
 [features]
 with-lite-markdown = ["sauron/with-lite-markdown"]

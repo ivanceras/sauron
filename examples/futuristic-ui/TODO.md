@@ -1,3 +1,5 @@
+# TODO
+
 - [X] Paragraph typing animation should support all other element nodes
     - algorithm:
         - for each node that contains text, increment the text length based on the number of characters in the text content
@@ -18,4 +20,7 @@
     - webkit does not affect opacity:0 to span
 - [ ] Make the futuristic button be in array with permutation of fui_button flag features
 - [X] Make an image component by using the Frame which wraps the img element
-
+- [ ] Add more futuristic widgets
+    - [ ] Searchbox
+    - [ ] Navigation links
+- [ ] use css-colors crate to manipulate colors in theme
