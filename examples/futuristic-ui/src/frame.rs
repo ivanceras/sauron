@@ -83,28 +83,28 @@ impl Frame {
         };
 
         let css = jss!({
-            ns(""): {
+            ns("."): {
                 "display": "block",
                 "padding": "1px",
                 "position": "relative",
                 "opacity": 1,
             },
 
-            ns("border"): {
+            ns(".border"): {
                 "border-color": "#029dbb",
                 "box-shadow": "0 0 4px rgba(2,157,187,0.65)",
             },
 
-            ns("hide"): {
+            ns(".hide"): {
                 "opacity": 0,
             },
 
-            ns("hide border"): {
+            ns(".hide .border"): {
                 "height": 0,
                 "width": 0,
             },
 
-            ns("border-left"): {
+            ns(".border-left"): {
                 "top": "50%",
                 "left": 0,
                 "height": "100%",
@@ -112,7 +112,7 @@ impl Frame {
                 "border-width": "0 0 0 1px",
             },
 
-            ns("border-anim"): {
+            ns(".border-anim"): {
                 "z-index": 1,
                 "opacity": 1,
                 "position": "absolute",
@@ -120,7 +120,7 @@ impl Frame {
                 "border-style": "solid",
             },
 
-            ns("border-right"): {
+            ns(".border-right"): {
                 "top": "50%",
                 "right": 0,
                 "height": "100%",
@@ -128,7 +128,7 @@ impl Frame {
                 "border-width": "0 0 0 1px",
             },
 
-            ns("border-top"): {
+            ns(".border-top"): {
                 "top": 0,
                 "left": "50%",
                 "width": "100%",
@@ -136,7 +136,7 @@ impl Frame {
                 "border-width": "1px 0 0 0",
             },
 
-            ns("border-bottom"): {
+            ns(".border-bottom"): {
                 "left": "50%",
                 "width": "100%",
                 "bottom": 0,
@@ -144,20 +144,20 @@ impl Frame {
                 "border-width": "1px 0 0 0",
             },
 
-            ns("corner"): {
+            ns(".corner"): {
                 "width": "24px",
                 "height": "24px",
                 "border-color": "#26dafd",
                 "box-shadow": "0 0 4px -2px rgba(38,218,253,0.65)",
             },
 
-            ns("hide corner"): {
+            ns(".hide .corner"): {
                 "width": 0,
                 "height": 0,
                 "opacity": 0,
             },
 
-            ns("corner-anim"): {
+            ns(".corner-anim"): {
                 "z-index": 2,
                 "opacity": 1,
                 "position": "absolute",
@@ -165,39 +165,39 @@ impl Frame {
                 "border-style": "solid",
             },
 
-            ns("corner__top-left"): {
+            ns(".corner__top-left"): {
                 "left": "-2px",
                 "top": "-2px",
                 "border-width": "2px 0 0 2px",
             },
 
-            ns("corner__bottom-left"): {
+            ns(".corner__bottom-left"): {
                 "left": "-2px",
                 "bottom": "-2px",
                 "border-width": "0 0 2px 2px",
             },
 
-            ns("corner__top-right"): {
+            ns(".corner__top-right"): {
                 "right": "-2px",
                 "top": "-2px",
                 "border-width": "2px 2px 0 0",
             },
 
-            ns("corner__bottom-right"): {
+            ns(".corner__bottom-right"): {
                 "right": "-2px",
                 "bottom": "-2px",
                 "border-width": "0 2px 2px 0",
             },
 
-            ns("text"): {
+            ns(".text"): {
                 "background-color": "rgba(4,35,41,0.65)",
             },
 
-            ns("hide text"): {
+            ns(".hide .text"): {
                 "background-color": "transparent",
             },
 
-            ns("text-anim"): {
+            ns(".text-anim"): {
                 "z-index": 3,
                 "display": "block",
                 "position": "relative",

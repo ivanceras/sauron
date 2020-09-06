@@ -11,6 +11,8 @@ use sauron::{
 };
 use web_sys::HtmlAudioElement;
 
+const COMPONENT_NAME: &str = "fui_button";
+
 #[derive(Clone, Debug)]
 pub enum Msg<PMSG> {
     Click,
@@ -99,60 +101,43 @@ where
         let click_highlight_color = "#029dbb";
         let button_wrap_text_color = "rgba(4,35,41,0.65)";
         let button_text_color = "#acf9fb";
+
         let alt_border_color = "#090";
         let alt_corner_color = "#0f0";
         let alt_click_highlight_color = "#090";
         let alt_button_text_color = "#0f0";
         let alt_border_box_shadow_color = "rgba(0,153,0,0.65)";
         let alt_corner_box_shadow_color = "rgba(0,255,0,0.65)";
+
         let disabled_border_color = "#666";
         let disabled_corner_color = "#999";
         let disabled_corner_box_shadow_color = "rgba(153,153,153,0.65)";
         let disabled_border_box_shadow_color = "rgba(102,102,102,0.65)";
         let disabled_button_text_color = "#999";
 
-        let css = jss!({
-            ".fui_button": {
+        let base_css = jss_ns!(COMPONENT_NAME, {
+            ".": {
                 "display": "inline-block",
                 "padding": "1px",
                 "position": "relative",
                 "margin": "4px 4px"
             },
 
-            ".skewed.fui_button": {
-                "transform": "skewX(-45deg)",
-                "transform-origin": "bottom left",
-            },
 
-            ".fui_button__border": {
+            ".border": {
                 "border-color": border_border_color,
                 "box-shadow": format!("0 0 4px {}",border_box_shadow_color),
+                "z-index": 1,
+                "opacity": 1,
+                "position": "absolute",
+                "transition": "all 250ms ease-in",
+                "border-style": "solid",
             },
 
             // HOVER at the lower  part of the button
-            ".fui_button__hover": {
+            ".hover": {
                 "border-color": border_border_color,
                 "box-shadow": format!("0 0 4px {}",border_box_shadow_color),
-            },
-
-            ".fui_button__hover-bottom": {
-                "width": 0,
-                "left": "50%",
-                "bottom": "2px",
-                "transform": "translate(-50%, 0)",
-                "border-width": "4px 0 0 0",
-            },
-
-            ".alt .fui_button__hover": {
-                "border-color": alt_border_color,
-                "box-shadow": format!("0 0 4px {}",alt_border_box_shadow_color),
-            },
-
-            ".hover .fui_button__hover": {
-                "width": "96%",
-            },
-
-            ".fui_button__hover-anim": {
                 "z-index": 1,
                 "opacity": 1,
                 "position": "absolute",
@@ -160,22 +145,16 @@ where
                 "border-style": "solid",
             },
 
-            ".alt .fui_button__border": {
-                "border-color": alt_border_color,
-                "box-shadow": format!("0 0 4px {}",alt_border_box_shadow_color),
-            },
-
-            ".disabled .fui_button__border": {
-                "border-color": disabled_border_color,
-                "box-shadow": format!("0 0 4px {}",disabled_border_box_shadow_color),
-            },
-
-            ".hide .fui_button__border": {
-                "height": 0,
+            ".hover-bottom": {
                 "width": 0,
+                "left": "50%",
+                "bottom": "2px",
+                "transform": "translate(-50%, 0)",
+                "border-width": "4px 0 0 0",
             },
 
-            ".fui_button__border-left": {
+
+            ".border-left": {
                 "top": "50%",
                 "left": 0,
                 "height": "100%",
@@ -183,15 +162,7 @@ where
                 "border-width": "0 0 0 1px",
             },
 
-            ".fui_button__border-anim": {
-                "z-index": 1,
-                "opacity": 1,
-                "position": "absolute",
-                "transition": "all 250ms ease-in",
-                "border-style": "solid",
-            },
-
-            ".fui_button__border-right": {
+            ".border-right": {
                 "top": "50%",
                 "right": 0,
                 "height": "100%",
@@ -199,7 +170,7 @@ where
                 "border-width": "0 0 0 1px",
             },
 
-            ".fui_button__border-top": {
+            ".border-top": {
                 "top": 0,
                 "left": "50%",
                 "width": "100%",
@@ -207,7 +178,7 @@ where
                 "border-width": "1px 0 0 0",
             },
 
-            ".fui_button__border-bottom": {
+            ".border-bottom": {
                 "left": "50%",
                 "width": "100%",
                 "bottom": 0,
@@ -215,30 +186,11 @@ where
                 "border-width": "1px 0 0 0",
             },
 
-            ".fui_button__corner": {
+            ".corner": {
                 "width": "8px",
                 "height": "8px",
                 "border-color": corner_color,
                 "box-shadow": format!("0 0 4px -2px {}",corner_box_shadow_color),
-            },
-
-            ".alt .fui_button__corner": {
-                "border-color": alt_corner_color,
-                "box-shadow": format!("0 0 4px {}",alt_corner_box_shadow_color),
-            },
-
-            ".disabled .fui_button__corner": {
-                "border-color": disabled_corner_color,
-                "box-shadow": format!("0 0 4px {}",disabled_corner_box_shadow_color),
-            },
-
-            ".hide .fui_button__corner": {
-                "width": 0,
-                "height": 0,
-                "opacity": 0,
-            },
-
-            ".fui_button__corner-anim": {
                 "z-index": 2,
                 "opacity": 1,
                 "position": "absolute",
@@ -246,39 +198,32 @@ where
                 "border-style": "solid",
             },
 
-            ".fui_button_corner__top-left": {
+            ".corner__top-left": {
                 "left": "-2px",
                 "top": "-2px",
                 "border-width": "2px 0 0 2px",
             },
 
-            ".fui_button_corner__bottom-left": {
+            ".corner__bottom-left": {
                 "left": "-2px",
                 "bottom": "-2px",
                 "border-width": "0 0 2px 2px",
             },
 
-            ".fui_button_corner__top-right": {
+            ".corner__top-right": {
                 "right": "-2px",
                 "top": "-2px",
                 "border-width": "2px 2px 0 0",
             },
 
-            ".fui_button_corner__bottom-right": {
+            ".corner__bottom-right": {
                 "right": "-2px",
                 "bottom": "-2px",
                 "border-width": "0 2px 2px 0",
             },
 
-            ".fui_button-text": {
+            ".text": {
                 "background-color": button_wrap_text_color,
-            },
-
-            ".hide .fui_button-text": {
-                "background-color": "transparent",
-            },
-
-            ".fui_button-text-anim": {
                 "z-index": 3,
                 "display": "block",
                 "position": "relative",
@@ -286,25 +231,9 @@ where
                 "transition": "background-color 250ms ease-in",
             },
 
-            ".fui_button__button": {
+            ".button": {
                 "color": button_text_color,
-                "cursor": "pointer"
-            },
-
-            ".alt .fui_button__button": {
-                "color": alt_button_text_color,
-            },
-
-            ".disabled .fui_button__button": {
-                "color": disabled_button_text_color,
-                "cursor": "auto",
-            },
-
-            ".skewed .fui_button__button": {
-                "transform": "skewX(45deg)",
-            },
-
-            ".fui_button__button-anim": {
+                "cursor": "pointer",
                 "margin": 0,
                 "border": "none",
                 "z-index": 2,
@@ -320,7 +249,7 @@ where
                 "vertical-align": "middle",
             },
 
-            ".fui_button__highlight": {
+            ".highlight": {
                   "z-index": 1,
                   "position": "absolute",
                   "left": 0,
@@ -329,23 +258,90 @@ where
                   "bottom": 0,
                   "background-color": "transparent",
                   "opacity": 0,
+                  "transition": "all 50ms ease-out",
             },
 
-            ".click .fui_button__highlight": {
+
+        });
+
+        let alt_css = jss_ns!(COMPONENT_NAME, {
+            ".alt .hover": {
+                "border-color": alt_border_color,
+                "box-shadow": format!("0 0 4px {}",alt_border_box_shadow_color),
+            },
+
+            ".alt .border": {
+                "border-color": alt_border_color,
+                "box-shadow": format!("0 0 4px {}",alt_border_box_shadow_color),
+            },
+
+            ".alt .corner": {
+                "border-color": alt_corner_color,
+                "box-shadow": format!("0 0 4px {}",alt_corner_box_shadow_color),
+            },
+
+            ".alt .button": {
+                "color": alt_button_text_color,
+            },
+
+
+            ".alt .highlight": {
+                "background-color": alt_click_highlight_color,
+            },
+        });
+
+        let skewed_css = jss_ns!(COMPONENT_NAME, {
+            ".skewed": {
+                "transform": "skewX(-45deg)",
+                "transform-origin": "bottom left",
+            },
+
+            ".skewed .button": {
+                "transform": "skewX(45deg)",
+            },
+
+        });
+
+        let disabled_css = jss_ns!(COMPONENT_NAME,{
+            ".disabled .border": {
+                "border-color": disabled_border_color,
+                "box-shadow": format!("0 0 4px {}",disabled_border_box_shadow_color),
+            },
+
+            ".disabled .corner": {
+                "border-color": disabled_corner_color,
+                "box-shadow": format!("0 0 4px {}",disabled_corner_box_shadow_color),
+            },
+
+            ".disabled .button": {
+                "color": disabled_button_text_color,
+                "cursor": "auto",
+            },
+
+
+        });
+
+        let clicked_css = jss_ns!(COMPONENT_NAME,{
+            ".clicked .highlight": {
                 "opacity": 1,
                 "background-color": click_highlight_color,
             },
-
-            ".alt .fui_button__highlight": {
-                "background-color": alt_click_highlight_color,
-            },
-
-            ".fui_button__highlight-anim": {
-                "transition": "all 50ms ease-out",
-            }
         });
 
-        vec![css]
+        let hovered_css = jss_ns!(COMPONENT_NAME,{
+            ".hovered .hover": {
+                "width": "96%",
+            },
+        });
+
+        vec![
+            base_css,
+            alt_css,
+            skewed_css,
+            disabled_css,
+            clicked_css,
+            hovered_css,
+        ]
     }
 
     pub fn update(&mut self, msg: Msg<PMSG>) -> Option<PMSG> {
@@ -380,12 +376,19 @@ where
     }
 
     pub fn view(&self) -> Node<Msg<PMSG>> {
+        let class_ns =
+            |class_names| jss::class_namespaced(COMPONENT_NAME, class_names);
+
+        let classes_ns_flag = |class_name_flags| {
+            jss::classes_namespaced_flag(COMPONENT_NAME, class_name_flags)
+        };
+
         div(
             vec![
-                class("fui_button"),
-                classes_flag([
-                    ("click", self.click),
-                    ("hover", self.hover),
+                class(COMPONENT_NAME),
+                classes_ns_flag([
+                    ("clicked", self.click),
+                    ("hovered", self.hover),
                     ("skewed", self.skewed),
                     ("alt", self.use_alt),
                     ("disabled", self.disabled),
@@ -393,61 +396,58 @@ where
             ],
             vec![
                 // hover
-                view_if(self.has_hover,
-                    div(vec![class("fui_button__hover fui_button__hover-anim fui_button__hover-bottom")], vec![]),
+                view_if(
+                    self.has_hover,
+                    div(vec![class_ns("hover hover-bottom")], vec![]),
                 ),
                 //borders
-                div(vec![class("fui_button__border fui_button__border-anim fui_button__border-bottom")], vec![]),
-                div(vec![class("fui_button__border fui_button__border-anim fui_button__border-left")], vec![]),
-                div(vec![class("fui_button__border fui_button__border-anim fui_button__border-right")], vec![]),
-                div(vec![class("fui_button__border fui_button__border-anim fui_button__border-top")], vec![]),
-                div(vec![class("fui_button__border fui_button__border-anim fui_button__border-bottom")], vec![]),
+                div(vec![class_ns("border border-bottom")], vec![]),
+                div(vec![class_ns("border border-left")], vec![]),
+                div(vec![class_ns("border border-right")], vec![]),
+                div(vec![class_ns("border border-top")], vec![]),
+                div(vec![class_ns("border border-bottom")], vec![]),
                 // corners
-                view_if(self.has_corners,
-                    div(vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__top-left")], vec![])
+                view_if(
+                    self.has_corners,
+                    div(vec![class_ns("corner corner__top-left")], vec![]),
                 ),
-                view_if(self.has_corners,
-                    div(
-                        vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__bottom-left")],
-                        vec![],
-                    )
+                view_if(
+                    self.has_corners,
+                    div(vec![class_ns("corner corner__bottom-left")], vec![]),
                 ),
-                view_if(self.has_corners,
-                    div(
-                        vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__top-right")],
-                        vec![],
-                    )
+                view_if(
+                    self.has_corners,
+                    div(vec![class_ns("corner corner__top-right")], vec![]),
                 ),
-                view_if(self.has_corners,
-                    div(
-                        vec![class("fui_button__corner fui_button__corner-anim fui_button_corner__bottom-right")],
-                        vec![],
-                    )
+                view_if(
+                    self.has_corners,
+                    div(vec![class_ns("corner corner__bottom-right")], vec![]),
                 ),
-                div(vec![class("fui_button__wrap")],
+                div(
+                    vec![class_ns("wrap")],
                     vec![
                         div(
-                            vec![class("fui_button-text fui_button-text-anim")],
-                            vec![
-                                button(
-                                    vec![
-                                        class("fui_button__button fui_button__button-anim"),
-                                        disabled(self.disabled),
-                                        on_click(|_|Msg::Click),
-                                        on_mouseover(|_|Msg::HoverIn),
-                                        on_mouseout(|_|Msg::HoverOut),
-                                    ],
-                                    vec![text(&self.label)]
-                                ).add_attributes(self.event_listeners.clone())
-                            ],
+                            vec![class_ns("text")],
+                            vec![button(
+                                vec![
+                                    class_ns("button"),
+                                    disabled(self.disabled),
+                                    on_click(|_| Msg::Click),
+                                    on_mouseover(|_| Msg::HoverIn),
+                                    on_mouseout(|_| Msg::HoverOut),
+                                ],
+                                vec![text(&self.label)],
+                            )
+                            .add_attributes(self.event_listeners.clone())],
                         ),
-                        div(vec![
-                            class("fui_button__highlight fui_button__highlight-anim"),
-                            on_transitionend(|_|Msg::HighlightEnd),
+                        div(
+                            vec![
+                                class_ns("highlight"),
+                                on_transitionend(|_| Msg::HighlightEnd),
                             ],
-                            vec![]
-                        )
-                    ]
+                            vec![],
+                        ),
+                    ],
                 ),
             ],
         )
