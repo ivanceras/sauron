@@ -33,6 +33,8 @@ pub struct FuiButton<PMSG> {
     has_corners: bool,
     /// enable/disable hover effect
     has_hover: bool,
+    /// expand corners when hovered
+    expand_corners: bool,
     disabled: bool,
     event_listeners: Vec<Attribute<Msg<PMSG>>>,
 }
@@ -50,27 +52,39 @@ where
             use_alt: false,
             has_corners: true,
             has_hover: true,
+            expand_corners: false,
             disabled: false,
             event_listeners: vec![],
         }
     }
 
+    /// whether the button is slanted 45 degree to the right
     pub fn skewed(&mut self, skewed: bool) {
         self.skewed = skewed;
     }
 
+    /// whether to use the alternate color of the theme
     pub fn use_alt(&mut self, use_alt: bool) {
         self.use_alt = use_alt;
     }
 
+    /// whether to show the fancy corners of this button
+    /// default: true
     pub fn has_corners(&mut self, has_corners: bool) {
         self.has_corners = has_corners;
     }
 
+    /// default: false
     pub fn disabled(&mut self, disabled: bool) {
         self.disabled = disabled;
         self.has_corners(false);
         self.has_hover(false);
+    }
+
+    /// whether or not expand corners on hover
+    /// default: false
+    pub fn expand_corners(&mut self, expand_corners_on_hover: bool) {
+        self.expand_corners = expand_corners_on_hover;
     }
 
     pub fn has_hover(&mut self, has_hover: bool) {
@@ -94,27 +108,9 @@ where
     }
 
     pub fn style(&self) -> Vec<String> {
-        let border_color = "#029dbb";
-        let corner_color = "#26dafd";
-        let border_shadow = "rgba(2,157,187,0.65)";
-        let corner_shadow = "rgba(38,218,253,0.65)";
-        let button_wrap_text_color = "rgba(4,35,41,0.65)";
-        let button_text_color = "#acf9fb";
-
-        let highlight_color = "#029dbb";
-
-        let alt_border_color = "#090";
-        let alt_corner_color = "#0f0";
-        let alt_highlight_color = "#090";
-        let alt_button_text_color = "#0f0";
-        let alt_border_shadow = "rgba(0,153,0,0.65)";
-        let alt_corner_shadow = "rgba(0,255,0,0.65)";
-
-        let disabled_border_color = "#666";
-        let disabled_corner_color = "#999";
-        let disabled_corner_shadow = "rgba(153,153,153,0.65)";
-        let disabled_border_shadow = "rgba(102,102,102,0.65)";
-        let disabled_button_text_color = "#999";
+        let base = crate::Theme::base();
+        let alt = crate::Theme::alt();
+        let disabled = crate::Theme::disabled();
 
         let base_css = jss_ns!(COMPONENT_NAME, {
 
@@ -130,9 +126,9 @@ where
 
             // HOVER at the lower  part of the button
             ".hover": {
-                "border-color": border_color,
-                "box-shadow": format!("0 0 4px {}",border_shadow),
-                "z-index": 1,
+                "border-color": base.hover_color,
+                "box-shadow": format!("0 0 4px {}",base.hover_shadow),
+                "z-index": 4,
                 "opacity": 1,
                 "position": "absolute",
                 "transition": "width 100ms ease-in",
@@ -154,8 +150,8 @@ where
 
             // BORDERS these are styled divs wrapping the buttons
             ".border": {
-                "border-color": border_color,
-                "box-shadow": format!("0 0 4px {}",border_shadow),
+                "border-color": base.border_color,
+                "box-shadow": format!("0 0 4px {}",base.border_shadow),
                 "z-index": 1,
                 "opacity": 1,
                 "position": "absolute",
@@ -200,8 +196,8 @@ where
             ".corner": {
                 "width": "8px",
                 "height": "8px",
-                "border-color": corner_color,
-                "box-shadow": format!("0 0 4px -2px {}",corner_shadow),
+                "border-color": base.corner_color,
+                "box-shadow": format!("0 0 4px -2px {}",base.corner_shadow),
                 "z-index": 2,
                 "opacity": 1,
                 "position": "absolute",
@@ -234,7 +230,7 @@ where
             },
 
             ".text": {
-                "background-color": button_wrap_text_color,
+                "background-color": base.button_wrap_text_color,
                 "z-index": 3,
                 "display": "block",
                 "position": "relative",
@@ -244,7 +240,7 @@ where
 
             // The actual button
             ".button": {
-                "color": button_text_color,
+                "color": base.button_text_color,
                 "cursor": "pointer",
                 "margin": 0,
                 "border": "none",
@@ -269,7 +265,7 @@ where
                   "right": 0,
                   "top": 0,
                   "bottom": 0,
-                  "background-color": highlight_color,
+                  "background-color": base.highlight_color,
                   "opacity": 0,
                   "transition": "all 50ms ease-out",
             },
@@ -282,27 +278,31 @@ where
 
         let alt_css = jss_ns!(COMPONENT_NAME, {
             ".alt .hover": {
-                "border-color": alt_border_color,
-                "box-shadow": format!("0 0 4px {}",alt_border_shadow),
+                "border-color": alt.hover_color,
+                "box-shadow": format!("0 0 4px {}",alt.hover_shadow),
             },
 
             ".alt .border": {
-                "border-color": alt_border_color,
-                "box-shadow": format!("0 0 4px {}",alt_border_shadow),
+                "border-color": alt.border_color,
+                "box-shadow": format!("0 0 4px {}",alt.border_shadow),
             },
 
             ".alt .corner": {
-                "border-color": alt_corner_color,
-                "box-shadow": format!("0 0 4px {}",alt_corner_shadow),
+                "border-color": alt.corner_color,
+                "box-shadow": format!("0 0 4px {}",alt.corner_shadow),
+            },
+
+            ".alt .text": {
+                "background-color": alt.button_wrap_text_color,
             },
 
             ".alt .button": {
-                "color": alt_button_text_color,
+                "color": alt.button_text_color,
             },
 
 
             ".alt .highlight": {
-                "background-color": alt_highlight_color,
+                "background-color": alt.highlight_color,
             },
         });
 
@@ -319,25 +319,81 @@ where
         });
 
         let disabled_css = jss_ns!(COMPONENT_NAME,{
+
+            ".disabled .hover": {
+                "border-color": disabled.hover_color,
+                "box-shadow": format!("0 0 4px {}",disabled.hover_shadow),
+            },
             ".disabled .border": {
-                "border-color": disabled_border_color,
-                "box-shadow": format!("0 0 4px {}",disabled_border_shadow),
+                "border-color": disabled.border_color,
+                "box-shadow": format!("0 0 4px {}",disabled.border_shadow),
             },
 
             ".disabled .corner": {
-                "border-color": disabled_corner_color,
-                "box-shadow": format!("0 0 4px {}",disabled_corner_shadow),
+                "border-color": disabled.corner_color,
+                "box-shadow": format!("0 0 4px {}",disabled.corner_shadow),
             },
 
             ".disabled .button": {
-                "color": disabled_button_text_color,
+                "color": disabled.button_text_color,
                 "cursor": "auto",
+            },
+
+            ".disabled .text": {
+                "background-color": disabled.button_wrap_text_color,
+            },
+
+            ".disabled .button": {
+                "color": disabled.button_text_color,
+            },
+
+
+            ".disabled .highlight": {
+                "background-color": disabled.highlight_color,
             },
 
 
         });
 
-        vec![base_css, alt_css, skewed_css, disabled_css]
+        // if expand_corners is enabled
+        // the fui_button corners will EXPAND when hovered.
+        //
+        // CSS Notes:
+        // - `.class1.class2 child` means if both class1 and class2 is specified in the
+        // parent, the properties will be applied to this child element
+        //
+        //  - `.class1,.class2 child` means either if either class1 or class2 is specified in the
+        // parent, the properties will be applied to this child element
+        //
+        let expand_corner_css = jss_ns! (COMPONENT_NAME, {
+            ".expand_corners.hovered .corner__top-left": {
+                "left": "-6px",
+                "top": "-6px",
+            },
+
+            ".expand_corners.hovered .corner__bottom-left": {
+                "left": "-6px",
+                "bottom": "-6px",
+            },
+
+            ".expand_corners.hovered .corner__top-right": {
+                "right": "-6px",
+                "top": "-6px",
+            },
+
+            ".expand_corners.hovered .corner__bottom-right": {
+                "right": "-6px",
+                "bottom": "-6px",
+            },
+        });
+
+        vec![
+            base_css,
+            alt_css,
+            skewed_css,
+            disabled_css,
+            expand_corner_css,
+        ]
     }
 
     pub fn update(&mut self, msg: Msg<PMSG>) -> Option<PMSG> {
@@ -384,11 +440,15 @@ where
                 class(COMPONENT_NAME),
                 classes_ns_flag([
                     ("clicked", self.click),
+                    ("expand_corners", self.expand_corners),
                     ("hovered", self.hover),
                     ("skewed", self.skewed),
                     ("alt", self.use_alt),
                     ("disabled", self.disabled),
                 ]),
+                on_click(|_| Msg::Click),
+                on_mouseover(|_| Msg::HoverIn),
+                on_mouseout(|_| Msg::HoverOut),
             ],
             vec![
                 // hover
@@ -428,9 +488,6 @@ where
                                 vec![
                                     class_ns("button"),
                                     disabled(self.disabled),
-                                    on_click(|_| Msg::Click),
-                                    on_mouseover(|_| Msg::HoverIn),
-                                    on_mouseout(|_| Msg::HoverOut),
                                 ],
                                 vec![text(&self.label)],
                             )

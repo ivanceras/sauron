@@ -22,6 +22,7 @@ use sauron::{
     Program,
 };
 use spinner::Spinner;
+use theme::Theme;
 
 mod animate_list;
 mod frame;
@@ -29,6 +30,7 @@ mod fui_button;
 mod header;
 mod paragraph;
 mod spinner;
+mod theme;
 
 #[derive(Clone, Debug)]
 pub enum Msg {
@@ -79,6 +81,7 @@ impl App {
             FuiButton::<Msg>::new_with_label("Skewed button");
         skewed_fui_button.skewed(true);
         skewed_fui_button.has_corners(true);
+        skewed_fui_button.expand_corners(true);
 
         let mut simple_skewed_fui_button =
             FuiButton::<Msg>::new_with_label("Skewed simple");
@@ -87,6 +90,7 @@ impl App {
 
         let mut alt_fui_button = FuiButton::<Msg>::new_with_label("Sci-fi");
         alt_fui_button.use_alt(true);
+        alt_fui_button.expand_corners(true);
 
         let mut disabled_fui_button =
             FuiButton::<Msg>::new_with_label("Disabled");
