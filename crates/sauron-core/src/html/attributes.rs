@@ -90,14 +90,15 @@ where
 ///        ("error", self.has_error),
 ///    ]),
 /// ```
-pub fn classes_flag<P, MSG>(pair: P) -> Attribute<MSG>
+pub fn classes_flag<P, S, MSG>(pair: P) -> Attribute<MSG>
 where
-    P: AsRef<[(&'static str, bool)]>,
+    P: AsRef<[(S, bool)]>,
+    S: ToString,
 {
     let mut class_list = Vec::with_capacity(pair.as_ref().len());
     for (class, flag) in pair.as_ref() {
         if *flag {
-            class_list.push(class);
+            class_list.push(class.to_string());
         }
     }
     classes(class_list)
