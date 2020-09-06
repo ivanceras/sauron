@@ -126,7 +126,7 @@ where
             // HOVER at the lower  part of the button
             ".hover": {
                 "border-color": base.hover_color,
-                "box-shadow": format!("0 0 4px {}",base.hover_shadow),
+                "box-shadow": format!("0 -2px 4px {}",base.hover_shadow),
                 "z-index": 4,
                 "opacity": 1,
                 "position": "absolute",
