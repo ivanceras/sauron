@@ -27,6 +27,7 @@ pub struct Data {
     pub modified_name: String,
 }
 
+// App and all its members should be Serializable by serde
 #[derive(Debug, Deserialize, Serialize)]
 pub struct App {
     pub name: String,
@@ -144,12 +145,16 @@ pub fn main(serialized_state: String) {
     console_log::init_with_level(log::Level::Trace).unwrap();
     console_error_panic_hook::set_once();
 
+    /* Deserialize starting app data from the argument, which is passed in index.html
+     * (but generated in server/src/main.rs) */
     let mut app = App::new();
     if let Ok(state) = serde_json::from_str::<App>(&serialized_state) {
        app.name = state.name;
        app.data = state.data;
     };
 
+    /* If there's a window (i.e., if this is running in the browser)
+     * then mount the app by swapping out the <main> tag */
     match web_sys::window() {
         Some(window) => {
             trace!("found window, will try to replace <main>");
