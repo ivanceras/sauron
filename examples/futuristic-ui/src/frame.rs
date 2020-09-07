@@ -79,7 +79,7 @@ impl Frame {
     }
 
     pub fn style(&self) -> Vec<String> {
-        let base = crate::Theme::base();
+        let base = crate::Theme::base().controls;
 
         let css = jss_ns!(COMPONENT_NAME,{
             // the ROOT component style

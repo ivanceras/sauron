@@ -73,13 +73,14 @@ impl Header {
     }
 
     pub fn style(&self) -> Vec<String> {
+        let base = crate::Theme::base();
         let css = jss_ns!(COMPONENT_NAME, {
             ".": {
                 "display": "block",
                 "padding": "1px",
                 "position": "relative",
                 "opacity": 1,
-                "color": "#26dafd",
+                "color": base.secondary_color,
                 "font-size": "21px",
                 "line-height": 1.5,
                 "font-family": "\"Titillium Web\", \"sans-serif\"",
@@ -95,8 +96,8 @@ impl Header {
             },
 
             ".border": {
-                "border-color": "#029dbb",
-                "box-shadow": "0 0 4px rgba(2,157,187,0.65)",
+                "border-color": base.controls.border_color,
+                "box-shadow": format!("0 0 4px {}",base.controls.border_shadow),
                 "z-index": 1,
                 "opacity": 1,
                 "position": "absolute",
@@ -118,11 +119,11 @@ impl Header {
             },
 
             ".text-anim": {
-                "color": "#a1ecfb",
+                "color": base.accent_color,
                 "transition": "color 250ms ease-out",
                 "font-family": "\"Electrolize\", \"sans-serif\"",
                 "font-weight": "bold",
-                "text-shadow": "0 0 4px rgba(161,236,251,0.65)",
+                "text-shadow": format!("0 0 4px {}",base.accent_shadow),
                 "text-transform": "uppercase",
             },
 

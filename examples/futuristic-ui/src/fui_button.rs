@@ -107,9 +107,9 @@ where
     }
 
     pub fn style(&self) -> Vec<String> {
-        let base = crate::Theme::base();
-        let alt = crate::Theme::alt();
-        let disabled = crate::Theme::disabled();
+        let base = crate::Theme::base().controls;
+        let alt = crate::Theme::alt().controls;
+        let disabled = crate::Theme::disabled().controls;
 
         let base_css = jss_ns!(COMPONENT_NAME, {
 

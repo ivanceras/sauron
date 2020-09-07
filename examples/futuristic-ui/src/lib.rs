@@ -98,10 +98,12 @@ impl App {
         let mut alt_fui_button = FuiButton::<Msg>::new_with_label("Sci-fi");
         alt_fui_button.use_alt(true);
         alt_fui_button.expand_corners(true);
+        alt_fui_button.has_hover(true);
 
         let mut disabled_fui_button =
             FuiButton::<Msg>::new_with_label("Disabled");
         disabled_fui_button.disabled(true);
+
         let paragraph_content = "This is an experimental demo showcasing usage of [Sauron](https://github.com/ivanceras/sauron)
                     Component lifecycle to work alongside
                     css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.
@@ -207,35 +209,98 @@ impl Component<Msg> for App {
     }
 
     fn style(&self) -> Vec<String> {
-        let mut root = vec![r#"
-        .container {
-            color: #26dafd;
-            font-size: 21px;
-            line-height: 1.5;
-            font-family: "Titillium Web", "sans-serif";
-            margin: auto;
-        }
-        .container ::selection {
-            color: #021114;
-            text-shadow: none;
-            background-color: #26dafd;
-        }
+        let base = crate::Theme::base();
 
-        .futuristic-buttons {
-            display: flex;
-        }
-        "#
-        .to_string()];
+        let body_css = jss!({
+            "body": {
+                "background-color": "#000000",
+                "font-family": "arial",
+                "color": "#ffffff",
+            },
 
-        root.extend(vec![
+            "button": {
+                "color": base.controls.button_text_color,
+                "border": format!("1px solid {}",base.controls.border_color),
+                "z-index": 2,
+                "display": "inline-block",
+                "padding": "10px 20px",
+                "outline": "none",
+                "position": "relative",
+                "font-size": "15.75px",
+                "background-color": base.controls.content_background_color,
+                "line-height": 1,
+                "user-select": "none",
+                "vertical-align": "middle",
+            },
+
+            "a": {
+                "color": base.controls.button_text_color,
+                "cursor": "pointer",
+                "transition": "color 250ms ease-out",
+                "text-shadow": format!("0 0 4px {}", base.accent_shadow),
+                "text-decoration": "none",
+            },
+
+            "a ::selection": {
+                "color": "#021114",
+                "text-shadow": "none",
+                "background-color": base.secondary_color,
+            },
+
+            "table": {
+                "width": "100%",
+                "border-collapse": "collapse",
+                "color": base.secondary_color,
+            },
+
+            "thead": {
+                "color": base.accent_color,
+                "text-align": "left",
+                "font-family": base.secondary_font,
+                "font-weight": "bold",
+                "white-space": "nowrap",
+            },
+
+            "tr": {
+                "border-bottom": format!("1px solid {}", base.controls.border_color),
+            },
+
+             "td": {
+                "padding": "5px",
+                "vertical-align": "top",
+            },
+        });
+
+        let container_css = jss!({
+            ".container": {
+                "color": base.secondary_color,
+                "font-size": "21px",
+                "line-height": "1.5",
+                "font-family": base.primary_font,
+                "margin": "auto",
+            },
+
+            ".container ::selection": {
+                "color": base.background_color,
+                "text-shadow": "none",
+                "background-color": base.secondary_color,
+            },
+
+            ".futuristic-buttons": {
+                "display": "flex",
+                "margin": "20px 10px",
+            }
+        });
+
+        vec![
+            body_css,
+            container_css,
             self.header.style().join("\n"),
             self.frame.style().join("\n"),
             self.fui_button.style().join("\n"),
             self.animate_list.style().join("\n"),
             self.spinner.style().join("\n"),
-        ]);
-
-        root
+        ]
     }
 
     fn view(&self) -> Node<Msg> {
@@ -265,13 +330,6 @@ impl Component<Msg> for App {
                         self.frame
                             .view()
                             .map_msg(|frame_msg| Msg::FrameMsg(frame_msg)),
-                        div(
-                            vec![
-                                style("width", px(100)),
-                                style("height", px(20)),
-                            ],
-                            vec![],
-                        ),
                         div(vec![class("futuristic-buttons")], vec![
                             self.fui_button.view().map_msg(|fbtn_msg| {
                                 Msg::FuiButtonMsg(Box::new(fbtn_msg))

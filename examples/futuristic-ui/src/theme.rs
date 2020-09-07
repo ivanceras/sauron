@@ -1,92 +1,144 @@
-pub struct Theme<'a> {
-    pub hover_color: &'a str,
-    pub hover_shadow: &'a str,
-    pub border_color: &'a str,
-    pub corner_color: &'a str,
-    pub border_shadow: &'a str,
-    pub corner_shadow: &'a str,
-    pub content_background_color: &'a str,
-    pub button_text_color: &'a str,
-    pub highlight_color: &'a str,
+use css_colors::{
+    percent,
+    rgba,
+    Color,
+};
+
+pub struct Theme {
+    pub primary_color: String,    // used in container
+    pub secondary_color: String,  // used in container
+    pub background_color: String, // used in container
+    pub accent_color: String,
+    pub accent_shadow: String,
+    pub primary_font: String,
+    pub secondary_font: String,
+    pub controls: Controls,
 }
 
-pub struct Colors<'a> {
-    pub primary: &'a str,
-    pub secondary: &'a str,
-    pub header: &'a str,
-    pub control: &'a str,
-    pub success: &'a str,
-    pub alert: &'a str,
-    pub disabled: &'a str,
+/// colors to controls
+/// such as buttons, navigation links, frames
+pub struct Controls {
+    pub hover_color: String,
+    pub hover_shadow: String,
+    pub border_color: String,
+    pub corner_color: String,
+    pub border_shadow: String,
+    pub corner_shadow: String,
+    pub content_background_color: String,
+    pub button_text_color: String,
+    pub highlight_color: String,
 }
 
-impl<'a> Theme<'a> {
-    // base theme
+impl Theme {
+    // base theme using a bluish base color #029dbb
     pub fn base() -> Self {
+        let primary = rgba(2, 157, 187, 1.0);
+        //let primary = rgba(255, 0, 255, 1.0);
+
+        let accent = primary.tint(percent(30)); //combine with 30% of white becomes rgba(179, 225, 234, 1.00)
+                                                //target color is rgba(161, 236, 251, 1.00);
+        let secondary = primary.lighten(percent(20));
+        let text_colors = primary.lighten(percent(40));
+        let primary_font = "\"Titillium Web\", \"sans-serif\"".to_string();
+        let secondary_font = "\"Electrolize\", \"sans-serif\"".to_string();
         Theme {
-            hover_color: "#26dafd",
-            hover_shadow: "#029dbb",
-            border_color: "#029dbb",
-            corner_color: "#26dafd",
-            border_shadow: "rgba(2,157,187,0.65)",
-            corner_shadow: "rgba(38,218,253,0.65)",
-            content_background_color: "rgba(4,35,41,0.65)",
-            button_text_color: "#acf9fb",
-            highlight_color: "#029dbb",
+            primary_color: primary.to_css(),
+            secondary_color: secondary.to_css(),
+            background_color: primary.darken(percent(60)).to_css(),
+            accent_color: accent.to_css(),
+            accent_shadow: accent.fadein(percent(35)).to_css(),
+            primary_font,
+            secondary_font,
+
+            controls: Controls {
+                hover_shadow: primary.to_css(),
+                border_color: primary.to_css(),
+                border_shadow: primary.to_css(),
+                highlight_color: primary.to_css(),
+
+                hover_color: secondary.to_css(),
+                corner_color: secondary.to_css(),
+                corner_shadow: secondary.fadeout(percent(35)).to_css(),
+
+                content_background_color: primary
+                    .darken(percent(30))
+                    .fadeout(percent(35))
+                    .to_css(),
+                button_text_color: text_colors.to_css(),
+            },
         }
     }
 
+    // alternate color for the button
     pub fn alt() -> Self {
+        let primary = rgba(0, 255, 0, 1.0); //#00ff00
+        let secondary = primary.lighten(percent(20));
+        let text_colors = primary.lighten(percent(40));
+        let accent = rgba(0, 100, 0, 1.00);
+        let primary_font = "\"Titillium Web\", \"sans-serif\"".to_string();
+        let secondary_font = "\"Electrolize\", \"sans-serif\"".to_string();
         Theme {
-            hover_color: "green",
-            hover_shadow: "yellow",
-            border_color: "#090",
-            corner_color: "#0f0",
-            button_text_color: "#0f0",
-            border_shadow: "rgba(0,153,0,0.65)",
-            corner_shadow: "rgba(0,255,0,0.65)",
-            content_background_color: "rgba(10,50,10,0.65)",
-            highlight_color: "#090",
+            primary_color: primary.to_css(),
+            secondary_color: secondary.to_css(),
+            background_color: primary.darken(percent(60)).to_css(),
+            accent_color: accent.to_css(),
+            accent_shadow: accent.fadein(percent(35)).to_css(),
+            primary_font,
+            secondary_font,
+
+            controls: Controls {
+                hover_shadow: primary.to_css(),
+                border_color: primary.to_css(),
+                border_shadow: primary.to_css(),
+                highlight_color: primary.to_css(),
+
+                hover_color: secondary.to_css(),
+                corner_color: secondary.to_css(),
+                corner_shadow: secondary.fadeout(percent(35)).to_css(),
+
+                content_background_color: primary
+                    .darken(percent(40))
+                    .fadeout(percent(35))
+                    .to_css(),
+                button_text_color: text_colors.to_css(),
+            },
         }
     }
 
+    // color for the disabled button
     pub fn disabled() -> Self {
+        let primary = rgba(255, 255, 255, 1.0); // #ffffff
+        let secondary = primary.lighten(percent(20));
+        let text_colors = primary.lighten(percent(30));
+        let accent = rgba(100, 100, 100, 1.00);
+        let primary_font = "\"Titillium Web\", \"sans-serif\"".to_string();
+        let secondary_font = "\"Electrolize\", \"sans-serif\"".to_string();
+
         Theme {
-            hover_color: "#fff",
-            hover_shadow: "#eee",
-            border_color: "#666",
-            corner_color: "#999",
-            corner_shadow: "rgba(153,153,153,0.65)",
-            border_shadow: "rgba(102,102,102,0.65)",
-            button_text_color: "#999",
-            content_background_color: "rgba(20,20,20,0.65)",
-            highlight_color: "#fff",
-        }
-    }
-}
+            primary_color: primary.to_css(),
+            secondary_color: secondary.to_css(),
+            background_color: primary.darken(percent(60)).to_css(),
+            accent_color: accent.to_css(),
+            accent_shadow: accent.fadein(percent(35)).to_css(),
+            primary_font,
+            secondary_font,
 
-impl<'a> Colors<'a> {
-    fn color() -> Self {
-        Colors {
-            primary: "#26dafd",
-            secondary: "#df9527",
-            header: "#a1ecfb",
-            control: "#acf9fb",
-            success: "#00ff00",
-            alert: "#ff0000",
-            disabled: "#999999",
-        }
-    }
+            controls: Controls {
+                hover_shadow: primary.to_css(),
+                border_color: primary.to_css(),
+                border_shadow: primary.to_css(),
+                highlight_color: primary.to_css(),
 
-    fn background() -> Self {
-        Colors {
-            primary: "#021114",
-            secondary: "#180f02",
-            header: "#032026",
-            control: "#041e1f",
-            success: "#081402",
-            alert: "#140202",
-            disabled: "#141414",
+                hover_color: secondary.to_css(),
+                corner_color: secondary.to_css(),
+                corner_shadow: secondary.fadeout(percent(35)).to_css(),
+
+                content_background_color: primary
+                    .darken(percent(80))
+                    .fadeout(percent(35))
+                    .to_css(),
+                button_text_color: text_colors.to_css(),
+            },
         }
     }
 }
@@ -123,8 +175,43 @@ mod test {
     }
 
     #[test]
-    fn test_generate_from_primary() {
-        let hex = "#26dafd";
+    fn equivalent_colors() {
+        let hex = "#029dbb"; //border_color,
+        let c = hex_to_real_rgba(hex);
+        println!("c:{}", c);
+        assert_eq!(c, rgba(2, 157, 187, 1.0));
+        let light_c = c.lighten(percent(20)); // hover_color, corner_color,
+        assert_eq!(light_c, rgba(39, 217, 253, 1.0));
+
+        let light_c2 = c.lighten(percent(40));
+        assert_eq!(light_c2, rgba(140, 235, 254, 1.0));
+
+        let dark_c = c.darken(percent(20));
+        println!("dark c: {}", dark_c);
+        assert_eq!(dark_c, rgba(1, 73, 87, 1.0));
+
+        let button_text_color = "#acf9fb";
+        let button_text_color = hex_to_real_rgba(button_text_color);
+        println!("button_text_color: {}", button_text_color);
+        assert_eq!(button_text_color, rgba(172, 249, 251, 1.0));
+
+        assert_eq!(
+            c.darken(percent(20)).fadeout(percent(35)),
+            rgba(1, 73, 87, 0.65)
+        );
+
+        let accent = rgba(161, 236, 251, 1.00);
+        println!("tint1: {}", c.tint(percent(10)));
+        println!("tint2: {}", c.tint(percent(20)));
+        println!("tint3: {}", c.tint(percent(30)));
+        println!("tint5: {}", c.tint(percent(50)));
+        assert_eq!(rgba(204, 235, 241, 1.0), c.tint(percent(20)));
+        panic!();
+    }
+
+    #[test]
+    fn test_generate_from_secondary() {
+        let hex = "#26dafd"; // very close to #029dbb -> lighten 20% = rgba(39, 217, 253, 1.0) which is the secondary color
         let base = hex_to_real_rgba(hex);
         println!("base: {}", base);
 

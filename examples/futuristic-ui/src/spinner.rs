@@ -23,7 +23,7 @@ impl<MSG> Spinner<MSG> {
     }
 
     pub fn style(&self) -> Vec<String> {
-        let base = crate::Theme::base();
+        let base = crate::Theme::base().controls;
 
         let base_css = jss_ns!(COMPONENT_NAME, {
             ".": {
