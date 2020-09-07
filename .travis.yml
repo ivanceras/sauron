@@ -19,7 +19,7 @@ intstall:
     - unzip chromedriver_linux64.zip
     # Install geckodriver
     - curl --retry 5 -LO https://github.com/mozilla/geckodriver/releases/download/v0.27.0/geckodriver-v0.27.0-linux64.tar.gz
-    - tar xf geckodriver-v0.24.0-linux64.tar.gz
+    - tar xf geckodriver-v0.27.0-linux64.tar.gz
     - cargo install wasm-pack
 
 script:
