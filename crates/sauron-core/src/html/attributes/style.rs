@@ -10,15 +10,18 @@ use std::fmt;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Style {
     /// style name such as border, width, etc
-    pub name: &'static str,
+    pub name: String,
     /// value of the style
     pub value: Value,
 }
 
 impl Style {
     /// create a style with name and value
-    pub fn new(name: &'static str, value: Value) -> Self {
-        Style { name, value }
+    pub fn new(name: impl ToString, value: Value) -> Self {
+        Style {
+            name: name.to_string(),
+            value,
+        }
     }
 }
 

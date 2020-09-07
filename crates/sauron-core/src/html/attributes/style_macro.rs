@@ -8,14 +8,6 @@ macro_rules! style {
             let mut styles = vec![];
             if let Some(style_properties) = json.as_object(){
                 for (prop,p_value) in style_properties.iter(){
-                    //TODO: change the type of style name to &'a str, so we don't
-                    //have to lookup the &'static str equivalent
-                    let style_name = $crate::html::attributes::HTML_STYLES
-                        .iter()
-                        .find(|name| name == &prop)
-                        .map(|name| *name)
-                        .expect("style name must be valid");
-
                     let value = match p_value{
                         serde_json::Value::String(s) => $crate::html::attributes::Value::String(s.to_string()),
                         serde_json::Value::Number(v) => {
@@ -31,7 +23,7 @@ macro_rules! style {
                         _ => panic!("supported values are String, Number or Bool only"),
                     };
                     println!("value: {}", value);
-                    styles.push($crate::html::attributes::style::Style::new(style_name, value));
+                    styles.push($crate::html::attributes::style::Style::new(prop, value));
 
                 }
             }
@@ -44,7 +36,7 @@ macro_rules! style {
 }
 
 /// HTML style names
-//#[cfg(feature = "with-parser")]
+#[cfg(feature = "with-parser")]
 pub const HTML_STYLES: [&'static str; 368] = [
     "align-content",
     "align-items",
