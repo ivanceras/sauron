@@ -200,13 +200,11 @@ mod test {
             rgba(1, 73, 87, 0.65)
         );
 
-        let accent = rgba(161, 236, 251, 1.00);
         println!("tint1: {}", c.tint(percent(10)));
         println!("tint2: {}", c.tint(percent(20)));
         println!("tint3: {}", c.tint(percent(30)));
         println!("tint5: {}", c.tint(percent(50)));
         assert_eq!(rgba(204, 235, 241, 1.0), c.tint(percent(20)));
-        panic!();
     }
 
     #[test]
