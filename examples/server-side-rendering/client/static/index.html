@@ -8,8 +8,8 @@
       import init, { main } from '/static/client.js';
       async function start() {
         await init();
+        // this will be replaced by the server with serialized state to be passed to the client
         main(``);
-        console.log('wAsM lOaDeD')
       }
       start();
     </script>
