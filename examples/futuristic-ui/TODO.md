@@ -22,7 +22,14 @@
 - [X] Make an image component by using the Frame which wraps the img element
 - [ ] Add more futuristic widgets
     - [ ] Searchbox
-    - [ ] Navigation links
+    - [ ] Navigation links, anchors
+        - [ ] cut out button links
 - [ ] use css-colors crate to manipulate colors in theme
     - Issue, crate `css-colors` can't parse hex colors, will need to add crate `css-color` to do that
     - crate `color_processing` seems to have both parsing and process of colors https://crates.io/crates/color_processing
+- [ ] Add multiple animation options for frame
+    - Animation names, the corner is like a robotic hand.
+    - [ ] grip/grab - frame__corner-gripping : the corner starts from outward then move inwards to grip the edges of the frame
+    - [ ] release - frame__corner-releasing: corner-expands, the corner starts from the edges of the frame then move outwards
+    - [ ] grow - frame__corner-grow: the corner starts from inside of the frame and grips-outwards
+    - [ ] crush - frame__corner-crush: the corners starts from the edge of the frame and then move in-wards to the inside of the frame.

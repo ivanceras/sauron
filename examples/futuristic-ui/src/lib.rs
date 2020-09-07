@@ -493,6 +493,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen(start)]
 pub fn main() {
+    #[cfg(feature = "console_log")]
     console_log::init_with_level(log::Level::Trace).unwrap();
     #[cfg(feature = "console_error_panic_hook")]
     console_error_panic_hook::set_once();

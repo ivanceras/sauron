@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 sauron = { path = "../../", default-features = false, features = ["with-dom", "with-request-animation-frame"]}
 log = "0.4"
-console_log = { version = "0.2", features = ["color"] }
+console_log = { version = "0.2", features = ["color"], optional = true }
 web-sys = { version = "0.3", features = ["HtmlAudioElement"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 console_error_panic_hook = { version = "0.1", optional = true }
@@ -24,9 +24,14 @@ css-color = "0.1.1"
 color_processing = "0.6.0"
 
 [features]
-with-lite-markdown = ["sauron/with-lite-markdown"]
+#with-lite-markdown = ["sauron/with-lite-markdown"]
 with-measure = ["sauron/with-measure"]
 
 [profile.release]
-# Tell `rustc` to optimize for small code size.
-opt-level = "s"
+# https://doc.rust-lang.org/cargo/reference/profiles.html
+# optimize for binary size
+#opt-level = "s"
+# optimize for binary size, but also turn off loop vectorization.
+opt-level = "z"
+lto = true
+panic = "abort"
