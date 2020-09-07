@@ -212,11 +212,6 @@ impl Component<Msg> for App {
         let base = crate::Theme::base();
 
         let body_css = jss!({
-            "body": {
-                "background-color": "#000000",
-                "font-family": "arial",
-                "color": "#ffffff",
-            },
 
             "button": {
                 "color": base.controls.button_text_color,
@@ -555,5 +550,8 @@ pub fn main() {
     console_log::init_with_level(log::Level::Trace).unwrap();
     #[cfg(feature = "console_error_panic_hook")]
     console_error_panic_hook::set_once();
-    Program::mount_to_body(App::new());
+    let app_container = sauron::document()
+        .get_element_by_id("app_container")
+        .expect("must have the app_container in index.html");
+    Program::new_replace_mount(App::new(), &app_container);
 }
