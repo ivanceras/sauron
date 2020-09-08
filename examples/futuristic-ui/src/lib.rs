@@ -3,8 +3,8 @@
 use animate_list::AnimateList;
 use frame::Frame;
 use fui_button::FuiButton;
-use header::Header;
 use image::Image;
+use nav_header::NavHeader;
 use paragraph::Paragraph;
 use sauron::{
     html::{
@@ -28,8 +28,8 @@ use theme::Theme;
 mod animate_list;
 mod frame;
 mod fui_button;
-mod header;
 mod image;
+mod nav_header;
 mod paragraph;
 pub mod sounds;
 mod spinner;
@@ -42,7 +42,7 @@ pub enum Msg {
     ReAnimateParagraph,
     ReAnimateList,
     FrameMsg(frame::Msg),
-    HeaderMsg(header::Msg),
+    NavHeaderMsg(nav_header::Msg),
     ParagraphMsg(paragraph::Msg),
     FuiButtonMsg(Box<fui_button::Msg<Self>>),
     SimpleFuiButtonMsg(Box<fui_button::Msg<Self>>),
@@ -57,7 +57,7 @@ pub enum Msg {
 }
 
 pub struct App {
-    header: Header,
+    nav_header: NavHeader,
     frame: Frame,
     paragraph: Paragraph<Msg>,
     fui_button: FuiButton<Msg>,
@@ -116,7 +116,7 @@ impl App {
 
         App {
             frame: Frame::new_with_content(frame_content),
-            header: Header::new_with_content("Header"),
+            nav_header: NavHeader::new_with_content("Navigation Header"),
             paragraph: Paragraph::new_with_markdown(paragraph_content),
             fui_button,
             simple_fui_button,
@@ -290,7 +290,7 @@ impl Component<Msg> for App {
         vec![
             body_css,
             container_css,
-            self.header.style().join("\n"),
+            self.nav_header.style().join("\n"),
             self.frame.style().join("\n"),
             self.fui_button.style().join("\n"),
             self.animate_list.style().join("\n"),
@@ -311,9 +311,9 @@ impl Component<Msg> for App {
                                 style("margin", "20px"),
                                 style("display", "block"),
                             ],
-                            vec![text("Animate Header")],
+                            vec![text("Animate NavHeader")],
                         ),
-                        self.header.view().map_msg(Msg::HeaderMsg),
+                        self.nav_header.view().map_msg(Msg::NavHeaderMsg),
                         button(
                             vec![
                                 on_click(|_| Msg::ReAnimateFrame),
@@ -393,19 +393,19 @@ impl Component<Msg> for App {
         match msg {
             Msg::ReAnimateHeader => {
                 if let Some(header_msg) =
-                    self.header.update(header::Msg::AnimateIn)
+                    self.nav_header.update(nav_header::Msg::AnimateIn)
                 {
                     Cmd::new(move |program| {
-                        program.dispatch(Msg::HeaderMsg(header_msg.clone()))
+                        program.dispatch(Msg::NavHeaderMsg(header_msg.clone()))
                     })
                 } else {
                     Cmd::none()
                 }
             }
-            Msg::HeaderMsg(header_msg) => {
-                if let Some(header_msg) = self.header.update(header_msg) {
+            Msg::NavHeaderMsg(header_msg) => {
+                if let Some(header_msg) = self.nav_header.update(header_msg) {
                     Cmd::new(move |program| {
-                        program.dispatch(Msg::HeaderMsg(header_msg.clone()))
+                        program.dispatch(Msg::NavHeaderMsg(header_msg.clone()))
                     })
                 } else {
                     Cmd::none()
