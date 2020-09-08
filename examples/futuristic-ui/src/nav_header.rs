@@ -73,7 +73,7 @@ impl NavHeader {
     }
 
     pub fn style(&self) -> Vec<String> {
-        let base = crate::Theme::base();
+        let base = crate::Theme::default();
         let css = jss_ns!(COMPONENT_NAME, {
             ".": {
                 "display": "block",

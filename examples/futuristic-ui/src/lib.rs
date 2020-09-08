@@ -209,7 +209,7 @@ impl Component<Msg> for App {
     }
 
     fn style(&self) -> Vec<String> {
-        let base = crate::Theme::base();
+        let base = crate::Theme::default();
 
         let body_css = jss!({
 

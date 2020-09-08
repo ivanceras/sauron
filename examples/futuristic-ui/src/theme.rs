@@ -2,6 +2,7 @@ use css_colors::{
     percent,
     rgba,
     Color,
+    RGBA,
 };
 
 pub struct Theme {
@@ -31,10 +32,24 @@ pub struct Controls {
 
 impl Theme {
     // base theme using a bluish base color #029dbb
-    pub fn base() -> Self {
-        let primary = rgba(2, 157, 187, 1.0);
-        //let primary = rgba(255, 0, 255, 1.0);
+    fn base() -> Self {
+        let primary = rgba(2, 157, 187, 1.0); // main theme
+        Self::calculate_from_primary_color(primary)
+    }
 
+    // alternate color for the button
+    pub fn alt() -> Self {
+        let primary = rgba(0, 255, 0, 1.0); //#00ff00
+        Self::calculate_from_primary_color(primary)
+    }
+
+    // color for the disabled button
+    pub fn disabled() -> Self {
+        let primary = rgba(255, 255, 255, 1.0); // #ffffff
+        Self::calculate_from_primary_color(primary)
+    }
+
+    pub fn calculate_from_primary_color(primary: RGBA) -> Self {
         let accent = primary.tint(percent(30)); //combine with 30% of white becomes rgba(179, 225, 234, 1.00)
                                                 //target color is rgba(161, 236, 251, 1.00);
         let secondary = primary.lighten(percent(20));
@@ -61,85 +76,18 @@ impl Theme {
                 corner_shadow: secondary.fadeout(percent(35)).to_css(),
 
                 content_background_color: primary
-                    .darken(percent(30))
+                    .shade(percent(15))
                     .fadeout(percent(35))
                     .to_css(),
                 button_text_color: text_colors.to_css(),
             },
         }
     }
+}
 
-    // alternate color for the button
-    pub fn alt() -> Self {
-        let primary = rgba(0, 255, 0, 1.0); //#00ff00
-        let secondary = primary.lighten(percent(20));
-        let text_colors = primary.lighten(percent(40));
-        let accent = rgba(0, 100, 0, 1.00);
-        let primary_font = "\"Titillium Web\", \"sans-serif\"".to_string();
-        let secondary_font = "\"Electrolize\", \"sans-serif\"".to_string();
-        Theme {
-            primary_color: primary.to_css(),
-            secondary_color: secondary.to_css(),
-            background_color: primary.darken(percent(60)).to_css(),
-            accent_color: accent.to_css(),
-            accent_shadow: accent.fadein(percent(35)).to_css(),
-            primary_font,
-            secondary_font,
-
-            controls: Controls {
-                hover_shadow: primary.to_css(),
-                border_color: primary.to_css(),
-                border_shadow: primary.to_css(),
-                highlight_color: primary.to_css(),
-
-                hover_color: secondary.to_css(),
-                corner_color: secondary.to_css(),
-                corner_shadow: secondary.fadeout(percent(35)).to_css(),
-
-                content_background_color: primary
-                    .darken(percent(40))
-                    .fadeout(percent(35))
-                    .to_css(),
-                button_text_color: text_colors.to_css(),
-            },
-        }
-    }
-
-    // color for the disabled button
-    pub fn disabled() -> Self {
-        let primary = rgba(255, 255, 255, 1.0); // #ffffff
-        let secondary = primary.lighten(percent(20));
-        let text_colors = primary.lighten(percent(30));
-        let accent = rgba(100, 100, 100, 1.00);
-        let primary_font = "\"Titillium Web\", \"sans-serif\"".to_string();
-        let secondary_font = "\"Electrolize\", \"sans-serif\"".to_string();
-
-        Theme {
-            primary_color: primary.to_css(),
-            secondary_color: secondary.to_css(),
-            background_color: primary.darken(percent(60)).to_css(),
-            accent_color: accent.to_css(),
-            accent_shadow: accent.fadein(percent(35)).to_css(),
-            primary_font,
-            secondary_font,
-
-            controls: Controls {
-                hover_shadow: primary.to_css(),
-                border_color: primary.to_css(),
-                border_shadow: primary.to_css(),
-                highlight_color: primary.to_css(),
-
-                hover_color: secondary.to_css(),
-                corner_color: secondary.to_css(),
-                corner_shadow: secondary.fadeout(percent(35)).to_css(),
-
-                content_background_color: primary
-                    .darken(percent(80))
-                    .fadeout(percent(35))
-                    .to_css(),
-                button_text_color: text_colors.to_css(),
-            },
-        }
+impl Default for Theme {
+    fn default() -> Self {
+        Self::disabled()
     }
 }
 
@@ -198,6 +146,15 @@ mod test {
         assert_eq!(
             c.darken(percent(20)).fadeout(percent(35)),
             rgba(1, 73, 87, 0.65)
+        );
+
+        assert_eq!(
+            c.shade(percent(45)).fadeout(percent(35)),
+            rgba(1, 71, 84, 0.65)
+        );
+        assert_eq!(
+            c.shade(percent(50)).fadeout(percent(35)),
+            rgba(1, 79, 94, 0.65)
         );
 
         println!("tint1: {}", c.tint(percent(10)));
