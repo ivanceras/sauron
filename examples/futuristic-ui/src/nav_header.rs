@@ -99,7 +99,7 @@ impl NavHeader {
             },
 
             ".border": {
-                "border-color": base.controls.border_color,
+                "border-color": base.controls.corner_color,
                 "box-shadow": format!("0 0 4px {}",base.controls.border_shadow),
                 "z-index": 1,
                 "opacity": 1,
@@ -133,7 +133,7 @@ impl NavHeader {
                 "transform": "skewX(-45deg)",
                 "border-color": base.controls.corner_color,
                 "border-style": "solid",
-                "border-width": "1px 0 0 16px",
+                "border-width": "2px 0 0 16px",
                 "position": "relative",
             },
 
