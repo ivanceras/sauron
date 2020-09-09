@@ -74,7 +74,7 @@ impl App {
                 Msg::ReAnimateFrame,
             ),
             ("Spacer", Options::disabled().hidden(true), Msg::NoOp),
-            ("Full button", Options::full(), Msg::NoOp),
+            ("Click", Options::regular(), Msg::NoOp),
             ("Disabled", Options::disabled(), Msg::NoOp),
             ("Muted", Options::muted(), Msg::NoOp),
         ];

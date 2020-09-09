@@ -122,18 +122,10 @@ impl Theme {
                     secondary.fadeout(percent(35)).to_css()
                 },
 
-                content_background_color: if light {
-                    // same algorithm here
-                    primary
-                        .mix(background, percent(15))
-                        .fadeout(percent(35))
-                        .to_css()
-                } else {
-                    primary
-                        .mix(background, percent(15))
-                        .fadeout(percent(35))
-                        .to_css()
-                },
+                content_background_color: primary
+                    .mix(background, percent(15))
+                    .fadeout(percent(35))
+                    .to_css(),
                 button_text_color: text_colors.to_css(),
                 link_color: accent.to_css(),
             },
@@ -144,8 +136,8 @@ impl Theme {
 impl Default for Theme {
     fn default() -> Self {
         //Self::black_on_white()
-        //Self::bondi_blue_on_dark()
-        Self::green_on_black()
+        //Self::green_on_black()
+        Self::bondi_blue_on_dark()
     }
 }
 
