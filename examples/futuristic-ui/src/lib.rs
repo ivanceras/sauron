@@ -74,7 +74,7 @@ impl App {
                 Msg::ReAnimateFrame,
             ),
             ("Spacer", Options::disabled().hidden(true), Msg::NoOp),
-            ("Sci-fi", Options::alt(), Msg::NoOp),
+            ("Full button", Options::full(), Msg::NoOp),
             ("Disabled", Options::disabled(), Msg::NoOp),
             ("Muted", Options::muted(), Msg::NoOp),
         ];
@@ -211,6 +211,10 @@ impl Component<Msg> for App {
                 "vertical-align": "middle",
             },
 
+            "img": {
+                "display": "inline-block",
+            },
+
             "a": {
                 "color": base.controls.button_text_color,
                 "cursor": "pointer",
@@ -257,18 +261,15 @@ impl Component<Msg> for App {
                 "font-family": base.primary_font,
                 "margin": "auto",
                 "background-color": base.background_color,
+                "width": "900px",
+                "padding": "10px",
             },
 
             "@media screen and (max-width: 800px)": {
               ".container": {
                 "width": "100%",
+                "padding": "5px",
               }
-            },
-
-            "@media screen and (min-width: 900px)": {
-                ".container": {
-                    "width": "900px",
-                }
             },
 
             ".container ::selection": {
@@ -279,6 +280,7 @@ impl Component<Msg> for App {
 
             ".futuristic-buttons-array": {
                 "display": "flex",
+                "flex-wrap": "wrap",
                 "margin": "20px 10px",
             }
         });
@@ -296,48 +298,43 @@ impl Component<Msg> for App {
 
     fn view(&self) -> Node<Msg> {
         div(
-            vec![],
+            vec![class("container")],
             vec![
-                div(
-                    vec![class("container")],
-                    vec![
-                        self.nav_header.view().map_msg(Msg::NavHeaderMsg),
-                        div(vec![style!{"padding":px(20), "position": "relative", "left": percent(50)}], vec![
-                            self.fui_button.view().map_msg(|fbtn_msg| {
-                                Msg::FuiButtonMsg(Box::new(fbtn_msg))
-                            })]
-                        ),
-                        self.frame
-                            .view()
-                            .map_msg(|frame_msg| Msg::FrameMsg(frame_msg)),
-
-                        div(vec![class("futuristic-buttons-array")],{
-                            self.button_array
-                                .iter()
-                                .enumerate()
-                                .map(|(index,btn)|
-                                    btn.view()
-                                        .map_msg(move|btn_msg|Msg::BtnMsg(index, Box::new(btn_msg)))
-                                ).collect::<Vec<_>>()
-                            }
-                        ),
-                        //self.paragraph.view(),
-                        p(
-                            vec![],
-                            vec![self.animate_list.view()],
-                        ),
-                        self.spinner.view(),
-                        self.image.view().map_msg(Msg::ImageMsg),
-                    ],
+                self.nav_header.view().map_msg(Msg::NavHeaderMsg),
+                div(vec![style!{"padding":px(20), "position": "relative", "left": percent(50)}], vec![
+                    self.fui_button.view().map_msg(|fbtn_msg| {
+                        Msg::FuiButtonMsg(Box::new(fbtn_msg))
+                    })]
                 ),
+                self.frame
+                    .view()
+                    .map_msg(|frame_msg| Msg::FrameMsg(frame_msg)),
+
+                div(vec![class("futuristic-buttons-array")],{
+                    self.button_array
+                        .iter()
+                        .enumerate()
+                        .map(|(index,btn)|
+                            btn.view()
+                                .map_msg(move|btn_msg|Msg::BtnMsg(index, Box::new(btn_msg)))
+                        ).collect::<Vec<_>>()
+                    }
+                ),
+                //self.paragraph.view(),
+                p(
+                    vec![],
+                    vec![self.animate_list.view()],
+                ),
+                self.spinner.view(),
+                self.image.view().map_msg(Msg::ImageMsg),
                 footer(
                     vec![],
                     vec![a(
                         vec![href("https://github.com/ivanceras/sauron/tree/master/examples/futuristic-ui/")],
                         vec![text("code")],
                     )],
-                ),
-            ],
+                )
+            ]
         )
     }
 

@@ -41,8 +41,6 @@ pub struct Options {
     pub click_highlights: bool,
     /// the button is slanted 45 degree to the right
     pub skewed: bool,
-    /// whether to use the alt color
-    pub use_alt: bool,
     /// has corners
     pub has_corners: bool,
     /// enable/disable hover effect
@@ -85,8 +83,6 @@ where
 
     pub fn style(&self) -> Vec<String> {
         let base = crate::Theme::default().controls;
-        let alt = crate::Theme::alt().controls;
-        let disabled = crate::Theme::disabled().controls;
 
         let base_css = jss_ns!(COMPONENT_NAME, {
 
@@ -254,36 +250,6 @@ where
 
         });
 
-        let alt_css = jss_ns!(COMPONENT_NAME, {
-            ".alt .hover": {
-                "border-color": alt.hover_color,
-                "box-shadow": format!("0 0 4px {}",alt.hover_shadow),
-            },
-
-            ".alt .border": {
-                "border-color": alt.border_color,
-                "box-shadow": format!("0 0 4px {}",alt.border_shadow),
-            },
-
-            ".alt .corner": {
-                "border-color": alt.corner_color,
-                "box-shadow": format!("0 0 4px {}",alt.corner_shadow),
-            },
-
-            ".alt .button_wrap": {
-                "background-color": alt.content_background_color,
-            },
-
-            ".alt .button": {
-                "color": alt.button_text_color,
-            },
-
-
-            ".alt .highlight": {
-                "background-color": alt.highlight_color,
-            },
-        });
-
         let skewed_css = jss_ns!(COMPONENT_NAME, {
             ".skewed": {
                 "transform": "skewX(-45deg)",
@@ -293,43 +259,6 @@ where
             ".skewed .button": {
                 "transform": "skewX(45deg)",
             },
-
-        });
-
-        let disabled_css = jss_ns!(COMPONENT_NAME,{
-
-            ".disabled .hover": {
-                "border-color": disabled.hover_color,
-                "box-shadow": format!("0 0 4px {}",disabled.hover_shadow),
-            },
-            ".disabled .border": {
-                "border-color": disabled.border_color,
-                "box-shadow": format!("0 0 4px {}",disabled.border_shadow),
-            },
-
-            ".disabled .corner": {
-                "border-color": disabled.corner_color,
-                "box-shadow": format!("0 0 4px {}",disabled.corner_shadow),
-            },
-
-            ".disabled .button": {
-                "color": disabled.button_text_color,
-                "cursor": "auto",
-            },
-
-            ".disabled .button_wrap": {
-                "background-color": disabled.content_background_color,
-            },
-
-            ".disabled .button": {
-                "color": disabled.button_text_color,
-            },
-
-
-            ".disabled .highlight": {
-                "background-color": disabled.highlight_color,
-            },
-
 
         });
 
@@ -365,13 +294,7 @@ where
             },
         });
 
-        vec![
-            base_css,
-            alt_css,
-            skewed_css,
-            disabled_css,
-            expand_corner_css,
-        ]
+        vec![base_css, skewed_css, expand_corner_css]
     }
 
     pub fn update(&mut self, msg: Msg<PMSG>) -> Option<PMSG> {
@@ -421,7 +344,6 @@ where
                     ("has_hover", self.options.has_hover),
                     ("hovered", self.hover),
                     ("skewed", self.options.skewed),
-                    ("alt", self.options.use_alt),
                     // setting this will also disable the div, therefore will not activate the
                     // events on it
                     ("disabled", self.options.disabled),
@@ -501,7 +423,6 @@ impl Options {
             sound: false,
             click_highlights: false,
             skewed: false,
-            use_alt: false,
             has_corners: false,
             expand_corners: false,
             has_hover: false,
@@ -516,7 +437,6 @@ impl Options {
             sound: true,
             click_highlights: true,
             skewed: true,
-            use_alt: false,
             has_corners: true,
             expand_corners: true,
             has_hover: true,
@@ -531,22 +451,6 @@ impl Options {
             sound: true,
             click_highlights: true,
             skewed: false,
-            use_alt: false,
-            has_corners: true,
-            expand_corners: true,
-            has_hover: true,
-            disabled: false,
-            hidden: false,
-        }
-    }
-
-    /// alternate color
-    pub fn alt() -> Self {
-        Options {
-            sound: true,
-            click_highlights: true,
-            skewed: false,
-            use_alt: true,
             has_corners: true,
             expand_corners: true,
             has_hover: true,
@@ -562,7 +466,6 @@ impl Options {
             sound: false,
             click_highlights: true,
             skewed: false,
-            use_alt: false,
             has_corners: true,
             expand_corners: true,
             has_hover: true,
@@ -577,7 +480,6 @@ impl Options {
             sound: true,
             click_highlights: true,
             skewed: false,
-            use_alt: false,
             has_corners: false,
             expand_corners: false,
             has_hover: false,
@@ -592,7 +494,6 @@ impl Options {
             sound: false,
             click_highlights: false,
             skewed: false,
-            use_alt: false,
             has_corners: false,
             expand_corners: false,
             has_hover: false,

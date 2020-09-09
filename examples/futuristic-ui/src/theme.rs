@@ -5,6 +5,7 @@ use css_colors::{
     RGBA,
 };
 
+#[derive(PartialEq, Debug)]
 pub struct Theme {
     pub primary_color: String,    // used in container
     pub secondary_color: String,  // used in container
@@ -18,6 +19,7 @@ pub struct Theme {
 
 /// colors to controls
 /// such as buttons, navigation links, frames
+#[derive(PartialEq, Debug)]
 pub struct Controls {
     pub hover_color: String,
     pub hover_shadow: String,
@@ -40,12 +42,17 @@ impl Theme {
     fn bondi_blue_on_dark() -> Self {
         let primary = rgba(2, 157, 187, 1.0); // main theme
         let background = rgba(0, 0, 0, 1.0);
-        //Self::calculate_dark_theme(primary)
         Self::calculate_theme(primary, background, false)
     }
 
     fn white_on_dark() -> Self {
         let primary = rgba(255, 255, 255, 1.0);
+        let background = rgba(0, 0, 0, 1.0);
+        Self::calculate_theme(primary, background, false)
+    }
+
+    fn green_on_black() -> Self {
+        let primary = rgba(0, 255, 0, 1.0);
         let background = rgba(0, 0, 0, 1.0);
         Self::calculate_theme(primary, background, false)
     }
@@ -56,54 +63,6 @@ impl Theme {
             rgba(255, 255, 255, 1.0),
             true,
         )
-    }
-
-    // alternate color for the button
-    pub fn alt() -> Self {
-        let primary = rgba(0, 255, 0, 1.0); //#00ff00
-        Self::calculate_dark_theme(primary)
-    }
-
-    // color for the disabled button
-    pub fn disabled() -> Self {
-        let primary = rgba(255, 255, 255, 1.0); // #ffffff
-        Self::calculate_dark_theme(primary)
-    }
-
-    pub fn calculate_dark_theme(primary: RGBA) -> Self {
-        let accent = primary.tint(percent(30)); //combine with 30% of white becomes rgba(179, 225, 234, 1.00)
-                                                //target color is rgba(161, 236, 251, 1.00);
-        let secondary = primary.lighten(percent(20));
-        let text_colors = primary.lighten(percent(40));
-        let primary_font = "\"Titillium Web\", \"sans-serif\"".to_string();
-        let secondary_font = "\"Electrolize\", \"sans-serif\"".to_string();
-        Theme {
-            primary_color: primary.to_css(),
-            secondary_color: secondary.to_css(),
-            background_color: primary.darken(percent(60)).to_css(),
-            accent_color: accent.to_css(),
-            accent_shadow: accent.fadein(percent(35)).to_css(),
-            primary_font,
-            secondary_font,
-
-            controls: Controls {
-                hover_shadow: primary.to_css(),
-                border_color: primary.to_css(),
-                border_shadow: primary.to_css(),
-                highlight_color: primary.to_css(),
-
-                hover_color: secondary.to_css(),
-                corner_color: secondary.to_css(),
-                corner_shadow: secondary.fadeout(percent(35)).to_css(),
-
-                content_background_color: primary
-                    .shade(percent(15))
-                    .fadeout(percent(35))
-                    .to_css(),
-                button_text_color: text_colors.to_css(),
-                link_color: accent.to_css(),
-            },
-        }
     }
 
     /// light: if background is light and foreground is dark
@@ -184,23 +143,15 @@ impl Theme {
 
 impl Default for Theme {
     fn default() -> Self {
-        //Self::calculate_theme(rgba(2, 157, 187, 1.0), rgba(0, 0, 0, 1.0), false)
-        //Self::calculate_theme(rgba(255, 0, 0, 1.0), rgba(0, 0, 0, 1.0), false)
-        /*
-        Self::calculate_theme(
-            rgba(0, 0, 0, 1.0),
-            rgba(255, 255, 255, 1.0),
-            true,
-        )
-        */
-        //Self::white_on_dark()//this doesnt look very good
         //Self::black_on_white()
-        Self::bondi_blue_on_dark()
+        //Self::bondi_blue_on_dark()
+        Self::green_on_black()
     }
 }
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use css_color::Rgba;
     use css_colors::{
         percent,
@@ -221,6 +172,17 @@ mod test {
     fn hex_to_real_rgba(hex: &str) -> RGBA {
         let from_hex: Rgba = hex.parse().expect("must parse");
         convert_to_real_rgba(from_hex)
+    }
+
+    #[test]
+    fn same_outcome() {
+        let white = rgba(255, 255, 255, 1.0);
+        let black = rgba(0, 0, 0, 1.0);
+        let disabled = Theme::disabled();
+        let calced = Theme::calculate_theme(white, black, false);
+        println!("{:#?}", disabled);
+        println!("{:#?}", calced);
+        assert_eq!(disabled, calced);
     }
 
     #[test]
