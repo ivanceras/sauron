@@ -23,7 +23,7 @@ macro_rules! style {
                         _ => panic!("supported values are String, Number or Bool only"),
                     };
                     println!("value: {}", value);
-                    styles.push($crate::html::attributes::style::Style::new(prop, value));
+                    styles.push($crate::html::attributes::Style::new(prop, value));
 
                 }
             }
