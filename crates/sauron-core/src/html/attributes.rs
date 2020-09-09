@@ -205,3 +205,31 @@ pub fn attr<MSG, V: Into<Value>>(att: &'static str, v: V) -> Attribute<MSG> {
 pub fn empty_attr<MSG>() -> Attribute<MSG> {
     mt_dom::attr("", AttributeValue::Empty)
 }
+
+/// merge the plain values
+pub(crate) fn merge_plain_attributes_values(
+    attr_values: &[&AttributeValue],
+) -> Option<String> {
+    use std::fmt::Write;
+
+    let plain_values: Vec<String> = attr_values
+        .iter()
+        .flat_map(|att_value| match att_value {
+            AttributeValue::Simple(simple) => Some(simple.to_string()),
+            AttributeValue::Style(styles) => {
+                let mut style_str = String::new();
+                styles.iter().for_each(|s| {
+                    write!(style_str, "{};", s).expect("must write")
+                });
+                Some(style_str)
+            }
+            AttributeValue::FunctionCall(fvalue) => Some(fvalue.to_string()),
+            AttributeValue::Empty => None,
+        })
+        .collect();
+    if !plain_values.is_empty() {
+        Some(plain_values.join(" "))
+    } else {
+        None
+    }
+}

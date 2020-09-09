@@ -1,11 +1,12 @@
 use crate::{
     dom::Dispatch,
+    html,
     mt_dom::{AttValue, Callback},
     prelude::AttributeValue,
     Attribute, Event,
 };
 use std::ops::Deref;
-use std::{collections::HashMap, fmt::Write, sync::Mutex};
+use std::{collections::HashMap, sync::Mutex};
 use wasm_bindgen::{closure::Closure, JsCast};
 use web_sys::{
     self, Element, EventTarget, HtmlInputElement, HtmlTextAreaElement, Node,
@@ -98,34 +99,6 @@ impl<T> CreatedNode<T> {
         }
     }
 
-    /// merge the plain values
-    fn merge_plain_attributes_values(
-        attr_values: &[&AttributeValue],
-    ) -> Option<String> {
-        let plain_values: Vec<String> = attr_values
-            .iter()
-            .flat_map(|att_value| match att_value {
-                AttributeValue::Simple(simple) => Some(simple.to_string()),
-                AttributeValue::Style(styles) => {
-                    let mut style_str = String::new();
-                    styles.iter().for_each(|s| {
-                        write!(style_str, "{};", s).expect("must write")
-                    });
-                    Some(style_str)
-                }
-                AttributeValue::FunctionCall(fvalue) => {
-                    Some(fvalue.to_string())
-                }
-                AttributeValue::Empty => None,
-            })
-            .collect();
-        if !plain_values.is_empty() {
-            Some(plain_values.join(" "))
-        } else {
-            None
-        }
-    }
-
     /// returns (callbacks, plain_attribtues, function_calls)
     fn partition_callbacks_from_plain_and_func_calls<MSG>(
         attr: &Attribute<MSG>,
@@ -183,7 +156,7 @@ impl<T> CreatedNode<T> {
 
         // set simple values
         if let Some(merged_plain_values) =
-            Self::merge_plain_attributes_values(&plain_values)
+            html::attributes::merge_plain_attributes_values(&plain_values)
         {
             if let Some(ref namespace) = attr.namespace() {
                 // Warning NOTE: set_attribute_ns should only be called
@@ -238,7 +211,7 @@ impl<T> CreatedNode<T> {
 
         // do function calls such as set_inner_html
         if let Some(merged_func_values) =
-            Self::merge_plain_attributes_values(&func_values)
+            html::attributes::merge_plain_attributes_values(&func_values)
         {
             match *attr.name() {
                 "inner_html" => element.set_inner_html(&merged_func_values),

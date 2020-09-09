@@ -44,8 +44,11 @@ impl<MSG> Render for Element<MSG> {
     ) -> fmt::Result {
         write!(buffer, "<{}", self.tag())?;
 
-        // TODO: merge attributes with the same name first
-        for attr in self.get_attributes() {
+        let ref_attrs: Vec<&Attribute<MSG>> =
+            self.get_attributes().iter().map(|att| att).collect();
+        let merged_attributes: Vec<Attribute<MSG>> =
+            mt_dom::merge_attributes_of_same_name(&ref_attrs);
+        for attr in merged_attributes {
             write!(buffer, " ")?;
             attr.render_with_indent(buffer, indent)?;
         }
@@ -119,5 +122,36 @@ impl Render for AttributeValue {
             _ => (),
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::prelude::*;
+
+    #[test]
+    fn test_render_classes() {
+        let view: Node<()> =
+            div(vec![class("frame"), class("component")], vec![]);
+        let expected = r#"<div class="frame component"></div>"#;
+        let mut buffer = String::new();
+        view.render(&mut buffer).expect("must render");
+        assert_eq!(expected, buffer);
+    }
+
+    #[test]
+    fn test_render_class_flag() {
+        let view: Node<()> = div(
+            vec![
+                class("frame"),
+                classes_flag([("component", true), ("layer", false)]),
+            ],
+            vec![],
+        );
+        let expected = r#"<div class="frame component"></div>"#;
+        let mut buffer = String::new();
+        view.render(&mut buffer).expect("must render");
+        assert_eq!(expected, buffer);
     }
 }
