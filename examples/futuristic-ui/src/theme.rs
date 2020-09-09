@@ -25,22 +25,37 @@ pub struct Controls {
     pub corner_color: String,
     pub border_shadow: String,
     pub corner_shadow: String,
+    // used a background in frames and buttons
     pub content_background_color: String,
+    // text color in buttons
     pub button_text_color: String,
+    // highlight color in buttons
     pub highlight_color: String,
+    // text color in links
     pub link_color: String,
 }
 
 impl Theme {
     // base theme using a bluish base color #029dbb
-    fn blue_on_dark() -> Self {
+    fn bondi_blue_on_dark() -> Self {
         let primary = rgba(2, 157, 187, 1.0); // main theme
-        Self::calculate_dark_theme(primary)
+        let background = rgba(0, 0, 0, 1.0);
+        //Self::calculate_dark_theme(primary)
+        Self::calculate_theme(primary, background, false)
     }
 
     fn white_on_dark() -> Self {
         let primary = rgba(255, 255, 255, 1.0);
-        Self::calculate_dark_theme(primary)
+        let background = rgba(0, 0, 0, 1.0);
+        Self::calculate_theme(primary, background, false)
+    }
+
+    fn black_on_white() -> Self {
+        Self::calculate_theme(
+            rgba(0, 0, 0, 1.0),
+            rgba(255, 255, 255, 1.0),
+            true,
+        )
     }
 
     // alternate color for the button
@@ -149,7 +164,8 @@ impl Theme {
                 },
 
                 content_background_color: if light {
-                    background
+                    // same algorithm here
+                    primary
                         .mix(background, percent(15))
                         .fadeout(percent(35))
                         .to_css()
@@ -170,11 +186,16 @@ impl Default for Theme {
     fn default() -> Self {
         //Self::calculate_theme(rgba(2, 157, 187, 1.0), rgba(0, 0, 0, 1.0), false)
         //Self::calculate_theme(rgba(255, 0, 0, 1.0), rgba(0, 0, 0, 1.0), false)
+        /*
         Self::calculate_theme(
             rgba(0, 0, 0, 1.0),
             rgba(255, 255, 255, 1.0),
             true,
         )
+        */
+        //Self::white_on_dark()//this doesnt look very good
+        //Self::black_on_white()
+        Self::bondi_blue_on_dark()
     }
 }
 

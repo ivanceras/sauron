@@ -259,6 +259,18 @@ impl Component<Msg> for App {
                 "background-color": base.background_color,
             },
 
+            "@media screen and (max-width: 800px)": {
+              ".container": {
+                "width": "100%",
+              }
+            },
+
+            "@media screen and (min-width: 900px)": {
+                ".container": {
+                    "width": "900px",
+                }
+            },
+
             ".container ::selection": {
                 "color": base.background_color,
                 "text-shadow": "none",
