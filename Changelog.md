@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+- Fix the `render` function where attributes of the same name not merged.
+- use the exported Style struct from html::attributes, to avoid namespace collision with 'style' attribute
+- Add Minimal SSR example
+- expose a `lite-markdown` feature from `sauron` which exclude the `sauron-parse` crate to minimize binary size
+- expose `empty_attr` in `html::attributes`
+- add `jss` module and utility functions which utilizes json to preprocess css styles.
+    - `jss_ns` allows you to create class names that will not collide with other components
+
 ## 0.31.0
 - (**breaking**) Improved `style!` macro by using json as the syntax
 - Added `jss!` macro which parses `json` and convert them to `css`

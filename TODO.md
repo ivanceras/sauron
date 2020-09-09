@@ -15,7 +15,7 @@
      - This would allow a total isomorphic app reusing the components
      - [ ] Make an equivalent for Program(client-side updater) for use in server-side
         - ie: ServerRender, where Msg could be passed as a data to hydrate the view (template) before sending to the client
- - [ ] Fix the render function where attributes of the same name not merged
+ - [X] Fix the render function where attributes of the same name not merged
  - [ ] Change type of tag, attribute_name, style keys from `&'static str` to `&'a str`
      - This will remove the need for hardcode HTML_STYLES lookup, which could be a performance penalty
  - Add the RealWorld example
@@ -48,7 +48,7 @@
 - [X] Url change service
     - using wasm-bindgen directly eliminates the need for Url change service wrapper
 - [ ] re-think about the `sauron-core` features:
-    - [ ] `with-dom` when used in client-side, default
+    - [X] `with-dom` when used in client-side, default
     - [ ] `with-ssr` when used in server-side rendering, mutually exlusive to `with-dom`
     - [X] `no_request_animation_frame` this should be additive
         -  crate is now using `with-request-animation` feature
@@ -56,11 +56,12 @@
     - [X] Add sanitation to markdown parser, use `ammonia` crate
     - [X] expose the `sauron-md` as `sauron::markdown` module, behind a feature flag
 - [ ] Add example using markdown
-- [ ] Make use of `serde_json` to parse `style` into components
+- [X] Make use of `serde_json` to parse `style` into components
 
 
 ## Performance
-- [ ] Fix the reported issues with benchmarks
+- [X] Fix the reported issues with benchmarks
+    - fixed by setting the target to web when building the wasm
 - [ ] Create a new benchmark for the js-comprehensive-benchmark suite
     - [link](https://github.com/krausest/js-framework-benchmark)
 - [ ] Use Weak pointer for program instead of Rc where strong reference is not needed.
