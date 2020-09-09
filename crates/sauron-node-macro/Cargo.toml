@@ -17,7 +17,7 @@ quote = {package = "quote", version = "1.0.3"}
 proc-macro2 = { version = "1.0.10" }
 
 [dev-dependencies]
-sauron = { path = "../../", default-features = false, features = ["with-dom"] }
+sauron = { path = "../../"}
 
 [lib]
 proc-macro = true

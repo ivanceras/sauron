@@ -17,8 +17,7 @@ mod node;
 /// closed are supported:
 ///
 /// ```rust
-/// use sauron::*;
-/// # use sauron_node_macro::node;
+/// use sauron::{node,Node};
 ///
 /// let _: Node<()> = node!(<input type="button" />);
 /// let _: Node<()> = node!(<h1>"A title"</h1>);
@@ -33,8 +32,7 @@ mod node;
 /// argument.
 ///
 /// ```rust
-/// use sauron::*;
-/// # use sauron_node_macro::node;
+/// use sauron::{node,Node};
 ///
 /// let _: Node<()> = node!(<input x_data_="my data" />);
 /// let _: Node<()> = node!(<input x_data_int_=42u32 x_data_bool_=true />);
@@ -44,8 +42,7 @@ mod node;
 /// an attribute that can be converted into a [Value].
 ///
 /// ```rust
-/// use sauron::*;
-/// # use sauron_node_macro::node;
+/// use sauron::{node,Node};
 ///
 /// struct Model {
 ///     value: String,
@@ -62,8 +59,7 @@ mod node;
 /// [Attribute].
 ///
 /// ```rust
-/// use sauron::{*, html::*,html::attributes::*};
-/// # use sauron_node_macro::node;
+/// use sauron::{node,Node,html::attributes::classes_flag};
 ///
 /// struct Model {
 ///     editing: bool,
@@ -84,8 +80,7 @@ mod node;
 /// Finally, we also support empty attributes.
 ///
 /// ```rust
-/// use sauron::*;
-/// # use sauron_node_macro::node;
+/// use sauron::{node,Node};
 ///
 /// let _: Node<()> = node!(<button disabled />);
 /// ```
@@ -99,8 +94,9 @@ mod node;
 /// will be matched with event handlers available in [sauron::dom::events].
 ///
 /// ```rust
-/// use sauron::*;
-/// # use sauron_node_macro::node;
+/// use sauron::{node,Node,
+///     events::{InputEvent,KeyboardEvent},
+/// };
 ///
 /// enum Msg {
 ///     Update(String),
@@ -144,8 +140,7 @@ mod node;
 /// The loop body must evaluate to a [Node].
 ///
 /// ```rust
-/// use sauron::{*,html::text};
-/// # use sauron_node_macro::node;
+/// use sauron::{node,Node,html::text};
 ///
 /// struct Model {
 ///     items: Vec<String>,
