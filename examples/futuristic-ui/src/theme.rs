@@ -28,28 +28,34 @@ pub struct Controls {
     pub content_background_color: String,
     pub button_text_color: String,
     pub highlight_color: String,
+    pub link_color: String,
 }
 
 impl Theme {
     // base theme using a bluish base color #029dbb
-    fn base() -> Self {
+    fn blue_on_dark() -> Self {
         let primary = rgba(2, 157, 187, 1.0); // main theme
-        Self::calculate_from_primary_color(primary)
+        Self::calculate_dark_theme(primary)
+    }
+
+    fn white_on_dark() -> Self {
+        let primary = rgba(255, 255, 255, 1.0);
+        Self::calculate_dark_theme(primary)
     }
 
     // alternate color for the button
     pub fn alt() -> Self {
         let primary = rgba(0, 255, 0, 1.0); //#00ff00
-        Self::calculate_from_primary_color(primary)
+        Self::calculate_dark_theme(primary)
     }
 
     // color for the disabled button
     pub fn disabled() -> Self {
         let primary = rgba(255, 255, 255, 1.0); // #ffffff
-        Self::calculate_from_primary_color(primary)
+        Self::calculate_dark_theme(primary)
     }
 
-    pub fn calculate_from_primary_color(primary: RGBA) -> Self {
+    pub fn calculate_dark_theme(primary: RGBA) -> Self {
         let accent = primary.tint(percent(30)); //combine with 30% of white becomes rgba(179, 225, 234, 1.00)
                                                 //target color is rgba(161, 236, 251, 1.00);
         let secondary = primary.lighten(percent(20));
@@ -80,6 +86,81 @@ impl Theme {
                     .fadeout(percent(35))
                     .to_css(),
                 button_text_color: text_colors.to_css(),
+                link_color: accent.to_css(),
+            },
+        }
+    }
+
+    /// light: if background is light and foreground is dark
+    pub fn calculate_theme(
+        foreground: RGBA,
+        background: RGBA,
+        light: bool,
+    ) -> Self {
+        let primary = foreground;
+        let accent = if light {
+            primary.shade(percent(30))
+        } else {
+            primary.tint(percent(30))
+        };
+
+        let secondary = if light {
+            primary.darken(percent(20))
+        } else {
+            primary.lighten(percent(20))
+        };
+
+        let text_colors = if light {
+            primary.darken(percent(40))
+        } else {
+            primary.lighten(percent(40))
+        };
+        let primary_font = "\"Titillium Web\", \"sans-serif\"".to_string();
+        let secondary_font = "\"Electrolize\", \"sans-serif\"".to_string();
+        Theme {
+            primary_color: primary.to_css(),
+            secondary_color: secondary.to_css(),
+            background_color: if light {
+                background.lighten(percent(60)).to_css()
+            } else {
+                primary.darken(percent(60)).to_css()
+            },
+            accent_color: accent.to_css(),
+            accent_shadow: if light {
+                accent.fadeout(percent(35)).to_css()
+            } else {
+                accent.fadein(percent(35)).to_css()
+            },
+            primary_font,
+            secondary_font,
+
+            controls: Controls {
+                hover_shadow: primary.to_css(),
+                border_color: primary.to_css(),
+                border_shadow: primary.to_css(),
+                highlight_color: primary.to_css(),
+
+                hover_color: secondary.to_css(),
+                corner_color: secondary.to_css(),
+                corner_shadow: if light {
+                    secondary.fadein(percent(35)).to_css()
+                } else {
+                    secondary.fadeout(percent(35)).to_css()
+                },
+
+                content_background_color: if light {
+                    background
+                        .mix(background, percent(15))
+                        .fadeout(percent(35))
+                        .to_css()
+                } else {
+                    primary
+                        .mix(background, percent(15))
+                        .fadeout(percent(35))
+                        .to_css()
+                },
+                button_text_color: text_colors.to_css(),
+                link_color: accent.to_css(),
             },
         }
     }
@@ -87,7 +168,13 @@ impl Theme {
 
 impl Default for Theme {
     fn default() -> Self {
-        Self::base()
+        //Self::calculate_theme(rgba(2, 157, 187, 1.0), rgba(0, 0, 0, 1.0), false)
+        //Self::calculate_theme(rgba(255, 0, 0, 1.0), rgba(0, 0, 0, 1.0), false)
+        Self::calculate_theme(
+            rgba(0, 0, 0, 1.0),
+            rgba(255, 255, 255, 1.0),
+            true,
+        )
     }
 }
 
@@ -162,6 +249,15 @@ mod test {
         println!("tint3: {}", c.tint(percent(30)));
         println!("tint5: {}", c.tint(percent(50)));
         assert_eq!(rgba(204, 235, 241, 1.0), c.tint(percent(20)));
+
+        assert_eq!(
+            c.tint(percent(20)),
+            c.mix(rgba(255, 255, 255, 1.0), percent(20))
+        );
+        assert_eq!(
+            c.shade(percent(20)),
+            c.mix(rgba(0, 0, 0, 1.0), percent(20))
+        );
     }
 
     #[test]

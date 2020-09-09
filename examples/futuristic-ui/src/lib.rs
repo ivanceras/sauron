@@ -256,6 +256,7 @@ impl Component<Msg> for App {
                 "line-height": "1.5",
                 "font-family": base.primary_font,
                 "margin": "auto",
+                "background-color": base.background_color,
             },
 
             ".container ::selection": {
