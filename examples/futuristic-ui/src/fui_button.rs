@@ -25,20 +25,32 @@ pub enum Msg<PMSG> {
 
 pub struct FuiButton<PMSG> {
     audio: HtmlAudioElement,
+    options: Options,
     label: String,
     click: bool,
     hover: bool,
-    skewed: bool,
-    /// whether to use the alt color
-    use_alt: bool,
-    /// has corners
-    has_corners: bool,
-    /// enable/disable hover effect
-    has_hover: bool,
-    /// expand corners when hovered
-    expand_corners: bool,
-    disabled: bool,
     event_listeners: Vec<Attribute<Msg<PMSG>>>,
+}
+
+pub struct Options {
+    pub hidden: bool,
+    /// enable sound
+    pub sound: bool,
+    /// enable click effect, which changes the background color
+    /// of the button with the highlight color
+    pub click_highlights: bool,
+    /// the button is slanted 45 degree to the right
+    pub skewed: bool,
+    /// whether to use the alt color
+    pub use_alt: bool,
+    /// has corners
+    pub has_corners: bool,
+    /// enable/disable hover effect
+    pub has_hover: bool,
+    /// expand corners when hovered
+    pub expand_corners: bool,
+    /// the button is disabled
+    pub disabled: bool,
 }
 
 impl<PMSG> FuiButton<PMSG>
@@ -46,54 +58,19 @@ where
     PMSG: 'static,
 {
     pub fn new_with_label(label: &str) -> Self {
+        let options = Options::regular();
         FuiButton {
             audio: sounds::preload("sounds/click.mp3"),
-            label: label.to_string(),
+            options,
             click: false,
             hover: false,
-            skewed: false,
-            use_alt: false,
-            has_corners: true,
-            has_hover: false,
-            expand_corners: false,
-            disabled: false,
+            label: label.to_string(),
             event_listeners: vec![],
         }
     }
 
-    /// whether the button is slanted 45 degree to the right
-    pub fn skewed(&mut self, skewed: bool) {
-        self.skewed = skewed;
-    }
-
-    /// whether to use the alternate color of the theme
-    pub fn use_alt(&mut self, use_alt: bool) {
-        self.use_alt = use_alt;
-    }
-
-    /// whether to show the fancy corners of this button
-    /// default: true
-    pub fn has_corners(&mut self, has_corners: bool) {
-        self.has_corners = has_corners;
-    }
-
-    /// default: false
-    pub fn disabled(&mut self, disabled: bool) {
-        self.disabled = disabled;
-        self.has_corners(false);
-        self.has_hover(false);
-    }
-
-    /// whether or not expand corners on hover
-    /// default: false
-    pub fn expand_corners(&mut self, expand_corners_on_hover: bool) {
-        self.expand_corners = expand_corners_on_hover;
-    }
-
-    /// whether or not to enable hover expect
-    /// default: false
-    pub fn has_hover(&mut self, has_hover: bool) {
-        self.has_hover = has_hover;
+    pub fn set_options(&mut self, options: Options) {
+        self.options = options;
     }
 
     pub fn add_event_listeners(
@@ -121,7 +98,9 @@ where
                 "margin": "4px 4px"
             },
 
-
+            ".hidden" : {
+                "visibility": "hidden",
+            },
 
             // HOVER at the lower  part of the button
             ".hover": {
@@ -398,7 +377,9 @@ where
     pub fn update(&mut self, msg: Msg<PMSG>) -> Option<PMSG> {
         match msg {
             Msg::Click => {
-                sounds::play(&self.audio);
+                if self.options.sound {
+                    sounds::play(&self.audio);
+                }
                 self.click = true;
                 None
             }
@@ -435,14 +416,16 @@ where
                 class(COMPONENT_NAME),
                 classes_ns_flag([
                     ("clicked", self.click),
-                    ("expand_corners", self.expand_corners),
-                    ("has_hover", self.has_hover),
+                    ("click_highlights", self.options.click_highlights),
+                    ("expand_corners", self.options.expand_corners),
+                    ("has_hover", self.options.has_hover),
                     ("hovered", self.hover),
-                    ("skewed", self.skewed),
-                    ("alt", self.use_alt),
+                    ("skewed", self.options.skewed),
+                    ("alt", self.options.use_alt),
                     // setting this will also disable the div, therefore will not activate the
                     // events on it
-                    ("disabled", self.disabled),
+                    ("disabled", self.options.disabled),
+                    ("hidden", self.options.hidden),
                 ]),
                 // normally click should be attached to the actual button element
                 on_click(|_| Msg::Click),
@@ -456,7 +439,7 @@ where
             vec![
                 // hover
                 view_if(
-                    self.has_hover,
+                    self.options.has_hover,
                     div(vec![class_ns("hover hover-bottom")], vec![]),
                 ),
                 //borders
@@ -467,19 +450,19 @@ where
                 div(vec![class_ns("border border-bottom")], vec![]),
                 // corners
                 view_if(
-                    self.has_corners,
+                    self.options.has_corners,
                     div(vec![class_ns("corner corner__top-left")], vec![]),
                 ),
                 view_if(
-                    self.has_corners,
+                    self.options.has_corners,
                     div(vec![class_ns("corner corner__bottom-left")], vec![]),
                 ),
                 view_if(
-                    self.has_corners,
+                    self.options.has_corners,
                     div(vec![class_ns("corner corner__top-right")], vec![]),
                 ),
                 view_if(
-                    self.has_corners,
+                    self.options.has_corners,
                     div(vec![class_ns("corner corner__bottom-right")], vec![]),
                 ),
                 div(
@@ -490,7 +473,7 @@ where
                             vec![button(
                                 vec![
                                     class_ns("button"),
-                                    disabled(self.disabled),
+                                    disabled(self.options.disabled),
                                 ],
                                 vec![text(&self.label)],
                             )
@@ -507,5 +490,124 @@ where
                 ),
             ],
         )
+    }
+}
+
+impl Options {
+    /// bare minimum button
+    /// no sound
+    pub fn bare() -> Self {
+        Options {
+            sound: false,
+            click_highlights: false,
+            skewed: false,
+            use_alt: false,
+            has_corners: false,
+            expand_corners: false,
+            has_hover: false,
+            disabled: false,
+            hidden: false,
+        }
+    }
+
+    /// full effect, skewed
+    pub fn full() -> Self {
+        Options {
+            sound: true,
+            click_highlights: true,
+            skewed: true,
+            use_alt: false,
+            has_corners: true,
+            expand_corners: true,
+            has_hover: true,
+            disabled: false,
+            hidden: false,
+        }
+    }
+
+    /// regular futuristic button
+    pub fn regular() -> Self {
+        Options {
+            sound: true,
+            click_highlights: true,
+            skewed: false,
+            use_alt: false,
+            has_corners: true,
+            expand_corners: true,
+            has_hover: true,
+            disabled: false,
+            hidden: false,
+        }
+    }
+
+    /// alternate color
+    pub fn alt() -> Self {
+        Options {
+            sound: true,
+            click_highlights: true,
+            skewed: false,
+            use_alt: true,
+            has_corners: true,
+            expand_corners: true,
+            has_hover: true,
+            disabled: false,
+            hidden: false,
+        }
+    }
+
+    /// just like regular but muted
+    /// sound off
+    pub fn muted() -> Self {
+        Options {
+            sound: false,
+            click_highlights: true,
+            skewed: false,
+            use_alt: false,
+            has_corners: true,
+            expand_corners: true,
+            has_hover: true,
+            disabled: false,
+            hidden: false,
+        }
+    }
+
+    /// no corners, no hover
+    pub fn simple() -> Self {
+        Options {
+            sound: true,
+            click_highlights: true,
+            skewed: false,
+            use_alt: false,
+            has_corners: false,
+            expand_corners: false,
+            has_hover: false,
+            disabled: false,
+            hidden: false,
+        }
+    }
+
+    ///does not interact
+    pub fn disabled() -> Self {
+        Options {
+            sound: false,
+            click_highlights: false,
+            skewed: false,
+            use_alt: false,
+            has_corners: false,
+            expand_corners: false,
+            has_hover: false,
+            disabled: true,
+            hidden: false,
+        }
+    }
+
+    pub fn skewed(mut self, skewed: bool) -> Self {
+        self.skewed = skewed;
+        self
+    }
+
+    pub fn hidden(mut self, hidden: bool) -> Self {
+        self.hidden = hidden;
+        self
     }
 }

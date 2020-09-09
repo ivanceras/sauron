@@ -1,17 +1,17 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 #![recursion_limit = "256"]
 use animate_list::AnimateList;
 use frame::Frame;
-use fui_button::FuiButton;
+use fui_button::{
+    FuiButton,
+    Options,
+};
 use image::Image;
 use nav_header::NavHeader;
 use paragraph::Paragraph;
 use sauron::{
     html::{
-        attributes::{
-            class,
-            style,
-        },
+        attributes::class,
         div,
         events::on_click,
         text,
@@ -41,18 +41,14 @@ pub enum Msg {
     ReAnimateHeader,
     ReAnimateParagraph,
     ReAnimateList,
+    BtnMsg(usize, Box<fui_button::Msg<Self>>),
+    FuiButtonMsg(Box<fui_button::Msg<Self>>),
     FrameMsg(frame::Msg),
     NavHeaderMsg(nav_header::Msg),
     ParagraphMsg(paragraph::Msg),
-    FuiButtonMsg(Box<fui_button::Msg<Self>>),
-    SimpleFuiButtonMsg(Box<fui_button::Msg<Self>>),
-    SkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
-    SimpleSkewedFuiButtonMsg(Box<fui_button::Msg<Self>>),
-    AltFuiButtonMsg(Box<fui_button::Msg<Self>>),
-    DisabledFuiButtonMsg(Box<fui_button::Msg<Self>>),
     AnimateListMsg(Box<animate_list::Msg>),
     ImageMsg(image::Msg),
-    ReanimateAll,
+    ReAnimateAll,
     NoOp,
 }
 
@@ -60,12 +56,8 @@ pub struct App {
     nav_header: NavHeader,
     frame: Frame,
     paragraph: Paragraph<Msg>,
+    button_array: Vec<FuiButton<Msg>>,
     fui_button: FuiButton<Msg>,
-    simple_fui_button: FuiButton<Msg>,
-    skewed_fui_button: FuiButton<Msg>,
-    simple_skewed_fui_button: FuiButton<Msg>,
-    alt_fui_button: FuiButton<Msg>,
-    disabled_fui_button: FuiButton<Msg>,
     spinner: Spinner<Msg>,
     animate_list: AnimateList<Msg>,
     image: Image,
@@ -73,36 +65,28 @@ pub struct App {
 
 impl App {
     pub fn new() -> Self {
-        let mut fui_button = FuiButton::<Msg>::new_with_label("Reanimate All");
-        fui_button.add_event_listeners(vec![on_click(|_| Msg::ReanimateAll)]);
-        fui_button.has_hover(true);
-
-        let mut simple_fui_button =
-            FuiButton::<Msg>::new_with_label("Reanimate Paragraph");
-        simple_fui_button.has_corners(false);
-        simple_fui_button
-            .add_event_listeners(vec![on_click(|_| Msg::ReAnimateParagraph)]);
-
-        let mut skewed_fui_button =
-            FuiButton::<Msg>::new_with_label("Skewed button");
-        skewed_fui_button.skewed(true);
-        skewed_fui_button.has_corners(true);
-        skewed_fui_button.expand_corners(true);
-        skewed_fui_button.has_hover(true);
-
-        let mut simple_skewed_fui_button =
-            FuiButton::<Msg>::new_with_label("Skewed simple");
-        simple_skewed_fui_button.skewed(true);
-        simple_skewed_fui_button.has_corners(false);
-
-        let mut alt_fui_button = FuiButton::<Msg>::new_with_label("Sci-fi");
-        alt_fui_button.use_alt(true);
-        alt_fui_button.expand_corners(true);
-        alt_fui_button.has_hover(true);
-
-        let mut disabled_fui_button =
-            FuiButton::<Msg>::new_with_label("Disabled");
-        disabled_fui_button.disabled(true);
+        let button_options = vec![
+            ("Renimate All", Options::regular(), Msg::ReAnimateAll),
+            ("Animate List", Options::full(), Msg::ReAnimateList),
+            (
+                "Animate Frame",
+                Options::simple().skewed(true),
+                Msg::ReAnimateFrame,
+            ),
+            ("Spacer", Options::disabled().hidden(true), Msg::NoOp),
+            ("Sci-fi", Options::alt(), Msg::NoOp),
+            ("Disabled", Options::disabled(), Msg::NoOp),
+            ("Muted", Options::muted(), Msg::NoOp),
+        ];
+        let button_array: Vec<FuiButton<Msg>> = button_options
+            .into_iter()
+            .map(|(label, options, msg)| {
+                let mut btn = FuiButton::new_with_label(label);
+                btn.set_options(options);
+                btn.add_event_listeners(vec![on_click(move |_| msg.clone())]);
+                btn
+            })
+            .collect();
 
         let paragraph_content = "This is an experimental demo showcasing usage of [Sauron](https://github.com/ivanceras/sauron)
                     Component lifecycle to work alongside
@@ -114,16 +98,16 @@ impl App {
             vec![text("Retro Futuristic UI in rust")],
         );
 
+        let mut fui_button = FuiButton::<Msg>::new_with_label("Welcome");
+        fui_button.add_event_listeners(vec![on_click(|_| Msg::ReAnimateAll)]);
+        fui_button.set_options(Options::regular());
+
         App {
             frame: Frame::new_with_content(frame_content),
             nav_header: NavHeader::new_with_content("Navigation Header"),
             paragraph: Paragraph::new_with_markdown(paragraph_content),
+            button_array,
             fui_button,
-            simple_fui_button,
-            skewed_fui_button,
-            simple_skewed_fui_button,
-            alt_fui_button,
-            disabled_fui_button,
             spinner: Spinner::new(),
             animate_list: AnimateList::new_with_content(
                 Self::animate_list_content(),
@@ -140,7 +124,6 @@ impl App {
         div(
             vec![],
             vec![
-                button(vec![on_click(|_|Msg::ReAnimateFrame)], vec![text("Animate Frame")]),
                 p(vec![], vec![
                     text("This is an experimental demo showcasing usage of sauron[0] Component lifecycle to work alongside
                     css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.
@@ -281,7 +264,7 @@ impl Component<Msg> for App {
                 "background-color": base.secondary_color,
             },
 
-            ".futuristic-buttons": {
+            ".futuristic-buttons-array": {
                 "display": "flex",
                 "margin": "20px 10px",
             }
@@ -305,77 +288,33 @@ impl Component<Msg> for App {
                 div(
                     vec![class("container")],
                     vec![
-                        button(
-                            vec![
-                                on_click(|_| Msg::ReAnimateHeader),
-                                style("margin", "20px"),
-                                style("display", "block"),
-                            ],
-                            vec![text("Animate NavHeader")],
-                        ),
                         self.nav_header.view().map_msg(Msg::NavHeaderMsg),
-                        button(
-                            vec![
-                                on_click(|_| Msg::ReAnimateFrame),
-                                style("margin", "20px"),
-                                style("display", "block"),
-                            ],
-                            vec![text("Animate Frame")],
+                        div(vec![style!{"padding":px(20), "position": "relative", "left": percent(50)}], vec![
+                            self.fui_button.view().map_msg(|fbtn_msg| {
+                                Msg::FuiButtonMsg(Box::new(fbtn_msg))
+                            })]
                         ),
                         self.frame
                             .view()
                             .map_msg(|frame_msg| Msg::FrameMsg(frame_msg)),
-                        div(vec![class("futuristic-buttons")], vec![
-                            self.fui_button.view().map_msg(|fbtn_msg| {
-                                Msg::FuiButtonMsg(Box::new(fbtn_msg))
-                            }),
-                            self.simple_fui_button.view().map_msg(|fbtn_msg| {
-                                Msg::SimpleFuiButtonMsg(Box::new(fbtn_msg))
-                            }),
-                            self.alt_fui_button.view().map_msg(|fbtn_msg| {
-                                Msg::AltFuiButtonMsg(Box::new(fbtn_msg))
-                            }),
-                            self.disabled_fui_button.view().map_msg(|fbtn_msg| {
-                                Msg::DisabledFuiButtonMsg(Box::new(fbtn_msg))
-                            }),
-                            self.skewed_fui_button.view().map_msg(|fbtn_msg| {
-                                Msg::SkewedFuiButtonMsg(Box::new(fbtn_msg))
-                            }),
-                            self.simple_skewed_fui_button.view().map_msg(|fbtn_msg| {
-                                Msg::SimpleSkewedFuiButtonMsg(Box::new(fbtn_msg))
-                            }),
-                        ]),
-                        //self.paragraph.view(),
-                        button(
-                            vec![
-                                on_click(|_| Msg::ReAnimateList),
-                                style("margin", "20px"),
-                                style("display", "block"),
-                            ],
-                            vec![text("Animate List")],
+
+                        div(vec![class("futuristic-buttons-array")],{
+                            self.button_array
+                                .iter()
+                                .enumerate()
+                                .map(|(index,btn)|
+                                    btn.view()
+                                        .map_msg(move|btn_msg|Msg::BtnMsg(index, Box::new(btn_msg)))
+                                ).collect::<Vec<_>>()
+                            }
                         ),
+                        //self.paragraph.view(),
                         p(
                             vec![],
                             vec![self.animate_list.view()],
                         ),
-                        button(
-                            vec![
-                                on_click(|_| Msg::ReAnimateList),
-                                style("margin", "20px"),
-                                style("display", "block"),
-                            ],
-                            vec![text("Animate List")],
-                        ),
                         self.spinner.view(),
                         self.image.view().map_msg(Msg::ImageMsg),
-                        button(
-                            vec![
-                                on_click(|_| Msg::ReanimateAll),
-                                style("margin", "20px"),
-                                style("display", "block"),
-                            ],
-                            vec![text("Reanimate All")],
-                        ),
                     ],
                 ),
                 footer(
@@ -431,49 +370,15 @@ impl Component<Msg> for App {
                     Cmd::none()
                 }
             }
+            Msg::BtnMsg(index, btn_msg) => {
+                if let Some(pmsg) = self.button_array[index].update(*btn_msg) {
+                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
+                } else {
+                    Cmd::none()
+                }
+            }
             Msg::FuiButtonMsg(fui_btn_msg) => {
                 if let Some(pmsg) = self.fui_button.update(*fui_btn_msg) {
-                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
-                } else {
-                    Cmd::none()
-                }
-            }
-            Msg::SimpleFuiButtonMsg(fui_btn_msg) => {
-                if let Some(pmsg) = self.simple_fui_button.update(*fui_btn_msg)
-                {
-                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
-                } else {
-                    Cmd::none()
-                }
-            }
-            Msg::SkewedFuiButtonMsg(fui_btn_msg) => {
-                if let Some(pmsg) = self.skewed_fui_button.update(*fui_btn_msg)
-                {
-                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
-                } else {
-                    Cmd::none()
-                }
-            }
-            Msg::SimpleSkewedFuiButtonMsg(fui_btn_msg) => {
-                if let Some(pmsg) =
-                    self.simple_skewed_fui_button.update(*fui_btn_msg)
-                {
-                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
-                } else {
-                    Cmd::none()
-                }
-            }
-            Msg::AltFuiButtonMsg(fui_btn_msg) => {
-                if let Some(pmsg) = self.alt_fui_button.update(*fui_btn_msg) {
-                    Cmd::new(move |program| program.dispatch(pmsg.clone()))
-                } else {
-                    Cmd::none()
-                }
-            }
-            Msg::DisabledFuiButtonMsg(fui_btn_msg) => {
-                if let Some(pmsg) =
-                    self.disabled_fui_button.update(*fui_btn_msg)
-                {
                     Cmd::new(move |program| program.dispatch(pmsg.clone()))
                 } else {
                     Cmd::none()
@@ -534,7 +439,7 @@ impl Component<Msg> for App {
                     Cmd::none()
                 }
             }
-            Msg::ReanimateAll => Self::reanimate_all(),
+            Msg::ReAnimateAll => Self::reanimate_all(),
             Msg::NoOp => Cmd::none(),
         }
     }
