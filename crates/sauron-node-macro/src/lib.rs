@@ -1,7 +1,4 @@
-#![recursion_limit = "256"]
 #![doc(html_root_url = "https://docs.rs/sauron/0.28.2")]
-
-use quote::ToTokens as _;
 
 extern crate proc_macro;
 
@@ -21,8 +18,9 @@ mod node;
 ///
 /// ```rust
 /// use sauron::*;
+/// # use sauron_node_macro::node;
 ///
-/// let _: Node<()> = node!(<input type_="button" />);
+/// let _: Node<()> = node!(<input type="button" />);
 /// let _: Node<()> = node!(<h1>"A title"</h1>);
 /// ```
 ///
@@ -36,6 +34,7 @@ mod node;
 ///
 /// ```rust
 /// use sauron::*;
+/// # use sauron_node_macro::node;
 ///
 /// let _: Node<()> = node!(<input x_data_="my data" />);
 /// let _: Node<()> = node!(<input x_data_int_=42u32 x_data_bool_=true />);
@@ -46,6 +45,7 @@ mod node;
 ///
 /// ```rust
 /// use sauron::*;
+/// # use sauron_node_macro::node;
 ///
 /// struct Model {
 ///     value: String,
@@ -63,6 +63,7 @@ mod node;
 ///
 /// ```rust
 /// use sauron::{*, html::*,html::attributes::*};
+/// # use sauron_node_macro::node;
 ///
 /// struct Model {
 ///     editing: bool,
@@ -84,6 +85,7 @@ mod node;
 ///
 /// ```rust
 /// use sauron::*;
+/// # use sauron_node_macro::node;
 ///
 /// let _: Node<()> = node!(<button disabled />);
 /// ```
@@ -98,6 +100,7 @@ mod node;
 ///
 /// ```rust
 /// use sauron::*;
+/// # use sauron_node_macro::node;
 ///
 /// enum Msg {
 ///     Update(String),
@@ -142,6 +145,7 @@ mod node;
 ///
 /// ```rust
 /// use sauron::{*,html::text};
+/// # use sauron_node_macro::node;
 ///
 /// struct Model {
 ///     items: Vec<String>,
@@ -167,6 +171,5 @@ mod node;
 /// the library to have collision with the `html` tag, when used as tag macro
 #[proc_macro]
 pub fn node(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let node = syn::parse_macro_input!(input as node::Node);
-    node.to_token_stream().into()
+    node::to_token_stream(input).into()
 }

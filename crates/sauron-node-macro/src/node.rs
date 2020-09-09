@@ -1,322 +1,183 @@
 use proc_macro2::{Span, TokenStream};
-use quote::ToTokens;
-use syn::{
-    ext::IdentExt as _,
-    parse::{Parse, ParseStream},
-    token, Error, Expr, ExprForLoop, Ident, Lit, LitStr, Token,
-};
+use quote::quote;
+use syn::{Expr, ExprBlock, ExprForLoop, Ident, Stmt};
+use syn_rsx::{Node, NodeType, ParserConfig};
 
-pub(super) struct Node {
-    name: Ident,
-    attrs: Vec<Attribute>,
-    children: Vec<Child>,
-}
-
-impl Node {
-    /// Parse an opening node.
-    fn parse_open(
-        input: ParseStream,
-    ) -> syn::Result<(bool, Ident, Vec<Attribute>)> {
-        input.parse::<Token![<]>()?;
-        let element = input.parse::<Ident>()?;
-
-        let mut attrs = Vec::new();
-
-        while !input.is_empty() {
-            if input.peek(Token![>]) {
-                input.parse::<Token![>]>()?;
-                return Ok((true, element, attrs));
-            }
-
-            if input.peek(Token![/]) && input.peek2(Token![>]) {
-                input.parse::<Token![/]>()?;
-                input.parse::<Token![>]>()?;
-                return Ok((false, element, attrs));
-            }
-
-            attrs.push(input.parse()?);
-        }
-
-        Err(input.error(format!("Expected closing of element `{}`", element)))
-    }
-
-    fn children_to_tokens(&self, receiver: &Ident, tokens: &mut TokenStream) {
-        if !self.children.is_empty() {
-            let count = self.children.len();
-
-            tokens.extend(quote::quote! {
-                let mut #receiver = Vec::with_capacity(#count);
-            });
-
-            for c in &self.children {
-                match c {
-                    Child::Node(node) => {
-                        tokens.extend(quote::quote! {
-                            #receiver.push(#node);
-                        });
-                    }
-                    Child::LitStr(s) => {
-                        tokens.extend(quote::quote! {
-                            #receiver.push(sauron::Node::Text(String::from(#s)));
-                        });
-                    }
-                    Child::Eval(e) => {
-                        tokens.extend(quote::quote! {
-                            #receiver.push(sauron::Node::from(#e));
-                        });
-                    }
-                    Child::Loop(ExprForLoop {
-                        pat, expr, body, ..
-                    }) => {
-                        tokens.extend(quote::quote! {
-                            for #pat in #expr {
-                                #receiver.push(sauron::Node::from(#body));
-                            }
-                        });
-                    }
-                }
-            }
-        } else {
-            tokens.extend(quote::quote! {
-                let #receiver = Vec::new();
-            });
-        }
+pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
+    match syn_rsx::parse_with_config(
+        input,
+        ParserConfig::new()
+            .number_of_top_level_nodes(1)
+            .type_of_top_level_nodes(NodeType::Element),
+    ) {
+        Ok(mut nodes) => node_to_tokens(nodes.pop().unwrap()),
+        Err(error) => error.to_compile_error(),
     }
 }
 
-impl Parse for Node {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let mut children = Vec::new();
+fn node_to_tokens(node: Node) -> TokenStream {
+    let mut tokens = TokenStream::new();
 
-        if !input.peek(Token![<]) {
-            return Err(input.error("expected opening caret"));
-        }
+    // NodeType::Element nodes can't have no name
+    let name = node.name_as_string().unwrap();
 
-        let (is_open, name, attrs) = Self::parse_open(input)?;
+    let mut attributes = vec![];
+    for attribute in &node.attributes {
+        attributes.push(attribute_to_tokens(attribute));
+    }
 
-        if is_open {
-            loop {
-                // Parse end node.
-                if input.peek(Token![<]) && input.peek2(Token![/]) {
-                    input.parse::<Token![<]>()?;
-                    input.parse::<Token![/]>()?;
-                    let end = input.parse::<Ident>()?;
-                    input.parse::<Token![>]>()?;
+    let children_tokens = children_to_tokens(node.children);
 
-                    if name != end {
-                        return Err(Error::new(
-                            end.span(),
-                            format!(
-                                "Closing node `{}` does not match open node `{}`",
-                                end, name
-                            ),
-                        ));
+    tokens.extend(quote! {{
+        let attrs = vec![#(#attributes),*];
+        #children_tokens
+        sauron::html::html_element(#name, attrs, children)
+    }});
+
+    tokens
+}
+
+fn attribute_to_tokens(attribute: &Node) -> TokenStream {
+    match &attribute.value {
+        Some(value) => {
+            match attribute.node_type {
+                NodeType::Block => {
+                    quote! {
+                        sauron::Attribute::from(#value)
                     }
-
-                    break;
                 }
+                NodeType::Attribute => {
+                    // NodeType::Attribute nodes can't have no name
+                    let name = attribute.name_as_string().unwrap();
 
-                if input.is_empty() {
-                    return Err(input.error(format!(
-                        "Expected closing of element `{}`",
-                        name
-                    )));
-                }
-
-                if input.peek(LitStr) {
-                    children.push(Child::LitStr(input.parse()?));
-                } else if input.peek(token::Brace) {
-                    let content;
-                    let _ = syn::braced!(content in input);
-
-                    let child = if content.peek(Token![for]) {
-                        let for_loop = content.parse::<ExprForLoop>()?;
-                        Child::Loop(for_loop)
+                    if name.starts_with("on_") {
+                        let name = quote::format_ident!("{}", name);
+                        quote::quote! {
+                            sauron::events::#name(#value)
+                        }
                     } else {
-                        Child::Eval(content.parse()?)
-                    };
-
-                    children.push(child);
-                } else {
-                    children.push(Child::Node(input.parse()?));
+                        let name = convert_name(&name);
+                        quote::quote! {
+                            sauron::Attribute::new(
+                                None,
+                                #name,
+                                sauron::html::attributes::AttributeValue::Simple(
+                                    sauron::html::attributes::Value::from(#value)
+                                )
+                            )
+                        }
+                    }
+                }
+                _ => {
+                    quote! {
+                        compile_error!("Unexpected NodeType")
+                    }
                 }
             }
         }
-
-        Ok(Node {
-            name,
-            attrs,
-            children,
-        })
-    }
-}
-
-impl ToTokens for Node {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        let name = LitStr::new(&self.name.to_string(), self.name.span());
-        let attrs = &self.attrs;
-
-        let receiver = Ident::new("children", Span::call_site());
-        let mut children_tokens = TokenStream::new();
-        self.children_to_tokens(&receiver, &mut children_tokens);
-
-        tokens.extend(quote::quote! {{
-            let attrs = vec![#(#attrs),*];
-            #children_tokens
-            sauron::html::html_element(#name, attrs, children)
-        }});
-    }
-}
-
-enum Attribute {
-    Event {
-        name: Ident,
-        value: Expr,
-    },
-    /// A literal attribute.
-    ///
-    /// Like `<button style="border: 1px solid red;">`.
-    Lit {
-        name: LitStr,
-        value: Lit,
-    },
-    /// An expression attribute.
-    ///
-    /// The expression is expected to evaluate to a attribute `Value`.
-    ///
-    /// Like `<button style={style()}>`.
-    Expr {
-        name: LitStr,
-        value: Expr,
-    },
-    /// An empty attribute.
-    ///
-    /// Like `<button disabled>`.
-    Empty {
-        name: LitStr,
-    },
-    /// An expression expected to generate an attribute.
-    AttributeExpr {
-        value: Expr,
-    },
-}
-
-impl Attribute {
-    /// Convert a name `n` from lower_camel to kebab-case.
-    fn convert_name(n: &str) -> String {
-        let mut out = String::with_capacity(n.len());
-
-        for c in n.trim_matches('_').chars() {
-            match c {
-                '_' => out.push('-'),
-                c => out.push(c),
+        None => {
+            let name = convert_name(&attribute.name_as_string().unwrap());
+            quote! {
+                sauron::Attribute::new(
+                    None,
+                    #name,
+                    sauron::html::attributes::AttributeValue::Empty,
+                )
             }
         }
-
-        out
     }
 }
 
-impl Parse for Attribute {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        if input.peek(token::Brace) {
-            let content;
-            let _ = syn::braced!(content in input);
-            let value = content.parse()?;
-            return Ok(Self::AttributeExpr { value });
-        }
+fn children_to_tokens(children: Vec<Node>) -> TokenStream {
+    let receiver = Ident::new("children", Span::call_site());
+    let mut tokens = TokenStream::new();
+    if !children.is_empty() {
+        let count = children.len();
 
-        let name = input.parse::<Ident>()?.unraw();
+        tokens.extend(quote! {
+            let mut #receiver = Vec::with_capacity(#count);
+        });
 
-        let event = match name.to_string().as_str() {
-            n if n.starts_with("on_") => true,
-            _ => false,
-        };
-
-        if event {
-            input.parse::<Token![=]>()?;
-
-            let content;
-            let _ = syn::braced!(content in input);
-
-            let value = content.parse()?;
-            Ok(Self::Event { name, value })
-        } else {
-            let name = LitStr::new(
-                &Self::convert_name(&name.to_string()),
-                name.span(),
-            );
-
-            if input.peek(Token![=]) {
-                input.parse::<Token![=]>()?;
-
-                if input.peek(token::Brace) {
-                    let content;
-                    let _ = syn::braced!(content in input);
-                    let value = content.parse()?;
-                    Ok(Self::Expr { name, value })
-                } else {
-                    let value = input.parse()?;
-                    Ok(Self::Lit { name, value })
+        for child in children {
+            match child.node_type {
+                NodeType::Element => {
+                    let node = node_to_tokens(child);
+                    tokens.extend(quote! {
+                        #receiver.push(#node);
+                    });
                 }
-            } else {
-                Ok(Self::Empty { name })
+                NodeType::Text => {
+                    let s = child.value_as_string().unwrap();
+                    tokens.extend(quote! {
+                        #receiver.push(sauron::Node::Text(String::from(#s)));
+                    });
+                }
+                NodeType::Block => match child.value {
+                    Some(syn::Expr::Block(expr)) => {
+                        match braced_for_loop(&expr) {
+                            Some(ExprForLoop {
+                                pat, expr, body, ..
+                            }) => {
+                                tokens.extend(quote! {
+                                        for #pat in #expr {
+                                            #receiver.push(sauron::Node::from(#body));
+                                        }
+                                    });
+                            }
+                            _ => {
+                                tokens.extend(quote! {
+                                    #receiver.push(sauron::Node::from(#expr));
+                                });
+                            }
+                        }
+                    }
+                    _ => {
+                        return quote! {
+                            compile_error!("Unexpected missing block for NodeType::Block")
+                        }
+                    }
+                },
+                _ => {
+                    return quote! {
+                        compile_error!(format!("Unexpected NodeType for child: {}", child.node_type))
+                    }
+                }
             }
+        }
+    } else {
+        tokens.extend(quote! {
+            let #receiver = Vec::new();
+        });
+    }
+
+    tokens
+}
+
+fn braced_for_loop<'a>(expr: &'a ExprBlock) -> Option<&'a ExprForLoop> {
+    let len = expr.block.stmts.len();
+    if len != 1 {
+        None
+    } else {
+        let stmt = &expr.block.stmts[0];
+        match stmt {
+            Stmt::Expr(expr) => match expr {
+                Expr::ForLoop(expr) => Some(expr),
+                _ => None,
+            },
+            _ => None,
         }
     }
 }
 
-impl ToTokens for Attribute {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        match self {
-            Self::Lit { name, value } => {
-                tokens.extend(quote::quote! {
-                    sauron::Attribute::new(
-                        None,
-                        #name,
-                        sauron::html::attributes::AttributeValue::Simple(
-                            sauron::html::attributes::Value::from(#value)
-                        )
-                    )
-                });
-            }
-            Self::Expr { name, value } => {
-                tokens.extend(quote::quote! {
-                    sauron::Attribute::new(
-                        None,
-                        #name,
-                        sauron::html::attributes::AttributeValue::Simple(
-                            sauron::html::attributes::Value::from(#value)
-                        )
-                    )
-                });
-            }
-            Self::Empty { name } => {
-                tokens.extend(quote::quote! {
-                    sauron::Attribute::new(
-                        None,
-                        #name,
-                        sauron::html::attributes::AttributeValue::Empty,
-                    )
-                });
-            }
-            Self::Event { name, value } => {
-                tokens.extend(quote::quote! {
-                    sauron::events::#name(#value)
-                });
-            }
-            Self::AttributeExpr { value } => {
-                tokens.extend(quote::quote! {
-                    sauron::Attribute::from(#value)
-                });
-            }
+fn convert_name(name: &str) -> String {
+    let mut out = String::with_capacity(name.len());
+
+    for c in name.trim_matches('_').chars() {
+        match c {
+            '_' => out.push('-'),
+            c => out.push(c),
         }
     }
-}
 
-enum Child {
-    Node(Node),
-    LitStr(LitStr),
-    Eval(Expr),
-    Loop(ExprForLoop),
+    out
 }

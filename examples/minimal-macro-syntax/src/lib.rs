@@ -27,7 +27,7 @@ impl Component<Msg> for App {
                 <h1>"Minimal example"</h1>
                 <div class="some-class" id="some-id" {attr("data-id", 1)}>
                     <input class="client"
-                            type_="button"
+                            type="button"
                             value="Click me!"
                             key=1
                             on_click={|_| {
@@ -36,7 +36,7 @@ impl Component<Msg> for App {
                             }}
                     />
                     <div>{text(format!("Clicked: {}", self.click_count))}</div>
-                    <input type_="text" value={self.click_count}/>
+                    <input type="text" value={self.click_count}/>
                 </div>
             </main>
         }

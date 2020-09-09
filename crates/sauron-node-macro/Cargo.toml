@@ -11,12 +11,13 @@ keywords = ["html", "dom", "web"]
 edition = "2018"
 
 [dependencies]
-syn = { version = "1.0.31", features = ["full"] }
+syn = { version = "1.0.40", features = ["full"] }
+syn-rsx = { version = "0.7.1" }
 quote = {package = "quote", version = "1.0.3"}
 proc-macro2 = { version = "1.0.10" }
 
 [dev-dependencies]
-sauron = { path = "../../" }
+sauron = { path = "../../", default-features = false, features = ["with-dom"] }
 
 [lib]
 proc-macro = true
