@@ -167,17 +167,6 @@ mod test {
     }
 
     #[test]
-    fn same_outcome() {
-        let white = rgba(255, 255, 255, 1.0);
-        let black = rgba(0, 0, 0, 1.0);
-        let disabled = Theme::disabled();
-        let calced = Theme::calculate_theme(white, black, false);
-        println!("{:#?}", disabled);
-        println!("{:#?}", calced);
-        assert_eq!(disabled, calced);
-    }
-
-    #[test]
     fn test_colors() {
         let salmon = rgb(250, 128, 114);
 
