@@ -138,6 +138,9 @@ where
         let html_style = document
             .create_element("style")
             .expect("must be able to create style element");
+        html_style
+            .set_attribute("name", "style_name")
+            .expect("must set attribute");
         let html_style: web_sys::Node = html_style.unchecked_into();
         html_style.set_text_content(Some(style));
         let head = document.head().expect("must have a head");

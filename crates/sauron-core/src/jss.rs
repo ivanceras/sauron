@@ -3,23 +3,39 @@
 //!
 use crate::html::attributes;
 
-/// process json to css transforming the selector
-/// if class name is specified
-pub fn process_css(namespace: Option<&str>, json: serde_json::Value) -> String {
+fn make_indent(n: usize) -> String {
+    "    ".repeat(n)
+}
+fn process_css_map(
+    indent: usize,
+    namespace: Option<&str>,
+    css_map: &serde_json::Map<String, serde_json::Value>,
+) -> String {
     let mut buffer = String::new();
-    if let Some(css) = json.as_object() {
-        for (index, (classes, style_properties)) in css.iter().enumerate() {
-            if index > 0 {
-                buffer += "\n";
-            }
-            if let Some(namespace) = &namespace {
-                buffer += &selector_namespaced(namespace.to_string(), classes);
-            } else {
-                buffer += classes;
-            }
-            buffer += " {\n";
-            if let Some(style_properties) = style_properties.as_object() {
-                for (prop, value) in style_properties {
+    for (i, (classes, style_properties)) in css_map.iter().enumerate() {
+        if i > 0 {
+            buffer += "\n";
+        }
+        if let Some(namespace) = &namespace {
+            buffer += &format!(
+                "{}{}",
+                make_indent(indent),
+                selector_namespaced(namespace.to_string(), classes)
+            );
+        } else {
+            buffer += &format!("{}{}", make_indent(indent), classes);
+        }
+        buffer += " {\n";
+        if let Some(style_properties) = style_properties.as_object() {
+            for (prop, value) in style_properties {
+                if value.is_object() {
+                    buffer += &process_css_map(
+                        indent + 1,
+                        namespace,
+                        style_properties,
+                    );
+                    buffer += "\n";
+                } else {
                     let value_str = match value {
                         serde_json::Value::String(s) => s.to_string(),
                         serde_json::Value::Number(v) => v.to_string(),
@@ -28,11 +44,30 @@ pub fn process_css(namespace: Option<&str>, json: serde_json::Value) -> String {
                             "supported values are String, Number or Bool only"
                         ),
                     };
-                    buffer += &format!("    {}: {};\n", prop, value_str);
+                    buffer += &format!(
+                        "{}{}: {};\n",
+                        make_indent(indent + 1),
+                        prop,
+                        value_str
+                    );
                 }
             }
-            buffer += "}";
         }
+        buffer += &make_indent(indent);
+        buffer += "}";
+    }
+    buffer
+}
+
+/// process json to css transforming the selector
+/// if class name is specified
+pub fn process_css(
+    namespace: Option<&str>,
+    json: &serde_json::Value,
+) -> String {
+    let mut buffer = String::new();
+    if let Some(css) = json.as_object() {
+        buffer += &process_css_map(0, namespace, &css);
     }
     buffer
 }
@@ -43,7 +78,7 @@ macro_rules! jss_ns {
     ($namespace: tt, $($tokens:tt)+) => {
         {
             let json = serde_json::json!($($tokens)*);
-            $crate::jss::process_css(Some($namespace), json)
+            $crate::jss::process_css(Some($namespace), &json)
         }
     };
 }
@@ -54,7 +89,7 @@ macro_rules! jss {
     ($($tokens:tt)+) => {
         {
             let json = serde_json::json!($($tokens)*);
-            $crate::jss::process_css(None, json)
+            $crate::jss::process_css(None, &json)
         }
     };
 
@@ -232,6 +267,48 @@ mod test {
 .frame__layer {
     background-color: red;
     border: 1px solid green;
+}
+.frame__hide .frame__layer {
+    opacity: 0;
+}"#;
+        println!("{}", css);
+        assert_eq!(expected, css);
+    }
+
+    #[test]
+    fn test_jss_ns_with_media_query() {
+        let css = jss_ns!("frame",{
+            ".": {
+                "display": "block",
+            },
+
+            ".layer": {
+                "background-color": "red",
+                "border": "1px solid green",
+            },
+
+            "@media screen and (max-width: 800px)": {
+              ".layer": {
+                "width": "100%",
+              }
+            },
+
+            ".hide .layer": {
+                "opacity": 0,
+            },
+        });
+
+        let expected = r#".frame {
+    display: block;
+}
+.frame__layer {
+    background-color: red;
+    border: 1px solid green;
+}
+@media screen and (max-width: 800px) {
+    .frame__layer {
+        width: 100%;
+    }
 }
 .frame__hide .frame__layer {
     opacity: 0;
