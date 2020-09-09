@@ -1,24 +1,16 @@
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{Expr, ExprBlock, ExprForLoop, Ident, Stmt};
-use syn_rsx::{Node, NodeType};
+use syn_rsx::{Node, NodeType, ParserConfig};
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
-    match syn_rsx::parse(input, None) {
-        Ok(mut nodes) => {
-            if nodes.len() != 1 {
-                return quote! {
-                    compile_error!("Exactly one top level node is required")
-                };
-            }
-            let node = nodes.pop().unwrap();
-            match node.node_type {
-                NodeType::Element => node_to_tokens(node),
-                _ => quote! {
-                    compile_error!("Top level node needs to be an element")
-                },
-            }
-        }
+    match syn_rsx::parse_with_config(
+        input,
+        ParserConfig::new()
+            .number_of_top_level_nodes(1)
+            .type_of_top_level_nodes(NodeType::Element),
+    ) {
+        Ok(mut nodes) => node_to_tokens(nodes.pop().unwrap()),
         Err(error) => error.to_compile_error(),
     }
 }
