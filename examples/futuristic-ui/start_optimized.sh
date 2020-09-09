@@ -5,6 +5,6 @@ set -v
 . ./bootstrap.sh
 
 
-wasm-pack build --target web --release -- --features "wee_alloc"
+./build_optimized.sh
 
 basic-http-server ./ -a 0.0.0.0:4001

@@ -2,6 +2,8 @@
 
 set -v
 
+./build_optimized.sh
+
 dest="../../../ivanceras.github.io/futuristic-ui/"
 
 mkdir -p "$dest"
