@@ -29,9 +29,12 @@ fn node_to_tokens(node: Node) -> TokenStream {
     let children_tokens = children_to_tokens(node.children);
 
     tokens.extend(quote! {{
-        let attrs = vec![#(#attributes),*];
-        #children_tokens
-        sauron::html::html_element(#name, attrs, children)
+        #[allow(unused_braces)]
+        {
+            let attrs = vec![#(#attributes),*];
+            #children_tokens
+            sauron::html::html_element(#name, attrs, children)
+        }
     }});
 
     tokens
