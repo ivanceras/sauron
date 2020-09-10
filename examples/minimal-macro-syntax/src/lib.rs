@@ -1,9 +1,10 @@
 #![deny(warnings)]
 use log::trace;
-use sauron::html::attributes::attr;
-use sauron::html::text;
 use sauron::prelude::*;
-use sauron::{Cmd, Component, Node, Program};
+use sauron::{
+    html::{attributes::attr, text},
+    node, Cmd, Component, Node, Program,
+};
 
 #[derive(Debug)]
 pub enum Msg {
