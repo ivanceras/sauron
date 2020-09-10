@@ -158,7 +158,7 @@ impl Model {
             <section class="main">
                 <input
                         class="toggle-all"
-                        type_="checkbox"
+                        type="checkbox"
                         checked={self.is_all_completed()}
                         on_click={|_| Msg::ToggleAll}
                 />
@@ -228,7 +228,7 @@ impl Model {
             <li class={class_name} key={format!("todo-{}", entry.id)}>
                   <div class="view">
                        <input class="toggle"
-                           type_="checkbox"
+                           type="checkbox"
                            checked={entry.completed}
                            on_click={move |_| Msg::Toggle(entry_id)}
                        />
@@ -242,7 +242,7 @@ impl Model {
                        </button>
                     </div>
                     <input class="edit"
-                        type_="text"
+                        type="text"
                         hidden={!entry.editing}
                         value={&entry.description}
                         on_input={move |input: InputEvent| {
