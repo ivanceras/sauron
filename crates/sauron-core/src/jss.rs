@@ -77,7 +77,7 @@ pub fn process_css(
 macro_rules! jss_ns {
     ($namespace: tt, $($tokens:tt)+) => {
         {
-            let json = $crate::serde_json::json!($($tokens)*);
+            let json = serde_json::json!($($tokens)*);
             $crate::jss::process_css(Some($namespace), &json)
         }
     };
@@ -88,7 +88,7 @@ macro_rules! jss_ns {
 macro_rules! jss {
     ($($tokens:tt)+) => {
         {
-            let json = $cate::serde_json::json!($($tokens)*);
+            let json = serde_json::json!($($tokens)*);
             $crate::jss::process_css(None, &json)
         }
     };
