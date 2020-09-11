@@ -22,6 +22,9 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use wasm_bindgen;
 }}
 
+// reexport serde_json
+pub use serde_json;
+
 /// When event is not needed, such as just rendering the dom
 /// tree in server side application
 #[cfg(not(feature = "with-dom"))]
@@ -56,6 +59,7 @@ pub mod prelude {
         svg::{attributes::*, tags::commons::*, *},
         *,
     };
+    pub use serde_json;
     #[cfg(feature = "with-dom")]
     pub use wasm_bindgen::prelude::*;
     #[cfg(feature = "with-dom")]

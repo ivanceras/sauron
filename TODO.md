@@ -38,6 +38,10 @@
 - [X] Get rid of test_fixtures and move it to test directory
 - [ ] Make each component have a reference to the root dom where it is mounted.
     - This will make local state changes to the component easier to do, as opposed to diffing the whole DOM tree.
+- [ ] Unify the code of Program replace_mount, append_mount
+- [ ] replace the request_animation_frame with the code from execute_request_animation frame
+- [ ] Create a function to derive Component name from the struct name of the Component
+    and preprocess the jss with it before injecting it to the main program
 
 
 

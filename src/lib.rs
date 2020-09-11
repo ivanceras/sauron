@@ -187,6 +187,9 @@ pub use sauron_core::{
     diff, html, jss, svg, Attribute, Callback, Element, Node, Patch, Render,
 };
 
+// reexports
+pub use sauron_core::serde_json;
+
 #[cfg(any(feature = "with-markdown", feature = "with-lite-markdown"))]
 pub use sauron_markdown::markdown;
 #[cfg(feature = "with-node-macro")]
