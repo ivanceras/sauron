@@ -114,8 +114,6 @@ fn subsequent_updates() {
         ],
     );
 
-    let update1_clone = update1.clone();
-
     let patches1 = diff(&old, &update1);
 
     log::trace!("patches1: {:#?}", patches1);
@@ -252,7 +250,7 @@ fn subsequent_updates() {
     log::trace!("expected: {:?}", container.outer_html());
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1.clone());
 
     let container = document
         .query_selector(".editor")
@@ -372,7 +370,7 @@ fn subsequent_updates() {
         ],
     );
 
-    let patches2 = diff(&update1_clone, &update2);
+    let patches2 = diff(&update1, &update2);
     log::trace!("patches2: {:#?}", patches2);
     assert_eq!(
         patches2,
@@ -397,7 +395,7 @@ fn subsequent_updates() {
         ]
     );
 
-    dom_updater.update_dom(&simple_program, update2);
+    dom_updater.update_dom(&simple_program, update2.clone());
 
     let container = document
         .query_selector(".editor")
@@ -466,4 +464,169 @@ fn subsequent_updates() {
                             <footer node_idx=\"22\">line:0, col:0</footer>\
                         </main>";
     assert_eq!(expected2, container.outer_html());
+
+    let update3: Node<()> = main(
+        vec![class("editor")],
+        vec![
+            section(
+                vec![class("lines")],
+                vec![
+                    div(
+                        vec![key("hashZZZ")],
+                        vec![
+                            div(vec![], vec![text("0")]),
+                            div(vec![], vec![text("\n")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hashYYY")],
+                        vec![
+                            div(vec![], vec![text("1")]),
+                            div(vec![], vec![text("lineYYY")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hashXXX")],
+                        vec![
+                            div(vec![], vec![text("2")]),
+                            div(vec![], vec![text("lineXXX")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash0")],
+                        vec![
+                            div(vec![], vec![text("3")]),
+                            div(vec![], vec![text("line0")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash1")],
+                        vec![
+                            div(vec![], vec![text("4")]),
+                            div(vec![], vec![text("line1")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash2")],
+                        vec![
+                            div(vec![], vec![text("5")]),
+                            div(vec![], vec![text("line2")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash3")],
+                        vec![
+                            div(vec![], vec![text("6")]),
+                            div(vec![], vec![text("line3")]),
+                        ],
+                    ),
+                ],
+            ),
+            footer(vec![], vec![text("line:0, col:0")]),
+        ],
+    );
+
+    let patches3 = diff(&update2, &update3);
+    log::trace!("patches2: {:#?}", patches3);
+    assert_eq!(
+        patches3,
+        vec![
+            Patch::ChangeText(ChangeText::new(4, "0", "1")),
+            Patch::ChangeText(ChangeText::new(9, "1", "2")),
+            Patch::ChangeText(ChangeText::new(14, "2", "3")),
+            Patch::ChangeText(ChangeText::new(19, "3", "4")),
+            Patch::ChangeText(ChangeText::new(24, "4", "5")),
+            Patch::ChangeText(ChangeText::new(29, "5", "6")),
+            Patch::InsertChildren(
+                &"section",
+                1,
+                0,
+                vec![&div(
+                    vec![key("hashZZZ")],
+                    vec![
+                        div(vec![], vec![text("0")]),
+                        div(vec![], vec![text("\n")]),
+                    ],
+                ),]
+            )
+        ]
+    );
+
+    dom_updater.update_dom(&simple_program, update3.clone());
+
+    let container = document
+        .query_selector(".editor")
+        .expect("must not error")
+        .expect("must exist");
+
+    #[cfg(not(feature = "with-measure"))]
+    let expected3 = "<main class=\"editor\">\
+                        <section class=\"lines\">\
+                            <div key=\"hashZZZ\">\
+                                <div>0</div>\
+                                <div>\n</div>\
+                            </div>\
+                            <div key=\"hashYYY\">\
+                                <div>1</div>\
+                                <div>lineYYY</div>\
+                            </div>\
+                            <div key=\"hashXXX\">\
+                                <div>2</div>\
+                                <div>lineXXX</div>\
+                            </div>\
+                            <div key=\"hash0\">\
+                                <div>3</div>\
+                                <div>line0</div>\
+                            </div>\
+                            <div key=\"hash1\">\
+                                <div>4</div>\
+                                <div>line1</div>\
+                            </div>\
+                            <div key=\"hash2\">\
+                                <div>5</div>\
+                                <div>line2</div>\
+                            </div>\
+                            <div key=\"hash3\">\
+                                <div>6</div>\
+                                <div>line3</div>\
+                            </div>\
+                        </section>\
+                            <footer>line:0, col:0</footer>\
+                        </main>";
+
+    #[cfg(feature = "with-measure")]
+    let expected3 = "<main class=\"editor\" node_idx=\"0\">\
+                        <section class=\"lines\" node_idx=\"1\">\
+                            <div key=\"hashZZZ\">\
+                                <div>0</div>\
+                                <div>\n</div>\
+                            </div>\
+                            <div key=\"hashYYY\">\
+                                <div>1</div>\
+                                <div>lineYYY</div>\
+                            </div>\
+                            <div key=\"hashXXX\">\
+                                <div>2</div>\
+                                <div>lineXXX</div>\
+                            </div>\
+                            <div key=\"hash0\" node_idx=\"2\">\
+                                <div node_idx=\"3\">3</div>\
+                                <div node_idx=\"5\">line0</div>\
+                            </div>\
+                            <div key=\"hash1\" node_idx=\"7\">\
+                                <div node_idx=\"8\">4</div>\
+                                <div node_idx=\"10\">line1</div>\
+                            </div>\
+                            <div key=\"hash2\" node_idx=\"12\">\
+                                <div node_idx=\"13\">5</div>\
+                                <div node_idx=\"15\">line2</div>\
+                            </div>\
+                            <div key=\"hash3\" node_idx=\"17\">\
+                                <div node_idx=\"18\">6</div>\
+                                <div node_idx=\"20\">line3</div>\
+                            </div>\
+                        </section>\
+                            <footer node_idx=\"22\">line:0, col:0</footer>\
+                        </main>";
+    assert_eq!(expected3, container.outer_html());
 }
