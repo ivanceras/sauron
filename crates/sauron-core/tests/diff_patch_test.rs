@@ -2,6 +2,7 @@
 use sauron_core::{
     diff,
     html::{attributes::*, events::*, *},
+    mt_dom::diff::ChangeText,
     Attribute, Node, Patch,
 };
 
@@ -380,7 +381,7 @@ fn replace_text_node() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::ChangeText(0, "New")],
+        vec![Patch::ChangeText(ChangeText::new(0, "Old", "New"))],
         "Replace text node",
     );
 }
@@ -432,7 +433,11 @@ fn text_changed_in_keyed_elements() {
     assert_eq!(
         patch,
         vec![
-            Patch::ChangeText(7, "item3 with changes"),
+            Patch::ChangeText(ChangeText::new(
+                7,
+                "item3",
+                "item3 with changes"
+            )),
             Patch::RemoveChildren(&"section", 1, vec![0])
         ]
     );

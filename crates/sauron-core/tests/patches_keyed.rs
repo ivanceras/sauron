@@ -1,6 +1,7 @@
 use log::*;
 use sauron_core::{
     html::{attributes::*, events::*, *},
+    mt_dom::diff::ChangeText,
     *,
 };
 use std::{cell::RefCell, rc::Rc};
@@ -238,7 +239,11 @@ fn node_patched_properly_text_changed() {
     assert_eq!(
         patches,
         vec![
-            Patch::ChangeText(7, "item3 with changes"),
+            Patch::ChangeText(ChangeText::new(
+                7,
+                "item3",
+                "item3 with changes"
+            )),
             Patch::RemoveChildren(&"section", 1, vec![0])
         ]
     );
@@ -323,19 +328,25 @@ fn mixed_keyed_and_non_keyed_elements() {
     );
 
     let patches = diff(&old, &update1);
-    debug!("patches: {:#?}", patches);
     assert_eq!(
         patches,
         vec![
-            Patch::ChangeText(7, "item3 with changes"),
+            Patch::ChangeText(ChangeText::new(
+                7,
+                "item3",
+                "item3 with changes"
+            )),
             Patch::RemoveChildren(&"section", 1, vec![0]),
-            Patch::ChangeText(9, "2 items left")
+            Patch::ChangeText(ChangeText::new(
+                9,
+                "3 items left",
+                "2 items left"
+            ))
         ]
     );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
-    debug!("old html: {}", old_html);
 
     let simple_program = simple_program();
     let mut dom_updater = DomUpdater::new_append_to_mount(
@@ -358,7 +369,6 @@ fn mixed_keyed_and_non_keyed_elements() {
         <footer>3 items left</footer>\
         </main>";
 
-    debug!("original outer html: {}", container.outer_html());
     assert_eq!(expected, container.outer_html());
 
     dom_updater.update_dom(&simple_program, update1);
@@ -367,7 +377,6 @@ fn mixed_keyed_and_non_keyed_elements() {
         .query_selector(".test5")
         .expect("must not error")
         .expect("must exist");
-    debug!("after update: {}", container.outer_html());
 
     let expected1 = "<main class=\"test5\">\
         <section class=\"todo\">\

@@ -64,7 +64,11 @@ where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
         let created_node: CreatedNode<Node> =
-            CreatedNode::<Node>::create_dom_node(program, &self.current_vdom);
+            CreatedNode::<Node>::create_dom_node(
+                program,
+                &self.current_vdom,
+                &mut Some(0),
+            );
         if replace {
             let root_element: &Element = self.root_node.unchecked_ref();
             root_element
@@ -134,6 +138,8 @@ where
         let patches = diff(&self.current_vdom, &new_vdom);
         #[cfg(feature = "with-measure")]
         log::trace!("applying {} patches", patches.len());
+        #[cfg(feature = "with-measure")]
+        log::trace!("patches: {:#?}", patches);
         let active_closures = patch(
             Some(program),
             self.root_node.clone(),

@@ -5,6 +5,7 @@ use crate::{
         created_node::{ActiveClosure, CreatedNode},
     },
     mt_dom::AttValue,
+    mt_dom::NodeIdx,
     Dispatch, Patch,
 };
 use js_sys::Function;
@@ -43,8 +44,13 @@ where
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = element_nodes_to_patch.get(&patch_node_idx) {
-            let new_closures =
-                apply_element_patch(program, &element, old_closures, &patch)?;
+            let new_closures = apply_element_patch(
+                program,
+                &element,
+                old_closures,
+                &patch,
+                &mut Some(patch_node_idx),
+            )?;
             active_closures.extend(new_closures);
             continue;
         }
@@ -102,15 +108,24 @@ fn find_nodes_recursive(
     let child_node_count = children.length();
 
     // If the root node matches, mark it for patching
-    if let Some(tag) = nodes_to_find.get(&cur_node_idx) {
+    if let Some(_tag) = nodes_to_find.get(&cur_node_idx) {
         match node.node_type() {
             Node::ELEMENT_NODE => {
                 let element: Element = node.unchecked_into();
-                let vtag = tag.expect("must have a tag here");
+                /*
+                let vtag = tag.unwrap_or_else(|| {
+                    log::trace!("tag: {:?}", tag);
+                    log::trace!("element: {}", element.outer_html());
+                    panic!(
+                        "must have a tag here at cur_node_idx: {} ",
+                        cur_node_idx
+                    )
+                });
                 assert_eq!(
                     element.tag_name().to_uppercase(),
                     vtag.to_uppercase()
                 );
+                */
 
                 element_nodes_to_patch.insert(*cur_node_idx, element);
             }
@@ -122,13 +137,12 @@ fn find_nodes_recursive(
         }
     }
 
-    *cur_node_idx += 1;
-
     for i in 0..child_node_count {
         let child_node = children.item(i).expect("Expecting a child node");
 
         match child_node.node_type() {
             Node::ELEMENT_NODE => {
+                *cur_node_idx += 1;
                 let child_to_patch = find_nodes_recursive(
                     child_node,
                     cur_node_idx,
@@ -139,14 +153,15 @@ fn find_nodes_recursive(
                 text_nodes_to_patch.extend(child_to_patch.1);
             }
             Node::TEXT_NODE => {
+                *cur_node_idx += 1;
                 if nodes_to_find.get(&cur_node_idx).is_some() {
                     text_nodes_to_patch
                         .insert(*cur_node_idx, child_node.unchecked_into());
                 }
-
-                *cur_node_idx += 1;
             }
             Node::COMMENT_NODE => {
+                *cur_node_idx += 1;
+                log::error!("Found a comment node..");
                 // At this time we do not support user entered comment nodes, so if we see a comment
                 // then it was a delimiter created by virtual-dom-rs in order to ensure that two
                 // neighboring text nodes did not get merged into one by the browser. So we skip
@@ -262,6 +277,7 @@ fn apply_element_patch<DSP, MSG>(
     node: &Element,
     old_closures: &mut ActiveClosure,
     patch: &Patch<MSG>,
+    node_idx: &mut Option<NodeIdx>,
 ) -> Result<ActiveClosure, JsValue>
 where
     MSG: 'static,
@@ -269,8 +285,8 @@ where
 {
     let mut active_closures = ActiveClosure::new();
 
-    let vtag = *patch.tag().expect("must have a tag");
-    assert_eq!(node.tag_name().to_uppercase(), vtag.to_uppercase());
+    //let vtag = *patch.tag().expect("must have a tag");
+    //assert_eq!(node.tag_name().to_uppercase(), vtag.to_uppercase());
 
     match patch {
         Patch::InsertChildren(_tag, _node_idx, child_idx, new_children) => {
@@ -278,10 +294,10 @@ where
             let children_nodes = parent.child_nodes();
             let mut active_closures = HashMap::new();
             for new_child in new_children {
-                let created_node = CreatedNode::<Node>::create_dom_node_opt::<
-                    DSP,
-                    MSG,
-                >(program, &new_child);
+                let created_node =
+                    CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
+                        program, &new_child, node_idx,
+                    );
                 let next_sibling = children_nodes
                     .item((*child_idx) as u32)
                     .expect("next item must exist");
@@ -333,7 +349,7 @@ where
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                 DSP,
                 MSG,
-            >(program, new_node);
+            >(program, new_node, node_idx);
             remove_event_listeners(&node, old_closures)?;
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
@@ -380,17 +396,23 @@ where
             let parent = &node;
             let mut active_closures = HashMap::new();
             for new_node in new_nodes {
-                let created_node = CreatedNode::<Node>::create_dom_node_opt::<
-                    DSP,
-                    MSG,
-                >(program, &new_node);
+                let created_node =
+                    CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
+                        program, &new_node, node_idx,
+                    );
                 parent.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }
 
             Ok(active_closures)
         }
-        Patch::ChangeText(_node_idx, _new_node) => {
+        Patch::ChangeText(_ct) => {
+            log::debug!("ct: {:?}", _ct);
+            log::debug!(
+                "this is a change text: {:?} for {:?}",
+                patch,
+                node.outer_html()
+            );
             unreachable!("Elements should not receive ChangeText patches.")
         }
     }
@@ -406,15 +428,14 @@ where
     DSP: Clone + Dispatch<MSG> + 'static,
 {
     match patch {
-        Patch::ChangeText(_node_idx, new_text) => {
-            println!("patching text node: {:?}", node);
-            node.set_node_value(Some(&new_text));
+        Patch::ChangeText(ct) => {
+            node.set_node_value(Some(ct.get_new()));
         }
         Patch::Replace(_tag, _node_idx, new_node) => {
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                 DSP,
                 MSG,
-            >(program, new_node);
+            >(program, new_node, &mut None);
             node.replace_with_with_node_1(&created_node.node)?;
         }
         _other => unreachable!(

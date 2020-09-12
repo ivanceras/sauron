@@ -1,4 +1,5 @@
 #![deny(warnings)]
+use sauron_core::mt_dom::diff::ChangeText;
 use sauron_core::prelude::*;
 
 #[test]
@@ -277,7 +278,7 @@ fn replace_text_node() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::ChangeText(0, "New")],
+        vec![Patch::ChangeText(ChangeText::new(0, "Old", "New"))],
         "Replace text node",
     );
 }

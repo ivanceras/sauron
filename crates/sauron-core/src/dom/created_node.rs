@@ -1,7 +1,7 @@
 use crate::{
     dom::Dispatch,
     html,
-    mt_dom::{AttValue, Callback},
+    mt_dom::{AttValue, Callback, NodeIdx},
     prelude::AttributeValue,
     Attribute, Event,
 };
@@ -69,12 +69,13 @@ impl<T> CreatedNode<T> {
     pub fn create_dom_node<DSP, MSG>(
         program: &DSP,
         vnode: &crate::Node<MSG>,
+        node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        Self::create_dom_node_opt(Some(program), vnode)
+        Self::create_dom_node_opt(Some(program), vnode, node_idx)
     }
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
@@ -82,6 +83,7 @@ impl<T> CreatedNode<T> {
     pub fn create_dom_node_opt<DSP, MSG>(
         program: Option<&DSP>,
         vnode: &crate::Node<MSG>,
+        node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
@@ -93,7 +95,8 @@ impl<T> CreatedNode<T> {
             }
             crate::Node::Element(element_node) => {
                 let created_element: CreatedNode<Node> =
-                    Self::create_element_node(program, element_node).into();
+                    Self::create_element_node(program, element_node, node_idx)
+                        .into();
                 created_element
             }
         }
@@ -256,6 +259,7 @@ impl<T> CreatedNode<T> {
     pub fn create_element_node<DSP, MSG>(
         program: Option<&DSP>,
         velem: &crate::Element<MSG>,
+        node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode<Element>
     where
         MSG: 'static,
@@ -284,10 +288,21 @@ impl<T> CreatedNode<T> {
             &velem.get_attributes().iter().collect::<Vec<_>>(),
         );
 
+        #[cfg(feature = "with-measure")]
+        if let Some(node_idx) = node_idx {
+            Self::set_element_attributes(
+                program,
+                &mut closures,
+                &element,
+                &[&crate::prelude::attr("node_idx", *node_idx)],
+            );
+        }
+
         let mut previous_node_was_text = false;
         for child in velem.get_children().iter() {
             match child {
                 crate::Node::Text(text_node) => {
+                    node_idx.as_mut().map(|idx| *idx += 1);
                     let current_node: &web_sys::Node = element.as_ref();
 
                     // We ensure that the text siblings are patched by preventing the browser from merging
@@ -310,10 +325,14 @@ impl<T> CreatedNode<T> {
                     previous_node_was_text = true;
                 }
                 crate::Node::Element(element_node) => {
+                    node_idx.as_mut().map(|idx| *idx += 1);
                     previous_node_was_text = false;
 
-                    let child =
-                        Self::create_element_node(program, element_node);
+                    let child = Self::create_element_node(
+                        program,
+                        element_node,
+                        node_idx,
+                    );
                     let child_elem: Element = child.node;
                     closures.extend(child.closures);
 
