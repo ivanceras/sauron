@@ -28,57 +28,168 @@ fn subsequent_updates() {
     let document = web_sys::window().unwrap().document().unwrap();
 
     let old: Node<()> = main(
-        vec![class("test5")],
+        vec![class("editor")],
         vec![
             section(
-                vec![class("todo")],
+                vec![class("lines")],
                 vec![
-                    article(vec![key(1)], vec![text("item1")]),
-                    article(vec![key(2)], vec![text("item2")]),
-                    article(vec![key(3)], vec![text("item3")]),
+                    div(
+                        vec![key("hash0")],
+                        vec![
+                            div(vec![], vec![text("0")]),
+                            div(vec![], vec![text("line0")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash1")],
+                        vec![
+                            div(vec![], vec![text("1")]),
+                            div(vec![], vec![text("line1")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash2")],
+                        vec![
+                            div(vec![], vec![text("2")]),
+                            div(vec![], vec![text("line2")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash3")],
+                        vec![
+                            div(vec![], vec![text("3")]),
+                            div(vec![], vec![text("line3")]),
+                        ],
+                    ),
                 ],
             ),
-            footer(vec![], vec![text("3 items left")]),
+            footer(vec![], vec![text("line:0, col:0")]),
         ],
     );
 
-    // we remove the key1
     let update1: Node<()> = main(
-        vec![class("test5")],
+        vec![class("editor")],
         vec![
             section(
-                vec![class("todo")],
+                vec![class("lines")],
                 vec![
-                    article(vec![key(2)], vec![text("item2")]),
-                    article(vec![key(3)], vec![text("item3 with changes")]),
+                    div(
+                        vec![key("hashXXX")],
+                        vec![
+                            div(vec![], vec![text("0")]),
+                            div(vec![], vec![text("lineXXX")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash0")],
+                        vec![
+                            div(vec![], vec![text("1")]),
+                            div(vec![], vec![text("line0")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash1")],
+                        vec![
+                            div(vec![], vec![text("2")]),
+                            div(vec![], vec![text("line1")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash2")],
+                        vec![
+                            div(vec![], vec![text("3")]),
+                            div(vec![], vec![text("line2")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash3")],
+                        vec![
+                            div(vec![], vec![text("4")]),
+                            div(vec![], vec![text("line3")]),
+                        ],
+                    ),
                 ],
             ),
-            footer(vec![], vec![text("2 items left")]),
+            footer(vec![], vec![text("line:0, col:0")]),
         ],
     );
 
     let update1_clone = update1.clone();
 
-    let patches = diff(&old, &update1);
+    let patches1 = diff(&old, &update1);
+
+    log::trace!("patches1: {:#?}", patches1);
     assert_eq!(
-        patches,
+        patches1,
         vec![
-            Patch::ChangeText(ChangeText::new(
-                7,
-                "item3",
-                "item3 with changes"
-            )),
-            Patch::RemoveChildren(&"section", 1, vec![0]),
-            Patch::ChangeText(ChangeText::new(
-                9,
-                "3 items left",
-                "2 items left"
-            ))
+            Patch::ChangeText(ChangeText::new(4, "0", "1")),
+            Patch::ChangeText(ChangeText::new(9, "1", "2")),
+            Patch::ChangeText(ChangeText::new(14, "2", "3")),
+            Patch::ChangeText(ChangeText::new(19, "3", "4")),
+            Patch::InsertChildren(
+                &"section",
+                1,
+                0,
+                vec![&div(
+                    vec![key("hashXXX")],
+                    vec![
+                        div(vec![], vec![text("0")]),
+                        div(vec![], vec![text("lineXXX")]),
+                    ],
+                )]
+            )
         ]
     );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
+    log::trace!("old html: {}", old_html);
+    #[cfg(not(feature = "with-measure"))]
+    let expected_old = r#"<main class="editor">
+    <section class="lines">
+        <div key="hash0">
+            <div>0</div>
+            <div>line0</div>
+        </div>
+        <div key="hash1">
+            <div>1</div>
+            <div>line1</div>
+        </div>
+        <div key="hash2">
+            <div>2</div>
+            <div>line2</div>
+        </div>
+        <div key="hash3">
+            <div>3</div>
+            <div>line3</div>
+        </div>
+    </section>
+    <footer>line:0, col:0</footer>
+</main>"#;
+
+    #[cfg(feature = "with-measure")]
+    let expected_old = r#"<main class="editor" node_idx="0">
+    <section class="lines" node_idx="1">
+        <div key="hash0" node_idx="2">
+            <div node_idx="3">0</div>
+            <div node_idx="5">line0</div>
+        </div>
+        <div key="hash1" node_idx="7">
+            <div node_idx="8">1</div>
+            <div node_idx="10">line1</div>
+        </div>
+        <div key="hash2" node_idx="12">
+            <div node_idx="13">2</div>
+            <div node_idx="15">line2</div>
+        </div>
+        <div key="hash3" node_idx="17">
+            <div node_idx="18">3</div>
+            <div node_idx="20">line3</div>
+        </div>
+    </section>
+    <footer node_idx="22">line:0, col:0</footer>
+</main>"#;
+    assert_eq!(old_html, expected_old);
 
     let simple_program = simple_program();
     let mut dom_updater = DomUpdater::new_append_to_mount(
@@ -88,73 +199,271 @@ fn subsequent_updates() {
     );
 
     let container = document
-        .query_selector(".test5")
+        .query_selector(".editor")
         .expect("must not error")
         .expect("must exist");
 
-    let expected = "<main class=\"test5\">\
-        <section class=\"todo\">\
-        <article key=\"1\">item1</article>\
-        <article key=\"2\">item2</article>\
-        <article key=\"3\">item3</article>\
-        </section>\
-        <footer>3 items left</footer>\
-        </main>";
+    #[cfg(not(feature = "with-measure"))]
+    let expected = "<main class=\"editor\">\
+                        <section class=\"lines\">\
+                            <div key=\"hash0\">\
+                                <div>0</div>\
+                                <div>line0</div>\
+                            </div>\
+                            <div key=\"hash1\">\
+                                <div>1</div>\
+                                <div>line1</div>\
+                            </div>\
+                            <div key=\"hash2\">\
+                                <div>2</div>\
+                                <div>line2</div>\
+                            </div>\
+                            <div key=\"hash3\">\
+                                <div>3</div>\
+                                <div>line3</div>\
+                            </div>\
+                        </section>\
+                            <footer>line:0, col:0</footer>\
+                        </main>";
 
+    #[cfg(feature = "with-measure")]
+    let expected = "<main class=\"editor\" node_idx=\"0\">\
+                        <section class=\"lines\" node_idx=\"1\">\
+                            <div key=\"hash0\" node_idx=\"2\">\
+                                <div node_idx=\"3\">0</div>\
+                                <div node_idx=\"5\">line0</div>\
+                            </div>\
+                            <div key=\"hash1\" node_idx=\"7\">\
+                                <div node_idx=\"8\">1</div>\
+                                <div node_idx=\"10\">line1</div>\
+                            </div>\
+                            <div key=\"hash2\" node_idx=\"12\">\
+                                <div node_idx=\"13\">2</div>\
+                                <div node_idx=\"15\">line2</div>\
+                            </div>\
+                            <div key=\"hash3\" node_idx=\"17\">\
+                                <div node_idx=\"18\">3</div>\
+                                <div node_idx=\"20\">line3</div>\
+                            </div>\
+                        </section>\
+                            <footer node_idx=\"22\">line:0, col:0</footer>\
+                        </main>";
+
+    log::trace!("expected: {:?}", container.outer_html());
     assert_eq!(expected, container.outer_html());
 
     dom_updater.update_dom(&simple_program, update1);
 
     let container = document
-        .query_selector(".test5")
+        .query_selector(".editor")
         .expect("must not error")
         .expect("must exist");
 
-    let expected1 = "<main class=\"test5\">\
-        <section class=\"todo\">\
-        <article key=\"2\">item2</article>\
-        <article key=\"3\">item3 with changes</article>\
-        </section>\
-        <footer>2 items left</footer>\
-        </main>";
+    log::trace!("expected1 {:?}", container.outer_html());
 
+    #[cfg(not(feature = "with-measure"))]
+    let expected1 = "<main class=\"editor\">\
+                        <section class=\"lines\">\
+                            <div key=\"hashXXX\">\
+                                <div>0</div>\
+                                <div>lineXXX</div>\
+                            </div>\
+                            <div key=\"hash0\">\
+                                <div>1</div>\
+                                <div>line0</div>\
+                            </div>\
+                            <div key=\"hash1\">\
+                                <div>2</div>\
+                                <div>line1</div>\
+                            </div>\
+                            <div key=\"hash2\">\
+                                <div>3</div>\
+                                <div>line2</div>\
+                            </div>\
+                            <div key=\"hash3\">\
+                                <div>4</div>\
+                                <div>line3</div>\
+                            </div>\
+                        </section>\
+                        <footer>line:0, col:0</footer>\
+                        </main>";
+
+    // The node_idx here is from the previous DOM, and since
+    // node_idx attribute is not diff therefore there is no patch for it.
+    #[cfg(feature = "with-measure")]
+    let expected1 = "<main class=\"editor\" node_idx=\"0\">\
+                        <section class=\"lines\" node_idx=\"1\">\
+                            <div key=\"hashXXX\">\
+                                <div>0</div>\
+                                <div>lineXXX</div>\
+                            </div>\
+                            <div key=\"hash0\" node_idx=\"2\">\
+                                <div node_idx=\"3\">1</div>\
+                                <div node_idx=\"5\">line0</div>\
+                            </div>\
+                            <div key=\"hash1\" node_idx=\"7\">\
+                                <div node_idx=\"8\">2</div>\
+                                <div node_idx=\"10\">line1</div>\
+                            </div>\
+                            <div key=\"hash2\" node_idx=\"12\">\
+                                <div node_idx=\"13\">3</div>\
+                                <div node_idx=\"15\">line2</div>\
+                            </div>\
+                            <div key=\"hash3\" node_idx=\"17\">\
+                                <div node_idx=\"18\">4</div>\
+                                <div node_idx=\"20\">line3</div>\
+                            </div>\
+                        </section>\
+                            <footer node_idx=\"22\">line:0, col:0</footer>\
+                        </main>";
     assert_eq!(expected1, container.outer_html());
 
     let update2: Node<()> = main(
-        vec![class("test5")],
+        vec![class("editor")],
         vec![
             section(
-                vec![class("todo")],
+                vec![class("lines")],
                 vec![
-                    article(vec![key(2)], vec![text("item2")]),
-                    article(vec![key(3)], vec![text("item3 with changes")]),
-                    article(vec![key(4)], vec![text("Added a new key4")]),
+                    div(
+                        vec![key("hashYYY")],
+                        vec![
+                            div(vec![], vec![text("0")]),
+                            div(vec![], vec![text("lineYYY")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hashXXX")],
+                        vec![
+                            div(vec![], vec![text("1")]),
+                            div(vec![], vec![text("lineXXX")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash0")],
+                        vec![
+                            div(vec![], vec![text("2")]),
+                            div(vec![], vec![text("line0")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash1")],
+                        vec![
+                            div(vec![], vec![text("3")]),
+                            div(vec![], vec![text("line1")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash2")],
+                        vec![
+                            div(vec![], vec![text("4")]),
+                            div(vec![], vec![text("line2")]),
+                        ],
+                    ),
+                    div(
+                        vec![key("hash3")],
+                        vec![
+                            div(vec![], vec![text("5")]),
+                            div(vec![], vec![text("line3")]),
+                        ],
+                    ),
                 ],
             ),
-            footer(vec![], vec![text("2 items left")]),
+            footer(vec![], vec![text("line:0, col:0")]),
         ],
     );
 
     let patches2 = diff(&update1_clone, &update2);
+    log::trace!("patches2: {:#?}", patches2);
     assert_eq!(
         patches2,
-        vec![Patch::AppendChildren(
-            &"section",
-            1,
-            vec![&article(vec![key(4)], vec![text("Added a new key4")])]
-        )]
+        vec![
+            Patch::ChangeText(ChangeText::new(4, "0", "1")),
+            Patch::ChangeText(ChangeText::new(9, "1", "2")),
+            Patch::ChangeText(ChangeText::new(14, "2", "3")),
+            Patch::ChangeText(ChangeText::new(19, "3", "4")),
+            Patch::ChangeText(ChangeText::new(24, "4", "5")),
+            Patch::InsertChildren(
+                &"section",
+                1,
+                0,
+                vec![&div(
+                    vec![key("hashYYY")],
+                    vec![
+                        div(vec![], vec![text("0")]),
+                        div(vec![], vec![text("lineYYY")]),
+                    ],
+                ),]
+            )
+        ]
     );
 
     dom_updater.update_dom(&simple_program, update2);
 
-    let expected2 = "<main class=\"test5\">\
-        <section class=\"todo\">\
-        <article key=\"2\">item2</article>\
-        <article key=\"3\">item3 with changes</article>\
-        <article key=\"4\">Added a new key4</article>\
-        </section>\
-        <footer>2 items left</footer>\
-        </main>";
+    let container = document
+        .query_selector(".editor")
+        .expect("must not error")
+        .expect("must exist");
 
+    #[cfg(not(feature = "with-measure"))]
+    let expected2 = "<main class=\"editor\">\
+                        <section class=\"lines\">\
+                            <div key=\"hashYYY\">\
+                                <div>0</div>\
+                                <div>lineYYY</div>\
+                            </div>\
+                            <div key=\"hashXXX\">\
+                                <div>1</div>\
+                                <div>lineXXX</div>\
+                            </div>\
+                            <div key=\"hash0\">\
+                                <div>2</div>\
+                                <div>line0</div>\
+                            </div>\
+                            <div key=\"hash1\">\
+                                <div>3</div>\
+                                <div>line1</div>\
+                            </div>\
+                            <div key=\"hash2\">\
+                                <div>4</div>\
+                                <div>line2</div>\
+                            </div>\
+                            <div key=\"hash3\">\
+                                <div>5</div>\
+                                <div>line3</div>\
+                            </div>\
+                        </section>\
+                            <footer>line:0, col:0</footer>\
+                        </main>";
+
+    #[cfg(feature = "with-measure")]
+    let expected2 = "<main class=\"editor\" node_idx=\"0\">\
+                        <section class=\"lines\" node_idx=\"1\">\
+                            <div key=\"hashYYY\">\
+                                <div>0</div>\
+                                <div>lineYYY</div>\
+                            </div>\
+                            <div key=\"hashXXX\">\
+                                <div>1</div>\
+                                <div>lineXXX</div>\
+                            </div>\
+                            <div key=\"hash0\" node_idx=\"2\">\
+                                <div node_idx=\"3\">2</div>\
+                                <div node_idx=\"5\">line0</div>\
+                            </div>\
+                            <div key=\"hash1\" node_idx=\"7\">\
+                                <div node_idx=\"8\">3</div>\
+                                <div node_idx=\"10\">line1</div>\
+                            </div>\
+                            <div key=\"hash2\" node_idx=\"12\">\
+                                <div node_idx=\"13\">4</div>\
+                                <div node_idx=\"15\">line2</div>\
+                            </div>\
+                            <div key=\"hash3\" node_idx=\"17\">\
+                                <div node_idx=\"18\">5</div>\
+                                <div node_idx=\"20\">line3</div>\
+                            </div>\
+                        </section>\
+                            <footer node_idx=\"22\">line:0, col:0</footer>\
+                        </main>";
     assert_eq!(expected2, container.outer_html());
 }

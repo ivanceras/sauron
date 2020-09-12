@@ -59,6 +59,7 @@ impl<MSG> Render for Element<MSG> {
         if let Some(node_idx) = node_idx {
             let node_idx_attr: Attribute<MSG> =
                 crate::prelude::attr("node_idx", *node_idx);
+            write!(buffer, " ")?;
             node_idx_attr.render_with_indent(buffer, indent, &mut None)?;
         }
         write!(buffer, ">")?;
@@ -73,12 +74,14 @@ impl<MSG> Render for Element<MSG> {
 
         // do not indent if it is only text child node
         if is_lone_child_text_node {
+            node_idx.as_mut().map(|idx| *idx += 1);
             first_child
                 .unwrap()
                 .render_with_indent(buffer, indent, node_idx)?;
         } else {
             // otherwise print all child nodes with each line and indented
             for child in self.get_children() {
+                node_idx.as_mut().map(|idx| *idx += 1);
                 write!(buffer, "\n{}", "    ".repeat(indent + 1))?;
                 child.render_with_indent(buffer, indent + 1, node_idx)?;
             }

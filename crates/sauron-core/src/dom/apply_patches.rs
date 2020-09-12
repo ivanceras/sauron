@@ -5,7 +5,6 @@ use crate::{
         created_node::{ActiveClosure, CreatedNode},
     },
     mt_dom::AttValue,
-    mt_dom::NodeIdx,
     Dispatch, Patch,
 };
 use js_sys::Function;
@@ -40,17 +39,15 @@ where
     let (element_nodes_to_patch, text_nodes_to_patch) =
         find_nodes(root_node, &patches);
 
+    log::trace!("element_nodes_to_patch: {:#?}", element_nodes_to_patch);
+    log::trace!("text_nodes_to_patch: {:#?}", text_nodes_to_patch);
+
     for patch in patches.iter() {
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = element_nodes_to_patch.get(&patch_node_idx) {
-            let new_closures = apply_element_patch(
-                program,
-                &element,
-                old_closures,
-                &patch,
-                &mut Some(patch_node_idx),
-            )?;
+            let new_closures =
+                apply_element_patch(program, &element, old_closures, &patch)?;
             active_closures.extend(new_closures);
             continue;
         }
@@ -277,7 +274,6 @@ fn apply_element_patch<DSP, MSG>(
     node: &Element,
     old_closures: &mut ActiveClosure,
     patch: &Patch<MSG>,
-    node_idx: &mut Option<NodeIdx>,
 ) -> Result<ActiveClosure, JsValue>
 where
     MSG: 'static,
@@ -296,7 +292,7 @@ where
             for new_child in new_children {
                 let created_node =
                     CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                        program, &new_child, node_idx,
+                        program, &new_child, &mut None,
                     );
                 let next_sibling = children_nodes
                     .item((*child_idx) as u32)
@@ -349,7 +345,7 @@ where
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                 DSP,
                 MSG,
-            >(program, new_node, node_idx);
+            >(program, new_node, &mut None);
             remove_event_listeners(&node, old_closures)?;
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
@@ -373,6 +369,7 @@ where
             let children_nodes = node.child_nodes();
 
             for child_idx in sorted_children_index.iter().rev() {
+                log::trace!("removing child: {}", child_idx);
                 let child_node = children_nodes
                     .item(*child_idx as u32)
                     .expect("child at this index must exist");
@@ -398,7 +395,7 @@ where
             for new_node in new_nodes {
                 let created_node =
                     CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                        program, &new_node, node_idx,
+                        program, &new_node, &mut None,
                     );
                 parent.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
