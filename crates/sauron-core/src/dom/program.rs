@@ -128,6 +128,13 @@ where
         {
             let t4 = crate::now();
             log::trace!("dom update took: {}ms", t4 - t3);
+            let dispatch_duration = t4 - t1;
+            // 60fps is 16.667 ms per frame.
+            if dispatch_duration > 16.0 {
+                log::warn!("dispatch took: {}ms", dispatch_duration);
+            } else {
+                log::trace!("dispatch took: {}ms", dispatch_duration);
+            }
         };
     }
 

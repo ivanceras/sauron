@@ -132,6 +132,8 @@ where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
         let patches = diff(&self.current_vdom, &new_vdom);
+        #[cfg(feature = "with-measure")]
+        log::trace!("applying {} patches", patches.len());
         let active_closures = patch(
             Some(program),
             self.root_node.clone(),
