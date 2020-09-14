@@ -1,10 +1,27 @@
 #![deny(warnings)]
 use log::trace;
-use sauron::html::attributes::{attr, class, id, key, type_, value};
-use sauron::html::events::on_click;
-use sauron::html::{div, h1, input, text};
-use sauron::prelude::*;
-use sauron::{Cmd, Component, Node, Program};
+use sauron::{
+    html::{
+        attributes::{
+            attr,
+            class,
+            id,
+            key,
+            type_,
+            value,
+        },
+        div,
+        events::on_click,
+        h1,
+        input,
+        text,
+    },
+    prelude::*,
+    Cmd,
+    Component,
+    Node,
+    Program,
+};
 
 pub enum Msg {
     Click,

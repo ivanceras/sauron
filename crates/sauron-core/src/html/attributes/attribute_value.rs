@@ -1,4 +1,7 @@
-use crate::prelude::{Style, Value};
+use crate::prelude::{
+    Style,
+    Value,
+};
 
 /// Values of an attribute can be in these variants
 #[derive(Debug, Clone)]

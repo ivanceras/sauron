@@ -1,10 +1,18 @@
 use sauron::{
     dom::events::KeyboardEvent,
-    html::{attributes::*, *},
+    html::{
+        attributes::*,
+        *,
+    },
     prelude::*,
-    Cmd, Component, Node,
+    Cmd,
+    Component,
+    Node,
 };
-use serde_derive::{Deserialize, Serialize};
+use serde_derive::{
+    Deserialize,
+    Serialize,
+};
 
 #[derive(Serialize, Deserialize)]
 pub struct Model {
@@ -149,6 +157,7 @@ impl Model {
     fn is_all_completed(&self) -> bool {
         self.entries.iter().all(|entry| entry.completed)
     }
+
     fn view_entries(&self) -> Node<Msg> {
         section(
             vec![class("main")],
@@ -165,10 +174,12 @@ impl Model {
                 ul(vec![class("todo-list")], {
                     self.entries
                         .iter()
-                        .filter(|entry| match self.visibility {
-                            Visibility::All => true,
-                            Visibility::Active => !entry.completed,
-                            Visibility::Completed => entry.completed,
+                        .filter(|entry| {
+                            match self.visibility {
+                                Visibility::All => true,
+                                Visibility::Active => !entry.completed,
+                                Visibility::Completed => entry.completed,
+                            }
                         })
                         .map(|entry| self.view_entry(entry))
                         .collect::<Vec<Node<Msg>>>()

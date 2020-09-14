@@ -1,12 +1,26 @@
 use log::*;
-use sauron::node;
 use sauron::{
-    html::{attributes::*, events::*, *},
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
     mt_dom::patch::*,
+    node,
     *,
 };
-use sauron_core::{body, html::div, Cmd, Component, Node, Program};
-use std::{cell::RefCell, rc::Rc};
+use sauron_core::{
+    body,
+    html::div,
+    Cmd,
+    Component,
+    Node,
+    Program,
+};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+};
 use wasm_bindgen_test::*;
 use web_sys::InputEvent;
 

@@ -51,12 +51,22 @@ pub use mt_dom;
 pub mod prelude {
     pub use crate::{
         html::{
-            attributes::{attr, *},
-            tags::{commons::*, *},
+            attributes::{
+                attr,
+                *,
+            },
+            tags::{
+                commons::*,
+                *,
+            },
             units::*,
             *,
         },
-        svg::{attributes::*, tags::commons::*, *},
+        svg::{
+            attributes::*,
+            tags::commons::*,
+            *,
+        },
         *,
     };
     pub use serde_json;

@@ -2,7 +2,10 @@
 //! virtual dom into a writable buffer
 //!
 use crate::{
-    html::attributes::AttributeValue, mt_dom::AttValue, Attribute, Element,
+    html::attributes::AttributeValue,
+    mt_dom::AttValue,
+    Attribute,
+    Element,
     Node,
 };
 use std::fmt;

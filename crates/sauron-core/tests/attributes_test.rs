@@ -1,6 +1,8 @@
 #![deny(warnings)]
-use sauron_core::html::attributes::style;
-use sauron_core::prelude::*;
+use sauron_core::{
+    html::attributes::style,
+    prelude::*,
+};
 
 #[test]
 fn test_styles() {

@@ -1,7 +1,20 @@
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::{
+    Span,
+    TokenStream,
+};
 use quote::quote;
-use syn::{Expr, ExprBlock, ExprForLoop, Ident, Stmt};
-use syn_rsx::{Node, NodeType, ParserConfig};
+use syn::{
+    Expr,
+    ExprBlock,
+    ExprForLoop,
+    Ident,
+    Stmt,
+};
+use syn_rsx::{
+    Node,
+    NodeType,
+    ParserConfig,
+};
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match syn_rsx::parse_with_config(
@@ -115,31 +128,33 @@ fn children_to_tokens(children: Vec<Node>) -> TokenStream {
                         #receiver.push(sauron::Node::Text(String::from(#s)));
                     });
                 }
-                NodeType::Block => match child.value {
-                    Some(syn::Expr::Block(expr)) => {
-                        match braced_for_loop(&expr) {
-                            Some(ExprForLoop {
-                                pat, expr, body, ..
-                            }) => {
-                                tokens.extend(quote! {
+                NodeType::Block => {
+                    match child.value {
+                        Some(syn::Expr::Block(expr)) => {
+                            match braced_for_loop(&expr) {
+                                Some(ExprForLoop {
+                                    pat, expr, body, ..
+                                }) => {
+                                    tokens.extend(quote! {
                                         for #pat in #expr {
                                             #receiver.push(sauron::Node::from(#body));
                                         }
                                     });
-                            }
-                            _ => {
-                                tokens.extend(quote! {
+                                }
+                                _ => {
+                                    tokens.extend(quote! {
                                     #receiver.push(sauron::Node::from(#expr));
                                 });
+                                }
+                            }
+                        }
+                        _ => {
+                            return quote! {
+                                compile_error!("Unexpected missing block for NodeType::Block")
                             }
                         }
                     }
-                    _ => {
-                        return quote! {
-                            compile_error!("Unexpected missing block for NodeType::Block")
-                        }
-                    }
-                },
+                }
                 _ => {
                     return quote! {
                         compile_error!(format!("Unexpected NodeType for child: {}", child.node_type))
@@ -163,10 +178,12 @@ fn braced_for_loop<'a>(expr: &'a ExprBlock) -> Option<&'a ExprForLoop> {
     } else {
         let stmt = &expr.block.stmts[0];
         match stmt {
-            Stmt::Expr(expr) => match expr {
-                Expr::ForLoop(expr) => Some(expr),
-                _ => None,
-            },
+            Stmt::Expr(expr) => {
+                match expr {
+                    Expr::ForLoop(expr) => Some(expr),
+                    _ => None,
+                }
+            }
             _ => None,
         }
     }

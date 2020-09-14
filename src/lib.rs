@@ -184,7 +184,16 @@ pub mod prelude {
     pub use sauron_node_macro::node;
 }
 pub use sauron_core::{
-    diff, html, jss, mt_dom, svg, Attribute, Callback, Element, Node, Patch,
+    diff,
+    html,
+    jss,
+    mt_dom,
+    svg,
+    Attribute,
+    Callback,
+    Element,
+    Node,
+    Patch,
     Render,
 };
 

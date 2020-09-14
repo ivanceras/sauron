@@ -1,9 +1,20 @@
 #![deny(warnings)]
 use chrono::Local;
-use sauron::html::{attributes::*, *};
-use sauron::*;
-use serde_derive::{Deserialize, Serialize};
-use warp::{http::Response, Filter};
+use sauron::{
+    html::{
+        attributes::*,
+        *,
+    },
+    *,
+};
+use serde_derive::{
+    Deserialize,
+    Serialize,
+};
+use warp::{
+    http::Response,
+    Filter,
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct FormData {

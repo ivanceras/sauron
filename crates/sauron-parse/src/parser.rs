@@ -1,30 +1,57 @@
 //! This module parses literal html returns sauron dom tree
 
 use html5ever::{
-    local_name, namespace_url, ns, parse_document, parse_fragment,
-    tendril::TendrilSink, QualName,
+    local_name,
+    namespace_url,
+    ns,
+    parse_document,
+    parse_fragment,
+    tendril::TendrilSink,
+    QualName,
 };
-use markup5ever_rcdom::{Handle, NodeData, RcDom};
+use markup5ever_rcdom::{
+    Handle,
+    NodeData,
+    RcDom,
+};
 use sauron_core::{
     html::{
         attributes,
         attributes::{
-            AttributeValue, Style, HTML_ATTRS, HTML_ATTRS_SPECIAL, HTML_STYLES,
+            AttributeValue,
+            Style,
+            HTML_ATTRS,
+            HTML_ATTRS_SPECIAL,
+            HTML_STYLES,
         },
         tags::{
-            HTML_TAGS, HTML_TAGS_NON_COMMON, HTML_TAGS_WITH_MACRO_NON_COMMON,
+            HTML_TAGS,
+            HTML_TAGS_NON_COMMON,
+            HTML_TAGS_WITH_MACRO_NON_COMMON,
         },
         text,
     },
     mt_dom,
     mt_dom::element,
     svg::{
-        attributes::{SVG_ATTRS, SVG_ATTRS_SPECIAL, SVG_ATTRS_XLINK},
-        tags::{SVG_TAGS, SVG_TAGS_NON_COMMON, SVG_TAGS_SPECIAL},
+        attributes::{
+            SVG_ATTRS,
+            SVG_ATTRS_SPECIAL,
+            SVG_ATTRS_XLINK,
+        },
+        tags::{
+            SVG_TAGS,
+            SVG_TAGS_NON_COMMON,
+            SVG_TAGS_SPECIAL,
+        },
     },
-    Attribute, Node,
+    Attribute,
+    Node,
 };
-use std::{fmt, io};
+use std::{
+    fmt,
+    io,
+};
 use thiserror::Error;
 
 #[derive(Debug, Error)]

@@ -1,4 +1,8 @@
-use sauron::{node, Node, Render};
+use sauron::{
+    node,
+    Node,
+    Render,
+};
 
 #[test]
 fn style_should_be_valid() {

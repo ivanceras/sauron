@@ -1,6 +1,10 @@
 #![deny(warnings)]
 use sauron_core::{
-    svg::{attributes::*, tags::line, *},
+    svg::{
+        attributes::*,
+        tags::line,
+        *,
+    },
     Node,
 };
 

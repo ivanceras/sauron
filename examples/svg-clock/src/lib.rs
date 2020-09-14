@@ -5,9 +5,11 @@
 #![deny(clippy::all)]
 use console_error_panic_hook;
 use js_sys::Date;
-use sauron::html::attributes::style;
-use sauron::prelude::*;
-use sauron::wasm_bindgen::JsCast;
+use sauron::{
+    html::attributes::style,
+    prelude::*,
+    wasm_bindgen::JsCast,
+};
 
 #[macro_use]
 extern crate log;

@@ -1,7 +1,9 @@
 //#![deny(warnings)]
-use sauron_core::mt_dom::patch::*;
-use sauron_core::prelude::*;
-use sauron_core::Patch;
+use sauron_core::{
+    mt_dom::patch::*,
+    prelude::*,
+    Patch,
+};
 
 #[test]
 fn test_macros() {

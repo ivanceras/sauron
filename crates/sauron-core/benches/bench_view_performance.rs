@@ -1,7 +1,15 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{
+    black_box,
+    criterion_group,
+    criterion_main,
+    Criterion,
+};
 
 use sauron_core::{
-    html::{attributes::*, *},
+    html::{
+        attributes::*,
+        *,
+    },
     Node,
 };
 

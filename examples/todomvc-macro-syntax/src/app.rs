@@ -1,7 +1,16 @@
 use sauron::{
-    dom::events::KeyboardEvent, html::*, node, prelude::*, Cmd, Component, Node,
+    dom::events::KeyboardEvent,
+    html::*,
+    node,
+    prelude::*,
+    Cmd,
+    Component,
+    Node,
 };
-use serde_derive::{Deserialize, Serialize};
+use serde_derive::{
+    Deserialize,
+    Serialize,
+};
 
 #[derive(Serialize, Deserialize)]
 pub struct Model {
@@ -147,10 +156,12 @@ impl Model {
         let entries = self
             .entries
             .iter()
-            .filter(|entry| match self.visibility {
-                Visibility::All => true,
-                Visibility::Active => !entry.completed,
-                Visibility::Completed => entry.completed,
+            .filter(|entry| {
+                match self.visibility {
+                    Visibility::All => true,
+                    Visibility::Active => !entry.completed,
+                    Visibility::Completed => entry.completed,
+                }
             })
             .collect::<Vec<_>>();
 

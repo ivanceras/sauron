@@ -1,9 +1,16 @@
 #![deny(warnings)]
 use log::trace;
-use sauron::prelude::*;
 use sauron::{
-    html::{attributes::attr, text},
-    node, Cmd, Component, Node, Program,
+    html::{
+        attributes::attr,
+        text,
+    },
+    node,
+    prelude::*,
+    Cmd,
+    Component,
+    Node,
+    Program,
 };
 
 #[derive(Debug)]

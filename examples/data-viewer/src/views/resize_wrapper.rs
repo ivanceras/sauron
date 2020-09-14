@@ -1,8 +1,19 @@
-use crate::views::{data_view, DataView};
+use crate::views::{
+    data_view,
+    DataView,
+};
 
 use sauron::{
-    html::{attributes::class, events::*, *},
-    Cmd, Component, Node, Window, *,
+    html::{
+        attributes::class,
+        events::*,
+        *,
+    },
+    Cmd,
+    Component,
+    Node,
+    Window,
+    *,
 };
 
 #[derive(Debug, PartialEq, Clone)]

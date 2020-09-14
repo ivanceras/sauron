@@ -411,7 +411,10 @@ pub const HTML_STYLES: [&'static str; 368] = [
 #[cfg(test)]
 mod tests {
     use crate::{
-        html::{units::px, *},
+        html::{
+            units::px,
+            *,
+        },
         Render,
     };
 

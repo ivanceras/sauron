@@ -1,11 +1,18 @@
 use log::*;
-use sauron_core::Patch;
 use sauron_core::{
-    html::{attributes::*, events::*, *},
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
     mt_dom::patch::*,
+    Patch,
     *,
 };
-use std::{cell::RefCell, rc::Rc};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 use web_sys::InputEvent;

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cargo test --all --no-default-features
-cargo test --all --features "with-dom"
+cargo +stable test --all --no-default-features
+cargo +stable test --all --features "with-dom"
 
 cd crates/sauron-core/
 ./test.sh

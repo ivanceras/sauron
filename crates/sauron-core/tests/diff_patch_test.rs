@@ -1,9 +1,15 @@
 //#![deny(warnings)]
 use sauron_core::{
     diff,
-    html::{attributes::*, events::*, *},
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
     mt_dom::patch::*,
-    Attribute, Node, Patch,
+    Attribute,
+    Node,
+    Patch,
 };
 
 #[test]

@@ -2,9 +2,16 @@
 #![deny(clippy::all)]
 use console_error_panic_hook;
 use sauron::*;
-use wasm_bindgen::{self, prelude::*, JsCast};
+use wasm_bindgen::{
+    self,
+    prelude::*,
+    JsCast,
+};
 
-use app::{App, Msg};
+use app::{
+    App,
+    Msg,
+};
 
 #[macro_use]
 extern crate log;

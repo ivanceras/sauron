@@ -40,9 +40,11 @@ fn process_css_map(
                         serde_json::Value::String(s) => s.to_string(),
                         serde_json::Value::Number(v) => v.to_string(),
                         serde_json::Value::Bool(v) => v.to_string(),
-                        _ => panic!(
+                        _ => {
+                            panic!(
                             "supported values are String, Number or Bool only"
-                        ),
+                        )
+                        }
                     };
                     buffer += &format!(
                         "{}{}: {};\n",
@@ -217,8 +219,10 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::html::attributes::class;
-    use crate::Attribute;
+    use crate::{
+        html::attributes::class,
+        Attribute,
+    };
 
     #[test]
     fn test_jss() {

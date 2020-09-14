@@ -7,12 +7,19 @@ extern crate web_sys;
 use sauron_core::{
     diff,
     dom::DomUpdater,
-    html::{attributes::*, events::*, *},
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
     mt_dom::patch::*,
-    Node, Patch,
+    Node,
+    Patch,
 };
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::{
+    cell::RefCell,
+    rc::Rc,
+};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 
