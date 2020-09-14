@@ -22,7 +22,6 @@ cfg-if = "0.1"
 thiserror = "1.0"
 doc-comment = "0.3"
 mt-dom = { version = "0.4", path = "../../../mt-dom" }
-console_log = { version = "0.2", optional = true, features = ["color"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 
 [dependencies.web-sys]
@@ -64,8 +63,9 @@ features = [
 default = ["with-dom", "with-request-animation-frame"]
 with-parser = [] #enumerates html tags and attributes
 with-measure = ["mt-dom/with-measure"]
+with-nodeidx = []
 with-request-animation-frame = [] # enable the use of request-animation-frame in calling dispatch
-with-dom = ["wasm-bindgen", "js-sys", "web-sys", "console_log"]
+with-dom = ["wasm-bindgen", "js-sys", "web-sys"]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

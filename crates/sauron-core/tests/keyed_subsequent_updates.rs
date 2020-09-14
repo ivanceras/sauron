@@ -1,7 +1,8 @@
 use log::*;
+use sauron_core::Patch;
 use sauron_core::{
     html::{attributes::*, events::*, *},
-    mt_dom::diff::ChangeText,
+    mt_dom::patch::*,
     *,
 };
 use std::{cell::RefCell, rc::Rc};
@@ -120,11 +121,11 @@ fn subsequent_updates() {
     assert_eq!(
         patches1,
         vec![
-            Patch::ChangeText(ChangeText::new(4, "0", "1")),
-            Patch::ChangeText(ChangeText::new(9, "1", "2")),
-            Patch::ChangeText(ChangeText::new(14, "2", "3")),
-            Patch::ChangeText(ChangeText::new(19, "3", "4")),
-            Patch::InsertChildren(
+            ChangeText::new(4, "0", "1").into(),
+            ChangeText::new(9, "1", "2").into(),
+            ChangeText::new(14, "2", "3").into(),
+            ChangeText::new(19, "3", "4").into(),
+            InsertChildren::new(
                 &"section",
                 1,
                 0,
@@ -136,6 +137,7 @@ fn subsequent_updates() {
                     ],
                 )]
             )
+            .into()
         ]
     );
 
@@ -192,7 +194,7 @@ fn subsequent_updates() {
     let simple_program = simple_program();
     let mut dom_updater = DomUpdater::new_append_to_mount(
         &simple_program,
-        old,
+        old.clone(),
         &sauron_core::body(),
     );
 
@@ -223,6 +225,10 @@ fn subsequent_updates() {
                         </section>\
                             <footer>line:0, col:0</footer>\
                         </main>";
+
+    let mut old_render = String::new();
+    old.render_compressed(&mut old_render).expect("must render");
+    assert_eq!(old_render, expected);
 
     #[cfg(feature = "with-measure")]
     let expected = "<main class=\"editor\" node_idx=\"0\">\
@@ -314,6 +320,12 @@ fn subsequent_updates() {
                         </section>\
                             <footer node_idx=\"22\">line:0, col:0</footer>\
                         </main>";
+
+    let mut update1_render = String::new();
+    update1
+        .render_compressed(&mut update1_render)
+        .expect("must render");
+    assert_eq!(expected1, update1_render);
     assert_eq!(expected1, container.outer_html());
 
     let update2: Node<()> = main(
@@ -375,12 +387,12 @@ fn subsequent_updates() {
     assert_eq!(
         patches2,
         vec![
-            Patch::ChangeText(ChangeText::new(4, "0", "1")),
-            Patch::ChangeText(ChangeText::new(9, "1", "2")),
-            Patch::ChangeText(ChangeText::new(14, "2", "3")),
-            Patch::ChangeText(ChangeText::new(19, "3", "4")),
-            Patch::ChangeText(ChangeText::new(24, "4", "5")),
-            Patch::InsertChildren(
+            ChangeText::new(4, "0", "1").into(),
+            ChangeText::new(9, "1", "2").into(),
+            ChangeText::new(14, "2", "3").into(),
+            ChangeText::new(19, "3", "4").into(),
+            ChangeText::new(24, "4", "5").into(),
+            InsertChildren::new(
                 &"section",
                 1,
                 0,
@@ -392,6 +404,7 @@ fn subsequent_updates() {
                     ],
                 ),]
             )
+            .into()
         ]
     );
 
@@ -463,6 +476,12 @@ fn subsequent_updates() {
                         </section>\
                             <footer node_idx=\"22\">line:0, col:0</footer>\
                         </main>";
+
+    let mut update2_render = String::new();
+    update2
+        .render_compressed(&mut update2_render)
+        .expect("must render");
+    assert_eq!(expected2, update2_render);
     assert_eq!(expected2, container.outer_html());
 
     let update3: Node<()> = main(
@@ -531,13 +550,13 @@ fn subsequent_updates() {
     assert_eq!(
         patches3,
         vec![
-            Patch::ChangeText(ChangeText::new(4, "0", "1")),
-            Patch::ChangeText(ChangeText::new(9, "1", "2")),
-            Patch::ChangeText(ChangeText::new(14, "2", "3")),
-            Patch::ChangeText(ChangeText::new(19, "3", "4")),
-            Patch::ChangeText(ChangeText::new(24, "4", "5")),
-            Patch::ChangeText(ChangeText::new(29, "5", "6")),
-            Patch::InsertChildren(
+            ChangeText::new(4, "0", "1").into(),
+            ChangeText::new(9, "1", "2").into(),
+            ChangeText::new(14, "2", "3").into(),
+            ChangeText::new(19, "3", "4").into(),
+            ChangeText::new(24, "4", "5").into(),
+            ChangeText::new(29, "5", "6").into(),
+            InsertChildren::new(
                 &"section",
                 1,
                 0,
@@ -549,6 +568,7 @@ fn subsequent_updates() {
                     ],
                 ),]
             )
+            .into()
         ]
     );
 
@@ -628,5 +648,11 @@ fn subsequent_updates() {
                         </section>\
                             <footer node_idx=\"22\">line:0, col:0</footer>\
                         </main>";
+
+    let mut update3_render = String::new();
+    update3
+        .render_compressed(&mut update3_render)
+        .expect("must render");
+    assert_eq!(expected3, update3_render);
     assert_eq!(expected3, container.outer_html());
 }

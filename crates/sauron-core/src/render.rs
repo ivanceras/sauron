@@ -11,14 +11,21 @@ use std::fmt;
 pub trait Render {
     /// render the node to a writable buffer
     fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
-        self.render_with_indent(buffer, 0, &mut Some(0))
+        self.render_with_indent(buffer, 0, &mut Some(0), false)
+    }
+
+    /// no new_lines, no indents
+    fn render_compressed(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
+        self.render_with_indent(buffer, 0, &mut Some(0), true)
     }
     /// render instance to a writable buffer with indention
+    /// node_idx is for debugging purposes
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
         indent: usize,
         node_idx: &mut Option<usize>,
+        compressed: bool,
     ) -> fmt::Result;
 }
 
@@ -28,10 +35,11 @@ impl<MSG> Render for Node<MSG> {
         buffer: &mut dyn fmt::Write,
         indent: usize,
         node_idx: &mut Option<usize>,
+        compressed: bool,
     ) -> fmt::Result {
         match self {
             Node::Element(element) => {
-                element.render_with_indent(buffer, indent, node_idx)
+                element.render_with_indent(buffer, indent, node_idx, compressed)
             }
             Node::Text(text) => write!(buffer, "{}", text),
         }
@@ -44,6 +52,7 @@ impl<MSG> Render for Element<MSG> {
         buffer: &mut dyn fmt::Write,
         indent: usize,
         node_idx: &mut Option<usize>,
+        compressed: bool,
     ) -> fmt::Result {
         write!(buffer, "<{}", self.tag())?;
 
@@ -53,14 +62,15 @@ impl<MSG> Render for Element<MSG> {
             mt_dom::merge_attributes_of_same_name(&ref_attrs);
         for attr in merged_attributes {
             write!(buffer, " ")?;
-            attr.render_with_indent(buffer, indent, node_idx)?;
+            attr.render_with_indent(buffer, indent, node_idx, compressed)?;
         }
-        #[cfg(feature = "with-measure")]
+        #[cfg(feature = "with-nodeidx")]
         if let Some(node_idx) = node_idx {
             let node_idx_attr: Attribute<MSG> =
                 crate::prelude::attr("node_idx", *node_idx);
             write!(buffer, " ")?;
-            node_idx_attr.render_with_indent(buffer, indent, &mut None)?;
+            node_idx_attr
+                .render_with_indent(buffer, indent, &mut None, compressed)?;
         }
         write!(buffer, ">")?;
 
@@ -77,18 +87,27 @@ impl<MSG> Render for Element<MSG> {
             node_idx.as_mut().map(|idx| *idx += 1);
             first_child
                 .unwrap()
-                .render_with_indent(buffer, indent, node_idx)?;
+                .render_with_indent(buffer, indent, node_idx, compressed)?;
         } else {
             // otherwise print all child nodes with each line and indented
             for child in self.get_children() {
                 node_idx.as_mut().map(|idx| *idx += 1);
-                write!(buffer, "\n{}", "    ".repeat(indent + 1))?;
-                child.render_with_indent(buffer, indent + 1, node_idx)?;
+                if !compressed {
+                    write!(buffer, "\n{}", "    ".repeat(indent + 1))?;
+                }
+                child.render_with_indent(
+                    buffer,
+                    indent + 1,
+                    node_idx,
+                    compressed,
+                )?;
             }
         }
         // do not make a new line it if is only a text child node or it has no child nodes
         if !is_lone_child_text_node && !children.is_empty() {
-            write!(buffer, "\n{}", "    ".repeat(indent))?;
+            if !compressed {
+                write!(buffer, "\n{}", "    ".repeat(indent))?;
+            }
         }
         write!(buffer, "</{}>", self.tag())?;
         Ok(())
@@ -101,6 +120,7 @@ impl<MSG> Render for Attribute<MSG> {
         buffer: &mut dyn fmt::Write,
         indent: usize,
         node_idx: &mut Option<usize>,
+        compressed: bool,
     ) -> fmt::Result {
         write!(buffer, "{}=\"", self.name())?;
         for (i, att_value) in self.value().iter().enumerate() {
@@ -109,7 +129,9 @@ impl<MSG> Render for Attribute<MSG> {
                     if i > 0 && !plain.is_style() {
                         write!(buffer, " ")?;
                     }
-                    plain.render_with_indent(buffer, indent, node_idx)?;
+                    plain.render_with_indent(
+                        buffer, indent, node_idx, compressed,
+                    )?;
                 }
                 _ => (),
             }
@@ -125,6 +147,7 @@ impl Render for AttributeValue {
         buffer: &mut dyn fmt::Write,
         _index: usize,
         _node_idx: &mut Option<usize>,
+        _compressed: bool,
     ) -> fmt::Result {
         match self {
             AttributeValue::Simple(simple) => {

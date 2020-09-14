@@ -1,7 +1,8 @@
 use log::*;
+use sauron_core::Patch;
 use sauron_core::{
     html::{attributes::*, events::*, *},
-    mt_dom::diff::ChangeText,
+    mt_dom::patch::*,
     *,
 };
 use std::{cell::RefCell, rc::Rc};
@@ -84,7 +85,10 @@ fn node_patched_properly() {
     );
 
     let patches = diff(&old, &update1);
-    assert_eq!(patches, vec![Patch::RemoveChildren(&"section", 1, vec![1])]);
+    assert_eq!(
+        patches,
+        vec![RemoveChildren::new(&"section", 1, vec![1]).into()]
+    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -159,7 +163,10 @@ fn node_patched_properly_remove_from_start() {
 
     let patches = diff(&old, &update1);
 
-    assert_eq!(patches, vec![Patch::RemoveChildren(&"section", 1, vec![0])]);
+    assert_eq!(
+        patches,
+        vec![RemoveChildren::new(&"section", 1, vec![0]).into()]
+    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -244,7 +251,7 @@ fn node_patched_properly_text_changed() {
                 "item3",
                 "item3 with changes"
             )),
-            Patch::RemoveChildren(&"section", 1, vec![0])
+            RemoveChildren::new(&"section", 1, vec![0]).into()
         ]
     );
 
@@ -336,7 +343,7 @@ fn mixed_keyed_and_non_keyed_elements() {
                 "item3",
                 "item3 with changes"
             )),
-            Patch::RemoveChildren(&"section", 1, vec![0]),
+            RemoveChildren::new(&"section", 1, vec![0]).into(),
             Patch::ChangeText(ChangeText::new(
                 9,
                 "3 items left",

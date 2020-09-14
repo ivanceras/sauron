@@ -22,19 +22,28 @@ cfg-if = "0.1"
 [features]
 default = ["with-dom", "with-node-macro", "with-request-animation-frame"]
 with-dom = ["sauron-core/with-dom"]
+
 # request-animation-frame should be ON all the time, otherwise
 # your webapp will have a very poor UI responsiveness
 with-request-animation-frame = ["sauron-core/with-request-animation-frame"]
+
+# shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]
+# show the node_idx in html nodes for debugging
+with-nodeidx = ["sauron-core/with-nodeidx"]
+
+# lets you use node! macro to write html like code in the view
 with-node-macro = ["sauron-node-macro"]
+
 with-markdown = ["sauron-markdown/include-html"]
 # light weight markdown, html are inserted as text node
 with-lite-markdown = ["sauron-markdown"]
 
 [dev-dependencies]
 console_error_panic_hook = "0.1"
-console_log = {version ="0.2", features = ["color"]}
+console_log = {version ="0.2"}
 log = "0.4"
+wasm-bindgen-test = "0.3"
 
 
 
@@ -61,4 +70,4 @@ members = [
 
 [patch.crates-io]
 #mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
-#mt-dom = { path = "../mt-dom" }
+mt-dom = { path = "../mt-dom" }

@@ -1,4 +1,4 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 
 #[macro_use]
 extern crate log;
@@ -8,6 +8,7 @@ use sauron_core::{
     diff,
     dom::DomUpdater,
     html::{attributes::*, events::*, *},
+    mt_dom::patch::*,
     Node, Patch,
 };
 use std::cell::RefCell;
@@ -186,7 +187,7 @@ fn remove_event_from_truncated_children() {
     let simple_program = simple_program();
     assert_eq!(
         sauron_core::diff(&old, &new),
-        vec![Patch::RemoveChildren(&"div", 0, vec![1, 2, 3, 4])],
+        vec![RemoveChildren::new(&"div", 0, vec![1, 2, 3, 4]).into()],
         "Should be a Truncate patch"
     );
     let mut dom_updater =
@@ -227,7 +228,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     let simple_program = simple_program();
     assert_eq!(
         sauron_core::diff(&old, &new),
-        vec![Patch::RemoveChildren(&"div", 0, vec![1, 2, 3, 4])],
+        vec![RemoveChildren::new(&"div", 0, vec![1, 2, 3, 4]).into()],
         "Should be a Truncate patch"
     );
     let mut dom_updater =
@@ -256,8 +257,8 @@ fn remove_event_from_replaced_node() {
     let simple_program = simple_program();
     assert_eq!(
         sauron_core::diff(&old, &new),
-        vec![Patch::Replace(&"div", 0, &p(vec![], vec![]))],
-        "Should be a Replace patch"
+        vec![ReplaceNode::new(&"div", 0, &p(vec![], vec![])).into()],
+        "Should be a ReplaceNode patch"
     );
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);

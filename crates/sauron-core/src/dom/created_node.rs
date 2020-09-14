@@ -61,8 +61,8 @@ impl<T> CreatedNode<T> {
     }
 
     /// create a text node
-    pub fn create_text_node(text: &str) -> Text {
-        crate::document().create_text_node(text)
+    pub fn create_text_node(txt: &str) -> Text {
+        crate::document().create_text_node(txt)
     }
 
     /// create an element node
@@ -90,8 +90,8 @@ impl<T> CreatedNode<T> {
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         match vnode {
-            crate::Node::Text(text_node) => {
-                CreatedNode::without_closures(Self::create_text_node(text_node))
+            crate::Node::Text(txt) => {
+                CreatedNode::without_closures(Self::create_text_node(txt))
             }
             crate::Node::Element(element_node) => {
                 let created_element: CreatedNode<Node> =
@@ -288,7 +288,7 @@ impl<T> CreatedNode<T> {
             &velem.get_attributes().iter().collect::<Vec<_>>(),
         );
 
-        #[cfg(feature = "with-measure")]
+        #[cfg(feature = "with-nodeidx")]
         if let Some(node_idx) = node_idx {
             Self::set_element_attributes(
                 program,
@@ -301,7 +301,7 @@ impl<T> CreatedNode<T> {
         let mut previous_node_was_text = false;
         for child in velem.get_children().iter() {
             match child {
-                crate::Node::Text(text_node) => {
+                crate::Node::Text(txt) => {
                     node_idx.as_mut().map(|idx| *idx += 1);
                     let current_node: &web_sys::Node = element.as_ref();
 
@@ -319,7 +319,7 @@ impl<T> CreatedNode<T> {
                     }
 
                     current_node
-                        .append_child(&Self::create_text_node(&text_node))
+                        .append_child(&Self::create_text_node(&txt))
                         .expect("Unable to append text node");
 
                     previous_node_was_text = true;

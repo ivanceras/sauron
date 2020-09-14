@@ -1,8 +1,8 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 use sauron_core::{
     diff,
     html::{attributes::*, events::*, *},
-    mt_dom::diff::ChangeText,
+    mt_dom::patch::*,
     Attribute, Node, Patch,
 };
 
@@ -35,11 +35,12 @@ fn event_remove() {
 
     assert_eq!(
         patch,
-        vec![Patch::RemoveAttributes(
+        vec![RemoveAttributes::new(
             &"input",
             0,
             vec![&on("input", |_| { () })],
-        )]
+        )
+        .into()]
     );
 }
 
@@ -50,7 +51,7 @@ fn change_class_attribute() {
     let new = div(vec![classes(["class1", "difference_class"])], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(
+        vec![AddAttributes::new(
             &"div",
             0,
             vec![&Attribute::with_multiple_values(
@@ -63,7 +64,8 @@ fn change_class_attribute() {
                     )
                 ]
             )]
-        )],
+        )
+        .into()],
         "Should add the new attributes"
     );
 }
@@ -93,7 +95,7 @@ fn truncate_children() {
     );
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveChildren(&"div", 0, vec![3, 4, 5, 6])],
+        vec![RemoveChildren::new(&"div", 0, vec![3, 4, 5, 6]).into()],
         "Should truncate children"
     );
 }
@@ -124,10 +126,10 @@ fn truncate_children_different_attributes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::AddAttributes(&"div", 1, vec![&class("class5")]),
-            Patch::AddAttributes(&"div", 2, vec![&class("class6")]),
-            Patch::AddAttributes(&"div", 3, vec![&class("class7")]),
-            Patch::RemoveChildren(&"div", 0, vec![3, 4, 5, 6]),
+            AddAttributes::new(&"div", 1, vec![&class("class5")]).into(),
+            AddAttributes::new(&"div", 2, vec![&class("class6")]).into(),
+            AddAttributes::new(&"div", 3, vec![&class("class7")]).into(),
+            RemoveChildren::new(&"div", 0, vec![3, 4, 5, 6]).into(),
         ],
         "Should truncate children"
     );
@@ -139,16 +141,16 @@ fn replace_node() {
     let new = span(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::Replace(&"div", 0, &span(vec![], vec![]))],
-        "Replace the root if the tag changed"
+        vec![ReplaceNode::new(&"div", 0, &span(vec![], vec![])).into()],
+        "ReplaceNode the root if the tag changed"
     );
 
     let old: Node<()> = div(vec![], vec![b(vec![], vec![])]);
     let new = div(vec![], vec![strong(vec![], vec![])]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::Replace(&"b", 1, &strong(vec![], vec![]))],
-        "Replace a child node"
+        vec![ReplaceNode::new(&"b", 1, &strong(vec![], vec![])).into()],
+        "ReplaceNode a child node"
     );
 }
 
@@ -160,10 +162,10 @@ fn replace_node2() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::Replace(&"b", 1, &i(vec![], vec![text("1")])),
-            Patch::Replace(&"b", 3, &i(vec![], vec![])),
+            ReplaceNode::new(&"b", 1, &i(vec![], vec![text("1")])).into(),
+            ReplaceNode::new(&"b", 3, &i(vec![], vec![])).into(),
         ],
-        "Replace node with a child",
+        "ReplaceNode node with a child",
     )
 }
 
@@ -176,11 +178,12 @@ fn add_children() {
     ); //{ <div> <b></b> <new></new> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AppendChildren(
+        vec![AppendChildren::new(
             &"div",
             0,
             vec![&html_element("new", vec![], vec![])]
-        )],
+        )
+        .into()],
         "Added a new node to the root node",
     )
 }
@@ -193,7 +196,7 @@ fn remove_nodes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveChildren(&"div", 0, vec![0, 1])],
+        vec![RemoveChildren::new(&"div", 0, vec![0, 1]).into()],
         "Remove all child nodes at and after child sibling index 1",
     );
 
@@ -219,8 +222,8 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::RemoveChildren(&"span", 1, vec![1]),
-            Patch::RemoveChildren(&"div", 0, vec![1]),
+            RemoveChildren::new(&"span", 1, vec![1]).into(),
+            RemoveChildren::new(&"div", 0, vec![1]).into(),
         ],
         "Remove a child and a grandchild node",
     );
@@ -239,8 +242,8 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::RemoveChildren(&"b", 1, vec![1]),
-            Patch::Replace(&"b", 4, &i(vec![], vec![])),
+            RemoveChildren::new(&"b", 1, vec![1]).into(),
+            ReplaceNode::new(&"b", 4, &i(vec![], vec![])).into(),
         ],
         "Removing child and change next node after parent",
     )
@@ -252,7 +255,7 @@ fn add_attributes() {
     let new = div(vec![id("hello")], vec![]); //{ <div id="hello"> </div> },
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
+        vec![AddAttributes::new(&"div", 0, vec![&id("hello")]).into()],
         "Add attributes",
     );
 
@@ -261,7 +264,7 @@ fn add_attributes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![&id("hello")])],
+        vec![AddAttributes::new(&"div", 0, vec![&id("hello")]).into()],
         "Change attribute",
     );
 }
@@ -272,11 +275,10 @@ fn add_style_attributes() {
     let new = div(vec![style("display", "none")], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(
-            &"div",
-            0,
-            vec![&style("display", "none")]
-        )],
+        vec![
+            AddAttributes::new(&"div", 0, vec![&style("display", "none")])
+                .into()
+        ],
         "Add attributes",
     );
 }
@@ -293,7 +295,7 @@ fn add_style_attributes_1_change() {
     );
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(
+        vec![AddAttributes::new(
             &"div",
             0,
             vec![&Attribute::with_multiple_values(
@@ -304,7 +306,8 @@ fn add_style_attributes_1_change() {
                     Style::new("position", "absolute".into())
                 ])]
             )]
-        )],
+        )
+        .into()],
     );
 }
 
@@ -327,11 +330,12 @@ fn remove_style_attributes() {
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveAttributes(
+        vec![RemoveAttributes::new(
             &"div",
             0,
             vec![&style("display", "block")]
-        )],
+        )
+        .into()],
         "Add attributes",
     );
 }
@@ -342,7 +346,7 @@ fn remove_attributes() {
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveAttributes(&"div", 0, vec![&id("hey-there")])],
+        vec![RemoveAttributes::new(&"div", 0, vec![&id("hey-there")]).into()],
         "Remove attributes",
     );
 }
@@ -353,11 +357,12 @@ fn remove_events() {
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::RemoveAttributes(
+        vec![RemoveAttributes::new(
             &"div",
             0,
             vec![&on_click(|_| println!("hi"))]
-        )],
+        )
+        .into()],
         "Remove events",
     );
 }
@@ -369,7 +374,7 @@ fn change_attribute() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::AddAttributes(&"div", 0, vec![&id("changed")])],
+        vec![AddAttributes::new(&"div", 0, vec![&id("changed")]).into()],
         "Add attributes",
     );
 }
@@ -381,8 +386,8 @@ fn replace_text_node() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::ChangeText(ChangeText::new(0, "Old", "New"))],
-        "Replace text node",
+        vec![ChangeText::new(0, "Old", "New").into()],
+        "ReplaceNode text node",
     );
 }
 
@@ -396,8 +401,9 @@ fn different_key_will_be_removed_and_create_a_new_one() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            Patch::RemoveChildren(&"main", 0, vec![0]),
-            Patch::AppendChildren(&"main", 0, vec![&div(vec![key(2)], vec![])]),
+            RemoveChildren::new(&"main", 0, vec![0]).into(),
+            AppendChildren::new(&"main", 0, vec![&div(vec![key(2)], vec![])])
+                .into(),
         ],
         "If two nodes have different keys always generate a full replace.",
     );
@@ -433,12 +439,8 @@ fn text_changed_in_keyed_elements() {
     assert_eq!(
         patch,
         vec![
-            Patch::ChangeText(ChangeText::new(
-                7,
-                "item3",
-                "item3 with changes"
-            )),
-            Patch::RemoveChildren(&"section", 1, vec![0])
+            ChangeText::new(7, "item3", "item3 with changes").into(),
+            RemoveChildren::new(&"section", 1, vec![0]).into(),
         ]
     );
 }
@@ -463,13 +465,14 @@ fn multiple_style_calls() {
     println!("patches: {:#?}", patches);
     assert_eq!(
         patches,
-        vec![Patch::AddAttributes(
+        vec![AddAttributes::new(
             &"div",
             0,
             vec![
                 &style("font-family", "monospace1"),
                 &style("display", "flex")
             ]
-        )]
+        )
+        .into()]
     );
 }

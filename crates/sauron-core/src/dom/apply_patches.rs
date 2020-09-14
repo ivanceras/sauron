@@ -4,6 +4,10 @@ use crate::{
         created_node,
         created_node::{ActiveClosure, CreatedNode},
     },
+    mt_dom::patch::{
+        AddAttributes, AppendChildren, InsertChildren, RemoveAttributes,
+        RemoveChildren, ReplaceNode,
+    },
     mt_dom::AttValue,
     Dispatch, Patch,
 };
@@ -100,7 +104,7 @@ fn find_nodes_recursive(
     let mut element_nodes_to_patch = HashMap::new();
     let mut text_nodes_to_patch = HashMap::new();
 
-    // We use child_nodes() instead of children() because children() ignores text nodes
+    // Important: We use child_nodes() instead of children() because children() ignores text nodes
     let children = node.child_nodes();
     let child_node_count = children.length();
 
@@ -140,14 +144,15 @@ fn find_nodes_recursive(
         match child_node.node_type() {
             Node::ELEMENT_NODE => {
                 *cur_node_idx += 1;
-                let child_to_patch = find_nodes_recursive(
-                    child_node,
-                    cur_node_idx,
-                    nodes_to_find,
-                );
+                let (child_element_to_patch, child_text_nodes_to_patch) =
+                    find_nodes_recursive(
+                        child_node,
+                        cur_node_idx,
+                        nodes_to_find,
+                    );
 
-                element_nodes_to_patch.extend(child_to_patch.0);
-                text_nodes_to_patch.extend(child_to_patch.1);
+                element_nodes_to_patch.extend(child_element_to_patch);
+                text_nodes_to_patch.extend(child_text_nodes_to_patch);
             }
             Node::TEXT_NODE => {
                 *cur_node_idx += 1;
@@ -159,14 +164,10 @@ fn find_nodes_recursive(
             Node::COMMENT_NODE => {
                 *cur_node_idx += 1;
                 log::error!("Found a comment node..");
-                // At this time we do not support user entered comment nodes, so if we see a comment
-                // then it was a delimiter created by virtual-dom-rs in order to ensure that two
-                // neighboring text nodes did not get merged into one by the browser. So we skip
-                // over this virtual-dom-rs generated comment node.
             }
             _other => {
                 // Ignoring unsupported child node type
-                // TODO: What do we do with this situation? Log a warning?
+                unreachable!("This is an unsupported node: {:?}", _other);
             }
         }
     }
@@ -285,7 +286,12 @@ where
     //assert_eq!(node.tag_name().to_uppercase(), vtag.to_uppercase());
 
     match patch {
-        Patch::InsertChildren(_tag, _node_idx, child_idx, new_children) => {
+        Patch::InsertChildren(InsertChildren {
+            tag: _,
+            node_idx: _,
+            target_index,
+            children: new_children,
+        }) => {
             let parent = &node;
             let children_nodes = parent.child_nodes();
             let mut active_closures = HashMap::new();
@@ -295,7 +301,7 @@ where
                         program, &new_child, &mut None,
                     );
                 let next_sibling = children_nodes
-                    .item((*child_idx) as u32)
+                    .item((*target_index) as u32)
                     .expect("next item must exist");
 
                 parent
@@ -305,18 +311,26 @@ where
 
             Ok(active_closures)
         }
-        Patch::AddAttributes(_tag, _node_idx, attributes) => {
+        Patch::AddAttributes(AddAttributes {
+            tag: _,
+            node_idx: _,
+            attrs,
+        }) => {
             CreatedNode::<Node>::set_element_attributes(
                 program,
                 &mut active_closures,
                 node,
-                attributes,
+                attrs,
             );
 
             Ok(active_closures)
         }
-        Patch::RemoveAttributes(_tag, _node_idx, attributes) => {
-            for attr in attributes.iter() {
+        Patch::RemoveAttributes(RemoveAttributes {
+            tag: _,
+            node_idx: _,
+            attrs,
+        }) => {
+            for attr in attrs.iter() {
                 for att_value in attr.value() {
                     match att_value {
                         AttValue::Plain(_) => {
@@ -341,11 +355,15 @@ where
         // including the associated closures of the descendant of replaced node
         // before it is actully replaced in the DOM
         //
-        Patch::Replace(_tag, _node_idx, new_node) => {
+        Patch::ReplaceNode(ReplaceNode {
+            tag: _,
+            node_idx: _,
+            replacement,
+        }) => {
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                 DSP,
                 MSG,
-            >(program, new_node, &mut None);
+            >(program, replacement, &mut None);
             remove_event_listeners(&node, old_closures)?;
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
@@ -357,7 +375,11 @@ where
         // of the children and indirect children of this node ( so we don't have to manually remove
         // them).
         // The closures of descendant of the children is also removed
-        Patch::RemoveChildren(_tag, _node_idx, children_index) => {
+        Patch::RemoveChildren(RemoveChildren {
+            tag: _,
+            node_idx: _,
+            target_index: children_index,
+        }) => {
             // we sort the children index, and reverse iterate them
             // to remove from the last since the DOM children
             // index is changed when you remove from the first child.
@@ -389,7 +411,11 @@ where
 
             Ok(active_closures)
         }
-        Patch::AppendChildren(_tag, _node_idx, new_nodes) => {
+        Patch::AppendChildren(AppendChildren {
+            tag: _,
+            node_idx: _,
+            children: new_nodes,
+        }) => {
             let parent = &node;
             let mut active_closures = HashMap::new();
             for new_node in new_nodes {
@@ -428,11 +454,15 @@ where
         Patch::ChangeText(ct) => {
             node.set_node_value(Some(ct.get_new()));
         }
-        Patch::Replace(_tag, _node_idx, new_node) => {
+        Patch::ReplaceNode(ReplaceNode {
+            tag: _,
+            node_idx: _,
+            replacement,
+        }) => {
             let created_node = CreatedNode::<Node>::create_dom_node_opt::<
                 DSP,
                 MSG,
-            >(program, new_node, &mut None);
+            >(program, replacement, &mut None);
             node.replace_with_with_node_1(&created_node.node)?;
         }
         _other => unreachable!(

@@ -5,6 +5,7 @@ use crate::{
         created_node::{ActiveClosure, CreatedNode},
         Dispatch,
     },
+    Patch,
 };
 use wasm_bindgen::JsCast;
 use web_sys::{self, Element, Node};
@@ -12,7 +13,8 @@ use web_sys::{self, Element, Node};
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
 pub struct DomUpdater<MSG> {
-    current_vdom: crate::Node<MSG>,
+    /// the current vdom representation
+    pub current_vdom: crate::Node<MSG>,
     root_node: Node,
 
     /// The closures that are currently attached to elements in the page.
@@ -135,10 +137,23 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
+        use crate::render::Render;
+        let mut current_dom = String::new();
+        self.current_vdom
+            .render_compressed(&mut current_dom)
+            .expect("must render");
+        log::trace!("current dom: {}", current_dom);
+
+        let mut target_dom = String::new();
+        new_vdom
+            .render_compressed(&mut target_dom)
+            .expect("must render");
+        log::trace!("target dom: {}", target_dom);
+
         let patches = diff(&self.current_vdom, &new_vdom);
-        #[cfg(feature = "with-measure")]
+        #[cfg(feature = "with-nodeidx")]
         log::trace!("applying {} patches", patches.len());
-        #[cfg(feature = "with-measure")]
+        #[cfg(feature = "with-nodeidx")]
         log::trace!("patches: {:#?}", patches);
         let active_closures = patch(
             Some(program),
@@ -149,6 +164,22 @@ where
         .expect("Error in patching the dom");
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
+    }
+
+    /// Apply patches to the dom updater
+    /// Warning: only used this for debuggin purposes
+    pub fn patch_dom<DSP>(&mut self, program: &DSP, patches: Vec<Patch<MSG>>)
+    where
+        DSP: Dispatch<MSG> + Clone + 'static,
+    {
+        let active_closures = patch(
+            Some(program),
+            self.root_node.clone(),
+            &mut self.active_closures,
+            patches,
+        )
+        .expect("Error in patching the dom");
+        self.active_closures.extend(active_closures);
     }
 
     /// map this DomUpdater such that the Node<MSG> will become Node<MSG2>

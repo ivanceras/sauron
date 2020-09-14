@@ -1,6 +1,7 @@
 #![cfg(target_arch = "wasm32")]
-#![deny(warnings)]
+//#![deny(warnings)]
 use sauron_core::Node;
+use sauron_core::Patch;
 use sauron_core::{
     dom::CreatedNode,
     html::{attributes::*, div, events::*},
