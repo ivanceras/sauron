@@ -1,6 +1,13 @@
 //! https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
 //!
-use crate::Attribute;
+use crate::{
+    mt_dom::{
+        AttValue,
+        Callback,
+    },
+    Attribute,
+    Event,
+};
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
 pub use style::Style;
@@ -236,4 +243,30 @@ pub(crate) fn merge_plain_attributes_values(
     } else {
         None
     }
+}
+
+/// returns (callbacks, plain_attribtues, function_calls)
+pub(crate) fn partition_callbacks_from_plain_and_func_calls<MSG>(
+    attr: &Attribute<MSG>,
+) -> (
+    Vec<&Callback<Event, MSG>>,
+    Vec<&AttributeValue>,
+    Vec<&AttributeValue>,
+) {
+    let mut callbacks = vec![];
+    let mut plain_values = vec![];
+    let mut func_values = vec![];
+    for av in attr.value() {
+        match av {
+            AttValue::Plain(plain) => {
+                if plain.is_function_call() {
+                    func_values.push(plain);
+                } else {
+                    plain_values.push(plain);
+                }
+            }
+            AttValue::Callback(cb) => callbacks.push(cb),
+        }
+    }
+    (callbacks, plain_values, func_values)
 }

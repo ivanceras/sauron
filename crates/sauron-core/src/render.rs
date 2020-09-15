@@ -2,8 +2,7 @@
 //! virtual dom into a writable buffer
 //!
 use crate::{
-    html::attributes::AttributeValue,
-    mt_dom::AttValue,
+    html::attributes,
     Attribute,
     Element,
     Node,
@@ -63,6 +62,7 @@ impl<MSG> Render for Element<MSG> {
             self.get_attributes().iter().map(|att| att).collect();
         let merged_attributes: Vec<Attribute<MSG>> =
             mt_dom::merge_attributes_of_same_name(&ref_attrs);
+
         for attr in merged_attributes {
             write!(buffer, " ")?;
             attr.render_with_indent(buffer, indent, node_idx, compressed)?;
@@ -73,7 +73,7 @@ impl<MSG> Render for Element<MSG> {
                 crate::prelude::attr("node_idx", *node_idx);
             write!(buffer, " ")?;
             node_idx_attr
-                .render_with_indent(buffer, indent, &mut None, compressed)?;
+                .render_with_indent(buffer, indent, node_idx, compressed)?;
         }
         write!(buffer, ">")?;
 
@@ -121,47 +121,16 @@ impl<MSG> Render for Attribute<MSG> {
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
-        indent: usize,
-        node_idx: &mut Option<usize>,
-        compressed: bool,
-    ) -> fmt::Result {
-        write!(buffer, "{}=\"", self.name())?;
-        for (i, att_value) in self.value().iter().enumerate() {
-            match att_value {
-                AttValue::Plain(plain) => {
-                    if i > 0 && !plain.is_style() {
-                        write!(buffer, " ")?;
-                    }
-                    plain.render_with_indent(
-                        buffer, indent, node_idx, compressed,
-                    )?;
-                }
-                _ => (),
-            }
-        }
-        write!(buffer, "\"")?;
-        Ok(())
-    }
-}
-
-impl Render for AttributeValue {
-    fn render_with_indent(
-        &self,
-        buffer: &mut dyn fmt::Write,
-        _index: usize,
+        _indent: usize,
         _node_idx: &mut Option<usize>,
         _compressed: bool,
     ) -> fmt::Result {
-        match self {
-            AttributeValue::Simple(simple) => {
-                write!(buffer, "{}", simple.to_string())?;
-            }
-            AttributeValue::Style(styles_att) => {
-                for s_att in styles_att {
-                    write!(buffer, "{};", s_att)?;
-                }
-            }
-            _ => (),
+        let (_callbacks, plain_values, _func_values) =
+            attributes::partition_callbacks_from_plain_and_func_calls(&self);
+        if let Some(merged_plain_values) =
+            attributes::merge_plain_attributes_values(&plain_values)
+        {
+            write!(buffer, "{}=\"{}\"", self.name(), merged_plain_values)?;
         }
         Ok(())
     }

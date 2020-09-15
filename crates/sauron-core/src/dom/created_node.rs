@@ -1,15 +1,28 @@
 use crate::{
     dom::Dispatch,
     html,
-    mt_dom::{AttValue, Callback, NodeIdx},
-    prelude::AttributeValue,
-    Attribute, Event,
+    mt_dom::{
+        Callback,
+        NodeIdx,
+    },
+    Attribute,
 };
-use std::ops::Deref;
-use std::{collections::HashMap, sync::Mutex};
-use wasm_bindgen::{closure::Closure, JsCast};
+use std::{
+    collections::HashMap,
+    ops::Deref,
+    sync::Mutex,
+};
+use wasm_bindgen::{
+    closure::Closure,
+    JsCast,
+};
 use web_sys::{
-    self, Element, EventTarget, HtmlInputElement, HtmlTextAreaElement, Node,
+    self,
+    Element,
+    EventTarget,
+    HtmlInputElement,
+    HtmlTextAreaElement,
+    Node,
     Text,
 };
 
@@ -102,32 +115,6 @@ impl<T> CreatedNode<T> {
         }
     }
 
-    /// returns (callbacks, plain_attribtues, function_calls)
-    fn partition_callbacks_from_plain_and_func_calls<MSG>(
-        attr: &Attribute<MSG>,
-    ) -> (
-        Vec<&Callback<Event, MSG>>,
-        Vec<&AttributeValue>,
-        Vec<&AttributeValue>,
-    ) {
-        let mut callbacks = vec![];
-        let mut plain_values = vec![];
-        let mut func_values = vec![];
-        for av in attr.value() {
-            match av {
-                AttValue::Plain(plain) => {
-                    if plain.is_function_call() {
-                        func_values.push(plain);
-                    } else {
-                        plain_values.push(plain);
-                    }
-                }
-                AttValue::Callback(cb) => callbacks.push(cb),
-            }
-        }
-        (callbacks, plain_values, func_values)
-    }
-
     /// set the element attribute
     pub fn set_element_attributes<DSP, MSG>(
         program: Option<&DSP>,
@@ -155,7 +142,9 @@ impl<T> CreatedNode<T> {
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         let (callbacks, plain_values, func_values) =
-            Self::partition_callbacks_from_plain_and_func_calls(attr);
+            html::attributes::partition_callbacks_from_plain_and_func_calls(
+                attr,
+            );
 
         // set simple values
         if let Some(merged_plain_values) =

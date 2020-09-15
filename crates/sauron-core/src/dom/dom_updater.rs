@@ -2,13 +2,20 @@ use crate::{
     diff,
     dom::{
         apply_patches::patch,
-        created_node::{ActiveClosure, CreatedNode},
+        created_node::{
+            ActiveClosure,
+            CreatedNode,
+        },
         Dispatch,
     },
     Patch,
 };
 use wasm_bindgen::JsCast;
-use web_sys::{self, Element, Node};
+use web_sys::{
+    self,
+    Element,
+    Node,
+};
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
@@ -137,23 +144,33 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
+        #[cfg(feature = "with-measure")]
         use crate::render::Render;
-        let mut current_dom = String::new();
-        self.current_vdom
-            .render_compressed(&mut current_dom)
-            .expect("must render");
-        log::trace!("current dom: {}", current_dom);
 
-        let mut target_dom = String::new();
-        new_vdom
-            .render_compressed(&mut target_dom)
-            .expect("must render");
-        log::trace!("target dom: {}", target_dom);
+        #[cfg(feature = "with-measure")]
+        let _current_dom = {
+            let mut current_dom = String::new();
+            self.current_vdom
+                .render_compressed(&mut current_dom)
+                .expect("must render");
+            log::trace!("current dom: {}", current_dom);
+            current_dom
+        };
+
+        #[cfg(feature = "with-measure")]
+        let target_dom = {
+            let mut target_dom = String::new();
+            new_vdom
+                .render_compressed(&mut target_dom)
+                .expect("must render");
+            log::trace!("target dom: {}", target_dom);
+            target_dom
+        };
 
         let patches = diff(&self.current_vdom, &new_vdom);
-        #[cfg(feature = "with-nodeidx")]
+        #[cfg(feature = "with-measure")]
         log::trace!("applying {} patches", patches.len());
-        #[cfg(feature = "with-nodeidx")]
+        #[cfg(feature = "with-measure")]
         log::trace!("patches: {:#?}", patches);
         let active_closures = patch(
             Some(program),
@@ -162,6 +179,14 @@ where
             patches,
         )
         .expect("Error in patching the dom");
+
+        #[cfg(feature = "with-measure")]
+        {
+            let root_element: &web_sys::Element =
+                self.root_node.unchecked_ref();
+            assert_eq!(target_dom, root_element.outer_html());
+        }
+
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
     }
