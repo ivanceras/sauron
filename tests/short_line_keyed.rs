@@ -97,7 +97,7 @@ fn test_unmatched_old_key() {
     );
 
     let patches = diff(&old, &new);
-    println!("{:#?}", patches);
+    dbg!(&patches);
     assert_eq!(
         patches,
         vec![
@@ -107,7 +107,7 @@ fn test_unmatched_old_key() {
             InsertChildren::new(
                 &"div",
                 0,
-                1,
+                0,
                 vec![&div(
                     vec![class("grid__number__line"), key("keyXXX"),],
                     vec![

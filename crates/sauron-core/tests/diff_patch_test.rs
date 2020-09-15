@@ -397,24 +397,6 @@ fn replace_text_node() {
     );
 }
 
-// the element with keys could have event listeners (which are not comparable)
-// To be safe, just remove non-matching old keyed element and re-create an element for the non-matching keyed
-// new element
-#[test]
-fn different_key_will_be_removed_and_create_a_new_one() {
-    let old: Node<()> = main(vec![], vec![div(vec![key(1)], vec![])]);
-    let new = main(vec![], vec![div(vec![key(2)], vec![])]);
-    assert_eq!(
-        diff(&old, &new),
-        vec![
-            RemoveChildren::new(&"main", 0, vec![0]).into(),
-            AppendChildren::new(&"main", 0, vec![&div(vec![key(2)], vec![])])
-                .into(),
-        ],
-        "If two nodes have different keys always generate a full replace.",
-    );
-}
-
 #[test]
 fn text_changed_in_keyed_elements() {
     let old: Node<()> = main(

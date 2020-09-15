@@ -1,10 +1,10 @@
 #!/bin/bash
 
-cargo +stable test
+cargo test
 
 # Install wasm-pack if it isn't installed yet
 if ! type wasm-pack > /dev/null; then
     cargo install wasm-pack
 fi
 
-wasm-pack test --firefox --headless -- +stable
+wasm-pack test --firefox --headless --

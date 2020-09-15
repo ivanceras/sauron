@@ -29,28 +29,11 @@ use std::{
     cell::RefCell,
     rc::Rc,
 };
+use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 use web_sys::InputEvent;
 
-/// This is a simple component for the puprpose of testing
-#[derive(Copy, Clone, Debug)]
-pub struct SimpleComponent;
-
-impl Component<()> for SimpleComponent {
-    fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
-        trace!("updating in SimpleComponent");
-        Cmd::none()
-    }
-
-    fn view(&self) -> Node<()> {
-        div(vec![], vec![])
-    }
-}
-
-/// creates a program from SimpleComponent
-pub fn simple_program() -> Program<SimpleComponent, ()> {
-    Program::new_append_to_mount(SimpleComponent, &body())
-}
+mod test_fixtures;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
