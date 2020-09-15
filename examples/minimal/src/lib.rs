@@ -6,7 +6,6 @@ use sauron::{
             attr,
             class,
             id,
-            key,
             type_,
             value,
         },
@@ -55,7 +54,6 @@ impl Component<Msg> for App {
                                 class("client"),
                                 type_("button"),
                                 value("Click me!"),
-                                key(1),
                                 on_click(|_| {
                                     trace!("Button is clicked");
                                     Msg::Click

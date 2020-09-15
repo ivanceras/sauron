@@ -158,7 +158,7 @@ where
         };
 
         #[cfg(feature = "with-measure")]
-        let target_dom = {
+        let _target_dom = {
             let mut target_dom = String::new();
             new_vdom
                 .render_compressed(&mut target_dom)
@@ -172,6 +172,7 @@ where
         log::trace!("applying {} patches", patches.len());
         #[cfg(feature = "with-measure")]
         log::trace!("patches: {:#?}", patches);
+
         let active_closures = patch(
             Some(program),
             self.root_node.clone(),
@@ -182,9 +183,9 @@ where
 
         #[cfg(feature = "with-measure")]
         {
-            let root_element: &web_sys::Element =
+            let _root_element: &web_sys::Element =
                 self.root_node.unchecked_ref();
-            assert_eq!(target_dom, root_element.outer_html());
+            //assert_eq!(target_dom, root_element.outer_html());
         }
 
         self.active_closures.extend(active_closures);

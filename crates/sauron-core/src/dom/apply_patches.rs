@@ -2,19 +2,36 @@
 use crate::{
     dom::{
         created_node,
-        created_node::{ActiveClosure, CreatedNode},
+        created_node::{
+            ActiveClosure,
+            CreatedNode,
+        },
     },
-    mt_dom::patch::{
-        AddAttributes, AppendChildren, InsertChildren, RemoveAttributes,
-        RemoveChildren, ReplaceNode,
+    mt_dom::{
+        patch::{
+            AddAttributes,
+            AppendChildren,
+            InsertChildren,
+            RemoveAttributes,
+            RemoveChildren,
+            ReplaceNode,
+        },
+        AttValue,
     },
-    mt_dom::AttValue,
-    Dispatch, Patch,
+    Dispatch,
+    Patch,
 };
 use js_sys::Function;
 use std::collections::HashMap;
-use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{Element, Node, Text};
+use wasm_bindgen::{
+    JsCast,
+    JsValue,
+};
+use web_sys::{
+    Element,
+    Node,
+    Text,
+};
 
 /// Apply all of the patches to our old root node in order to create the new root node
 /// that we desire.
@@ -292,10 +309,12 @@ where
             target_index,
             children: new_children,
         }) => {
+            log::trace!("inserting children..");
             let parent = &node;
             let children_nodes = parent.child_nodes();
             let mut active_closures = HashMap::new();
             for new_child in new_children {
+                log::trace!("inserted child");
                 let created_node =
                     CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
                         program, &new_child, &mut None,
@@ -465,9 +484,11 @@ where
             >(program, replacement, &mut None);
             node.replace_with_with_node_1(&created_node.node)?;
         }
-        _other => unreachable!(
-            "Text nodes should only receive ChangeText or Replace patches."
-        ),
+        _other => {
+            unreachable!(
+                "Text nodes should only receive ChangeText or Replace patches."
+            )
+        }
     };
 
     Ok(())
