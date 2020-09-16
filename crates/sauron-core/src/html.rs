@@ -17,7 +17,10 @@ pub mod units;
 #[cfg(feature = "with-dom")]
 pub use crate::dom::events;
 
-pub use tags::commons::*;
+pub use tags::{
+    commons::*,
+    self_closing::*,
+};
 
 /// A help function which render the view when the condition is met, otherwise
 /// just display a text("")
@@ -44,6 +47,16 @@ pub fn html_element<MSG>(
     element(tag, attrs, children)
 }
 
+/// for self closing tags
+pub fn html_element_sc<MSG>(
+    tag: &'static str,
+    attrs: Vec<Attribute<MSG>>,
+    children: Vec<Node<MSG>>,
+    self_closing: bool,
+) -> Node<MSG> {
+    element_ns(None, tag, attrs, children, self_closing)
+}
+
 /// creates an html element with the element tag name and namespace
 /// This is specifically used for creating svg element where a namespace is needed, otherwise the
 /// browser will not render it correctly.
@@ -54,7 +67,7 @@ pub fn html_element_ns<MSG>(
     attrs: Vec<Attribute<MSG>>,
     children: Vec<Node<MSG>>,
 ) -> Node<MSG> {
-    element_ns(Some(namespace), tag, attrs, children)
+    element_ns(Some(namespace), tag, attrs, children, false)
 }
 
 /// creates a text node

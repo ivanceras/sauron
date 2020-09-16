@@ -25,6 +25,7 @@ use sauron_core::{
             HTML_STYLES,
         },
         tags::{
+            HTML_SC_TAGS,
             HTML_TAGS,
             HTML_TAGS_NON_COMMON,
             HTML_TAGS_WITH_MACRO_NON_COMMON,
@@ -67,6 +68,7 @@ pub enum ParseError {
 fn match_tag(tag: &str) -> Option<&'static str> {
     HTML_TAGS
         .iter()
+        .chain(HTML_SC_TAGS.iter())
         .chain(HTML_TAGS_NON_COMMON.iter())
         .chain(HTML_TAGS_WITH_MACRO_NON_COMMON.iter())
         .chain(SVG_TAGS.iter())

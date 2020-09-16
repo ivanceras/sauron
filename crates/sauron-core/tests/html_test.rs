@@ -68,10 +68,10 @@ fn test_macros_with_lines() {
 
 #[test]
 fn simple_builder() {
-    let mut div: Element<()> = Element::new(None, "div", vec![], vec![]);
+    let mut div: Element<()> = Element::new(None, "div", vec![], vec![], false);
     div.add_attributes(vec![attr("class", "some-class")]);
     let expected: Element<()> =
-        Element::new(None, "div", vec![class("some-class")], vec![]);
+        Element::new(None, "div", vec![class("some-class")], vec![], false);
 
     assert_eq!(div, expected);
 }
@@ -81,10 +81,10 @@ fn builder_with_event() {
     let cb = |x: Event| {
         println!("hello! {:?}", x);
     };
-    let mut div: Element<()> = Element::new(None, "div", vec![], vec![]);
+    let mut div: Element<()> = Element::new(None, "div", vec![], vec![], false);
     div.add_attributes(vec![on("click", cb.clone())]);
     let expected: Element<()> =
-        Element::new(None, "div", vec![on("click", cb)], vec![]);
+        Element::new(None, "div", vec![on("click", cb)], vec![], false);
 
     assert_eq!(
         div, expected,
@@ -94,7 +94,7 @@ fn builder_with_event() {
 
 #[test]
 fn builder_with_children() {
-    let mut div: Element<()> = Element::new(None, "div", vec![], vec![]);
+    let mut div: Element<()> = Element::new(None, "div", vec![], vec![], false);
     div.add_attributes(vec![attr("class", "some-class")]);
     div.add_children(vec![Node::Text("Hello".to_string())]);
     let expected = Element::new(
@@ -102,6 +102,7 @@ fn builder_with_children() {
         "div",
         vec![class("some-class")],
         vec![Node::Text("Hello".to_string())],
+        false,
     );
 
     assert_eq!(div, expected);

@@ -60,8 +60,10 @@ where
     let (element_nodes_to_patch, text_nodes_to_patch) =
         find_nodes(root_node, &patches);
 
+    /*
     log::trace!("element_nodes_to_patch: {:#?}", element_nodes_to_patch);
     log::trace!("text_nodes_to_patch: {:#?}", text_nodes_to_patch);
+    */
 
     for patch in patches.iter() {
         let patch_node_idx = patch.node_idx();
@@ -309,12 +311,10 @@ where
             target_index,
             children: new_children,
         }) => {
-            log::trace!("inserting children..");
             let parent = &node;
             let children_nodes = parent.child_nodes();
             let mut active_closures = HashMap::new();
             for new_child in new_children {
-                log::trace!("inserted child");
                 let created_node =
                     CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
                         program, &new_child, &mut None,
@@ -410,7 +410,6 @@ where
             let children_nodes = node.child_nodes();
 
             for child_idx in sorted_children_index.iter().rev() {
-                log::trace!("removing child: {}", child_idx);
                 let child_node = children_nodes
                     .item(*child_idx as u32)
                     .expect("child at this index must exist");

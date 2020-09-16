@@ -112,7 +112,11 @@ impl<MSG> Render for Element<MSG> {
                 write!(buffer, "\n{}", "    ".repeat(indent))?;
             }
         }
-        write!(buffer, "</{}>", self.tag())?;
+        if self.self_closing {
+            write!(buffer, "/>")?;
+        } else {
+            write!(buffer, "</{}>", self.tag())?;
+        }
         Ok(())
     }
 }

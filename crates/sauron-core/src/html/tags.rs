@@ -22,6 +22,38 @@ macro_rules! declare_tags {
     }
 }
 
+/// declare self closing tags
+macro_rules! declare_sc_tags {
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+
+        /// self closing tags
+        pub(crate) mod self_closing{
+            $(
+                doc_comment!{
+                    concat!("Creates an html [",stringify!($name),"](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/",stringify!($name),") element"),
+
+                $(#[$attr])*
+                #[inline]
+                #[allow(non_snake_case)]
+                pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
+                    {
+                        $crate::html::html_element_sc(stringify!($name), attrs, children, true)
+                    }
+                }
+
+             )*
+        }
+
+        #[cfg(feature = "with-parser")]
+        /// These are the self closing tags such as `<input/>`, `<br/>`,
+        pub const HTML_SC_TAGS: [&'static str; 16] = [$(stringify!($name),)*];
+    }
+}
+
 macro_rules! declare_common_tags_and_macro {
     ($($(#[$attr:meta])* $name:ident;)*) => {
 
@@ -32,7 +64,7 @@ macro_rules! declare_common_tags_and_macro {
 
         #[cfg(feature = "with-parser")]
         /// These are the comonly used html tags such as div, input, buttons,.. etc
-        pub const HTML_TAGS: [&'static str; 112] = [$(stringify!($name),)*];
+        pub const HTML_TAGS: [&'static str; 98] = [$(stringify!($name),)*];
     };
 }
 
@@ -83,10 +115,7 @@ macro_rules! declare_tags_and_macro_non_common{
 //
 // Does not include obsolete elements.
 declare_common_tags_and_macro! {
-    base;
     head;
-    link;
-    meta;
     body;
     address;
     article;
@@ -110,7 +139,6 @@ declare_common_tags_and_macro! {
     dt;
     figcaption;
     figure;
-    hr;
     html;
     li;
     ol;
@@ -122,7 +150,6 @@ declare_common_tags_and_macro! {
     b;
     bdi;
     bdo;
-    br;
     cite;
     code;
     data;
@@ -147,26 +174,18 @@ declare_common_tags_and_macro! {
     time;
     u;
     var;
-    wbr;
-    area;
     audio;
-    img;
     map;
-    track;
     video;
-    embed;
     iframe;
     object;
-    param;
     picture;
-    source;
     canvas;
     noscript;
     script;
     del;
     ins;
     caption;
-    col;
     colgroup;
     table;
     tbody;
@@ -179,7 +198,6 @@ declare_common_tags_and_macro! {
     datalist;
     fieldset;
     form;
-    input;
     label;
     legend;
     meter;
@@ -208,4 +226,24 @@ declare_tags_non_common! {
 declare_tags_and_macro_non_common! {
     title; // conflicts with html::attributes::title  , attributes::title   > tags::title
     slot;  // conflicts with html::attributes::slot   , attrributes::slot   > tags::slot
+}
+
+// self closing tags such as `<input/>, `<br/>`
+declare_sc_tags! {
+    area;
+    base;
+    br;
+    col;
+    command;
+    embed;
+    hr;
+    img;
+    input;
+    keygen;
+    link;
+    meta;
+    param;
+    source;
+    track;
+    wbr;
 }

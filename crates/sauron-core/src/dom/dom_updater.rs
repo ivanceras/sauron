@@ -144,9 +144,12 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
+        /*
         #[cfg(feature = "with-measure")]
         use crate::render::Render;
+        */
 
+        /*
         #[cfg(feature = "with-measure")]
         let _current_dom = {
             let mut current_dom = String::new();
@@ -156,7 +159,9 @@ where
             log::trace!("current dom: {}", current_dom);
             current_dom
         };
+        */
 
+        /*
         #[cfg(feature = "with-measure")]
         let _target_dom = {
             let mut target_dom = String::new();
@@ -166,6 +171,7 @@ where
             log::trace!("target dom: {}", target_dom);
             target_dom
         };
+        */
 
         let patches = diff(&self.current_vdom, &new_vdom);
         #[cfg(feature = "with-measure")]
@@ -181,12 +187,14 @@ where
         )
         .expect("Error in patching the dom");
 
+        /*
         #[cfg(feature = "with-measure")]
         {
             let _root_element: &web_sys::Element =
                 self.root_node.unchecked_ref();
             //assert_eq!(target_dom, root_element.outer_html());
         }
+        */
 
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
