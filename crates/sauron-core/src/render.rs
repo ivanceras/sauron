@@ -29,6 +29,13 @@ pub trait Render {
         node_idx: &mut Option<usize>,
         compressed: bool,
     ) -> fmt::Result;
+
+    /// render compressed html to string
+    fn render_to_string(&self) -> String {
+        let mut buffer = String::new();
+        self.render_compressed(&mut buffer).expect("must render");
+        buffer
+    }
 }
 
 impl<MSG> Render for Node<MSG> {
@@ -48,6 +55,29 @@ impl<MSG> Render for Node<MSG> {
     }
 }
 
+fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
+    log::trace!("extracting inner html");
+    // get the func values such as inner html
+    merged_attributes
+        .iter()
+        .flat_map(|attr| {
+            let (_callbacks, _plain_values, func_values) =
+                attributes::partition_callbacks_from_plain_and_func_calls(
+                    &attr,
+                );
+            log::trace!("attr: {:?}", attr);
+
+            if *attr.name() == "inner_html" {
+                log::trace!("it is an inner html");
+                attributes::merge_plain_attributes_values(&func_values)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 impl<MSG> Render for Element<MSG> {
     fn render_with_indent(
         &self,
@@ -63,10 +93,11 @@ impl<MSG> Render for Element<MSG> {
         let merged_attributes: Vec<Attribute<MSG>> =
             mt_dom::merge_attributes_of_same_name(&ref_attrs);
 
-        for attr in merged_attributes {
+        for attr in &merged_attributes {
             write!(buffer, " ")?;
             attr.render_with_indent(buffer, indent, node_idx, compressed)?;
         }
+
         #[cfg(feature = "with-nodeidx")]
         if let Some(node_idx_) = node_idx {
             let node_idx_attr: Attribute<MSG> =
@@ -75,7 +106,11 @@ impl<MSG> Render for Element<MSG> {
             node_idx_attr
                 .render_with_indent(buffer, indent, node_idx, compressed)?;
         }
-        write!(buffer, ">")?;
+        if self.self_closing {
+            write!(buffer, "/>")?;
+        } else {
+            write!(buffer, ">")?;
+        }
 
         let children = self.get_children();
         let first_child = children.get(0);
@@ -106,15 +141,21 @@ impl<MSG> Render for Element<MSG> {
                 )?;
             }
         }
+
         // do not make a new line it if is only a text child node or it has no child nodes
         if !is_lone_child_text_node && !children.is_empty() {
             if !compressed {
                 write!(buffer, "\n{}", "    ".repeat(indent))?;
             }
         }
-        if self.self_closing {
-            write!(buffer, "/>")?;
-        } else {
+
+        let inner_html = extract_inner_html(&merged_attributes);
+        log::trace!("got iner_html: {}", inner_html);
+        if !inner_html.is_empty() {
+            write!(buffer, "{}", inner_html)?;
+        }
+
+        if !self.self_closing {
             write!(buffer, "</{}>", self.tag())?;
         }
         Ok(())

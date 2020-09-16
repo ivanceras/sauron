@@ -205,6 +205,11 @@ impl<T> CreatedNode<T> {
         if let Some(merged_func_values) =
             html::attributes::merge_plain_attributes_values(&func_values)
         {
+            log::trace!(
+                "inner html for {} = {}",
+                attr.name(),
+                merged_func_values
+            );
             match *attr.name() {
                 "inner_html" => element.set_inner_html(&merged_func_values),
                 _ => (),

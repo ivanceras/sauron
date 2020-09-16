@@ -182,6 +182,7 @@ pub fn inner_html<V, MSG>(inner_html: V) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
 {
+    log::trace!("got innher html: {}", inner_html.clone().into());
     mt_dom::attr(
         "inner_html",
         AttributeValue::function_call(inner_html.into()),
