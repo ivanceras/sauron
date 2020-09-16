@@ -34,19 +34,19 @@ fn node_to_tokens(node: Node) -> TokenStream {
     // NodeType::Element nodes can't have no name
     let name = node.name_as_string().unwrap();
 
-    let mut attributes = vec![];
-    for attribute in &node.attributes {
-        attributes.push(attribute_to_tokens(attribute));
-    }
+    let attributes = node
+        .attributes
+        .iter()
+        .map(|attribute| attribute_to_tokens(attribute))
+        .collect::<Vec<_>>();
 
     let children_tokens = children_to_tokens(node.children);
 
     tokens.extend(quote! {{
         #[allow(unused_braces)]
         {
-            let attrs = vec![#(#attributes),*];
             #children_tokens
-            sauron::html::html_element(#name, attrs, children)
+            sauron::html::html_element(#name, vec![#(#attributes),*], children)
         }
     }});
 
