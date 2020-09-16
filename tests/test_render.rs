@@ -36,3 +36,47 @@ fn test_self_closing_tag() {
 
     assert_eq!(expected, view1.render_to_string());
 }
+
+#[test]
+fn test_inner_html_patch() {
+    let view1: Node<()> =
+        main(vec![class("container")], vec![article(vec![], vec![])]);
+
+    let view2: Node<()> = main(
+        vec![class("container")],
+        vec![article(vec![inner_html("<h1>Lorep Ipsum</h1>")], vec![])],
+    );
+
+    let patch = diff(&view1, &view2);
+    assert_eq!(
+        patch,
+        vec![AddAttributes::new(
+            &"article",
+            1,
+            vec![&inner_html("<h1>Lorep Ipsum</h1>")]
+        )
+        .into()]
+    );
+}
+
+#[test]
+fn test_inner_html_removed() {
+    let view1: Node<()> = main(
+        vec![class("container")],
+        vec![article(vec![inner_html("<h1>Lorep Ipsum</h1>")], vec![])],
+    );
+
+    let view2: Node<()> =
+        main(vec![class("container")], vec![article(vec![], vec![])]);
+
+    let patch = diff(&view1, &view2);
+    assert_eq!(
+        patch,
+        vec![RemoveAttributes::new(
+            &"article",
+            1,
+            vec![&inner_html("<h1>Lorep Ipsum</h1>")]
+        )
+        .into()]
+    );
+}
