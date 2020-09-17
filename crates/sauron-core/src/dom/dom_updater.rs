@@ -179,6 +179,8 @@ where
         #[cfg(feature = "with-measure")]
         log::trace!("patches: {:#?}", patches);
 
+        log::trace!("patches: {:#?}", patches);
+
         let active_closures = patch(
             Some(program),
             self.root_node.clone(),

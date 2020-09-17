@@ -299,6 +299,7 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
+    log::trace!("apply element patch: {:#?}", patch);
     let mut active_closures = ActiveClosure::new();
 
     //let vtag = *patch.tag().expect("must have a tag");

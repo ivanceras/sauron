@@ -98,6 +98,7 @@ fn test_unmatched_old_key() {
 
     let patches = diff(&old, &new);
     dbg!(&patches);
+    /*
     assert_eq!(
         patches,
         vec![
@@ -121,6 +122,17 @@ fn test_unmatched_old_key() {
             )
             .into(),
             RemoveChildren::new(&"div", 0, vec![0]).into(),
+        ]
+    );
+    */
+    assert_eq!(
+        patches,
+        vec![
+            AddAttributes::new(&"div", 1, vec![&key("keyXXX")]).into(),
+            ChangeText::new(3, "0", "XXX").into(),
+            ChangeText::new(9, "1", "2").into(),
+            ChangeText::new(15, "2", "3").into(),
+            ChangeText::new(27, "3", "4").into(),
         ]
     );
 }
@@ -201,7 +213,8 @@ fn target_dom() {
     );
 
     // 1 is lost
-    let patch = diff(&current_dom, &target_dom);
+    let mut patch = diff(&current_dom, &target_dom);
+    patch.sort_by_key(|p| p.priority());
     println!("patch: {:#?}", patch);
     let to_insert = node!(
                 <div class="grid__number__line" key="4638962052468762037">
@@ -213,8 +226,11 @@ fn target_dom() {
     let expected = vec![
         ChangeText::new(10, "1", "2").into(),
         ChangeText::new(22, "2", "3").into(),
-        InsertChildren::new(&"div", 1, 1, vec![&to_insert]).into(),
         ChangeText::new(33, "line: 1, column: 0", "line: 2, column: 0").into(),
+        InsertChildren::new(&"div", 1, 1, vec![&to_insert]).into(),
     ];
     assert_eq!(patch, expected);
+    let mut current_dom_clone = current_dom.clone();
+    mt_dom::apply_patches(&mut current_dom_clone, &patch);
+    assert_eq!(current_dom_clone, target_dom);
 }

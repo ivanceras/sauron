@@ -233,6 +233,7 @@ pub(crate) fn merge_plain_attributes_values(
                     Some(style_str)
                 }
                 AttributeValue::FunctionCall(fvalue) => {
+                    log::trace!("func call: {}", fvalue);
                     Some(fvalue.to_string())
                 }
                 AttributeValue::Empty => None,
@@ -261,8 +262,10 @@ pub(crate) fn partition_callbacks_from_plain_and_func_calls<MSG>(
         match av {
             AttValue::Plain(plain) => {
                 if plain.is_function_call() {
+                    log::trace!("this is func call: {:?}", plain);
                     func_values.push(plain);
                 } else {
+                    log::trace!("simple..{:?}", plain);
                     plain_values.push(plain);
                 }
             }
