@@ -21,6 +21,11 @@ mod test_fixtures;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
+/// this is an inefficient patch since the blank lines are matches
+/// causing the next good match to skip due to the there has been
+///  a previous match with bigger node_idx
+///  The solution is therefore to not put key to elements that
+///  are meant to be discarded  and can easily be construcated
 #[wasm_bindgen_test]
 #[test]
 fn test1() {
@@ -105,7 +110,53 @@ fn test1() {
     );
 
     let patch = diff(&current_dom, &target_dom);
-    dbg!(&patch);
-    log::trace!("patch: {:#?}", patch);
-    //assert_eq!(patch, vec![]);
+    assert_eq!(
+        patch,
+        vec![
+            ChangeText::new(20, "1", "0").into(),
+            ChangeText::new(26, "2", "3").into(),
+            InsertChildren::new(
+                &"div",
+                5,
+                1,
+                vec![
+                    &div(
+                        vec![
+                            class("grid__number__line"),
+                            key("623356695095054844")
+                        ],
+                        vec![
+                            div(vec![class("grid__number")], vec![text(1)]),
+                            div(
+                                vec![class("grid__line")],
+                                vec![
+                                    div(vec![], vec![text("C")]),
+                                    div(vec![], vec![text("J")]),
+                                    div(vec![], vec![text("K")]),
+                                    div(vec![], vec![text("\n")]),
+                                ]
+                            ),
+                        ]
+                    ),
+                    &div(
+                        vec![
+                            class("grid__number__line"),
+                            key("4638962052468762037")
+                        ],
+                        vec![
+                            div(vec![class("grid__number")], vec![text(2)]),
+                            div(
+                                vec![class("grid__line")],
+                                vec![div(vec![], vec![text("\n")]),]
+                            ),
+                        ]
+                    )
+                ]
+            )
+            .into(),
+            RemoveChildren::new(&"div", 5, vec![0]).into(),
+            ChangeText::new(37, "line: 0, column: 0", "line: 1, column: 0")
+                .into(),
+        ]
+    );
 }
