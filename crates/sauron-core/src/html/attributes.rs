@@ -182,7 +182,6 @@ pub fn inner_html<V, MSG>(inner_html: V) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
 {
-    log::trace!("got innher html: {}", inner_html.clone().into());
     mt_dom::attr(
         "inner_html",
         AttributeValue::function_call(inner_html.into()),
@@ -233,7 +232,6 @@ pub(crate) fn merge_plain_attributes_values(
                     Some(style_str)
                 }
                 AttributeValue::FunctionCall(fvalue) => {
-                    log::trace!("func call: {}", fvalue);
                     Some(fvalue.to_string())
                 }
                 AttributeValue::Empty => None,
@@ -262,10 +260,8 @@ pub(crate) fn partition_callbacks_from_plain_and_func_calls<MSG>(
         match av {
             AttValue::Plain(plain) => {
                 if plain.is_function_call() {
-                    log::trace!("this is func call: {:?}", plain);
                     func_values.push(plain);
                 } else {
-                    log::trace!("simple..{:?}", plain);
                     plain_values.push(plain);
                 }
             }

@@ -149,9 +149,9 @@ where
         use crate::render::Render;
         */
 
-        /*
         #[cfg(feature = "with-measure")]
-        let _current_dom = {
+        let mut _current_dom = {
+            use crate::Render;
             let mut current_dom = String::new();
             self.current_vdom
                 .render_compressed(&mut current_dom)
@@ -159,11 +159,10 @@ where
             log::trace!("current dom: {}", current_dom);
             current_dom
         };
-        */
 
-        /*
         #[cfg(feature = "with-measure")]
         let _target_dom = {
+            use crate::Render;
             let mut target_dom = String::new();
             new_vdom
                 .render_compressed(&mut target_dom)
@@ -171,9 +170,23 @@ where
             log::trace!("target dom: {}", target_dom);
             target_dom
         };
-        */
 
         let patches = diff(&self.current_vdom, &new_vdom);
+        #[cfg(feature = "with-measure")]
+        {
+            //use crate::Render;
+
+            let mut current_vdom = self.current_vdom.clone();
+            log::trace!("patches: {:#?}", patches);
+            mt_dom::apply_patches(&mut current_vdom, &patches);
+            /*
+            assert_eq!(
+                current_vdom.render_to_string(),
+                new_vdom.render_to_string()
+            );
+            */
+        }
+
         #[cfg(feature = "with-measure")]
         log::trace!("applying {} patches", patches.len());
         #[cfg(feature = "with-measure")]

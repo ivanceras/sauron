@@ -125,14 +125,8 @@ impl<T> CreatedNode<T> {
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        log::trace!("merging attributes of the same name: {:?}", attrs);
         let attrs = mt_dom::merge_attributes_of_same_name(attrs);
-        log::trace!(
-            "grouped attributes: {:?}",
-            mt_dom::group_attributes_per_name(&attrs)
-        );
         for att in attrs {
-            log::trace!("attr {:?}", att);
             Self::set_element_attribute(program, closures, element, &att);
         }
     }
@@ -211,11 +205,6 @@ impl<T> CreatedNode<T> {
         if let Some(merged_func_values) =
             html::attributes::merge_plain_attributes_values(&func_values)
         {
-            log::trace!(
-                "inner html for {} = {}",
-                attr.name(),
-                merged_func_values
-            );
             match *attr.name() {
                 "inner_html" => element.set_inner_html(&merged_func_values),
                 _ => (),

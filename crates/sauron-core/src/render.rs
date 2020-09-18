@@ -56,8 +56,6 @@ impl<MSG> Render for Node<MSG> {
 }
 
 fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
-    log::trace!("extracting inner html");
-    // get the func values such as inner html
     merged_attributes
         .iter()
         .flat_map(|attr| {
@@ -65,10 +63,8 @@ fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
                 attributes::partition_callbacks_from_plain_and_func_calls(
                     &attr,
                 );
-            log::trace!("attr: {:?}", attr);
 
             if *attr.name() == "inner_html" {
-                log::trace!("it is an inner html");
                 attributes::merge_plain_attributes_values(&func_values)
             } else {
                 None
@@ -150,7 +146,6 @@ impl<MSG> Render for Element<MSG> {
         }
 
         let inner_html = extract_inner_html(&merged_attributes);
-        log::trace!("got iner_html: {}", inner_html);
         if !inner_html.is_empty() {
             write!(buffer, "{}", inner_html)?;
         }

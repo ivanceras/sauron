@@ -23,7 +23,11 @@ pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
             .number_of_top_level_nodes(1)
             .type_of_top_level_nodes(NodeType::Element),
     ) {
-        Ok(mut nodes) => node_to_tokens(nodes.pop().unwrap()),
+        Ok(mut nodes) => {
+            node_to_tokens(
+                nodes.pop().expect("unable to convert node to tokens"),
+            )
+        }
         Err(error) => error.to_compile_error(),
     }
 }
@@ -32,7 +36,7 @@ fn node_to_tokens(node: Node) -> TokenStream {
     let mut tokens = TokenStream::new();
 
     // NodeType::Element nodes can't have no name
-    let name = node.name_as_string().unwrap();
+    let name = node.name_as_string().expect("node should have a name");
 
     let attributes = node
         .attributes
@@ -64,7 +68,9 @@ fn attribute_to_tokens(attribute: &Node) -> TokenStream {
                 }
                 NodeType::Attribute => {
                     // NodeType::Attribute nodes can't have no name
-                    let name = attribute.name_as_string().unwrap();
+                    let name = attribute
+                        .name_as_string()
+                        .expect("attribute should have name");
 
                     if name.starts_with("on_") {
                         let name = quote::format_ident!("{}", name);
@@ -92,7 +98,11 @@ fn attribute_to_tokens(attribute: &Node) -> TokenStream {
             }
         }
         None => {
-            let name = convert_name(&attribute.name_as_string().unwrap());
+            let name = convert_name(
+                &attribute
+                    .name_as_string()
+                    .expect("attribute should have a name"),
+            );
             quote! {
                 sauron::Attribute::new(
                     None,
@@ -123,7 +133,9 @@ fn children_to_tokens(children: Vec<Node>) -> TokenStream {
                     });
                 }
                 NodeType::Text => {
-                    let s = child.value_as_string().unwrap();
+                    let s = child
+                        .value_as_string()
+                        .expect("expecting a string on a text node");
                     tokens.extend(quote! {
                         #receiver.push(sauron::Node::Text(String::from(#s)));
                     });
