@@ -101,7 +101,12 @@ fn truncate_children() {
     );
     assert_eq!(
         diff(&old, &new),
-        vec![RemoveChildren::new(&"div", 0, vec![3, 4, 5, 6]).into()],
+        vec![
+            RemoveNode::new(Some(&"div"), 4).into(),
+            RemoveNode::new(Some(&"div"), 5).into(),
+            RemoveNode::new(Some(&"div"), 6).into(),
+            RemoveNode::new(Some(&"div"), 7).into(),
+        ],
         "Should truncate children"
     );
 }
@@ -129,13 +134,20 @@ fn truncate_children_different_attributes() {
             div(vec![class("class7")], vec![]),
         ],
     );
+
+    let patch = diff(&old, &new);
+    dbg!(&patch);
+
     assert_eq!(
-        diff(&old, &new),
+        patch,
         vec![
             AddAttributes::new(&"div", 1, vec![&class("class5")]).into(),
             AddAttributes::new(&"div", 2, vec![&class("class6")]).into(),
             AddAttributes::new(&"div", 3, vec![&class("class7")]).into(),
-            RemoveChildren::new(&"div", 0, vec![3, 4, 5, 6]).into(),
+            RemoveNode::new(Some(&"div"), 4).into(),
+            RemoveNode::new(Some(&"div"), 5).into(),
+            RemoveNode::new(Some(&"div"), 6).into(),
+            RemoveNode::new(Some(&"div"), 7).into(),
         ],
         "Should truncate children"
     );
@@ -202,7 +214,10 @@ fn remove_nodes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![RemoveChildren::new(&"div", 0, vec![0, 1]).into()],
+        vec![
+            RemoveNode::new(Some(&"b"), 1).into(),
+            RemoveNode::new(Some(&"span"), 2).into(),
+        ],
         "Remove all child nodes at and after child sibling index 1",
     );
 
@@ -228,8 +243,8 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            RemoveChildren::new(&"span", 1, vec![1]).into(),
-            RemoveChildren::new(&"div", 0, vec![1]).into(),
+            RemoveNode::new(Some(&"i"), 3).into(),
+            RemoveNode::new(Some(&"strong"), 4).into(),
         ],
         "Remove a child and a grandchild node",
     );
@@ -248,7 +263,7 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            RemoveChildren::new(&"b", 1, vec![1]).into(),
+            RemoveNode::new(Some(&"i"), 3).into(),
             ReplaceNode::new(&"b", 4, &i(vec![], vec![])).into(),
         ],
         "Removing child and change next node after parent",
@@ -428,7 +443,7 @@ fn text_changed_in_keyed_elements() {
         patch,
         vec![
             ChangeText::new(7, "item3", "item3 with changes").into(),
-            RemoveChildren::new(&"section", 1, vec![0]).into(),
+            RemoveNode::new(Some(&"article"), 2).into(),
         ]
     );
 }

@@ -11,9 +11,9 @@ use crate::{
         patch::{
             AddAttributes,
             AppendChildren,
-            InsertChildren,
+            InsertNode,
             RemoveAttributes,
-            RemoveChildren,
+            RemoveNode,
             ReplaceNode,
         },
         AttValue,
@@ -306,28 +306,20 @@ where
     //assert_eq!(node.tag_name().to_uppercase(), vtag.to_uppercase());
 
     match patch {
-        Patch::InsertChildren(InsertChildren {
+        Patch::InsertNode(InsertNode {
             tag: _,
             node_idx: _,
-            target_index,
-            children: new_children,
+            node: for_insert,
         }) => {
-            let parent = &node;
-            let children_nodes = parent.child_nodes();
-            let mut active_closures = HashMap::new();
-            for new_child in new_children {
-                let created_node =
-                    CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                        program, &new_child, &mut None,
-                    );
-                let next_sibling = children_nodes
-                    .item((*target_index) as u32)
-                    .expect("next item must exist");
-
-                parent
-                    .insert_before(&created_node.node, Some(&next_sibling))?;
-                active_closures.extend(created_node.closures);
-            }
+            let created_node = CreatedNode::<Node>::create_dom_node_opt::<
+                DSP,
+                MSG,
+            >(program, &for_insert, &mut None);
+            let parent_node =
+                node.parent_node().expect("must have a parent node");
+            parent_node
+                .insert_before(&created_node.node, Some(node))
+                .expect("must remove target node");
 
             Ok(active_closures)
         }
@@ -388,46 +380,23 @@ where
             node.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
         }
-        // This also removes the associated closures and event listener to the truncated chilren
-        // before actually removing it from the DOM
-        //
-        // The browser will take handling of removing the event listeners
-        // of the children and indirect children of this node ( so we don't have to manually remove
-        // them).
-        // The closures of descendant of the children is also removed
-        Patch::RemoveChildren(RemoveChildren {
+        Patch::RemoveNode(RemoveNode {
             tag: _,
             node_idx: _,
-            target_index: children_index,
         }) => {
-            // we sort the children index, and reverse iterate them
-            // to remove from the last since the DOM children
-            // index is changed when you remove from the first child.
-            // removing from the last, won't change the index of the children of the lower index
-            // range
-            let mut sorted_children_index = children_index.clone();
-            sorted_children_index.sort();
-
-            let children_nodes = node.child_nodes();
-
-            for child_idx in sorted_children_index.iter().rev() {
-                let child_node = children_nodes
-                    .item(*child_idx as u32)
-                    .expect("child at this index must exist");
-                // Do not remove comment node
-                if child_node.node_type() != Node::COMMENT_NODE {
-                    node.remove_child(&child_node)
-                        .expect("unable to remove child");
-
-                    if child_node.node_type() != Node::TEXT_NODE {
-                        let child_element: &Element =
-                            child_node.unchecked_ref();
-
-                        remove_event_listeners(&child_element, old_closures)?;
-                    }
+            let parent_node =
+                node.parent_node().expect("must have a parent node");
+            if node.node_type() == Node::COMMENT_NODE {
+                //do not remove comment nodes
+            } else {
+                parent_node
+                    .remove_child(node)
+                    .expect("must remove target node");
+                if node.node_type() != Node::TEXT_NODE {
+                    let element: &Element = node.unchecked_ref();
+                    remove_event_listeners(&element, old_closures)?;
                 }
             }
-
             Ok(active_closures)
         }
         Patch::AppendChildren(AppendChildren {

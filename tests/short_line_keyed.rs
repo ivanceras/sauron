@@ -227,8 +227,11 @@ fn target_dom() {
         ChangeText::new(10, "1", "2").into(),
         ChangeText::new(22, "2", "3").into(),
         ChangeText::new(33, "line: 1, column: 0", "line: 2, column: 0").into(),
-        InsertChildren::new(&"div", 1, 1, vec![&to_insert]).into(),
+        InsertNode::new(Some(&"div"), 8, &to_insert).into(),
     ];
+
+    dbg!(&patch);
+
     assert_eq!(patch, expected);
     let mut current_dom_clone = current_dom.clone();
     mt_dom::apply_patches(&mut current_dom_clone, &patch);

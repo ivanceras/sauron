@@ -110,51 +110,54 @@ fn test1() {
     );
 
     let patch = diff(&current_dom, &target_dom);
+    dbg!(&patch);
     assert_eq!(
         patch,
         vec![
             ChangeText::new(20, "1", "0").into(),
             ChangeText::new(26, "2", "3").into(),
-            InsertChildren::new(
-                &"div",
-                5,
-                1,
-                vec![
-                    &div(
-                        vec![
-                            class("grid__number__line"),
-                            key("623356695095054844")
-                        ],
-                        vec![
-                            div(vec![class("grid__number")], vec![text(1)]),
-                            div(
-                                vec![class("grid__line")],
-                                vec![
-                                    div(vec![], vec![text("C")]),
-                                    div(vec![], vec![text("J")]),
-                                    div(vec![], vec![text("K")]),
-                                    div(vec![], vec![text("\n")]),
-                                ]
-                            ),
-                        ]
-                    ),
-                    &div(
-                        vec![
-                            class("grid__number__line"),
-                            key("4638962052468762037")
-                        ],
-                        vec![
-                            div(vec![class("grid__number")], vec![text(2)]),
-                            div(
-                                vec![class("grid__line")],
-                                vec![div(vec![], vec![text("\n")]),]
-                            ),
-                        ]
-                    )
-                ]
+            InsertNode::new(
+                Some(&"div"),
+                12,
+                &div(
+                    vec![
+                        class("grid__number__line"),
+                        key("623356695095054844")
+                    ],
+                    vec![
+                        div(vec![class("grid__number")], vec![text(1)]),
+                        div(
+                            vec![class("grid__line")],
+                            vec![
+                                div(vec![], vec![text("C")]),
+                                div(vec![], vec![text("J")]),
+                                div(vec![], vec![text("K")]),
+                                div(vec![], vec![text("\n")]),
+                            ]
+                        ),
+                    ]
+                ),
             )
             .into(),
-            RemoveChildren::new(&"div", 5, vec![0]).into(),
+            InsertNode::new(
+                Some(&"div"),
+                13,
+                &div(
+                    vec![
+                        class("grid__number__line"),
+                        key("4638962052468762037")
+                    ],
+                    vec![
+                        div(vec![class("grid__number")], vec![text(2)]),
+                        div(
+                            vec![class("grid__line")],
+                            vec![div(vec![], vec![text("\n")]),]
+                        ),
+                    ]
+                )
+            )
+            .into(),
+            RemoveNode::new(Some(&"div"), 6).into(),
             ChangeText::new(37, "line: 0, column: 0", "line: 1, column: 0")
                 .into(),
         ]

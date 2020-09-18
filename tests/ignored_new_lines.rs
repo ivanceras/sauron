@@ -133,11 +133,10 @@ fn new_lines_ignored() {
             ChangeText::new(8, "0", "1").into(),
             ChangeText::new(26, "2", "3").into(),
             ChangeText::new(38, "3", "4").into(),
-            InsertChildren::new(
-                &"div",
-                5,
-                0,
-                vec![&div(
+            InsertNode::new(
+                Some(&"div"),
+                6,
+                &div(
                     vec![class("grid__number__line")],
                     vec![
                         div(vec![class("grid__number")], vec![text(0)]),
@@ -146,14 +145,13 @@ fn new_lines_ignored() {
                             vec![div(vec![], vec![text("\n")])]
                         ),
                     ]
-                )]
+                )
             )
             .into(),
-            InsertChildren::new(
-                &"div",
-                5,
-                2,
-                vec![&div(
+            InsertNode::new(
+                Some(&"div"),
+                19,
+                &div(
                     vec![class("grid__number__line")],
                     vec![
                         div(vec![class("grid__number")], vec![text(2)]),
@@ -162,10 +160,10 @@ fn new_lines_ignored() {
                             vec![div(vec![], vec![text("\n")])]
                         ),
                     ]
-                )]
+                )
             )
             .into(),
-            RemoveChildren::new(&"div", 5, vec![1]).into(),
+            RemoveNode::new(Some(&"div"), 18).into(),
             ChangeText::new(49, "line: 0, column: 0", "line: 1, column: 0")
                 .into(),
         ]

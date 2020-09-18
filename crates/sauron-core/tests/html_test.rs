@@ -166,7 +166,10 @@ fn remove_nodes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![RemoveChildren::new(&"div", 0, vec![0, 1]).into()],
+        vec![
+            RemoveNode::new(Some(&"b"), 1).into(),
+            RemoveNode::new(Some(&"span"), 2).into()
+        ],
         "Remove all child nodes at and after child sibling index 1",
     );
 
@@ -191,8 +194,8 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            RemoveChildren::new(&"span", 1, vec![1]).into(),
-            RemoveChildren::new(&"div", 0, vec![1]).into(),
+            RemoveNode::new(Some(&"i"), 3).into(),
+            RemoveNode::new(Some(&"strong"), 4).into(),
         ],
         "Remove a child and a grandchild node",
     );
@@ -211,7 +214,7 @@ fn remove_nodes() {
     assert_eq!(
         diff(&old, &new),
         vec![
-            RemoveChildren::new(&"b", 1, vec![1]).into(),
+            RemoveNode::new(Some(&"i"), 3).into(),
             ReplaceNode::new(&"b", 4, &i(vec![], vec![])).into(),
         ],
         "Removing child and change next node after parent",

@@ -132,17 +132,16 @@ fn subsequent_updates() {
             ChangeText::new(9, "1", "2").into(),
             ChangeText::new(14, "2", "3").into(),
             ChangeText::new(19, "3", "4").into(),
-            InsertChildren::new(
-                &"section",
-                1,
-                0,
-                vec![&div(
+            InsertNode::new(
+                Some(&"section"),
+                2,
+                &div(
                     vec![key("hashXXX")],
                     vec![
                         div(vec![], vec![text("0")]),
                         div(vec![], vec![text("lineXXX")]),
                     ],
-                )]
+                )
             )
             .into()
         ]
@@ -399,17 +398,16 @@ fn subsequent_updates() {
             ChangeText::new(14, "2", "3").into(),
             ChangeText::new(19, "3", "4").into(),
             ChangeText::new(24, "4", "5").into(),
-            InsertChildren::new(
-                &"section",
-                1,
-                0,
-                vec![&div(
+            InsertNode::new(
+                Some(&"section"),
+                2,
+                &div(
                     vec![key("hashYYY")],
                     vec![
                         div(vec![], vec![text("0")]),
                         div(vec![], vec![text("lineYYY")]),
                     ],
-                ),]
+                )
             )
             .into()
         ]
@@ -563,17 +561,16 @@ fn subsequent_updates() {
             ChangeText::new(19, "3", "4").into(),
             ChangeText::new(24, "4", "5").into(),
             ChangeText::new(29, "5", "6").into(),
-            InsertChildren::new(
-                &"section",
-                1,
-                0,
-                vec![&div(
+            InsertNode::new(
+                Some(&"section"),
+                2,
+                &div(
                     vec![key("hashZZZ")],
                     vec![
                         div(vec![], vec![text("0")]),
                         div(vec![], vec![text("\n")]),
                     ],
-                ),]
+                )
             )
             .into()
         ]

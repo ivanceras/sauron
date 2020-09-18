@@ -120,7 +120,7 @@ fn multiple_match_on_keyed_elements() {
 
     let patches = diff(&current_dom, &target_dom);
 
-    log::trace!("{:#?}", patches);
+    log::trace!("patches: {:#?}", patches);
 
     let simple_program = simple_program();
     let mut dom_updater = DomUpdater::new_append_to_mount(

@@ -92,10 +92,7 @@ fn node_patched_properly() {
     );
 
     let patches = diff(&old, &update1);
-    assert_eq!(
-        patches,
-        vec![RemoveChildren::new(&"section", 1, vec![1]).into()]
-    );
+    assert_eq!(patches, vec![RemoveNode::new(Some(&"article"), 4).into()]);
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -170,10 +167,7 @@ fn node_patched_properly_remove_from_start() {
 
     let patches = diff(&old, &update1);
 
-    assert_eq!(
-        patches,
-        vec![RemoveChildren::new(&"section", 1, vec![0]).into()]
-    );
+    assert_eq!(patches, vec![RemoveNode::new(Some(&"article"), 2).into()]);
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -258,7 +252,7 @@ fn node_patched_properly_text_changed() {
                 "item3",
                 "item3 with changes"
             )),
-            RemoveChildren::new(&"section", 1, vec![0]).into()
+            RemoveNode::new(Some(&"article"), 2).into()
         ]
     );
 
@@ -350,7 +344,7 @@ fn mixed_keyed_and_non_keyed_elements() {
                 "item3",
                 "item3 with changes"
             )),
-            RemoveChildren::new(&"section", 1, vec![0]).into(),
+            RemoveNode::new(Some(&"article"), 2).into(),
             Patch::ChangeText(ChangeText::new(
                 9,
                 "3 items left",

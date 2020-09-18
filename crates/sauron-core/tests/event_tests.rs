@@ -194,8 +194,12 @@ fn remove_event_from_truncated_children() {
     let simple_program = simple_program();
     assert_eq!(
         sauron_core::diff(&old, &new),
-        vec![RemoveChildren::new(&"div", 0, vec![1, 2, 3, 4]).into()],
-        "Should be a Truncate patch"
+        vec![
+            RemoveNode::new(Some(&"button"), 2).into(),
+            RemoveNode::new(Some(&"button"), 3).into(),
+            RemoveNode::new(Some(&"button"), 4).into(),
+            RemoveNode::new(Some(&"button"), 5).into(),
+        ],
     );
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);
@@ -235,7 +239,12 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     let simple_program = simple_program();
     assert_eq!(
         sauron_core::diff(&old, &new),
-        vec![RemoveChildren::new(&"div", 0, vec![1, 2, 3, 4]).into()],
+        vec![
+            RemoveNode::new(Some(&"button"), 2).into(),
+            RemoveNode::new(Some(&"button"), 3).into(),
+            RemoveNode::new(Some(&"button"), 4).into(),
+            RemoveNode::new(Some(&"button"), 5).into(),
+        ],
         "Should be a Truncate patch"
     );
     let mut dom_updater =

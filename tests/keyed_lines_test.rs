@@ -9,9 +9,9 @@ use sauron::{
         AddAttributes,
         AppendChildren,
         ChangeText,
-        InsertChildren,
+        InsertNode,
         RemoveAttributes,
-        RemoveChildren,
+        RemoveNode,
         ReplaceNode,
     },
     node,
@@ -192,7 +192,7 @@ fn test_lines() {
         ChangeText::new(32, "2", "3").into(),
         ChangeText::new(46, "3", "4").into(),
         ChangeText::new(60, "4", "5").into(),
-        InsertChildren::new(&"div", 5, 0, vec![&inserted]).into(),
+        InsertNode::new(Some(&"div"), 6, &inserted).into(),
         ChangeText::new(73, "line: 0, column: 0", "line: 1, column: 0").into(),
     ];
     assert_eq!(patch1_diff, patch1_expected);
@@ -231,7 +231,7 @@ fn test_lines() {
         ChangeText::new(44, "4", "5").into(),
         ChangeText::new(58, "5", "6").into(),
         ChangeText::new(72, "6", "7").into(),
-        RemoveChildren::new(&"div", 5, vec![1]).into(),
+        RemoveNode::new(Some(&"div"), 5).into(),
         ChangeText::new(85, "line: 2, column: 0", "line: 3, column: 0").into(),
     ];
 
