@@ -63,20 +63,10 @@ where
     let (element_nodes_to_patch, text_nodes_to_patch) =
         find_nodes(root_node, &patches);
 
-    /*
-    log::trace!("element_nodes_to_patch: {:#?}", element_nodes_to_patch);
-    log::trace!("text_nodes_to_patch: {:#?}", text_nodes_to_patch);
-    */
-
     for patch in patches.iter() {
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = element_nodes_to_patch.get(&patch_node_idx) {
-            log::trace!(
-                "element patch_node_idx: {}, target node: {}",
-                patch_node_idx,
-                element.outer_html()
-            );
             let new_closures =
                 apply_element_patch(program, &element, old_closures, &patch)?;
             active_closures.extend(new_closures);
@@ -84,11 +74,6 @@ where
         }
 
         if let Some(text_node) = text_nodes_to_patch.get(&patch_node_idx) {
-            log::trace!(
-                "text patch_node_idx: {}, target node: {}",
-                patch_node_idx,
-                text_node.whole_text().expect("must have whole text")
-            );
             apply_text_patch(program, &text_node, &patch)?;
             continue;
         }
@@ -118,11 +103,9 @@ fn find_nodes<MSG>(
     patches: &[Patch<MSG>],
 ) -> (BTreeMap<usize, Element>, BTreeMap<usize, Text>) {
     let mut nodes_to_find = BTreeMap::new();
-    log::trace!("patches: {:#?}", patches);
     for patch in patches {
         nodes_to_find.insert(patch.node_idx(), patch.tag());
     }
-    log::trace!("nodes_to_find: {:#?}", &nodes_to_find);
     find_nodes_recursive(root_node, &mut 0, &nodes_to_find)
 }
 
@@ -132,7 +115,6 @@ fn find_nodes_recursive(
     cur_node_idx: &mut usize,
     nodes_to_find: &BTreeMap<usize, Option<&&'static str>>,
 ) -> (BTreeMap<usize, Element>, BTreeMap<usize, Text>) {
-    //log::trace!("find node recursive at cur_node_idx: {}", cur_node_idx);
     let mut element_nodes_to_patch = BTreeMap::new();
     let mut text_nodes_to_patch = BTreeMap::new();
 
@@ -142,16 +124,12 @@ fn find_nodes_recursive(
 
     // If the root node matches, mark it for patching
     if let Some(_tag) = nodes_to_find.get(&cur_node_idx) {
-        //log::trace!("found {:?} at cur_node_idx: {}", _tag, cur_node_idx);
         match node.node_type() {
             Node::ELEMENT_NODE => {
                 let element: Element = node.unchecked_into();
-                /*
                 let vtag = tag.unwrap_or_else(|| {
-                    log::trace!("tag: {:?}", tag);
-                    log::trace!("element: {}", element.outer_html());
                     panic!(
-                        "must have a tag here at cur_node_idx: {} ",
+                        "node must have a tag here at cur_node_idx: {} ",
                         cur_node_idx
                     )
                 });
@@ -159,13 +137,10 @@ fn find_nodes_recursive(
                     element.tag_name().to_uppercase(),
                     vtag.to_uppercase()
                 );
-                */
-                log::trace!("found element: {}", element.outer_html());
                 element_nodes_to_patch.insert(*cur_node_idx, element);
             }
             Node::TEXT_NODE => {
                 let text_node: Text = node.unchecked_into();
-                log::trace!("found text_node: {:?}", text_node.whole_text());
                 text_nodes_to_patch.insert(*cur_node_idx, text_node);
             }
             other => unimplemented!("Unsupported root node type: {}", other),
@@ -290,7 +265,6 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    //log::trace!("apply element patch: {:#?}", patch);
     let mut active_closures = ActiveClosure::new();
 
     //let vtag = *patch.tag().expect("must have a tag");
@@ -409,12 +383,6 @@ where
             Ok(active_closures)
         }
         Patch::ChangeText(_ct) => {
-            log::debug!("ct: {:?}", _ct);
-            log::debug!(
-                "this is a change text: {:?} for {:?}",
-                patch,
-                node.outer_html()
-            );
             unreachable!("Elements should not receive ChangeText patches.")
         }
     }

@@ -145,28 +145,6 @@ where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
         let patches = diff(&self.current_vdom, &new_vdom);
-        /*
-        #[cfg(feature = "with-measure")]
-        {
-            use crate::Render;
-
-            let mut current_vdom = self.current_vdom.clone();
-            log::trace!("patches: {:#?}", patches);
-            mt_dom::apply_patches(&mut current_vdom, &patches);
-            assert_eq!(
-                current_vdom.render_to_string(),
-                new_vdom.render_to_string()
-            );
-            log::warn!("it matched...");
-        }
-        */
-
-        #[cfg(feature = "with-measure")]
-        log::trace!("applying {} patches", patches.len());
-        #[cfg(feature = "with-measure")]
-        log::trace!("patches: {:#?}", patches);
-
-        log::trace!("patches: {:#?}", patches);
 
         let active_closures = patch(
             Some(program),
@@ -175,19 +153,6 @@ where
             patches,
         )
         .expect("Error in patching the dom");
-
-        #[cfg(feature = "with-measure")]
-        {
-            use crate::Render;
-
-            log::trace!("trying to match new_vdom and the outer_html");
-            let root_element: &web_sys::Element =
-                self.root_node.unchecked_ref();
-            log::trace!("new_vdom: {}", new_vdom.render_to_string());
-            log::trace!("outer_html: {}", root_element.outer_html());
-            assert_eq!(new_vdom.render_to_string(), root_element.outer_html());
-            log::trace!("it matched");
-        }
 
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
