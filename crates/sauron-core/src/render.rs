@@ -90,8 +90,12 @@ impl<MSG> Render for Element<MSG> {
             mt_dom::merge_attributes_of_same_name(&ref_attrs);
 
         for attr in &merged_attributes {
-            write!(buffer, " ")?;
-            attr.render_with_indent(buffer, indent, node_idx, compressed)?;
+            // dont render empty attribute
+            // TODO: must check the attribute value for empty value
+            if !attr.name().is_empty() {
+                write!(buffer, " ")?;
+                attr.render_with_indent(buffer, indent, node_idx, compressed)?;
+            }
         }
 
         #[cfg(feature = "with-nodeidx")]

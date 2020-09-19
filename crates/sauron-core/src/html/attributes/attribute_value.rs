@@ -86,4 +86,12 @@ impl AttributeValue {
             _ => false,
         }
     }
+
+    /// returns true if this attribute value is empty
+    pub fn is_empty(&self) -> bool {
+        match self {
+            AttributeValue::Empty => true,
+            _ => false,
+        }
+    }
 }

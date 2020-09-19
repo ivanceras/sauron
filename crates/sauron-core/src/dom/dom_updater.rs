@@ -144,48 +144,22 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
+        let patches = diff(&self.current_vdom, &new_vdom);
         /*
         #[cfg(feature = "with-measure")]
-        use crate::render::Render;
-        */
-
-        #[cfg(feature = "with-measure")]
-        let mut _current_dom = {
-            use crate::Render;
-            let mut current_dom = String::new();
-            self.current_vdom
-                .render_compressed(&mut current_dom)
-                .expect("must render");
-            log::trace!("current dom: {}", current_dom);
-            current_dom
-        };
-
-        #[cfg(feature = "with-measure")]
-        let _target_dom = {
-            use crate::Render;
-            let mut target_dom = String::new();
-            new_vdom
-                .render_compressed(&mut target_dom)
-                .expect("must render");
-            log::trace!("target dom: {}", target_dom);
-            target_dom
-        };
-
-        let patches = diff(&self.current_vdom, &new_vdom);
-        #[cfg(feature = "with-measure")]
         {
-            //use crate::Render;
+            use crate::Render;
 
             let mut current_vdom = self.current_vdom.clone();
             log::trace!("patches: {:#?}", patches);
             mt_dom::apply_patches(&mut current_vdom, &patches);
-            /*
             assert_eq!(
                 current_vdom.render_to_string(),
                 new_vdom.render_to_string()
             );
-            */
+            log::warn!("it matched...");
         }
+        */
 
         #[cfg(feature = "with-measure")]
         log::trace!("applying {} patches", patches.len());
@@ -202,14 +176,18 @@ where
         )
         .expect("Error in patching the dom");
 
-        /*
         #[cfg(feature = "with-measure")]
         {
-            let _root_element: &web_sys::Element =
+            use crate::Render;
+
+            log::trace!("trying to match new_vdom and the outer_html");
+            let root_element: &web_sys::Element =
                 self.root_node.unchecked_ref();
-            //assert_eq!(target_dom, root_element.outer_html());
+            log::trace!("new_vdom: {}", new_vdom.render_to_string());
+            log::trace!("outer_html: {}", root_element.outer_html());
+            assert_eq!(new_vdom.render_to_string(), root_element.outer_html());
+            log::trace!("it matched");
         }
-        */
 
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;

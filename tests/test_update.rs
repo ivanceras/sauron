@@ -19,13 +19,18 @@ use web_sys::InputEvent;
 
 mod test_fixtures;
 
+wasm_bindgen_test_configure!(run_in_browser);
+
 /// this is an inefficient patch since the blank lines are matches
 /// causing the next good match to skip due to the there has been
 ///  a previous match with bigger node_idx
 ///  The solution is therefore to not put key to elements that
 ///  are meant to be discarded  and can easily be construcated
-#[test]
+#[wasm_bindgen_test]
 fn test1() {
+    console_log::init_with_level(log::Level::Trace);
+    console_error_panic_hook::set_once();
+
     let current_dom: Node<()> = node!(
     <div class="app">
        <h1>"Lines"</h1>
@@ -164,4 +169,20 @@ fn test1() {
                 .into(),
         ]
     );
+
+    let simple_program = simple_program();
+    let mut dom_updater = DomUpdater::new_append_to_mount(
+        &simple_program,
+        current_dom.clone(),
+        &sauron_core::body(),
+    );
+
+    dom_updater.patch_dom(&simple_program, patch);
+
+    let app_node = crate::document()
+        .query_selector(".app")
+        .expect("must not error")
+        .expect("must exist");
+
+    assert_eq!(target_dom.render_to_string(), app_node.outer_html());
 }

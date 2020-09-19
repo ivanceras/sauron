@@ -171,12 +171,7 @@ fn multiple_match_on_keyed_elements() {
         .expect("must not error")
         .expect("must exist");
 
-    let app_html = app_node.outer_html();
-
-    let mut target_html = String::new();
-    target_dom.render_compressed(&mut target_html);
-
-    assert_eq!(target_html, app_html);
+    assert_eq!(target_dom.render_to_string(), app_node.outer_html());
 }
 
 #[test]
