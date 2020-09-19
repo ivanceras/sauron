@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 use sauron_core::{
     mt_dom::patch::*,
     prelude::*,

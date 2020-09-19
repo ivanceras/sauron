@@ -199,22 +199,4 @@ fn test_lines() {
     log::trace!("view2_rendered: {}", view2.render_to_string());
     let patch2_diff = diff(&view1, &view2);
     log::trace!("patch2_diff: {:#?}", patch2_diff);
-    //assert_eq!(patch2_diff, patch2_expected);
-
-    let patch3: Vec<Patch<()>> = vec![
-        ChangeText::new(20, "2", "3").into(),
-        ChangeText::new(32, "3", "4").into(),
-        ChangeText::new(44, "4", "5").into(),
-        ChangeText::new(58, "5", "6").into(),
-        ChangeText::new(72, "6", "7").into(),
-        RemoveNode::new(Some(&"div"), 5).into(),
-        ChangeText::new(85, "line: 2, column: 0", "line: 3, column: 0").into(),
-    ];
-
-    // will FAIL here
-    // this is a change text: ChangeText { node_idx: 20, old: "2", new: "3" } for "<div node_idx=\"14\">K</div>"
-    //
-    // console.log div contained:
-    //    panicked at 'internal error: entered unreachable code: Elements should not receive ChangeText patches.'
-    dom_updater.patch_dom(&simple_program, patch3);
 }

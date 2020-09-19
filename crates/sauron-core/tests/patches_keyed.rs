@@ -1,4 +1,4 @@
-
+#![deny(warnings)]
 use sauron_core::{
     html::{
         attributes::*,
@@ -12,14 +12,13 @@ use sauron_core::{
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 
-
 mod test_fixtures;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 fn node_mounted_properly() {
-    console_log::init_with_level(log::Level::Trace);
+    console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
     let document = web_sys::window().unwrap().document().unwrap();
@@ -62,7 +61,7 @@ fn node_mounted_properly() {
 
 #[wasm_bindgen_test]
 fn node_patched_properly() {
-    console_log::init_with_level(log::Level::Trace);
+    console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
     let document = web_sys::window().unwrap().document().unwrap();
@@ -132,7 +131,7 @@ fn node_patched_properly() {
 
 #[wasm_bindgen_test]
 fn node_patched_properly_remove_from_start() {
-    console_log::init_with_level(log::Level::Trace);
+    console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
     let document = web_sys::window().unwrap().document().unwrap();
@@ -209,7 +208,7 @@ fn node_patched_properly_remove_from_start() {
 
 #[wasm_bindgen_test]
 fn node_patched_properly_text_changed() {
-    console_log::init_with_level(log::Level::Trace);
+    console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
     let document = web_sys::window().unwrap().document().unwrap();
@@ -296,7 +295,7 @@ fn node_patched_properly_text_changed() {
 
 #[wasm_bindgen_test]
 fn mixed_keyed_and_non_keyed_elements() {
-    console_log::init_with_level(log::Level::Trace);
+    console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
     let document = web_sys::window().unwrap().document().unwrap();

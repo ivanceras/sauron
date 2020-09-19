@@ -1,18 +1,15 @@
-
+#![deny(warnings)]
 use sauron_core::{
     html::{
         attributes::*,
-        events::*,
         *,
     },
     mt_dom::patch::*,
-    Patch,
     *,
 };
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
-
 
 mod test_fixtures;
 
@@ -27,7 +24,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 fn subsequent_updates() {
-    console_log::init_with_level(log::Level::Trace);
+    console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
     let document = web_sys::window().unwrap().document().unwrap();

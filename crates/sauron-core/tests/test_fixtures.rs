@@ -2,6 +2,7 @@
 //! This is a simple component which just barely comply to being a component
 //! use for doing component tests
 //!
+#![deny(warnings)]
 use log::*;
 use sauron_core::{
     body,

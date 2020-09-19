@@ -1,5 +1,4 @@
-#![cfg(target_arch = "wasm32")]
-//#![deny(warnings)]
+#![deny(warnings)]
 use sauron_core::{
     dom::CreatedNode,
     html::{
@@ -18,7 +17,6 @@ use sauron_core::{
         svg,
     },
     Node,
-    Patch,
     *,
 };
 use std::{
