@@ -123,20 +123,10 @@ fn find_nodes_recursive(
     let child_node_count = children.length();
 
     // If the root node matches, mark it for patching
-    if let Some(_tag) = nodes_to_find.get(&cur_node_idx) {
+    if let Some(_vtag) = nodes_to_find.get(&cur_node_idx) {
         match node.node_type() {
             Node::ELEMENT_NODE => {
                 let element: Element = node.unchecked_into();
-                let vtag = tag.unwrap_or_else(|| {
-                    panic!(
-                        "node must have a tag here at cur_node_idx: {} ",
-                        cur_node_idx
-                    )
-                });
-                assert_eq!(
-                    element.tag_name().to_uppercase(),
-                    vtag.to_uppercase()
-                );
                 element_nodes_to_patch.insert(*cur_node_idx, element);
             }
             Node::TEXT_NODE => {
@@ -266,9 +256,6 @@ where
     DSP: Clone + Dispatch<MSG> + 'static,
 {
     let mut active_closures = ActiveClosure::new();
-
-    //let vtag = *patch.tag().expect("must have a tag");
-    //assert_eq!(node.tag_name().to_uppercase(), vtag.to_uppercase());
 
     match patch {
         Patch::InsertNode(InsertNode {
