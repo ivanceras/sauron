@@ -26,9 +26,6 @@ jobs:
     - name: Run tests no features
       run: cargo test --all --no-default-features
 
-    - name: Run tests with all features
-      run: cargo test --all --all-features
-
     - name: Run tests with dom features
-      run: cargo test --all --features "with-dom"
+      run: cargo test --all --features "with-dom with-measure with-markdown with-parser"
 

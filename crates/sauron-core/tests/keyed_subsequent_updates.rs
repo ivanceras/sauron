@@ -144,7 +144,6 @@ fn subsequent_updates() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
     log::trace!("old html: {}", old_html);
-    #[cfg(not(feature = "with-measure"))]
     let expected_old = r#"<main class="editor">
     <section class="lines">
         <div key="hash0">
@@ -167,28 +166,6 @@ fn subsequent_updates() {
     <footer>line:0, col:0</footer>
 </main>"#;
 
-    #[cfg(feature = "with-measure")]
-    let expected_old = r#"<main class="editor" node_idx="0">
-    <section class="lines" node_idx="1">
-        <div key="hash0" node_idx="2">
-            <div node_idx="3">0</div>
-            <div node_idx="5">line0</div>
-        </div>
-        <div key="hash1" node_idx="7">
-            <div node_idx="8">1</div>
-            <div node_idx="10">line1</div>
-        </div>
-        <div key="hash2" node_idx="12">
-            <div node_idx="13">2</div>
-            <div node_idx="15">line2</div>
-        </div>
-        <div key="hash3" node_idx="17">
-            <div node_idx="18">3</div>
-            <div node_idx="20">line3</div>
-        </div>
-    </section>
-    <footer node_idx="22">line:0, col:0</footer>
-</main>"#;
     assert_eq!(old_html, expected_old);
 
     let simple_program = simple_program();
@@ -203,7 +180,6 @@ fn subsequent_updates() {
         .expect("must not error")
         .expect("must exist");
 
-    #[cfg(not(feature = "with-measure"))]
     let expected = "<main class=\"editor\">\
                         <section class=\"lines\">\
                             <div key=\"hash0\">\
@@ -226,34 +202,8 @@ fn subsequent_updates() {
                             <footer>line:0, col:0</footer>\
                         </main>";
 
-    let mut old_render = String::new();
-    old.render_compressed(&mut old_render).expect("must render");
-    assert_eq!(old_render, expected);
+    assert_eq!(old.render_to_string(), expected);
 
-    #[cfg(feature = "with-measure")]
-    let expected = "<main class=\"editor\" node_idx=\"0\">\
-                        <section class=\"lines\" node_idx=\"1\">\
-                            <div key=\"hash0\" node_idx=\"2\">\
-                                <div node_idx=\"3\">0</div>\
-                                <div node_idx=\"5\">line0</div>\
-                            </div>\
-                            <div key=\"hash1\" node_idx=\"7\">\
-                                <div node_idx=\"8\">1</div>\
-                                <div node_idx=\"10\">line1</div>\
-                            </div>\
-                            <div key=\"hash2\" node_idx=\"12\">\
-                                <div node_idx=\"13\">2</div>\
-                                <div node_idx=\"15\">line2</div>\
-                            </div>\
-                            <div key=\"hash3\" node_idx=\"17\">\
-                                <div node_idx=\"18\">3</div>\
-                                <div node_idx=\"20\">line3</div>\
-                            </div>\
-                        </section>\
-                            <footer node_idx=\"22\">line:0, col:0</footer>\
-                        </main>";
-
-    log::trace!("expected: {:?}", container.outer_html());
     assert_eq!(expected, container.outer_html());
 
     dom_updater.update_dom(&simple_program, update1.clone());
@@ -265,7 +215,6 @@ fn subsequent_updates() {
 
     log::trace!("expected1 {:?}", container.outer_html());
 
-    #[cfg(not(feature = "with-measure"))]
     let expected1 = "<main class=\"editor\">\
                         <section class=\"lines\">\
                             <div key=\"hashXXX\">\
@@ -292,40 +241,7 @@ fn subsequent_updates() {
                         <footer>line:0, col:0</footer>\
                         </main>";
 
-    // The node_idx here is from the previous DOM, and since
-    // node_idx attribute is not diff therefore there is no patch for it.
-    #[cfg(feature = "with-measure")]
-    let expected1 = "<main class=\"editor\" node_idx=\"0\">\
-                        <section class=\"lines\" node_idx=\"1\">\
-                            <div key=\"hashXXX\">\
-                                <div>0</div>\
-                                <div>lineXXX</div>\
-                            </div>\
-                            <div key=\"hash0\" node_idx=\"2\">\
-                                <div node_idx=\"3\">1</div>\
-                                <div node_idx=\"5\">line0</div>\
-                            </div>\
-                            <div key=\"hash1\" node_idx=\"7\">\
-                                <div node_idx=\"8\">2</div>\
-                                <div node_idx=\"10\">line1</div>\
-                            </div>\
-                            <div key=\"hash2\" node_idx=\"12\">\
-                                <div node_idx=\"13\">3</div>\
-                                <div node_idx=\"15\">line2</div>\
-                            </div>\
-                            <div key=\"hash3\" node_idx=\"17\">\
-                                <div node_idx=\"18\">4</div>\
-                                <div node_idx=\"20\">line3</div>\
-                            </div>\
-                        </section>\
-                            <footer node_idx=\"22\">line:0, col:0</footer>\
-                        </main>";
-
-    let mut update1_render = String::new();
-    update1
-        .render_compressed(&mut update1_render)
-        .expect("must render");
-    assert_eq!(expected1, update1_render);
+    assert_eq!(expected1, update1.render_to_string());
     assert_eq!(expected1, container.outer_html());
 
     let update2: Node<()> = main(
@@ -414,7 +330,6 @@ fn subsequent_updates() {
         .expect("must not error")
         .expect("must exist");
 
-    #[cfg(not(feature = "with-measure"))]
     let expected2 = "<main class=\"editor\">\
                         <section class=\"lines\">\
                             <div key=\"hashYYY\">\
@@ -445,42 +360,7 @@ fn subsequent_updates() {
                             <footer>line:0, col:0</footer>\
                         </main>";
 
-    #[cfg(feature = "with-measure")]
-    let expected2 = "<main class=\"editor\" node_idx=\"0\">\
-                        <section class=\"lines\" node_idx=\"1\">\
-                            <div key=\"hashYYY\">\
-                                <div>0</div>\
-                                <div>lineYYY</div>\
-                            </div>\
-                            <div key=\"hashXXX\">\
-                                <div>1</div>\
-                                <div>lineXXX</div>\
-                            </div>\
-                            <div key=\"hash0\" node_idx=\"2\">\
-                                <div node_idx=\"3\">2</div>\
-                                <div node_idx=\"5\">line0</div>\
-                            </div>\
-                            <div key=\"hash1\" node_idx=\"7\">\
-                                <div node_idx=\"8\">3</div>\
-                                <div node_idx=\"10\">line1</div>\
-                            </div>\
-                            <div key=\"hash2\" node_idx=\"12\">\
-                                <div node_idx=\"13\">4</div>\
-                                <div node_idx=\"15\">line2</div>\
-                            </div>\
-                            <div key=\"hash3\" node_idx=\"17\">\
-                                <div node_idx=\"18\">5</div>\
-                                <div node_idx=\"20\">line3</div>\
-                            </div>\
-                        </section>\
-                            <footer node_idx=\"22\">line:0, col:0</footer>\
-                        </main>";
-
-    let mut update2_render = String::new();
-    update2
-        .render_compressed(&mut update2_render)
-        .expect("must render");
-    assert_eq!(expected2, update2_render);
+    assert_eq!(expected2, update2.render_to_string());
     assert_eq!(expected2, container.outer_html());
 
     let update3: Node<()> = main(
@@ -577,7 +457,6 @@ fn subsequent_updates() {
         .expect("must not error")
         .expect("must exist");
 
-    #[cfg(not(feature = "with-measure"))]
     let expected3 = "<main class=\"editor\">\
                         <section class=\"lines\">\
                             <div key=\"hashZZZ\">\
@@ -612,45 +491,6 @@ fn subsequent_updates() {
                             <footer>line:0, col:0</footer>\
                         </main>";
 
-    #[cfg(feature = "with-measure")]
-    let expected3 = "<main class=\"editor\" node_idx=\"0\">\
-                        <section class=\"lines\" node_idx=\"1\">\
-                            <div key=\"hashZZZ\">\
-                                <div>0</div>\
-                                <div>\n</div>\
-                            </div>\
-                            <div key=\"hashYYY\">\
-                                <div>1</div>\
-                                <div>lineYYY</div>\
-                            </div>\
-                            <div key=\"hashXXX\">\
-                                <div>2</div>\
-                                <div>lineXXX</div>\
-                            </div>\
-                            <div key=\"hash0\" node_idx=\"2\">\
-                                <div node_idx=\"3\">3</div>\
-                                <div node_idx=\"5\">line0</div>\
-                            </div>\
-                            <div key=\"hash1\" node_idx=\"7\">\
-                                <div node_idx=\"8\">4</div>\
-                                <div node_idx=\"10\">line1</div>\
-                            </div>\
-                            <div key=\"hash2\" node_idx=\"12\">\
-                                <div node_idx=\"13\">5</div>\
-                                <div node_idx=\"15\">line2</div>\
-                            </div>\
-                            <div key=\"hash3\" node_idx=\"17\">\
-                                <div node_idx=\"18\">6</div>\
-                                <div node_idx=\"20\">line3</div>\
-                            </div>\
-                        </section>\
-                            <footer node_idx=\"22\">line:0, col:0</footer>\
-                        </main>";
-
-    let mut update3_render = String::new();
-    update3
-        .render_compressed(&mut update3_render)
-        .expect("must render");
-    assert_eq!(expected3, update3_render);
+    assert_eq!(expected3, update3.render_to_string());
     assert_eq!(expected3, container.outer_html());
 }
