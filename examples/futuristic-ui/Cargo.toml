@@ -8,7 +8,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = { path = "../../", default-features = false, features = ["with-dom", "with-request-animation-frame"]}
+sauron = { path = "../../", default-features = false, features = ["with-dom", "with-request-animation-frame", "with-markdown"]}
 log = "0.4"
 console_log = { version = "0.2", features = ["color"], optional = true }
 web-sys = { version = "0.3", features = ["HtmlAudioElement"] }
@@ -24,7 +24,6 @@ css-color = "0.1.1"
 color_processing = "0.6.0"
 
 [features]
-with-lite-markdown = ["sauron/with-lite-markdown"]
 with-measure = ["sauron/with-measure"]
 
 [profile.release]
