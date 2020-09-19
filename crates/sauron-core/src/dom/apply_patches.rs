@@ -133,6 +133,13 @@ fn find_nodes_recursive(
                 let text_node: Text = node.unchecked_into();
                 text_nodes_to_patch.insert(*cur_node_idx, text_node);
             }
+            //TODO: There is an issue with comment node not accounted for
+            // when finding the target node
+            // this happens when comment node is added
+            // for 2 succeeding text nodes such as in markdown parsers.
+            Node::COMMENT_NODE => {
+                log::trace!("skipping comment node");
+            }
             other => unimplemented!("Unsupported root node type: {}", other),
         }
     }
