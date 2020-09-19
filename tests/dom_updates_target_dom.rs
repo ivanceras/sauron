@@ -119,8 +119,43 @@ fn multiple_match_on_keyed_elements() {
     );
 
     let patches = diff(&current_dom, &target_dom);
-
     log::trace!("patches: {:#?}", patches);
+
+    let for_insert1 = node!(
+        <div class="grid__number__line" key="623356695095054844">
+           <div class="grid__number">"2"</div>
+           <div class="grid__line">
+              <div>"C"</div>
+              <div>"J"</div>
+              <div>"K"</div>
+              <div>"\n"</div>
+           </div>
+        </div>
+    );
+
+    let for_insert2 = node!(
+        <div class="grid__number__line" key="4638962052468762037">
+           <div class="grid__number">"3"</div>
+           <div class="grid__line">
+              <div>"\n"</div>
+           </div>
+        </div>
+    );
+    assert_eq!(
+        patches,
+        vec![
+            ChangeText::new(26, "2", "1").into(),
+            ChangeText::new(32, "3", "4").into(),
+            InsertNode::new(Some(&"div"), 30, &for_insert1).into(),
+            InsertNode::new(Some(&"div"), 30, &for_insert2).into(),
+            RemoveNode::new(Some(&"div"), 12).into(),
+            ChangeText::new(43, "line: 1, column: 0", "line: 2, column: 0")
+                .into(),
+        ]
+    );
+
+    log::trace!("current_dom: {}", current_dom.render_to_string());
+    log::trace!("target_dom: {}", target_dom.render_to_string());
 
     let simple_program = simple_program();
     let mut dom_updater = DomUpdater::new_append_to_mount(

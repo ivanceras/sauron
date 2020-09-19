@@ -19,14 +19,11 @@ use web_sys::InputEvent;
 
 mod test_fixtures;
 
-wasm_bindgen_test_configure!(run_in_browser);
-
 /// this is an inefficient patch since the blank lines are matches
 /// causing the next good match to skip due to the there has been
 ///  a previous match with bigger node_idx
 ///  The solution is therefore to not put key to elements that
 ///  are meant to be discarded  and can easily be construcated
-#[wasm_bindgen_test]
 #[test]
 fn test1() {
     let current_dom: Node<()> = node!(
@@ -110,7 +107,12 @@ fn test1() {
     );
 
     let patch = diff(&current_dom, &target_dom);
+
+    log::trace!("test update here..");
+    log::debug!("patches: {:#?}", patch);
+
     dbg!(&patch);
+
     assert_eq!(
         patch,
         vec![
@@ -118,7 +120,7 @@ fn test1() {
             ChangeText::new(26, "2", "3").into(),
             InsertNode::new(
                 Some(&"div"),
-                12,
+                24,
                 &div(
                     vec![
                         class("grid__number__line"),
@@ -141,7 +143,7 @@ fn test1() {
             .into(),
             InsertNode::new(
                 Some(&"div"),
-                13,
+                24,
                 &div(
                     vec![
                         class("grid__number__line"),
