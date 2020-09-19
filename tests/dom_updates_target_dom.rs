@@ -1,12 +1,6 @@
 #![deny(warnings)]
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
     mt_dom::patch::*,
-    Patch,
     *,
 };
 
@@ -19,7 +13,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 fn multiple_match_on_keyed_elements() {
-    console_log::init_with_level(log::Level::Trace);
+    console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
     let current_dom: Node<()> = node!(

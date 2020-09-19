@@ -2,28 +2,12 @@
 use sauron::{
     html::{
         attributes::*,
-        events::*,
         *,
     },
-    mt_dom::patch::{
-        AddAttributes,
-        AppendChildren,
-        ChangeText,
-        InsertNode,
-        RemoveAttributes,
-        RemoveNode,
-        ReplaceNode,
-    },
+    mt_dom::patch::*,
     node,
+    Patch,
     *,
-};
-use sauron_core::{
-    body,
-    html::div,
-    Cmd,
-    Component,
-    Node,
-    Program,
 };
 
 use test_fixtures::simple_program;
@@ -35,7 +19,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 fn test_lines() {
-    console_log::init_with_level(log::Level::Trace);
+    console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
     let _document = web_sys::window().unwrap().document().unwrap();
 
@@ -100,9 +84,7 @@ fn test_lines() {
     </div>
     );
 
-    let mut view0_rendered = String::new();
-    view0.render_compressed(&mut view0_rendered);
-    log::trace!("render: {}", view0_rendered);
+    log::trace!("render: {}", view0.render_to_string());
 
     let view1: Node<()> = node!(
     <div class="app">
@@ -214,14 +196,12 @@ fn test_lines() {
     dom_updater.patch_dom(&simple_program, patch2_expected);
 
     let view2 = dom_updater.current_vdom.clone();
-    let mut view2_rendered = String::new();
-    view2.render_compressed(&mut view2_rendered);
-    log::trace!("view2_rendered: {}", view2_rendered);
+    log::trace!("view2_rendered: {}", view2.render_to_string());
     let patch2_diff = diff(&view1, &view2);
     log::trace!("patch2_diff: {:#?}", patch2_diff);
     //assert_eq!(patch2_diff, patch2_expected);
 
-    let _patch3: Vec<Patch<()>> = vec![
+    let patch3: Vec<Patch<()>> = vec![
         ChangeText::new(20, "2", "3").into(),
         ChangeText::new(32, "3", "4").into(),
         ChangeText::new(44, "4", "5").into(),
@@ -236,5 +216,5 @@ fn test_lines() {
     //
     // console.log div contained:
     //    panicked at 'internal error: entered unreachable code: Elements should not receive ChangeText patches.'
-    //dom_updater.patch_dom(&simple_program, patch3);
+    dom_updater.patch_dom(&simple_program, patch3);
 }

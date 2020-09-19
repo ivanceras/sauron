@@ -8,14 +8,6 @@ use sauron::{
     node,
     *,
 };
-use sauron_core::{
-    body,
-    html::div,
-    Cmd,
-    Component,
-    Node,
-    Program,
-};
 
 #[test]
 fn new_lines_ignored() {

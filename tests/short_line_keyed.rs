@@ -2,17 +2,9 @@
 use sauron::{
     html::attributes::*,
     mt_dom::patch::*,
-    node,
     *,
 };
-use sauron_core::{
-    body,
-    html::div,
-    Cmd,
-    Component,
-    Node,
-    Program,
-};
+use sauron_core::Node;
 
 #[test]
 fn test_unmatched_old_key() {

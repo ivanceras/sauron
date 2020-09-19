@@ -2,11 +2,9 @@
 use sauron::{
     html::{
         attributes::*,
-        events::*,
         *,
     },
     mt_dom::patch::*,
-    Patch,
     *,
 };
 
@@ -24,7 +22,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 ///  are meant to be discarded  and can easily be construcated
 #[wasm_bindgen_test]
 fn test1() {
-    console_log::init_with_level(log::Level::Trace);
+    console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
     let current_dom: Node<()> = node!(

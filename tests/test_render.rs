@@ -2,11 +2,9 @@
 use sauron::{
     html::{
         attributes::*,
-        events::*,
         *,
     },
     mt_dom::patch::*,
-    Patch,
     *,
 };
 
