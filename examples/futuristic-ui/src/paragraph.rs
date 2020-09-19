@@ -24,10 +24,7 @@ where
 {
     pub fn new_with_markdown(md: &str) -> Self {
         Paragraph {
-            //#[cfg(feature = "with-lite-markdown")]
             animated_list: AnimateList::new_with_content(sauron::markdown(md)),
-            //#[cfg(not(feature = "with-lite-markdown"))]
-            //animated_list: AnimateList::new_with_content(text(md)),
         }
     }
 
