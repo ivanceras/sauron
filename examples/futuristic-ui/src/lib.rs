@@ -66,7 +66,12 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         let button_options = vec![
-            ("Renimate All", Options::regular(), Msg::ReAnimateAll),
+            ("ReAnimate All", Options::regular(), Msg::ReAnimateAll),
+            (
+                "Animate Paragraph",
+                Options::regular(),
+                Msg::ReAnimateParagraph,
+            ),
             ("Animate List", Options::full(), Msg::ReAnimateList),
             (
                 "Animate Frame",
@@ -88,9 +93,9 @@ impl App {
             })
             .collect();
 
-        let paragraph_content = "This is an experimental demo showcasing usage of [Sauron](https://github.com/ivanceras/sauron)
-                    Component lifecycle to work alongside
-                    css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.
+        let paragraph_content = "This is an experimental demo showcasing usage of [Sauron](https://github.com/ivanceras/sauron). \
+                    Component lifecycle to work alongside\
+                    css transition, animation and timed DOM manipulation. This is also an exploration on how to add theming to the web framework.\
                     Sauron is a light-weight web framework designed to have you write least amount of code possible.";
 
         let frame_content = div(
@@ -323,7 +328,7 @@ impl Component<Msg> for App {
                         ).collect::<Vec<_>>()
                     }
                 ),
-                //self.paragraph.view(),
+                self.paragraph.view(),
                 p(
                     vec![],
                     vec![self.animate_list.view()],

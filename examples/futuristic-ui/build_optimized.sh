@@ -1,3 +1,3 @@
 #!/bin/bash
 
-wasm-pack build --target web --release -- --features "wee_alloc"
+wasm-pack build --target web --release -- --features "wee_alloc with-lite-markdown"

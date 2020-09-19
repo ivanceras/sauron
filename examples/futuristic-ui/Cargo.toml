@@ -24,7 +24,7 @@ css-color = "0.1.1"
 color_processing = "0.6.0"
 
 [features]
-#with-lite-markdown = ["sauron/with-lite-markdown"]
+with-lite-markdown = ["sauron/with-lite-markdown"]
 with-measure = ["sauron/with-measure"]
 
 [profile.release]
