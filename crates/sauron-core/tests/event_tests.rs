@@ -14,7 +14,6 @@ use sauron_core::{
     },
     mt_dom::patch::*,
     Node,
-    Patch,
 };
 use std::{
     cell::RefCell,

@@ -1,3 +1,4 @@
+#![deny(warnings)]
 use regex::Regex;
 
 #[test]

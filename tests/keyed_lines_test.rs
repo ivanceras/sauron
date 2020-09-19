@@ -1,4 +1,4 @@
-use log::*;
+#![deny(warnings)]
 use sauron::{
     html::{
         attributes::*,
@@ -25,13 +25,9 @@ use sauron_core::{
     Node,
     Program,
 };
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
-use web_sys::InputEvent;
 
 mod test_fixtures;
 
@@ -41,7 +37,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 fn test_lines() {
     console_log::init_with_level(log::Level::Trace);
     console_error_panic_hook::set_once();
-    let document = web_sys::window().unwrap().document().unwrap();
+    let _document = web_sys::window().unwrap().document().unwrap();
 
     let view0: Node<()> = node!(
     <div class="app">
@@ -225,7 +221,7 @@ fn test_lines() {
     log::trace!("patch2_diff: {:#?}", patch2_diff);
     //assert_eq!(patch2_diff, patch2_expected);
 
-    let patch3: Vec<Patch<()>> = vec![
+    let _patch3: Vec<Patch<()>> = vec![
         ChangeText::new(20, "2", "3").into(),
         ChangeText::new(32, "3", "4").into(),
         ChangeText::new(44, "4", "5").into(),

@@ -1,21 +1,17 @@
-use log::*;
+
 use sauron_core::{
     html::{
         attributes::*,
-        events::*,
         *,
     },
     mt_dom::patch::*,
     Patch,
     *,
 };
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
-use web_sys::InputEvent;
+
 
 mod test_fixtures;
 
@@ -43,7 +39,7 @@ fn node_mounted_properly() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let dom_updater = DomUpdater::new_append_to_mount(
+    let _dom_updater = DomUpdater::new_append_to_mount(
         &simple_program,
         old,
         &sauron_core::body(),

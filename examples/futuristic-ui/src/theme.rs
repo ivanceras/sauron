@@ -143,7 +143,7 @@ impl Default for Theme {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    
     use css_color::Rgba;
     use css_colors::{
         percent,

@@ -2,7 +2,6 @@
 use sauron_core::{
     mt_dom::patch::*,
     prelude::*,
-    Patch,
 };
 
 #[test]

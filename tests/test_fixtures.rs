@@ -1,3 +1,4 @@
+#![deny(warnings)]
 //! This is useful only for testing
 //! This is a simple component which just barely comply to being a component
 //! use for doing component tests

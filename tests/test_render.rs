@@ -1,4 +1,4 @@
-use log::*;
+#![deny(warnings)]
 use sauron::{
     html::{
         attributes::*,

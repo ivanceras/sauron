@@ -9,7 +9,6 @@ use sauron_core::{
     mt_dom::patch::*,
     Attribute,
     Node,
-    Patch,
 };
 
 #[test]

@@ -1,8 +1,7 @@
-use log::*;
+#![deny(warnings)]
 use sauron::{
     html::{
         attributes::*,
-        events::*,
         *,
     },
     mt_dom::patch::*,
@@ -17,12 +16,6 @@ use sauron_core::{
     Node,
     Program,
 };
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
-use wasm_bindgen_test::*;
-use web_sys::InputEvent;
 
 #[test]
 fn new_lines_ignored() {

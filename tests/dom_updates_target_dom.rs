@@ -1,4 +1,4 @@
-use log::*;
+#![deny(warnings)]
 use sauron::{
     html::{
         attributes::*,
@@ -9,13 +9,9 @@ use sauron::{
     Patch,
     *,
 };
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
-use web_sys::InputEvent;
 
 mod test_fixtures;
 
@@ -223,7 +219,7 @@ fn unmatching_result_dom() {
    </div>
 </div>"#;
 
-    let out_html = r#"<div class=\"app\">
+    let _out_html = r#"<div class=\"app\">
    <h1>Lines</h1>
    <div>
       <div class=\"grid__wrapper\">
