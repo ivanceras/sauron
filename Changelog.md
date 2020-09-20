@@ -1,13 +1,58 @@
 # Changelog
 
+
 ## Unreleased
+- Added improvements on `node!` macro, now allowing you to use the exact attribute names for rust keywords.
+    before:
+    ```rust
+    node!(
+        <main>
+            <label for_="input1">Input:</label>
+            <input id="input1" type_="text" />
+        </main>
+    )
+    ```
+    now:
+    ```rust
+    node!(
+        <main>
+            <label for="input1">Input:</label>
+            <input id="input1" type="text" />
+        </main>
+    )
+    ```
+- simplify the algorithmn for find_node_recursive
+- Fix serder side rendering of self closing tags html, such as `input`, `br`, `hr`
+- unify attribute manipulation in render and in dom_updater, the common code is in html::attributes module
+- Add node_idx attribute in render if `with-nodeidx` feature is enabled
+- Reexport `serde_json` in order for `jss` macro be able to use reexported `serde_json` from sauron crate
+- fix example: remove the use of workaround on attributes that are keywords in rust
+- Add #[allow(unused_braces)] inside node macro to prevent the compiler from making expressions in braces in html as unncessary
+
+## 0.31.2
 - Fix the `render` function where attributes of the same name not merged.
 - use the exported Style struct from html::attributes, to avoid namespace collision with 'style' attribute
 - Add Minimal SSR example
 - expose a `lite-markdown` feature from `sauron` which exclude the `sauron-parse` crate to minimize binary size
 - expose `empty_attr` in `html::attributes`
+    - this allows you to add a conditional attribute in building the view.
+    Example:
+      ```rust
+            img(vec![
+                    src("img/image.jpg"),
+                    if let Some(img_title) = self.img_title {
+                       title(img_title.to_string())
+                    } else {
+                       empty_attr()
+                    }
+                ],
+                vec![]
+            )
+      ```
 - add `jss` module and utility functions which utilizes json to preprocess css styles.
-    - `jss_ns` allows you to create class names that will not collide with other components
+    - `jss_ns` allows you to add style to your components while prefixing the classnames with a namespace to prevent clashing
+        with classes from other components.
+        Check out the `futuristic-ui` [example](https://github.com/ivanceras/sauron/tree/master/examples/futuristic-ui/) for complete usage.
 
 ## 0.31.0
 - (**breaking**) Improved `style!` macro by using json as the syntax
