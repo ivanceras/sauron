@@ -1,5 +1,13 @@
-use crate::{dom::dom_updater::DomUpdater, Cmd, Component, Dispatch};
-use std::{cell::RefCell, rc::Rc};
+use crate::{
+    dom::dom_updater::DomUpdater,
+    Cmd,
+    Component,
+    Dispatch,
+};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+};
 #[cfg(feature = "with-request-animation-frame")]
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;
@@ -45,7 +53,16 @@ where
             app: Rc::new(RefCell::new(app)),
             dom_updater: Rc::new(RefCell::new(dom_updater)),
         };
+        program.init_emit();
         program
+    }
+
+    fn init_emit(&self) {
+        // call the init of the component
+        let cmds: Cmd<APP, MSG> = self.app.borrow().init();
+        // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
+        // listening to events (resize, hashchange)
+        cmds.emit(&self);
     }
 
     /// executed after the program has been mounted
@@ -53,11 +70,6 @@ where
         for style in self.app.borrow().style() {
             Self::inject_style(&style);
         }
-        // call the init of the component
-        let cmds: Cmd<APP, MSG> = self.app.borrow().init();
-        // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
-        // listening to events (resize, hashchange)
-        cmds.emit(&self);
     }
 
     /// get the real DOM node where this app is mounted to.
@@ -119,7 +131,7 @@ where
         #[cfg(feature = "with-measure")]
         let t3 = {
             let t3 = crate::now();
-            log::trace!("app view took: {}ms", t3 - t2);
+            log::trace!("creating app view took: {}ms", t3 - t2);
             t3
         };
         // update the last DOM node tree with this new view
