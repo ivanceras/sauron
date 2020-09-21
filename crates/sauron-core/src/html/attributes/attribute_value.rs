@@ -4,7 +4,7 @@ use crate::prelude::{
 };
 
 /// Values of an attribute can be in these variants
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum AttributeValue {
     /// an argument value, to be called as parameter, the function is called to the element
     FunctionCall(Value),
@@ -14,21 +14,6 @@ pub enum AttributeValue {
     Style(Vec<Style>),
     /// no value
     Empty,
-}
-
-impl PartialEq for AttributeValue {
-    /// all callbacks will have to return equal
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (AttributeValue::Simple(this), AttributeValue::Simple(other)) => {
-                this == other
-            }
-            (AttributeValue::Style(this), AttributeValue::Style(other)) => {
-                this == other
-            }
-            _ => true,
-        }
-    }
 }
 
 impl AttributeValue {
