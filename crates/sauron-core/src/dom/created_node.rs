@@ -199,6 +199,12 @@ impl<T> CreatedNode<T> {
                     }
                 }
             }
+        } else {
+            //if the merged attribute is blank of empty when string is trimmed
+            //remove the attribute
+            element
+                .remove_attribute(attr.name())
+                .expect("must remove attribute");
         }
 
         // do function calls such as set_inner_html
