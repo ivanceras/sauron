@@ -105,10 +105,10 @@ crate-type = ["cdylib"]
 
 
 [dependencies]
-sauron = "0.30"
-console_error_panic_hook = { version = "0.1"}
+sauron = "0.32"
+console_error_panic_hook = "0.1"
 log = "0.4"
-console_log = {version ="0.2", features = ["color"]}
+console_log = "0.2"
 ```
 
 
@@ -121,7 +121,7 @@ and the build script for the details.
 
 
 #### Demo examples
-- [todomvc](https://ivanceras.github.io/todomvc/)
+- [todomvc](https://ivanceras.github.io/todomvc/) The todomvc example
 - [futuristic-ui](https://ivanceras.github.io/futuristic-ui/) - A demo of futuristic-ui
 showcasing animation, transition and timed Component update.
 - [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet CSV data viewer
