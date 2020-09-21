@@ -1,5 +1,8 @@
 use sauron::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 #[macro_use]
 extern crate log;
@@ -11,14 +14,14 @@ pub enum FetchStatus<T> {
     Idle(T),
     Loading,
     Complete(T),
-    Error(Option<String>)
+    Error(Option<String>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     EditName(String),
     ReceivedData(Result<Data, JsValue>),
-    QueryAPI
+    QueryAPI,
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
@@ -32,7 +35,7 @@ pub struct Data {
 pub struct App {
     pub name: String,
     pub data: FetchStatus<Data>,
-    error: Option<String>
+    error: Option<String>,
 }
 
 impl App {
@@ -41,9 +44,9 @@ impl App {
             name: String::from(""),
             data: FetchStatus::Idle(Data {
                 length: 0,
-                modified_name: String::from("")
+                modified_name: String::from(""),
             }),
-            error: None
+            error: None,
         }
     }
 
@@ -76,12 +79,12 @@ impl Component<Msg> for App {
                     <label>
                         "What’s your name, man?"
                         <input
-                            type_="text"
+                            type="text"
                             value={&self.name}
                             on_input={|e| Msg::EditName(e.value)}
                         />
                     </label>
-                    <button type_="submit">"Okay!"</button>
+                    <button type="submit">"Okay!"</button>
                 </form>
                 {self.view_data()}
             </main>
@@ -96,8 +99,10 @@ impl Component<Msg> for App {
             Msg::QueryAPI => {
                 self.data = FetchStatus::Loading;
                 cmd = self.fetch_data()
-            },
-            Msg::ReceivedData(Ok(data)) => self.data = FetchStatus::Complete(data),
+            }
+            Msg::ReceivedData(Ok(data)) => {
+                self.data = FetchStatus::Complete(data)
+            }
             Msg::ReceivedData(Err(js_value)) => {
                 trace!("Error fetching data! {:#?}", js_value);
                 self.data = FetchStatus::Error(Some(format!(
@@ -114,28 +119,36 @@ impl App {
     fn view_data(&self) -> Node<Msg> {
         match &self.data {
             FetchStatus::Idle(_) => node! { <p>"Waiting around..."</p> },
-            FetchStatus::Error(Some(e)) => node! {
-                <article>
-                    <p>"Okay, something went wrong. I think it was: "</p>
-                    <code>{text(e)}</code>
-                </article>
-            },
-            FetchStatus::Error(None) => node! {
-                <article>
-                    <p>"Okay, something went wrong. I have no idea what it is."</p>
-                </article>
-            },
-            FetchStatus::Loading => node! {
-                <article>
-                    <p>"Loading..."</p>
-                </article>
-            },
-            FetchStatus::Complete(data) => node! {
-                <article>
-                    <p>"Hello, "<span class="modified-name">{text(&data.modified_name)}</span></p>
-                    <p>"Hey, did you know that’s "<span class="length">{text(&data.length)}</span>" characters long?"</p>
-                </article>
-            },
+            FetchStatus::Error(Some(e)) => {
+                node! {
+                    <article>
+                        <p>"Okay, something went wrong. I think it was: "</p>
+                        <code>{text(e)}</code>
+                    </article>
+                }
+            }
+            FetchStatus::Error(None) => {
+                node! {
+                    <article>
+                        <p>"Okay, something went wrong. I have no idea what it is."</p>
+                    </article>
+                }
+            }
+            FetchStatus::Loading => {
+                node! {
+                    <article>
+                        <p>"Loading..."</p>
+                    </article>
+                }
+            }
+            FetchStatus::Complete(data) => {
+                node! {
+                    <article>
+                        <p>"Hello, "<span class="modified-name">{text(&data.modified_name)}</span></p>
+                        <p>"Hey, did you know that’s "<span class="length">{text(&data.length)}</span>" characters long?"</p>
+                    </article>
+                }
+            }
         }
     }
 }
@@ -149,8 +162,8 @@ pub fn main(serialized_state: String) {
      * (but generated in server/src/main.rs) */
     let mut app = App::new();
     if let Ok(state) = serde_json::from_str::<App>(&serialized_state) {
-       app.name = state.name;
-       app.data = state.data;
+        app.name = state.name;
+        app.data = state.data;
     };
 
     /* If there's a window (i.e., if this is running in the browser)
@@ -158,8 +171,12 @@ pub fn main(serialized_state: String) {
     match web_sys::window() {
         Some(window) => {
             trace!("found window, will try to replace <main>");
-            let document = window.document().expect("should have a document on window");
-            Program::new_replace_mount(app, &document.query_selector_all("main").unwrap().get(0).unwrap());
+            let document =
+                window.document().expect("should have a document on window");
+            Program::new_replace_mount(
+                app,
+                &document.query_selector_all("main").unwrap().get(0).unwrap(),
+            );
         }
         None => {
             trace!("window not found");

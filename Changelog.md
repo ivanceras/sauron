@@ -27,7 +27,7 @@
 - Add node_idx attribute in render if `with-nodeidx` feature is enabled
 - Reexport `serde_json` in order for `jss` macro be able to use reexported `serde_json` from sauron crate
 - fix example: remove the use of workaround on attributes that are keywords in rust
-- Add #[allow(unused_braces)] inside node macro to prevent the compiler from making expressions in braces in html as unncessary
+- Add `#[allow(unused_braces)]` inside node macro to prevent the compiler from making expressions in braces in html as unncessary
 
 ## 0.31.2
 - Fix the `render` function where attributes of the same name not merged.

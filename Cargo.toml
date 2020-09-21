@@ -31,6 +31,8 @@ with-request-animation-frame = ["sauron-core/with-request-animation-frame"]
 with-measure = ["sauron-core/with-measure"]
 # show the node_idx in html nodes for debugging
 with-nodeidx = ["sauron-core/with-nodeidx"]
+# log debug patches
+with-debug = ["sauron-core/with-debug"]
 
 # lets you use node! macro to write html like code in the view
 with-node-macro = ["sauron-node-macro"]
@@ -72,4 +74,4 @@ members = [
 [patch.crates-io]
 #mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
 #mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "develop" }
-#mt-dom = { path = "../mt-dom" }
+mt-dom = { path = "../mt-dom" }
