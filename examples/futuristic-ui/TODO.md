@@ -33,3 +33,5 @@
     - [ ] release - frame__corner-releasing: corner-expands, the corner starts from the edges of the frame then move outwards
     - [ ] grow - frame__corner-grow: the corner starts from inside of the frame and grips-outwards
     - [ ] crush - frame__corner-crush: the corners starts from the edge of the frame and then move in-wards to the inside of the frame.
+- [ ] Extract the name of the component using https://doc.rust-lang.org/std/any/fn.type_name.html
+    and string manipulation to extract just the base struct name and into lower case, it will be the namespace to be used for css classnames
