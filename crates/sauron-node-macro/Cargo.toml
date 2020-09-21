@@ -1,6 +1,6 @@
 [package]
 name = "sauron-node-macro"
-version = "0.30.0"
+version = "0.32.0"
 authors = ["John-John Tedro <udoprog@tedro.se>", "Jovansonlee Cesar <ivanceras@gmail.com>"]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -11,10 +11,10 @@ keywords = ["html", "dom", "web"]
 edition = "2018"
 
 [dependencies]
-syn = { version = "1.0.40", features = ["full"] }
-syn-rsx = { version = "0.7.1" }
+syn = { version = "1", features = ["full"] }
+syn-rsx = { version = "0.7" }
 quote = {package = "quote", version = "1.0.3"}
-proc-macro2 = { version = "1.0.10" }
+proc-macro2 = { version = "1" }
 
 [dev-dependencies]
 sauron = { path = "../../"}
