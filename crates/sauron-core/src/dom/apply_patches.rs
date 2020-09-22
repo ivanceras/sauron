@@ -406,9 +406,23 @@ where
             >(program, replacement, &mut None);
             node.replace_with_with_node_1(&created_node.node)?;
         }
+        Patch::RemoveNode(RemoveNode {
+            tag: _,
+            node_idx: _,
+        }) => {
+            let parent_node =
+                node.parent_node().expect("must have a parent node");
+            if node.node_type() == Node::COMMENT_NODE {
+                //do not remove comment nodes
+            } else {
+                parent_node
+                    .remove_child(node)
+                    .expect("must remove target node");
+            }
+        }
         _other => {
             unreachable!(
-                "Text nodes should only receive ChangeText or Replace patches."
+                "Text nodes should only receive ChangeText, ReplaceNode, or RemoveNode patches."
             )
         }
     };

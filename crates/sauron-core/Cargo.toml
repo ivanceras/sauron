@@ -1,6 +1,6 @@
 [package]
 name = "sauron-core"
-version = "0.32.0"
+version = "0.32.1"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -63,7 +63,7 @@ features = [
 default = ["with-dom", "with-request-animation-frame"]
 with-parser = [] #enumerates html tags and attributes
 with-measure = ["mt-dom/with-measure"]
-with-nodeidx = []
+with-nodeidx = [] #add node-idx as node attributes
 with-debug = [] # log debug patches
 with-request-animation-frame = [] # enable the use of request-animation-frame in calling dispatch
 with-dom = ["wasm-bindgen", "js-sys", "web-sys"]
