@@ -10,6 +10,11 @@ use crate::{
 };
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
+pub use special::{
+    key,
+    skip,
+    Special,
+};
 pub use style::Style;
 pub use style_macro::*;
 pub use value::Value;
@@ -19,6 +24,7 @@ mod attribute_macros;
 #[macro_use]
 mod style_macro;
 mod attribute_value;
+mod special;
 mod style;
 mod value;
 

@@ -41,7 +41,6 @@ mod render;
 pub use render::Render;
 
 use html::attributes::AttributeValue;
-use mt_dom::diff_with_key;
 
 pub use mt_dom;
 
@@ -114,5 +113,15 @@ pub fn diff<'a, MSG>(
 where
     MSG: 'static,
 {
-    diff_with_key(old, new, &"key")
+    use crate::html::attributes::Special;
+
+    // check if the skip attribute is true
+    let skip = |_old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
+        new_node
+            .get_value("skip")
+            .map(|v| v.as_bool())
+            .flatten()
+            .unwrap_or(false)
+    };
+    mt_dom::diff::diff_with_key_and_skip(old, new, &"key", &skip)
 }
