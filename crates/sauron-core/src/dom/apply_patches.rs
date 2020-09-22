@@ -22,10 +22,7 @@ use crate::{
     Patch,
 };
 use js_sys::Function;
-use std::collections::{
-    BTreeMap,
-    HashMap,
-};
+use std::collections::HashMap;
 use wasm_bindgen::{
     JsCast,
     JsValue,
@@ -53,6 +50,8 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
+    #[cfg(feature = "with-measure")]
+    let t1 = crate::now();
     let root_node: Node = root_node.into();
 
     // Closure that were added to the DOM during this patch operation.
@@ -62,6 +61,13 @@ where
     // in every patch loop.
     let (element_nodes_to_patch, text_nodes_to_patch) =
         find_nodes(root_node, &patches);
+
+    #[cfg(feature = "with-measure")]
+    let t2 = {
+        let t2 = crate::now();
+        log::trace!("finding nodes to patch took: {}ms", t2 - t1);
+        t2
+    };
 
     for patch in patches.iter() {
         let patch_node_idx = patch.node_idx();
@@ -83,6 +89,13 @@ where
         )
     }
 
+    #[cfg(feature = "with-measure")]
+    let _t3 = {
+        let t3 = crate::now();
+        log::trace!("actual applying patch took: {}ms", t3 - t2);
+        t3
+    };
+
     Ok(active_closures)
 }
 
@@ -98,26 +111,39 @@ where
 /// such as removal and insertion of nodes
 /// will not change to NodeIdx we need to find, since
 /// we already get a reference to these nodes prior to applying any of the patches.
+/// TODO: took a lot of time to lookup for nodes to find
 fn find_nodes<MSG>(
     root_node: Node,
     patches: &[Patch<MSG>],
-) -> (BTreeMap<usize, Element>, BTreeMap<usize, Text>) {
-    let mut nodes_to_find = BTreeMap::new();
+) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
+    let mut nodes_to_find = HashMap::new();
+
+    let mut element_nodes_to_patch = HashMap::new();
+    let mut text_nodes_to_patch = HashMap::new();
+
     for patch in patches {
         nodes_to_find.insert(patch.node_idx(), patch.tag());
     }
-    find_nodes_recursive(root_node, &mut 0, &nodes_to_find)
+    #[cfg(feature = "with-measure")]
+    log::trace!("there are {} nodes_to_find", nodes_to_find.len());
+    find_nodes_recursive(
+        root_node,
+        &mut 0,
+        &nodes_to_find,
+        &mut element_nodes_to_patch,
+        &mut text_nodes_to_patch,
+    );
+    (element_nodes_to_patch, text_nodes_to_patch)
 }
 
 /// find the html nodes recursively
 fn find_nodes_recursive(
     node: Node,
     cur_node_idx: &mut usize,
-    nodes_to_find: &BTreeMap<usize, Option<&&'static str>>,
-) -> (BTreeMap<usize, Element>, BTreeMap<usize, Text>) {
-    let mut element_nodes_to_patch = BTreeMap::new();
-    let mut text_nodes_to_patch = BTreeMap::new();
-
+    nodes_to_find: &HashMap<usize, Option<&&'static str>>,
+    element_nodes_to_patch: &mut HashMap<usize, Element>,
+    text_nodes_to_patch: &mut HashMap<usize, Text>,
+) {
     // Important: We use child_nodes() instead of children() because children() ignores text nodes
     let children = node.child_nodes();
     let child_node_count = children.length();
@@ -147,14 +173,14 @@ fn find_nodes_recursive(
     for i in 0..child_node_count {
         let child_node = children.item(i).expect("Expecting a child node");
         *cur_node_idx += 1;
-        let (child_element_to_patch, child_text_nodes_to_patch) =
-            find_nodes_recursive(child_node, cur_node_idx, nodes_to_find);
-
-        element_nodes_to_patch.extend(child_element_to_patch);
-        text_nodes_to_patch.extend(child_text_nodes_to_patch);
+        find_nodes_recursive(
+            child_node,
+            cur_node_idx,
+            nodes_to_find,
+            element_nodes_to_patch,
+            text_nodes_to_patch,
+        );
     }
-
-    (element_nodes_to_patch, text_nodes_to_patch)
 }
 
 /// Get the "data-sauron-vdom-id" of all the desendent of this node including itself
