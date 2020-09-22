@@ -272,7 +272,7 @@ fn remove_event_from_replaced_node() {
     let simple_program = simple_program();
     assert_eq!(
         sauron_core::diff(&old, &new),
-        vec![ReplaceNode::new(&"div", 0, &p(vec![], vec![])).into()],
+        vec![ReplaceNode::new(Some(&"div"), 0, &p(vec![], vec![])).into()],
         "Should be a ReplaceNode patch"
     );
     let mut dom_updater =
