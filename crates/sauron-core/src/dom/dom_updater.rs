@@ -68,6 +68,8 @@ where
         self.mount(program, false);
     }
 
+    /// each element and it's descendant in the vdom is created into
+    /// an actual DOM node.
     fn mount<DSP>(&mut self, program: &DSP, replace: bool)
     where
         DSP: Dispatch<MSG> + Clone + 'static,

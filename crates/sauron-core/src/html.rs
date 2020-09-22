@@ -48,6 +48,7 @@ pub fn html_element<MSG>(
 }
 
 /// for self closing tags
+#[inline]
 pub fn html_element_sc<MSG>(
     tag: &'static str,
     attrs: Vec<Attribute<MSG>>,

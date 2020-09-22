@@ -93,6 +93,11 @@ impl<T> CreatedNode<T> {
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
+    ///
+    /// TODO: Optimization for apply_patches::find_nodes
+    /// Keep track of the Node with their corresponding NodeIdx, so as not
+    /// to traverse all of them to find the node.
+    /// We can maintain a HashMap<NodeIdx, web_sys::Node>
     pub fn create_dom_node_opt<DSP, MSG>(
         program: Option<&DSP>,
         vnode: &crate::Node<MSG>,

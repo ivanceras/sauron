@@ -112,6 +112,14 @@ where
 /// will not change to NodeIdx we need to find, since
 /// we already get a reference to these nodes prior to applying any of the patches.
 /// TODO: took a lot of time to lookup for nodes to find
+///
+/// Note:
+/// Worst case scenario:
+/// Finding the node that is in the bottom part of the html tree
+/// will take a long time, since it has to traverse to each of the
+/// elements are it's descendant before it could reach the elements in the bottom.
+///
+/// Complexity: O(n), where n is the total number of html nodes
 fn find_nodes<MSG>(
     root_node: Node,
     patches: &[Patch<MSG>],
@@ -137,13 +145,25 @@ fn find_nodes<MSG>(
 }
 
 /// find the html nodes recursively
+/// early returns true if all node has been found
+/// before completing iterating all the elements
 fn find_nodes_recursive(
     node: Node,
     cur_node_idx: &mut usize,
     nodes_to_find: &HashMap<usize, Option<&&'static str>>,
     element_nodes_to_patch: &mut HashMap<usize, Element>,
     text_nodes_to_patch: &mut HashMap<usize, Text>,
-) {
+) -> bool {
+    //let t1 = crate::now();
+    if nodes_to_find.len() == 0 {
+        return true;
+    }
+    let total_found = element_nodes_to_patch.len() + text_nodes_to_patch.len();
+    let all_has_been_found = nodes_to_find.len() == total_found;
+    if all_has_been_found {
+        log::trace!("all has been found..");
+        return true;
+    }
     // Important: We use child_nodes() instead of children() because children() ignores text nodes
     let children = node.child_nodes();
     let child_node_count = children.length();
@@ -170,17 +190,25 @@ fn find_nodes_recursive(
         }
     }
 
+    //let t2 = crate::now();
+    //log::trace!("find node recursive part1 took: {}ms", t2 - t1);
+
     for i in 0..child_node_count {
         let child_node = children.item(i).expect("Expecting a child node");
         *cur_node_idx += 1;
-        find_nodes_recursive(
+        if find_nodes_recursive(
             child_node,
             cur_node_idx,
             nodes_to_find,
             element_nodes_to_patch,
             text_nodes_to_patch,
-        );
+        ) {
+            return true;
+        }
     }
+    false
+    //let t3 = crate::now();
+    //log::trace!("find node recursive part2 took: {}ms", t3 - t2);
 }
 
 /// Get the "data-sauron-vdom-id" of all the desendent of this node including itself
