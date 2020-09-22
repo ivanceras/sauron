@@ -66,7 +66,7 @@ macro_rules! declare_html_attributes{
 
         #[cfg(feature = "with-parser")]
         /// These are most commonly used html attributes such as class, id, etc
-        pub const HTML_ATTRS:[&'static str; 116] = [$(stringify!($name),)*];
+        pub const HTML_ATTRS:[&'static str; 115] = [$(stringify!($name),)*];
     }
 }
 
@@ -206,7 +206,6 @@ declare_html_attributes! {
     value;
     width;
     wrap;
-    key;
 }
 
 // attributes with dash
