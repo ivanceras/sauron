@@ -30,7 +30,6 @@ use wasm_bindgen::{
 use web_sys::{
     Element,
     Node,
-    Text,
 };
 
 /// Apply all of the patches to our old root node in order to create the new root node
@@ -59,8 +58,7 @@ where
 
     // finding the nodes to be patched before hand, instead of calling it
     // in every patch loop.
-    let (element_nodes_to_patch, text_nodes_to_patch) =
-        find_nodes(root_node, &patches);
+    let nodes_to_patch = find_nodes(root_node, &patches);
 
     #[cfg(feature = "with-measure")]
     let t2 = {
@@ -72,21 +70,15 @@ where
     for patch in patches.iter() {
         let patch_node_idx = patch.node_idx();
 
-        if let Some(element) = element_nodes_to_patch.get(&patch_node_idx) {
+        if let Some(element) = nodes_to_patch.get(&patch_node_idx) {
             let new_closures =
-                apply_element_patch(program, &element, old_closures, &patch)?;
+                apply_patch_to_node(program, &element, old_closures, &patch)?;
             active_closures.extend(new_closures);
-            continue;
-        }
-
-        if let Some(text_node) = text_nodes_to_patch.get(&patch_node_idx) {
-            apply_text_patch(program, &text_node, &patch)?;
-            continue;
-        }
-
-        unreachable!(
+        } else {
+            unreachable!(
             "Getting here means we didn't find the element or next node that we were supposed to patch."
-        )
+            );
+        }
     }
 
     #[cfg(feature = "with-measure")]
@@ -123,11 +115,10 @@ where
 fn find_nodes<MSG>(
     root_node: Node,
     patches: &[Patch<MSG>],
-) -> (HashMap<usize, Element>, HashMap<usize, Text>) {
+) -> HashMap<usize, Node> {
     let mut nodes_to_find = HashMap::new();
 
-    let mut element_nodes_to_patch = HashMap::new();
-    let mut text_nodes_to_patch = HashMap::new();
+    let mut nodes_to_patch = HashMap::new();
 
     for patch in patches {
         nodes_to_find.insert(patch.node_idx(), patch.tag());
@@ -138,10 +129,9 @@ fn find_nodes<MSG>(
         root_node,
         &mut 0,
         &nodes_to_find,
-        &mut element_nodes_to_patch,
-        &mut text_nodes_to_patch,
+        &mut nodes_to_patch,
     );
-    (element_nodes_to_patch, text_nodes_to_patch)
+    nodes_to_patch
 }
 
 /// find the html nodes recursively
@@ -151,15 +141,13 @@ fn find_nodes_recursive(
     node: Node,
     cur_node_idx: &mut usize,
     nodes_to_find: &HashMap<usize, Option<&&'static str>>,
-    element_nodes_to_patch: &mut HashMap<usize, Element>,
-    text_nodes_to_patch: &mut HashMap<usize, Text>,
+    nodes_to_patch: &mut HashMap<usize, Node>,
 ) -> bool {
     //let t1 = crate::now();
     if nodes_to_find.len() == 0 {
         return true;
     }
-    let total_found = element_nodes_to_patch.len() + text_nodes_to_patch.len();
-    let all_has_been_found = nodes_to_find.len() == total_found;
+    let all_has_been_found = nodes_to_find.len() == nodes_to_patch.len();
     if all_has_been_found {
         log::trace!("all has been found..");
         return true;
@@ -170,24 +158,7 @@ fn find_nodes_recursive(
 
     // If the root node matches, mark it for patching
     if let Some(_vtag) = nodes_to_find.get(&cur_node_idx) {
-        match node.node_type() {
-            Node::ELEMENT_NODE => {
-                let element: Element = node.unchecked_into();
-                element_nodes_to_patch.insert(*cur_node_idx, element);
-            }
-            Node::TEXT_NODE => {
-                let text_node: Text = node.unchecked_into();
-                text_nodes_to_patch.insert(*cur_node_idx, text_node);
-            }
-            //TODO: There is an issue with comment node not accounted for
-            // when finding the target node
-            // this happens when comment node is added
-            // for 2 succeeding text nodes such as in markdown parsers.
-            Node::COMMENT_NODE => {
-                log::trace!("skipping comment node");
-            }
-            other => unimplemented!("Unsupported root node type: {}", other),
-        }
+        nodes_to_patch.insert(*cur_node_idx, node);
     }
 
     //let t2 = crate::now();
@@ -200,8 +171,7 @@ fn find_nodes_recursive(
             child_node,
             cur_node_idx,
             nodes_to_find,
-            element_nodes_to_patch,
-            text_nodes_to_patch,
+            nodes_to_patch,
         ) {
             return true;
         }
@@ -306,9 +276,9 @@ fn remove_event_listener_with_name(
 
 /// apply a the patch to this element node.
 /// and return the ActiveClosure that may be attached to that element
-fn apply_element_patch<DSP, MSG>(
+fn apply_patch_to_node<DSP, MSG>(
     program: Option<&DSP>,
-    node: &Element,
+    node: &Node,
     old_closures: &mut ActiveClosure,
     patch: &Patch<MSG>,
 ) -> Result<ActiveClosure, JsValue>
@@ -317,6 +287,7 @@ where
     DSP: Clone + Dispatch<MSG> + 'static,
 {
     let mut active_closures = ActiveClosure::new();
+    let element: &Element = node.unchecked_ref();
 
     match patch {
         Patch::InsertNode(InsertNode {
@@ -329,9 +300,9 @@ where
                 MSG,
             >(program, &for_insert, &mut None);
             let parent_node =
-                node.parent_node().expect("must have a parent node");
+                element.parent_node().expect("must have a parent node");
             parent_node
-                .insert_before(&created_node.node, Some(node))
+                .insert_before(&created_node.node, Some(element))
                 .expect("must remove target node");
 
             Ok(active_closures)
@@ -344,7 +315,7 @@ where
             CreatedNode::<Node>::set_element_attributes(
                 program,
                 &mut active_closures,
-                node,
+                element,
                 attrs,
             );
 
@@ -359,13 +330,13 @@ where
                 for att_value in attr.value() {
                     match att_value {
                         AttValue::Plain(_) => {
-                            node.remove_attribute(attr.name())?;
+                            element.remove_attribute(attr.name())?;
                         }
                         // it is an event listener
                         AttValue::Callback(_) => {
                             remove_event_listener_with_name(
                                 attr.name(),
-                                node,
+                                element,
                                 old_closures,
                             )?;
                         }
@@ -389,8 +360,10 @@ where
                 DSP,
                 MSG,
             >(program, replacement, &mut None);
-            remove_event_listeners(&node, old_closures)?;
-            node.replace_with_with_node_1(&created_node.node)?;
+            if element.node_type() != Node::TEXT_NODE {
+                remove_event_listeners(&element, old_closures)?;
+            }
+            element.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
         }
         Patch::RemoveNode(RemoveNode {
@@ -398,14 +371,14 @@ where
             node_idx: _,
         }) => {
             let parent_node =
-                node.parent_node().expect("must have a parent node");
-            if node.node_type() == Node::COMMENT_NODE {
+                element.parent_node().expect("must have a parent node");
+            if element.node_type() == Node::COMMENT_NODE {
                 //do not remove comment nodes
             } else {
                 parent_node
-                    .remove_child(node)
+                    .remove_child(element)
                     .expect("must remove target node");
-                if node.node_type() != Node::TEXT_NODE {
+                if element.node_type() != Node::TEXT_NODE {
                     let element: &Element = node.unchecked_ref();
                     remove_event_listeners(&element, old_closures)?;
                 }
@@ -417,7 +390,7 @@ where
             node_idx: _,
             children: new_nodes,
         }) => {
-            let parent = &node;
+            let parent = &element;
             let mut active_closures = HashMap::new();
             for new_node in new_nodes {
                 let created_node =
@@ -430,56 +403,9 @@ where
 
             Ok(active_closures)
         }
-        Patch::ChangeText(_ct) => {
-            unreachable!("Elements should not receive ChangeText patches.")
-        }
-    }
-}
-
-fn apply_text_patch<DSP, MSG>(
-    program: Option<&DSP>,
-    node: &Text,
-    patch: &Patch<MSG>,
-) -> Result<(), JsValue>
-where
-    MSG: 'static,
-    DSP: Clone + Dispatch<MSG> + 'static,
-{
-    match patch {
         Patch::ChangeText(ct) => {
             node.set_node_value(Some(ct.get_new()));
+            Ok(active_closures)
         }
-        Patch::ReplaceNode(ReplaceNode {
-            tag: _,
-            node_idx: _,
-            replacement,
-        }) => {
-            let created_node = CreatedNode::<Node>::create_dom_node_opt::<
-                DSP,
-                MSG,
-            >(program, replacement, &mut None);
-            node.replace_with_with_node_1(&created_node.node)?;
-        }
-        Patch::RemoveNode(RemoveNode {
-            tag: _,
-            node_idx: _,
-        }) => {
-            let parent_node =
-                node.parent_node().expect("must have a parent node");
-            if node.node_type() == Node::COMMENT_NODE {
-                //do not remove comment nodes
-            } else {
-                parent_node
-                    .remove_child(node)
-                    .expect("must remove target node");
-            }
-        }
-        _other => {
-            unreachable!(
-                "Text nodes should only receive ChangeText, ReplaceNode, or RemoveNode patches."
-            )
-        }
-    };
-
-    Ok(())
+    }
 }
