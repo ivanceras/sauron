@@ -31,6 +31,7 @@ with-request-animation-frame = ["sauron-core/with-request-animation-frame"]
 with-measure = ["sauron-core/with-measure"]
 # show the node_idx in html nodes for debugging
 with-nodeidx-debug = ["sauron-core/with-nodeidx-debug"]
+with-nodeidx-lookup = ["sauron-core/with-nodeidx-lookup"]
 # log debug patches
 with-debug = ["sauron-core/with-debug"]
 

@@ -22,7 +22,14 @@ use crate::{
     Patch,
 };
 use js_sys::Function;
-use std::collections::HashMap;
+use mt_dom::NodeIdx;
+use std::{
+    collections::{
+        BTreeMap,
+        HashMap,
+    },
+    iter::FromIterator,
+};
 use wasm_bindgen::{
     JsCast,
     JsValue,
@@ -43,6 +50,7 @@ pub fn patch<N, DSP, MSG>(
     root_node: N,
     old_closures: &mut ActiveClosure,
     patches: Vec<Patch<MSG>>,
+    node_idx_lookup: &mut BTreeMap<NodeIdx, Node>,
 ) -> Result<ActiveClosure, JsValue>
 where
     N: Into<Node>,
@@ -53,12 +61,23 @@ where
     let t1 = crate::now();
     let root_node: Node = root_node.into();
 
+    #[cfg(feature = "with-debug")]
+    log::trace!("patches: {:#?}", patches);
+
     // Closure that were added to the DOM during this patch operation.
     let mut active_closures = HashMap::new();
 
     // finding the nodes to be patched before hand, instead of calling it
     // in every patch loop.
+    #[cfg(not(feature = "with-nodeidx-lookup"))]
     let nodes_to_patch = find_nodes(root_node, &patches);
+
+    #[cfg(feature = "with-nodeidx-lookup")]
+    let nodes_to_patch = find_nodes_from_lookup(&patches, node_idx_lookup);
+
+    log::trace!("nodes to patch: {:#?}", nodes_to_patch);
+
+    log::trace!("node_idx_lookup: {:#?}", node_idx_lookup);
 
     #[cfg(feature = "with-measure")]
     let t2 = {
@@ -71,8 +90,13 @@ where
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = nodes_to_patch.get(&patch_node_idx) {
-            let new_closures =
-                apply_patch_to_node(program, &element, old_closures, &patch)?;
+            let new_closures = apply_patch_to_node(
+                program,
+                &element,
+                old_closures,
+                &patch,
+                node_idx_lookup,
+            )?;
             active_closures.extend(new_closures);
         } else {
             unreachable!(
@@ -80,6 +104,8 @@ where
             );
         }
     }
+
+    log::trace!("AFTER PATCHING node_idx_lookup: {:#?}", node_idx_lookup);
 
     #[cfg(feature = "with-measure")]
     let _t3 = {
@@ -89,6 +115,21 @@ where
     };
 
     Ok(active_closures)
+}
+
+fn find_nodes_from_lookup<MSG>(
+    patches: &[Patch<MSG>],
+    node_idx_lookup: &BTreeMap<NodeIdx, Node>,
+) -> HashMap<usize, Node> {
+    HashMap::from_iter(patches.iter().filter_map(|patch| {
+        let node_idx = patch.node_idx();
+        if let Some(found) = node_idx_lookup.get(&node_idx) {
+            Some((node_idx, found.clone()))
+        } else {
+            panic!("wasn't able to find: {}", node_idx);
+            //None
+        }
+    }))
 }
 
 /// find the nodes to be patched
@@ -281,24 +322,29 @@ fn apply_patch_to_node<DSP, MSG>(
     node: &Node,
     old_closures: &mut ActiveClosure,
     patch: &Patch<MSG>,
+    node_idx_lookup: &mut BTreeMap<NodeIdx, Node>,
 ) -> Result<ActiveClosure, JsValue>
 where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
     let mut active_closures = ActiveClosure::new();
-    let element: &Element = node.unchecked_ref();
 
     match patch {
         Patch::InsertNode(InsertNode {
             tag: _,
-            node_idx: _,
+            node_idx,
             node: for_insert,
         }) => {
-            let created_node = CreatedNode::<Node>::create_dom_node_opt::<
-                DSP,
-                MSG,
-            >(program, &for_insert, &mut None);
+            let element: &Element = node.unchecked_ref();
+            let mut cur_node_idx = *node_idx;
+            let created_node =
+                CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
+                    program,
+                    &for_insert,
+                    &mut cur_node_idx,
+                    node_idx_lookup,
+                );
             let parent_node =
                 element.parent_node().expect("must have a parent node");
             parent_node
@@ -308,10 +354,20 @@ where
             Ok(active_closures)
         }
         Patch::AddAttributes(AddAttributes {
-            tag: _,
-            node_idx: _,
+            tag,
+            node_idx,
             attrs,
         }) => {
+            let element: &Element = node.unchecked_ref();
+            log::trace!("Expecting element with tag {:?}", tag);
+            log::trace!(
+                "at node_idx: {}, \n
+                adding attributes {:#?} \n
+                for element: {:?}",
+                node_idx,
+                attrs,
+                element
+            );
             CreatedNode::<Node>::set_element_attributes(
                 program,
                 &mut active_closures,
@@ -326,6 +382,7 @@ where
             node_idx: _,
             attrs,
         }) => {
+            let element: &Element = node.unchecked_ref();
             for attr in attrs.iter() {
                 for att_value in attr.value() {
                     match att_value {
@@ -353,23 +410,31 @@ where
         //
         Patch::ReplaceNode(ReplaceNode {
             tag: _,
-            node_idx: _,
+            node_idx,
             replacement,
         }) => {
-            let created_node = CreatedNode::<Node>::create_dom_node_opt::<
-                DSP,
-                MSG,
-            >(program, replacement, &mut None);
+            let mut cur_node_idx = *node_idx;
+            log::error!("replacing node at {}", node_idx);
+            log::error!("DO WE REINDEX IN THESE CASE?");
+            log::error!("original node was: {:#?}", node);
+            log::error!("replacment is: {:#?}", replacement);
+            let element: &Element = node.unchecked_ref();
+            let created_node =
+                CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
+                    program,
+                    replacement,
+                    &mut cur_node_idx,
+                    node_idx_lookup,
+                );
             if element.node_type() != Node::TEXT_NODE {
                 remove_event_listeners(&element, old_closures)?;
             }
             element.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
         }
-        Patch::RemoveNode(RemoveNode {
-            tag: _,
-            node_idx: _,
-        }) => {
+        Patch::RemoveNode(RemoveNode { tag: _, node_idx }) => {
+            log::error!("Removing node: {}", node_idx);
+            let element: &Element = node.unchecked_ref();
             let parent_node =
                 element.parent_node().expect("must have a parent node");
             if element.node_type() == Node::COMMENT_NODE {
@@ -387,17 +452,23 @@ where
         }
         Patch::AppendChildren(AppendChildren {
             tag: _,
-            node_idx: _,
+            node_idx,
             children: new_nodes,
         }) => {
-            let parent = &element;
+            let element: &Element = node.unchecked_ref();
             let mut active_closures = HashMap::new();
+            let mut cur_node_idx = *node_idx;
             for new_node in new_nodes {
+                cur_node_idx += 1;
+                log::warn!("appending child at : {}", cur_node_idx);
                 let created_node =
                     CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                        program, &new_node, &mut None,
+                        program,
+                        &new_node,
+                        &mut cur_node_idx,
+                        node_idx_lookup,
                     );
-                parent.append_child(&created_node.node)?;
+                element.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }
 

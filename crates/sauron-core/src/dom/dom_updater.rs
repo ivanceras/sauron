@@ -10,6 +10,8 @@ use crate::{
     },
     Patch,
 };
+use mt_dom::NodeIdx;
+use std::collections::BTreeMap;
 use wasm_bindgen::JsCast;
 use web_sys::{
     self,
@@ -29,6 +31,8 @@ pub struct DomUpdater<MSG> {
     /// We keep these around so that they don't get dropped (and thus stop working);
     ///
     pub active_closures: ActiveClosure,
+    /// The node_idx for fast lookup on getting the DOM node using node_idx
+    pub node_idx_lookup: BTreeMap<NodeIdx, Node>,
 }
 
 impl<MSG> DomUpdater<MSG> {
@@ -41,6 +45,7 @@ impl<MSG> DomUpdater<MSG> {
             current_vdom,
             root_node: mount.clone(),
             active_closures: ActiveClosure::new(),
+            node_idx_lookup: BTreeMap::new(),
         }
     }
 
@@ -74,12 +79,18 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
+        log::trace!("mounting...");
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(
                 program,
                 &self.current_vdom,
-                &mut Some(0),
+                &mut 0,
+                &mut self.node_idx_lookup,
             );
+        log::trace!(
+            "after mounting.. node_idx_lookup: {:#?}",
+            self.node_idx_lookup
+        );
         if replace {
             let root_element: &Element = self.root_node.unchecked_ref();
             root_element
@@ -168,6 +179,7 @@ where
             self.root_node.clone(),
             &mut self.active_closures,
             patches,
+            &mut self.node_idx_lookup,
         )
         .expect("Error in patching the dom");
 
@@ -186,6 +198,7 @@ where
             self.root_node.clone(),
             &mut self.active_closures,
             patches,
+            &mut self.node_idx_lookup,
         )
         .expect("Error in patching the dom");
         self.active_closures.extend(active_closures);
@@ -201,11 +214,13 @@ where
             current_vdom,
             root_node,
             active_closures,
+            node_idx_lookup,
         } = self;
         DomUpdater {
             current_vdom: current_vdom.map_msg(func),
             root_node,
             active_closures,
+            node_idx_lookup,
         }
     }
 

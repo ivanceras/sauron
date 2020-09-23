@@ -8,7 +8,10 @@ use crate::{
     Attribute,
 };
 use std::{
-    collections::HashMap,
+    collections::{
+        BTreeMap,
+        HashMap,
+    },
     ops::Deref,
     sync::Mutex,
 };
@@ -82,13 +85,19 @@ impl<T> CreatedNode<T> {
     pub fn create_dom_node<DSP, MSG>(
         program: &DSP,
         vnode: &crate::Node<MSG>,
-        node_idx: &mut Option<NodeIdx>,
+        node_idx: &mut NodeIdx,
+        node_idx_lookup: &mut BTreeMap<NodeIdx, Node>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        Self::create_dom_node_opt(Some(program), vnode, node_idx)
+        Self::create_dom_node_opt(
+            Some(program),
+            vnode,
+            node_idx,
+            node_idx_lookup,
+        )
     }
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
@@ -101,7 +110,8 @@ impl<T> CreatedNode<T> {
     pub fn create_dom_node_opt<DSP, MSG>(
         program: Option<&DSP>,
         vnode: &crate::Node<MSG>,
-        node_idx: &mut Option<NodeIdx>,
+        node_idx: &mut NodeIdx,
+        node_idx_lookup: &mut BTreeMap<NodeIdx, Node>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
@@ -109,15 +119,129 @@ impl<T> CreatedNode<T> {
     {
         match vnode {
             crate::Node::Text(txt) => {
-                CreatedNode::without_closures(Self::create_text_node(txt))
+                let text_node = Self::create_text_node(txt);
+                let node: Node = text_node.clone().unchecked_into();
+                log::error!(
+                    "INSERTING [{}] at create_dom_node_opt inserted",
+                    *node_idx
+                );
+                node_idx_lookup.insert(*node_idx, node);
+                CreatedNode::without_closures(text_node)
             }
             crate::Node::Element(element_node) => {
+                log::trace!("descending into element_node..");
                 let created_element: CreatedNode<Node> =
-                    Self::create_element_node(program, element_node, node_idx)
-                        .into();
+                    Self::create_element_node(
+                        program,
+                        element_node,
+                        node_idx,
+                        node_idx_lookup,
+                    )
+                    .into();
+
                 created_element
             }
         }
+    }
+
+    /// Build a DOM element by recursively creating DOM nodes for this element and it's
+    /// children, it's children's children, etc.
+    fn create_element_node<DSP, MSG>(
+        program: Option<&DSP>,
+        velem: &crate::Element<MSG>,
+        node_idx: &mut NodeIdx,
+        node_idx_lookup: &mut BTreeMap<NodeIdx, Node>,
+    ) -> CreatedNode<Node>
+    where
+        MSG: 'static,
+        DSP: Clone + Dispatch<MSG> + 'static,
+    {
+        let document = crate::document();
+
+        let element = if let Some(ref namespace) = velem.namespace() {
+            document
+                .create_element_ns(Some(namespace), &velem.tag())
+                .expect("Unable to create element")
+        } else {
+            document
+                .create_element(&velem.tag())
+                .expect("Unable to create element")
+        };
+
+        let this_node: Node = element.clone().unchecked_into();
+
+        let mut closures = ActiveClosure::new();
+
+        Self::set_element_attributes(
+            program,
+            &mut closures,
+            &element,
+            &velem.get_attributes().iter().collect::<Vec<_>>(),
+        );
+
+        #[cfg(feature = "with-nodeidx-debug")]
+        Self::set_element_attributes(
+            program,
+            &mut closures,
+            &element,
+            &[&crate::prelude::attr("node_idx", *node_idx)],
+        );
+
+        let mut previous_node_was_text = false;
+
+        log::trace!("[{}] inserting element node  ==> {:?}", node_idx, element);
+        let node: Node = element.clone().unchecked_into();
+        node_idx_lookup.insert(*node_idx, node.clone());
+
+        for (i, child) in velem.get_children().iter().enumerate() {
+            *node_idx += 1;
+            match child {
+                crate::Node::Text(txt) => {
+                    let current_node: &web_sys::Node = element.as_ref();
+
+                    // We ensure that the text siblings are patched by preventing the browser from merging
+                    // neighboring text nodes. Originally inspired by some of React's work from 2016.
+                    //  -> https://reactjs.org/blog/2016/04/07/react-v15.html#major-changes
+                    //  -> https://github.com/facebook/react/pull/5753
+                    //
+                    // `mordor` one does not simply walk into mordor
+                    if previous_node_was_text {
+                        let separator = document.create_comment("mordor");
+                        current_node
+                            .append_child(separator.as_ref())
+                            .expect("Unable to append child");
+                    }
+                    let text_node = Self::create_text_node(&txt);
+                    current_node
+                        .append_child(&text_node)
+                        .expect("Unable to append text node");
+
+                    let node: Node = text_node.unchecked_into();
+
+                    log::trace!("[{}] inserting text ==> {:?}", node_idx, node);
+
+                    node_idx_lookup.insert(*node_idx, node);
+                    previous_node_was_text = true;
+                }
+                crate::Node::Element(element_node) => {
+                    previous_node_was_text = false;
+
+                    let created_child = Self::create_dom_node_opt(
+                        program,
+                        child,
+                        node_idx,
+                        node_idx_lookup,
+                    );
+                    closures.extend(created_child.closures);
+
+                    element
+                        .append_child(&created_child.node)
+                        .expect("Unable to append element node");
+                }
+            }
+        }
+
+        CreatedNode { node, closures }
     }
 
     /// set the element attribute
@@ -251,99 +375,6 @@ impl<T> CreatedNode<T> {
                     .expect("Unable to get closure")
                     .push((event_str, closure_wrap));
             }
-        }
-    }
-
-    /// Build a DOM element by recursively creating DOM nodes for this element and it's
-    /// children, it's children's children, etc.
-    pub fn create_element_node<DSP, MSG>(
-        program: Option<&DSP>,
-        velem: &crate::Element<MSG>,
-        node_idx: &mut Option<NodeIdx>,
-    ) -> CreatedNode<Element>
-    where
-        MSG: 'static,
-        DSP: Clone + Dispatch<MSG> + 'static,
-    {
-        let document = crate::document();
-
-        let element = if let Some(ref namespace) = velem.namespace() {
-            document
-                .create_element_ns(Some(namespace), &velem.tag())
-                .expect("Unable to create element")
-        } else {
-            document
-                .create_element(&velem.tag())
-                .expect("Unable to create element")
-        };
-
-        let mut closures = ActiveClosure::new();
-
-        Self::set_element_attributes(
-            program,
-            &mut closures,
-            &element,
-            &velem.get_attributes().iter().collect::<Vec<_>>(),
-        );
-
-        #[cfg(feature = "with-nodeidx-debug")]
-        if let Some(node_idx) = node_idx {
-            Self::set_element_attributes(
-                program,
-                &mut closures,
-                &element,
-                &[&crate::prelude::attr("node_idx", *node_idx)],
-            );
-        }
-
-        let mut previous_node_was_text = false;
-        for child in velem.get_children().iter() {
-            match child {
-                crate::Node::Text(txt) => {
-                    node_idx.as_mut().map(|idx| *idx += 1);
-                    let current_node: &web_sys::Node = element.as_ref();
-
-                    // We ensure that the text siblings are patched by preventing the browser from merging
-                    // neighboring text nodes. Originally inspired by some of React's work from 2016.
-                    //  -> https://reactjs.org/blog/2016/04/07/react-v15.html#major-changes
-                    //  -> https://github.com/facebook/react/pull/5753
-                    //
-                    // `mordor` one does not simply walk into mordor
-                    if previous_node_was_text {
-                        let separator = document.create_comment("mordor");
-                        current_node
-                            .append_child(separator.as_ref())
-                            .expect("Unable to append child");
-                    }
-
-                    current_node
-                        .append_child(&Self::create_text_node(&txt))
-                        .expect("Unable to append text node");
-
-                    previous_node_was_text = true;
-                }
-                crate::Node::Element(element_node) => {
-                    node_idx.as_mut().map(|idx| *idx += 1);
-                    previous_node_was_text = false;
-
-                    let child = Self::create_element_node(
-                        program,
-                        element_node,
-                        node_idx,
-                    );
-                    let child_elem: Element = child.node;
-                    closures.extend(child.closures);
-
-                    element
-                        .append_child(&child_elem)
-                        .expect("Unable to append element node");
-                }
-            }
-        }
-
-        CreatedNode {
-            node: element,
-            closures,
         }
     }
 }

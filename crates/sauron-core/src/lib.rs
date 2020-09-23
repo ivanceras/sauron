@@ -1,12 +1,12 @@
-#![deny(
-    warnings,
-    missing_docs,
-    missing_copy_implementations,
-    trivial_casts,
-    trivial_numeric_casts,
-    unstable_features,
-    unused_import_braces
-)]
+//#![deny(
+//    warnings,
+//    missing_docs,
+//    missing_copy_implementations,
+//    trivial_casts,
+//    trivial_numeric_casts,
+//    unstable_features,
+//    unused_import_braces
+//)]
 //! This is the core of sauron
 //!
 #[macro_use]
