@@ -30,7 +30,7 @@ with-request-animation-frame = ["sauron-core/with-request-animation-frame"]
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]
 # show the node_idx in html nodes for debugging
-with-nodeidx = ["sauron-core/with-nodeidx"]
+with-nodeidx-debug = ["sauron-core/with-nodeidx-debug"]
 # log debug patches
 with-debug = ["sauron-core/with-debug"]
 
@@ -72,6 +72,6 @@ members = [
 
 
 [patch.crates-io]
-#mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
+mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
 #mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "develop" }
-mt-dom = { path = "../mt-dom" }
+#mt-dom = { path = "../mt-dom" }

@@ -279,8 +279,6 @@ impl<T> CreatedNode<T> {
 
         let mut closures = ActiveClosure::new();
 
-        // TODO: attributes can be further merge here so as not to override the previous value
-        // when there are more than 1 attributes of the same name in an element
         Self::set_element_attributes(
             program,
             &mut closures,
@@ -288,7 +286,7 @@ impl<T> CreatedNode<T> {
             &velem.get_attributes().iter().collect::<Vec<_>>(),
         );
 
-        #[cfg(feature = "with-nodeidx")]
+        #[cfg(feature = "with-nodeidx-debug")]
         if let Some(node_idx) = node_idx {
             Self::set_element_attributes(
                 program,

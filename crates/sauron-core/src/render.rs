@@ -98,7 +98,7 @@ impl<MSG> Render for Element<MSG> {
             }
         }
 
-        #[cfg(feature = "with-nodeidx")]
+        #[cfg(feature = "with-nodeidx-debug")]
         if let Some(node_idx_) = node_idx {
             let node_idx_attr: Attribute<MSG> =
                 crate::prelude::attr("node_idx", *node_idx_);
