@@ -121,15 +121,10 @@ impl<T> CreatedNode<T> {
             crate::Node::Text(txt) => {
                 let text_node = Self::create_text_node(txt);
                 let node: Node = text_node.clone().unchecked_into();
-                log::error!(
-                    "INSERTING [{}] at create_dom_node_opt inserted",
-                    *node_idx
-                );
                 node_idx_lookup.insert(*node_idx, node);
                 CreatedNode::without_closures(text_node)
             }
             crate::Node::Element(element_node) => {
-                log::trace!("descending into element_node..");
                 let created_element: CreatedNode<Node> =
                     Self::create_element_node(
                         program,
@@ -189,7 +184,6 @@ impl<T> CreatedNode<T> {
 
         let mut previous_node_was_text = false;
 
-        log::trace!("[{}] inserting element node  ==> {:?}", node_idx, element);
         let node: Node = element.clone().unchecked_into();
         node_idx_lookup.insert(*node_idx, node.clone());
 
@@ -217,8 +211,6 @@ impl<T> CreatedNode<T> {
                         .expect("Unable to append text node");
 
                     let node: Node = text_node.unchecked_into();
-
-                    log::trace!("[{}] inserting text ==> {:?}", node_idx, node);
 
                     node_idx_lookup.insert(*node_idx, node);
                     previous_node_was_text = true;

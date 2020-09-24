@@ -69,15 +69,7 @@ where
 
     // finding the nodes to be patched before hand, instead of calling it
     // in every patch loop.
-    #[cfg(not(feature = "with-nodeidx-lookup"))]
     let nodes_to_patch = find_nodes(root_node, &patches);
-
-    #[cfg(feature = "with-nodeidx-lookup")]
-    let nodes_to_patch = find_nodes_from_lookup(&patches, node_idx_lookup);
-
-    log::trace!("nodes to patch: {:#?}", nodes_to_patch);
-
-    log::trace!("node_idx_lookup: {:#?}", node_idx_lookup);
 
     #[cfg(feature = "with-measure")]
     let t2 = {
@@ -105,8 +97,6 @@ where
         }
     }
 
-    log::trace!("AFTER PATCHING node_idx_lookup: {:#?}", node_idx_lookup);
-
     #[cfg(feature = "with-measure")]
     let _t3 = {
         let t3 = crate::now();
@@ -115,21 +105,6 @@ where
     };
 
     Ok(active_closures)
-}
-
-fn find_nodes_from_lookup<MSG>(
-    patches: &[Patch<MSG>],
-    node_idx_lookup: &BTreeMap<NodeIdx, Node>,
-) -> HashMap<usize, Node> {
-    HashMap::from_iter(patches.iter().filter_map(|patch| {
-        let node_idx = patch.node_idx();
-        if let Some(found) = node_idx_lookup.get(&node_idx) {
-            Some((node_idx, found.clone()))
-        } else {
-            panic!("wasn't able to find: {}", node_idx);
-            //None
-        }
-    }))
 }
 
 /// find the nodes to be patched
@@ -164,8 +139,10 @@ fn find_nodes<MSG>(
     for patch in patches {
         nodes_to_find.insert(patch.node_idx(), patch.tag());
     }
+
     #[cfg(feature = "with-measure")]
     log::trace!("there are {} nodes_to_find", nodes_to_find.len());
+
     find_nodes_recursive(
         root_node,
         &mut 0,
@@ -184,13 +161,11 @@ fn find_nodes_recursive(
     nodes_to_find: &HashMap<usize, Option<&&'static str>>,
     nodes_to_patch: &mut HashMap<usize, Node>,
 ) -> bool {
-    //let t1 = crate::now();
     if nodes_to_find.len() == 0 {
         return true;
     }
     let all_has_been_found = nodes_to_find.len() == nodes_to_patch.len();
     if all_has_been_found {
-        log::trace!("all has been found..");
         return true;
     }
     // Important: We use child_nodes() instead of children() because children() ignores text nodes
@@ -201,9 +176,6 @@ fn find_nodes_recursive(
     if let Some(_vtag) = nodes_to_find.get(&cur_node_idx) {
         nodes_to_patch.insert(*cur_node_idx, node);
     }
-
-    //let t2 = crate::now();
-    //log::trace!("find node recursive part1 took: {}ms", t2 - t1);
 
     for i in 0..child_node_count {
         let child_node = children.item(i).expect("Expecting a child node");
@@ -218,8 +190,6 @@ fn find_nodes_recursive(
         }
     }
     false
-    //let t3 = crate::now();
-    //log::trace!("find node recursive part2 took: {}ms", t3 - t2);
 }
 
 /// Get the "data-sauron-vdom-id" of all the desendent of this node including itself
@@ -359,15 +329,6 @@ where
             attrs,
         }) => {
             let element: &Element = node.unchecked_ref();
-            log::trace!("Expecting element with tag {:?}", tag);
-            log::trace!(
-                "at node_idx: {}, \n
-                adding attributes {:#?} \n
-                for element: {:?}",
-                node_idx,
-                attrs,
-                element
-            );
             CreatedNode::<Node>::set_element_attributes(
                 program,
                 &mut active_closures,
@@ -414,10 +375,6 @@ where
             replacement,
         }) => {
             let mut cur_node_idx = *node_idx;
-            log::error!("replacing node at {}", node_idx);
-            log::error!("DO WE REINDEX IN THESE CASE?");
-            log::error!("original node was: {:#?}", node);
-            log::error!("replacment is: {:#?}", replacement);
             let element: &Element = node.unchecked_ref();
             let created_node =
                 CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
@@ -433,7 +390,6 @@ where
             Ok(created_node.closures)
         }
         Patch::RemoveNode(RemoveNode { tag: _, node_idx }) => {
-            log::error!("Removing node: {}", node_idx);
             let element: &Element = node.unchecked_ref();
             let parent_node =
                 element.parent_node().expect("must have a parent node");
@@ -460,7 +416,6 @@ where
             let mut cur_node_idx = *node_idx;
             for new_node in new_nodes {
                 cur_node_idx += 1;
-                log::warn!("appending child at : {}", cur_node_idx);
                 let created_node =
                     CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
                         program,

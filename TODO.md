@@ -8,7 +8,7 @@
      - [X] Done in `mt-dom` branch: non-static-lifetime
  - [X] Deprecate the tag macro since it complicates the conflict in reexporting the functions
      - ie: `style!` as a tag, `style!` macro for attributes, `style` as attribute call.
- - [ ] Change the README example to use the node macro syntax
+ - [X] Change the README example to use the node macro syntax
      - rename the old `minimal` to `minimal-alt` and use the `node-macro-syntax` in `minimal` example
  - [X] Move `sauron-syntax` into `html2sauron` project
  - [ ] Expose Cmd,Component outside of `with-dom` feature gate
@@ -16,7 +16,7 @@
      - [ ] Make an equivalent for Program(client-side updater) for use in server-side
         - ie: ServerRender, where Msg could be passed as a data to hydrate the view (template) before sending to the client
  - [X] Fix the render function where attributes of the same name not merged
- - [ ] Change type of tag, attribute_name, style keys from `&'static str` to `&'a str`
+ - [X] Change type of tag, attribute_name, style keys from `&'static str` to `&'a str`
      - This will remove the need for hardcode HTML_STYLES lookup, which could be a performance penalty
  - Add the RealWorld example
      - Use the elm base code https://github.com/rtfeldman/elm-spa-example
@@ -38,10 +38,12 @@
 - [X] Get rid of test_fixtures and move it to test directory
 - [ ] Make each component have a reference to the root dom where it is mounted.
     - This will make local state changes to the component easier to do, as opposed to diffing the whole DOM tree.
-- [ ] Unify the code of Program replace_mount, append_mount
+- [X] Unify the code of Program replace_mount, append_mount
 - [ ] replace the request_animation_frame with the code from execute_request_animation frame
 - [ ] Create a function to derive Component name from the struct name of the Component
     and preprocess the jss with it before injecting it to the main program
+- [ ] Clean up `CreateNode`
+    - no need to wrap `Node` and `Element` instead just return them as created with their `closures`
 
 
 

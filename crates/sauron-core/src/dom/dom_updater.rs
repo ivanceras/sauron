@@ -79,7 +79,6 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
-        log::trace!("mounting...");
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(
                 program,
@@ -87,10 +86,6 @@ where
                 &mut 0,
                 &mut self.node_idx_lookup,
             );
-        log::trace!(
-            "after mounting.. node_idx_lookup: {:#?}",
-            self.node_idx_lookup
-        );
         if replace {
             let root_element: &Element = self.root_node.unchecked_ref();
             root_element
