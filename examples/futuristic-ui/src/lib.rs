@@ -266,19 +266,9 @@ impl Component<Msg> for App {
                 "font-family": base.primary_font,
                 "margin": "auto",
                 "background-color": base.background_color,
-                //"max-width": "900px",
                 "max-width": "50em",
                 "padding": "10px",
             },
-
-            /*
-            "@media screen and (max-width: 800px)": {
-              ".container": {
-                "width": "100%",
-                "padding": "5px",
-              }
-            },
-            */
 
             ".container ::selection": {
                 "color": base.background_color,
