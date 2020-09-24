@@ -22,14 +22,7 @@ use crate::{
     Patch,
 };
 use js_sys::Function;
-use mt_dom::NodeIdx;
-use std::{
-    collections::{
-        BTreeMap,
-        HashMap,
-    },
-    iter::FromIterator,
-};
+use std::collections::HashMap;
 use wasm_bindgen::{
     JsCast,
     JsValue,
@@ -50,7 +43,6 @@ pub fn patch<N, DSP, MSG>(
     root_node: N,
     old_closures: &mut ActiveClosure,
     patches: Vec<Patch<MSG>>,
-    node_idx_lookup: &mut BTreeMap<NodeIdx, Node>,
 ) -> Result<ActiveClosure, JsValue>
 where
     N: Into<Node>,
@@ -82,13 +74,8 @@ where
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = nodes_to_patch.get(&patch_node_idx) {
-            let new_closures = apply_patch_to_node(
-                program,
-                &element,
-                old_closures,
-                &patch,
-                node_idx_lookup,
-            )?;
+            let new_closures =
+                apply_patch_to_node(program, &element, old_closures, &patch)?;
             active_closures.extend(new_closures);
         } else {
             unreachable!(
@@ -292,7 +279,6 @@ fn apply_patch_to_node<DSP, MSG>(
     node: &Node,
     old_closures: &mut ActiveClosure,
     patch: &Patch<MSG>,
-    node_idx_lookup: &mut BTreeMap<NodeIdx, Node>,
 ) -> Result<ActiveClosure, JsValue>
 where
     MSG: 'static,
@@ -308,13 +294,12 @@ where
         }) => {
             let element: &Element = node.unchecked_ref();
             let mut cur_node_idx = *node_idx;
-            let created_node =
-                CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                    program,
-                    &for_insert,
-                    &mut cur_node_idx,
-                    node_idx_lookup,
-                );
+            let created_node = CreatedNode::<Node>::create_dom_node_opt::<
+                DSP,
+                MSG,
+            >(
+                program, &for_insert, &mut cur_node_idx
+            );
             let parent_node =
                 element.parent_node().expect("must have a parent node");
             parent_node
@@ -324,8 +309,8 @@ where
             Ok(active_closures)
         }
         Patch::AddAttributes(AddAttributes {
-            tag,
-            node_idx,
+            tag: _,
+            node_idx: _,
             attrs,
         }) => {
             let element: &Element = node.unchecked_ref();
@@ -376,20 +361,22 @@ where
         }) => {
             let mut cur_node_idx = *node_idx;
             let element: &Element = node.unchecked_ref();
-            let created_node =
-                CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                    program,
-                    replacement,
-                    &mut cur_node_idx,
-                    node_idx_lookup,
-                );
+            let created_node = CreatedNode::<Node>::create_dom_node_opt::<
+                DSP,
+                MSG,
+            >(
+                program, replacement, &mut cur_node_idx
+            );
             if element.node_type() != Node::TEXT_NODE {
                 remove_event_listeners(&element, old_closures)?;
             }
             element.replace_with_with_node_1(&created_node.node)?;
             Ok(created_node.closures)
         }
-        Patch::RemoveNode(RemoveNode { tag: _, node_idx }) => {
+        Patch::RemoveNode(RemoveNode {
+            tag: _,
+            node_idx: _,
+        }) => {
             let element: &Element = node.unchecked_ref();
             let parent_node =
                 element.parent_node().expect("must have a parent node");
@@ -416,13 +403,12 @@ where
             let mut cur_node_idx = *node_idx;
             for new_node in new_nodes {
                 cur_node_idx += 1;
-                let created_node =
-                    CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                        program,
-                        &new_node,
-                        &mut cur_node_idx,
-                        node_idx_lookup,
-                    );
+                let created_node = CreatedNode::<Node>::create_dom_node_opt::<
+                    DSP,
+                    MSG,
+                >(
+                    program, &new_node, &mut cur_node_idx
+                );
                 element.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }

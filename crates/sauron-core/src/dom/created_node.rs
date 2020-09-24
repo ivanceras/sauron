@@ -8,10 +8,7 @@ use crate::{
     Attribute,
 };
 use std::{
-    collections::{
-        BTreeMap,
-        HashMap,
-    },
+    collections::HashMap,
     ops::Deref,
     sync::Mutex,
 };
@@ -86,18 +83,12 @@ impl<T> CreatedNode<T> {
         program: &DSP,
         vnode: &crate::Node<MSG>,
         node_idx: &mut NodeIdx,
-        node_idx_lookup: &mut BTreeMap<NodeIdx, Node>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        Self::create_dom_node_opt(
-            Some(program),
-            vnode,
-            node_idx,
-            node_idx_lookup,
-        )
+        Self::create_dom_node_opt(Some(program), vnode, node_idx)
     }
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
@@ -111,7 +102,6 @@ impl<T> CreatedNode<T> {
         program: Option<&DSP>,
         vnode: &crate::Node<MSG>,
         node_idx: &mut NodeIdx,
-        node_idx_lookup: &mut BTreeMap<NodeIdx, Node>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
@@ -120,19 +110,12 @@ impl<T> CreatedNode<T> {
         match vnode {
             crate::Node::Text(txt) => {
                 let text_node = Self::create_text_node(txt);
-                let node: Node = text_node.clone().unchecked_into();
-                node_idx_lookup.insert(*node_idx, node);
                 CreatedNode::without_closures(text_node)
             }
             crate::Node::Element(element_node) => {
                 let created_element: CreatedNode<Node> =
-                    Self::create_element_node(
-                        program,
-                        element_node,
-                        node_idx,
-                        node_idx_lookup,
-                    )
-                    .into();
+                    Self::create_element_node(program, element_node, node_idx)
+                        .into();
 
                 created_element
             }
@@ -145,7 +128,6 @@ impl<T> CreatedNode<T> {
         program: Option<&DSP>,
         velem: &crate::Element<MSG>,
         node_idx: &mut NodeIdx,
-        node_idx_lookup: &mut BTreeMap<NodeIdx, Node>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
@@ -162,8 +144,6 @@ impl<T> CreatedNode<T> {
                 .create_element(&velem.tag())
                 .expect("Unable to create element")
         };
-
-        let this_node: Node = element.clone().unchecked_into();
 
         let mut closures = ActiveClosure::new();
 
@@ -184,10 +164,7 @@ impl<T> CreatedNode<T> {
 
         let mut previous_node_was_text = false;
 
-        let node: Node = element.clone().unchecked_into();
-        node_idx_lookup.insert(*node_idx, node.clone());
-
-        for (i, child) in velem.get_children().iter().enumerate() {
+        for child in velem.get_children().iter() {
             *node_idx += 1;
             match child {
                 crate::Node::Text(txt) => {
@@ -210,20 +187,13 @@ impl<T> CreatedNode<T> {
                         .append_child(&text_node)
                         .expect("Unable to append text node");
 
-                    let node: Node = text_node.unchecked_into();
-
-                    node_idx_lookup.insert(*node_idx, node);
                     previous_node_was_text = true;
                 }
-                crate::Node::Element(element_node) => {
+                crate::Node::Element(_element_node) => {
                     previous_node_was_text = false;
 
-                    let created_child = Self::create_dom_node_opt(
-                        program,
-                        child,
-                        node_idx,
-                        node_idx_lookup,
-                    );
+                    let created_child =
+                        Self::create_dom_node_opt(program, child, node_idx);
                     closures.extend(created_child.closures);
 
                     element
@@ -233,6 +203,7 @@ impl<T> CreatedNode<T> {
             }
         }
 
+        let node: Node = element.unchecked_into();
         CreatedNode { node, closures }
     }
 

@@ -21,7 +21,6 @@ use sauron_core::{
 };
 use std::{
     cell::Cell,
-    collections::BTreeMap,
     rc::Rc,
 };
 use test_fixtures::simple_program;
@@ -45,7 +44,6 @@ fn nested_divs() {
         &simple_program(),
         &vdiv,
         &mut 0,
-        &mut BTreeMap::new(),
     )
     .node
     .unchecked_into();
@@ -66,7 +64,6 @@ fn svg_element() {
         &simple_program(),
         &vdiv,
         &mut 0,
-        &mut BTreeMap::new(),
     )
     .node
     .unchecked_into();
@@ -84,7 +81,6 @@ fn div_with_attributes() {
         &simple_program(),
         &vdiv,
         &mut 0,
-        &mut BTreeMap::new(),
     )
     .node
     .unchecked_into();
