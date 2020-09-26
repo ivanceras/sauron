@@ -20,6 +20,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub type Event = web_sys::Event;
     pub use web_sys;
     pub use wasm_bindgen;
+    pub use js_sys;
 }}
 
 // reexport serde_json
@@ -74,6 +75,8 @@ pub mod prelude {
     #[cfg(feature = "with-dom")]
     pub use web_sys;
 }
+
+pub use mt_dom::Text;
 
 /// namespace type in node, which could be change to an enum
 pub type Namespace = &'static str;

@@ -95,12 +95,12 @@ fn builder_with_event() {
 fn builder_with_children() {
     let mut div: Element<()> = Element::new(None, "div", vec![], vec![], false);
     div.add_attributes(vec![attr("class", "some-class")]);
-    div.add_children(vec![Node::Text("Hello".to_string())]);
+    div.add_children(vec![text("Hello")]);
     let expected = Element::new(
         None,
         "div",
         vec![class("some-class")],
-        vec![Node::Text("Hello".to_string())],
+        vec![text("Hello")],
         false,
     );
 
@@ -286,7 +286,7 @@ fn replace_text_node() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![ChangeText::new(0, "Old", "New").into()],
+        vec![ChangeText::new(0, &Text::new("Old"), &Text::new("New")).into()],
         "ReplaceNode text node",
     );
 }

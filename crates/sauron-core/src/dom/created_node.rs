@@ -109,7 +109,7 @@ impl<T> CreatedNode<T> {
     {
         match vnode {
             crate::Node::Text(txt) => {
-                let text_node = Self::create_text_node(txt);
+                let text_node = Self::create_text_node(&txt.text);
                 CreatedNode::without_closures(text_node)
             }
             crate::Node::Element(element_node) => {
@@ -182,7 +182,7 @@ impl<T> CreatedNode<T> {
                             .append_child(separator.as_ref())
                             .expect("Unable to append child");
                     }
-                    let text_node = Self::create_text_node(&txt);
+                    let text_node = Self::create_text_node(&txt.text);
                     current_node
                         .append_child(&text_node)
                         .expect("Unable to append text node");
@@ -253,7 +253,12 @@ impl<T> CreatedNode<T> {
                         attr.name(),
                         &merged_plain_values,
                     )
-                    .expect("Set element attribute_ns in create element");
+                    .unwrap_or_else(|_| {
+                        panic!(
+                            "Error setting an attribute_ns for {:?}",
+                            element
+                        )
+                    });
             } else {
                 match *attr.name() {
                     "value" => {
@@ -287,7 +292,12 @@ impl<T> CreatedNode<T> {
                     _ => {
                         element
                             .set_attribute(attr.name(), &merged_plain_values)
-                            .expect("Set element attribute in create element");
+                            .unwrap_or_else(|_| {
+                                panic!(
+                                    "Error setting an attribute for {:?}",
+                                    element
+                                )
+                            });
                     }
                 }
             }

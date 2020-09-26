@@ -175,6 +175,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use sauron_core::web_sys;
     pub use sauron_core::wasm_bindgen;
     pub use sauron_core::{Component, Cmd, Program};
+    pub use sauron_core::js_sys;
 }}
 
 /// reexport prelude from sauron core
@@ -195,6 +196,7 @@ pub use sauron_core::{
     Node,
     Patch,
     Render,
+    Text,
 };
 
 // reexports

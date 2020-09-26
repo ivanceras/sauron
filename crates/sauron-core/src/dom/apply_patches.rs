@@ -53,8 +53,10 @@ where
     let t1 = crate::now();
     let root_node: Node = root_node.into();
 
+    /*
     #[cfg(feature = "with-debug")]
     log::trace!("patches: {:#?}", patches);
+    */
 
     // Closure that were added to the DOM during this patch operation.
     let mut active_closures = HashMap::new();
@@ -416,7 +418,7 @@ where
             Ok(active_closures)
         }
         Patch::ChangeText(ct) => {
-            node.set_node_value(Some(ct.get_new()));
+            node.set_node_value(Some(&ct.new.text));
             Ok(active_closures)
         }
     }

@@ -160,8 +160,10 @@ where
         #[cfg(feature = "with-measure")]
         log::trace!("applying {} patches", patches.len());
 
+        /*
         #[cfg(feature = "with-debug")]
         log::debug!("patches: {:#?}", patches);
+        */
 
         let active_closures = patch(
             Some(program),

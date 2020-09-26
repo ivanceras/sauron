@@ -115,8 +115,8 @@ fn test1() {
     assert_eq!(
         patch,
         vec![
-            ChangeText::new(20, "1", "0").into(),
-            ChangeText::new(26, "2", "3").into(),
+            ChangeText::new(20, &Text::new("1"), &Text::new("0")).into(),
+            ChangeText::new(26, &Text::new("2"), &Text::new("3")).into(),
             InsertNode::new(
                 Some(&"div"),
                 24,
@@ -159,8 +159,12 @@ fn test1() {
             )
             .into(),
             RemoveNode::new(Some(&"div"), 6).into(),
-            ChangeText::new(37, "line: 0, column: 0", "line: 1, column: 0")
-                .into(),
+            ChangeText::new(
+                37,
+                &Text::new("line: 0, column: 0"),
+                &Text::new("line: 1, column: 0")
+            )
+            .into(),
         ]
     );
 

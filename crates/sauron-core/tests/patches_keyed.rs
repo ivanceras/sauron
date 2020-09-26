@@ -244,8 +244,8 @@ fn node_patched_properly_text_changed() {
         vec![
             Patch::ChangeText(ChangeText::new(
                 7,
-                "item3",
-                "item3 with changes"
+                &Text::new("item3"),
+                &Text::new("item3 with changes")
             )),
             RemoveNode::new(Some(&"article"), 2).into()
         ]
@@ -336,14 +336,14 @@ fn mixed_keyed_and_non_keyed_elements() {
         vec![
             Patch::ChangeText(ChangeText::new(
                 7,
-                "item3",
-                "item3 with changes"
+                &Text::new("item3"),
+                &Text::new("item3 with changes")
             )),
             RemoveNode::new(Some(&"article"), 2).into(),
             Patch::ChangeText(ChangeText::new(
                 9,
-                "3 items left",
-                "2 items left"
+                &Text::new("3 items left"),
+                &Text::new("2 items left")
             ))
         ]
     );

@@ -6,7 +6,6 @@ use sauron::{
     },
     mt_dom::patch::*,
     node,
-    Patch,
     *,
 };
 
@@ -164,17 +163,6 @@ fn test_lines() {
         ],
     );
 
-    let patch1_expected: Vec<Patch<()>> = vec![
-        ChangeText::new(8, "0", "1").into(),
-        ChangeText::new(20, "1", "2").into(),
-        ChangeText::new(32, "2", "3").into(),
-        ChangeText::new(46, "3", "4").into(),
-        ChangeText::new(60, "4", "5").into(),
-        InsertNode::new(Some(&"div"), 6, &inserted).into(),
-        ChangeText::new(73, "line: 0, column: 0", "line: 1, column: 0").into(),
-    ];
-    assert_eq!(patch1_diff, patch1_expected);
-
     let simple_program = simple_program();
     let mut dom_updater = DomUpdater::new_append_to_mount(
         &simple_program,
@@ -182,18 +170,40 @@ fn test_lines() {
         &sauron_core::body(),
     );
 
-    dom_updater.patch_dom(&simple_program, patch1_expected);
+    dom_updater.patch_dom(
+        &simple_program,
+        vec![
+            ChangeText::new(8, &Text::new("0"), &Text::new("1")).into(),
+            ChangeText::new(20, &Text::new("1"), &Text::new("2")).into(),
+            ChangeText::new(32, &Text::new("2"), &Text::new("3")).into(),
+            ChangeText::new(46, &Text::new("3"), &Text::new("4")).into(),
+            ChangeText::new(60, &Text::new("4"), &Text::new("5")).into(),
+            InsertNode::new(Some(&"div"), 6, &inserted).into(),
+            ChangeText::new(
+                73,
+                &Text::new("line: 0, column: 0"),
+                &Text::new("line: 1, column: 0"),
+            )
+            .into(),
+        ],
+    );
 
-    let patch2_expected: Vec<Patch<()>> = vec![
-        ChangeText::new(14, "1", "2").into(),
-        ChangeText::new(26, "2", "3").into(),
-        ChangeText::new(38, "3", "4").into(),
-        ChangeText::new(52, "4", "5").into(),
-        ChangeText::new(66, "5", "6").into(),
-        ChangeText::new(79, "line: 1, column: 0", "line: 2, column: 0").into(),
-    ];
-
-    dom_updater.patch_dom(&simple_program, patch2_expected);
+    dom_updater.patch_dom(
+        &simple_program,
+        vec![
+            ChangeText::new(14, &Text::new("1"), &Text::new("2")).into(),
+            ChangeText::new(26, &Text::new("2"), &Text::new("3")).into(),
+            ChangeText::new(38, &Text::new("3"), &Text::new("4")).into(),
+            ChangeText::new(52, &Text::new("4"), &Text::new("5")).into(),
+            ChangeText::new(66, &Text::new("5"), &Text::new("6")).into(),
+            ChangeText::new(
+                79,
+                &Text::new("line: 1, column: 0"),
+                &Text::new("line: 2, column: 0"),
+            )
+            .into(),
+        ],
+    );
 
     let view2 = dom_updater.current_vdom.clone();
     log::trace!("view2_rendered: {}", view2.render_to_string());

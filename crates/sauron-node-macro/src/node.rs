@@ -137,7 +137,7 @@ fn children_to_tokens(children: Vec<Node>) -> TokenStream {
                         .value_as_string()
                         .expect("expecting a string on a text node");
                     tokens.extend(quote! {
-                        #receiver.push(sauron::Node::Text(String::from(#s)));
+                        #receiver.push(sauron::html::text(#s));
                     });
                 }
                 NodeType::Block => {

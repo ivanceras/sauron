@@ -80,41 +80,14 @@ fn test_unmatched_old_key() {
 
     let patches = diff(&old, &new);
     dbg!(&patches);
-    /*
-    assert_eq!(
-        patches,
-        vec![
-            ChangeText::new(9, "1", "2",).into(),
-            ChangeText::new(15, "2", "3",).into(),
-            ChangeText::new(27, "3", "4",).into(),
-            InsertChildren::new(
-                &"div",
-                0,
-                0,
-                vec![&div(
-                    vec![class("grid__number__line"), key("keyXXX"),],
-                    vec![
-                        div(vec![class("grid__number")], vec![text("XXX")]),
-                        div(
-                            vec![class("grid__line")],
-                            vec![div(vec![], vec![text("\n")])]
-                        ),
-                    ]
-                )]
-            )
-            .into(),
-            RemoveChildren::new(&"div", 0, vec![0]).into(),
-        ]
-    );
-    */
     assert_eq!(
         patches,
         vec![
             AddAttributes::new(&"div", 1, vec![&key("keyXXX")]).into(),
-            ChangeText::new(3, "0", "XXX").into(),
-            ChangeText::new(9, "1", "2").into(),
-            ChangeText::new(15, "2", "3").into(),
-            ChangeText::new(27, "3", "4").into(),
+            ChangeText::new(3, &Text::new("0"), &Text::new("XXX")).into(),
+            ChangeText::new(9, &Text::new("1"), &Text::new("2")).into(),
+            ChangeText::new(15, &Text::new("2"), &Text::new("3")).into(),
+            ChangeText::new(27, &Text::new("3"), &Text::new("4")).into(),
         ]
     );
 }
@@ -205,16 +178,23 @@ fn target_dom() {
                         <div>"\n"</div>
                     </div>
                 </div>);
-    let expected = vec![
-        ChangeText::new(10, "1", "2").into(),
-        ChangeText::new(22, "2", "3").into(),
-        ChangeText::new(33, "line: 1, column: 0", "line: 2, column: 0").into(),
-        InsertNode::new(Some(&"div"), 8, &to_insert).into(),
-    ];
 
     dbg!(&patch);
 
-    assert_eq!(patch, expected);
+    assert_eq!(
+        patch,
+        vec![
+            ChangeText::new(10, &Text::new("1"), &Text::new("2")).into(),
+            ChangeText::new(22, &Text::new("2"), &Text::new("3")).into(),
+            ChangeText::new(
+                33,
+                &Text::new("line: 1, column: 0"),
+                &Text::new("line: 2, column: 0"),
+            )
+            .into(),
+            InsertNode::new(Some(&"div"), 8, &to_insert).into(),
+        ]
+    );
     let mut current_dom_clone = current_dom.clone();
     mt_dom::apply_patches(&mut current_dom_clone, &patch);
     assert_eq!(current_dom_clone, target_dom);

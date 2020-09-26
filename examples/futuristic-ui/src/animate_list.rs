@@ -89,7 +89,7 @@ where
                 }
             }
             Node::Text(txt) => {
-                *current_cnt += txt.len();
+                *current_cnt += txt.text.len();
             }
         }
     }
@@ -143,7 +143,7 @@ where
                 }
             }
             Node::Text(txt) => {
-                let txt_len = txt.len();
+                let txt_len = txt.text.len();
                 let truncate_len = if chars_limit > *current_cnt {
                     std::cmp::min(txt_len, chars_limit - *current_cnt)
                 } else {
@@ -154,8 +154,8 @@ where
                     let start = 0;
                     let end = truncate_len;
 
-                    let truncated_txt = &txt[start..end];
-                    let text_node = Node::Text(truncated_txt.to_string());
+                    let truncated_txt = &txt.text[start..end];
+                    let text_node = Node::Text(Text::new(truncated_txt));
                     dest.add_children_ref_mut(vec![text_node]);
                     // we append the blinking character to the end of the text
                     // here, and only when this node has not yet finish animating..

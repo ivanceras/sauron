@@ -134,13 +134,17 @@ fn multiple_match_on_keyed_elements() {
     assert_eq!(
         patches,
         vec![
-            ChangeText::new(26, "2", "1").into(),
-            ChangeText::new(32, "3", "4").into(),
+            ChangeText::new(26, &Text::new("2"), &Text::new("1")).into(),
+            ChangeText::new(32, &Text::new("3"), &Text::new("4")).into(),
             InsertNode::new(Some(&"div"), 30, &for_insert1).into(),
             InsertNode::new(Some(&"div"), 30, &for_insert2).into(),
             RemoveNode::new(Some(&"div"), 12).into(),
-            ChangeText::new(43, "line: 1, column: 0", "line: 2, column: 0")
-                .into(),
+            ChangeText::new(
+                43,
+                &Text::new("line: 1, column: 0"),
+                &Text::new("line: 2, column: 0")
+            )
+            .into(),
         ]
     );
 

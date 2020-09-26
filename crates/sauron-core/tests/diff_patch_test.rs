@@ -9,6 +9,7 @@ use sauron_core::{
     mt_dom::patch::*,
     Attribute,
     Node,
+    *,
 };
 
 #[test]
@@ -406,7 +407,7 @@ fn replace_text_node() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![ChangeText::new(0, "Old", "New").into()],
+        vec![ChangeText::new(0, &Text::new("Old"), &Text::new("New")).into()],
         "ReplaceNode text node",
     );
 }
@@ -441,7 +442,12 @@ fn text_changed_in_keyed_elements() {
     assert_eq!(
         patch,
         vec![
-            ChangeText::new(7, "item3", "item3 with changes").into(),
+            ChangeText::new(
+                7,
+                &Text::new("item3"),
+                &Text::new("item3 with changes")
+            )
+            .into(),
             RemoveNode::new(Some(&"article"), 2).into(),
         ]
     );

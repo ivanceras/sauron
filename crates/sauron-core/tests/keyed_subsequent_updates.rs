@@ -122,10 +122,10 @@ fn subsequent_updates() {
     assert_eq!(
         patches1,
         vec![
-            ChangeText::new(4, "0", "1").into(),
-            ChangeText::new(9, "1", "2").into(),
-            ChangeText::new(14, "2", "3").into(),
-            ChangeText::new(19, "3", "4").into(),
+            ChangeText::new(4, &Text::new("0"), &Text::new("1")).into(),
+            ChangeText::new(9, &Text::new("1"), &Text::new("2")).into(),
+            ChangeText::new(14, &Text::new("2"), &Text::new("3")).into(),
+            ChangeText::new(19, &Text::new("3"), &Text::new("4")).into(),
             InsertNode::new(
                 Some(&"section"),
                 2,
@@ -303,11 +303,11 @@ fn subsequent_updates() {
     assert_eq!(
         patches2,
         vec![
-            ChangeText::new(4, "0", "1").into(),
-            ChangeText::new(9, "1", "2").into(),
-            ChangeText::new(14, "2", "3").into(),
-            ChangeText::new(19, "3", "4").into(),
-            ChangeText::new(24, "4", "5").into(),
+            ChangeText::new(4, &Text::new("0"), &Text::new("1")).into(),
+            ChangeText::new(9, &Text::new("1"), &Text::new("2")).into(),
+            ChangeText::new(14, &Text::new("2"), &Text::new("3")).into(),
+            ChangeText::new(19, &Text::new("3"), &Text::new("4")).into(),
+            ChangeText::new(24, &Text::new("4"), &Text::new("5")).into(),
             InsertNode::new(
                 Some(&"section"),
                 2,
@@ -429,12 +429,12 @@ fn subsequent_updates() {
     assert_eq!(
         patches3,
         vec![
-            ChangeText::new(4, "0", "1").into(),
-            ChangeText::new(9, "1", "2").into(),
-            ChangeText::new(14, "2", "3").into(),
-            ChangeText::new(19, "3", "4").into(),
-            ChangeText::new(24, "4", "5").into(),
-            ChangeText::new(29, "5", "6").into(),
+            ChangeText::new(4, &Text::new("0"), &Text::new("1")).into(),
+            ChangeText::new(9, &Text::new("1"), &Text::new("2")).into(),
+            ChangeText::new(14, &Text::new("2"), &Text::new("3")).into(),
+            ChangeText::new(19, &Text::new("3"), &Text::new("4")).into(),
+            ChangeText::new(24, &Text::new("4"), &Text::new("5")).into(),
+            ChangeText::new(29, &Text::new("5"), &Text::new("6")).into(),
             InsertNode::new(
                 Some(&"section"),
                 2,

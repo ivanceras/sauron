@@ -115,9 +115,9 @@ fn new_lines_ignored() {
     assert_eq!(
         patches,
         vec![
-            ChangeText::new(8, "0", "1").into(),
-            ChangeText::new(26, "2", "3").into(),
-            ChangeText::new(38, "3", "4").into(),
+            ChangeText::new(8, &Text::new("0"), &Text::new("1")).into(),
+            ChangeText::new(26, &Text::new("2"), &Text::new("3")).into(),
+            ChangeText::new(38, &Text::new("3"), &Text::new("4")).into(),
             InsertNode::new(
                 Some(&"div"),
                 6,
@@ -149,8 +149,12 @@ fn new_lines_ignored() {
             )
             .into(),
             RemoveNode::new(Some(&"div"), 18).into(),
-            ChangeText::new(49, "line: 0, column: 0", "line: 1, column: 0")
-                .into(),
+            ChangeText::new(
+                49,
+                &Text::new("line: 0, column: 0"),
+                &Text::new("line: 1, column: 0")
+            )
+            .into(),
         ]
     );
 }
