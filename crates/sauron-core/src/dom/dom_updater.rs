@@ -8,8 +8,10 @@ use crate::{
         },
         Dispatch,
     },
+    mt_dom::NodeIdx,
     Patch,
 };
+use std::collections::HashMap;
 use wasm_bindgen::JsCast;
 use web_sys::{
     self,
@@ -29,6 +31,8 @@ pub struct DomUpdater<MSG> {
     /// We keep these around so that they don't get dropped (and thus stop working);
     ///
     pub active_closures: ActiveClosure,
+    /// a fast lookup for getting the Node from from NodeIdx
+    pub node_idx_lookup: HashMap<NodeIdx, Node>,
 }
 
 impl<MSG> DomUpdater<MSG> {
@@ -41,6 +45,7 @@ impl<MSG> DomUpdater<MSG> {
             current_vdom,
             root_node: mount.clone(),
             active_closures: ActiveClosure::new(),
+            node_idx_lookup: HashMap::new(),
         }
     }
 
@@ -77,6 +82,7 @@ where
         let created_node: CreatedNode<Node> =
             CreatedNode::<Node>::create_dom_node(
                 program,
+                &mut self.node_idx_lookup,
                 &self.current_vdom,
                 &mut 0,
             );
@@ -169,6 +175,7 @@ where
             Some(program),
             self.root_node.clone(),
             &mut self.active_closures,
+            &mut self.node_idx_lookup,
             patches,
         )
         .expect("Error in patching the dom");
@@ -187,6 +194,7 @@ where
             Some(program),
             self.root_node.clone(),
             &mut self.active_closures,
+            &mut self.node_idx_lookup,
             patches,
         )
         .expect("Error in patching the dom");
@@ -203,11 +211,13 @@ where
             current_vdom,
             root_node,
             active_closures,
+            node_idx_lookup,
         } = self;
         DomUpdater {
             current_vdom: current_vdom.map_msg(func),
             root_node,
             active_closures,
+            node_idx_lookup,
         }
     }
 
