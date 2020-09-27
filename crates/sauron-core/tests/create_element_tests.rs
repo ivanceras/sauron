@@ -21,6 +21,7 @@ use sauron_core::{
 };
 use std::{
     cell::Cell,
+    collections::HashMap,
     rc::Rc,
 };
 use test_fixtures::simple_program;
@@ -42,8 +43,9 @@ fn nested_divs() {
         div(vec![], vec![div(vec![], vec![div(vec![], vec![])])]); // <div> <div> <div></div> </div> </div>
     let div: Element = CreatedNode::<Element>::create_dom_node(
         &simple_program(),
+        &mut HashMap::new(),
         &vdiv,
-        &mut 0,
+        &mut None,
     )
     .node
     .unchecked_into();
@@ -62,8 +64,9 @@ fn svg_element() {
     );
     let div: Element = CreatedNode::<Element>::create_dom_node(
         &simple_program(),
+        &mut HashMap::new(),
         &vdiv,
-        &mut 0,
+        &mut None,
     )
     .node
     .unchecked_into();
@@ -79,8 +82,9 @@ fn div_with_attributes() {
     let vdiv: Node<()> = div(vec![id("id-here"), class("two classes")], vec![]);
     let div: Element = CreatedNode::<Element>::create_dom_node(
         &simple_program(),
+        &mut HashMap::new(),
         &vdiv,
-        &mut 0,
+        &mut None,
     )
     .node
     .unchecked_into();

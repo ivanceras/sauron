@@ -83,7 +83,7 @@ impl<T> CreatedNode<T> {
         program: &DSP,
         node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         vnode: &crate::Node<MSG>,
-        node_idx: &mut NodeIdx,
+        node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
@@ -108,7 +108,7 @@ impl<T> CreatedNode<T> {
         program: Option<&DSP>,
         node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         vnode: &crate::Node<MSG>,
-        node_idx: &mut NodeIdx,
+        node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
@@ -117,8 +117,10 @@ impl<T> CreatedNode<T> {
         match vnode {
             crate::Node::Text(txt) => {
                 let text_node = Self::create_text_node(&txt.text);
-                node_idx_lookup
-                    .insert(*node_idx, text_node.clone().unchecked_into());
+                if let Some(node_idx) = node_idx {
+                    node_idx_lookup
+                        .insert(*node_idx, text_node.clone().unchecked_into());
+                }
                 CreatedNode::without_closures(text_node)
             }
             crate::Node::Element(element_node) => {
@@ -141,7 +143,7 @@ impl<T> CreatedNode<T> {
         program: Option<&DSP>,
         node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         velem: &crate::Element<MSG>,
-        node_idx: &mut NodeIdx,
+        node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode<Node>
     where
         MSG: 'static,
@@ -159,7 +161,9 @@ impl<T> CreatedNode<T> {
                 .expect("Unable to create element")
         };
 
-        node_idx_lookup.insert(*node_idx, element.clone().unchecked_into());
+        if let Some(ref node_idx) = node_idx {
+            node_idx_lookup.insert(*node_idx, element.clone().unchecked_into());
+        }
 
         let mut closures = ActiveClosure::new();
 
@@ -171,17 +175,19 @@ impl<T> CreatedNode<T> {
         );
 
         #[cfg(feature = "with-nodeidx-debug")]
-        Self::set_element_attributes(
-            program,
-            &mut closures,
-            &element,
-            &[&crate::prelude::attr("node_idx", *node_idx)],
-        );
+        if let Some(node_idx) = node_idx {
+            Self::set_element_attributes(
+                program,
+                &mut closures,
+                &element,
+                &[&crate::prelude::attr("node_idx", *node_idx)],
+            );
+        }
 
         let mut previous_node_was_text = false;
 
         for child in velem.get_children().iter() {
-            *node_idx += 1;
+            node_idx.as_mut().map(|node_idx| *node_idx += 1);
             match child {
                 crate::Node::Text(txt) => {
                     let current_node: &web_sys::Node = element.as_ref();
@@ -203,8 +209,10 @@ impl<T> CreatedNode<T> {
                         .append_child(&text_node)
                         .expect("Unable to append text node");
 
-                    node_idx_lookup
-                        .insert(*node_idx, text_node.unchecked_into());
+                    if let Some(node_idx) = &node_idx {
+                        node_idx_lookup
+                            .insert(*node_idx, text_node.unchecked_into());
+                    }
 
                     previous_node_was_text = true;
                 }

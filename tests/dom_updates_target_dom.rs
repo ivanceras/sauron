@@ -136,8 +136,8 @@ fn multiple_match_on_keyed_elements() {
         vec![
             ChangeText::new(26, &Text::new("2"), &Text::new("1")).into(),
             ChangeText::new(32, &Text::new("3"), &Text::new("4")).into(),
-            InsertNode::new(Some(&"div"), 30, &for_insert1).into(),
-            InsertNode::new(Some(&"div"), 30, &for_insert2).into(),
+            InsertNode::new(Some(&"div"), 30, 30, &for_insert1).into(),
+            InsertNode::new(Some(&"div"), 30, 30, &for_insert2).into(),
             RemoveNode::new(Some(&"div"), 12).into(),
             ChangeText::new(
                 43,

@@ -178,7 +178,7 @@ fn test_lines() {
             ChangeText::new(32, &Text::new("2"), &Text::new("3")).into(),
             ChangeText::new(46, &Text::new("3"), &Text::new("4")).into(),
             ChangeText::new(60, &Text::new("4"), &Text::new("5")).into(),
-            InsertNode::new(Some(&"div"), 6, &inserted).into(),
+            InsertNode::new(Some(&"div"), 6, 6, &inserted).into(),
             ChangeText::new(
                 73,
                 &Text::new("line: 0, column: 0"),

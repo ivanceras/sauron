@@ -192,7 +192,7 @@ fn target_dom() {
                 &Text::new("line: 2, column: 0"),
             )
             .into(),
-            InsertNode::new(Some(&"div"), 8, &to_insert).into(),
+            InsertNode::new(Some(&"div"), 8, 8, &to_insert).into(),
         ]
     );
     let mut current_dom_clone = current_dom.clone();

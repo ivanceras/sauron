@@ -129,6 +129,7 @@ fn subsequent_updates() {
             InsertNode::new(
                 Some(&"section"),
                 2,
+                2,
                 &div(
                     vec![key("hashXXX")],
                     vec![
@@ -311,6 +312,7 @@ fn subsequent_updates() {
             InsertNode::new(
                 Some(&"section"),
                 2,
+                2,
                 &div(
                     vec![key("hashYYY")],
                     vec![
@@ -437,6 +439,7 @@ fn subsequent_updates() {
             ChangeText::new(29, &Text::new("5"), &Text::new("6")).into(),
             InsertNode::new(
                 Some(&"section"),
+                2,
                 2,
                 &div(
                     vec![key("hashZZZ")],

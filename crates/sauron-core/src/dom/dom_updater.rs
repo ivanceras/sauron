@@ -84,7 +84,7 @@ where
                 program,
                 &mut self.node_idx_lookup,
                 &self.current_vdom,
-                &mut 0,
+                &mut None,
             );
         if replace {
             let root_element: &Element = self.root_node.unchecked_ref();

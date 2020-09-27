@@ -121,6 +121,7 @@ fn new_lines_ignored() {
             InsertNode::new(
                 Some(&"div"),
                 6,
+                7,
                 &div(
                     vec![class("grid__number__line")],
                     vec![
@@ -136,6 +137,7 @@ fn new_lines_ignored() {
             InsertNode::new(
                 Some(&"div"),
                 24,
+                25,
                 &div(
                     vec![class("grid__number__line")],
                     vec![

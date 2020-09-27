@@ -8,6 +8,7 @@ use crate::{
         },
     },
     mt_dom::{
+        diff::increment_node_idx_to_descendant_count,
         patch::{
             AddAttributes,
             AppendChildren,
@@ -45,7 +46,7 @@ pub fn patch<N, DSP, MSG>(
     root_node: N,
     old_closures: &mut ActiveClosure,
     node_idx_lookup: &mut HashMap<NodeIdx, Node>,
-    patches: Vec<Patch<MSG>>,
+    mut patches: Vec<Patch<MSG>>,
 ) -> Result<ActiveClosure, JsValue>
 where
     N: Into<Node>,
@@ -57,6 +58,11 @@ where
     let root_node: Node = root_node.into();
 
     log::trace!("patches: {:#?}", patches);
+
+    patches.sort_by_key(|p| p.node_idx());
+
+    log::trace!("sorted patches: {:#?}", patches);
+
     log::trace!("node_idx_lookup: {:#?}", node_idx_lookup);
 
     // Closure that were added to the DOM during this patch operation.
@@ -190,7 +196,14 @@ fn find_nodes_recursive(
             log::trace!("--->>>> FOUND in node_idx_lookup: {}", cur_node_idx);
             log::trace!("lookup found: {}", outer_html(lookup_node));
             log::trace!("has to match: {}", outer_html(&node));
-            assert_eq!(outer_html(lookup_node), outer_html(&node));
+            //assert_eq!(outer_html(lookup_node), outer_html(&node));
+            if outer_html(lookup_node) == outer_html(&node) {
+                log::info!("matched OK");
+            } else {
+                log::error!("not matched: {}", cur_node_idx);
+                log::error!("expecting: {}", outer_html(&node));
+                log::error!("but found: {}", outer_html(&lookup_node));
+            }
         }
 
         nodes_to_patch.insert(*cur_node_idx, node);
@@ -323,24 +336,36 @@ where
     match patch {
         Patch::InsertNode(InsertNode {
             tag: _,
-            node_idx: _,
+            node_idx,
             new_node_idx,
             node: for_insert,
         }) => {
             let element: &Element = node.unchecked_ref();
-            let mut cur_node_idx = *new_node_idx;
             let created_node =
                 CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
                     program,
                     node_idx_lookup,
                     &for_insert,
-                    &mut cur_node_idx,
+                    &mut Some(*new_node_idx),
                 );
             let parent_node =
                 element.parent_node().expect("must have a parent node");
             parent_node
                 .insert_before(&created_node.node, Some(element))
                 .expect("must remove target node");
+
+            if let Some(_removed) = node_idx_lookup.remove(node_idx) {
+                log::info!(
+                    "removed node_idx: {} since a new node is inserted before it {}",
+                    node_idx,
+                    new_node_idx
+                );
+            } else {
+                log::error!(
+                    "ReplaceNode: no existing node_idx_lookup for {}",
+                    node_idx
+                );
+            }
 
             Ok(active_closures)
         }
@@ -393,27 +418,38 @@ where
         Patch::ReplaceNode(ReplaceNode {
             tag: _,
             node_idx,
+            new_node_idx,
             replacement,
         }) => {
-            let mut cur_node_idx = *node_idx;
             let element: &Element = node.unchecked_ref();
             let created_node =
                 CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
                     program,
                     node_idx_lookup,
                     replacement,
-                    &mut cur_node_idx,
+                    &mut Some(*new_node_idx),
                 );
             if element.node_type() != Node::TEXT_NODE {
                 remove_event_listeners(&element, old_closures)?;
             }
             element.replace_with_with_node_1(&created_node.node)?;
+
+            if let Some(_removed) = node_idx_lookup.remove(node_idx) {
+                log::info!(
+                    "removed node_idx: {} since it was replaced with {}",
+                    node_idx,
+                    new_node_idx
+                );
+            } else {
+                log::error!(
+                    "ReplaceNode: no existing node_idx_lookup for {}",
+                    node_idx
+                );
+            }
+
             Ok(created_node.closures)
         }
-        Patch::RemoveNode(RemoveNode {
-            tag: _,
-            node_idx: _,
-        }) => {
+        Patch::RemoveNode(RemoveNode { tag: _, node_idx }) => {
             let element: &Element = node.unchecked_ref();
             let parent_node =
                 element.parent_node().expect("must have a parent node");
@@ -427,6 +463,15 @@ where
                     let element: &Element = node.unchecked_ref();
                     remove_event_listeners(&element, old_closures)?;
                 }
+
+                if let Some(_removed) = node_idx_lookup.remove(node_idx) {
+                    log::info!(
+                        "removed node_idx: {} since it was removed",
+                        node_idx
+                    );
+                } else {
+                    log::error!("no existing node_idx_lookup for {}", node_idx);
+                }
             }
             Ok(active_closures)
         }
@@ -438,7 +483,7 @@ where
         }) => {
             let element: &Element = node.unchecked_ref();
             let mut active_closures = HashMap::new();
-            let mut cur_node_idx = *new_node_idx;
+            let mut append_children_node_idx = *new_node_idx;
             if new_nodes.len() > 1 {
                 panic!(
                     "These has multiple chilren to append: {:#?}",
@@ -446,18 +491,21 @@ where
                 );
             }
             for new_node in new_nodes.iter() {
-                cur_node_idx += 1;
+                append_children_node_idx += 1;
                 let created_node =
                     CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
                         program,
                         node_idx_lookup,
                         &new_node,
-                        &mut cur_node_idx,
+                        &mut Some(append_children_node_idx),
                     );
                 element.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
+                increment_node_idx_to_descendant_count(
+                    new_node,
+                    &mut append_children_node_idx,
+                );
             }
-
             Ok(active_closures)
         }
         Patch::ChangeText(ct) => {

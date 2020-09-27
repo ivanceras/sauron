@@ -110,31 +110,35 @@ fn builder_with_children() {
 #[test]
 fn replace_node() {
     let old: Node<()> = div(vec![], vec![]);
-    let new = span(vec![], vec![]);
+    let new: Node<()> = span(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![ReplaceNode::new(Some(&"div"), 0, &span(vec![], vec![])).into()],
+        vec![ReplaceNode::new(Some(&"div"), 0, 0, &span(vec![], vec![])).into()],
         "ReplaceNode the root if the tag changed"
     );
 
     let old: Node<()> = div(vec![], vec![b(vec![], vec![])]);
-    let new = div(vec![], vec![strong(vec![], vec![])]);
+    let new: Node<()> = div(vec![], vec![strong(vec![], vec![])]);
     assert_eq!(
         diff(&old, &new),
-        vec![ReplaceNode::new(Some(&"b"), 1, &strong(vec![], vec![])).into()],
-        "ReplaceNode a child node"
+        vec![ReplaceNode::new(Some(&"b"), 1, 1, &strong(vec![], vec![])).into()],
     );
 
     let old: Node<()> =
         div(vec![], vec![b(vec![], vec![text("1")]), b(vec![], vec![])]);
-    let new = div(vec![], vec![i(vec![], vec![text("1")]), i(vec![], vec![])]);
+    let new: Node<()> =
+        div(vec![], vec![i(vec![], vec![text("1")]), i(vec![], vec![])]);
+    let patch = diff(&old, &new);
+
+    dbg!(&patch);
+
     assert_eq!(
-        diff(&old, &new),
+        patch,
         vec![
-            ReplaceNode::new(Some(&"b"), 1, &i(vec![], vec![text("1")])).into(),
-            ReplaceNode::new(Some(&"b"), 3, &i(vec![], vec![])).into(),
+            ReplaceNode::new(Some(&"b"), 1, 1, &i(vec![], vec![text("1")]))
+                .into(),
+            ReplaceNode::new(Some(&"b"), 3, 3, &i(vec![], vec![])).into(),
         ],
-        "ReplaceNode node with a child",
     )
 }
 
@@ -149,6 +153,7 @@ fn add_children() {
         diff(&old, &new),
         vec![AppendChildren::new(
             &"div",
+            0,
             0,
             vec![&html_element("new", vec![], vec![])]
         )
@@ -214,7 +219,7 @@ fn remove_nodes() {
         diff(&old, &new),
         vec![
             RemoveNode::new(Some(&"i"), 3).into(),
-            ReplaceNode::new(Some(&"b"), 4, &i(vec![], vec![])).into(),
+            ReplaceNode::new(Some(&"b"), 4, 4, &i(vec![], vec![])).into(),
         ],
         "Removing child and change next node after parent",
     )

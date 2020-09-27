@@ -120,6 +120,7 @@ fn test1() {
             InsertNode::new(
                 Some(&"div"),
                 24,
+                24,
                 &div(
                     vec![
                         class("grid__number__line"),
@@ -142,6 +143,7 @@ fn test1() {
             .into(),
             InsertNode::new(
                 Some(&"div"),
+                24,
                 24,
                 &div(
                     vec![
