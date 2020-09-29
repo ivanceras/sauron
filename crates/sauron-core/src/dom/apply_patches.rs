@@ -189,10 +189,12 @@ fn find_nodes_recursive(
     // If the root node matches, mark it for patching
     if let Some(_vtag) = nodes_to_find.get(&cur_node_idx) {
         if let Some(lookup_node) = node_idx_lookup.get(&cur_node_idx) {
+            /*
             log::trace!("--->>>> FOUND in node_idx_lookup: {}", cur_node_idx);
             log::trace!("lookup found: {}", outer_html(lookup_node));
             log::trace!("has to match: {}", outer_html(&node));
             //assert_eq!(outer_html(lookup_node), outer_html(&node));
+            */
             if outer_html(lookup_node) == outer_html(&node) {
                 log::info!("matched OK");
             } else {
@@ -201,10 +203,12 @@ fn find_nodes_recursive(
                 log::error!("but found: {}", outer_html(&lookup_node));
             }
         } else {
-            log::error!(
+            /*
+            log::warn!(
                 "cur_node_idx: {} not found in node_idx_lookup",
                 cur_node_idx
             );
+            */
         }
         nodes_to_patch.insert(*cur_node_idx, node);
     }
