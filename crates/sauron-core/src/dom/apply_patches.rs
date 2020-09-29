@@ -188,13 +188,9 @@ fn find_nodes_recursive(
 
     // If the root node matches, mark it for patching
     if let Some(_vtag) = nodes_to_find.get(&cur_node_idx) {
+        #[cfg(feature = "with-nodeidx-debug")]
         if let Some(lookup_node) = node_idx_lookup.get(&cur_node_idx) {
-            /*
             log::trace!("--->>>> FOUND in node_idx_lookup: {}", cur_node_idx);
-            log::trace!("lookup found: {}", outer_html(lookup_node));
-            log::trace!("has to match: {}", outer_html(&node));
-            //assert_eq!(outer_html(lookup_node), outer_html(&node));
-            */
             if outer_html(lookup_node) == outer_html(&node) {
                 log::info!("matched OK");
             } else {
@@ -203,12 +199,10 @@ fn find_nodes_recursive(
                 log::error!("but found: {}", outer_html(&lookup_node));
             }
         } else {
-            /*
             log::warn!(
                 "cur_node_idx: {} not found in node_idx_lookup",
                 cur_node_idx
             );
-            */
         }
         nodes_to_patch.insert(*cur_node_idx, node);
     }
@@ -374,6 +368,7 @@ where
                 attrs,
             );
 
+            #[cfg(feature = "with-nodeidx-debug")]
             CreatedNode::<Node>::set_element_attributes(
                 program,
                 &mut active_closures,
@@ -411,6 +406,8 @@ where
                     }
                 }
             }
+
+            #[cfg(feature = "with-nodeidx-debug")]
             CreatedNode::<Node>::set_element_attributes(
                 program,
                 &mut active_closures,
@@ -426,7 +423,7 @@ where
             Ok(active_closures)
         }
 
-        // THis also removes the associated closures and event listeners to the node being replaced
+        // This also removes the associated closures and event listeners to the node being replaced
         // including the associated closures of the descendant of replaced node
         // before it is actully replaced in the DOM
         //
@@ -449,21 +446,6 @@ where
             }
             element.replace_with_with_node_1(&created_node.node)?;
 
-            /*
-            if let Some(_removed) = node_idx_lookup.remove(node_idx) {
-                log::info!(
-                    "removed node_idx: {} since it was replaced with {}",
-                    node_idx,
-                    new_node_idx
-                );
-            } else {
-                log::error!(
-                    "ReplaceNode: no existing node_idx_lookup for {}",
-                    node_idx
-                );
-            }
-            */
-
             Ok(created_node.closures)
         }
         Patch::RemoveNode(RemoveNode { tag: _, node_idx }) => {
@@ -480,17 +462,6 @@ where
                     let element: &Element = node.unchecked_ref();
                     remove_event_listeners(&element, old_closures)?;
                 }
-
-                /*
-                if let Some(_removed) = node_idx_lookup.remove(node_idx) {
-                    log::info!(
-                        "removed node_idx: {} since it was removed",
-                        node_idx
-                    );
-                } else {
-                    log::error!("no existing node_idx_lookup for {}", node_idx);
-                }
-                */
             }
             Ok(active_closures)
         }
