@@ -111,37 +111,47 @@ fn multiple_match_on_keyed_elements() {
     let patches = diff(&current_dom, &target_dom);
     log::trace!("patches: {:#?}", patches);
 
-    let for_insert1 = node!(
-        <div class="grid__number__line" key="623356695095054844">
-           <div class="grid__number">"2"</div>
-           <div class="grid__line">
-              <div>"C"</div>
-              <div>"J"</div>
-              <div>"K"</div>
-              <div>"\n"</div>
-           </div>
-        </div>
-    );
-
-    let for_insert2 = node!(
-        <div class="grid__number__line" key="4638962052468762037">
-           <div class="grid__number">"3"</div>
-           <div class="grid__line">
-              <div>"\n"</div>
-           </div>
-        </div>
-    );
     assert_eq!(
         patches,
         vec![
-            ChangeText::new(26, &Text::new("2"), &Text::new("1")).into(),
-            ChangeText::new(32, &Text::new("3"), &Text::new("4")).into(),
-            InsertNode::new(Some(&"div"), 30, 30, &for_insert1).into(),
-            InsertNode::new(Some(&"div"), 30, 30, &for_insert2).into(),
+            ChangeText::new(26, &Text::new("2"), 14, &Text::new("1")).into(),
+            ChangeText::new(32, &Text::new("3"), 38, &Text::new("4")).into(),
+            InsertNode::new(
+                Some(&"div"),
+                30,
+                18,
+                &node!(
+                    <div class="grid__number__line" key="623356695095054844">
+                       <div class="grid__number">"2"</div>
+                       <div class="grid__line">
+                          <div>"C"</div>
+                          <div>"J"</div>
+                          <div>"K"</div>
+                          <div>"\n"</div>
+                       </div>
+                    </div>
+                )
+            )
+            .into(),
+            InsertNode::new(
+                Some(&"div"),
+                30,
+                30,
+                &node!(
+                    <div class="grid__number__line" key="4638962052468762037">
+                       <div class="grid__number">"3"</div>
+                       <div class="grid__line">
+                          <div>"\n"</div>
+                       </div>
+                    </div>
+                )
+            )
+            .into(),
             RemoveNode::new(Some(&"div"), 12).into(),
             ChangeText::new(
                 43,
                 &Text::new("line: 1, column: 0"),
+                49,
                 &Text::new("line: 2, column: 0")
             )
             .into(),

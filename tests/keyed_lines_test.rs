@@ -173,15 +173,16 @@ fn test_lines() {
     dom_updater.patch_dom(
         &simple_program,
         vec![
-            ChangeText::new(8, &Text::new("0"), &Text::new("1")).into(),
-            ChangeText::new(20, &Text::new("1"), &Text::new("2")).into(),
-            ChangeText::new(32, &Text::new("2"), &Text::new("3")).into(),
-            ChangeText::new(46, &Text::new("3"), &Text::new("4")).into(),
-            ChangeText::new(60, &Text::new("4"), &Text::new("5")).into(),
+            ChangeText::new(8, &Text::new("0"), 14, &Text::new("1")).into(),
+            ChangeText::new(20, &Text::new("1"), 26, &Text::new("2")).into(),
+            ChangeText::new(32, &Text::new("2"), 38, &Text::new("3")).into(),
+            ChangeText::new(46, &Text::new("3"), 52, &Text::new("4")).into(),
+            ChangeText::new(60, &Text::new("4"), 66, &Text::new("5")).into(),
             InsertNode::new(Some(&"div"), 6, 6, &inserted).into(),
             ChangeText::new(
                 73,
                 &Text::new("line: 0, column: 0"),
+                79,
                 &Text::new("line: 1, column: 0"),
             )
             .into(),
@@ -191,14 +192,15 @@ fn test_lines() {
     dom_updater.patch_dom(
         &simple_program,
         vec![
-            ChangeText::new(14, &Text::new("1"), &Text::new("2")).into(),
-            ChangeText::new(26, &Text::new("2"), &Text::new("3")).into(),
-            ChangeText::new(38, &Text::new("3"), &Text::new("4")).into(),
-            ChangeText::new(52, &Text::new("4"), &Text::new("5")).into(),
-            ChangeText::new(66, &Text::new("5"), &Text::new("6")).into(),
+            ChangeText::new(14, &Text::new("1"), 0, &Text::new("2")).into(),
+            ChangeText::new(26, &Text::new("2"), 0, &Text::new("3")).into(),
+            ChangeText::new(38, &Text::new("3"), 0, &Text::new("4")).into(),
+            ChangeText::new(52, &Text::new("4"), 0, &Text::new("5")).into(),
+            ChangeText::new(66, &Text::new("5"), 0, &Text::new("6")).into(),
             ChangeText::new(
                 79,
                 &Text::new("line: 1, column: 0"),
+                0,
                 &Text::new("line: 2, column: 0"),
             )
             .into(),

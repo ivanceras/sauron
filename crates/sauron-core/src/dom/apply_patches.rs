@@ -8,6 +8,7 @@ use crate::{
         },
     },
     mt_dom::{
+        attr,
         diff::increment_node_idx_to_descendant_count,
         patch::{
             AddAttributes,
@@ -20,6 +21,8 @@ use crate::{
         AttValue,
         NodeIdx,
     },
+    prelude::Value,
+    AttributeValue,
     Dispatch,
     Patch,
 };
@@ -46,7 +49,7 @@ pub fn patch<N, DSP, MSG>(
     root_node: N,
     old_closures: &mut ActiveClosure,
     node_idx_lookup: &mut HashMap<NodeIdx, Node>,
-    mut patches: Vec<Patch<MSG>>,
+    patches: Vec<Patch<MSG>>,
 ) -> Result<ActiveClosure, JsValue>
 where
     N: Into<Node>,
@@ -56,14 +59,6 @@ where
     #[cfg(feature = "with-measure")]
     let t1 = crate::now();
     let root_node: Node = root_node.into();
-
-    log::trace!("patches: {:#?}", patches);
-
-    patches.sort_by_key(|p| p.node_idx());
-
-    log::trace!("sorted patches: {:#?}", patches);
-
-    log::trace!("node_idx_lookup: {:#?}", node_idx_lookup);
 
     // Closure that were added to the DOM during this patch operation.
     let mut active_closures = HashMap::new();
@@ -79,6 +74,7 @@ where
         t2
     };
 
+    //TODO: insert all patched_node idx only after everything has been applied
     for patch in patches.iter() {
         let patch_node_idx = patch.node_idx();
 
@@ -204,8 +200,12 @@ fn find_nodes_recursive(
                 log::error!("expecting: {}", outer_html(&node));
                 log::error!("but found: {}", outer_html(&lookup_node));
             }
+        } else {
+            log::error!(
+                "cur_node_idx: {} not found in node_idx_lookup",
+                cur_node_idx
+            );
         }
-
         nodes_to_patch.insert(*cur_node_idx, node);
     }
 
@@ -336,7 +336,7 @@ where
     match patch {
         Patch::InsertNode(InsertNode {
             tag: _,
-            node_idx,
+            node_idx: _,
             new_node_idx,
             node: for_insert,
         }) => {
@@ -354,24 +354,12 @@ where
                 .insert_before(&created_node.node, Some(element))
                 .expect("must remove target node");
 
-            if let Some(_removed) = node_idx_lookup.remove(node_idx) {
-                log::info!(
-                    "removed node_idx: {} since a new node is inserted before it {}",
-                    node_idx,
-                    new_node_idx
-                );
-            } else {
-                log::error!(
-                    "ReplaceNode: no existing node_idx_lookup for {}",
-                    node_idx
-                );
-            }
-
             Ok(active_closures)
         }
         Patch::AddAttributes(AddAttributes {
             tag: _,
             node_idx: _,
+            new_node_idx,
             attrs,
         }) => {
             let element: &Element = node.unchecked_ref();
@@ -382,11 +370,23 @@ where
                 attrs,
             );
 
+            CreatedNode::<Node>::set_element_attributes(
+                program,
+                &mut active_closures,
+                element,
+                &[&attr(
+                    "node_idx",
+                    AttributeValue::from_value(Value::from(*new_node_idx)),
+                )],
+            );
+
+            node_idx_lookup.insert(*new_node_idx, node.clone());
             Ok(active_closures)
         }
         Patch::RemoveAttributes(RemoveAttributes {
             tag: _,
             node_idx: _,
+            new_node_idx,
             attrs,
         }) => {
             let element: &Element = node.unchecked_ref();
@@ -407,6 +407,17 @@ where
                     }
                 }
             }
+            CreatedNode::<Node>::set_element_attributes(
+                program,
+                &mut active_closures,
+                element,
+                &[&attr(
+                    "node_idx",
+                    AttributeValue::from_value(Value::from(*new_node_idx)),
+                )],
+            );
+
+            node_idx_lookup.insert(*new_node_idx, node.clone());
 
             Ok(active_closures)
         }
@@ -434,6 +445,7 @@ where
             }
             element.replace_with_with_node_1(&created_node.node)?;
 
+            /*
             if let Some(_removed) = node_idx_lookup.remove(node_idx) {
                 log::info!(
                     "removed node_idx: {} since it was replaced with {}",
@@ -446,6 +458,7 @@ where
                     node_idx
                 );
             }
+            */
 
             Ok(created_node.closures)
         }
@@ -464,6 +477,7 @@ where
                     remove_event_listeners(&element, old_closures)?;
                 }
 
+                /*
                 if let Some(_removed) = node_idx_lookup.remove(node_idx) {
                     log::info!(
                         "removed node_idx: {} since it was removed",
@@ -472,44 +486,33 @@ where
                 } else {
                     log::error!("no existing node_idx_lookup for {}", node_idx);
                 }
+                */
             }
             Ok(active_closures)
         }
         Patch::AppendChildren(AppendChildren {
             tag: _,
             node_idx: _,
-            new_node_idx,
             children: new_nodes,
         }) => {
             let element: &Element = node.unchecked_ref();
             let mut active_closures = HashMap::new();
-            let mut append_children_node_idx = *new_node_idx;
-            if new_nodes.len() > 1 {
-                panic!(
-                    "These has multiple chilren to append: {:#?}",
-                    new_nodes
-                );
-            }
-            for new_node in new_nodes.iter() {
-                append_children_node_idx += 1;
+            for (append_children_node_idx, new_node) in new_nodes.iter() {
                 let created_node =
                     CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
                         program,
                         node_idx_lookup,
                         &new_node,
-                        &mut Some(append_children_node_idx),
+                        &mut Some(*append_children_node_idx),
                     );
                 element.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
-                increment_node_idx_to_descendant_count(
-                    new_node,
-                    &mut append_children_node_idx,
-                );
             }
             Ok(active_closures)
         }
         Patch::ChangeText(ct) => {
             node.set_node_value(Some(&ct.new.text));
+            node_idx_lookup.insert(ct.new_node_idx, node.clone());
             Ok(active_closures)
         }
     }

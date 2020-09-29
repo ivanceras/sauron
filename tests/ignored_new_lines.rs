@@ -115,13 +115,13 @@ fn new_lines_ignored() {
     assert_eq!(
         patches,
         vec![
-            ChangeText::new(8, &Text::new("0"), &Text::new("1")).into(),
-            ChangeText::new(26, &Text::new("2"), &Text::new("3")).into(),
-            ChangeText::new(38, &Text::new("3"), &Text::new("4")).into(),
+            ChangeText::new(8, &Text::new("0"), 14, &Text::new("1")).into(),
+            ChangeText::new(26, &Text::new("2"), 32, &Text::new("3")).into(),
+            ChangeText::new(38, &Text::new("3"), 44, &Text::new("4")).into(),
             InsertNode::new(
                 Some(&"div"),
                 6,
-                7,
+                6,
                 &div(
                     vec![class("grid__number__line")],
                     vec![
@@ -137,7 +137,7 @@ fn new_lines_ignored() {
             InsertNode::new(
                 Some(&"div"),
                 24,
-                25,
+                24,
                 &div(
                     vec![class("grid__number__line")],
                     vec![
@@ -154,6 +154,7 @@ fn new_lines_ignored() {
             ChangeText::new(
                 49,
                 &Text::new("line: 0, column: 0"),
+                55,
                 &Text::new("line: 1, column: 0")
             )
             .into(),

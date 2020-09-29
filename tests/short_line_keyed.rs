@@ -83,11 +83,11 @@ fn test_unmatched_old_key() {
     assert_eq!(
         patches,
         vec![
-            AddAttributes::new(&"div", 1, vec![&key("keyXXX")]).into(),
-            ChangeText::new(3, &Text::new("0"), &Text::new("XXX")).into(),
-            ChangeText::new(9, &Text::new("1"), &Text::new("2")).into(),
-            ChangeText::new(15, &Text::new("2"), &Text::new("3")).into(),
-            ChangeText::new(27, &Text::new("3"), &Text::new("4")).into(),
+            AddAttributes::new(&"div", 1, 1, vec![&key("keyXXX")]).into(),
+            ChangeText::new(3, &Text::new("0"), 3, &Text::new("XXX")).into(),
+            ChangeText::new(9, &Text::new("1"), 9, &Text::new("2")).into(),
+            ChangeText::new(15, &Text::new("2"), 15, &Text::new("3")).into(),
+            ChangeText::new(27, &Text::new("3"), 27, &Text::new("4")).into(),
         ]
     );
 }
@@ -171,28 +171,34 @@ fn target_dom() {
     let mut patch = diff(&current_dom, &target_dom);
     patch.sort_by_key(|p| p.priority());
     println!("patch: {:#?}", patch);
-    let to_insert = node!(
-                <div class="grid__number__line" key="4638962052468762037">
-                    <div class="grid__number">"1"</div>
-                    <div class="grid__line">
-                        <div>"\n"</div>
-                    </div>
-                </div>);
 
     dbg!(&patch);
 
     assert_eq!(
         patch,
         vec![
-            ChangeText::new(10, &Text::new("1"), &Text::new("2")).into(),
-            ChangeText::new(22, &Text::new("2"), &Text::new("3")).into(),
+            ChangeText::new(10, &Text::new("1"), 16, &Text::new("2")).into(),
+            ChangeText::new(22, &Text::new("2"), 28, &Text::new("3")).into(),
             ChangeText::new(
                 33,
                 &Text::new("line: 1, column: 0"),
+                39,
                 &Text::new("line: 2, column: 0"),
             )
             .into(),
-            InsertNode::new(Some(&"div"), 8, 8, &to_insert).into(),
+            InsertNode::new(
+                Some(&"div"),
+                8,
+                8,
+                &node!(
+                <div class="grid__number__line" key="4638962052468762037">
+                    <div class="grid__number">"1"</div>
+                    <div class="grid__line">
+                        <div>"\n"</div>
+                    </div>
+                </div>)
+            )
+            .into(),
         ]
     );
     let mut current_dom_clone = current_dom.clone();

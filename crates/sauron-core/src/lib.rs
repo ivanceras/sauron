@@ -1,5 +1,5 @@
 #![deny(
-    warnings,
+    //warnings,
     missing_docs,
     missing_copy_implementations,
     trivial_casts,

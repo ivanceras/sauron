@@ -154,8 +154,7 @@ fn add_children() {
         vec![AppendChildren::new(
             &"div",
             0,
-            0,
-            vec![&html_element("new", vec![], vec![])]
+            vec![(2, &html_element("new", vec![], vec![]))]
         )
         .into()],
         "Added a new node to the root node",
@@ -219,7 +218,7 @@ fn remove_nodes() {
         diff(&old, &new),
         vec![
             RemoveNode::new(Some(&"i"), 3).into(),
-            ReplaceNode::new(Some(&"b"), 4, 4, &i(vec![], vec![])).into(),
+            ReplaceNode::new(Some(&"b"), 4, 3, &i(vec![], vec![])).into(),
         ],
         "Removing child and change next node after parent",
     )
@@ -231,7 +230,7 @@ fn add_attributes() {
     let new = div(vec![id("hello")], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![AddAttributes::new(&"div", 0, vec![&id("hello")]).into()],
+        vec![AddAttributes::new(&"div", 0, 0, vec![&id("hello")]).into()],
         "Add attributes",
     );
 
@@ -240,7 +239,7 @@ fn add_attributes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![AddAttributes::new(&"div", 0, vec![&id("hello")]).into()],
+        vec![AddAttributes::new(&"div", 0, 0, vec![&id("hello")]).into()],
         "Change attribute",
     );
 }
@@ -251,7 +250,7 @@ fn remove_attributes() {
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![RemoveAttributes::new(&"div", 0, vec![&id("hey-there")]).into()],
+        vec![RemoveAttributes::new(&"div", 0, 0, vec![&id("hey-there")]).into()],
         "Remove attributes",
     );
 }
@@ -264,6 +263,7 @@ fn remove_events() {
         diff(&old, &new),
         vec![RemoveAttributes::new(
             &"div",
+            0,
             0,
             vec![&on_click(|_| println!("hi"))]
         )
@@ -279,7 +279,7 @@ fn change_attribute() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![AddAttributes::new(&"div", 0, vec![&id("changed")]).into()],
+        vec![AddAttributes::new(&"div", 0, 0, vec![&id("changed")]).into()],
         "Add attributes",
     );
 }
@@ -291,7 +291,7 @@ fn replace_text_node() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![ChangeText::new(0, &Text::new("Old"), &Text::new("New")).into()],
+        vec![ChangeText::new(0, &Text::new("Old"), 0, &Text::new("New")).into()],
         "ReplaceNode text node",
     );
 }

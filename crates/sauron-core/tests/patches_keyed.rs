@@ -245,6 +245,7 @@ fn node_patched_properly_text_changed() {
             Patch::ChangeText(ChangeText::new(
                 7,
                 &Text::new("item3"),
+                5,
                 &Text::new("item3 with changes")
             )),
             RemoveNode::new(Some(&"article"), 2).into()
@@ -337,12 +338,14 @@ fn mixed_keyed_and_non_keyed_elements() {
             Patch::ChangeText(ChangeText::new(
                 7,
                 &Text::new("item3"),
+                5,
                 &Text::new("item3 with changes")
             )),
             RemoveNode::new(Some(&"article"), 2).into(),
             Patch::ChangeText(ChangeText::new(
                 9,
                 &Text::new("3 items left"),
+                7,
                 &Text::new("2 items left")
             ))
         ]

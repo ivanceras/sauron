@@ -51,6 +51,7 @@ fn test_inner_html_patch() {
         vec![AddAttributes::new(
             &"article",
             1,
+            1,
             vec![&inner_html("<h1>Lorep Ipsum</h1>")]
         )
         .into()]
@@ -72,6 +73,7 @@ fn test_inner_html_removed() {
         patch,
         vec![RemoveAttributes::new(
             &"article",
+            1,
             1,
             vec![&inner_html("<h1>Lorep Ipsum</h1>")]
         )

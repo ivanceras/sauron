@@ -115,12 +115,12 @@ fn test1() {
     assert_eq!(
         patch,
         vec![
-            ChangeText::new(20, &Text::new("1"), &Text::new("0")).into(),
-            ChangeText::new(26, &Text::new("2"), &Text::new("3")).into(),
+            ChangeText::new(20, &Text::new("1"), 8, &Text::new("0")).into(),
+            ChangeText::new(26, &Text::new("2"), 32, &Text::new("3")).into(),
             InsertNode::new(
                 Some(&"div"),
                 24,
-                24,
+                12,
                 &div(
                     vec![
                         class("grid__number__line"),
@@ -164,6 +164,7 @@ fn test1() {
             ChangeText::new(
                 37,
                 &Text::new("line: 0, column: 0"),
+                43,
                 &Text::new("line: 1, column: 0")
             )
             .into(),
