@@ -109,6 +109,7 @@ impl Component<Msg> for Model {
             }
             Msg::NoOp => {}
         }
+        #[cfg(feature = "with-storage")]
         self.save_to_storage();
         Cmd::none()
     }
@@ -323,7 +324,8 @@ impl Model {
         }
     }
 
-    fn save_to_storage(&self) {
+    #[allow(unused)]
+    pub(crate) fn save_to_storage(&self) {
         let window = web_sys::window().expect("no global `window` exists");
         let local_storage = window.local_storage();
         if let Ok(Some(local_storage)) = local_storage {
@@ -337,7 +339,8 @@ impl Model {
         }
     }
 
-    pub fn get_from_storage() -> Self {
+    #[allow(unused)]
+    pub(crate) fn get_from_storage() -> Self {
         let window = web_sys::window().expect("no global `window` exists");
         let local_storage = window.local_storage();
 
