@@ -307,17 +307,17 @@ impl<T> CreatedNode<T> {
                         if let Some(input) =
                             element.dyn_ref::<HtmlInputElement>()
                         {
-                            let checked = plain_values
+                            let checked: bool = plain_values
                                 .first()
                                 .map(|av| {
                                     av.get_simple()
-                                        .expect("must be a simple value")
+                                        .map(|v| v.as_bool())
+                                        .flatten()
                                 })
-                                .unwrap()
-                                .to_string();
-                            if !checked.is_empty() {
-                                input.set_checked(true);
-                            }
+                                .flatten()
+                                .unwrap_or(false);
+
+                            input.set_checked(checked);
                         }
                     }
                     _ => {

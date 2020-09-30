@@ -165,7 +165,14 @@ where
 /// set the checked value, used checkbox and radio buttons
 pub fn checked<MSG>(is_checked: bool) -> Attribute<MSG> {
     if is_checked {
-        attr("checked", "checked")
+        #[cfg(not(feature = "with-dom"))]
+        {
+            attr("checked", "checked")
+        }
+        #[cfg(feature = "with-dom")]
+        {
+            attr("checked", true)
+        }
     } else {
         empty_attr()
     }
@@ -174,7 +181,7 @@ pub fn checked<MSG>(is_checked: bool) -> Attribute<MSG> {
 /// set whether an element is disabled or not
 pub fn disabled<MSG>(is_disabled: bool) -> Attribute<MSG> {
     if is_disabled {
-        attr("disabled", "true")
+        attr("disabled", true)
     } else {
         empty_attr()
     }

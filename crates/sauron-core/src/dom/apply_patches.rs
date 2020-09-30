@@ -8,8 +8,6 @@ use crate::{
         },
     },
     mt_dom::{
-        attr,
-        diff::increment_node_idx_to_descendant_count,
         patch::{
             AddAttributes,
             AppendChildren,
@@ -21,8 +19,6 @@ use crate::{
         AttValue,
         NodeIdx,
     },
-    prelude::Value,
-    AttributeValue,
     Dispatch,
     Patch,
 };
@@ -59,6 +55,9 @@ where
     #[cfg(feature = "with-measure")]
     let t1 = crate::now();
     let root_node: Node = root_node.into();
+
+    #[cfg(feature = "with-nodeidx-debug")]
+    log::trace!("patches: {:#?}", patches);
 
     // Closure that were added to the DOM during this patch operation.
     let mut active_closures = HashMap::new();
@@ -373,10 +372,7 @@ where
                 program,
                 &mut active_closures,
                 element,
-                &[&attr(
-                    "node_idx",
-                    AttributeValue::from_value(Value::from(*new_node_idx)),
-                )],
+                &[&crate::html::attributes::attr("node_idx", *new_node_idx)],
             );
 
             node_idx_lookup.insert(*new_node_idx, node.clone());
@@ -412,10 +408,7 @@ where
                 program,
                 &mut active_closures,
                 element,
-                &[&attr(
-                    "node_idx",
-                    AttributeValue::from_value(Value::from(*new_node_idx)),
-                )],
+                &[&crate::html::attributes::attr("node_idx", *new_node_idx)],
             );
 
             node_idx_lookup.insert(*new_node_idx, node.clone());
@@ -429,7 +422,7 @@ where
         //
         Patch::ReplaceNode(ReplaceNode {
             tag: _,
-            node_idx,
+            node_idx: _,
             new_node_idx,
             replacement,
         }) => {
@@ -461,6 +454,14 @@ where
                 if element.node_type() != Node::TEXT_NODE {
                     let element: &Element = node.unchecked_ref();
                     remove_event_listeners(&element, old_closures)?;
+                }
+                if let Some(_removed) = node_idx_lookup.remove(node_idx) {
+                    log::trace!(
+                        "remove node {} from node_idx_lookup",
+                        node_idx
+                    );
+                } else {
+                    log::error!("no node_idx to remove");
                 }
             }
             Ok(active_closures)
