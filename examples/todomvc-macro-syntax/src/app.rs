@@ -140,7 +140,7 @@ impl Entry {
 }
 
 impl Model {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Model {
             entries: vec![],
             visibility: Visibility::All,
