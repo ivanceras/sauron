@@ -99,10 +99,6 @@ impl Component<Msg> for Model {
                 self.entries.iter_mut().for_each(|entry| {
                     if entry.id == id {
                         entry.completed = !entry.completed;
-                        debug!(
-                            "Toggle entry: {} to {}",
-                            entry.id, entry.completed,
-                        );
                     }
                 });
             }
@@ -111,6 +107,7 @@ impl Component<Msg> for Model {
             }
             Msg::NoOp => {}
         }
+        #[cfg(feature = "with-storage")]
         self.save_to_storage();
         Cmd::none()
     }
@@ -145,7 +142,7 @@ impl Entry {
 }
 
 impl Model {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Model {
             entries: vec![],
             visibility: Visibility::All,
@@ -373,6 +370,7 @@ impl Model {
         )
     }
 
+    #[allow(unused)]
     fn save_to_storage(&self) {
         let window = web_sys::window().expect("no global `window` exists");
         let local_storage = window.local_storage();
@@ -387,6 +385,7 @@ impl Model {
         }
     }
 
+    #[allow(unused)]
     pub fn get_from_storage() -> Self {
         let window = web_sys::window().expect("no global `window` exists");
         let local_storage = window.local_storage();
