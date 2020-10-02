@@ -183,7 +183,7 @@ fn find_nodes_recursive(
                         node_element.outer_html()
                     }
                     Node::TEXT_NODE => {
-                        let text_node: &Text = node.unchecked_ref();
+                        let text_node: &web_sys::Text = node.unchecked_ref();
                         text_node
                             .text_content()
                             .expect("must have a text content")

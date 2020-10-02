@@ -46,6 +46,7 @@ fn nested_divs() {
         &mut HashMap::new(),
         &vdiv,
         &mut None,
+        &mut None,
     )
     .node
     .unchecked_into();
@@ -67,6 +68,7 @@ fn svg_element() {
         &mut HashMap::new(),
         &vdiv,
         &mut None,
+        &mut None,
     )
     .node
     .unchecked_into();
@@ -84,6 +86,7 @@ fn div_with_attributes() {
         &simple_program(),
         &mut HashMap::new(),
         &vdiv,
+        &mut None,
         &mut None,
     )
     .node
