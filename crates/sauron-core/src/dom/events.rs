@@ -91,7 +91,7 @@ macro_rules! declare_html_events{
         }
 
         /// html events
-        pub const HTML_EVENTS: [&'static str; 30] = [$(stringify!($event),)*];
+        pub const HTML_EVENTS: [&'static str; 31] = [$(stringify!($event),)*];
     }
 }
 
@@ -187,6 +187,8 @@ declare_html_events! {
     on_input => input => to_input_event => InputEvent;
     #[cfg(web_sys_unstable_apis)]
     on_paste => paste => to_clipboard_event => ClipboardEvent;
+    #[cfg(web_sys_unstable_apis)]
+    on_copy => copy => to_clipboard_event => ClipboardEvent;
     on_change => change => to_input_event => InputEvent;
     on_broadcast => broadcast => to_input_event => InputEvent;
     on_hashchange => hashchange => to_hashchange_event => HashChangeEvent;
