@@ -86,6 +86,7 @@ where
             program,
             &mut self.node_idx_lookup,
             &self.current_vdom,
+            &mut self.focused_node,
             &mut None,
         );
         if replace {
@@ -100,9 +101,16 @@ where
         }
         self.root_node = created_node.node;
         self.active_closures = created_node.closures;
+        self.set_focus_element();
+    }
+
+    fn set_focus_element(&self) {
         if let Some(focused_node) = &self.focused_node {
             let focused_element: &Element = focused_node.unchecked_ref();
+            log::trace!("focused element: {}", focused_element.outer_html());
             CreatedNode::set_element_focus(focused_element);
+        } else {
+            log::warn!("no focused node");
         }
     }
 
@@ -182,12 +190,14 @@ where
             self.root_node.clone(),
             &mut self.active_closures,
             &mut self.node_idx_lookup,
+            &mut self.focused_node,
             patches,
         )
         .expect("Error in patching the dom");
 
         self.active_closures.extend(active_closures);
         self.current_vdom = new_vdom;
+        self.set_focus_element();
     }
 
     /// Apply patches to the dom updater
@@ -201,6 +211,7 @@ where
             self.root_node.clone(),
             &mut self.active_closures,
             &mut self.node_idx_lookup,
+            &mut self.focused_node,
             patches,
         )
         .expect("Error in patching the dom");

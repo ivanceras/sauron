@@ -6,7 +6,10 @@ use super::{
     AttributeValue,
     Value,
 };
-use crate::Node;
+use crate::{
+    Element,
+    Node,
+};
 use mt_dom::attr;
 
 /// Special Node attributes that are treated differently
@@ -31,6 +34,16 @@ pub trait Special {
 }
 
 impl<MSG> Special for Node<MSG> {
+    fn get_value<'a>(&'a self, att_name: &'static str) -> Option<&'a Value> {
+        self.get_attribute_value(&&att_name)
+            .map(|att_values| {
+                att_values.first().map(|v| v.get_simple()).flatten()
+            })
+            .flatten()
+    }
+}
+
+impl<MSG> Special for Element<MSG> {
     fn get_value<'a>(&'a self, att_name: &'static str) -> Option<&'a Value> {
         self.get_attribute_value(&&att_name)
             .map(|att_values| {

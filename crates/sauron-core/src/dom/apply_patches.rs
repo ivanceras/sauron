@@ -44,6 +44,7 @@ pub fn patch<N, DSP, MSG>(
     root_node: N,
     old_closures: &mut ActiveClosure,
     node_idx_lookup: &mut HashMap<NodeIdx, Node>,
+    focused_node: &mut Option<Node>,
     patches: Vec<Patch<MSG>>,
 ) -> Result<ActiveClosure, JsValue>
 where
@@ -82,6 +83,7 @@ where
                 &element,
                 old_closures,
                 node_idx_lookup,
+                focused_node,
                 &patch,
             )?;
             active_closures.extend(new_closures);
@@ -322,6 +324,7 @@ fn apply_patch_to_node<DSP, MSG>(
     node: &Node,
     old_closures: &mut ActiveClosure,
     node_idx_lookup: &mut HashMap<NodeIdx, Node>,
+    focused_node: &mut Option<Node>,
     patch: &Patch<MSG>,
 ) -> Result<ActiveClosure, JsValue>
 where
@@ -342,6 +345,7 @@ where
                 program,
                 node_idx_lookup,
                 &for_insert,
+                focused_node,
                 &mut Some(*new_node_idx),
             );
             let parent_node =
@@ -430,6 +434,7 @@ where
                 program,
                 node_idx_lookup,
                 replacement,
+                focused_node,
                 &mut Some(*new_node_idx),
             );
             if element.node_type() != Node::TEXT_NODE {
@@ -476,6 +481,7 @@ where
                     program,
                     node_idx_lookup,
                     &new_node,
+                    focused_node,
                     &mut Some(*append_children_node_idx),
                 );
                 element.append_child(&created_node.node)?;

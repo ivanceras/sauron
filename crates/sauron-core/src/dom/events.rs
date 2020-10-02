@@ -84,7 +84,7 @@ macro_rules! declare_html_events{
         declare_events!{ $($name => $event => $mapper => $ret;)* }
 
         /// html events
-        pub const HTML_EVENTS: [&'static str; 30] = [$(stringify!($event),)*];
+        pub const HTML_EVENTS: [&'static str; 29] = [$(stringify!($event),)*];
     }
 }
 
@@ -121,11 +121,13 @@ fn to_hashchange_event(event: Event) -> HashChangeEvent {
 pub struct InputEvent {
     /// the input value
     pub value: String,
+    /// the event target of the input
+    pub target: EventTarget,
 }
 
 impl InputEvent {
-    fn new(value: String) -> Self {
-        InputEvent { value }
+    fn new(value: String, target: EventTarget) -> Self {
+        InputEvent { value, target }
     }
 }
 
@@ -133,9 +135,9 @@ fn to_input_event(event: Event) -> InputEvent {
     let target: EventTarget =
         event.target().expect("Unable to get event target");
     if let Some(input) = target.dyn_ref::<HtmlInputElement>() {
-        InputEvent::new(input.value())
+        InputEvent::new(input.value(), target)
     } else if let Some(textarea) = target.dyn_ref::<HtmlTextAreaElement>() {
-        InputEvent::new(textarea.value())
+        InputEvent::new(textarea.value(), target)
     } else {
         panic!("fail in mapping event into input event");
     }
@@ -168,7 +170,6 @@ declare_html_events! {
     on_reset => reset => as_is => Event;
     on_submit => submit => as_is => Event;
     on_input => input => to_input_event => InputEvent;
-    on_paste => paste => to_input_event => InputEvent;
     on_change => change => to_input_event => InputEvent;
     on_broadcast => broadcast => to_input_event => InputEvent;
     on_hashchange => hashchange => to_hashchange_event => HashChangeEvent;

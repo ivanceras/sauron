@@ -1,6 +1,7 @@
 use crate::{
     dom::Dispatch,
     html,
+    html::attributes::Special,
     mt_dom::{
         Callback,
         NodeIdx,
@@ -83,6 +84,7 @@ impl CreatedNode {
         program: &DSP,
         node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         vnode: &crate::Node<MSG>,
+        focused_node: &mut Option<Node>,
         node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode
     where
@@ -93,6 +95,7 @@ impl CreatedNode {
             Some(program),
             node_idx_lookup,
             vnode,
+            focused_node,
             node_idx,
         )
     }
@@ -108,6 +111,7 @@ impl CreatedNode {
         program: Option<&DSP>,
         node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         vnode: &crate::Node<MSG>,
+        focused_node: &mut Option<Node>,
         node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode
     where
@@ -128,6 +132,7 @@ impl CreatedNode {
                     program,
                     node_idx_lookup,
                     element_node,
+                    focused_node,
                     node_idx,
                 )
                 .into();
@@ -142,6 +147,7 @@ impl CreatedNode {
         program: Option<&DSP>,
         node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         velem: &crate::Element<MSG>,
+        focused_node: &mut Option<Node>,
         node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode
     where
@@ -159,6 +165,11 @@ impl CreatedNode {
                 .create_element(&velem.tag())
                 .expect("Unable to create element")
         };
+
+        if velem.is_focused() {
+            *focused_node = Some(element.clone().unchecked_into());
+            log::trace!("element is focused..{:?}", focused_node);
+        }
 
         if let Some(ref node_idx) = node_idx {
             node_idx_lookup.insert(*node_idx, element.clone().unchecked_into());
@@ -222,6 +233,7 @@ impl CreatedNode {
                         program,
                         node_idx_lookup,
                         child,
+                        focused_node,
                         node_idx,
                     );
                     closures.extend(created_child.closures);
