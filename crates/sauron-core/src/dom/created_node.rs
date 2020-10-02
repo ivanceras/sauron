@@ -9,7 +9,6 @@ use crate::{
 };
 use std::{
     collections::HashMap,
-    ops::Deref,
     sync::Mutex,
 };
 use wasm_bindgen::{
@@ -59,17 +58,17 @@ pub type ActiveClosure =
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
 #[derive(Debug)]
-pub struct CreatedNode<T> {
+pub struct CreatedNode {
     /// A `Node` or `Element` that was created from a `Node`
-    pub node: T,
+    pub node: Node,
     pub(crate) closures: ActiveClosure,
 }
 
-impl<T> CreatedNode<T> {
+impl CreatedNode {
     /// create a simple node with no closure attache
-    pub fn without_closures<N: Into<T>>(node: N) -> Self {
+    pub fn without_closures(node: Node) -> Self {
         CreatedNode {
-            node: node.into(),
+            node,
             closures: HashMap::with_capacity(0),
         }
     }
@@ -85,7 +84,7 @@ impl<T> CreatedNode<T> {
         node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         vnode: &crate::Node<MSG>,
         node_idx: &mut Option<NodeIdx>,
-    ) -> CreatedNode<Node>
+    ) -> CreatedNode
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
@@ -110,7 +109,7 @@ impl<T> CreatedNode<T> {
         node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         vnode: &crate::Node<MSG>,
         node_idx: &mut Option<NodeIdx>,
-    ) -> CreatedNode<Node>
+    ) -> CreatedNode
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
@@ -122,17 +121,16 @@ impl<T> CreatedNode<T> {
                     node_idx_lookup
                         .insert(*node_idx, text_node.clone().unchecked_into());
                 }
-                CreatedNode::without_closures(text_node)
+                CreatedNode::without_closures(text_node.unchecked_into())
             }
             crate::Node::Element(element_node) => {
-                let created_element: CreatedNode<Node> =
-                    Self::create_element_node(
-                        program,
-                        node_idx_lookup,
-                        element_node,
-                        node_idx,
-                    )
-                    .into();
+                let created_element: CreatedNode = Self::create_element_node(
+                    program,
+                    node_idx_lookup,
+                    element_node,
+                    node_idx,
+                )
+                .into();
                 created_element
             }
         }
@@ -145,7 +143,7 @@ impl<T> CreatedNode<T> {
         node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         velem: &crate::Element<MSG>,
         node_idx: &mut Option<NodeIdx>,
-    ) -> CreatedNode<Node>
+    ) -> CreatedNode
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
@@ -421,21 +419,4 @@ where
         let msg = callback_clone.emit(event);
         program_clone.dispatch(msg);
     }))
-}
-
-impl From<CreatedNode<Element>> for CreatedNode<Node> {
-    fn from(other: CreatedNode<Element>) -> CreatedNode<Node> {
-        CreatedNode {
-            node: other.node.into(),
-            closures: other.closures,
-        }
-    }
-}
-
-impl<T> Deref for CreatedNode<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.node
-    }
 }

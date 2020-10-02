@@ -82,13 +82,12 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
-        let created_node: CreatedNode<Node> =
-            CreatedNode::<Node>::create_dom_node(
-                program,
-                &mut self.node_idx_lookup,
-                &self.current_vdom,
-                &mut None,
-            );
+        let created_node = CreatedNode::create_dom_node(
+            program,
+            &mut self.node_idx_lookup,
+            &self.current_vdom,
+            &mut None,
+        );
         if replace {
             let root_element: &Element = self.root_node.unchecked_ref();
             root_element
@@ -103,7 +102,7 @@ where
         self.active_closures = created_node.closures;
         if let Some(focused_node) = &self.focused_node {
             let focused_element: &Element = focused_node.unchecked_ref();
-            CreatedNode::<Node>::set_element_focus(focused_element);
+            CreatedNode::set_element_focus(focused_element);
         }
     }
 

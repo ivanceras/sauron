@@ -338,13 +338,12 @@ where
             node: for_insert,
         }) => {
             let element: &Element = node.unchecked_ref();
-            let created_node =
-                CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                    program,
-                    node_idx_lookup,
-                    &for_insert,
-                    &mut Some(*new_node_idx),
-                );
+            let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
+                program,
+                node_idx_lookup,
+                &for_insert,
+                &mut Some(*new_node_idx),
+            );
             let parent_node =
                 element.parent_node().expect("must have a parent node");
             parent_node
@@ -360,7 +359,7 @@ where
             attrs,
         }) => {
             let element: &Element = node.unchecked_ref();
-            CreatedNode::<Node>::set_element_attributes(
+            CreatedNode::set_element_attributes(
                 program,
                 &mut active_closures,
                 element,
@@ -368,7 +367,7 @@ where
             );
 
             #[cfg(feature = "with-nodeidx-debug")]
-            CreatedNode::<Node>::set_element_attributes(
+            CreatedNode::set_element_attributes(
                 program,
                 &mut active_closures,
                 element,
@@ -404,7 +403,7 @@ where
             }
 
             #[cfg(feature = "with-nodeidx-debug")]
-            CreatedNode::<Node>::set_element_attributes(
+            CreatedNode::set_element_attributes(
                 program,
                 &mut active_closures,
                 element,
@@ -427,13 +426,12 @@ where
             replacement,
         }) => {
             let element: &Element = node.unchecked_ref();
-            let created_node =
-                CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                    program,
-                    node_idx_lookup,
-                    replacement,
-                    &mut Some(*new_node_idx),
-                );
+            let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
+                program,
+                node_idx_lookup,
+                replacement,
+                &mut Some(*new_node_idx),
+            );
             if element.node_type() != Node::TEXT_NODE {
                 remove_event_listeners(&element, old_closures)?;
             }
@@ -474,13 +472,12 @@ where
             let element: &Element = node.unchecked_ref();
             let mut active_closures = HashMap::new();
             for (append_children_node_idx, new_node) in new_nodes.iter() {
-                let created_node =
-                    CreatedNode::<Node>::create_dom_node_opt::<DSP, MSG>(
-                        program,
-                        node_idx_lookup,
-                        &new_node,
-                        &mut Some(*append_children_node_idx),
-                    );
+                let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
+                    program,
+                    node_idx_lookup,
+                    &new_node,
+                    &mut Some(*append_children_node_idx),
+                );
                 element.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }

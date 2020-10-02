@@ -41,7 +41,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 fn nested_divs() {
     let vdiv: Node<()> =
         div(vec![], vec![div(vec![], vec![div(vec![], vec![])])]); // <div> <div> <div></div> </div> </div>
-    let div: Element = CreatedNode::<Element>::create_dom_node(
+    let div: Element = CreatedNode::create_dom_node(
         &simple_program(),
         &mut HashMap::new(),
         &vdiv,
@@ -62,7 +62,7 @@ fn svg_element() {
             vec![circle(vec![cx("50"), cy("50"), r("50")], vec![])],
         )],
     );
-    let div: Element = CreatedNode::<Element>::create_dom_node(
+    let div: Element = CreatedNode::create_dom_node(
         &simple_program(),
         &mut HashMap::new(),
         &vdiv,
@@ -80,7 +80,7 @@ fn svg_element() {
 #[wasm_bindgen_test]
 fn div_with_attributes() {
     let vdiv: Node<()> = div(vec![id("id-here"), class("two classes")], vec![]);
-    let div: Element = CreatedNode::<Element>::create_dom_node(
+    let div: Element = CreatedNode::create_dom_node(
         &simple_program(),
         &mut HashMap::new(),
         &vdiv,
