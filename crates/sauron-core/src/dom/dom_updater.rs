@@ -101,6 +101,7 @@ where
         }
         self.root_node = created_node.node;
         self.active_closures = created_node.closures;
+        log::trace!("focusing element after mounting");
         self.set_focus_element();
     }
 

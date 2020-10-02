@@ -6,6 +6,8 @@ use crate::{
     Event,
 };
 use wasm_bindgen::JsCast;
+#[cfg(web_sys_unstable_apis)]
+pub use web_sys::ClipboardEvent;
 pub use web_sys::{
     AnimationEvent,
     HashChangeEvent,
@@ -81,10 +83,15 @@ macro_rules! declare_html_events{
          $name:ident => $event:ident => $mapper:ident => $ret:ty;
        )*
      ) => {
-        declare_events!{ $($name => $event => $mapper => $ret;)* }
+        declare_events!{
+            $(
+                $(#[$attr])*
+                $name => $event => $mapper => $ret;
+            )*
+        }
 
         /// html events
-        pub const HTML_EVENTS: [&'static str; 29] = [$(stringify!($event),)*];
+        pub const HTML_EVENTS: [&'static str; 30] = [$(stringify!($event),)*];
     }
 }
 
@@ -121,13 +128,13 @@ fn to_hashchange_event(event: Event) -> HashChangeEvent {
 pub struct InputEvent {
     /// the input value
     pub value: String,
-    /// the event target of the input
-    pub target: EventTarget,
+    /// the actual dom event
+    pub event: Event,
 }
 
 impl InputEvent {
-    fn new(value: String, target: EventTarget) -> Self {
-        InputEvent { value, target }
+    fn new(value: String, event: Event) -> Self {
+        InputEvent { value, event }
     }
 }
 
@@ -135,12 +142,20 @@ fn to_input_event(event: Event) -> InputEvent {
     let target: EventTarget =
         event.target().expect("Unable to get event target");
     if let Some(input) = target.dyn_ref::<HtmlInputElement>() {
-        InputEvent::new(input.value(), target)
+        InputEvent::new(input.value(), event)
     } else if let Some(textarea) = target.dyn_ref::<HtmlTextAreaElement>() {
-        InputEvent::new(textarea.value(), target)
+        InputEvent::new(textarea.value(), event)
     } else {
         panic!("fail in mapping event into input event");
     }
+}
+
+/// Note: paste event happens before the data is inserted into the target element
+/// therefore trying to access the data on the target element triggered from paste will get an
+/// empty text
+#[cfg(web_sys_unstable_apis)]
+fn to_clipboard_event(event: Event) -> ClipboardEvent {
+    event.dyn_into().expect("unable to cast to clipboard event")
 }
 
 // Mouse events
@@ -170,6 +185,8 @@ declare_html_events! {
     on_reset => reset => as_is => Event;
     on_submit => submit => as_is => Event;
     on_input => input => to_input_event => InputEvent;
+    #[cfg(web_sys_unstable_apis)]
+    on_paste => paste => to_clipboard_event => ClipboardEvent;
     on_change => change => to_input_event => InputEvent;
     on_broadcast => broadcast => to_input_event => InputEvent;
     on_hashchange => hashchange => to_hashchange_event => HashChangeEvent;

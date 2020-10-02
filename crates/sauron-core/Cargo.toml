@@ -30,6 +30,7 @@ optional = true
 features = [
     "AnimationEvent",
     "Comment",
+    "ClipboardEvent",
     "console",
     "Document",
     "Element",
