@@ -20,6 +20,7 @@ use web_sys::{
     self,
     Element,
     EventTarget,
+    HtmlElement,
     HtmlInputElement,
     HtmlTextAreaElement,
     Node,
@@ -380,6 +381,12 @@ impl<T> CreatedNode<T> {
                     .push((event_str, closure_wrap));
             }
         }
+    }
+
+    /// set focus to this element
+    pub(crate) fn set_element_focus(element: &Element) {
+        let html_element: &HtmlElement = element.unchecked_ref();
+        html_element.focus().expect("must focus")
     }
 }
 

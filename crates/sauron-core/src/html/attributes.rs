@@ -201,6 +201,11 @@ where
     )
 }
 
+/// focus the html element
+pub fn focus<MSG>(is_focus: bool) -> Attribute<MSG> {
+    attr("focus", is_focus)
+}
+
 /// a utility function to convert simple value into attribute
 pub fn attr<MSG, V: Into<Value>>(att: &'static str, v: V) -> Attribute<MSG> {
     mt_dom::attr(att, AttributeValue::from_value(v.into()))

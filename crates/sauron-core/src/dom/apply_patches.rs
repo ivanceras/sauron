@@ -31,7 +31,6 @@ use wasm_bindgen::{
 use web_sys::{
     Element,
     Node,
-    Text,
 };
 
 /// Apply all of the patches to our old root node in order to create the new root node
@@ -150,20 +149,6 @@ fn find_nodes<MSG>(
     nodes_to_patch
 }
 
-fn outer_html(node: &Node) -> String {
-    match node.node_type() {
-        Node::ELEMENT_NODE => {
-            let node_element: &Element = node.unchecked_ref();
-            node_element.outer_html()
-        }
-        Node::TEXT_NODE => {
-            let text_node: &Text = node.unchecked_ref();
-            text_node.text_content().expect("must have a text content")
-        }
-        _ => unreachable!(),
-    }
-}
-
 /// find the html nodes recursively
 /// early returns true if all node has been found
 /// before completing iterating all the elements
@@ -189,6 +174,21 @@ fn find_nodes_recursive(
     if let Some(_vtag) = nodes_to_find.get(&cur_node_idx) {
         #[cfg(feature = "with-nodeidx-debug")]
         if let Some(lookup_node) = node_idx_lookup.get(&cur_node_idx) {
+            fn outer_html(node: &Node) -> String {
+                match node.node_type() {
+                    Node::ELEMENT_NODE => {
+                        let node_element: &Element = node.unchecked_ref();
+                        node_element.outer_html()
+                    }
+                    Node::TEXT_NODE => {
+                        let text_node: &Text = node.unchecked_ref();
+                        text_node
+                            .text_content()
+                            .expect("must have a text content")
+                    }
+                    _ => unreachable!(),
+                }
+            }
             log::trace!("--->>>> FOUND in node_idx_lookup: {}", cur_node_idx);
             if outer_html(lookup_node) == outer_html(&node) {
                 log::info!("matched OK");

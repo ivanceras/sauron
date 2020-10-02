@@ -33,6 +33,8 @@ pub struct DomUpdater<MSG> {
     pub active_closures: ActiveClosure,
     /// a fast lookup for getting the Node from from NodeIdx
     pub node_idx_lookup: HashMap<NodeIdx, Node>,
+    /// after mounting or update dispatch call, the element will be focused
+    pub focused_node: Option<Node>,
 }
 
 impl<MSG> DomUpdater<MSG> {
@@ -46,6 +48,7 @@ impl<MSG> DomUpdater<MSG> {
             root_node: mount.clone(),
             active_closures: ActiveClosure::new(),
             node_idx_lookup: HashMap::new(),
+            focused_node: None,
         }
     }
 
@@ -98,6 +101,10 @@ where
         }
         self.root_node = created_node.node;
         self.active_closures = created_node.closures;
+        if let Some(focused_node) = &self.focused_node {
+            let focused_element: &Element = focused_node.unchecked_ref();
+            CreatedNode::<Node>::set_element_focus(focused_element);
+        }
     }
 
     /// Mount the current_vdom replacing the actual browser DOM specified in the root_node
@@ -212,12 +219,14 @@ where
             root_node,
             active_closures,
             node_idx_lookup,
+            focused_node,
         } = self;
         DomUpdater {
             current_vdom: current_vdom.map_msg(func),
             root_node,
             active_closures,
             node_idx_lookup,
+            focused_node,
         }
     }
 

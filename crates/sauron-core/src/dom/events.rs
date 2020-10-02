@@ -1,11 +1,23 @@
 //! https://developer.mozilla.org/en-US/docs/Web/Events
 
-use crate::{Attribute, Callback, Event};
+use crate::{
+    Attribute,
+    Callback,
+    Event,
+};
 use wasm_bindgen::JsCast;
 pub use web_sys::{
-    AnimationEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TransitionEvent,
+    AnimationEvent,
+    HashChangeEvent,
+    KeyboardEvent,
+    MouseEvent,
+    TransitionEvent,
 };
-use web_sys::{EventTarget, HtmlInputElement, HtmlTextAreaElement};
+use web_sys::{
+    EventTarget,
+    HtmlInputElement,
+    HtmlTextAreaElement,
+};
 
 /// an event builder
 pub fn on<F, MSG>(event_name: &'static str, f: F) -> Attribute<MSG>
@@ -72,7 +84,7 @@ macro_rules! declare_html_events{
         declare_events!{ $($name => $event => $mapper => $ret;)* }
 
         /// html events
-        pub const HTML_EVENTS: [&'static str; 29] = [$(stringify!($event),)*];
+        pub const HTML_EVENTS: [&'static str; 30] = [$(stringify!($event),)*];
     }
 }
 
@@ -156,6 +168,7 @@ declare_html_events! {
     on_reset => reset => as_is => Event;
     on_submit => submit => as_is => Event;
     on_input => input => to_input_event => InputEvent;
+    on_paste => paste => to_input_event => InputEvent;
     on_change => change => to_input_event => InputEvent;
     on_broadcast => broadcast => to_input_event => InputEvent;
     on_hashchange => hashchange => to_hashchange_event => HashChangeEvent;

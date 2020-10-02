@@ -56,6 +56,7 @@ features = [
     "Response",
 	"Location",
 	"ScrollToOptions",
+    "Navigator",
 ]
 
 

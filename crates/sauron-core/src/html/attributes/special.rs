@@ -18,6 +18,14 @@ pub trait Special {
         self.get_value("key")
     }
 
+    /// return the boolean value of the "focus" attribute of this node
+    fn is_focused(&self) -> bool {
+        self.get_value("focus")
+            .map(|v| v.as_bool())
+            .flatten()
+            .unwrap_or(false)
+    }
+
     /// get the first attribute value with this attribute name
     fn get_value<'a>(&'a self, att_name: &'static str) -> Option<&'a Value>;
 }
