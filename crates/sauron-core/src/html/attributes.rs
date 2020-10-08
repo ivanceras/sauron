@@ -12,6 +12,7 @@ pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
 pub use special::{
     key,
+    replace,
     skip,
     Special,
 };

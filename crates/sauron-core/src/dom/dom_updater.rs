@@ -108,7 +108,6 @@ where
     fn set_focus_element(&self) {
         if let Some(focused_node) = &self.focused_node {
             let focused_element: &Element = focused_node.unchecked_ref();
-            log::trace!("focused element: {}", focused_element.outer_html());
             CreatedNode::set_element_focus(focused_element);
         } else {
             log::warn!("no focused node");

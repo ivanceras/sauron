@@ -2,15 +2,14 @@
 //!
 //!
 use super::{
+    attr,
     Attribute,
-    AttributeValue,
     Value,
 };
 use crate::{
     Element,
     Node,
 };
-use mt_dom::attr;
 
 /// Special Node attributes that are treated differently
 /// such as key and skip which both greatly affects the diffing algorithm
@@ -59,14 +58,17 @@ pub fn key<V, MSG>(v: V) -> Attribute<MSG>
 where
     V: Into<Value>,
 {
-    attr("key", AttributeValue::from_value(v.into()))
+    attr("key", v)
 }
 
 /// if the value is true, then the diffing of this element
 /// and its descendants are skip entirely
-pub fn skip<V, MSG>(v: V) -> Attribute<MSG>
-where
-    V: Into<Value>,
-{
-    attr("skip", AttributeValue::from_value(v.into()))
+pub fn skip<MSG>(v: bool) -> Attribute<MSG> {
+    attr("skip", v)
+}
+
+/// if the value is true, then this node is made to replace the old
+/// node it matches
+pub fn replace<MSG>(v: bool) -> Attribute<MSG> {
+    attr("replace", v)
 }

@@ -119,6 +119,7 @@ where
     use crate::html::attributes::Special;
 
     // check if the skip attribute is true
+    // if it is true, skip diffing and no patches is created at this dom
     let skip = |_old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
         new_node
             .get_value("skip")
@@ -126,5 +127,16 @@ where
             .flatten()
             .unwrap_or(false)
     };
-    mt_dom::diff::diff_with_key_and_skip(old, new, &"key", &skip)
+
+    // check if the replace attribute evaluates to true,
+    // if it is, a replace patch replace the old node with the new node
+    // without diffing the dom tree
+    let replace = |_old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
+        new_node
+            .get_value("replace")
+            .map(|v| v.as_bool())
+            .flatten()
+            .unwrap_or(false)
+    };
+    mt_dom::diff::diff_with_functions(old, new, &"key", &skip, &replace)
 }
