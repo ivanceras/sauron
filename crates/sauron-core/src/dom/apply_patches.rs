@@ -66,6 +66,9 @@ where
     // in every patch loop.
     let nodes_to_patch = find_nodes(root_node, node_idx_lookup, &patches);
 
+    #[cfg(feature = "with-nodeidx-debug")]
+    log::trace!("nodes_to_patch: {:#?}", nodes_to_patch);
+
     #[cfg(feature = "with-measure")]
     let t2 = {
         let t2 = crate::now();
