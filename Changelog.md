@@ -1,7 +1,18 @@
 # Changelog
 
+## 0.32.2
+- Add `on_copy` and `on_paste` event.
+- modify execute_in_request_animation_frame to return the handle ( can be used for cancelling the execution )
+- Add special attributes `focus`, `skip` and `replace`
+    - If an element has a `focus(true)` attribute, it will always have a focus on each update.
+    - If an element has a `skip(true)` attribute, it will skip diffing of that node and assume no changes
+    - If an element has a `replace(true)` attribute, it will return a `ReplaceNode` patch replacing the matching old node skipping the diffing. 
+        This will be useful, for parts in the view code where it always changes at every update, for diffing would just become an uncessary overhead.
 
-## Unreleased
+## 0.32.1
+- Fix apply_text_patch to include RemoveNode
+
+## 0.32.0
 - Added improvements on `node!` macro, now allowing you to use the exact attribute names for rust keywords.
     before:
     ```rust
@@ -28,13 +39,6 @@
 - Reexport `serde_json` in order for `jss` macro be able to use reexported `serde_json` from sauron crate
 - fix example: remove the use of workaround on attributes that are keywords in rust
 - Add `#[allow(unused_braces)]` inside node macro to prevent the compiler from making expressions in braces in html as unncessary
-- Add `on_copy` and `on_paste` event.
-- modify execute_in_request_animation_frame to return the handle ( can be used for cancelling the execution )
-- Add special attributes `focus`, `skip` and `replace`
-    - If an element has a `focus(true)` attribute, it will always have a focus on each update.
-    - If an element has a `skip(true)` attribute, it will skip diffing of that node and assume no changes
-    - If an element has a `replace(true)` attribute, it will return a `ReplaceNode` patch replacing the matching old node skipping the diffing. 
-        This will be useful, for parts in the view code where it always changes at every update, for diffing would just become an uncessary overhead.
 
 ## 0.31.2
 - Fix the `render` function where attributes of the same name not merged.
