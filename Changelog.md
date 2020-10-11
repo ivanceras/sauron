@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.32.3
+- put behind a feature flag functionalities which deals with `node_idx_lookup`
+
 ## 0.32.2
 - Add `on_copy` and `on_paste` event.
 - modify execute_in_request_animation_frame to return the handle ( can be used for cancelling the execution )
