@@ -502,6 +502,7 @@ where
         }
         Patch::ChangeText(ct) => {
             node.set_node_value(Some(&ct.new.text));
+            #[cfg(feature = "with-nodeidx-debug")]
             node_idx_lookup.insert(ct.new_node_idx, node.clone());
             Ok(active_closures)
         }
