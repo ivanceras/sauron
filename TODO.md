@@ -42,7 +42,7 @@
 - [ ] replace the request_animation_frame with the code from execute_request_animation frame
 - [ ] Create a function to derive Component name from the struct name of the Component
     and preprocess the jss with it before injecting it to the main program
-- [ ] Clean up `CreateNode`
+- [X] Clean up `CreateNode`
     - no need to wrap `Node` and `Element` instead just return them as created with their `closures`
 
 
