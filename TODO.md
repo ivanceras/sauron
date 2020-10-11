@@ -44,6 +44,9 @@
     and preprocess the jss with it before injecting it to the main program
 - [X] Clean up `CreateNode`
     - no need to wrap `Node` and `Element` instead just return them as created with their `closures`
+- [ ] Cmd should include a `should_update: bool` field which indicates if the update should be made or not
+        - Cmd{ commands:Vec<..>,should_update }
+        - Cmd::noop() // no update operation
 
 
 
