@@ -121,6 +121,7 @@ impl CreatedNode {
         match vnode {
             crate::Node::Text(txt) => {
                 let text_node = Self::create_text_node(&txt.text);
+                #[cfg(feature = "with-nodeidx-debug")]
                 if let Some(node_idx) = node_idx {
                     node_idx_lookup
                         .insert(*node_idx, text_node.clone().unchecked_into());
@@ -171,6 +172,7 @@ impl CreatedNode {
             log::trace!("element is focused..{:?}", focused_node);
         }
 
+        #[cfg(feature = "with-nodeidx-debug")]
         if let Some(ref node_idx) = node_idx {
             node_idx_lookup.insert(*node_idx, element.clone().unchecked_into());
         }
@@ -219,6 +221,7 @@ impl CreatedNode {
                         .append_child(&text_node)
                         .expect("Unable to append text node");
 
+                    #[cfg(feature = "with-nodeidx-debug")]
                     if let Some(node_idx) = &node_idx {
                         node_idx_lookup
                             .insert(*node_idx, text_node.unchecked_into());

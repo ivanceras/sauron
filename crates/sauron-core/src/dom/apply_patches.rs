@@ -360,10 +360,10 @@ where
             Ok(active_closures)
         }
         Patch::AddAttributes(AddAttributes {
-            tag: _,
-            node_idx: _,
+            #[cfg(feature = "with-nodeidx-debug")]
             new_node_idx,
             attrs,
+            ..
         }) => {
             let element: &Element = node.unchecked_ref();
             CreatedNode::set_element_attributes(
@@ -381,14 +381,15 @@ where
                 &[&crate::html::attributes::attr("node_idx", *new_node_idx)],
             );
 
+            #[cfg(feature = "with-nodeidx-debug")]
             node_idx_lookup.insert(*new_node_idx, node.clone());
             Ok(active_closures)
         }
         Patch::RemoveAttributes(RemoveAttributes {
-            tag: _,
-            node_idx: _,
+            #[cfg(feature = "with-nodeidx-debug")]
             new_node_idx,
             attrs,
+            ..
         }) => {
             let element: &Element = node.unchecked_ref();
             for attr in attrs.iter() {
@@ -417,6 +418,7 @@ where
                 &[&crate::html::attributes::attr("node_idx", *new_node_idx)],
             );
 
+            #[cfg(feature = "with-nodeidx-debug")]
             node_idx_lookup.insert(*new_node_idx, node.clone());
 
             Ok(active_closures)
@@ -447,7 +449,11 @@ where
 
             Ok(created_node.closures)
         }
-        Patch::RemoveNode(RemoveNode { tag: _, node_idx }) => {
+        Patch::RemoveNode(RemoveNode {
+            #[cfg(feature = "with-nodeidx-debug")]
+            node_idx,
+            ..
+        }) => {
             let element: &Element = node.unchecked_ref();
             let parent_node =
                 element.parent_node().expect("must have a parent node");
@@ -461,6 +467,8 @@ where
                     let element: &Element = node.unchecked_ref();
                     remove_event_listeners(&element, old_closures)?;
                 }
+
+                #[cfg(feature = "with-nodeidx-debug")]
                 if let Some(_removed) = node_idx_lookup.remove(node_idx) {
                     log::trace!(
                         "remove node {} from node_idx_lookup",
