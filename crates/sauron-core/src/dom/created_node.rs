@@ -380,18 +380,47 @@ impl CreatedNode {
                 let event_str = attr.name();
                 let current_elm: &EventTarget =
                     element.dyn_ref().expect("unable to cast to event targe");
-                let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
-                    create_closure_wrap(program, &callback);
-                current_elm
-                    .add_event_listener_with_callback(
-                        event_str,
-                        closure_wrap.as_ref().unchecked_ref(),
-                    )
-                    .expect("Unable to attached event listener");
-                closures
-                    .get_mut(&unique_id)
-                    .expect("Unable to get closure")
-                    .push((event_str, closure_wrap));
+
+                // a custom enter event which triggers the callback
+                // when the enter key is pressed
+                if *event_str == "enter" {
+                    let program_clone = program.clone();
+                    let callback_clone = callback.clone();
+                    let key_press_func: Closure<dyn FnMut(web_sys::Event)> =
+                        Closure::wrap(Box::new(
+                            move |event: web_sys::Event| {
+                                let ke: &web_sys::KeyboardEvent = event
+                                    .dyn_ref()
+                                    .expect("should be a keyboard event");
+                                if ke.key() == "Enter" {
+                                    let msg = callback_clone.emit(event);
+                                    program_clone.dispatch(msg);
+                                }
+                            },
+                        ));
+
+                    current_elm
+                        .add_event_listener_with_callback(
+                            "keypress",
+                            key_press_func.as_ref().unchecked_ref(),
+                        )
+                        .expect("unable to attach enter event listener");
+
+                    key_press_func.forget();
+                } else {
+                    let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
+                        create_closure_wrap(program, &callback);
+                    current_elm
+                        .add_event_listener_with_callback(
+                            event_str,
+                            closure_wrap.as_ref().unchecked_ref(),
+                        )
+                        .expect("Unable to attached event listener");
+                    closures
+                        .get_mut(&unique_id)
+                        .expect("Unable to get closure")
+                        .push((event_str, closure_wrap));
+                }
             }
         }
     }
