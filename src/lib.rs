@@ -125,6 +125,7 @@
 //! - [svg-graph](https://ivanceras.github.io/svg-graph/) - A simple graph using SVG
 //! - [tinki wiki](https://github.com/ivanceras/tinki) - My personal wiki, powering my [github
 //! pages](https://ivanceras.github.io)
+//! - [code-editor](https://ivanceras.github.io/code-editor/) - A WIP web-base code-editor
 //!
 //! ### Converting HTML into Sauron's syntax
 //!
