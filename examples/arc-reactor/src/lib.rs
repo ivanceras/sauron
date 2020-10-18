@@ -153,7 +153,12 @@ impl Component<Msg> for App {
                 background-color: #ffffff;
                 border-radius: 50%;
                 box-shadow: 0 0 4px 2px #52fefe, 0 0 9px 3px #52fefe inset;
-            }"#;
+            }
+            .reactor .circle-innner:hover {
+               background-color: #ff0000; 
+            }
+
+            "#;
         vec![css.to_string()]
     }
 
@@ -183,7 +188,11 @@ impl Component<Msg> for App {
               </div>
               <div class="circle-outer"></div>
               <div class="circle-center"></div>
-              <div class="circle-innner"></div>
+              <a href="https://github.com/ivanceras/sauron/tree/master/examples/arc-reactor/src/lib.rs"
+                 alt="view code"
+                 title="view code">
+                <div class="circle-innner"></div>
+              </a>
             </div>
         }
     }
