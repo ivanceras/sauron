@@ -4,6 +4,6 @@ set -v
 
 . ./bootstrap.sh
 
-wasm-pack build --target web --release
+. ./build_optimized.sh
 
 basic-http-server ./ -a 0.0.0.0:4001
