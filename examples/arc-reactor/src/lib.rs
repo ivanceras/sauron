@@ -43,12 +43,12 @@ impl Component<Msg> for App {
                 bottom: 0;
                 left: 0;
                 margin: auto;
-                width: 60px;
-                height: 60px;
+                width: 120px;
+                height: 120px;
                 border-radius: 50%;
                 background: radial-gradient(circle, #002d34 30%, #0089a9 60%, #00a6ce);
-                border: 1px solid rgba(0, 45, 52, 0.3);
-                filter: drop-shadow(0 0 1.8px #46fffe);
+                border: 2px solid rgba(0, 45, 52, 0.3);
+                filter: drop-shadow(0 0 3.6px #46fffe);
             }
 
             @keyframes spin {
@@ -69,29 +69,29 @@ impl Component<Msg> for App {
 
             .reactor .trapezoid-container .trapezoid {
                 box-sizing: content-box;
-                width: 5px;
+                width: 10px;
                 height: 0;
                 position: absolute;
-                top: -4.5px;
-                left: 20.5px;
-                transform-origin: 10px 35px;
-                border: 5px solid transparent;
+                top: -9px;
+                left: 41px;
+                transform-origin: 20px 70px;
+                border: 10px solid transparent;
                 border-bottom: 0 solid;
-                border-top: 10px solid #46fffe;
-                border-radius: 4px;
-                filter: drop-shadow(0 0 1.8px #46fffe);
+                border-top: 20px solid #46fffe;
+                border-radius: 8px;
+                filter: drop-shadow(0 0 3.6px #46fffe);
             }
 
             .reactor .trapezoid-container .trapezoid:after {
                 content: "";
                 position: absolute;
-                width: 8px;
-                height: 8px;
+                width: 16px;
+                height: 16px;
                 border-radius: 50%;
                 background: radial-gradient(circle, #e4ffff 30%, #1ffffd);
                 margin: 0;
-                bottom: 1.5px;
-                right: -1.5px;
+                bottom: 3px;
+                right: -3px;
             }
 
             .reactor .small-circle-container {
@@ -102,11 +102,11 @@ impl Component<Msg> for App {
 
             .reactor .small-circle-container .small-circle {
                 position: absolute;
-                width: 4px;
-                height: 4px;
-                top: -50px;
-                left: 21px;
-                transform-origin: 9px 20.5px;
+                width: 8px;
+                height: 8px;
+                top: -100px;
+                left: 42px;
+                transform-origin: 18px 41px;
                 border-radius: 50%;
                 background: radial-gradient(circle, #eeffff 20%, #21fffe, #009fc1);
             }
@@ -118,12 +118,12 @@ impl Component<Msg> for App {
                 bottom: 0;
                 left: 0;
                 margin: auto;
-                width: 30.5px;
-                height: 30.5px;
-                border: 1px solid #52fefe;
+                width: 61px;
+                height: 61px;
+                border: 2px solid #52fefe;
                 background-color: #ffffff;
                 border-radius: 50%;
-                box-shadow: 0px 0px 2px 1px #52fefe, 0px 0px 2px 0.8px #52fefe inset;
+                box-shadow: 0 0 4px 2px #52fefe, 0 0 4px 1.6px #52fefe inset;
             }
 
             .reactor .circle-center {
@@ -133,11 +133,11 @@ impl Component<Msg> for App {
                 bottom: 0;
                 left: 0;
                 margin: auto;
-                width: 22px;
-                height: 22px;
+                width: 44px;
+                height: 44px;
                 background-color: #0c4d5b;
                 border-radius: 50%;
-                box-shadow: 0px 0px 2px 1px #52fefe, 0px 0px 2px 0.8px #52fefe;
+                box-shadow: 0 0 4px 2px #52fefe, 0 0 4px 1.6px #52fefe;
             }
 
             .reactor .circle-innner {
@@ -147,12 +147,12 @@ impl Component<Msg> for App {
                 bottom: 0;
                 left: 0;
                 margin: auto;
-                width: 19px;
-                height: 19px;
-                border: 1px solid #52fefe;
+                width: 38px;
+                height: 38px;
+                border: 2px solid #52fefe;
                 background-color: #ffffff;
                 border-radius: 50%;
-                box-shadow: 0px 0px 2px 1px #52fefe, 0px 0px 4.5px 1.5px #52fefe inset;
+                box-shadow: 0 0 4px 2px #52fefe, 0 0 9px 3px #52fefe inset;
             }"#;
         vec![css.to_string()]
     }
