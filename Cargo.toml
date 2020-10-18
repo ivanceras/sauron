@@ -56,6 +56,7 @@ members = [
     "crates/sauron-markdown",
     "crates/sauron-parse",
     "crates/sauron-node-macro",
+    "examples/arc-reactor",
     "examples/minimal",
     "examples/minimal-macro-syntax",
     "examples/fetch-data",
