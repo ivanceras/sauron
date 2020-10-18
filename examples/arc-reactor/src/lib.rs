@@ -23,7 +23,7 @@ impl App {
 
 impl Component<Msg> for App {
     fn style(&self) -> Vec<String> {
-        vec![r#"
+        let css = r#"
             body {
                 position: absolute;
                 top: 0;
@@ -43,12 +43,12 @@ impl Component<Msg> for App {
                 bottom: 0;
                 left: 0;
                 margin: auto;
-                width: 60vmin;
-                height: 60vmin;
+                width: 60px;
+                height: 60px;
                 border-radius: 50%;
                 background: radial-gradient(circle, #002d34 30%, #0089a9 60%, #00a6ce);
-                border: 1vw solid rgba(0, 45, 52, 0.3);
-                filter: drop-shadow(0 0 1.8vmin #46fffe);
+                border: 1px solid rgba(0, 45, 52, 0.3);
+                filter: drop-shadow(0 0 1.8px #46fffe);
             }
 
             @keyframes spin {
@@ -64,74 +64,34 @@ impl Component<Msg> for App {
                 position: relative;
                 width: 100%;
                 height: 100%;
-                animation: spin 10s infinite linear;
+                animation: spin 5s infinite linear;
             }
 
             .reactor .trapezoid-container .trapezoid {
                 box-sizing: content-box;
-                width: 5vmin;
+                width: 5px;
                 height: 0;
                 position: absolute;
-                top: -4.5vmin;
-                left: 20.5vmin;
-                transform-origin: 10vmin 35vmin;
-                border: 5vmin solid transparent;
+                top: -4.5px;
+                left: 20.5px;
+                transform-origin: 10px 35px;
+                border: 5px solid transparent;
                 border-bottom: 0 solid;
-                border-top: 10vmin solid #46fffe;
-                border-radius: 4vmin;
-                filter: drop-shadow(0 0 1.8vmin #46fffe);
+                border-top: 10px solid #46fffe;
+                border-radius: 4px;
+                filter: drop-shadow(0 0 1.8px #46fffe);
             }
 
             .reactor .trapezoid-container .trapezoid:after {
                 content: "";
                 position: absolute;
-                width: 8vmin;
-                height: 8vmin;
+                width: 8px;
+                height: 8px;
                 border-radius: 50%;
                 background: radial-gradient(circle, #e4ffff 30%, #1ffffd);
                 margin: 0;
-                bottom: 1.5vmin;
-                right: -1.5vmin;
-            }
-
-            .reactor .trapezoid-container .trapezoid-1 {
-                transform: rotate(0deg);
-            }
-
-            .reactor .trapezoid-container .trapezoid-2 {
-                transform: rotate(36deg);
-            }
-
-            .reactor .trapezoid-container .trapezoid-3 {
-                transform: rotate(72deg);
-            }
-
-            .reactor .trapezoid-container .trapezoid-4 {
-                transform: rotate(108deg);
-            }
-
-            .reactor .trapezoid-container .trapezoid-5 {
-                transform: rotate(144deg);
-            }
-
-            .reactor .trapezoid-container .trapezoid-6 {
-                transform: rotate(180deg);
-            }
-
-            .reactor .trapezoid-container .trapezoid-7 {
-                transform: rotate(216deg);
-            }
-
-            .reactor .trapezoid-container .trapezoid-8 {
-                transform: rotate(252deg);
-            }
-
-            .reactor .trapezoid-container .trapezoid-9 {
-                transform: rotate(288deg);
-            }
-
-            .reactor .trapezoid-container .trapezoid-10 {
-                transform: rotate(324deg);
+                bottom: 1.5px;
+                right: -1.5px;
             }
 
             .reactor .small-circle-container {
@@ -142,61 +102,13 @@ impl Component<Msg> for App {
 
             .reactor .small-circle-container .small-circle {
                 position: absolute;
-                width: 4vmin;
-                height: 4vmin;
-                top: -50vmin;
-                left: 21vmin;
-                transform-origin: 9vmin 20.5vmin;
+                width: 4px;
+                height: 4px;
+                top: -50px;
+                left: 21px;
+                transform-origin: 9px 20.5px;
                 border-radius: 50%;
                 background: radial-gradient(circle, #eeffff 20%, #21fffe, #009fc1);
-            }
-
-            .reactor .small-circle-container .small-circle-1 {
-                transform: rotate(0deg);
-            }
-
-            .reactor .small-circle-container .small-circle-2 {
-                transform: rotate(30deg);
-            }
-
-            .reactor .small-circle-container .small-circle-3 {
-                transform: rotate(60deg);
-            }
-
-            .reactor .small-circle-container .small-circle-4 {
-                transform: rotate(90deg);
-            }
-
-            .reactor .small-circle-container .small-circle-5 {
-                transform: rotate(120deg);
-            }
-
-            .reactor .small-circle-container .small-circle-6 {
-                transform: rotate(150deg);
-            }
-
-            .reactor .small-circle-container .small-circle-7 {
-                transform: rotate(180deg);
-            }
-
-            .reactor .small-circle-container .small-circle-8 {
-                transform: rotate(210deg);
-            }
-
-            .reactor .small-circle-container .small-circle-9 {
-                transform: rotate(240deg);
-            }
-
-            .reactor .small-circle-container .small-circle-10 {
-                transform: rotate(270deg);
-            }
-
-            .reactor .small-circle-container .small-circle-11 {
-                transform: rotate(300deg);
-            }
-
-            .reactor .small-circle-container .small-circle-12 {
-                transform: rotate(330deg);
             }
 
             .reactor .circle-outer {
@@ -206,12 +118,12 @@ impl Component<Msg> for App {
                 bottom: 0;
                 left: 0;
                 margin: auto;
-                width: 30.5vmin;
-                height: 30.5vmin;
+                width: 30.5px;
+                height: 30.5px;
                 border: 1px solid #52fefe;
                 background-color: #ffffff;
                 border-radius: 50%;
-                box-shadow: 0px 0px 2px 1px #52fefe, 0px 0px 2vw 0.8vmin #52fefe inset;
+                box-shadow: 0px 0px 2px 1px #52fefe, 0px 0px 2px 0.8px #52fefe inset;
             }
 
             .reactor .circle-center {
@@ -221,11 +133,11 @@ impl Component<Msg> for App {
                 bottom: 0;
                 left: 0;
                 margin: auto;
-                width: 22vmin;
-                height: 22vmin;
+                width: 22px;
+                height: 22px;
                 background-color: #0c4d5b;
                 border-radius: 50%;
-                box-shadow: 0px 0px 2px 1px #52fefe, 0px 0px 2vw 0.8vmin #52fefe;
+                box-shadow: 0px 0px 2px 1px #52fefe, 0px 0px 2px 0.8px #52fefe;
             }
 
             .reactor .circle-innner {
@@ -235,47 +147,40 @@ impl Component<Msg> for App {
                 bottom: 0;
                 left: 0;
                 margin: auto;
-                width: 19vmin;
-                height: 19vmin;
+                width: 19px;
+                height: 19px;
                 border: 1px solid #52fefe;
                 background-color: #ffffff;
                 border-radius: 50%;
-                box-shadow: 0px 0px 2px 1px #52fefe, 0px 0px 4.5vw 1.5vmin #52fefe inset;
-            }"#
-        .to_string()]
+                box-shadow: 0px 0px 2px 1px #52fefe, 0px 0px 4.5px 1.5px #52fefe inset;
+            }"#;
+        vec![css.to_string()]
     }
 
     fn view(&self) -> Node<Msg> {
+        let trapezoid_count = 8;
+        let small_circle_count = 10;
         node! {
             <div class="reactor">
               <div class="trapezoid-container">
-                <div class="trapezoid trapezoid-1"></div>
-                <div class="trapezoid trapezoid-2"></div>
-                <div class="trapezoid trapezoid-3"></div>
-                <div class="trapezoid trapezoid-4"></div>
-                <div class="trapezoid trapezoid-5"></div>
-                <div class="trapezoid trapezoid-6"></div>
-                <div class="trapezoid trapezoid-7"></div>
-                <div class="trapezoid trapezoid-8"></div>
-                <div class="trapezoid trapezoid-9"></div>
-                <div class="trapezoid trapezoid-10"></div>
+                {for i in 0..trapezoid_count{
+                    node!{
+                        <div class=format!("trapezoid trapezoid-{}",i+1)
+                             style=format!("transform:rotate({}deg)", i * 360 / trapezoid_count)>
+                        </div>
+                    }
+                }}
               </div>
 
               <div class="small-circle-container">
-                <div class="small-circle small-circle-1"></div>
-                <div class="small-circle small-circle-2"></div>
-                <div class="small-circle small-circle-3"></div>
-                <div class="small-circle small-circle-4"></div>
-                <div class="small-circle small-circle-5"></div>
-                <div class="small-circle small-circle-6"></div>
-                <div class="small-circle small-circle-7"></div>
-                <div class="small-circle small-circle-8"></div>
-                <div class="small-circle small-circle-9"></div>
-                <div class="small-circle small-circle-10"></div>
-                <div class="small-circle small-circle-11"></div>
-                <div class="small-circle small-circle-12"></div>
+                {for i in 0..small_circle_count{
+                    node!{
+                        <div class=format!("small-circle small-circle-{}",i+1)
+                             style=format!("transform:rotate({}deg)", i * 360 / small_circle_count)>
+                        </div>
+                    }
+                }}
               </div>
-
               <div class="circle-outer"></div>
               <div class="circle-center"></div>
               <div class="circle-innner"></div>
