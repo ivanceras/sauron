@@ -24,6 +24,7 @@ use sauron_core::{
             HTML_ATTRS_SPECIAL,
             HTML_STYLES,
         },
+        html_element_sc,
         tags::{
             HTML_SC_TAGS,
             HTML_TAGS,
@@ -191,7 +192,13 @@ fn process_node<MSG>(node: &Handle) -> Option<Node<MSG>> {
             if let Some(html_tag) = match_tag(&tag) {
                 let children_nodes = process_children(node);
                 let attributes = extract_attributes(&attrs.borrow());
-                Some(element(html_tag, attributes, children_nodes))
+                let is_self_closing = HTML_SC_TAGS.contains(&html_tag);
+                Some(html_element_sc(
+                    html_tag,
+                    attributes,
+                    children_nodes,
+                    is_self_closing,
+                ))
             } else {
                 log::warn!("Invalid tag: {}", tag);
                 None
