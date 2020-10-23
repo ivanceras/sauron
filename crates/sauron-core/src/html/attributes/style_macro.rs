@@ -4,7 +4,6 @@ macro_rules! style {
     ($($tokens:tt)+) => {
         {
             let json = serde_json::json!({$($tokens)*});
-            println!("json: {}", json.to_string());
             let mut styles = vec![];
             if let Some(style_properties) = json.as_object(){
                 for (prop,p_value) in style_properties.iter(){
@@ -22,7 +21,6 @@ macro_rules! style {
                         serde_json::Value::Bool(v) => $crate::html::attributes::Value::Bool(*v),
                         _ => panic!("supported values are String, Number or Bool only"),
                     };
-                    println!("value: {}", value);
                     styles.push($crate::html::attributes::Style::new(prop, value));
 
                 }
