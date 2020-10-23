@@ -1,3 +1,4 @@
+#![deny(warnings)]
 pub use parser::{
     match_attribute_function,
     parse,

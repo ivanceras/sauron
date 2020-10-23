@@ -34,7 +34,6 @@ use sauron_core::{
         text,
     },
     mt_dom,
-    mt_dom::element,
     svg::{
         attributes::{
             SVG_ATTRS,
@@ -250,5 +249,31 @@ pub fn parse_simple<MSG>(html: &str) -> Result<Vec<Node<MSG>>, ParseError> {
         }
     } else {
         Ok(vec![])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sauron_core::{
+        html::div,
+        Render,
+    };
+
+    #[test]
+    fn test_html_child() {
+        let html = r#"<article class="side-to-side">
+    <div>
+        This is div content1
+    </div>
+    <footer>
+        This is footer
+    </footer>
+</article>"#;
+        let node: Vec<Node<()>> = parse_simple(html).expect("must parse");
+        println!("node: {:#?}", node);
+        let one = div(vec![], node);
+        println!("one: {}", one.render_to_string());
+        panic!();
     }
 }

@@ -110,9 +110,6 @@ pub fn render_markdown<'a, MSG>(src: &'a str) -> Vec<Node<MSG>> {
                 assert!(l >= 1);
                 let mut top = spine.pop().unwrap();
                 match tag {
-                    Tag::CodeBlock(_codeblock) => {
-                        top = pre(vec![], vec![top]);
-                    }
                     Tag::Table(aligns) => {
                         if let Some(element) = top.as_element_mut() {
                             for r in element.children_mut() {
