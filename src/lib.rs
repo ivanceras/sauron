@@ -5,6 +5,7 @@
 //!
 //! ![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png)
 //!
+//! [Guide](https://sauron-rs.github.io/)
 //!
 //!  **Sauron** is an HTML web framework for building web-apps with the goal of
 //!  closely adhering to [The Elm Architecture](https://guide.elm-lang.org/architecture/), a paragon of elegant design.
@@ -123,8 +124,6 @@
 //! - [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet CSV data viewer
 //! - [svg-clock](https://ivanceras.github.io/svg-clock/) - A clock drawn using SVG and window tick event.
 //! - [svg-graph](https://ivanceras.github.io/svg-graph/) - A simple graph using SVG
-//! - [tinki wiki](https://github.com/ivanceras/tinki) - My personal wiki, powering my [github
-//! pages](https://ivanceras.github.io)
 //! - [code-editor](https://ivanceras.github.io/code-editor/) - A WIP web-base code-editor
 //!
 //! ### Converting HTML into Sauron's syntax
@@ -186,18 +185,8 @@ pub mod prelude {
     pub use sauron_node_macro::node;
 }
 pub use sauron_core::{
-    diff,
-    html,
-    jss,
-    mt_dom,
-    svg,
-    Attribute,
-    Callback,
-    Element,
-    Node,
-    Patch,
-    Render,
-    Text,
+    diff, html, jss, mt_dom, svg, Attribute, Callback, Element, Node, Patch,
+    Render, Text,
 };
 
 // reexports
