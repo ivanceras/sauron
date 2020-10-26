@@ -1,16 +1,28 @@
 //! This contains a trait to be able to render
 //! virtual dom into a writable buffer
 //!
-use crate::{
-    html::attributes,
-    Attribute,
-    Element,
-    Node,
-};
+use crate::{html::attributes, Attribute, Element, Node};
 use std::fmt;
 
 /// render node, elements to a writable buffer
 pub trait Render {
+    // ISSUE: sublte difference in `render` and `render_to_string`:
+    //  - flow content element such as span will treat the whitespace in between them as html text
+    //  node
+    //  Example:
+    //  in `render`
+    //  ```html
+    //     <span>hello</span>
+    //     <span> world</span>
+    //  ```
+    //     will displayed as "hello  world"
+    //
+    //  where us `render_to_string`
+    //  ```html
+    //  <span>hello</span><span> world</span>
+    //  ```
+    //  will result to a desirable output: "hello world"
+    //
     /// render the node to a writable buffer
     fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
         self.render_with_indent(buffer, 0, &mut Some(0), false)
