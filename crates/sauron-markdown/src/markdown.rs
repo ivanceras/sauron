@@ -204,7 +204,7 @@ impl<MSG> MarkdownParser<MSG> {
                     _ => unreachable!(),
                 }
             }
-            Tag::BlockQuote => blockquote(vec![class("blockquote")], vec![]),
+            Tag::BlockQuote => blockquote(vec![], vec![]),
             Tag::CodeBlock(codeblock) => {
                 self.in_code_block = true;
                 match codeblock {
@@ -240,8 +240,8 @@ impl<MSG> MarkdownParser<MSG> {
                     td(vec![], vec![])
                 }
             }
-            Tag::Emphasis => span(vec![class("font-italic")], vec![]),
-            Tag::Strong => span(vec![class("font-weight-bold")], vec![]),
+            Tag::Emphasis => em(vec![], vec![]),
+            Tag::Strong => strong(vec![], vec![]),
             Tag::Strikethrough => s(vec![], vec![]),
             // replace links using the link_lookup
             Tag::Link(_link_type, ref link_href, ref link_title) => a(
@@ -262,7 +262,7 @@ impl<MSG> MarkdownParser<MSG> {
                 let len = self.numbers.len() + 1;
                 let number =
                     self.numbers.entry(name.to_string()).or_insert(len);
-                div(
+                footer(
                     vec![class("footnote-definition"), id(name.to_string())],
                     vec![sup(
                         vec![class("footnote-label")],
@@ -404,7 +404,7 @@ Duplicated footnote reference[^second].
 [^second]: Footnote text.
         "#;
 
-        let expected = "<div>\n    <h3>\n        <a href=\"https://github.com/markdown-it/markdown-it-footnote\" title=\"\">Footnotes</a>\n    </h3>\n    <p>\n        Footnote 1 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#first\">1</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Footnote 2 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Inline footnote^\n        [\n        Text of inline footnote\n        ]\n         definition.\n    </p>\n    <p>\n        Duplicated footnote reference\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <div class=\"footnote-definition\" id=\"first\">\n        <sup class=\"footnote-label\">1</sup>\n        <p>\n            Footnote \n            <span class=\"font-weight-bold\">can have markup</span>\n        </p>\n    </div>\n    <pre>\n        <code>and multiple paragraphs.\n</code>\n    </pre>\n    <div class=\"footnote-definition\" id=\"second\">\n        <sup class=\"footnote-label\">2</sup>\n        <p>Footnote text.</p>\n    </div>\n</div>";
+        let expected = "<div>\n    <h3>\n        <a href=\"https://github.com/markdown-it/markdown-it-footnote\" title=\"\">Footnotes</a>\n    </h3>\n    <p>\n        Footnote 1 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#first\">1</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Footnote 2 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Inline footnote^\n        [\n        Text of inline footnote\n        ]\n         definition.\n    </p>\n    <p>\n        Duplicated footnote reference\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <footer class=\"footnote-definition\" id=\"first\">\n        <sup class=\"footnote-label\">1</sup>\n        <p>\n            Footnote \n            <strong>can have markup</strong>\n        </p>\n    </footer>\n    <pre>\n        <code>and multiple paragraphs.\n</code>\n    </pre>\n    <footer class=\"footnote-definition\" id=\"second\">\n        <sup class=\"footnote-label\">2</sup>\n        <p>Footnote text.</p>\n    </footer>\n</div>";
         let view: Node<()> = markdown(md);
 
         let mut buffer = String::new();
