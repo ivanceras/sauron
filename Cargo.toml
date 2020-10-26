@@ -1,6 +1,6 @@
 [package]
 name = "sauron"
-version = "0.32.4"
+version = "0.32.5"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -73,6 +73,6 @@ members = [
 
 
 [patch.crates-io]
-mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
+#mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
 #mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "develop" }
 #mt-dom = { path = "../mt-dom" }
