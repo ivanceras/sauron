@@ -9,7 +9,7 @@ use sauron_core::{
     Node,
 };
 use std::{
-    collections::{BTreeMap, HashMap, HashSet},
+    collections::{HashMap, HashSet},
     iter::FromIterator,
 };
 

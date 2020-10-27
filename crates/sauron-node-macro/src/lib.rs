@@ -1,5 +1,16 @@
-#![doc(html_root_url = "https://docs.rs/sauron/0.28.2")]
+#![deny(
+    warnings,
+    missing_docs,
+    missing_debug_implementations,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unstable_features,
+    unused_import_braces
+)]
 
+//! node macro facilitates users of sauron to use html-like syntax
+//! for building view of web app components
 extern crate proc_macro;
 
 mod node;

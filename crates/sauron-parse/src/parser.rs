@@ -28,12 +28,16 @@ use sauron_core::{
 use std::{fmt, io};
 use thiserror::Error;
 
+/// all the possible error when parsing html string
 #[derive(Debug, Error)]
 pub enum ParseError {
+    /// generic parser error, expressed in string
     #[error("Generic Error {0}")]
     Generic(String),
+    /// io error
     #[error("{0}")]
     IoError(#[from] io::Error),
+    /// formatting error
     #[error("{0}")]
     FmtError(#[from] fmt::Error),
 }
@@ -79,6 +83,7 @@ fn match_style_name(key: &str) -> Option<&'static str> {
         .map(|name| *name)
 }
 
+/// return the static str of this function name
 pub fn match_attribute_function(key: &str) -> Option<&'static str> {
     HTML_ATTRS
         .iter()
@@ -191,6 +196,7 @@ fn process_node<MSG>(node: &Handle) -> Option<Node<MSG>> {
     }
 }
 
+/// Parse html string and convert it into sauron Node
 pub fn parse<MSG>(html: &str) -> Result<Option<Node<MSG>>, ParseError> {
     let html_start = html.trim_start();
     let parser = if html_start.starts_with("<html")
