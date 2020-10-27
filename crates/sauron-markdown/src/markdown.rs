@@ -86,7 +86,7 @@ impl<MSG> MarkdownParser<MSG> {
         if self.elems.len() == 1 {
             self.elems[0].clone()
         } else {
-            div(vec![], self.elems.clone())
+            p(vec![], self.elems.clone())
         }
     }
 
@@ -404,7 +404,7 @@ Duplicated footnote reference[^second].
 [^second]: Footnote text.
         "#;
 
-        let expected = "<div>\n    <h3>\n        <a href=\"https://github.com/markdown-it/markdown-it-footnote\" title=\"\">Footnotes</a>\n    </h3>\n    <p>\n        Footnote 1 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#first\">1</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Footnote 2 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Inline footnote^\n        [\n        Text of inline footnote\n        ]\n         definition.\n    </p>\n    <p>\n        Duplicated footnote reference\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <footer class=\"footnote-definition\" id=\"first\">\n        <sup class=\"footnote-label\">1</sup>\n        <p>\n            Footnote \n            <strong>can have markup</strong>\n        </p>\n    </footer>\n    <pre>\n        <code>and multiple paragraphs.\n</code>\n    </pre>\n    <footer class=\"footnote-definition\" id=\"second\">\n        <sup class=\"footnote-label\">2</sup>\n        <p>Footnote text.</p>\n    </footer>\n</div>";
+        let expected = "<p>\n    <h3>\n        <a href=\"https://github.com/markdown-it/markdown-it-footnote\" title=\"\">Footnotes</a>\n    </h3>\n    <p>\n        Footnote 1 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#first\">1</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Footnote 2 link\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <p>\n        Inline footnote^\n        [\n        Text of inline footnote\n        ]\n         definition.\n    </p>\n    <p>\n        Duplicated footnote reference\n        <sup class=\"footnote-reference\">\n            <a href=\"#second\">2</a>\n        </sup>\n        .\n    </p>\n    <footer class=\"footnote-definition\" id=\"first\">\n        <sup class=\"footnote-label\">1</sup>\n        <p>\n            Footnote \n            <strong>can have markup</strong>\n        </p>\n    </footer>\n    <pre>\n        <code>and multiple paragraphs.\n</code>\n    </pre>\n    <footer class=\"footnote-definition\" id=\"second\">\n        <sup class=\"footnote-label\">2</sup>\n        <p>Footnote text.</p>\n    </footer>\n</p>";
         let view: Node<()> = markdown(md);
 
         let mut buffer = String::new();
@@ -420,7 +420,7 @@ Duplicated footnote reference[^second].
 <img src="img.jpeg"/>"#;
 
         let expected =
-"<div>\n    <p>\n        <a href=\"link.html\" title=\"\">Hello</a>\n        \n\n    </p>\n    <img src=\"img.jpeg\"/>\n</div>";
+"<p>\n    <p>\n        <a href=\"link.html\" title=\"\">Hello</a>\n        \n\n    </p>\n    <img src=\"img.jpeg\"/>\n</p>";
         let view: Node<()> = markdown(md);
 
         let mut buffer = String::new();
@@ -458,7 +458,7 @@ Duplicated footnote reference[^second].
     - sublist 2
     - sublist 3
 "#;
-        let expected = r#"<div><h1>List</h1><ul><li>list 1</li><li>list 2</li><li>list 3<ul><li>sublist 1<ul><li>some other sublist A</li><li>some other sublist B</li></ul></li><li>sublist 2</li><li>sublist 3</li></ul></li></ul></div>"#;
+        let expected = r#"<p><h1>List</h1><ul><li>list 1</li><li>list 2</li><li>list 3<ul><li>sublist 1<ul><li>some other sublist A</li><li>some other sublist B</li></ul></li><li>sublist 2</li><li>sublist 3</li></ul></li></ul></p>"#;
         let view: Node<()> = markdown(md);
         let mut buffer = String::new();
         view.render_compressed(&mut buffer).unwrap();
@@ -477,7 +477,7 @@ look like:
   * the other one"#;
         let view: Node<()> = markdown(md);
 
-        let expected = r#"<div>
+        let expected = r#"<p>
     <h1>An h1 header</h1>
     <p>look like:</p>
     <ul>
@@ -485,7 +485,7 @@ look like:
         <li>that one</li>
         <li>the other one</li>
     </ul>
-</div>"#;
+</p>"#;
 
         let mut buffer = String::new();
         view.render(&mut buffer).unwrap();
@@ -500,14 +500,14 @@ look like:
 
 [link with title](http://nodeca.github.io/pica/demo/ "title text!")"#;
         let view: Node<()> = markdown(md);
-        let expected = r#"<div>
+        let expected = r#"<p>
     <p>
         <a href="http://dev.nodeca.com" title="">link text</a>
     </p>
     <p>
         <a href="http://nodeca.github.io/pica/demo/" title="title text!">link with title</a>
     </p>
-</div>"#;
+</p>"#;
 
         let mut buffer = String::new();
         view.render(&mut buffer).unwrap();
@@ -528,7 +528,7 @@ look like:
 }
 "#;
         let view: Node<()> = markdown(md);
-        let expected = r#"<div>
+        let expected = r#"<p>
     <h2>Tables</h2>
     <table>
         <tr>
@@ -552,7 +552,7 @@ look like:
             <td class="text-right"></td>
         </tr>
     </table>
-</div>"#;
+</p>"#;
 
         let mut buffer = String::new();
         view.render(&mut buffer).unwrap();
