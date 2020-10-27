@@ -15,6 +15,7 @@ use warp::{
     http::Response,
     Filter,
 };
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct FormData {
@@ -132,7 +133,9 @@ async fn main() {
         Response::builder().body(buffer)
     });
 
+    let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
+    println!("serve at http://localhost:{}", socket.port());
     warp::serve(submission.or(index))
-        .run(([127, 0, 0, 1], 3030))
+        .run(socket)
         .await;
 }
