@@ -1,58 +1,31 @@
 //! This module parses literal html returns sauron dom tree
 
 use html5ever::{
-    local_name,
-    namespace_url,
-    ns,
-    parse_document,
-    parse_fragment,
-    tendril::TendrilSink,
-    QualName,
+    local_name, namespace_url, ns, parse_document, parse_fragment,
+    tendril::TendrilSink, QualName,
 };
-use markup5ever_rcdom::{
-    Handle,
-    NodeData,
-    RcDom,
-};
+use markup5ever_rcdom::{Handle, NodeData, RcDom};
 use sauron_core::{
     html::{
         attributes,
         attributes::{
-            AttributeValue,
-            Style,
-            HTML_ATTRS,
-            HTML_ATTRS_SPECIAL,
-            HTML_STYLES,
+            AttributeValue, Style, HTML_ATTRS, HTML_ATTRS_SPECIAL, HTML_STYLES,
         },
         html_element_sc,
         tags::{
-            HTML_SC_TAGS,
-            HTML_TAGS,
-            HTML_TAGS_NON_COMMON,
+            HTML_SC_TAGS, HTML_TAGS, HTML_TAGS_NON_COMMON,
             HTML_TAGS_WITH_MACRO_NON_COMMON,
         },
         text,
     },
     mt_dom,
     svg::{
-        attributes::{
-            SVG_ATTRS,
-            SVG_ATTRS_SPECIAL,
-            SVG_ATTRS_XLINK,
-        },
-        tags::{
-            SVG_TAGS,
-            SVG_TAGS_NON_COMMON,
-            SVG_TAGS_SPECIAL,
-        },
+        attributes::{SVG_ATTRS, SVG_ATTRS_SPECIAL, SVG_ATTRS_XLINK},
+        tags::{SVG_TAGS, SVG_TAGS_NON_COMMON, SVG_TAGS_SPECIAL},
     },
-    Attribute,
-    Node,
+    Attribute, Node,
 };
-use std::{
-    fmt,
-    io,
-};
+use std::{fmt, io};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -255,10 +228,7 @@ pub fn parse_simple<MSG>(html: &str) -> Result<Vec<Node<MSG>>, ParseError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use sauron_core::{
-        html::div,
-        Render,
-    };
+    use sauron_core::{html::div, Render};
 
     #[test]
     fn test_html_child() {
@@ -274,6 +244,5 @@ mod tests {
         println!("node: {:#?}", node);
         let one = div(vec![], node);
         println!("one: {}", one.render_to_string());
-        panic!();
     }
 }
