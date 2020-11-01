@@ -1,5 +1,15 @@
 # Changelog
 
+## (Unreleased)
+ - implement `on_mount` event where virtual node (sauron::Node) can listen to when the element is materialized into an actual dom element.
+    The `MountEvent` that is passed on the argument function contains the `target_node` which is the actual created DOM node.
+ - restructure the interactive examples
+ - improve implementation of markdown-parser
+    - Use `<p>` to wrap multiple top-level elements instead of `<div>` in sauron-markdown.
+    - use the semantic equivalent html tag, such as `<em>` and `<stron>`, instead of just `<span>` with a `class` attribute
+ - fix parsing of self-closing tag for in `sauron-parse` craate.
+ - Add special handling of `on_enter` event, input elements can now use `on_enter` event to listen to when the user presses the `Enter` key
+
 ## 0.32.3
 - put behind a feature flag functionalities which deals with `node_idx_lookup`
 
@@ -9,7 +19,7 @@
 - Add special attributes `focus`, `skip` and `replace`
     - If an element has a `focus(true)` attribute, it will always have a focus on each update.
     - If an element has a `skip(true)` attribute, it will skip diffing of that node and assume no changes
-    - If an element has a `replace(true)` attribute, it will return a `ReplaceNode` patch replacing the matching old node skipping the diffing. 
+    - If an element has a `replace(true)` attribute, it will return a `ReplaceNode` patch replacing the matching old node skipping the diffing.
         This will be useful, for parts in the view code where it always changes at every update, for diffing would just become an uncessary overhead.
 
 ## 0.32.1
