@@ -1,29 +1,19 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 use log::trace;
 use sauron::{
     html::{
-        attributes::{
-            attr,
-            class,
-            id,
-            type_,
-            value,
-        },
+        attributes::{attr, class, id, type_, value},
         div,
         events::on_click,
-        h1,
-        input,
-        text,
+        h1, input, text,
     },
     prelude::*,
-    Cmd,
-    Component,
-    Node,
-    Program,
+    Cmd, Component, Node, Program,
 };
 
 pub enum Msg {
     Click,
+    NoOp,
 }
 
 pub struct App {
@@ -58,6 +48,13 @@ impl Component<Msg> for App {
                                     trace!("Button is clicked");
                                     Msg::Click
                                 }),
+                                on_mount(|m| {
+                                    log::trace!(
+                                        "input button is mounted into: {:?}",
+                                        m.target_node
+                                    );
+                                    Msg::NoOp
+                                }),
                             ],
                             vec![],
                         ),
@@ -81,6 +78,7 @@ impl Component<Msg> for App {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Click => self.click_count += 1,
+            Msg::NoOp => (),
         }
         Cmd::none()
     }

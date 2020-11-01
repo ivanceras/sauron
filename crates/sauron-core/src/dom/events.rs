@@ -1,25 +1,43 @@
 //! https://developer.mozilla.org/en-US/docs/Web/Events
 
-use crate::{
-    Attribute,
-    Callback,
-    Event,
-};
+use crate::{Attribute, Callback};
 use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
 pub use web_sys::{
-    AnimationEvent,
-    HashChangeEvent,
-    KeyboardEvent,
-    MouseEvent,
-    TransitionEvent,
+    AnimationEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TransitionEvent,
 };
-use web_sys::{
-    EventTarget,
-    HtmlInputElement,
-    HtmlTextAreaElement,
-};
+use web_sys::{EventTarget, HtmlInputElement, HtmlTextAreaElement};
+
+/// Map the Event to DomEvent, which are browser events
+#[derive(Debug, Clone, PartialEq)]
+pub enum Event {
+    /// native dome events web_sys::Events
+    WebEvent(web_sys::Event),
+    /// custom event here follows
+    MountEvent(MountEvent),
+}
+
+impl Event {
+    fn as_web(self) -> Option<web_sys::Event> {
+        match self {
+            Event::WebEvent(web_event) => Some(web_event),
+            _ => None,
+        }
+    }
+}
+
+impl From<MountEvent> for Event {
+    fn from(mount_event: MountEvent) -> Self {
+        Event::MountEvent(mount_event)
+    }
+}
+
+impl From<web_sys::Event> for Event {
+    fn from(web_event: web_sys::Event) -> Self {
+        Event::WebEvent(web_event)
+    }
+}
 
 /// an event builder
 pub fn on<F, MSG>(event_name: &'static str, f: F) -> Attribute<MSG>
@@ -51,12 +69,35 @@ where
     MSG: 'static,
 {
     on("scroll", move |event: Event| {
-        let target = event.target().expect("can't get target");
+        let web_event = event.as_web().expect("must be a web event");
+        let target = web_event.target().expect("can't get target");
         let element: &web_sys::Element =
             target.dyn_ref().expect("Cant cast to Element");
         let scroll_top = element.scroll_top();
         let scroll_left = element.scroll_left();
         f((scroll_top, scroll_left))
+    })
+}
+
+/// an event when a virtual Node is mounted the field node is the actual
+/// dom node where the virtual Node is created in the actual dom
+#[derive(Debug, Clone, PartialEq)]
+pub struct MountEvent {
+    /// the node where the virtual node is materialized into the actual dom
+    pub target_node: web_sys::Node,
+}
+
+/// custom mount event
+pub fn on_mount<F, MSG>(f: F) -> Attribute<MSG>
+where
+    F: Fn(MountEvent) -> MSG + 'static,
+{
+    on("mount", move |event: Event| match event {
+        Event::MountEvent(me) => f(me),
+        _ => {
+            log::warn!("was expecting a mount event");
+            unreachable!()
+        }
     })
 }
 
@@ -105,19 +146,27 @@ macro_rules! declare_html_events{
 
 /// convert a generic event to MouseEvent
 fn to_mouse_event(event: Event) -> MouseEvent {
-    event.dyn_into().expect("Unable to cast to mouse event")
+    let web_event = event.as_web().expect("must be a web_sys event");
+    web_event.dyn_into().expect("Unable to cast to mouse event")
 }
 
 fn to_keyboard_event(event: Event) -> KeyboardEvent {
-    event.dyn_into().expect("unable to cast to keyboard event")
+    let web_event = event.as_web().expect("must be a web_sys event");
+    web_event
+        .dyn_into()
+        .expect("unable to cast to keyboard event")
 }
 
 fn to_animation_event(event: Event) -> AnimationEvent {
-    event.dyn_into().expect("unable to cast to animation event")
+    let web_event = event.as_web().expect("must be a web_sys event");
+    web_event
+        .dyn_into()
+        .expect("unable to cast to animation event")
 }
 
 fn to_transition_event(event: Event) -> TransitionEvent {
-    event
+    let web_event = event.as_web().expect("must be a web_sys event");
+    web_event
         .dyn_into()
         .expect("unable to cast to transition event")
 }
@@ -127,7 +176,8 @@ fn as_is(event: Event) -> Event {
 }
 
 fn to_hashchange_event(event: Event) -> HashChangeEvent {
-    event
+    let web_event = event.as_web().expect("must be a web_sys event");
+    web_event
         .dyn_into()
         .expect("unable to cast to hashchange event")
 }
@@ -137,22 +187,23 @@ pub struct InputEvent {
     /// the input value
     pub value: String,
     /// the actual dom event
-    pub event: Event,
+    pub event: web_sys::Event,
 }
 
 impl InputEvent {
-    fn new(value: String, event: Event) -> Self {
+    fn new(value: String, event: web_sys::Event) -> Self {
         InputEvent { value, event }
     }
 }
 
 fn to_input_event(event: Event) -> InputEvent {
+    let web_event = event.as_web().expect("must be a web event");
     let target: EventTarget =
-        event.target().expect("Unable to get event target");
+        web_event.target().expect("Unable to get event target");
     if let Some(input) = target.dyn_ref::<HtmlInputElement>() {
-        InputEvent::new(input.value(), event)
+        InputEvent::new(input.value(), web_event)
     } else if let Some(textarea) = target.dyn_ref::<HtmlTextAreaElement>() {
-        InputEvent::new(textarea.value(), event)
+        InputEvent::new(textarea.value(), web_event)
     } else {
         panic!("fail in mapping event into input event");
     }

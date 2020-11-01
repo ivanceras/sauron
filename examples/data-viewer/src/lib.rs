@@ -2,21 +2,11 @@
 pub use error::Error;
 use log::Level;
 pub use restq::{
-    ast::{
-        ddl::DataTypeDef,
-        Column,
-        Table,
-    },
-    ColumnDef,
-    DataType,
-    DataValue,
+    ast::{ddl::DataTypeDef, Column, Table},
+    ColumnDef, DataType, DataValue,
 };
 use sauron::prelude::*;
-use views::{
-    resize_wrapper,
-    DataView,
-    ResizeWrapper,
-};
+use views::{resize_wrapper, DataView, ResizeWrapper};
 
 #[macro_use]
 extern crate log;
@@ -81,7 +71,7 @@ fn create_data_view() -> DataView {
 
     data_view.set_allocated_size(total_width, 600);
     data_view.set_column_widths(&column_widths);
-    data_view.freeze_columns(vec![0]);
+    data_view.freeze_columns(vec![0, 1, 2]);
     data_view.freeze_rows(vec![(0, vec![0, 1, 2])]);
     data_view
 }

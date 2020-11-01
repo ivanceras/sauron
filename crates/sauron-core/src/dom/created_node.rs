@@ -1,30 +1,17 @@
+use crate::events::MountEvent;
 use crate::{
     dom::Dispatch,
     html,
     html::attributes::Special,
-    mt_dom::{
-        Callback,
-        NodeIdx,
-    },
+    mt_dom::{Callback, NodeIdx},
     Attribute,
 };
-use std::{
-    collections::HashMap,
-    sync::Mutex,
-};
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-};
+use mt_dom::AttValue;
+use std::{collections::HashMap, sync::Mutex};
+use wasm_bindgen::{closure::Closure, JsCast};
 use web_sys::{
-    self,
-    Element,
-    EventTarget,
-    HtmlElement,
-    HtmlInputElement,
-    HtmlTextAreaElement,
-    Node,
-    Text,
+    self, Element, Event, EventTarget, HtmlElement, HtmlInputElement,
+    HtmlTextAreaElement, Node, Text,
 };
 
 // Used to uniquely identify elements that contain closures so that the DomUpdater can
@@ -142,6 +129,32 @@ impl CreatedNode {
         }
     }
 
+    /// dispatch the mount event,
+    /// call the callback since browser don't allow asynchronous execution of
+    /// dispatching custom events (non-native browser events)
+    fn dispatch_mount_event<MSG>(velem: &crate::Element<MSG>, element: &Element)
+    where
+        MSG: 'static,
+    {
+        for att in velem.attrs.iter() {
+            if *att.name() == "mount" {
+                log::trace!("found a mount event");
+                for val in att.value().iter() {
+                    match val {
+                        AttValue::Callback(cb) => {
+                            cb.emit(MountEvent {
+                                target_node: element.clone().unchecked_into(),
+                            });
+                        }
+                        AttValue::Plain(_) => {
+                            log::warn!("mount should not be a plain value");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
     fn create_element_node<DSP, MSG>(
@@ -166,6 +179,8 @@ impl CreatedNode {
                 .create_element(&velem.tag())
                 .expect("Unable to create element")
         };
+
+        Self::dispatch_mount_event(velem, &element);
 
         if velem.is_focused() {
             *focused_node = Some(element.clone().unchecked_into());
@@ -393,7 +408,8 @@ impl CreatedNode {
                                     .dyn_ref()
                                     .expect("should be a keyboard event");
                                 if ke.key() == "Enter" {
-                                    let msg = callback_clone.emit(event);
+                                    let msg = callback_clone
+                                        .emit(Into::<Event>::into(event));
                                     program_clone.dispatch(msg);
                                 }
                             },
