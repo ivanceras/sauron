@@ -1,6 +1,6 @@
 # Changelog
 
-## (Unreleased)
+## 0.32.6
  - implement `on_mount` event where virtual node (sauron::Node) can listen to when the element is materialized into an actual dom element.
     The `MountEvent` that is passed on the argument function contains the `target_node` which is the actual created DOM node.
  - restructure the interactive examples
