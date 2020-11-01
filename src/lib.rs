@@ -7,10 +7,9 @@
 //!
 //! [Guide](https://sauron-rs.github.io/)
 //!
-//!  **Sauron** is an HTML web framework for building web-apps with the goal of
-//!  closely adhering to [The Elm Architecture](https://guide.elm-lang.org/architecture/), a paragon of elegant design.
+//!  **Sauron** is an web framework for creating fast and interactive client side web application,
+//!  as well as server-side rendering for back-end web applications.
 //!
-//!  Sauron follow Elm's simplistic design of writing view code.
 //!
 //! ### Example
 //! ```rust,no_run
