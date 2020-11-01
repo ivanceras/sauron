@@ -4,11 +4,15 @@
  - implement `on_mount` event where virtual node (sauron::Node) can listen to when the element is materialized into an actual dom element.
     The `MountEvent` that is passed on the argument function contains the `target_node` which is the actual created DOM node.
  - restructure the interactive examples
+## 0.32.5
  - improve implementation of markdown-parser
     - Use `<p>` to wrap multiple top-level elements instead of `<div>` in sauron-markdown.
     - use the semantic equivalent html tag, such as `<em>` and `<stron>`, instead of just `<span>` with a `class` attribute
  - fix parsing of self-closing tag for in `sauron-parse` craate.
  - Add special handling of `on_enter` event, input elements can now use `on_enter` event to listen to when the user presses the `Enter` key
+
+## 0.32.4
+ - minor: put behind a feature-flag some trace/debugging code.
 
 ## 0.32.3
 - put behind a feature flag functionalities which deals with `node_idx_lookup`
