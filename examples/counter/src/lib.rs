@@ -25,17 +25,17 @@ impl Component<Msg> for App {
                 <input type="button"
                     value="+"
                     key="inc"
-                    on_click={|_| {
+                    on_click=|_| {
                         Msg::Increment
-                    }}
+                    }
                 />
                 <div>{text(self.count)}</div>
                 <input type="button"
                     value="-"
                     key="dec"
-                    on_click={|_| {
+                    on_click=|_| {
                         Msg::Decrement
-                    }}
+                    }
                 />
             </main>
         }
