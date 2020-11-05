@@ -2,13 +2,13 @@
 
 ## 0.32.6
  - implement `on_mount` event where virtual node (sauron::Node) can listen to when the element is materialized into an actual dom element.
-    The `MountEvent` that is passed on the argument function contains the `target_node` which is the actual created DOM node.
+    The `MountEvent` that is passed on the argument function contains the `target_node` which is the equivalent created DOM node.
  - restructure the interactive examples
 ## 0.32.5
  - improve implementation of markdown-parser
     - Use `<p>` to wrap multiple top-level elements instead of `<div>` in sauron-markdown.
-    - use the semantic equivalent html tag, such as `<em>` and `<stron>`, instead of just `<span>` with a `class` attribute
- - fix parsing of self-closing tag for in `sauron-parse` craate.
+    - use the semantic equivalent html tag, such as `<em>` and `<strong>`, instead of just `<span>` with a `class` attribute
+ - fix parsing of self-closing tag for in `sauron-parse` crate.
  - Add special handling of `on_enter` event, input elements can now use `on_enter` event to listen to when the user presses the `Enter` key
 
 ## 0.32.4
@@ -19,7 +19,7 @@
 
 ## 0.32.2
 - Add `on_copy` and `on_paste` event.
-- modify execute_in_request_animation_frame to return the handle ( can be used for cancelling the execution )
+- modify `execute_in_request_animation_frame` to return the handle ( can be used for cancelling the execution )
 - Add special attributes `focus`, `skip` and `replace`
     - If an element has a `focus(true)` attribute, it will always have a focus on each update.
     - If an element has a `skip(true)` attribute, it will skip diffing of that node and assume no changes
@@ -27,7 +27,7 @@
         This will be useful, for parts in the view code where it always changes at every update, for diffing would just become an uncessary overhead.
 
 ## 0.32.1
-- Fix apply_text_patch to include RemoveNode
+- Fix `apply_text_patch` to include RemoveNode
 
 ## 0.32.0
 - Added improvements on `node!` macro, now allowing you to use the exact attribute names for rust keywords.
@@ -49,8 +49,8 @@
         </main>
     )
     ```
-- simplify the algorithmn for find_node_recursive
-- Fix serder side rendering of self closing tags html, such as `input`, `br`, `hr`
+- simplify the algorithmn for `find_node_recursive`
+- Fix server side rendering of self closing tags html, such as `input`, `br`, `hr`
 - unify attribute manipulation in render and in dom_updater, the common code is in html::attributes module
 - Add node_idx attribute in render if `with-nodeidx` feature is enabled
 - Reexport `serde_json` in order for `jss` macro be able to use reexported `serde_json` from sauron crate

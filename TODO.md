@@ -18,8 +18,9 @@
  - [X] Fix the render function where attributes of the same name not merged
  - [X] Change type of tag, attribute_name, style keys from `&'static str` to `&'a str`
      - This will remove the need for hardcode HTML_STYLES lookup, which could be a performance penalty
- - Add the RealWorld example
+ - [ ] Add the RealWorld example
      - Use the elm base code https://github.com/rtfeldman/elm-spa-example
+ - [ ] **breaking** put back `style` as a normal attribute, to avoid possible confusion to new users.
 
 ## Internal
 - [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`
