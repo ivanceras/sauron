@@ -40,6 +40,7 @@ features = [
     "KeyboardEvent",
     "HashChangeEvent",
     "InputEvent",
+    "Headers",
     "HtmlCollection",
     "HtmlElement",
     "HtmlHeadElement",

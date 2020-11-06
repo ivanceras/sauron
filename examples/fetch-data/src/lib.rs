@@ -1,5 +1,7 @@
 #![deny(warnings)]
+use sauron::js_sys::TypeError;
 use sauron::prelude::*;
+use sauron::web_sys::Response;
 use serde::Deserialize;
 
 #[macro_use]
@@ -11,7 +13,8 @@ const DATA_URL: &'static str = "https://reqres.in/api/users";
 pub enum Msg {
     NextPage,
     PrevPage,
-    ReceivedData(Result<Data, JsValue>),
+    ReceivedData(Result<Data, Response>),
+    RequestError(TypeError),
 }
 
 pub struct App {
@@ -57,6 +60,7 @@ impl App {
                 data.expect("Error deserializing data")
             },
             Msg::ReceivedData,
+            Msg::RequestError,
         )
     }
 }
@@ -166,6 +170,14 @@ impl Component<Msg> for App {
                 self.error = Some(format!(
                     "There was an error fetching the page: {:?}",
                     js_value
+                ));
+                Cmd::none()
+            }
+            Msg::RequestError(type_error) => {
+                trace!("Error requesting the page: {:?}", type_error);
+                self.error = Some(format!(
+                    "There was an error fetching the page: {:?}",
+                    type_error
                 ));
                 Cmd::none()
             }
