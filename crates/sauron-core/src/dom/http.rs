@@ -4,6 +4,7 @@ use js_sys::TypeError;
 use std::fmt::Debug;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::Headers;
+use web_sys::RequestInit;
 use web_sys::Response;
 
 /// Provides functions for doing http network request
@@ -59,13 +60,42 @@ impl Http {
         FAIL: Fn(Response) -> MSG + 'static,
         ERR: Fn(TypeError) -> MSG + 'static,
     {
+        Self::fetch_with_request_and_response_decoder(
+            url,
+            None,
+            success_text_decoder,
+            fail_cb,
+            err_cb,
+        )
+    }
+
+    /// API for fetching http rest request
+    pub fn fetch_with_request_and_response_decoder<
+        APP,
+        MSG,
+        SUCCEED,
+        FAIL,
+        ERR,
+    >(
+        url: &str,
+        request_init: Option<RequestInit>,
+        success_text_decoder: SUCCEED,
+        fail_cb: FAIL,
+        err_cb: ERR,
+    ) -> Cmd<APP, MSG>
+    where
+        APP: Component<MSG> + 'static,
+        MSG: 'static,
+        SUCCEED: Fn((String, Headers)) -> MSG + 'static,
+        FAIL: Fn(Response) -> MSG + 'static,
+        ERR: Fn(TypeError) -> MSG + 'static,
+    {
         let url_clone = url.to_string();
         let success_text_decoder = Callback::from(success_text_decoder);
 
         let fail_cb = Callback::from(fail_cb);
         let err_cb = Callback::from(err_cb);
-
-        let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
+        Cmd::new(move |program| {
             let program_clone = program.clone();
 
             let success_text_decoder = success_text_decoder.clone();
@@ -74,8 +104,15 @@ impl Http {
             let err_cb = err_cb.clone();
 
             let program_clone_status_err = program.clone();
+            let window =
+                web_sys::window().expect("should a refernce to window");
 
-            let promise = crate::window().fetch_with_str(&url_clone);
+            let promise = if let Some(ref request_init) = request_init {
+                window.fetch_with_str_and_init(&url_clone, request_init)
+            } else {
+                window.fetch_with_str(&url_clone)
+            };
+
             let cb: Closure<dyn FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
                     let fail_cb = fail_cb.clone();
@@ -115,8 +152,6 @@ impl Http {
 
             cb.forget();
             err_closure.forget();
-        });
-
-        cmd
+        })
     }
 }
