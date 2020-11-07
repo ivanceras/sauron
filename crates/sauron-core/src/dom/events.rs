@@ -171,8 +171,11 @@ fn to_transition_event(event: Event) -> TransitionEvent {
         .expect("unable to cast to transition event")
 }
 
-fn as_is(event: Event) -> Event {
-    event
+fn to_webevent(event: Event) -> web_sys::Event {
+    match event {
+        Event::WebEvent(event) => event,
+        _ => unreachable!(),
+    }
 }
 
 fn to_hashchange_event(event: Event) -> HashChangeEvent {
@@ -233,16 +236,16 @@ declare_html_events! {
     on_mouseup => mouseup => to_mouse_event => MouseEvent;
     on_pointerlockchange => pointerlockchange => to_mouse_event => MouseEvent;
     on_pointerlockerror => pointerlockerror => to_mouse_event => MouseEvent;
-    on_select => select => as_is => Event;
+    on_select => select => to_webevent => web_sys::Event;
     on_wheel => wheel => to_mouse_event => MouseEvent;
     on_doubleclick => dblclick => to_mouse_event => MouseEvent;
     on_keydown => keydown => to_keyboard_event => KeyboardEvent;
     on_keypress => keypress => to_keyboard_event => KeyboardEvent;
     on_keyup => keyup => to_keyboard_event => KeyboardEvent;
-    on_focus => focus => as_is => Event;
-    on_blur => blur => as_is => Event;
-    on_reset => reset => as_is => Event;
-    on_submit => submit => as_is => Event;
+    on_focus => focus => to_webevent => web_sys::Event;
+    on_blur => blur => to_webevent => web_sys::Event;
+    on_reset => reset => to_webevent => web_sys::Event;
+    on_submit => submit => to_webevent => web_sys::Event;
     on_input => input => to_input_event => InputEvent;
     #[cfg(web_sys_unstable_apis)]
     on_paste => paste => to_clipboard_event => ClipboardEvent;
@@ -251,5 +254,5 @@ declare_html_events! {
     on_change => change => to_input_event => InputEvent;
     on_broadcast => broadcast => to_input_event => InputEvent;
     on_hashchange => hashchange => to_hashchange_event => HashChangeEvent;
-    on_readystatechange => readystatechange => as_is => Event;
+    on_readystatechange => readystatechange => to_webevent => web_sys::Event;
 }
