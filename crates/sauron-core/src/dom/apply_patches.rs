@@ -2,36 +2,21 @@
 use crate::{
     dom::{
         created_node,
-        created_node::{
-            ActiveClosure,
-            CreatedNode,
-        },
+        created_node::{ActiveClosure, CreatedNode},
     },
     mt_dom::{
         patch::{
-            AddAttributes,
-            AppendChildren,
-            InsertNode,
-            RemoveAttributes,
-            RemoveNode,
-            ReplaceNode,
+            AddAttributes, AppendChildren, InsertNode, RemoveAttributes,
+            RemoveNode, ReplaceNode,
         },
-        AttValue,
-        NodeIdx,
+        AttValue, NodeIdx,
     },
-    Dispatch,
-    Patch,
+    Dispatch, Patch,
 };
 use js_sys::Function;
 use std::collections::HashMap;
-use wasm_bindgen::{
-    JsCast,
-    JsValue,
-};
-use web_sys::{
-    Element,
-    Node,
-};
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{Element, Node};
 
 /// Apply all of the patches to our old root node in order to create the new root node
 /// that we desire.
@@ -39,22 +24,20 @@ use web_sys::{
 ///
 /// Note: If Program is None, it is a dumb patch, meaning
 /// there is no event listener attached or changed
-pub fn patch<N, DSP, MSG>(
+pub fn patch<DSP, MSG>(
     program: Option<&DSP>,
-    root_node: N,
+    root_node: &mut Node,
     old_closures: &mut ActiveClosure,
     node_idx_lookup: &mut HashMap<NodeIdx, Node>,
     focused_node: &mut Option<Node>,
     patches: Vec<Patch<MSG>>,
 ) -> Result<ActiveClosure, JsValue>
 where
-    N: Into<Node>,
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
     #[cfg(feature = "with-measure")]
     let t1 = crate::now();
-    let root_node: Node = root_node.into();
 
     #[cfg(feature = "with-nodeidx-debug")]
     log::trace!("patches: {:#?}", patches);
@@ -64,9 +47,16 @@ where
 
     // finding the nodes to be patched before hand, instead of calling it
     // in every patch loop.
+    {
+        let root_element: &Element = root_node.unchecked_ref();
+        log::trace!(
+            "find the nodes from this root_node: {}",
+            root_element.outer_html()
+        );
+    }
     let nodes_to_patch = find_nodes(root_node, node_idx_lookup, &patches);
 
-    #[cfg(feature = "with-nodeidx-debug")]
+    #[cfg(any(feature = "with-nodeidx-debug", feature = "with-debug"))]
     log::trace!("nodes_to_patch: {:#?}", nodes_to_patch);
 
     #[cfg(feature = "with-measure")]
@@ -76,13 +66,13 @@ where
         t2
     };
 
-    //TODO: insert all patched_node idx only after everything has been applied
     for patch in patches.iter() {
         let patch_node_idx = patch.node_idx();
 
         if let Some(element) = nodes_to_patch.get(&patch_node_idx) {
             let new_closures = apply_patch_to_node(
                 program,
+                root_node,
                 &element,
                 old_closures,
                 node_idx_lookup,
@@ -129,7 +119,7 @@ where
 ///
 /// Complexity: O(n), where n is the total number of html nodes
 fn find_nodes<MSG>(
-    root_node: Node,
+    root_node: &Node,
     node_idx_lookup: &HashMap<NodeIdx, Node>,
     patches: &[Patch<MSG>],
 ) -> HashMap<usize, Node> {
@@ -158,7 +148,7 @@ fn find_nodes<MSG>(
 /// early returns true if all node has been found
 /// before completing iterating all the elements
 fn find_nodes_recursive(
-    node: Node,
+    node: &Node,
     node_idx_lookup: &HashMap<NodeIdx, Node>,
     cur_node_idx: &mut usize,
     nodes_to_find: &HashMap<usize, Option<&&'static str>>,
@@ -208,14 +198,15 @@ fn find_nodes_recursive(
                 cur_node_idx
             );
         }
-        nodes_to_patch.insert(*cur_node_idx, node);
+        log::trace!("This node has {} siblings", child_node_count);
+        nodes_to_patch.insert(*cur_node_idx, node.clone());
     }
 
     for i in 0..child_node_count {
         let child_node = children.item(i).expect("Expecting a child node");
         *cur_node_idx += 1;
         if find_nodes_recursive(
-            child_node,
+            &child_node,
             node_idx_lookup,
             cur_node_idx,
             nodes_to_find,
@@ -322,8 +313,12 @@ fn remove_event_listener_with_name(
 
 /// apply a the patch to this element node.
 /// and return the ActiveClosure that may be attached to that element
+///
+/// Note: a mutable root_node is passed here
+/// for the sole purpose of setting it when the a patch ReplaceNode at 0 is encountered.
 fn apply_patch_to_node<DSP, MSG>(
     program: Option<&DSP>,
+    root_node: &mut Node,
     node: &Node,
     old_closures: &mut ActiveClosure,
     node_idx_lookup: &mut HashMap<NodeIdx, Node>,
@@ -429,12 +424,13 @@ where
         // before it is actully replaced in the DOM
         //
         Patch::ReplaceNode(ReplaceNode {
-            tag: _,
-            node_idx: _,
+            tag,
+            node_idx,
             new_node_idx,
             replacement,
         }) => {
             let element: &Element = node.unchecked_ref();
+            log::trace!("element to be replaced: {:?}", element.outer_html());
             let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
                 program,
                 node_idx_lookup,
@@ -442,10 +438,28 @@ where
                 focused_node,
                 &mut Some(*new_node_idx),
             );
+            log::trace!("created node replacement: {:?}", created_node.node);
+            log::trace!("replacing {:?} with {:?}", tag, replacement);
+            if *node_idx == 0 {
+                log::trace!("THIS IS REPLACING THE DOM_UPDATER ROOT_NODE");
+                *root_node = created_node.node.clone();
+            }
+            let tag = tag.expect("must have a tag");
+            let target_tag = element.tag_name().to_lowercase();
+            if target_tag != **tag {
+                panic!(
+                    "expecting a tag: {:?}, but found: {:?}",
+                    tag, target_tag
+                );
+            }
+
             if element.node_type() != Node::TEXT_NODE {
                 remove_event_listeners(&element, old_closures)?;
             }
-            element.replace_with_with_node_1(&created_node.node)?;
+            log::info!("replace_node patch is applied here..");
+            element
+                .replace_with_with_node_1(&created_node.node)
+                .expect("must replace node");
 
             Ok(created_node.closures)
         }

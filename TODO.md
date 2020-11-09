@@ -48,6 +48,8 @@
 - [ ] Cmd should include a `should_update: bool` field which indicates if the update should be made or not
         - Cmd{ commands:Vec<..>,should_update }
         - Cmd::noop() // no update operation
+- [ ] Remove the Dispatch trait and pass Program as it is in dom_updater and apply_patches module
+    - There is only one implementation of `Dispatch` trait anyway, that is `Program`
 
 
 

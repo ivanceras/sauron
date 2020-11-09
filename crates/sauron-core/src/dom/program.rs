@@ -1,13 +1,5 @@
-use crate::{
-    dom::dom_updater::DomUpdater,
-    Cmd,
-    Component,
-    Dispatch,
-};
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use crate::{dom::dom_updater::DomUpdater, Cmd, Component, Dispatch};
+use std::{cell::RefCell, rc::Rc};
 #[cfg(feature = "with-request-animation-frame")]
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;
@@ -58,6 +50,7 @@ where
     }
 
     fn init_emit(&self) {
+        log::trace!("Executing the App's init function..");
         // call the init of the component
         let cmds: Cmd<APP, MSG> = self.app.borrow().init();
         // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
@@ -118,7 +111,6 @@ where
         let t1 = crate::now();
         // update the app and emit the cmd returned from the update
         let cmd = self.app.borrow_mut().update(msg);
-        cmd.emit(self);
         //trace!("Executing cmd..");
         #[cfg(feature = "with-measure")]
         let t2 = {
@@ -148,6 +140,7 @@ where
                 log::trace!("dispatch took: {}ms", dispatch_duration);
             }
         };
+        cmd.emit(self);
     }
 
     fn inject_style(style: &str) {

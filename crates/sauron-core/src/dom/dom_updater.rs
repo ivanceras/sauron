@@ -2,10 +2,7 @@ use crate::{
     diff,
     dom::{
         apply_patches::patch,
-        created_node::{
-            ActiveClosure,
-            CreatedNode,
-        },
+        created_node::{ActiveClosure, CreatedNode},
         Dispatch,
     },
     mt_dom::NodeIdx,
@@ -13,18 +10,15 @@ use crate::{
 };
 use std::collections::HashMap;
 use wasm_bindgen::JsCast;
-use web_sys::{
-    self,
-    Element,
-    Node,
-};
+use web_sys::{self, Element, Node};
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
 pub struct DomUpdater<MSG> {
     /// the current vdom representation
     pub current_vdom: crate::Node<MSG>,
-    root_node: Node,
+    /// the equivalent actual DOM element where the App is mounted into
+    pub root_node: Node,
 
     /// The closures that are currently attached to elements in the page.
     ///
@@ -100,6 +94,13 @@ where
                 .expect("Could not append child to mount");
         }
         self.root_node = created_node.node;
+        {
+            let root_element: &Element = self.root_node.unchecked_ref();
+            log::info!(
+                "dom_updater self.root_node: {:?}",
+                root_element.outer_html()
+            );
+        }
         self.active_closures = created_node.closures;
         log::trace!("focusing element after mounting");
         self.set_focus_element();
@@ -168,6 +169,16 @@ where
     {
         #[cfg(feature = "with-measure")]
         let t1 = crate::now();
+
+        #[cfg(feature = "with-debug")]
+        {
+            use crate::Render;
+            log::trace!(
+                "current_vdom: {}",
+                self.current_vdom.render_to_string()
+            );
+            log::trace!("new_vdom: {}", new_vdom.render_to_string());
+        }
         let patches = diff(&self.current_vdom, &new_vdom);
 
         #[cfg(feature = "with-measure")]
@@ -185,7 +196,7 @@ where
 
         let active_closures = patch(
             Some(program),
-            self.root_node.clone(),
+            &mut self.root_node,
             &mut self.active_closures,
             &mut self.node_idx_lookup,
             &mut self.focused_node,
@@ -206,7 +217,7 @@ where
     {
         let active_closures = patch(
             Some(program),
-            self.root_node.clone(),
+            &mut self.root_node,
             &mut self.active_closures,
             &mut self.node_idx_lookup,
             &mut self.focused_node,
