@@ -47,13 +47,6 @@ where
 
     // finding the nodes to be patched before hand, instead of calling it
     // in every patch loop.
-    {
-        let root_element: &Element = root_node.unchecked_ref();
-        log::trace!(
-            "find the nodes from this root_node: {}",
-            root_element.outer_html()
-        );
-    }
     let nodes_to_patch = find_nodes(root_node, node_idx_lookup, &patches);
 
     #[cfg(any(feature = "with-nodeidx-debug", feature = "with-debug"))]
@@ -430,7 +423,6 @@ where
             replacement,
         }) => {
             let element: &Element = node.unchecked_ref();
-            log::trace!("element to be replaced: {:?}", element.outer_html());
             let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
                 program,
                 node_idx_lookup,
@@ -438,10 +430,7 @@ where
                 focused_node,
                 &mut Some(*new_node_idx),
             );
-            log::trace!("created node replacement: {:?}", created_node.node);
-            log::trace!("replacing {:?} with {:?}", tag, replacement);
             if *node_idx == 0 {
-                log::trace!("THIS IS REPLACING THE DOM_UPDATER ROOT_NODE");
                 *root_node = created_node.node.clone();
             }
             let tag = tag.expect("must have a tag");
@@ -456,7 +445,6 @@ where
             if element.node_type() != Node::TEXT_NODE {
                 remove_event_listeners(&element, old_closures)?;
             }
-            log::info!("replace_node patch is applied here..");
             element
                 .replace_with_with_node_1(&created_node.node)
                 .expect("must replace node");

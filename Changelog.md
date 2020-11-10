@@ -1,5 +1,8 @@
 # Changelog
 
+## (Unreleased)
+- **breaking** overhaul on the `Http` api to allow users to manipulate response headers, and assign callback functions to errored request.
+
 ## 0.32.6
  - implement `on_mount` event where virtual node (sauron::Node) can listen to when the element is materialized into an actual dom element.
     The `MountEvent` that is passed on the argument function contains the `target_node` which is the equivalent created DOM node.

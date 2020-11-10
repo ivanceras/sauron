@@ -94,15 +94,7 @@ where
                 .expect("Could not append child to mount");
         }
         self.root_node = created_node.node;
-        {
-            let root_element: &Element = self.root_node.unchecked_ref();
-            log::info!(
-                "dom_updater self.root_node: {:?}",
-                root_element.outer_html()
-            );
-        }
         self.active_closures = created_node.closures;
-        log::trace!("focusing element after mounting");
         self.set_focus_element();
     }
 
@@ -110,8 +102,6 @@ where
         if let Some(focused_node) = &self.focused_node {
             let focused_element: &Element = focused_node.unchecked_ref();
             CreatedNode::set_element_focus(focused_element);
-        } else {
-            log::warn!("no focused node");
         }
     }
 
@@ -170,15 +160,6 @@ where
         #[cfg(feature = "with-measure")]
         let t1 = crate::now();
 
-        #[cfg(feature = "with-debug")]
-        {
-            use crate::Render;
-            log::trace!(
-                "current_vdom: {}",
-                self.current_vdom.render_to_string()
-            );
-            log::trace!("new_vdom: {}", new_vdom.render_to_string());
-        }
         let patches = diff(&self.current_vdom, &new_vdom);
 
         #[cfg(feature = "with-measure")]
