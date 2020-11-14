@@ -191,7 +191,6 @@ fn find_nodes_recursive(
                 cur_node_idx
             );
         }
-        log::trace!("This node has {} siblings", child_node_count);
         nodes_to_patch.insert(*cur_node_idx, node.clone());
     }
 
@@ -433,13 +432,14 @@ where
             if *node_idx == 0 {
                 *root_node = created_node.node.clone();
             }
-            let tag = tag.expect("must have a tag");
-            let target_tag = element.tag_name().to_lowercase();
-            if target_tag != **tag {
-                panic!(
-                    "expecting a tag: {:?}, but found: {:?}",
-                    tag, target_tag
-                );
+            if let Some(tag) = tag {
+                let target_tag = element.tag_name().to_lowercase();
+                if target_tag != **tag {
+                    panic!(
+                        "expecting a tag: {:?}, but found: {:?}",
+                        tag, target_tag
+                    );
+                }
             }
 
             if element.node_type() != Node::TEXT_NODE {

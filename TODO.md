@@ -21,6 +21,7 @@
  - [ ] Add the RealWorld example
      - Use the elm base code https://github.com/rtfeldman/elm-spa-example
  - [ ] **breaking** put back `style` as a normal attribute, to avoid possible confusion to new users.
+ - [ ] **breaking** merge `Browser` to `Window`.
 
 ## Internal
 - [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`

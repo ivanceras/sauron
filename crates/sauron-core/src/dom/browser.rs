@@ -87,4 +87,11 @@ impl Browser {
         options.left(0.0);
         crate::window().scroll_to_with_scroll_to_options(&options);
     }
+
+    /// set the browser location hash
+    pub fn set_location_hash(hash: &str) {
+        let window = crate::window();
+        let location = window.location();
+        location.set_hash(hash).expect("must set the location hash");
+    }
 }
