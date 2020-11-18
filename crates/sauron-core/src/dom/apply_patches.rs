@@ -383,7 +383,9 @@ where
                 for att_value in attr.value() {
                     match att_value {
                         AttValue::Plain(_) => {
-                            element.remove_attribute(attr.name())?;
+                            CreatedNode::remove_element_attribute(
+                                element, attr,
+                            )?;
                         }
                         // it is an event listener
                         AttValue::Callback(_) => {

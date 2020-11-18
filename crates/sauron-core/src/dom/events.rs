@@ -140,7 +140,7 @@ macro_rules! declare_html_events{
         }
 
         /// html events
-        pub const HTML_EVENTS: [&'static str; 31] = [$(stringify!($event),)*];
+        pub const HTML_EVENTS: [&'static str; 32] = [$(stringify!($event),)*];
     }
 }
 
@@ -212,6 +212,19 @@ fn to_input_event(event: Event) -> InputEvent {
     }
 }
 
+fn to_checked(event: Event) -> bool {
+    let web_event = event.as_web().expect("must be a web event");
+    //web_event.prevent_default();
+    //web_event.stop_propagation();
+    let target: EventTarget =
+        web_event.target().expect("Unable to get event target");
+    if let Some(input) = target.dyn_ref::<HtmlInputElement>() {
+        input.checked()
+    } else {
+        panic!("must be a html input element");
+    }
+}
+
 /// Note: paste event happens before the data is inserted into the target element
 /// therefore trying to access the data on the target element triggered from paste will get an
 /// empty text
@@ -247,6 +260,7 @@ declare_html_events! {
     on_reset => reset => to_webevent => web_sys::Event;
     on_submit => submit => to_webevent => web_sys::Event;
     on_input => input => to_input_event => InputEvent;
+    on_checked => input => to_checked => bool;
     #[cfg(web_sys_unstable_apis)]
     on_paste => paste => to_clipboard_event => ClipboardEvent;
     #[cfg(web_sys_unstable_apis)]

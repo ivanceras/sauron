@@ -8,7 +8,7 @@ use crate::{
 };
 use mt_dom::AttValue;
 use std::{collections::HashMap, sync::Mutex};
-use wasm_bindgen::{closure::Closure, JsCast};
+use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
     self, Element, Event, EventTarget, HtmlElement, HtmlInputElement,
     HtmlTextAreaElement, Node, Text,
@@ -445,6 +445,27 @@ impl CreatedNode {
     pub(crate) fn set_element_focus(element: &Element) {
         let html_element: &HtmlElement = element.unchecked_ref();
         html_element.focus().expect("must focus")
+    }
+
+    /// remove element attribute,
+    /// takes care of special case such as checked
+    pub fn remove_element_attribute<MSG>(
+        element: &Element,
+        attr: &Attribute<MSG>,
+    ) -> Result<(), JsValue> {
+        log::trace!("removing attribute: {}", attr.name());
+
+        element.remove_attribute(attr.name())?;
+
+        match *attr.name() {
+            "checked" => {
+                if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
+                    input.set_checked(false);
+                }
+            }
+            _ => (),
+        }
+        Ok(())
     }
 }
 
