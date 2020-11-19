@@ -2,7 +2,6 @@
 //! manipulating the actual Document Object Model in the browser
 //!
 pub mod apply_patches;
-mod browser;
 pub mod cmd;
 mod component;
 mod created_node;
@@ -14,7 +13,6 @@ mod program;
 mod util;
 mod window;
 
-pub use browser::Browser;
 pub use component::Component;
 pub use created_node::CreatedNode;
 pub use dispatch::Dispatch;
