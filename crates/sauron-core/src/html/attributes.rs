@@ -1,21 +1,12 @@
 //! https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
 //!
 use crate::{
-    mt_dom::{
-        AttValue,
-        Callback,
-    },
-    Attribute,
-    Event,
+    mt_dom::{AttValue, Callback},
+    Attribute, Event,
 };
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
-pub use special::{
-    key,
-    replace,
-    skip,
-    Special,
-};
+pub use special::{key, replace, skip, Special};
 pub use style::Style;
 pub use style_macro::*;
 pub use value::Value;
@@ -42,11 +33,11 @@ where
 
 /// A helper function which creates a style attribute by assembling the tuples into a string for the style value.
 /// ```ignore
-///  div([styles([("display", "flex"), ("flex-direction", "row")])], [])
+///  div(vec![styles([("display", "flex"), ("flex-direction", "row")])], vec![])
 /// ```
 /// is the same way of writing
 /// ```ignore
-/// div([style("display:flex;flex-direction:row;")],[])
+/// div(vec![style!{"display":"flex","flex-direction":"row"}],vec![])
 /// ```
 pub fn styles<V, MSG, P>(pairs: P) -> Attribute<MSG>
 where
@@ -142,7 +133,7 @@ where
 /// returns an array of attributes which doesn't play well with the others
 /// Example:
 /// ```ignore
-/// input([r#type("checkbox")], []).attributes(attrs_flag([(
+/// input(vec![r#type("checkbox")], vec![]).attributes(attrs_flag(vec![(
 ///                             "checked",
 ///                             "checked",
 ///                             is_checked,
@@ -240,21 +231,17 @@ pub(crate) fn merge_plain_attributes_values(
 
     let plain_values: Vec<String> = attr_values
         .iter()
-        .flat_map(|att_value| {
-            match att_value {
-                AttributeValue::Simple(simple) => Some(simple.to_string()),
-                AttributeValue::Style(styles) => {
-                    let mut style_str = String::new();
-                    styles.iter().for_each(|s| {
-                        write!(style_str, "{};", s).expect("must write")
-                    });
-                    Some(style_str)
-                }
-                AttributeValue::FunctionCall(fvalue) => {
-                    Some(fvalue.to_string())
-                }
-                AttributeValue::Empty => None,
+        .flat_map(|att_value| match att_value {
+            AttributeValue::Simple(simple) => Some(simple.to_string()),
+            AttributeValue::Style(styles) => {
+                let mut style_str = String::new();
+                styles.iter().for_each(|s| {
+                    write!(style_str, "{};", s).expect("must write")
+                });
+                Some(style_str)
             }
+            AttributeValue::FunctionCall(fvalue) => Some(fvalue.to_string()),
+            AttributeValue::Empty => None,
         })
         .collect();
     if !plain_values.is_empty() {

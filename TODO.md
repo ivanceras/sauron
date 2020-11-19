@@ -20,7 +20,8 @@
      - This will remove the need for hardcode HTML_STYLES lookup, which could be a performance penalty
  - [ ] Add the RealWorld example
      - Use the elm base code https://github.com/rtfeldman/elm-spa-example
- - [ ] **breaking** put back `style` as a normal attribute, to avoid possible confusion to new users.
+ - [ ] **breaking** ~put back `style` as a normal attribute~, to avoid possible confusion to new users.
+     - Cancelled, since style is treated differently in attributes.
  - [ ] **breaking** merge `Browser` to `Window`.
 
 ## Internal

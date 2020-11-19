@@ -1,13 +1,6 @@
 //! Provides functions and macros to build html elements
-use crate::{
-    Attribute,
-    Node,
-};
-pub use mt_dom::{
-    element,
-    element_ns,
-    text,
-};
+use crate::{Attribute, Node};
+pub use mt_dom::{element, element_ns, text};
 
 #[macro_use]
 pub mod attributes;
@@ -17,13 +10,10 @@ pub mod units;
 #[cfg(feature = "with-dom")]
 pub use crate::dom::events;
 
-pub use tags::{
-    commons::*,
-    self_closing::*,
-};
+pub use tags::{commons::*, self_closing::*};
 
 /// A help function which render the view when the condition is met, otherwise
-/// just display a text("")
+/// just display a `span(vec![], vec![])`
 pub fn view_if<MSG>(flag: bool, node: Node<MSG>) -> Node<MSG> {
     if flag {
         node
