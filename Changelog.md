@@ -4,6 +4,7 @@
 - **breaking** overhaul on the `Http` api to allow users to manipulate response headers, and assign callback functions to errored request.
 - fix too aggressive assertion in `apply_patches` checking for matching tags.
 - implement `set_location_hash` to `Browser` api.
+- **breaking** dissolve `Browser` api functionalities into  `Window` api.
 
 ## 0.32.6
  - implement `on_mount` event where virtual node (sauron::Node) can listen to when the element is materialized into an actual dom element.

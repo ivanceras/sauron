@@ -22,7 +22,8 @@
      - Use the elm base code https://github.com/rtfeldman/elm-spa-example
  - [ ] **breaking** ~put back `style` as a normal attribute~, to avoid possible confusion to new users.
      - Cancelled, since style is treated differently in attributes.
- - [ ] **breaking** merge `Browser` to `Window`.
+ - [X] **breaking** merge `Browser` to `Window`.
+ - [ ] Add `and_then`, `sequence` to `Cmd` to perform a task after the preceding Cmd succeeds.
 
 ## Internal
 - [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`
