@@ -53,6 +53,7 @@
         - Cmd::noop() // no update operation
 - [ ] Remove the Dispatch trait and pass Program as it is in dom_updater and apply_patches module
     - There is only one implementation of `Dispatch` trait anyway, that is `Program`
+- [ ] ISSUE: sauron `node!` macro doesn't work on svg tags since it is using only `html_element` function which `namespace` is not supplied.
 
 
 
