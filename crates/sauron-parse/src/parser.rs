@@ -22,6 +22,7 @@ use sauron_core::{
     svg::{
         attributes::{SVG_ATTRS, SVG_ATTRS_SPECIAL, SVG_ATTRS_XLINK},
         tags::{SVG_TAGS, SVG_TAGS_NON_COMMON, SVG_TAGS_SPECIAL},
+        SVG_NAMESPACE,
     },
     Attribute, Node,
 };
@@ -98,6 +99,30 @@ pub fn match_attribute_function(key: &str) -> Option<&'static str> {
                 .find(|(func, _att)| func.eq_ignore_ascii_case(key))
                 .map(|(func, _att)| *func)
         })
+}
+
+/// Find the namespace of this tag
+/// if the arg tag is an SVG tag, return the svg namespace
+/// html tags don't need to have namespace while svg does, otherwise it will not be properly
+/// mounted into the DOM
+pub fn tag_namespace(tag: &str) -> Option<&'static str> {
+    let find_svg_tag = SVG_TAGS
+        .iter()
+        .chain(SVG_TAGS_NON_COMMON.iter())
+        .chain(
+            SVG_TAGS_SPECIAL
+                .iter()
+                .map(|(_func, t)| t)
+                .collect::<Vec<_>>()
+                .into_iter(),
+        )
+        .find(|t| t.eq_ignore_ascii_case(tag));
+
+    if find_svg_tag.is_some() {
+        Some(SVG_NAMESPACE)
+    } else {
+        None
+    }
 }
 
 fn extract_attributes<MSG>(

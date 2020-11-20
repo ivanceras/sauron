@@ -10,6 +10,8 @@
 )]
 //! facilitates parsing html string into sauron Node
 
-pub use parser::{match_attribute_function, parse, parse_simple, ParseError};
+pub use parser::{
+    match_attribute_function, parse, parse_simple, tag_namespace, ParseError,
+};
 
 mod parser;
