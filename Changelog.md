@@ -5,6 +5,7 @@
 - fix too aggressive assertion in `apply_patches` checking for matching tags.
 - implement `set_location_hash` to `Browser` api.
 - **breaking** dissolve `Browser` api functionalities into  `Window` api.
+- Fix behavior of checkboxes, it must be explicitly set_checked to false when checked attribute is removed
 
 ## 0.32.6
  - implement `on_mount` event where virtual node (sauron::Node) can listen to when the element is materialized into an actual dom element.

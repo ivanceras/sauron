@@ -19,7 +19,8 @@ pub enum Event {
 }
 
 impl Event {
-    fn as_web(self) -> Option<web_sys::Event> {
+    /// convert to web event
+    pub fn as_web(self) -> Option<web_sys::Event> {
         match self {
             Event::WebEvent(web_event) => Some(web_event),
             _ => None,
@@ -230,7 +231,11 @@ fn to_checked(event: Event) -> bool {
 /// empty text
 #[cfg(web_sys_unstable_apis)]
 fn to_clipboard_event(event: Event) -> ClipboardEvent {
-    event.dyn_into().expect("unable to cast to clipboard event")
+    event
+        .as_web()
+        .expect("must be a web event")
+        .dyn_into()
+        .expect("unable to cast to clipboard event")
 }
 
 // Mouse events
