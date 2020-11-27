@@ -10,7 +10,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = { version = "0.32", default-features = false, features = ["with-dom", "with-node-macro"] }
+sauron = { version = "0.33", default-features = false, features = ["with-dom", "with-node-macro"] }
 wasm-bindgen = "0.2"
 console_error_panic_hook = { version = "0.1", optional = true }
 wee_alloc = { version = "0.4.4", optional = true }

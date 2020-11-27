@@ -105,7 +105,7 @@ crate-type = ["cdylib"]
 
 
 [dependencies]
-sauron = "0.32"
+sauron = "0.33"
 console_error_panic_hook = "0.1"
 log = "0.4"
 console_log = "0.2"
