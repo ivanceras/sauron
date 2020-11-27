@@ -1,9 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    html::attributes::*,
-    mt_dom::patch::*,
-    *,
-};
+use sauron::{mt_dom::patch::*, *};
 use sauron_core::Node;
 
 #[test]
@@ -45,8 +41,8 @@ fn test_unmatched_old_key() {
 
     let new: Node<()> = node!(
         <div class="grid grid__number_wide1">
-            <div class="grid__number__line" key="keyXXX">
-                <div class="grid__number">"XXX"</div>
+            <div class="grid__number__line" key="keyxxx">
+                <div class="grid__number">"xxx"</div>
                 <div class="grid__line">
                     <div>"\n"</div>
                 </div>
@@ -83,8 +79,19 @@ fn test_unmatched_old_key() {
     assert_eq!(
         patches,
         vec![
-            AddAttributes::new(&"div", 1, 1, vec![&key("keyXXX")]).into(),
-            ChangeText::new(3, &Text::new("0"), 3, &Text::new("XXX")).into(),
+            ReplaceNode::new(
+                Some(&"div"),
+                1,
+                1,
+                &node!(
+                <div class="grid__number__line" key="keyxxx">
+                    <div class="grid__number">"xxx"</div>
+                    <div class="grid__line">
+                        <div>"\n"</div>
+                    </div>
+                </div>)
+            )
+            .into(),
             ChangeText::new(9, &Text::new("1"), 9, &Text::new("2")).into(),
             ChangeText::new(15, &Text::new("2"), 15, &Text::new("3")).into(),
             ChangeText::new(27, &Text::new("3"), 27, &Text::new("4")).into(),
