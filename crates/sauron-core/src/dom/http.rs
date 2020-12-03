@@ -30,80 +30,63 @@ impl Http {
     {
         let response_text_decoder = Callback::from(response_text_decoder);
         let cb = Callback::from(cb);
-        let cb_clone = cb.clone();
-        let success_text_decoder =
-            move |(response_text, _headers): (String, Headers)| {
-                let msg_value = response_text_decoder.emit(response_text);
-                cb.emit(Ok(msg_value))
-            };
-        let fail_cb = move |resp| cb_clone.emit(Err(resp));
+        let text_response_decoder = move |(
+            _status_code,
+            response_text,
+            _headers,
+        ): (u16, String, Headers)| {
+            let msg_value = response_text_decoder.emit(response_text);
+            cb.emit(Ok(msg_value))
+        };
         let err_cb = move |type_error| err_cb(type_error);
-        Self::fetch_with_response_decoder(
-            url,
-            success_text_decoder,
-            fail_cb,
-            err_cb,
-        )
+        Self::fetch_with_response_decoder(url, text_response_decoder, err_cb)
     }
 
     /// API for fetching http rest request
-    pub fn fetch_with_response_decoder<APP, MSG, SUCCEED, FAIL, ERR>(
+    pub fn fetch_with_response_decoder<APP, MSG, DECODE, ERR>(
         url: &str,
-        success_text_decoder: SUCCEED,
-        fail_cb: FAIL,
+        text_response_decoder: DECODE,
         err_cb: ERR,
     ) -> Cmd<APP, MSG>
     where
         APP: Component<MSG> + 'static,
         MSG: 'static,
-        SUCCEED: Fn((String, Headers)) -> MSG + 'static,
-        FAIL: Fn(Response) -> MSG + 'static,
+        DECODE: Fn((u16, String, Headers)) -> MSG + 'static,
         ERR: Fn(TypeError) -> MSG + 'static,
     {
         Self::fetch_with_request_and_response_decoder(
             url,
             None,
-            success_text_decoder,
-            fail_cb,
+            text_response_decoder,
             err_cb,
         )
     }
 
     /// API for fetching http rest request
-    pub fn fetch_with_request_and_response_decoder<
-        APP,
-        MSG,
-        SUCCEED,
-        FAIL,
-        ERR,
-    >(
+    /// err_cb - request failed, in cases where a network is down, server is dead, etc.
+    pub fn fetch_with_request_and_response_decoder<APP, MSG, DECODE, ERR>(
         url: &str,
         request_init: Option<RequestInit>,
-        success_text_decoder: SUCCEED,
-        fail_cb: FAIL,
+        text_response_decoder: DECODE,
         err_cb: ERR,
     ) -> Cmd<APP, MSG>
     where
         APP: Component<MSG> + 'static,
         MSG: 'static,
-        SUCCEED: Fn((String, Headers)) -> MSG + 'static,
-        FAIL: Fn(Response) -> MSG + 'static,
+        DECODE: Fn((u16, String, Headers)) -> MSG + 'static,
         ERR: Fn(TypeError) -> MSG + 'static,
     {
         let url_clone = url.to_string();
-        let success_text_decoder = Callback::from(success_text_decoder);
+        let text_response_decoder = Callback::from(text_response_decoder);
 
-        let fail_cb = Callback::from(fail_cb);
         let err_cb = Callback::from(err_cb);
         Cmd::new(move |program| {
             let program_clone = program.clone();
 
-            let success_text_decoder = success_text_decoder.clone();
+            let text_response_decoder = text_response_decoder.clone();
 
-            let fail_cb = fail_cb.clone();
             let err_cb = err_cb.clone();
 
-            let program_clone_status_err = program.clone();
             let window =
                 web_sys::window().expect("should a refernce to window");
 
@@ -115,31 +98,26 @@ impl Http {
 
             let cb: Closure<dyn FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
-                    let fail_cb = fail_cb.clone();
                     let response: Response = js_value.unchecked_into();
                     let status = response.status();
-                    if status == 200 {
-                        let response_promise =
-                            response.text().expect("must be a promise text");
-                        let decoder_and_dispatcher_cb: Closure<
-                            dyn FnMut(JsValue),
-                        > = Closure::once(move |js_value: JsValue| {
+                    let response_promise =
+                        response.text().expect("must be a promise text");
+                    let decoder_and_dispatcher_cb: Closure<dyn FnMut(JsValue)> =
+                        Closure::once(move |js_value: JsValue| {
                             let response_text = js_value
                                 .as_string()
                                 .expect("There's no string value");
-                            let msg = success_text_decoder
-                                .emit((response_text, response.headers()));
+                            let msg = text_response_decoder.emit((
+                                status,
+                                response_text,
+                                response.headers(),
+                            ));
                             program_clone.dispatch(msg);
                         });
 
-                        let _ =
-                            response_promise.then(&decoder_and_dispatcher_cb);
+                    let _ = response_promise.then(&decoder_and_dispatcher_cb);
 
-                        decoder_and_dispatcher_cb.forget();
-                    } else {
-                        program_clone_status_err
-                            .dispatch(fail_cb.emit(response));
-                    }
+                    decoder_and_dispatcher_cb.forget();
                 });
 
             let err_closure: Closure<dyn FnMut(JsValue)> =

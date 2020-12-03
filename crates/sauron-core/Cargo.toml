@@ -68,6 +68,7 @@ features = [
 	"Location",
 	"ScrollToOptions",
     "Navigator",
+    "ReadableStream",
 ]
 
 
