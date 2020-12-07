@@ -1,5 +1,8 @@
 # Changelog
 
+## (Unreleased)
+- **breaking** unify the fail and success decoder into just text_reponse_decoder, it receives the status code together with the text body and header
+
 ## 0.33.0
 - **breaking** overhaul on the `Http` api to allow users to manipulate response headers, and assign callback functions to errored request.
 - fix too aggressive assertion in `apply_patches` checking for matching tags.
