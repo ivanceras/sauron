@@ -132,19 +132,25 @@ impl CreatedNode {
     /// dispatch the mount event,
     /// call the callback since browser don't allow asynchronous execution of
     /// dispatching custom events (non-native browser events)
-    fn dispatch_mount_event<MSG>(velem: &crate::Element<MSG>, element: &Element)
-    where
+    fn dispatch_mount_event<DSP, MSG>(
+        program: Option<&DSP>,
+        velem: &crate::Element<MSG>,
+        element: &Element,
+    ) where
         MSG: 'static,
+        DSP: Clone + Dispatch<MSG> + 'static,
     {
         for att in velem.attrs.iter() {
             if *att.name() == "mount" {
-                log::trace!("found a mount event");
                 for val in att.value().iter() {
                     match val {
                         AttValue::Callback(cb) => {
-                            cb.emit(MountEvent {
+                            let msg = cb.emit(MountEvent {
                                 target_node: element.clone().unchecked_into(),
                             });
+                            if let Some(program) = program {
+                                program.dispatch(msg);
+                            }
                         }
                         AttValue::Plain(_) => {
                             log::warn!("mount should not be a plain value");
@@ -180,7 +186,7 @@ impl CreatedNode {
                 .expect("Unable to create element")
         };
 
-        Self::dispatch_mount_event(velem, &element);
+        Self::dispatch_mount_event(program, velem, &element);
 
         if velem.is_focused() {
             *focused_node = Some(element.clone().unchecked_into());
