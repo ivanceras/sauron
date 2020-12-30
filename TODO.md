@@ -71,7 +71,7 @@
 - [X] `with-markdown`
     - [X] Add sanitation to markdown parser, use `ammonia` crate
     - [X] expose the `sauron-md` as `sauron::markdown` module, behind a feature flag
-- [ ] Add example using markdown
+- [X] Add example using markdown
 - [X] Make use of `serde_json` to parse `style` into components
 
 
