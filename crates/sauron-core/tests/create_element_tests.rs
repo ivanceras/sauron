@@ -1,37 +1,18 @@
 #![deny(warnings)]
 use sauron_core::{
     dom::CreatedNode,
-    html::{
-        attributes::*,
-        div,
-        events::*,
-    },
+    html::{attributes::*, div, events::*},
     svg::{
-        attributes::{
-            cx,
-            cy,
-            r,
-            xmlns,
-        },
-        circle,
-        svg,
+        attributes::{cx, cy, r, xmlns},
+        circle, svg,
     },
-    Node,
-    *,
+    Node, *,
 };
-use std::{
-    cell::Cell,
-    collections::HashMap,
-    rc::Rc,
-};
+use std::{cell::Cell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
-use web_sys::{
-    console,
-    Element,
-    EventTarget,
-};
+use web_sys::{console, Element, EventTarget};
 
 mod test_fixtures;
 
@@ -43,7 +24,6 @@ fn nested_divs() {
         div(vec![], vec![div(vec![], vec![div(vec![], vec![])])]); // <div> <div> <div></div> </div> </div>
     let div: Element = CreatedNode::create_dom_node(
         &simple_program(),
-        &mut HashMap::new(),
         &vdiv,
         &mut None,
         &mut None,
@@ -65,7 +45,6 @@ fn svg_element() {
     );
     let div: Element = CreatedNode::create_dom_node(
         &simple_program(),
-        &mut HashMap::new(),
         &vdiv,
         &mut None,
         &mut None,
@@ -84,7 +63,6 @@ fn div_with_attributes() {
     let vdiv: Node<()> = div(vec![id("id-here"), class("two classes")], vec![]);
     let div: Element = CreatedNode::create_dom_node(
         &simple_program(),
-        &mut HashMap::new(),
         &vdiv,
         &mut None,
         &mut None,

@@ -9,7 +9,7 @@ use crate::{
             AddAttributes, AppendChildren, InsertNode, RemoveAttributes,
             RemoveNode, ReplaceNode,
         },
-        AttValue, NodeIdx,
+        AttValue,
     },
     Dispatch, Patch,
 };
@@ -28,7 +28,6 @@ pub fn patch<DSP, MSG>(
     program: Option<&DSP>,
     root_node: &mut Node,
     old_closures: &mut ActiveClosure,
-    node_idx_lookup: &mut HashMap<NodeIdx, Node>,
     focused_node: &mut Option<Node>,
     patches: Vec<Patch<MSG>>,
 ) -> Result<ActiveClosure, JsValue>
@@ -39,18 +38,12 @@ where
     #[cfg(feature = "with-measure")]
     let t1 = crate::now();
 
-    #[cfg(feature = "with-nodeidx-debug")]
-    log::trace!("patches: {:#?}", patches);
-
     // Closure that were added to the DOM during this patch operation.
     let mut active_closures = HashMap::new();
 
     // finding the nodes to be patched before hand, instead of calling it
     // in every patch loop.
-    let nodes_to_patch = find_nodes(root_node, node_idx_lookup, &patches);
-
-    #[cfg(any(feature = "with-nodeidx-debug", feature = "with-debug"))]
-    log::trace!("nodes_to_patch: {:#?}", nodes_to_patch);
+    let nodes_to_patch = find_nodes(root_node, &patches);
 
     #[cfg(feature = "with-measure")]
     let t2 = {
@@ -68,7 +61,6 @@ where
                 root_node,
                 &element,
                 old_closures,
-                node_idx_lookup,
                 focused_node,
                 &patch,
             )?;
@@ -113,7 +105,6 @@ where
 /// Complexity: O(n), where n is the total number of html nodes
 fn find_nodes<MSG>(
     root_node: &Node,
-    node_idx_lookup: &HashMap<NodeIdx, Node>,
     patches: &[Patch<MSG>],
 ) -> HashMap<usize, Node> {
     let mut nodes_to_find = HashMap::new();
@@ -129,7 +120,6 @@ fn find_nodes<MSG>(
 
     find_nodes_recursive(
         root_node,
-        node_idx_lookup,
         &mut 0,
         &nodes_to_find,
         &mut nodes_to_patch,
@@ -142,7 +132,6 @@ fn find_nodes<MSG>(
 /// before completing iterating all the elements
 fn find_nodes_recursive(
     node: &Node,
-    node_idx_lookup: &HashMap<NodeIdx, Node>,
     cur_node_idx: &mut usize,
     nodes_to_find: &HashMap<usize, Option<&&'static str>>,
     nodes_to_patch: &mut HashMap<usize, Node>,
@@ -160,37 +149,6 @@ fn find_nodes_recursive(
 
     // If the root node matches, mark it for patching
     if let Some(_vtag) = nodes_to_find.get(&cur_node_idx) {
-        #[cfg(feature = "with-nodeidx-debug")]
-        if let Some(lookup_node) = node_idx_lookup.get(&cur_node_idx) {
-            fn outer_html(node: &Node) -> String {
-                match node.node_type() {
-                    Node::ELEMENT_NODE => {
-                        let node_element: &Element = node.unchecked_ref();
-                        node_element.outer_html()
-                    }
-                    Node::TEXT_NODE => {
-                        let text_node: &web_sys::Text = node.unchecked_ref();
-                        text_node
-                            .text_content()
-                            .expect("must have a text content")
-                    }
-                    _ => unreachable!(),
-                }
-            }
-            log::trace!("--->>>> FOUND in node_idx_lookup: {}", cur_node_idx);
-            if outer_html(lookup_node) == outer_html(&node) {
-                log::info!("matched OK");
-            } else {
-                log::error!("not matched: {}", cur_node_idx);
-                log::error!("expecting: {}", outer_html(&node));
-                log::error!("but found: {}", outer_html(&lookup_node));
-            }
-        } else {
-            log::warn!(
-                "cur_node_idx: {} not found in node_idx_lookup",
-                cur_node_idx
-            );
-        }
         nodes_to_patch.insert(*cur_node_idx, node.clone());
     }
 
@@ -199,7 +157,6 @@ fn find_nodes_recursive(
         *cur_node_idx += 1;
         if find_nodes_recursive(
             &child_node,
-            node_idx_lookup,
             cur_node_idx,
             nodes_to_find,
             nodes_to_patch,
@@ -313,7 +270,6 @@ fn apply_patch_to_node<DSP, MSG>(
     root_node: &mut Node,
     node: &Node,
     old_closures: &mut ActiveClosure,
-    node_idx_lookup: &mut HashMap<NodeIdx, Node>,
     focused_node: &mut Option<Node>,
     patch: &Patch<MSG>,
 ) -> Result<ActiveClosure, JsValue>
@@ -333,7 +289,6 @@ where
             let element: &Element = node.unchecked_ref();
             let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
                 program,
-                node_idx_lookup,
                 &for_insert,
                 focused_node,
                 &mut Some(*new_node_idx),
@@ -346,12 +301,7 @@ where
 
             Ok(active_closures)
         }
-        Patch::AddAttributes(AddAttributes {
-            #[cfg(feature = "with-nodeidx-debug")]
-            new_node_idx,
-            attrs,
-            ..
-        }) => {
+        Patch::AddAttributes(AddAttributes { attrs, .. }) => {
             let element: &Element = node.unchecked_ref();
             CreatedNode::set_element_attributes(
                 program,
@@ -360,24 +310,9 @@ where
                 attrs,
             );
 
-            #[cfg(feature = "with-nodeidx-debug")]
-            CreatedNode::set_element_attributes(
-                program,
-                &mut active_closures,
-                element,
-                &[&crate::html::attributes::attr("node_idx", *new_node_idx)],
-            );
-
-            #[cfg(feature = "with-nodeidx-debug")]
-            node_idx_lookup.insert(*new_node_idx, node.clone());
             Ok(active_closures)
         }
-        Patch::RemoveAttributes(RemoveAttributes {
-            #[cfg(feature = "with-nodeidx-debug")]
-            new_node_idx,
-            attrs,
-            ..
-        }) => {
+        Patch::RemoveAttributes(RemoveAttributes { attrs, .. }) => {
             let element: &Element = node.unchecked_ref();
             for attr in attrs.iter() {
                 for att_value in attr.value() {
@@ -398,18 +333,6 @@ where
                     }
                 }
             }
-
-            #[cfg(feature = "with-nodeidx-debug")]
-            CreatedNode::set_element_attributes(
-                program,
-                &mut active_closures,
-                element,
-                &[&crate::html::attributes::attr("node_idx", *new_node_idx)],
-            );
-
-            #[cfg(feature = "with-nodeidx-debug")]
-            node_idx_lookup.insert(*new_node_idx, node.clone());
-
             Ok(active_closures)
         }
 
@@ -426,7 +349,6 @@ where
             let element: &Element = node.unchecked_ref();
             let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
                 program,
-                node_idx_lookup,
                 replacement,
                 focused_node,
                 &mut Some(*new_node_idx),
@@ -453,11 +375,7 @@ where
 
             Ok(created_node.closures)
         }
-        Patch::RemoveNode(RemoveNode {
-            #[cfg(feature = "with-nodeidx-debug")]
-            node_idx,
-            ..
-        }) => {
+        Patch::RemoveNode(RemoveNode { .. }) => {
             let element: &Element = node.unchecked_ref();
             let parent_node =
                 element.parent_node().expect("must have a parent node");
@@ -470,16 +388,6 @@ where
                 if element.node_type() != Node::TEXT_NODE {
                     let element: &Element = node.unchecked_ref();
                     remove_event_listeners(&element, old_closures)?;
-                }
-
-                #[cfg(feature = "with-nodeidx-debug")]
-                if let Some(_removed) = node_idx_lookup.remove(node_idx) {
-                    log::trace!(
-                        "remove node {} from node_idx_lookup",
-                        node_idx
-                    );
-                } else {
-                    log::error!("no node_idx to remove");
                 }
             }
             Ok(active_closures)
@@ -494,7 +402,6 @@ where
             for (append_children_node_idx, new_node) in new_nodes.iter() {
                 let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
                     program,
-                    node_idx_lookup,
                     &new_node,
                     focused_node,
                     &mut Some(*append_children_node_idx),
@@ -506,8 +413,6 @@ where
         }
         Patch::ChangeText(ct) => {
             node.set_node_value(Some(&ct.new.text));
-            #[cfg(feature = "with-nodeidx-debug")]
-            node_idx_lookup.insert(ct.new_node_idx, node.clone());
             Ok(active_closures)
         }
     }

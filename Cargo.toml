@@ -29,8 +29,6 @@ with-request-animation-frame = ["sauron-core/with-request-animation-frame"]
 
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]
-# show the node_idx in html nodes for debugging
-with-nodeidx-debug = ["sauron-core/with-nodeidx-debug"]
 # log debug patches
 with-debug = ["sauron-core/with-debug"]
 

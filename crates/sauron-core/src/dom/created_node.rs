@@ -69,7 +69,6 @@ impl CreatedNode {
     /// create an element node
     pub fn create_dom_node<DSP, MSG>(
         program: &DSP,
-        node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         vnode: &crate::Node<MSG>,
         focused_node: &mut Option<Node>,
         node_idx: &mut Option<NodeIdx>,
@@ -78,13 +77,7 @@ impl CreatedNode {
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        Self::create_dom_node_opt(
-            Some(program),
-            node_idx_lookup,
-            vnode,
-            focused_node,
-            node_idx,
-        )
+        Self::create_dom_node_opt(Some(program), vnode, focused_node, node_idx)
     }
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
@@ -96,7 +89,6 @@ impl CreatedNode {
     /// We can maintain a HashMap<NodeIdx, web_sys::Node>
     pub fn create_dom_node_opt<DSP, MSG>(
         program: Option<&DSP>,
-        node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         vnode: &crate::Node<MSG>,
         focused_node: &mut Option<Node>,
         node_idx: &mut Option<NodeIdx>,
@@ -108,17 +100,11 @@ impl CreatedNode {
         match vnode {
             crate::Node::Text(txt) => {
                 let text_node = Self::create_text_node(&txt.text);
-                #[cfg(feature = "with-nodeidx-debug")]
-                if let Some(node_idx) = node_idx {
-                    node_idx_lookup
-                        .insert(*node_idx, text_node.clone().unchecked_into());
-                }
                 CreatedNode::without_closures(text_node.unchecked_into())
             }
             crate::Node::Element(element_node) => {
                 let created_element: CreatedNode = Self::create_element_node(
                     program,
-                    node_idx_lookup,
                     element_node,
                     focused_node,
                     node_idx,
@@ -165,7 +151,6 @@ impl CreatedNode {
     /// children, it's children's children, etc.
     fn create_element_node<DSP, MSG>(
         program: Option<&DSP>,
-        node_idx_lookup: &mut HashMap<NodeIdx, Node>,
         velem: &crate::Element<MSG>,
         focused_node: &mut Option<Node>,
         node_idx: &mut Option<NodeIdx>,
@@ -193,11 +178,6 @@ impl CreatedNode {
             log::trace!("element is focused..{:?}", focused_node);
         }
 
-        #[cfg(feature = "with-nodeidx-debug")]
-        if let Some(ref node_idx) = node_idx {
-            node_idx_lookup.insert(*node_idx, element.clone().unchecked_into());
-        }
-
         let mut closures = ActiveClosure::new();
 
         Self::set_element_attributes(
@@ -206,16 +186,6 @@ impl CreatedNode {
             &element,
             &velem.get_attributes().iter().collect::<Vec<_>>(),
         );
-
-        #[cfg(feature = "with-nodeidx-debug")]
-        if let Some(node_idx) = node_idx {
-            Self::set_element_attributes(
-                program,
-                &mut closures,
-                &element,
-                &[&crate::prelude::attr("node_idx", *node_idx)],
-            );
-        }
 
         let mut previous_node_was_text = false;
 
@@ -242,12 +212,6 @@ impl CreatedNode {
                         .append_child(&text_node)
                         .expect("Unable to append text node");
 
-                    #[cfg(feature = "with-nodeidx-debug")]
-                    if let Some(node_idx) = &node_idx {
-                        node_idx_lookup
-                            .insert(*node_idx, text_node.unchecked_into());
-                    }
-
                     previous_node_was_text = true;
                 }
                 crate::Node::Element(_element_node) => {
@@ -255,7 +219,6 @@ impl CreatedNode {
 
                     let created_child = Self::create_dom_node_opt(
                         program,
-                        node_idx_lookup,
                         child,
                         focused_node,
                         node_idx,

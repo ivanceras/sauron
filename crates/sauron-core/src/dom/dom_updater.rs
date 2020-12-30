@@ -5,10 +5,8 @@ use crate::{
         created_node::{ActiveClosure, CreatedNode},
         Dispatch,
     },
-    mt_dom::NodeIdx,
     Patch,
 };
-use std::collections::HashMap;
 use wasm_bindgen::JsCast;
 use web_sys::{self, Element, Node};
 
@@ -25,8 +23,6 @@ pub struct DomUpdater<MSG> {
     /// We keep these around so that they don't get dropped (and thus stop working);
     ///
     pub active_closures: ActiveClosure,
-    /// a fast lookup for getting the Node from from NodeIdx
-    pub node_idx_lookup: HashMap<NodeIdx, Node>,
     /// after mounting or update dispatch call, the element will be focused
     pub focused_node: Option<Node>,
 }
@@ -41,7 +37,6 @@ impl<MSG> DomUpdater<MSG> {
             current_vdom,
             root_node: mount.clone(),
             active_closures: ActiveClosure::new(),
-            node_idx_lookup: HashMap::new(),
             focused_node: None,
         }
     }
@@ -78,7 +73,6 @@ where
     {
         let created_node = CreatedNode::create_dom_node(
             program,
-            &mut self.node_idx_lookup,
             &self.current_vdom,
             &mut self.focused_node,
             &mut None,
@@ -179,7 +173,6 @@ where
             Some(program),
             &mut self.root_node,
             &mut self.active_closures,
-            &mut self.node_idx_lookup,
             &mut self.focused_node,
             patches,
         )
@@ -200,7 +193,6 @@ where
             Some(program),
             &mut self.root_node,
             &mut self.active_closures,
-            &mut self.node_idx_lookup,
             &mut self.focused_node,
             patches,
         )
@@ -218,14 +210,12 @@ where
             current_vdom,
             root_node,
             active_closures,
-            node_idx_lookup,
             focused_node,
         } = self;
         DomUpdater {
             current_vdom: current_vdom.map_msg(func),
             root_node,
             active_closures,
-            node_idx_lookup,
             focused_node,
         }
     }
