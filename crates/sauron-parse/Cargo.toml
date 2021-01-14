@@ -1,6 +1,6 @@
 [package]
 name = "sauron-parse"
-version = "0.33.0"
+version = "0.34.0"
 authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -12,7 +12,7 @@ keywords = ["svg", "html", "parser"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sauron-core = { version = "0.33", features = ["with-parser"], path = "../sauron-core" }
+sauron-core = { version = "0.34", features = ["with-parser"], path = "../sauron-core" }
 html5ever = {version = "0.25"}
 markup5ever_rcdom = { version = "0.1" }
 thiserror = "1.0"
