@@ -123,7 +123,7 @@
 //! - [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet CSV data viewer
 //! - [svg-clock](https://ivanceras.github.io/svg-clock/) - A clock drawn using SVG and window tick event.
 //! - [svg-graph](https://ivanceras.github.io/svg-graph/) - A simple graph using SVG
-//! - [code-editor](https://ivanceras.github.io/code-editor/) - A WIP web-base code-editor
+//! - [ultron code-editor](https://ivanceras.github.io/ultron/) - A web-base text-editor with syntax highlighting
 //!
 //! ### Converting HTML into Sauron's syntax
 //!

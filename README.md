@@ -105,7 +105,7 @@ crate-type = ["cdylib"]
 
 
 [dependencies]
-sauron = "0.33"
+sauron = "0.34"
 console_error_panic_hook = "0.1"
 log = "0.4"
 console_log = "0.2"
@@ -127,7 +127,7 @@ showcasing animation, transition and timed Component update.
 - [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet CSV data viewer
 - [svg-clock](https://ivanceras.github.io/svg-clock/) - A clock drawn using SVG and window tick event.
 - [svg-graph](https://ivanceras.github.io/svg-graph/) - A simple graph using SVG
-- [ultron code-editor](https://ivanceras.github.io/ultron/) - A web-base text-editor with syntax highlighting.
+- [ultron code-editor](https://ivanceras.github.io/ultron/) - A web-base text-editor with syntax highlighting
 
 #### Converting HTML into Sauron's syntax
 
