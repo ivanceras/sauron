@@ -33,6 +33,7 @@ pub(crate) struct MarkdownParser<MSG> {
     /// if h1 is encountered
     is_title_heading: bool,
     /// if a text inside an h1 is encountered
+    #[allow(dead_code)]
     pub(crate) title: Option<String>,
     /// indicates if the text is inside a code block
     in_code_block: bool,

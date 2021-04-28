@@ -36,8 +36,10 @@ pub struct PageView {
     frozen_rows: Vec<usize>,
     frozen_columns: Vec<usize>,
     pub scroll_top: i32,
+    #[allow(dead_code)]
     allocated_width: i32,
     /// the total number of rows count in the table
+    #[allow(dead_code)]
     total_rows: usize,
     pub current_page: usize,
     is_visible: bool,
