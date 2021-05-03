@@ -1,4 +1,6 @@
 use sauron::prelude::*;
+use sauron::js_sys::TypeError;
+use sauron::web_sys::Response;
 use serde::{
     Deserialize,
     Serialize,
@@ -20,7 +22,8 @@ pub enum FetchStatus<T> {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     EditName(String),
-    ReceivedData(Result<Data, JsValue>),
+    ReceivedData(Result<Data, Response>),
+    RequestError(TypeError),
     QueryAPI,
 }
 
@@ -60,6 +63,7 @@ impl App {
                 data.expect("Error deserializing data")
             },
             Msg::ReceivedData,
+            Msg::RequestError,
         )
     }
 }
@@ -108,6 +112,13 @@ impl Component<Msg> for App {
                 self.data = FetchStatus::Error(Some(format!(
                     "There was an error reaching the api: {:?}",
                     js_value
+                )));
+            }
+            Msg::RequestError(type_error) => {
+                trace!("Error requesting the page: {:?}", type_error);
+                self.data = FetchStatus::Error(Some(format!(
+                    "There was an error fetching the page: {:?}",
+                    type_error
                 )));
             }
         };

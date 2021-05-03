@@ -70,10 +70,13 @@ pub struct DataView {
     frozen_columns: Vec<usize>,
     pub scroll_top: i32,
     scroll_left: i32,
+    #[allow(dead_code)]
     pub allocated_width: i32,
     pub allocated_height: i32,
     /// the total number of rows count in the table
+    #[allow(dead_code)]
     total_rows: usize,
+    #[allow(dead_code)]
     current_page: usize,
     visible_page: usize,
     active_resize: Option<(usize, Grip)>,
