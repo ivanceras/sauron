@@ -157,5 +157,14 @@ Sauron is one of the fastest.
 
 
 
-
 License: MIT
+
+
+## Contributors
+
+Sauron would not have been possible without the wonderful work of all the people who contributed. Thank you!
+
+<a href="https://github.com/ivanceras/sauron/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ivanceras/sauron" />
+</a>
+
