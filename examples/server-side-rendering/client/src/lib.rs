@@ -1,15 +1,12 @@
-use sauron::prelude::*;
 use sauron::js_sys::TypeError;
+use sauron::prelude::*;
 use sauron::web_sys::Response;
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 #[macro_use]
 extern crate log;
 
-const DATA_URL: &'static str = "http://localhost:3030/api";
+const DATA_URL: &'static str = "/api";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum FetchStatus<T> {

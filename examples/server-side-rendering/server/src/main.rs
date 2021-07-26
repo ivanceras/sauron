@@ -2,6 +2,7 @@ use warp::{Filter, http::Response};
 use serde_json;
 use client::{App, Data, FetchStatus};
 use sauron::prelude::*;
+use std::net::SocketAddr;
 
 // Replace this with whatever data you're actually trying to return
 fn fake_api_call(name: String) -> Data {
@@ -22,7 +23,7 @@ async fn main() {
         .map(|name| {
             serde_json::to_string(&fake_api_call(name)).unwrap()
         });
-    
+
     // Static assets: CSS, JS, etc.
     let static_files = warp::path("static")
         .and(warp::fs::dir(STATIC_DIR));
@@ -36,7 +37,7 @@ async fn main() {
         let api_data = fake_api_call(name);
         app.data = FetchStatus::Complete(api_data);
 
-        // Serialize the state 
+        // Serialize the state
         let serialized_state = serde_json::to_string(&app).unwrap();
 
         // Render the app into a String buffer
@@ -67,7 +68,9 @@ async fn main() {
         .or(static_files)
     );
 
+    let socket: SocketAddr = ([127, 0, 0, 1], 3030).into();
+    println!("serve at http://{}:{}", socket.ip(), socket.port());
     warp::serve(routes)
-        .run(([127, 0, 0, 1], 3030))
+        .run(socket)
         .await;
 }
