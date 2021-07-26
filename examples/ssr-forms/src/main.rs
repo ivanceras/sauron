@@ -134,7 +134,7 @@ async fn main() {
     });
 
     let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
-    println!("serve at http://localhost:{}", socket.port());
+    println!("serve at http://{}:{}", socket.ip(), socket.port());
     warp::serve(submission.or(index))
         .run(socket)
         .await;
