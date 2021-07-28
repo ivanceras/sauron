@@ -1,6 +1,6 @@
 # Progressive rendering example
 
-This example showcases sauron's server-side rendering capability.
+This example showcases sauron's both server-side and client-side rendering capability.
 The goal of this setup is to have a consistent look when the page loaded from the server and when it is re-rendered in the client.
 This is accomplished by rendering the page with the same data in the server as in the client.
 
@@ -50,7 +50,7 @@ The url is routed into 5 main paths:
 
 ### Index page
 When the user navigates to `http://localhost:3030/`. An html file is served by the web server.
-The whole page is served in `index` function found in [`server/src/page.rs`](https://github.com/ivanceras/sauron/blob/master/examples/progressive-rendering/server/src/page.rs)
+The whole page created in `index` function found in [`server/src/page.rs`](https://github.com/ivanceras/sauron/blob/master/examples/progressive-rendering/server/src/page.rs)
 The `index` function takes `App` as a parameter, this contains the data we need to render the page.
 Since `App` struct is a sauron `Component`, we can call the `view` function on it, which returns a `Node<Msg>`.
 We then inject this view into the body of our generated html. Take note of the `{view}` notation.
@@ -59,7 +59,7 @@ We then inject this view into the body of our generated html. Take note of the `
 To use the same state we have in the server, we can derive a `serialized_state` from the app by serializing the `App` into json.
 This `serialized_state` is then passed in the `main` function of client code which will be executed, right after the page is loaded in the browser.
 The `main` function in [`client/src/lib.rs`](https://github.com/ivanceras/sauron/blob/master/examples/progressive-rendering/client/src/lib.rs) is the code that will be called when the script has loaded.
-From there, we can recreate the `App` by deserializing the `serialized_state`. Our `App` is a component in `sauron` which we then can mount into the an anchor element in the document.
+From there, we can recreate the `App` by deserializing the `serialized_state`. Our `App` is a [`Component`](https://docs.rs/sauron/0.34.0/sauron/trait.Component.html) in `sauron` which we then can mount into the an anchor element in the document.
 In this case, we just replace the `<main>..</main` element in the page. All the state changes, diffing, and patches is handled by `sauron` framework.
 
 ### Api call
@@ -82,7 +82,7 @@ There are actually 2 possible scenarios that can happen here.
     - The form will submit to the server, since there is no way to cancel it with `prevent_default`.
 
 ### Submit form
-The server has a sumit route which expects a form data, where we specify to map it into a `HashMap<String,String>`.
+The server has a submit route which expects a form data, where we specify to map it into a `HashMap<String,String>`.
 We then extract the value of `name` from the `HashMap`. This `name` is then used as argument to `render_page`, which return an html file with the supplied `name` rendered on it.
 
 
