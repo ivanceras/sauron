@@ -8,6 +8,16 @@ This is accomplished by rendering the page with the same data in the server as i
 
 ## Quick start
 
+Make sure you have the installed pre-requisite.
+Go to [rustup.rs](http://rustup.rs) if you haven't installed rust.
+Then we need to add `wasm32-unknown-unknown` to our target list.
+Install also `wasm-pack`. To easily compile and package our client rust code into `wasm`.
+
+```sh
+ rustup target add wasm32-unknown-unknown
+ cargo install wasm-pack
+```
+
 ```sh
 git clone --depth=1 https://github.com/ivanceras/sauron.git
 cd examples/progressive-rendering

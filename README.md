@@ -137,6 +137,7 @@ sauron node tree for your views.
 #### Prerequisite:
 
 ```sh
+rustup target add wasm32-unknown-unknown
 cargo install wasm-pack
 cargo install basic-http-server
 ```
