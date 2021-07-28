@@ -25,8 +25,8 @@ cd examples/progressive-rendering
 Open [http://localhost:3030](http://localhost:3030)
 
 ## What's going on?
-
-in `server/src/main.rs`, url is routed into 5 main paths
+In [`server/src/main.rs`](https://github.com/ivanceras/sauron/blob/master/examples/progressive-rendering/server/src/main.rs), we use `warp` for our server.
+The url is routed into 5 main paths:
 - root
     - ie: `http://localhost:3030/`
     - This serves the index page.
@@ -56,7 +56,7 @@ We then inject this view into the body of our generated html. Take note of the `
 ### Client
 To use the same state we have in the server, we can derive a `serialized_state` from the app by serializing the `App` into json.
 This `serialized_state` is then passed in the `main` function of client code which will be executed, right after the page is loaded in the browser.
-The `main` function in `client/src/lib.rs` is the code that will be called when the script has loaded.
+The `main` function in [`client/src/lib.rs`](https://github.com/ivanceras/sauron/blob/master/examples/progressive-rendering/client/src/lib.rs) is the code that will be called when the script has loaded.
 From there, we can recreate the `App` by deserializing the `serialized_state`. Our `App` is a component in `sauron` which we then can mount into the an anchor element in the document.
 In this case, we just replace the `<main>..</main` element in the page. All the state changes, diffing, and patches is handled by `sauron` framework.
 
