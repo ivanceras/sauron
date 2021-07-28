@@ -35,7 +35,8 @@ The url is routed into 5 main paths:
 - api calls
     - ie: `http://localhost:3030/api/`
     - Example calls: `/api/Foo Bar`
-    - This just respond serialized json `Data` based on the supplied `name`.
+    - This function is where you would normally put the api calls such as reading data from your server database.
+    - For the sake of simplicity here, this just respond serialized json `Data` derived from the supplied `name`.
 - static files
     - ie: `/pkg/client.js`
     - This serves the static files in `/pkg` directory where the compiled client files are located.
@@ -56,7 +57,7 @@ Since `App` struct is a sauron `Component`, we can call the `view` function on i
 We then inject this view into the body of our generated html. Take note of the `{view}` notation.
 
 ### Client
-To use the same state we have in the server, we can derive a `serialized_state` from the app by serializing the `App` into json.
+To use the same state we have in the server, we can derive a `serialized_state` by serializing the `App` into json.
 This `serialized_state` is then passed in the `main` function of client code which will be executed, right after the page is loaded in the browser.
 The `main` function in [`client/src/lib.rs`](https://github.com/ivanceras/sauron/blob/master/examples/progressive-rendering/client/src/lib.rs) is the code that will be called when the script has loaded.
 From there, we can recreate the `App` by deserializing the `serialized_state`. Our `App` is a [`Component`](https://docs.rs/sauron/0.34.0/sauron/trait.Component.html) in `sauron` which we then can mount into the an anchor element in the document.
