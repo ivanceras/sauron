@@ -3,6 +3,7 @@ use serde_json;
 use client::{App, Data, FetchStatus};
 use sauron::prelude::*;
 use std::net::SocketAddr;
+use percent_encoding::percent_decode_str;
 
 mod page;
 
@@ -16,12 +17,14 @@ fn fake_api_call(name: String) -> Data {
 
 // path relative to the working directory when you run the server binary
 const PKG_DIR: &str = "client/pkg";
+const FAVICON_FILE: &str = "client/favicon.ico";
 
 
 #[tokio::main]
 async fn main() {
     let api_call = warp::path!("api" / String)
-        .map(|name| {
+        .map(move|name:String| {
+            let name = percent_decode_str(&name).decode_utf8_lossy().to_string();
             serde_json::to_string(&fake_api_call(name)).unwrap()
         });
 
@@ -29,10 +32,11 @@ async fn main() {
     let pkg_files = warp::path("pkg")
         .and(warp::fs::dir(PKG_DIR));
 
+    let favicon = warp::path("favicon.ico").and(warp::fs::file(FAVICON_FILE));
+
     let render_page = |name: String| {
         // initialize blank app state
         let mut app = App::new();
-
         // Fetch API data for the argument and stuff it into the app
         app.name = name.clone();
         let api_data = fake_api_call(name);
@@ -45,7 +49,10 @@ async fn main() {
 
     // Render paths that include a name argument
     let named = warp::path!(String)
-        .map(render_page);
+        .map(move|name: String| {
+            let name = percent_decode_str(&name).decode_utf8_lossy().to_string();
+            render_page(name)
+        });
 
     // Render paths that don't include a name with a default
     let root = warp::path::end()
@@ -53,6 +60,7 @@ async fn main() {
 
     let routes = warp::get().and(
         root
+        .or(favicon)
         .or(named)
         .or(api_call)
         .or(pkg_files)
