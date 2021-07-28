@@ -26,7 +26,7 @@ Open [http://localhost:3030](http://localhost:3030)
 
 ## What's going on?
 
-in `server/src/main.rs`, url is rounted into 5 main paths
+in `server/src/main.rs`, url is routed into 5 main paths
 - root
     - ie: `http://localhost:3030/`
     - This serves the index page.
@@ -47,8 +47,8 @@ in `server/src/main.rs`, url is rounted into 5 main paths
     - You can test this by installing an add-on like `noscript` to disable the javascript in your browser.
 
 ### Index page
-When the user navigates to `http://localhost:3030/`. An html file is served by the war server.
-The whole page is served in `index` function found in `server/src/page.rs`
+When the user navigates to `http://localhost:3030/`. An html file is served by the web server.
+The whole page is served in `index` function found in [`server/src/page.rs`](https://github.com/ivanceras/sauron/blob/master/examples/progressive-rendering/server/src/page.rs)
 The `index` function takes `App` as a parameter, this contains the data we need to render the page.
 Since `App` struct is a sauron `Component`, we can call the `view` function on it, which returns a `Node<Msg>`.
 We then inject this view into the body of our generated html. Take note of the `{view}` notation.
@@ -67,7 +67,7 @@ Example:
 
 `/api/Foo Bar`
 
-```
+```json
 {"length":7,"modified_name":"FOO BAR"}
 ```
 This `/api` route is used in the client when the user clicks on the `Okay!` submit button.
@@ -77,12 +77,11 @@ There are actually 2 possible scenarios that can happen here.
     - We hooked into the form `on_submit` event and immediately call on `prevent_default()` to prevent the browser on submitting the form
     and instead, we pass on `Msg::QueryAPI` which in turn execute an http fetch to the server.
 2. If there is no javascript capability in the browser
-    - The form submit action will execute since there was no javascript to cancel it with `prevent_default`.
+    - The form submit action will execute since there is no way to cancel it with `prevent_default`.
     - The form data will be submitted to the server and will be served in the `submit` route, which is expecting a form data.
 
 ### Submit form
 The server has a route to `submit` which expects data triggered by submit form from the client.
-We then extract the value of `name` from the `HashMap`. This `name` is then used as argument to `render_page` to render the page
-with using data from the the submitted name.
+We then extract the value of `name` from the `HashMap`. This `name` is then used as argument to `render_page`, which return an html file with the supplied `name` rendered on it.
 
 
