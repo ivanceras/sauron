@@ -8,6 +8,11 @@ use percent_encoding::percent_decode_str;
 
 mod page;
 
+// path relative to the working directory when you run the server binary
+const PKG_DIR: &str = "client/pkg";
+const FAVICON_FILE: &str = "client/favicon.ico";
+const DEFAULT_NAME: &str = "Ferris";
+
 // Replace this with whatever data you're actually trying to return
 fn fake_api_call(name: String) -> Data {
     Data {
@@ -15,11 +20,6 @@ fn fake_api_call(name: String) -> Data {
         modified_name: name.to_uppercase(),
     }
 }
-
-// path relative to the working directory when you run the server binary
-const PKG_DIR: &str = "client/pkg";
-const FAVICON_FILE: &str = "client/favicon.ico";
-const DEFAULT_NAME: &str = "Ferris";
 
 
 #[tokio::main]
@@ -77,11 +77,21 @@ async fn main() {
             render_page(name)
         });
 
+    // These are the example url paths
+    // GET
+    //   /
+    //   /favicon.ico
+    //   /api
+    //   /Foo Bar
+    //   /pkg/client.js
+    //
+    // POST
+    //   /?name=Foo Bar
     let routes = warp::get().and(
         root
         .or(favicon)
-        .or(named)
         .or(api_call)
+        .or(named)
         .or(pkg_files)
     ).or(submit);
 
