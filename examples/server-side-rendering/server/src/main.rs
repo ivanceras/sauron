@@ -3,6 +3,7 @@ use serde_json;
 use client::{App, Data, FetchStatus};
 use sauron::prelude::*;
 use std::net::SocketAddr;
+use percent_encoding::percent_decode_str;
 
 // Replace this with whatever data you're actually trying to return
 fn fake_api_call(name: String) -> Data {
@@ -20,7 +21,8 @@ static INDEX_HTML: &'static str = include_str!("../../client/static/index.html")
 #[tokio::main]
 async fn main() {
     let api_call = warp::path!("api" / String)
-        .map(|name| {
+        .map(move|name:String| {
+            let name = percent_decode_str(&name).decode_utf8_lossy().to_string();
             serde_json::to_string(&fake_api_call(name)).unwrap()
         });
 
@@ -55,7 +57,10 @@ async fn main() {
 
     // Render paths that include a name argument
     let named = warp::path!(String)
-        .map(render_page);
+        .map(move|name:String|{
+            let name = percent_decode_str(&name).decode_utf8_lossy().to_string();
+            render_page(name)
+        });
 
     // Render paths that don't include a name with a default
     let root = warp::path::end()
