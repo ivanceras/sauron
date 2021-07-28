@@ -1,8 +1,7 @@
 # Progressive rendering example
 
 This example showcases sauron's server-side rendering capability.
-This also showcase `jss!` macro which lets you easily compose css style dynamically in the server.
-The goal of this setup is to have a consistent look when the page is rendered from the server and even after the dynamic part is loaded and re-rendered on the client.
+The goal of this setup is to have a consistent look when the page loaded from the server and when it is re-rendered in the client.
 This is accomplished by rendering the page with the same data in the server as in the client.
 
 
@@ -11,7 +10,7 @@ This is accomplished by rendering the page with the same data in the server as i
 Make sure you have the installed pre-requisite.
 Go to [rustup.rs](http://rustup.rs) if you haven't installed rust.
 Then we need to add `wasm32-unknown-unknown` to our target list.
-Install also `wasm-pack`. To easily compile and package our client rust code into `wasm`.
+Install also `wasm-pack`, to simplfiy our workflow in compiling and packaging our client rust code into `wasm`.
 
 ```sh
  rustup target add wasm32-unknown-unknown
