@@ -12,7 +12,7 @@ pub fn index(app: &App) -> Node<Msg> {
         <html lang="en">
           <head>
             <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-            <title>{text("Server-Side Rendering with Sauron")}</title>
+            <title>{text("Progressive Rendering with Sauron")}</title>
             <style>{text(style)}</style>
             <script type="module">
                 {text!("
