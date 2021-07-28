@@ -25,6 +25,8 @@ cd examples/progressive-rendering
 Open [http://localhost:3030](http://localhost:3030)
 
 ## What's going on?
+Please take a look at the code of this example as you follow along this README guide.
+
 In [`server/src/main.rs`](https://github.com/ivanceras/sauron/blob/master/examples/progressive-rendering/server/src/main.rs), we use `warp` for our server.
 The url is routed into 5 main paths:
 - root
@@ -70,18 +72,21 @@ Example:
 ```json
 {"length":7,"modified_name":"FOO BAR"}
 ```
-This `/api` route is used in the client when the user clicks on the `Okay!` submit button.
+This `/api` route is called from the client when the user clicks on the `Okay!` submit button.
 There are actually 2 possible scenarios that can happen here.
 
 1. If javascript is enabled in the browser.
     - We hooked into the form `on_submit` event and immediately call on `prevent_default()` to prevent the browser on submitting the form
     and instead, we pass on `Msg::QueryAPI` which in turn execute an http fetch to the server.
 2. If there is no javascript capability in the browser
-    - The form submit action will execute since there is no way to cancel it with `prevent_default`.
-    - The form data will be submitted to the server and will be served in the `submit` route, which is expecting a form data.
+    - The form will submit to the server, since there is no way to cancel it with `prevent_default`.
 
 ### Submit form
-The server has a route to `submit` which expects data triggered by submit form from the client.
+The server has a sumit route which expects a form data, where we specify to map it into a `HashMap<String,String>`.
 We then extract the value of `name` from the `HashMap`. This `name` is then used as argument to `render_page`, which return an html file with the supplied `name` rendered on it.
 
 
+### Final thoughts
+We can now finally use rust to efficiently serve progressive webapps.
+Sauron can be use to render the view either via client of via server whichever is convenient or available.
+Here we demonstrated, that the page can still work even if the javascript is disabled in the browser, by rendering the page server-side.
