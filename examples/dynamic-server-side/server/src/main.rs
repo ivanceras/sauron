@@ -3,6 +3,7 @@ use serde_json;
 use client::{App, Data, FetchStatus};
 use sauron::prelude::*;
 use std::net::SocketAddr;
+use std::collections::HashMap;
 use percent_encoding::percent_decode_str;
 
 mod page;
@@ -18,6 +19,7 @@ fn fake_api_call(name: String) -> Data {
 // path relative to the working directory when you run the server binary
 const PKG_DIR: &str = "client/pkg";
 const FAVICON_FILE: &str = "client/favicon.ico";
+const DEFAULT_NAME: &str = "Ferris";
 
 
 #[tokio::main]
@@ -56,7 +58,24 @@ async fn main() {
 
     // Render paths that don't include a name with a default
     let root = warp::path::end()
-        .map(move || render_page(String::from("Ferris")));
+        .map(move || render_page(DEFAULT_NAME.to_string()));
+
+    // When the user has no javascript enabled, we render the page
+    // with the name extracted from the form.
+    // The html form is in [`App.view`](client/src/lib.rs) where the name is the text input named `name`.
+    let submit = warp::body::form()
+        .map(move|value_map:HashMap<String,String>|{
+            let mut name = if let Some(name) = value_map.get("name"){
+                name.to_string()
+            }else{
+                DEFAULT_NAME.to_string()
+            };
+
+            if name.trim().is_empty(){
+                name = DEFAULT_NAME.to_string();
+            }
+            render_page(name)
+        });
 
     let routes = warp::get().and(
         root
@@ -64,7 +83,8 @@ async fn main() {
         .or(named)
         .or(api_call)
         .or(pkg_files)
-    );
+    ).or(submit);
+
 
     let socket: SocketAddr = ([127, 0, 0, 1], 3030).into();
     println!("serve at http://{}:{}", socket.ip(), socket.port());

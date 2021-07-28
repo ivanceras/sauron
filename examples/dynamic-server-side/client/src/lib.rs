@@ -76,10 +76,11 @@ impl Component<Msg> for App {
                 <form on_submit={|e| {
                     e.prevent_default();
                     Msg::QueryAPI
-                }}>
+                }} method="POST" action="/" >
                     <label>
                         "What’s your name, man?"
                         <input
+                            name="name"
                             type="text"
                             value={&self.name}
                             on_input={|e| Msg::EditName(e.value)}
@@ -161,6 +162,10 @@ impl App {
     }
 }
 
+/// The serialized_state is supplied by the generated page from the webserver.
+/// The generated page in index function has a main function which is supplied by a json text
+/// serialized state. This json text is deserialized and used here as our `App` value which
+/// will then be injected into the view
 #[wasm_bindgen]
 pub fn main(serialized_state: String) {
     console_log::init_with_level(log::Level::Trace).unwrap();
