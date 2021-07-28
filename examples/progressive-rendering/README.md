@@ -17,10 +17,19 @@ Install also `wasm-pack`, to simplfiy our workflow in compiling and packaging ou
  cargo install wasm-pack
 ```
 
+Checkout and the run this example.
 ```sh
 git clone --depth=1 https://github.com/ivanceras/sauron.git
 cd examples/progressive-rendering
 ./serve.sh
+```
+
+For windows users, and/or the complete step to build and run is:
+```sh
+git clone --depth=1 https://github.com/ivanceras/sauron.git
+cd examples/progressive-rendering
+cd client && wasm-pack build --release --target web && cd ..
+cargo run --release --bin server
 ```
 Open [http://localhost:3030](http://localhost:3030)
 

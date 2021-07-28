@@ -1,3 +1,3 @@
 ./build.sh
 
-cargo run --bin server
+cargo run --release --bin server

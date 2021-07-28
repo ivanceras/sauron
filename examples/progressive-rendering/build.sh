@@ -1,1 +1,1 @@
-cd client && wasm-pack build --target web && cd ..
+cd client && wasm-pack build --release --target web && cd ..
