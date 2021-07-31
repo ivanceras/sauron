@@ -33,6 +33,8 @@ cargo run --release --bin server
 ```
 Open [http://localhost:3030](http://localhost:3030)
 
+Live [demo](https://progressive-rendering.herokuapp.com/)
+
 ## What's going on?
 Please take a look at the code of this example as you follow along this README guide.
 
