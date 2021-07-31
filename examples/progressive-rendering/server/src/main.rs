@@ -12,6 +12,7 @@ mod page;
 const PKG_DIR: &str = "client/pkg";
 const FAVICON_FILE: &str = "client/favicon.ico";
 const DEFAULT_NAME: &str = "Ferris";
+const DEFAULT_PORT: u16 = 3030;
 
 // Replace this with whatever data you're actually trying to return
 fn fake_api_call(name: String) -> Data {
@@ -38,7 +39,7 @@ async fn main() {
 
     let render_page = |name: String| {
         // initialize blank app state
-        let mut app = App::new();
+        let mut app = App::default();
         // Fetch API data for the argument and stuff it into the app
         app.name = name.clone();
         let api_data = fake_api_call(name);
@@ -96,7 +97,17 @@ async fn main() {
     ).or(submit);
 
 
-    let socket: SocketAddr = ([127, 0, 0, 1], 3030).into();
+    let port = if let Ok(port) = std::env::var("PORT") {
+        if let Ok(port) = port.parse::<u16>() {
+            port
+        } else {
+            DEFAULT_PORT
+        }
+    } else {
+        DEFAULT_PORT
+    };
+
+    let socket: SocketAddr = ([0, 0, 0, 0], port).into();
     println!("serve at http://{}:{}", socket.ip(), socket.port());
     warp::serve(routes)
         .run(socket)

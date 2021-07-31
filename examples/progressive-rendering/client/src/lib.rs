@@ -38,9 +38,9 @@ pub struct App {
     error: Option<String>,
 }
 
-impl App {
-    pub fn new() -> Self {
-        App {
+impl Default for App {
+    fn default() -> Self {
+        Self {
             name: String::from(""),
             data: FetchStatus::Idle(Data {
                 length: 0,
@@ -49,7 +49,9 @@ impl App {
             error: None,
         }
     }
+}
 
+impl App {
     fn fetch_data(&self) -> Cmd<Self, Msg> {
         let url = format!("{}/{}", DATA_URL, self.name);
         Http::fetch_with_text_response_decoder(
@@ -173,11 +175,12 @@ pub fn main(serialized_state: String) {
 
     /* Deserialize starting app data from the argument, which is passed in the generated index page
      * (but generated in server/src/main.rs) */
-    let mut app = App::new();
-    if let Ok(state) = serde_json::from_str::<App>(&serialized_state) {
-        app.name = state.name;
-        app.data = state.data;
-    };
+    let app =
+        if let Ok(app_state) = serde_json::from_str::<App>(&serialized_state) {
+            app_state
+        } else {
+            App::default()
+        };
 
     /* If there's a window (i.e., if this is running in the browser)
      * then mount the app by swapping out the <main> tag */
