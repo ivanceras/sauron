@@ -24,10 +24,11 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
 // reexport serde_json
 pub use serde_json;
 
-/// When event is not needed, such as just rendering the dom
-/// tree in server side application
-#[cfg(not(feature = "with-dom"))]
-pub type Event = ();
+cfg_if! {if #[cfg(not(feature = "with-dom"))] {
+    /// When event is not needed, such as just rendering the dom
+    /// tree in server side application
+    pub type Event = ();
+}}
 
 #[macro_use]
 pub mod html;

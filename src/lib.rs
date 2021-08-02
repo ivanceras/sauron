@@ -187,6 +187,8 @@ pub use sauron_core::{
     diff, html, jss, mt_dom, svg, Attribute, Callback, Element, Node, Patch,
     Render, Text,
 };
+#[cfg(feature = "sauron-parse")]
+pub use sauron_parse::parser;
 
 // reexports
 pub use sauron_core::serde_json;

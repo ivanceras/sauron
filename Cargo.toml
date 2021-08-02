@@ -17,6 +17,7 @@ maintenance = { status = "actively-developed" }
 sauron-core = { version = "0.34", path = "crates/sauron-core", default-features = false }
 sauron-node-macro = { version = "0.34", path = "crates/sauron-node-macro", optional = true }
 sauron-markdown = { version = "0.34", path = "crates/sauron-markdown", optional = true, default-features = false }
+sauron-parse = { version = "0.34", path = "crates/sauron-parse", optional = true }
 cfg-if = "0.1"
 
 [features]
@@ -33,7 +34,7 @@ with-measure = ["sauron-core/with-measure"]
 with-debug = ["sauron-core/with-debug"]
 
 # lets you use node! macro to write html like code in the view
-with-node-macro = ["sauron-node-macro"]
+with-node-macro = ["sauron-node-macro", "sauron-core/with-parser", "sauron-parse"]
 
 with-markdown = ["sauron-markdown/include-html"]
 # light weight markdown, html are inserted as text node

@@ -14,4 +14,4 @@ pub use parser::{
     match_attribute_function, parse, parse_simple, tag_namespace, ParseError,
 };
 
-mod parser;
+pub mod parser;

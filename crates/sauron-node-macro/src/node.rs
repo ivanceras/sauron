@@ -1,20 +1,7 @@
-use proc_macro2::{
-    Span,
-    TokenStream,
-};
+use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use syn::{
-    Expr,
-    ExprBlock,
-    ExprForLoop,
-    Ident,
-    Stmt,
-};
-use syn_rsx::{
-    Node,
-    NodeType,
-    ParserConfig,
-};
+use syn::{Expr, ExprBlock, ExprForLoop, Ident, Stmt};
+use syn_rsx::{Node, NodeType, ParserConfig};
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match syn_rsx::parse_with_config(
@@ -23,11 +10,9 @@ pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
             .number_of_top_level_nodes(1)
             .type_of_top_level_nodes(NodeType::Element),
     ) {
-        Ok(mut nodes) => {
-            node_to_tokens(
-                nodes.pop().expect("unable to convert node to tokens"),
-            )
-        }
+        Ok(mut nodes) => node_to_tokens(
+            nodes.pop().expect("unable to convert node to tokens"),
+        ),
         Err(error) => error.to_compile_error(),
     }
 }
@@ -50,7 +35,11 @@ fn node_to_tokens(node: Node) -> TokenStream {
         #[allow(unused_braces)]
         {
             #children_tokens
-            sauron::html::html_element(#name, vec![#(#attributes),*], children)
+            if let Some(ns) = sauron::parser::tag_namespace(#name){
+                sauron::html::html_element_ns(#name, ns, vec![#(#attributes),*], children)
+            }else{
+                sauron::html::html_element(#name, vec![#(#attributes),*], children)
+            }
         }
     }});
 
@@ -140,33 +129,31 @@ fn children_to_tokens(children: Vec<Node>) -> TokenStream {
                         #receiver.push(sauron::html::text(#s));
                     });
                 }
-                NodeType::Block => {
-                    match child.value {
-                        Some(syn::Expr::Block(expr)) => {
-                            match braced_for_loop(&expr) {
-                                Some(ExprForLoop {
-                                    pat, expr, body, ..
-                                }) => {
-                                    tokens.extend(quote! {
+                NodeType::Block => match child.value {
+                    Some(syn::Expr::Block(expr)) => {
+                        match braced_for_loop(&expr) {
+                            Some(ExprForLoop {
+                                pat, expr, body, ..
+                            }) => {
+                                tokens.extend(quote! {
                                         for #pat in #expr {
                                             #receiver.push(sauron::Node::from(#body));
                                         }
                                     });
-                                }
-                                _ => {
-                                    tokens.extend(quote! {
+                            }
+                            _ => {
+                                tokens.extend(quote! {
                                     #receiver.push(sauron::Node::from(#expr));
                                 });
-                                }
-                            }
-                        }
-                        _ => {
-                            return quote! {
-                                compile_error!("Unexpected missing block for NodeType::Block")
                             }
                         }
                     }
-                }
+                    _ => {
+                        return quote! {
+                            compile_error!("Unexpected missing block for NodeType::Block")
+                        }
+                    }
+                },
                 _ => {
                     return quote! {
                         compile_error!(format!("Unexpected NodeType for child: {}", child.node_type))
@@ -190,12 +177,10 @@ fn braced_for_loop<'a>(expr: &'a ExprBlock) -> Option<&'a ExprForLoop> {
     } else {
         let stmt = &expr.block.stmts[0];
         match stmt {
-            Stmt::Expr(expr) => {
-                match expr {
-                    Expr::ForLoop(expr) => Some(expr),
-                    _ => None,
-                }
-            }
+            Stmt::Expr(expr) => match expr {
+                Expr::ForLoop(expr) => Some(expr),
+                _ => None,
+            },
             _ => None,
         }
     }
