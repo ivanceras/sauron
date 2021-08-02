@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.35.0
 - Fix svg not appearing in the client when used in node macro syntax
 - Expose `sauron-parse::parser` module in `sauron::parser`
 

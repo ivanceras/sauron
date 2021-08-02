@@ -105,7 +105,7 @@ crate-type = ["cdylib"]
 
 
 [dependencies]
-sauron = "0.34"
+sauron = "0.35"
 console_error_panic_hook = "0.1"
 log = "0.4"
 console_log = "0.2"
@@ -137,7 +137,6 @@ sauron node tree for your views.
 #### Prerequisite:
 
 ```sh
-rustup target add wasm32-unknown-unknown
 cargo install wasm-pack
 cargo install basic-http-server
 ```
@@ -158,14 +157,5 @@ Sauron is one of the fastest.
 
 
 
+
 License: MIT
-
-
-## Contributors
-
-Sauron would not have been possible without the wonderful work of all the people who contributed. Thank you!
-
-<a href="https://github.com/ivanceras/sauron/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=ivanceras/sauron" />
-</a>
-

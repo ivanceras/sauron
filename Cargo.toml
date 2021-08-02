@@ -1,6 +1,6 @@
 [package]
 name = "sauron"
-version = "0.34.0"
+version = "0.35.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -14,10 +14,10 @@ edition = "2018"
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-sauron-core = { version = "0.34", path = "crates/sauron-core", default-features = false }
-sauron-node-macro = { version = "0.34", path = "crates/sauron-node-macro", optional = true }
-sauron-markdown = { version = "0.34", path = "crates/sauron-markdown", optional = true, default-features = false }
-sauron-parse = { version = "0.34", path = "crates/sauron-parse", optional = true }
+sauron-core = { version = "0.35", path = "crates/sauron-core", default-features = false }
+sauron-node-macro = { version = "0.35", path = "crates/sauron-node-macro", optional = true }
+sauron-markdown = { version = "0.35", path = "crates/sauron-markdown", optional = true, default-features = false }
+sauron-parse = { version = "0.35", path = "crates/sauron-parse", optional = true }
 cfg-if = "0.1"
 
 [features]
