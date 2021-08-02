@@ -1,6 +1,10 @@
 # Changelog
 
-## (Unreleased)
+## Unreleased
+- Fix svg not appearing in the client when used in node macro syntax
+- Expose `sauron-parse::parser` module in `sauron::parser`
+
+## 0.34.0
 - **breaking** unify the fail and success decoder into just text_reponse_decoder, it receives the status code together with the text body and header
 
 ## 0.33.0
