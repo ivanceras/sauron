@@ -102,3 +102,7 @@ We then extract the value of `name` from the `HashMap`. This `name` is then used
 We can now finally use rust to efficiently serve progressive webapps.
 Sauron can be use to render the view either via client of via server whichever is convenient or available.
 Here we demonstrated, that the page can still work even if the javascript is disabled in the browser, by rendering the page server-side.
+There are not many technology stack that can do this.
+
+ * react.js - massive community of users, can render client-side and server-side via nodejs.
+ * elm - neat and clean syntax, there is no server-side rendering.
