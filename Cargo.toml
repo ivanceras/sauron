@@ -68,6 +68,7 @@ members = [
     "examples/todomvc-macro-syntax",
     "examples/window-tab-rows",
     "examples/svg-clock",
+    "examples/svg-clock-macro-syntax",
     "examples/svg-graph",
     "examples/data-viewer",
 ]
