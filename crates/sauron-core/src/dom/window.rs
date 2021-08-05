@@ -1,3 +1,4 @@
+use crate::map_msg::AttValueMapMsg;
 use crate::{
     dom::created_node::create_closure_wrap, Attribute, Cmd, Component, Dispatch,
 };

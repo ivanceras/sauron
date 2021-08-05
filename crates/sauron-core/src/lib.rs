@@ -9,6 +9,9 @@
 )]
 //! This is the core of sauron
 //!
+//!
+use html::attributes::{self, AttributeValue};
+
 #[macro_use]
 extern crate doc_comment;
 
@@ -36,11 +39,10 @@ pub mod html;
 pub mod svg;
 #[macro_use]
 pub mod jss;
+mod map_msg;
 mod render;
 
 pub use render::Render;
-
-use html::attributes::AttributeValue;
 
 pub use mt_dom;
 
@@ -58,6 +60,10 @@ pub mod prelude {
         svg::{attributes::*, tags::commons::*, *},
         *,
     };
+    pub use map_msg::{
+        AttValueMapMsg, AttributeMapMsg, ElementMapMsg, NodeMapMsg,
+    };
+    pub use render::Render;
     pub use serde_json;
     #[cfg(feature = "with-dom")]
     pub use wasm_bindgen::prelude::*;
@@ -77,24 +83,48 @@ pub type AttributeKey = &'static str;
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
 /// App code.
-pub type Node<MSG> =
-    mt_dom::Node<Namespace, Tag, AttributeKey, AttributeValue, Event, MSG>;
+pub type Node<MSG> = mt_dom::Node<
+    Namespace,
+    Tag,
+    AttributeKey,
+    AttributeValue,
+    attributes::Callback<Event, MSG>,
+>;
 
 /// Element type with tag and attribute name type set to &'static str
-pub type Element<MSG> =
-    mt_dom::Element<Namespace, Tag, AttributeKey, AttributeValue, Event, MSG>;
+pub type Element<MSG> = mt_dom::Element<
+    Namespace,
+    Tag,
+    AttributeKey,
+    AttributeValue,
+    attributes::Callback<Event, MSG>,
+>;
 
 /// Patch as result of diffing the current_vdom and the new vdom.
 /// The tag and attribute name types is set to &'static str
-pub type Patch<'a, MSG> =
-    mt_dom::Patch<'a, Namespace, Tag, AttributeKey, AttributeValue, Event, MSG>;
+pub type Patch<'a, MSG> = mt_dom::Patch<
+    'a,
+    Namespace,
+    Tag,
+    AttributeKey,
+    AttributeValue,
+    attributes::Callback<Event, MSG>,
+>;
 
 /// Attribute type used in sauron where the type of the Attribute name is &'static str
-pub type Attribute<MSG> =
-    mt_dom::Attribute<Namespace, AttributeKey, AttributeValue, Event, MSG>;
+pub type Attribute<MSG> = mt_dom::Attribute<
+    Namespace,
+    AttributeKey,
+    AttributeValue,
+    attributes::Callback<Event, MSG>,
+>;
+
+/// AttValue type is the container for the value of an attribute
+pub type AttValue<MSG> =
+    mt_dom::AttValue<AttributeValue, attributes::Callback<Event, MSG>>;
 
 /// Callback where Event type is supplied
-pub type Callback<MSG> = mt_dom::Callback<Event, MSG>;
+pub type Callback<MSG> = attributes::Callback<Event, MSG>;
 
 /// This is a sauron html specific functionality
 /// diff 2 nodes with attribute using `&'static str` instead of generic ATT

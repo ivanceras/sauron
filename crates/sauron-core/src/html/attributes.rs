@@ -1,11 +1,9 @@
 //! https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
 //!
-use crate::{
-    mt_dom::{AttValue, Callback},
-    Attribute, Event,
-};
+use crate::{mt_dom::AttValue, Attribute, Event};
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
+pub use callback::Callback;
 pub use special::{key, replace, skip, Special};
 pub use style::Style;
 pub use style_macro::*;
@@ -16,6 +14,7 @@ mod attribute_macros;
 #[macro_use]
 mod style_macro;
 mod attribute_value;
+mod callback;
 mod special;
 mod style;
 mod value;
@@ -271,7 +270,7 @@ pub(crate) fn partition_callbacks_from_plain_and_func_calls<MSG>(
                     plain_values.push(plain);
                 }
             }
-            AttValue::Callback(cb) => callbacks.push(cb),
+            AttValue::Event(cb) => callbacks.push(cb),
         }
     }
     (callbacks, plain_values, func_values)

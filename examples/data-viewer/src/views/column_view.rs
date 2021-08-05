@@ -1,18 +1,7 @@
-use crate::{
-    assets,
-    widgets::search_widget,
-    ColumnDef,
-};
+use crate::{assets, widgets::search_widget, ColumnDef};
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        units::*,
-        *,
-    },
-    Cmd,
-    Component,
-    Node,
+    html::{attributes::*, events::*, units::*, *},
+    Cmd, Component, Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]

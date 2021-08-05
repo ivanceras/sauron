@@ -1,3 +1,4 @@
+use crate::map_msg::NodeMapMsg;
 use crate::{
     diff,
     dom::{

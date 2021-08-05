@@ -1,15 +1,8 @@
-use crate::row::{
-    self,
-    Row,
-};
+use crate::row::{self, Row};
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
-    Component,
-    Node,
+    html::{attributes::*, events::*, *},
+    prelude::*,
+    Component, Node,
 };
 
 use sauron::Cmd;
