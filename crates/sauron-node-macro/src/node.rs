@@ -69,13 +69,7 @@ fn attribute_to_tokens(attribute: &Node) -> TokenStream {
                     } else {
                         let name = convert_name(&name);
                         quote::quote! {
-                            sauron::Attribute::new(
-                                None,
-                                #name,
-                                sauron::html::attributes::AttributeValue::Simple(
-                                    sauron::html::attributes::Value::from(#value)
-                                )
-                            )
+                            sauron::html::attributes::attr(#name, #value)
                         }
                     }
                 }

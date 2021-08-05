@@ -12,7 +12,7 @@ edition = "2018"
 
 [dependencies]
 syn = { version = "1", features = ["full"] }
-syn-rsx = { version = "0.7" }
+syn-rsx = { version = "0.8" }
 quote = {package = "quote", version = "1.0.3"}
 proc-macro2 = { version = "1" }
 
