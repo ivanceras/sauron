@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.36.0
+- simplify the construction of attribute in node-macro by using `attr`
+- Revamp `Cmd` to contain flag `should_update_view` which instruct the `Program` to skip
+    updating the view.
+
 ## 0.35.0
 - Fix svg not appearing in the client when used in node macro syntax
 - Expose `sauron-parse::parser` module in `sauron::parser`

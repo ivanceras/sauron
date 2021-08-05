@@ -101,7 +101,7 @@
 //!
 //!
 //! [dependencies]
-//! sauron = "0.35"
+//! sauron = "0.36"
 //! console_error_panic_hook = "0.1"
 //! log = "0.4"
 //! console_log = "0.2"
