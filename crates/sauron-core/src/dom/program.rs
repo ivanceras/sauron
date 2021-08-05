@@ -123,35 +123,41 @@ where
         let t1 = crate::now();
         // update the app and emit the cmd returned from the update
         let cmd = self.app.borrow_mut().update(msg);
-        //trace!("Executing cmd..");
-        #[cfg(feature = "with-measure")]
-        let t2 = {
-            let t2 = crate::now();
-            log::trace!("app update took: {}ms", t2 - t1);
-            t2
-        };
-        // a new view is created due to the app update
-        let view = self.app.borrow().view();
-        #[cfg(feature = "with-measure")]
-        let t3 = {
-            let t3 = crate::now();
-            log::trace!("creating app view took: {}ms", t3 - t2);
-            t3
-        };
-        // update the last DOM node tree with this new view
-        self.dom_updater.borrow_mut().update_dom(self, view);
-        #[cfg(feature = "with-measure")]
-        {
-            let t4 = crate::now();
-            log::trace!("dom update took: {}ms", t4 - t3);
-            let dispatch_duration = t4 - t1;
-            // 60fps is 16.667 ms per frame.
-            if dispatch_duration > 16.0 {
-                log::warn!("dispatch took: {}ms", dispatch_duration);
-            } else {
-                log::trace!("dispatch took: {}ms", dispatch_duration);
-            }
-        };
+
+        if cmd.should_update_view {
+            //trace!("Executing cmd..");
+            #[cfg(feature = "with-measure")]
+            let t2 = {
+                let t2 = crate::now();
+                log::trace!("app update took: {}ms", t2 - t1);
+                t2
+            };
+            // a new view is created due to the app update
+            let view = self.app.borrow().view();
+            #[cfg(feature = "with-measure")]
+            let t3 = {
+                let t3 = crate::now();
+                log::trace!("creating app view took: {}ms", t3 - t2);
+                t3
+            };
+            // update the last DOM node tree with this new view
+            self.dom_updater.borrow_mut().update_dom(self, view);
+            #[cfg(feature = "with-measure")]
+            {
+                let t4 = crate::now();
+                log::trace!("dom update took: {}ms", t4 - t3);
+                let dispatch_duration = t4 - t1;
+                // 60fps is 16.667 ms per frame.
+                if dispatch_duration > 16.0 {
+                    log::warn!("dispatch took: {}ms", dispatch_duration);
+                } else {
+                    log::trace!("dispatch took: {}ms", dispatch_duration);
+                }
+            };
+        } else {
+            #[cfg(feature = "with-debug")]
+            log::info!("dom update is skipped here");
+        }
         cmd.emit(self);
     }
 

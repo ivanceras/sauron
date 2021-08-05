@@ -9,7 +9,12 @@ use std::rc::Rc;
 /// Cmd required a DSP object which is the Program as an argument
 /// The emit function is called with the program argument.
 /// The callback is supplied with the program an is then executed/emitted.
-pub struct Cmd<DSP>(pub Vec<Rc<dyn Fn(DSP)>>);
+pub struct Cmd<DSP> {
+    /// the functions that would be executed when this Cmd is emited
+    pub commands: Vec<Rc<dyn Fn(DSP)>>,
+    /// this instruct the program whether or not to update the view
+    pub should_update_view: bool,
+}
 
 impl<DSP> Cmd<DSP>
 where
@@ -20,28 +25,52 @@ where
     where
         F: Fn(DSP) + 'static,
     {
-        Cmd(vec![Rc::new(f)])
+        Self {
+            commands: vec![Rc::new(f)],
+            should_update_view: true,
+        }
     }
 
     /// creates a unified Cmd which batches all the other Cmds in one.
     pub fn batch(cmds: Vec<Self>) -> Self {
-        let mut callbacks = vec![];
+        let mut commands = vec![];
         for cmd in cmds {
-            callbacks.extend(cmd.0);
+            commands.extend(cmd.commands);
         }
-        Cmd(callbacks)
+        Self {
+            commands,
+            should_update_view: true,
+        }
     }
 
     /// A Cmd with no callback, similar to NoOp.
     pub fn none() -> Self {
-        Cmd(vec![])
+        Cmd {
+            commands: vec![],
+            should_update_view: true,
+        }
     }
 
     /// Executes the Cmd
     pub fn emit(self, program: &DSP) {
-        for cb in self.0 {
+        for cb in self.commands {
             let program_clone = program.clone();
             cb(program_clone);
         }
+    }
+
+    /// Creates an empty Cmd and specifies that there is NO update will be made to the
+    /// view.
+    pub fn should_update_view(should_update_view: bool) -> Self {
+        Self {
+            commands: vec![],
+            should_update_view,
+        }
+    }
+
+    /// Create a cmd which instruct the program that there is NO update
+    /// will be made to the view
+    pub fn no_render() -> Self {
+        Self::should_update_view(false)
     }
 }
