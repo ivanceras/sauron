@@ -20,7 +20,7 @@ log = "0.4"
 cfg-if = "0.1"
 thiserror = "1.0"
 doc-comment = "0.3"
-mt-dom = { version = "0.6", path = "../../../mt-dom" }
+mt-dom = { version = "0.6" }
 serde_json = { version = "1", features = ["preserve_order"] }
 
 
