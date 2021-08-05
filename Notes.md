@@ -7,3 +7,4 @@ Publish the crates in the following order:
  2. sauron-parse
  3. sauron-node-macro
  4. sauron-markdown
+ 5. sauron
