@@ -1,6 +1,6 @@
 [package]
 name = "sauron-markdown"
-version = "0.36.0"
+version = "0.37.0"
 authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -12,8 +12,8 @@ keywords = ["md", "sauron", "node"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sauron-core = { version = "0.36", path = "../sauron-core" }
-sauron-parse = { version = "0.36", path = "../sauron-parse", optional = true }
+sauron-core = { version = "0.37", path = "../sauron-core" }
+sauron-parse = { version = "0.37", path = "../sauron-parse", optional = true }
 pulldown-cmark = { version = "0.8"}
 ammonia = "3"
 
