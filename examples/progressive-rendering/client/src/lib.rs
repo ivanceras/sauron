@@ -52,6 +52,13 @@ impl Default for App {
 }
 
 impl App {
+    pub fn with_name_and_data(name: &str, data: Data) -> Self {
+        Self {
+            name: name.to_string(),
+            data: FetchStatus::Complete(data),
+            ..Default::default()
+        }
+    }
     fn fetch_data(&self) -> Cmd<Self, Msg> {
         let url = format!("{}/{}", DATA_URL, self.name);
         Http::fetch_with_text_response_decoder(

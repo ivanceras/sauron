@@ -1,6 +1,5 @@
 use warp::{Filter, http::Response};
-use serde_json;
-use client::{App, Data, FetchStatus};
+use client::{App, Data};
 use sauron::prelude::*;
 use std::net::SocketAddr;
 use std::collections::HashMap;
@@ -15,6 +14,8 @@ const DEFAULT_NAME: &str = "Ferris";
 const DEFAULT_PORT: u16 = 3030;
 
 // Replace this with whatever data you're actually trying to return
+// This is normally something where the client side can not do
+// such as accessing a database.
 fn fake_api_call(name: String) -> Data {
     Data {
         length: name.len(),
@@ -38,12 +39,9 @@ async fn main() {
     let favicon = warp::path("favicon.ico").and(warp::fs::file(FAVICON_FILE));
 
     let render_page = |name: String| {
-        // initialize blank app state
-        let mut app = App::default();
         // Fetch API data for the argument and stuff it into the app
-        app.name = name.clone();
-        let api_data = fake_api_call(name);
-        app.data = FetchStatus::Complete(api_data);
+        let api_data = fake_api_call(name.clone());
+        let app = App::with_name_and_data(&name, api_data);
 
         let rendered_index_page = page::index(&app).render_to_string();
 
