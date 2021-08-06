@@ -283,7 +283,7 @@ where
         Patch::InsertNode(InsertNode {
             tag: _,
             node_idx: _,
-            new_node_idx,
+            new_node_idx: _,
             node: for_insert,
         }) => {
             let element: &Element = node.unchecked_ref();
@@ -291,7 +291,6 @@ where
                 program,
                 &for_insert,
                 focused_node,
-                &mut Some(*new_node_idx),
             );
             let parent_node =
                 element.parent_node().expect("must have a parent node");
@@ -343,7 +342,7 @@ where
         Patch::ReplaceNode(ReplaceNode {
             tag,
             node_idx,
-            new_node_idx,
+            new_node_idx: _,
             replacement,
         }) => {
             let element: &Element = node.unchecked_ref();
@@ -351,7 +350,6 @@ where
                 program,
                 replacement,
                 focused_node,
-                &mut Some(*new_node_idx),
             );
             if *node_idx == 0 {
                 *root_node = created_node.node.clone();
@@ -399,12 +397,11 @@ where
         }) => {
             let element: &Element = node.unchecked_ref();
             let mut active_closures = HashMap::new();
-            for (append_children_node_idx, new_node) in new_nodes.iter() {
+            for (_append_children_node_idx, new_node) in new_nodes.iter() {
                 let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
                     program,
                     &new_node,
                     focused_node,
-                    &mut Some(*append_children_node_idx),
                 );
                 element.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);

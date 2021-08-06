@@ -76,7 +76,6 @@ where
             program,
             &self.current_vdom,
             &mut self.focused_node,
-            &mut None,
         );
         if replace {
             let root_element: &Element = self.root_node.unchecked_ref();

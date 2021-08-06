@@ -1,8 +1,6 @@
 use crate::events::MountEvent;
 use crate::Callback;
-use crate::{
-    dom::Dispatch, html, html::attributes::Special, mt_dom::NodeIdx, Attribute,
-};
+use crate::{dom::Dispatch, html, html::attributes::Special, Attribute};
 use mt_dom::AttValue;
 use std::{collections::HashMap, sync::Mutex};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
@@ -68,13 +66,12 @@ impl CreatedNode {
         program: &DSP,
         vnode: &crate::Node<MSG>,
         focused_node: &mut Option<Node>,
-        node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        Self::create_dom_node_opt(Some(program), vnode, focused_node, node_idx)
+        Self::create_dom_node_opt(Some(program), vnode, focused_node)
     }
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
@@ -88,7 +85,6 @@ impl CreatedNode {
         program: Option<&DSP>,
         vnode: &crate::Node<MSG>,
         focused_node: &mut Option<Node>,
-        node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode
     where
         MSG: 'static,
@@ -104,7 +100,6 @@ impl CreatedNode {
                     program,
                     element_node,
                     focused_node,
-                    node_idx,
                 )
                 .into();
                 created_element
@@ -150,7 +145,6 @@ impl CreatedNode {
         program: Option<&DSP>,
         velem: &crate::Element<MSG>,
         focused_node: &mut Option<Node>,
-        node_idx: &mut Option<NodeIdx>,
     ) -> CreatedNode
     where
         MSG: 'static,
@@ -187,7 +181,6 @@ impl CreatedNode {
         let mut previous_node_was_text = false;
 
         for child in velem.get_children().iter() {
-            node_idx.as_mut().map(|node_idx| *node_idx += 1);
             match child {
                 crate::Node::Text(txt) => {
                     let current_node: &web_sys::Node = element.as_ref();
@@ -214,12 +207,8 @@ impl CreatedNode {
                 crate::Node::Element(_element_node) => {
                     previous_node_was_text = false;
 
-                    let created_child = Self::create_dom_node_opt(
-                        program,
-                        child,
-                        focused_node,
-                        node_idx,
-                    );
+                    let created_child =
+                        Self::create_dom_node_opt(program, child, focused_node);
                     closures.extend(created_child.closures);
 
                     element
