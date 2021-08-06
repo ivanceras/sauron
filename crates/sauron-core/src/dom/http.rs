@@ -1,5 +1,6 @@
 //! provides functions for retrieving data using http network request
-use crate::{mt_dom::Callback, Cmd, Component, Dispatch};
+use crate::html::attributes::Callback;
+use crate::{Cmd, Component, Dispatch};
 use js_sys::TypeError;
 use std::fmt::Debug;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};

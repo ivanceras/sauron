@@ -323,7 +323,7 @@ where
                             )?;
                         }
                         // it is an event listener
-                        AttValue::Callback(_) => {
+                        AttValue::Event(_) => {
                             remove_event_listener_with_name(
                                 attr.name(),
                                 element,

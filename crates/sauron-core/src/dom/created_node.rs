@@ -1,10 +1,7 @@
 use crate::events::MountEvent;
+use crate::Callback;
 use crate::{
-    dom::Dispatch,
-    html,
-    html::attributes::Special,
-    mt_dom::{Callback, NodeIdx},
-    Attribute,
+    dom::Dispatch, html, html::attributes::Special, mt_dom::NodeIdx, Attribute,
 };
 use mt_dom::AttValue;
 use std::{collections::HashMap, sync::Mutex};
@@ -130,7 +127,7 @@ impl CreatedNode {
             if *att.name() == "mount" {
                 for val in att.value().iter() {
                     match val {
-                        AttValue::Callback(cb) => {
+                        AttValue::Event(cb) => {
                             let msg = cb.emit(MountEvent {
                                 target_node: element.clone().unchecked_into(),
                             });
@@ -441,7 +438,7 @@ impl CreatedNode {
 /// This wrap into a closure the function that is dispatched when the event is triggered.
 pub(crate) fn create_closure_wrap<DSP, MSG>(
     program: &DSP,
-    callback: &Callback<crate::Event, MSG>,
+    callback: &Callback<MSG>,
 ) -> Closure<dyn FnMut(web_sys::Event)>
 where
     MSG: 'static,
