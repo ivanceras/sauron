@@ -48,12 +48,14 @@
     and preprocess the jss with it before injecting it to the main program
 - [X] Clean up `CreateNode`
     - no need to wrap `Node` and `Element` instead just return them as created with their `closures`
-- [ ] Cmd should include a `should_update: bool` field which indicates if the update should be made or not
+- [X] Cmd should include a `should_update: bool` field which indicates if the update should be made or not
         - Cmd{ commands:Vec<..>,should_update }
         - Cmd::noop() // no update operation
+        - Fixed in `0.36.0`
 - [ ] Remove the Dispatch trait and pass Program as it is in dom_updater and apply_patches module
     - There is only one implementation of `Dispatch` trait anyway, that is `Program`
-- [ ] ISSUE: sauron `node!` macro doesn't work on svg tags since it is using only `html_element` function which `namespace` is not supplied.
+- [X] ISSUE: sauron `node!` macro doesn't work on svg tags since it is using only `html_element` function which `namespace` is not supplied.
+    - Fixed in `0.35.0` by checking whether a tag has a namespace.
 
 
 

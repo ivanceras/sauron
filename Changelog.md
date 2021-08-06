@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.37.0
+- Move Callback from `mt-dom` crate to here, since it is more relevant to `sauron` than `mt-dom`.
+    `map_callback` and `map_msg` is done using `trait` implementation to `mt-dom's` `Node`, `Element`, `Attribute`, and `AttValue`.
+- No longer `lib.rs` will be used to generate the readme. Make a separate document for each
+
 ## 0.36.0
 - simplify the construction of attribute in node-macro by using `attr`
 - Revamp `Cmd` to contain flag `should_update_view` which instruct the `Program` to skip
