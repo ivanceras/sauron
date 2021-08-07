@@ -282,8 +282,7 @@ where
     match patch {
         Patch::InsertNode(InsertNode {
             tag: _,
-            node_idx: _,
-            new_node_idx: _,
+            patch_path: _,
             node: for_insert,
         }) => {
             let element: &Element = node.unchecked_ref();
@@ -341,8 +340,7 @@ where
         //
         Patch::ReplaceNode(ReplaceNode {
             tag,
-            node_idx,
-            new_node_idx: _,
+            patch_path,
             replacement,
         }) => {
             let element: &Element = node.unchecked_ref();
@@ -351,7 +349,7 @@ where
                 replacement,
                 focused_node,
             );
-            if *node_idx == 0 {
+            if patch_path.node_idx() == 0 {
                 *root_node = created_node.node.clone();
             }
             if let Some(tag) = tag {
@@ -392,7 +390,7 @@ where
         }
         Patch::AppendChildren(AppendChildren {
             tag: _,
-            node_idx: _,
+            patch_path: _,
             children: new_nodes,
         }) => {
             let element: &Element = node.unchecked_ref();
