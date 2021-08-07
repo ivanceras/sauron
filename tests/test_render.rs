@@ -1,9 +1,6 @@
 #![deny(warnings)]
 use sauron::{
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     mt_dom::patch::*,
     *,
 };
@@ -50,8 +47,10 @@ fn test_inner_html_patch() {
         patch,
         vec![AddAttributes::new(
             &"article",
-            1,
-            1,
+            PatchPath::new(
+                TreePath::start_at(1, vec![0, 0]),
+                TreePath::start_at(1, vec![0, 0])
+            ),
             vec![&inner_html("<h1>Lorep Ipsum</h1>")]
         )
         .into()]
@@ -73,8 +72,10 @@ fn test_inner_html_removed() {
         patch,
         vec![RemoveAttributes::new(
             &"article",
-            1,
-            1,
+            PatchPath::new(
+                TreePath::start_at(1, vec![0, 0]),
+                TreePath::start_at(1, vec![0, 0])
+            ),
             vec![&inner_html("<h1>Lorep Ipsum</h1>")]
         )
         .into()]

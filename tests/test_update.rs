@@ -1,9 +1,6 @@
 #![deny(warnings)]
 use sauron::{
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     mt_dom::patch::*,
     *,
 };
@@ -115,12 +112,30 @@ fn test1() {
     assert_eq!(
         patch,
         vec![
-            ChangeText::new(20, &Text::new("1"), 8, &Text::new("0")).into(),
-            ChangeText::new(26, &Text::new("2"), 32, &Text::new("3")).into(),
+            ChangeText::new(
+                &Text::new("1"),
+                PatchPath::new(
+                    TreePath::start_at(20, vec![0, 0]),
+                    TreePath::start_at(8, vec![0, 0])
+                ),
+                &Text::new("0")
+            )
+            .into(),
+            ChangeText::new(
+                &Text::new("2"),
+                PatchPath::new(
+                    TreePath::start_at(26, vec![0, 0]),
+                    TreePath::start_at(32, vec![0, 0])
+                ),
+                &Text::new("3")
+            )
+            .into(),
             InsertNode::new(
                 Some(&"div"),
-                24,
-                12,
+                PatchPath::new(
+                    TreePath::start_at(24, vec![0, 0]),
+                    TreePath::start_at(12, vec![0, 0])
+                ),
                 &div(
                     vec![
                         class("grid__number__line"),
@@ -143,8 +158,10 @@ fn test1() {
             .into(),
             InsertNode::new(
                 Some(&"div"),
-                24,
-                24,
+                PatchPath::new(
+                    TreePath::start_at(24, vec![0, 0]),
+                    TreePath::start_at(24, vec![0, 0])
+                ),
                 &div(
                     vec![
                         class("grid__number__line"),
@@ -160,11 +177,17 @@ fn test1() {
                 )
             )
             .into(),
-            RemoveNode::new(Some(&"div"), 6).into(),
+            RemoveNode::new(
+                Some(&"div"),
+                PatchPath::old(TreePath::start_at(6, vec![0, 0]),),
+            )
+            .into(),
             ChangeText::new(
-                37,
                 &Text::new("line: 0, column: 0"),
-                43,
+                PatchPath::new(
+                    TreePath::start_at(37, vec![0, 0]),
+                    TreePath::start_at(43, vec![0, 0])
+                ),
                 &Text::new("line: 1, column: 0")
             )
             .into(),

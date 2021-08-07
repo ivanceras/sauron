@@ -1,8 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    mt_dom::patch::*,
-    *,
-};
+use sauron::{mt_dom::patch::*, *};
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -114,12 +111,30 @@ fn multiple_match_on_keyed_elements() {
     assert_eq!(
         patches,
         vec![
-            ChangeText::new(26, &Text::new("2"), 14, &Text::new("1")).into(),
-            ChangeText::new(32, &Text::new("3"), 38, &Text::new("4")).into(),
+            ChangeText::new(
+                &Text::new("2"),
+                PatchPath::new(
+                    TreePath::start_at(26, vec![0, 0]),
+                    TreePath::start_at(14, vec![0, 0])
+                ),
+                &Text::new("1")
+            )
+            .into(),
+            ChangeText::new(
+                &Text::new("3"),
+                PatchPath::new(
+                    TreePath::start_at(32, vec![0, 0]),
+                    TreePath::start_at(38, vec![0, 0])
+                ),
+                &Text::new("4")
+            )
+            .into(),
             InsertNode::new(
                 Some(&"div"),
-                30,
-                18,
+                PatchPath::new(
+                    TreePath::start_at(30, vec![0, 0]),
+                    TreePath::start_at(18, vec![0, 0])
+                ),
                 &node!(
                     <div class="grid__number__line" key="623356695095054844">
                        <div class="grid__number">"2"</div>
@@ -135,8 +150,10 @@ fn multiple_match_on_keyed_elements() {
             .into(),
             InsertNode::new(
                 Some(&"div"),
-                30,
-                30,
+                PatchPath::new(
+                    TreePath::start_at(30, vec![0, 0]),
+                    TreePath::start_at(30, vec![0, 0])
+                ),
                 &node!(
                     <div class="grid__number__line" key="4638962052468762037">
                        <div class="grid__number">"3"</div>
@@ -147,11 +164,20 @@ fn multiple_match_on_keyed_elements() {
                 )
             )
             .into(),
-            RemoveNode::new(Some(&"div"), 12).into(),
+            RemoveNode::new(
+                Some(&"div"),
+                PatchPath::new(
+                    TreePath::start_at(12, vec![0, 0]),
+                    TreePath::start_at(12, vec![0, 0])
+                ),
+            )
+            .into(),
             ChangeText::new(
-                43,
                 &Text::new("line: 1, column: 0"),
-                49,
+                PatchPath::new(
+                    TreePath::start_at(43, vec![0, 0]),
+                    TreePath::start_at(49, vec![0, 0])
+                ),
                 &Text::new("line: 2, column: 0")
             )
             .into(),

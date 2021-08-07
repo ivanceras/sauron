@@ -1,12 +1,8 @@
 #![deny(warnings)]
 use sauron::{
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     mt_dom::patch::*,
-    node,
-    *,
+    node, *,
 };
 
 #[test]
@@ -115,13 +111,39 @@ fn new_lines_ignored() {
     assert_eq!(
         patches,
         vec![
-            ChangeText::new(8, &Text::new("0"), 14, &Text::new("1")).into(),
-            ChangeText::new(26, &Text::new("2"), 32, &Text::new("3")).into(),
-            ChangeText::new(38, &Text::new("3"), 44, &Text::new("4")).into(),
+            ChangeText::new(
+                &Text::new("0"),
+                PatchPath::new(
+                    TreePath::start_at(8, vec![0, 1, 0, 0, 0, 0, 0,]),
+                    TreePath::start_at(14, vec![0, 1, 0, 0, 0, 0, 0,])
+                ),
+                &Text::new("1")
+            )
+            .into(),
+            ChangeText::new(
+                &Text::new("2"),
+                PatchPath::new(
+                    TreePath::start_at(26, vec![0, 1, 0, 0, 2, 0, 0,]),
+                    TreePath::start_at(32, vec![0, 1, 0, 0, 2, 0, 0,])
+                ),
+                &Text::new("3")
+            )
+            .into(),
+            ChangeText::new(
+                &Text::new("3"),
+                PatchPath::new(
+                    TreePath::start_at(38, vec![0, 1, 0, 0, 3, 0, 0,]),
+                    TreePath::start_at(44, vec![0, 1, 0, 0, 3, 0, 0,])
+                ),
+                &Text::new("4")
+            )
+            .into(),
             InsertNode::new(
                 Some(&"div"),
-                6,
-                6,
+                PatchPath::new(
+                    TreePath::start_at(6, vec![0, 1, 0, 0, 0,]),
+                    TreePath::start_at(6, vec![0, 1, 0, 0, 0,])
+                ),
                 &div(
                     vec![class("grid__number__line")],
                     vec![
@@ -136,8 +158,10 @@ fn new_lines_ignored() {
             .into(),
             InsertNode::new(
                 Some(&"div"),
-                24,
-                24,
+                PatchPath::new(
+                    TreePath::start_at(24, vec![0, 1, 0, 0, 2,]),
+                    TreePath::start_at(24, vec![0, 1, 0, 0, 2,])
+                ),
                 &div(
                     vec![class("grid__number__line")],
                     vec![
@@ -150,11 +174,17 @@ fn new_lines_ignored() {
                 )
             )
             .into(),
-            RemoveNode::new(Some(&"div"), 18).into(),
+            RemoveNode::new(
+                Some(&"div"),
+                PatchPath::old(TreePath::start_at(18, vec![0, 1, 0, 0, 1,]),),
+            )
+            .into(),
             ChangeText::new(
-                49,
                 &Text::new("line: 0, column: 0"),
-                55,
+                PatchPath::new(
+                    TreePath::start_at(49, vec![0, 1, 0, 1, 0,]),
+                    TreePath::start_at(55, vec![0, 1, 0, 1, 0,])
+                ),
                 &Text::new("line: 1, column: 0")
             )
             .into(),

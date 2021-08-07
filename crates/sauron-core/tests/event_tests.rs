@@ -7,18 +7,11 @@ extern crate web_sys;
 use sauron_core::{
     diff,
     dom::DomUpdater,
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
+    html::{attributes::*, events::*, *},
     mt_dom::patch::*,
     Node,
 };
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 
@@ -194,10 +187,26 @@ fn remove_event_from_truncated_children() {
     assert_eq!(
         sauron_core::diff(&old, &new),
         vec![
-            RemoveNode::new(Some(&"button"), 2).into(),
-            RemoveNode::new(Some(&"button"), 3).into(),
-            RemoveNode::new(Some(&"button"), 4).into(),
-            RemoveNode::new(Some(&"button"), 5).into(),
+            RemoveNode::new(
+                Some(&"button"),
+                PatchPath::old(TreePath::start_at(2, vec![0]),),
+            )
+            .into(),
+            RemoveNode::new(
+                Some(&"button"),
+                PatchPath::old(TreePath::start_at(3, vec![0]),),
+            )
+            .into(),
+            RemoveNode::new(
+                Some(&"button"),
+                PatchPath::old(TreePath::start_at(4, vec![0]),),
+            )
+            .into(),
+            RemoveNode::new(
+                Some(&"button"),
+                PatchPath::old(TreePath::start_at(5, vec![0]),),
+            )
+            .into(),
         ],
     );
     let mut dom_updater =
@@ -239,10 +248,26 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     assert_eq!(
         sauron_core::diff(&old, &new),
         vec![
-            RemoveNode::new(Some(&"button"), 2).into(),
-            RemoveNode::new(Some(&"button"), 3).into(),
-            RemoveNode::new(Some(&"button"), 4).into(),
-            RemoveNode::new(Some(&"button"), 5).into(),
+            RemoveNode::new(
+                Some(&"button"),
+                PatchPath::old(TreePath::start_at(2, vec![0]),),
+            )
+            .into(),
+            RemoveNode::new(
+                Some(&"button"),
+                PatchPath::old(TreePath::start_at(3, vec![0]),),
+            )
+            .into(),
+            RemoveNode::new(
+                Some(&"button"),
+                PatchPath::old(TreePath::start_at(4, vec![0]),),
+            )
+            .into(),
+            RemoveNode::new(
+                Some(&"button"),
+                PatchPath::old(TreePath::start_at(5, vec![0]),),
+            )
+            .into(),
         ],
         "Should be a Truncate patch"
     );
@@ -272,7 +297,12 @@ fn remove_event_from_replaced_node() {
     let simple_program = simple_program();
     assert_eq!(
         sauron_core::diff(&old, &new),
-        vec![ReplaceNode::new(Some(&"div"), 0, 0, &p(vec![], vec![])).into()],
+        vec![ReplaceNode::new(
+            Some(&"div"),
+            PatchPath::old(TreePath::start_at(0, vec![0]),),
+            &p(vec![], vec![])
+        )
+        .into()],
     );
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);

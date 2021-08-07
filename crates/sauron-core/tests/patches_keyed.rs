@@ -1,12 +1,8 @@
 #![deny(warnings)]
 use sauron_core::{
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     mt_dom::patch::*,
-    Patch,
-    *,
+    Patch, *,
 };
 
 use test_fixtures::simple_program;
@@ -87,7 +83,14 @@ fn node_patched_properly() {
     );
 
     let patches = diff(&old, &update1);
-    assert_eq!(patches, vec![RemoveNode::new(Some(&"article"), 4).into()]);
+    assert_eq!(
+        patches,
+        vec![RemoveNode::new(
+            Some(&"article"),
+            PatchPath::old(TreePath::start_at(2, vec![0, 0, 1]))
+        )
+        .into()]
+    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -162,7 +165,14 @@ fn node_patched_properly_remove_from_start() {
 
     let patches = diff(&old, &update1);
 
-    assert_eq!(patches, vec![RemoveNode::new(Some(&"article"), 2).into()]);
+    assert_eq!(
+        patches,
+        vec![RemoveNode::new(
+            Some(&"article"),
+            PatchPath::old(TreePath::start_at(2, vec![0, 0, 1]))
+        )
+        .into()]
+    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -243,12 +253,18 @@ fn node_patched_properly_text_changed() {
         patches,
         vec![
             Patch::ChangeText(ChangeText::new(
-                7,
                 &Text::new("item3"),
-                5,
+                PatchPath::new(
+                    TreePath::start_at(7, vec![0]),
+                    TreePath::start_at(5, vec![0])
+                ),
                 &Text::new("item3 with changes")
             )),
-            RemoveNode::new(Some(&"article"), 2).into()
+            RemoveNode::new(
+                Some(&"article"),
+                PatchPath::old(TreePath::start_at(2, vec![0, 0, 1]))
+            )
+            .into()
         ]
     );
 
@@ -336,16 +352,24 @@ fn mixed_keyed_and_non_keyed_elements() {
         patches,
         vec![
             Patch::ChangeText(ChangeText::new(
-                7,
                 &Text::new("item3"),
-                5,
+                PatchPath::new(
+                    TreePath::start_at(7, vec![0]),
+                    TreePath::start_at(5, vec![0])
+                ),
                 &Text::new("item3 with changes")
             )),
-            RemoveNode::new(Some(&"article"), 2).into(),
+            RemoveNode::new(
+                Some(&"article"),
+                PatchPath::old(TreePath::start_at(2, vec![0]),),
+            )
+            .into(),
             Patch::ChangeText(ChangeText::new(
-                9,
                 &Text::new("3 items left"),
-                7,
+                PatchPath::new(
+                    TreePath::start_at(9, vec![0]),
+                    TreePath::start_at(7, vec![0])
+                ),
                 &Text::new("2 items left")
             ))
         ]
