@@ -122,8 +122,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("0"),
                 PatchPath::new(
-                    TreePath::start_at(4, vec![0]),
-                    TreePath::start_at(9, vec![0])
+                    TreePath::start_at(4, vec![0, 0, 0, 0, 0,]),
+                    TreePath::start_at(9, vec![0, 0, 0, 0, 0,])
                 ),
                 &Text::new("1")
             )
@@ -131,8 +131,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("1"),
                 PatchPath::new(
-                    TreePath::start_at(9, vec![0]),
-                    TreePath::start_at(14, vec![0])
+                    TreePath::start_at(9, vec![0, 0, 1, 0, 0,]),
+                    TreePath::start_at(14, vec![0, 0, 1, 0, 0,])
                 ),
                 &Text::new("2")
             )
@@ -140,8 +140,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("2"),
                 PatchPath::new(
-                    TreePath::start_at(14, vec![0]),
-                    TreePath::start_at(19, vec![0])
+                    TreePath::start_at(14, vec![0, 0, 2, 0, 0,]),
+                    TreePath::start_at(19, vec![0, 0, 2, 0, 0,])
                 ),
                 &Text::new("3")
             )
@@ -149,8 +149,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("3"),
                 PatchPath::new(
-                    TreePath::start_at(19, vec![0]),
-                    TreePath::start_at(24, vec![0])
+                    TreePath::start_at(19, vec![0, 0, 3, 0, 0,]),
+                    TreePath::start_at(24, vec![0, 0, 3, 0, 0,])
                 ),
                 &Text::new("4")
             )
@@ -158,8 +158,8 @@ fn subsequent_updates() {
             InsertNode::new(
                 Some(&"section"),
                 PatchPath::new(
-                    TreePath::start_at(2, vec![0]),
-                    TreePath::start_at(2, vec![0])
+                    TreePath::start_at(2, vec![0, 0, 0]),
+                    TreePath::start_at(2, vec![0, 0, 0])
                 ),
                 &div(
                     vec![key("hashXXX")],
@@ -331,15 +331,15 @@ fn subsequent_updates() {
     );
 
     let patches2 = diff(&update1, &update2);
-    log::trace!("patches2: {:#?}", patches2);
+    log::trace!("-->patches2: {:#?}", patches2);
     assert_eq!(
         patches2,
         vec![
             ChangeText::new(
                 &Text::new("0"),
                 PatchPath::new(
-                    TreePath::start_at(4, vec![0]),
-                    TreePath::start_at(9, vec![0])
+                    TreePath::start_at(4, vec![0, 0, 0, 0, 0,]),
+                    TreePath::start_at(9, vec![0, 0, 0, 0, 0,])
                 ),
                 &Text::new("1")
             )
@@ -347,8 +347,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("1"),
                 PatchPath::new(
-                    TreePath::start_at(9, vec![0]),
-                    TreePath::start_at(14, vec![0])
+                    TreePath::start_at(9, vec![0, 0, 1, 0, 0,]),
+                    TreePath::start_at(14, vec![0, 0, 1, 0, 0,])
                 ),
                 &Text::new("2")
             )
@@ -356,8 +356,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("2"),
                 PatchPath::new(
-                    TreePath::start_at(14, vec![0]),
-                    TreePath::start_at(19, vec![0])
+                    TreePath::start_at(14, vec![0, 0, 2, 0, 0,]),
+                    TreePath::start_at(19, vec![0, 0, 2, 0, 0,])
                 ),
                 &Text::new("3")
             )
@@ -365,8 +365,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("3"),
                 PatchPath::new(
-                    TreePath::start_at(19, vec![0]),
-                    TreePath::start_at(24, vec![0])
+                    TreePath::start_at(19, vec![0, 0, 3, 0, 0,]),
+                    TreePath::start_at(24, vec![0, 0, 3, 0, 0,])
                 ),
                 &Text::new("4")
             )
@@ -374,8 +374,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("4"),
                 PatchPath::new(
-                    TreePath::start_at(24, vec![0]),
-                    TreePath::start_at(29, vec![0])
+                    TreePath::start_at(24, vec![0, 0, 4, 0, 0,]),
+                    TreePath::start_at(29, vec![0, 0, 4, 0, 0,])
                 ),
                 &Text::new("5")
             )
@@ -383,8 +383,8 @@ fn subsequent_updates() {
             InsertNode::new(
                 Some(&"section"),
                 PatchPath::new(
-                    TreePath::start_at(2, vec![0]),
-                    TreePath::start_at(2, vec![0])
+                    TreePath::start_at(2, vec![0, 0, 0,]),
+                    TreePath::start_at(2, vec![0, 0, 0,])
                 ),
                 &div(
                     vec![key("hashYYY")],
@@ -500,15 +500,15 @@ fn subsequent_updates() {
     );
 
     let patches3 = diff(&update2, &update3);
-    log::trace!("patches2: {:#?}", patches3);
+    log::trace!("\n---->patches3: {:#?}", patches3);
     assert_eq!(
         patches3,
         vec![
             ChangeText::new(
                 &Text::new("0"),
                 PatchPath::new(
-                    TreePath::start_at(4, vec![0]),
-                    TreePath::start_at(9, vec![0])
+                    TreePath::start_at(4, vec![0, 0, 0, 0, 0,]),
+                    TreePath::start_at(9, vec![0, 0, 0, 0, 0,])
                 ),
                 &Text::new("1")
             )
@@ -516,8 +516,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("1"),
                 PatchPath::new(
-                    TreePath::start_at(9, vec![0]),
-                    TreePath::start_at(14, vec![0])
+                    TreePath::start_at(9, vec![0, 0, 1, 0, 0,]),
+                    TreePath::start_at(14, vec![0, 0, 1, 0, 0,])
                 ),
                 &Text::new("2")
             )
@@ -525,8 +525,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("2"),
                 PatchPath::new(
-                    TreePath::start_at(14, vec![0]),
-                    TreePath::start_at(19, vec![0])
+                    TreePath::start_at(14, vec![0, 0, 2, 0, 0,]),
+                    TreePath::start_at(19, vec![0, 0, 2, 0, 0,])
                 ),
                 &Text::new("3")
             )
@@ -534,8 +534,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("3"),
                 PatchPath::new(
-                    TreePath::start_at(19, vec![0]),
-                    TreePath::start_at(24, vec![0])
+                    TreePath::start_at(19, vec![0, 0, 3, 0, 0,]),
+                    TreePath::start_at(24, vec![0, 0, 3, 0, 0,])
                 ),
                 &Text::new("4")
             )
@@ -543,8 +543,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("4"),
                 PatchPath::new(
-                    TreePath::start_at(24, vec![0]),
-                    TreePath::start_at(29, vec![0])
+                    TreePath::start_at(24, vec![0, 0, 4, 0, 0,]),
+                    TreePath::start_at(29, vec![0, 0, 4, 0, 0,])
                 ),
                 &Text::new("5")
             )
@@ -552,8 +552,8 @@ fn subsequent_updates() {
             ChangeText::new(
                 &Text::new("5"),
                 PatchPath::new(
-                    TreePath::start_at(29, vec![0]),
-                    TreePath::start_at(34, vec![0])
+                    TreePath::start_at(29, vec![0, 0, 5, 0, 0,]),
+                    TreePath::start_at(34, vec![0, 0, 5, 0, 0,])
                 ),
                 &Text::new("6")
             )
@@ -561,8 +561,8 @@ fn subsequent_updates() {
             InsertNode::new(
                 Some(&"section"),
                 PatchPath::new(
-                    TreePath::start_at(2, vec![0]),
-                    TreePath::start_at(2, vec![0])
+                    TreePath::start_at(2, vec![0, 0, 0,]),
+                    TreePath::start_at(2, vec![0, 0, 0,])
                 ),
                 &div(
                     vec![key("hashZZZ")],

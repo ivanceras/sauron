@@ -22,6 +22,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 // Make sure that we successfully attach an event listener and see it work.
 #[wasm_bindgen_test]
 fn on_input_test() {
+    console_log::init_with_level(log::Level::Trace).ok();
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
 
@@ -61,6 +62,7 @@ fn on_input_test() {
 
 #[wasm_bindgen_test]
 fn added_event() {
+    console_log::init_with_level(log::Level::Trace).ok();
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
 
@@ -112,6 +114,7 @@ fn added_event() {
 
 #[wasm_bindgen_test]
 fn remove_event() {
+    console_log::init_with_level(log::Level::Trace).ok();
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
 
@@ -166,6 +169,7 @@ fn remove_event() {
 
 #[wasm_bindgen_test]
 fn remove_event_from_truncated_children() {
+    console_log::init_with_level(log::Level::Trace).ok();
     let old: Node<()> = div(
         vec![],
         vec![
@@ -184,27 +188,29 @@ fn remove_event_from_truncated_children() {
 
     let body = sauron_core::body();
     let simple_program = simple_program();
+    let diff = sauron_core::diff(&old, &new);
+    log::debug!("{:#?}", diff);
     assert_eq!(
-        sauron_core::diff(&old, &new),
+        diff,
         vec![
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(2, vec![0]),),
+                PatchPath::old(TreePath::start_at(2, vec![0, 1]),),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(3, vec![0]),),
+                PatchPath::old(TreePath::start_at(3, vec![0, 2]),),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(4, vec![0]),),
+                PatchPath::old(TreePath::start_at(4, vec![0, 3]),),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(5, vec![0]),),
+                PatchPath::old(TreePath::start_at(5, vec![0, 4]),),
             )
             .into(),
         ],
@@ -227,6 +233,7 @@ fn remove_event_from_truncated_children() {
 
 #[wasm_bindgen_test]
 fn remove_event_from_truncated_children_some_with_no_events() {
+    console_log::init_with_level(log::Level::Trace).ok();
     let old: Node<()> = div(
         vec![],
         vec![
@@ -245,27 +252,29 @@ fn remove_event_from_truncated_children_some_with_no_events() {
 
     let body = sauron_core::body();
     let simple_program = simple_program();
+    let diff = sauron_core::diff(&old, &new);
+    log::debug!("{:#?}", diff);
     assert_eq!(
-        sauron_core::diff(&old, &new),
+        diff,
         vec![
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(2, vec![0]),),
+                PatchPath::old(TreePath::start_at(2, vec![0, 1]),),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(3, vec![0]),),
+                PatchPath::old(TreePath::start_at(3, vec![0, 2]),),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(4, vec![0]),),
+                PatchPath::old(TreePath::start_at(4, vec![0, 3]),),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(5, vec![0]),),
+                PatchPath::old(TreePath::start_at(5, vec![0, 4]),),
             )
             .into(),
         ],
@@ -289,17 +298,24 @@ fn remove_event_from_truncated_children_some_with_no_events() {
 
 #[wasm_bindgen_test]
 fn remove_event_from_replaced_node() {
+    console_log::init_with_level(log::Level::Trace).ok();
+
     let old: Node<()> = div(vec![on_click(|_| trace!("I'm a div"))], vec![]);
 
     let new: Node<()> = p(vec![], vec![]);
 
     let body = sauron_core::body();
     let simple_program = simple_program();
+    let diff = sauron_core::diff(&old, &new);
+    log::info!("{:#?}", diff);
     assert_eq!(
-        sauron_core::diff(&old, &new),
+        diff,
         vec![ReplaceNode::new(
             Some(&"div"),
-            PatchPath::old(TreePath::start_at(0, vec![0]),),
+            PatchPath::new(
+                TreePath::start_at(0, vec![0]),
+                TreePath::start_at(0, vec![0])
+            ),
             &p(vec![], vec![])
         )
         .into()],

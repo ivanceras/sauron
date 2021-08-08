@@ -114,8 +114,8 @@ fn multiple_match_on_keyed_elements() {
             ChangeText::new(
                 &Text::new("2"),
                 PatchPath::new(
-                    TreePath::start_at(26, vec![0, 0]),
-                    TreePath::start_at(14, vec![0, 0])
+                    TreePath::start_at(26, vec![0, 1, 0, 0, 2, 0, 0,]),
+                    TreePath::start_at(14, vec![0, 1, 0, 0, 2, 0, 0,])
                 ),
                 &Text::new("1")
             )
@@ -123,8 +123,8 @@ fn multiple_match_on_keyed_elements() {
             ChangeText::new(
                 &Text::new("3"),
                 PatchPath::new(
-                    TreePath::start_at(32, vec![0, 0]),
-                    TreePath::start_at(38, vec![0, 0])
+                    TreePath::start_at(32, vec![0, 1, 0, 0, 3, 0, 0,]),
+                    TreePath::start_at(38, vec![0, 1, 0, 0, 3, 0, 0,])
                 ),
                 &Text::new("4")
             )
@@ -132,8 +132,8 @@ fn multiple_match_on_keyed_elements() {
             InsertNode::new(
                 Some(&"div"),
                 PatchPath::new(
-                    TreePath::start_at(30, vec![0, 0]),
-                    TreePath::start_at(18, vec![0, 0])
+                    TreePath::start_at(30, vec![0, 1, 0, 0, 3,]),
+                    TreePath::start_at(18, vec![0, 1, 0, 0, 3,])
                 ),
                 &node!(
                     <div class="grid__number__line" key="623356695095054844">
@@ -151,8 +151,8 @@ fn multiple_match_on_keyed_elements() {
             InsertNode::new(
                 Some(&"div"),
                 PatchPath::new(
-                    TreePath::start_at(30, vec![0, 0]),
-                    TreePath::start_at(30, vec![0, 0])
+                    TreePath::start_at(30, vec![0, 1, 0, 0, 3,]),
+                    TreePath::start_at(30, vec![0, 1, 0, 0, 3,])
                 ),
                 &node!(
                     <div class="grid__number__line" key="4638962052468762037">
@@ -166,17 +166,14 @@ fn multiple_match_on_keyed_elements() {
             .into(),
             RemoveNode::new(
                 Some(&"div"),
-                PatchPath::new(
-                    TreePath::start_at(12, vec![0, 0]),
-                    TreePath::start_at(12, vec![0, 0])
-                ),
+                PatchPath::old(TreePath::start_at(12, vec![0, 1, 0, 0, 1,]),),
             )
             .into(),
             ChangeText::new(
                 &Text::new("line: 1, column: 0"),
                 PatchPath::new(
-                    TreePath::start_at(43, vec![0, 0]),
-                    TreePath::start_at(49, vec![0, 0])
+                    TreePath::start_at(43, vec![0, 1, 0, 1, 0,]),
+                    TreePath::start_at(49, vec![0, 1, 0, 1, 0,])
                 ),
                 &Text::new("line: 2, column: 0")
             )
