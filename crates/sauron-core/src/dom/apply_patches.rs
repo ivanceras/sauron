@@ -107,9 +107,10 @@ fn find_nodes<MSG>(
     root_node: &Node,
     patches: &[Patch<MSG>],
 ) -> HashMap<usize, Node> {
-    let mut nodes_to_find = HashMap::new();
+    let mut nodes_to_find: HashMap<usize, Option<&&'static str>> =
+        HashMap::new();
 
-    let mut nodes_to_patch = HashMap::new();
+    let mut nodes_to_patch: HashMap<usize, Node> = HashMap::new();
 
     for patch in patches {
         nodes_to_find.insert(patch.node_idx(), patch.tag());
@@ -124,7 +125,29 @@ fn find_nodes<MSG>(
         &nodes_to_find,
         &mut nodes_to_patch,
     );
+
+    let not_found = determine_not_found(&nodes_to_find, &nodes_to_patch);
+    if !not_found.is_empty() {
+        log::warn!("These are not found: {:#?}", not_found);
+    }
+
     nodes_to_patch
+}
+
+fn determine_not_found(
+    nodes_to_find: &HashMap<usize, Option<&&'static str>>,
+    nodes_to_patch: &HashMap<usize, Node>,
+) -> Vec<usize> {
+    let mut not_found = vec![];
+    for (idx, tag) in nodes_to_find.iter() {
+        if nodes_to_patch.contains_key(idx) {
+            // found
+        } else {
+            log::warn!("not found.. {} - {:?}", idx, tag);
+            not_found.push(*idx);
+        }
+    }
+    not_found
 }
 
 /// find the html nodes recursively
