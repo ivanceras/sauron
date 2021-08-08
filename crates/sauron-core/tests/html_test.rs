@@ -129,8 +129,8 @@ fn replace_node() {
         vec![ReplaceNode::new(
             Some(&"b"),
             PatchPath::new(
-                TreePath::start_at(1, vec![0]),
-                TreePath::start_at(1, vec![0])
+                TreePath::start_at(1, vec![0, 0]),
+                TreePath::start_at(1, vec![0, 0])
             ),
             &strong(vec![], vec![])
         )
@@ -151,8 +151,8 @@ fn replace_node() {
             ReplaceNode::new(
                 Some(&"b"),
                 PatchPath::new(
-                    TreePath::start_at(1, vec![0]),
-                    TreePath::start_at(1, vec![0])
+                    TreePath::start_at(1, vec![0, 0]),
+                    TreePath::start_at(1, vec![0, 0])
                 ),
                 &i(vec![], vec![text("1")])
             )
@@ -160,8 +160,8 @@ fn replace_node() {
             ReplaceNode::new(
                 Some(&"b"),
                 PatchPath::new(
-                    TreePath::start_at(3, vec![0]),
-                    TreePath::start_at(3, vec![0])
+                    TreePath::start_at(3, vec![0, 1]),
+                    TreePath::start_at(3, vec![0, 1])
                 ),
                 &i(vec![], vec![])
             )
@@ -178,108 +178,14 @@ fn add_children() {
         vec![b(vec![], vec![]), html_element("new", vec![], vec![])],
     ); //{ <div> <b></b> <new></new> </div> },
     assert_eq!(
-        diff(&old, &new),
+        dbg!(diff(&old, &new)),
         vec![AppendChildren::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            PatchPath::old(TreePath::start_at(0, vec![0]),),
             vec![(2, &html_element("new", vec![], vec![]))]
         )
         .into()],
         "Added a new node to the root node",
-    )
-}
-
-#[test]
-fn remove_nodes() {
-    let old: Node<()> =
-        div(vec![], vec![b(vec![], vec![]), span(vec![], vec![])]); //{ <div> <b></b> <span></span> </div> },
-    let new = div(vec![], vec![]); //{ <div> </div> },
-
-    assert_eq!(
-        diff(&old, &new),
-        vec![
-            RemoveNode::new(
-                Some(&"b"),
-                PatchPath::old(TreePath::start_at(1, vec![0]),),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"span"),
-                PatchPath::old(TreePath::start_at(2, vec![0]),),
-            )
-            .into()
-        ],
-        "Remove all child nodes at and after child sibling index 1",
-    );
-
-    let old: Node<()> = div(
-        vec![],
-        vec![
-            span(
-                vec![],
-                vec![
-                    b(vec![], vec![]),
-                    // This `i` tag will get removed
-                    i(vec![], vec![]),
-                ],
-            ),
-            // This `strong` tag will get removed
-            strong(vec![], vec![]),
-        ],
-    );
-
-    let new = div(vec![], vec![span(vec![], vec![b(vec![], vec![])])]);
-
-    assert_eq!(
-        diff(&old, &new),
-        vec![
-            RemoveNode::new(
-                Some(&"i"),
-                PatchPath::old(TreePath::start_at(3, vec![0]),),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"strong"),
-                PatchPath::old(TreePath::start_at(4, vec![0]),),
-            )
-            .into(),
-        ],
-        "Remove a child and a grandchild node",
-    );
-
-    let old: Node<()> = div(
-        vec![],
-        vec![
-            b(vec![], vec![i(vec![], vec![]), i(vec![], vec![])]),
-            b(vec![], vec![]),
-        ],
-    ); //{ <div> <b> <i></i> <i></i> </b> <b></b> </div> },
-    let new = div(
-        vec![],
-        vec![b(vec![], vec![i(vec![], vec![])]), i(vec![], vec![])],
-    ); //{ <div> <b> <i></i> </b> <i></i> </div>},
-    assert_eq!(
-        diff(&old, &new),
-        vec![
-            RemoveNode::new(
-                Some(&"i"),
-                PatchPath::old(TreePath::start_at(3, vec![0]),),
-            )
-            .into(),
-            ReplaceNode::new(
-                Some(&"b"),
-                PatchPath::new(
-                    TreePath::start_at(4, vec![0]),
-                    TreePath::start_at(3, vec![0])
-                ),
-                &i(vec![], vec![])
-            )
-            .into(),
-        ],
-        "Removing child and change next node after parent",
     )
 }
 
