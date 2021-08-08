@@ -18,13 +18,51 @@ use std::collections::HashMap;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{Element, Node};
 
+/// patch using the tree path traversal instead of node_idx
+pub fn patch<DSP, MSG>(
+    program: Option<&DSP>,
+    root_node: &mut Node,
+    old_closures: &mut ActiveClosure,
+    focused_node: &mut Option<Node>,
+    patches: Vec<Patch<MSG>>,
+) -> Result<ActiveClosure, JsValue>
+where
+    MSG: 'static,
+    DSP: Clone + Dispatch<MSG> + 'static,
+{
+    let nodes_to_find: Vec<(&[usize], Option<&&'static str>)> = patches
+        .iter()
+        .map(|patch| (patch.path(), patch.tag()))
+        .collect();
+    let mut active_closures = HashMap::new();
+    let nodes_to_patch =
+        find_all_nodes_by_path(root_node.clone(), &nodes_to_find);
+    for patch in patches.iter() {
+        let patch_path = patch.path();
+        if let Some(element) = nodes_to_patch.get(patch_path) {
+            let new_closures = apply_patch_to_node(
+                program,
+                root_node,
+                &element,
+                old_closures,
+                focused_node,
+                &patch,
+            )?;
+            active_closures.extend(new_closures);
+        } else {
+            unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?} node_idx: {}", patch_path, patch.node_idx());
+        }
+    }
+    Ok(active_closures)
+}
+
 /// Apply all of the patches to our old root node in order to create the new root node
 /// that we desire.
 /// This is usually used after diffing two virtual nodes.
 ///
 /// Note: If Program is None, it is a dumb patch, meaning
 /// there is no event listener attached or changed
-pub fn patch<DSP, MSG>(
+pub fn patch1<DSP, MSG>(
     program: Option<&DSP>,
     root_node: &mut Node,
     old_closures: &mut ActiveClosure,
@@ -188,6 +226,41 @@ fn find_nodes_recursive(
         }
     }
     false
+}
+
+fn find_node_by_path(node: Node, path: &mut Vec<usize>) -> Option<Node> {
+    if path.is_empty() {
+        Some(node)
+    } else {
+        let idx = path.remove(0);
+        let children = node.child_nodes();
+        if let Some(child) = children.item(idx as u32) {
+            find_node_by_path(child, path)
+        } else {
+            None
+        }
+    }
+}
+
+fn find_all_nodes_by_path(
+    node: Node,
+    nodes_to_find: &Vec<(&[usize], Option<&&'static str>)>,
+) -> HashMap<Vec<usize>, Node> {
+    let mut nodes_to_patch: HashMap<Vec<usize>, Node> =
+        HashMap::with_capacity(nodes_to_find.len());
+
+    for (path, tag) in nodes_to_find {
+        let mut traverse_path = path.to_vec();
+        let root_idx = traverse_path.remove(0);
+        assert_eq!(0, root_idx, "path should start at 0");
+        if let Some(found) = find_node_by_path(node.clone(), &mut traverse_path)
+        {
+            nodes_to_patch.insert(path.to_vec(), found);
+        } else {
+            log::warn!("can not find: {:?} {:?}", path, tag);
+        }
+    }
+    nodes_to_patch
 }
 
 /// Get the "data-sauron-vdom-id" of all the desendent of this node including itself
