@@ -11,8 +11,8 @@
 
 [Guide](https://sauron-rs.github.io/)
 
- **Sauron** is an web framework for creating fast and interactive client side web application,
- as well as server-side rendering for back-end web applications.
+**Sauron** is a versatile web framework and library for building client-side and/or server-side web applications
+with strong focus on simplicity. It is suited for developing web application which uses progressive rendering.
 
 
 #### Example

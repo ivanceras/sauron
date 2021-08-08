@@ -1,9 +1,16 @@
 # Progressive rendering example
 
+Progressive Rendering is the technique of sequentially rendering portions of a webpage in the server and streaming it to the client in parts without waiting for the whole page to rendered.
+
 This example showcases sauron's both server-side and client-side rendering capability.
 The goal of this setup is to have a consistent look when the page loaded from the server and when it is re-rendered in the client.
 This is accomplished by rendering the page with the same data in the server as in the client.
 
+One key advantage of sauron web-framework is that it doesn't use any templating language to render the page.
+It instead uses a macro system that takes html code and produce the equivalent valid html document.
+It uses valid rust expression in setting values of portions of a page, as opposed to templating engine where you are forced to use a mini-language tailored for each of these templating engines.
+
+Let's go ahead and do a quick start.
 
 ## Quick start
 
