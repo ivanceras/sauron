@@ -18,8 +18,34 @@ use std::collections::HashMap;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{Element, Node};
 
-/// patch using the tree path traversal instead of node_idx
+/// Apply all of the patches to our old root node in order to create the new root node
+/// that we desire.
+/// This is usually used after diffing two virtual nodes.
+///
+/// Note: If Program is None, it is a dumb patch, meaning
+/// there is no event listener attached or changed
 pub fn patch<DSP, MSG>(
+    program: Option<&DSP>,
+    root_node: &mut Node,
+    old_closures: &mut ActiveClosure,
+    focused_node: &mut Option<Node>,
+    patches: Vec<Patch<MSG>>,
+) -> Result<ActiveClosure, JsValue>
+where
+    MSG: 'static,
+    DSP: Clone + Dispatch<MSG> + 'static,
+{
+    patch_by_traversal_path(
+        program,
+        root_node,
+        old_closures,
+        focused_node,
+        patches,
+    )
+}
+
+/// patch using the tree path traversal instead of node_idx
+pub fn patch_by_traversal_path<DSP, MSG>(
     program: Option<&DSP>,
     root_node: &mut Node,
     old_closures: &mut ActiveClosure,
@@ -62,7 +88,7 @@ where
 ///
 /// Note: If Program is None, it is a dumb patch, meaning
 /// there is no event listener attached or changed
-pub fn patch1<DSP, MSG>(
+pub fn patch_by_node_idx_traversal<DSP, MSG>(
     program: Option<&DSP>,
     root_node: &mut Node,
     old_closures: &mut ActiveClosure,
@@ -81,7 +107,7 @@ where
 
     // finding the nodes to be patched before hand, instead of calling it
     // in every patch loop.
-    let nodes_to_patch = find_nodes(root_node, &patches);
+    let nodes_to_patch = find_nodes_by_node_idx(root_node, &patches);
 
     #[cfg(feature = "with-measure")]
     let t2 = {
@@ -141,7 +167,7 @@ where
 /// elements are it's descendant before it could reach the elements in the bottom.
 ///
 /// Complexity: O(n), where n is the total number of html nodes
-fn find_nodes<MSG>(
+fn find_nodes_by_node_idx<MSG>(
     root_node: &Node,
     patches: &[Patch<MSG>],
 ) -> HashMap<usize, Node> {
@@ -157,14 +183,14 @@ fn find_nodes<MSG>(
     #[cfg(feature = "with-measure")]
     log::trace!("there are {} nodes_to_find", nodes_to_find.len());
 
-    find_nodes_recursive(
+    find_nodes_by_idx_recursive(
         root_node,
         &mut 0,
         &nodes_to_find,
         &mut nodes_to_patch,
     );
 
-    let not_found = determine_not_found(&nodes_to_find, &nodes_to_patch);
+    let not_found = list_nodes_not_found(&nodes_to_find, &nodes_to_patch);
     if !not_found.is_empty() {
         log::warn!("These are not found: {:#?}", not_found);
     }
@@ -172,7 +198,7 @@ fn find_nodes<MSG>(
     nodes_to_patch
 }
 
-fn determine_not_found(
+fn list_nodes_not_found(
     nodes_to_find: &HashMap<usize, Option<&&'static str>>,
     nodes_to_patch: &HashMap<usize, Node>,
 ) -> Vec<usize> {
@@ -191,7 +217,7 @@ fn determine_not_found(
 /// find the html nodes recursively
 /// early returns true if all node has been found
 /// before completing iterating all the elements
-fn find_nodes_recursive(
+fn find_nodes_by_idx_recursive(
     node: &Node,
     cur_node_idx: &mut usize,
     nodes_to_find: &HashMap<usize, Option<&&'static str>>,
@@ -216,7 +242,7 @@ fn find_nodes_recursive(
     for i in 0..child_node_count {
         let child_node = children.item(i).expect("Expecting a child node");
         *cur_node_idx += 1;
-        if find_nodes_recursive(
+        if find_nodes_by_idx_recursive(
             &child_node,
             cur_node_idx,
             nodes_to_find,
@@ -228,14 +254,17 @@ fn find_nodes_recursive(
     false
 }
 
-fn find_node_by_path(node: Node, path: &mut Vec<usize>) -> Option<Node> {
+fn find_node_by_path_recursive(
+    node: Node,
+    path: &mut Vec<usize>,
+) -> Option<Node> {
     if path.is_empty() {
         Some(node)
     } else {
         let idx = path.remove(0);
         let children = node.child_nodes();
         if let Some(child) = children.item(idx as u32) {
-            find_node_by_path(child, path)
+            find_node_by_path_recursive(child, path)
         } else {
             None
         }
@@ -253,7 +282,8 @@ fn find_all_nodes_by_path(
         let mut traverse_path = path.to_vec();
         let root_idx = traverse_path.remove(0);
         assert_eq!(0, root_idx, "path should start at 0");
-        if let Some(found) = find_node_by_path(node.clone(), &mut traverse_path)
+        if let Some(found) =
+            find_node_by_path_recursive(node.clone(), &mut traverse_path)
         {
             nodes_to_patch.insert(path.to_vec(), found);
         } else {
