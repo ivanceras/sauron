@@ -171,64 +171,43 @@ fn test_lines() {
         vec![
             ChangeText::new(
                 &Text::new("0"),
-                PatchPath::new(
-                    TreePath::start_at(8, vec![0, 0]),
-                    TreePath::start_at(14, vec![0, 0]),
-                ),
+                TreePath::start_at(8, vec![0, 0]),
                 &Text::new("1"),
             )
             .into(),
             ChangeText::new(
                 &Text::new("1"),
-                PatchPath::new(
-                    TreePath::start_at(20, vec![0, 0]),
-                    TreePath::start_at(26, vec![0, 0]),
-                ),
+                TreePath::start_at(20, vec![0, 0]),
                 &Text::new("2"),
             )
             .into(),
             ChangeText::new(
                 &Text::new("2"),
-                PatchPath::new(
-                    TreePath::start_at(32, vec![0, 0]),
-                    TreePath::start_at(38, vec![0, 0]),
-                ),
+                TreePath::start_at(32, vec![0, 0]),
                 &Text::new("3"),
             )
             .into(),
             ChangeText::new(
                 &Text::new("3"),
-                PatchPath::new(
-                    TreePath::start_at(46, vec![0, 0]),
-                    TreePath::start_at(52, vec![0, 0]),
-                ),
+                TreePath::start_at(46, vec![0, 0]),
                 &Text::new("4"),
             )
             .into(),
             ChangeText::new(
                 &Text::new("4"),
-                PatchPath::new(
-                    TreePath::start_at(60, vec![0, 0]),
-                    TreePath::start_at(66, vec![0, 0]),
-                ),
+                TreePath::start_at(60, vec![0, 0]),
                 &Text::new("5"),
             )
             .into(),
             InsertNode::new(
                 Some(&"div"),
-                PatchPath::new(
-                    TreePath::start_at(6, vec![0, 0]),
-                    TreePath::start_at(6, vec![0, 0]),
-                ),
+                TreePath::start_at(6, vec![0, 0]),
                 &inserted,
             )
             .into(),
             ChangeText::new(
                 &Text::new("line: 0, column: 0"),
-                PatchPath::new(
-                    TreePath::start_at(73, vec![0, 0]),
-                    TreePath::start_at(79, vec![0, 0]),
-                ),
+                TreePath::start_at(73, vec![0, 0]),
                 &Text::new("line: 1, column: 0"),
             )
             .into(),
@@ -240,55 +219,37 @@ fn test_lines() {
         vec![
             ChangeText::new(
                 &Text::new("1"),
-                PatchPath::new(
-                    TreePath::start_at(14, vec![0, 0]),
-                    TreePath::start_at(0, vec![0, 0]),
-                ),
+                TreePath::start_at(14, vec![0, 0]),
                 &Text::new("2"),
             )
             .into(),
             ChangeText::new(
                 &Text::new("2"),
-                PatchPath::new(
-                    TreePath::start_at(26, vec![0, 0]),
-                    TreePath::start_at(0, vec![0, 0]),
-                ),
+                TreePath::start_at(26, vec![0, 0]),
                 &Text::new("3"),
             )
             .into(),
             ChangeText::new(
                 &Text::new("3"),
-                PatchPath::new(
-                    TreePath::start_at(38, vec![0, 0]),
-                    TreePath::start_at(0, vec![0, 0]),
-                ),
+                TreePath::start_at(38, vec![0, 0]),
                 &Text::new("4"),
             )
             .into(),
             ChangeText::new(
                 &Text::new("4"),
-                PatchPath::new(
-                    TreePath::start_at(52, vec![0, 0]),
-                    TreePath::start_at(0, vec![0, 0]),
-                ),
+                TreePath::start_at(52, vec![0, 0]),
                 &Text::new("5"),
             )
             .into(),
             ChangeText::new(
                 &Text::new("5"),
-                PatchPath::new(
-                    TreePath::start_at(66, vec![0, 0]),
-                    TreePath::start_at(0, vec![0, 0]),
-                ),
+                TreePath::start_at(66, vec![0, 0]),
                 &Text::new("6"),
             )
             .into(),
             ChangeText::new(
                 &Text::new("line: 1, column: 0"),
-                PatchPath::new(
-                    TreePath::start_at(79, vec![0, 0]),
-                    TreePath::start_at(0, vec![0, 0]),
-                ),
+                TreePath::start_at(79, vec![0, 0]),
                 &Text::new("line: 2, column: 0"),
             )
             .into(),

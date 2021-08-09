@@ -112,10 +112,7 @@ fn replace_node() {
         diff(&old, &new),
         vec![ReplaceNode::new(
             Some(&"div"),
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             &span(vec![], vec![])
         )
         .into()],
@@ -128,10 +125,7 @@ fn replace_node() {
         diff(&old, &new),
         vec![ReplaceNode::new(
             Some(&"b"),
-            PatchPath::new(
-                TreePath::start_at(1, vec![0, 0]),
-                TreePath::start_at(1, vec![0, 0])
-            ),
+            TreePath::start_at(1, vec![0, 0]),
             &strong(vec![], vec![])
         )
         .into()],
@@ -150,19 +144,13 @@ fn replace_node() {
         vec![
             ReplaceNode::new(
                 Some(&"b"),
-                PatchPath::new(
-                    TreePath::start_at(1, vec![0, 0]),
-                    TreePath::start_at(1, vec![0, 0])
-                ),
+                TreePath::start_at(1, vec![0, 0]),
                 &i(vec![], vec![text("1")])
             )
             .into(),
             ReplaceNode::new(
                 Some(&"b"),
-                PatchPath::new(
-                    TreePath::start_at(3, vec![0, 1]),
-                    TreePath::start_at(3, vec![0, 1])
-                ),
+                TreePath::start_at(3, vec![0, 1]),
                 &i(vec![], vec![])
             )
             .into(),
@@ -181,7 +169,7 @@ fn add_children() {
         dbg!(diff(&old, &new)),
         vec![AppendChildren::new(
             &"div",
-            PatchPath::old(TreePath::start_at(0, vec![0]),),
+            TreePath::start_at(0, vec![0]),
             vec![(2, &html_element("new", vec![], vec![]))]
         )
         .into()],
@@ -197,10 +185,7 @@ fn add_attributes() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&id("hello")]
         )
         .into()],
@@ -214,10 +199,7 @@ fn add_attributes() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&id("hello")]
         )
         .into()],
@@ -233,10 +215,7 @@ fn remove_attributes() {
         diff(&old, &new),
         vec![RemoveAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&id("hey-there")]
         )
         .into()],
@@ -252,10 +231,7 @@ fn remove_events() {
         diff(&old, &new),
         vec![RemoveAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&on_click(|_| println!("hi"))]
         )
         .into()],
@@ -272,10 +248,7 @@ fn change_attribute() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&id("changed")]
         )
         .into()],
@@ -292,10 +265,7 @@ fn replace_text_node() {
         diff(&old, &new),
         vec![ChangeText::new(
             &Text::new("Old"),
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             &Text::new("New")
         )
         .into()],

@@ -476,7 +476,7 @@ where
                 replacement,
                 focused_node,
             );
-            if patch_path.node_idx() == 0 {
+            if patch_path.node_idx == 0 {
                 *root_node = created_node.node.clone();
             }
             if let Some(tag) = tag {

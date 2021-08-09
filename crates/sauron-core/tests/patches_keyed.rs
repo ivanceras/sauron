@@ -88,7 +88,7 @@ fn node_patched_properly() {
         patches,
         vec![RemoveNode::new(
             Some(&"article"),
-            PatchPath::old(TreePath::start_at(4, vec![0, 0, 1]))
+            TreePath::start_at(4, vec![0, 0, 1])
         )
         .into()]
     );
@@ -171,7 +171,7 @@ fn node_patched_properly_remove_from_start() {
         patches,
         vec![RemoveNode::new(
             Some(&"article"),
-            PatchPath::old(TreePath::start_at(2, vec![0, 0, 0]))
+            TreePath::start_at(2, vec![0, 0, 0])
         )
         .into()]
     );
@@ -256,15 +256,12 @@ fn node_patched_properly_text_changed() {
         vec![
             Patch::ChangeText(ChangeText::new(
                 &Text::new("item3"),
-                PatchPath::new(
-                    TreePath::start_at(7, vec![0, 0, 2, 0]),
-                    TreePath::start_at(5, vec![0, 0, 2, 0])
-                ),
+                TreePath::start_at(7, vec![0, 0, 2, 0]),
                 &Text::new("item3 with changes")
             )),
             RemoveNode::new(
                 Some(&"article"),
-                PatchPath::old(TreePath::start_at(2, vec![0, 0, 0]))
+                TreePath::start_at(2, vec![0, 0, 0])
             )
             .into()
         ]
@@ -356,23 +353,17 @@ fn mixed_keyed_and_non_keyed_elements() {
         vec![
             Patch::ChangeText(ChangeText::new(
                 &Text::new("item3"),
-                PatchPath::new(
-                    TreePath::start_at(7, vec![0, 0, 2, 0,]),
-                    TreePath::start_at(5, vec![0, 0, 2, 0,])
-                ),
+                TreePath::start_at(7, vec![0, 0, 2, 0,]),
                 &Text::new("item3 with changes")
             )),
             RemoveNode::new(
                 Some(&"article"),
-                PatchPath::old(TreePath::start_at(2, vec![0, 0, 0]),),
+                TreePath::start_at(2, vec![0, 0, 0]),
             )
             .into(),
             Patch::ChangeText(ChangeText::new(
                 &Text::new("3 items left"),
-                PatchPath::new(
-                    TreePath::start_at(9, vec![0, 1, 0]),
-                    TreePath::start_at(7, vec![0, 1, 0])
-                ),
+                TreePath::start_at(9, vec![0, 1, 0]),
                 &Text::new("2 items left")
             ))
         ]

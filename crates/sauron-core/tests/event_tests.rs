@@ -195,22 +195,22 @@ fn remove_event_from_truncated_children() {
         vec![
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(2, vec![0, 1]),),
+                TreePath::start_at(2, vec![0, 1]),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(3, vec![0, 2]),),
+                TreePath::start_at(3, vec![0, 2]),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(4, vec![0, 3]),),
+                TreePath::start_at(4, vec![0, 3]),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(5, vec![0, 4]),),
+                TreePath::start_at(5, vec![0, 4]),
             )
             .into(),
         ],
@@ -259,22 +259,22 @@ fn remove_event_from_truncated_children_some_with_no_events() {
         vec![
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(2, vec![0, 1]),),
+                TreePath::start_at(2, vec![0, 1]),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(3, vec![0, 2]),),
+                TreePath::start_at(3, vec![0, 2]),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(4, vec![0, 3]),),
+                TreePath::start_at(4, vec![0, 3]),
             )
             .into(),
             RemoveNode::new(
                 Some(&"button"),
-                PatchPath::old(TreePath::start_at(5, vec![0, 4]),),
+                TreePath::start_at(5, vec![0, 4]),
             )
             .into(),
         ],
@@ -312,10 +312,7 @@ fn remove_event_from_replaced_node() {
         diff,
         vec![ReplaceNode::new(
             Some(&"div"),
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             &p(vec![], vec![])
         )
         .into()],

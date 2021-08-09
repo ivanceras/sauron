@@ -37,10 +37,7 @@ fn event_remove() {
         patch,
         vec![RemoveAttributes::new(
             &"input",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&on("input", |_| { () })],
         )
         .into()]
@@ -56,10 +53,7 @@ fn change_class_attribute() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&Attribute::with_multiple_values(
                 None,
                 "class",
@@ -102,26 +96,14 @@ fn truncate_children() {
     assert_eq!(
         dbg!(diff(&old, &new)),
         vec![
-            RemoveNode::new(
-                Some(&"div"),
-                PatchPath::old(TreePath::start_at(4, vec![0, 3]),),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"div"),
-                PatchPath::old(TreePath::start_at(5, vec![0, 4]),),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"div"),
-                PatchPath::old(TreePath::start_at(6, vec![0, 5]),),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"div"),
-                PatchPath::old(TreePath::start_at(7, vec![0, 6]),),
-            )
-            .into(),
+            RemoveNode::new(Some(&"div"), TreePath::start_at(4, vec![0, 3]),)
+                .into(),
+            RemoveNode::new(Some(&"div"), TreePath::start_at(5, vec![0, 4]),)
+                .into(),
+            RemoveNode::new(Some(&"div"), TreePath::start_at(6, vec![0, 5]),)
+                .into(),
+            RemoveNode::new(Some(&"div"), TreePath::start_at(7, vec![0, 6]),)
+                .into(),
         ],
         "Should truncate children"
     );
@@ -159,51 +141,30 @@ fn truncate_children_different_attributes() {
         vec![
             AddAttributes::new(
                 &"div",
-                PatchPath::new(
-                    TreePath::start_at(1, vec![0, 0]),
-                    TreePath::start_at(1, vec![0, 0])
-                ),
+                TreePath::start_at(1, vec![0, 0]),
                 vec![&class("class5")]
             )
             .into(),
             AddAttributes::new(
                 &"div",
-                PatchPath::new(
-                    TreePath::start_at(2, vec![0, 1]),
-                    TreePath::start_at(2, vec![0, 1])
-                ),
+                TreePath::start_at(2, vec![0, 1]),
                 vec![&class("class6")]
             )
             .into(),
             AddAttributes::new(
                 &"div",
-                PatchPath::new(
-                    TreePath::start_at(3, vec![0, 2]),
-                    TreePath::start_at(3, vec![0, 2])
-                ),
+                TreePath::start_at(3, vec![0, 2]),
                 vec![&class("class7")]
             )
             .into(),
-            RemoveNode::new(
-                Some(&"div"),
-                PatchPath::old(TreePath::start_at(4, vec![0, 3]),),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"div"),
-                PatchPath::old(TreePath::start_at(5, vec![0, 4]),),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"div"),
-                PatchPath::old(TreePath::start_at(6, vec![0, 5]),),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"div"),
-                PatchPath::old(TreePath::start_at(7, vec![0, 6]),),
-            )
-            .into(),
+            RemoveNode::new(Some(&"div"), TreePath::start_at(4, vec![0, 3]),)
+                .into(),
+            RemoveNode::new(Some(&"div"), TreePath::start_at(5, vec![0, 4]),)
+                .into(),
+            RemoveNode::new(Some(&"div"), TreePath::start_at(6, vec![0, 5]),)
+                .into(),
+            RemoveNode::new(Some(&"div"), TreePath::start_at(7, vec![0, 6]),)
+                .into(),
         ],
         "Should truncate children"
     );
@@ -217,10 +178,7 @@ fn replace_node() {
         diff(&old, &new),
         vec![ReplaceNode::new(
             Some(&"div"),
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             &span(vec![], vec![])
         )
         .into()],
@@ -233,10 +191,7 @@ fn replace_node() {
         diff(&old, &new),
         vec![ReplaceNode::new(
             Some(&"b"),
-            PatchPath::new(
-                TreePath::start_at(1, vec![0, 0]),
-                TreePath::start_at(1, vec![0, 0])
-            ),
+            TreePath::start_at(1, vec![0, 0]),
             &strong(vec![], vec![])
         )
         .into()],
@@ -257,19 +212,13 @@ fn replace_node2() {
         vec![
             ReplaceNode::new(
                 Some(&"b"),
-                PatchPath::new(
-                    TreePath::start_at(1, vec![0, 0]),
-                    TreePath::start_at(1, vec![0, 0])
-                ),
+                TreePath::start_at(1, vec![0, 0]),
                 &i(vec![], vec![text("1")])
             )
             .into(),
             ReplaceNode::new(
                 Some(&"b"),
-                PatchPath::new(
-                    TreePath::start_at(3, vec![0, 1]),
-                    TreePath::start_at(3, vec![0, 1])
-                ),
+                TreePath::start_at(3, vec![0, 1]),
                 &i(vec![], vec![])
             )
             .into(),
@@ -289,7 +238,7 @@ fn add_children() {
         dbg!(diff(&old, &new)),
         vec![AppendChildren::new(
             &"div",
-            PatchPath::old(TreePath::start_at(0, vec![0]),),
+            TreePath::start_at(0, vec![0]),
             vec![(2, &html_element("new", vec![], vec![]))]
         )
         .into()],
@@ -306,16 +255,10 @@ fn remove_nodes1() {
     assert_eq!(
         dbg!(diff(&old, &new)),
         vec![
-            RemoveNode::new(
-                Some(&"b"),
-                PatchPath::old(TreePath::start_at(1, vec![0, 0]),),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"span"),
-                PatchPath::old(TreePath::start_at(2, vec![0, 1]),),
-            )
-            .into(),
+            RemoveNode::new(Some(&"b"), TreePath::start_at(1, vec![0, 0]),)
+                .into(),
+            RemoveNode::new(Some(&"span"), TreePath::start_at(2, vec![0, 1]),)
+                .into(),
         ],
         "Remove all child nodes at and after child sibling index 1",
     );
@@ -347,12 +290,12 @@ fn remove_nodes2() {
         vec![
             RemoveNode::new(
                 Some(&"i"),
-                PatchPath::old(TreePath::start_at(3, vec![0, 0, 1]),),
+                TreePath::start_at(3, vec![0, 0, 1]),
             )
             .into(),
             RemoveNode::new(
                 Some(&"strong"),
-                PatchPath::old(TreePath::start_at(4, vec![0, 1]),),
+                TreePath::start_at(4, vec![0, 1]),
             )
             .into(),
         ],
@@ -376,17 +319,11 @@ fn remove_nodes3() {
     assert_eq!(
         dbg!(diff(&old, &new)),
         vec![
-            RemoveNode::new(
-                Some(&"i"),
-                PatchPath::old(TreePath::start_at(3, vec![0, 0, 1]),),
-            )
-            .into(),
+            RemoveNode::new(Some(&"i"), TreePath::start_at(3, vec![0, 0, 1]),)
+                .into(),
             ReplaceNode::new(
                 Some(&"b"),
-                PatchPath::new(
-                    TreePath::start_at(4, vec![0, 1]),
-                    TreePath::start_at(3, vec![0, 1])
-                ),
+                TreePath::start_at(4, vec![0, 1]),
                 &i(vec![], vec![])
             )
             .into(),
@@ -403,10 +340,7 @@ fn add_attributes() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&id("hello")]
         )
         .into()],
@@ -420,10 +354,7 @@ fn add_attributes() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&id("hello")]
         )
         .into()],
@@ -439,10 +370,7 @@ fn add_style_attributes() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&style("display", "none")]
         )
         .into()],
@@ -464,10 +392,7 @@ fn add_style_attributes_1_change() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&Attribute::with_multiple_values(
                 None,
                 "style",
@@ -502,10 +427,7 @@ fn remove_style_attributes() {
         diff(&old, &new),
         vec![RemoveAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&style("display", "block")]
         )
         .into()],
@@ -521,10 +443,7 @@ fn remove_attributes() {
         diff(&old, &new),
         vec![RemoveAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&id("hey-there")]
         )
         .into()],
@@ -540,10 +459,7 @@ fn remove_events() {
         diff(&old, &new),
         vec![RemoveAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&on_click(|_| println!("hi"))]
         )
         .into()],
@@ -560,10 +476,7 @@ fn change_attribute() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![&id("changed")]
         )
         .into()],
@@ -580,10 +493,7 @@ fn replace_text_node() {
         diff(&old, &new),
         vec![ChangeText::new(
             &Text::new("Old"),
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             &Text::new("New")
         )
         .into()],
@@ -623,16 +533,13 @@ fn text_changed_in_keyed_elements() {
         vec![
             ChangeText::new(
                 &Text::new("item3"),
-                PatchPath::new(
-                    TreePath::start_at(7, vec![0, 0, 2, 0]),
-                    TreePath::start_at(5, vec![0, 0, 2, 0])
-                ),
+                TreePath::start_at(7, vec![0, 0, 2, 0]),
                 &Text::new("item3 with changes")
             )
             .into(),
             RemoveNode::new(
                 Some(&"article"),
-                PatchPath::old(TreePath::start_at(2, vec![0, 0, 0]),),
+                TreePath::start_at(2, vec![0, 0, 0]),
             )
             .into(),
         ]
@@ -661,10 +568,7 @@ fn multiple_style_calls() {
         patches,
         vec![AddAttributes::new(
             &"div",
-            PatchPath::new(
-                TreePath::start_at(0, vec![0]),
-                TreePath::start_at(0, vec![0])
-            ),
+            TreePath::start_at(0, vec![0]),
             vec![
                 &style("font-family", "monospace1"),
                 &style("display", "flex")
