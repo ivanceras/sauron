@@ -1,7 +1,8 @@
+use crate::html::attributes::AttributeValue;
 use crate::html::attributes::Callback;
-use crate::{AttValue, Attribute, Element, Event, Node};
+use crate::{Attribute, Element, Event, Node};
 
-/// Add mapping function for Node, Element, Attribute, AttValue,
+/// Add mapping function for Node, Element, Attribute,
 pub trait NodeMapMsg<MSG>
 where
     MSG: 'static,
@@ -47,23 +48,6 @@ where
 
     /// return the callback values of this attribute
     fn get_callback(&self) -> Vec<&Callback<Event, MSG>>;
-}
-
-/// Add mapping function for AttValue
-pub trait AttValueMapMsg<MSG>
-where
-    MSG: 'static,
-{
-    /// transform att_value such that MSG becomes MSG2
-    fn map_callback<MSG2>(self, cb: Callback<MSG, MSG2>) -> AttValue<MSG2>
-    where
-        MSG2: 'static;
-
-    /// return a reference to the callback if it is a callback
-    fn get_callback(&self) -> Option<&Callback<Event, MSG>>;
-
-    /// return true if this is a callback
-    fn is_callback(&self) -> bool;
 }
 
 impl<MSG> NodeMapMsg<MSG> for Node<MSG>
@@ -151,38 +135,35 @@ where
 
     /// return the callback values of this attribute
     fn get_callback(&self) -> Vec<&Callback<Event, MSG>> {
-        self.value.iter().filter_map(|v| v.get_callback()).collect()
+        self.value
+            .iter()
+            .filter_map(|v| v.as_event_listener())
+            .collect()
     }
 }
 
-impl<MSG> AttValueMapMsg<MSG> for AttValue<MSG>
+impl<MSG> AttributeValue<MSG>
 where
     MSG: 'static,
 {
-    /// transform att_value such that MSG becomes MSG2
-    fn map_callback<MSG2>(self, cb: Callback<MSG, MSG2>) -> AttValue<MSG2>
+    /// map the callback of this attribute using another callback
+    pub fn map_callback<MSG2>(
+        self,
+        cb: Callback<MSG, MSG2>,
+    ) -> AttributeValue<MSG2>
     where
         MSG2: 'static,
     {
         match self {
-            AttValue::Plain(plain) => AttValue::Plain(plain),
-            AttValue::Event(att_cb) => AttValue::Event(att_cb.map_callback(cb)),
-        }
-    }
-
-    /// return a reference to the callback if it is a callback
-    fn get_callback(&self) -> Option<&Callback<Event, MSG>> {
-        match self {
-            AttValue::Plain(_) => None,
-            AttValue::Event(cb) => Some(cb),
-        }
-    }
-
-    /// return true if this is a callback
-    fn is_callback(&self) -> bool {
-        match self {
-            AttValue::Plain(_) => false,
-            AttValue::Event(_) => true,
+            AttributeValue::FunctionCall(this) => {
+                AttributeValue::FunctionCall(this)
+            }
+            AttributeValue::Simple(this) => AttributeValue::Simple(this),
+            AttributeValue::Style(this) => AttributeValue::Style(this),
+            AttributeValue::EventListener(this) => {
+                AttributeValue::EventListener(this.map_callback(cb))
+            }
+            AttributeValue::Empty => AttributeValue::Empty,
         }
     }
 }

@@ -60,9 +60,7 @@ pub mod prelude {
         svg::{attributes::*, tags::commons::*, *},
         *,
     };
-    pub use map_msg::{
-        AttValueMapMsg, AttributeMapMsg, ElementMapMsg, NodeMapMsg,
-    };
+    pub use map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg};
     pub use render::Render;
     pub use serde_json;
     #[cfg(feature = "with-dom")]
@@ -83,45 +81,21 @@ pub type AttributeName = &'static str;
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
 /// App code.
-pub type Node<MSG> = mt_dom::Node<
-    Namespace,
-    Tag,
-    AttributeName,
-    AttributeValue,
-    attributes::Callback<Event, MSG>,
->;
+pub type Node<MSG> =
+    mt_dom::Node<Namespace, Tag, AttributeName, AttributeValue<MSG>>;
 
 /// Element type with tag and attribute name type set to &'static str
-pub type Element<MSG> = mt_dom::Element<
-    Namespace,
-    Tag,
-    AttributeName,
-    AttributeValue,
-    attributes::Callback<Event, MSG>,
->;
+pub type Element<MSG> =
+    mt_dom::Element<Namespace, Tag, AttributeName, AttributeValue<MSG>>;
 
 /// Patch as result of diffing the current_vdom and the new vdom.
 /// The tag and attribute name types is set to &'static str
-pub type Patch<'a, MSG> = mt_dom::Patch<
-    'a,
-    Namespace,
-    Tag,
-    AttributeName,
-    AttributeValue,
-    attributes::Callback<Event, MSG>,
->;
+pub type Patch<'a, MSG> =
+    mt_dom::Patch<'a, Namespace, Tag, AttributeName, AttributeValue<MSG>>;
 
 /// Attribute type used in sauron where the type of the Attribute name is &'static str
-pub type Attribute<MSG> = mt_dom::Attribute<
-    Namespace,
-    AttributeName,
-    AttributeValue,
-    attributes::Callback<Event, MSG>,
->;
-
-/// AttValue type is the container for the value of an attribute
-pub type AttValue<MSG> =
-    mt_dom::AttValue<AttributeValue, attributes::Callback<Event, MSG>>;
+pub type Attribute<MSG> =
+    mt_dom::Attribute<Namespace, AttributeName, AttributeValue<MSG>>;
 
 /// Callback where Event type is supplied
 pub type Callback<MSG> = attributes::Callback<Event, MSG>;

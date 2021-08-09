@@ -1,5 +1,6 @@
 //! https://developer.mozilla.org/en-US/docs/Web/Events
 
+use crate::html::attributes::AttributeValue;
 use crate::{Attribute, Callback};
 use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
@@ -45,7 +46,7 @@ pub fn on<F, MSG>(event_name: &'static str, f: F) -> Attribute<MSG>
 where
     F: Fn(Event) -> MSG + 'static,
 {
-    mt_dom::on(event_name, Callback::from(f))
+    mt_dom::attr(event_name, AttributeValue::EventListener(Callback::from(f)))
 }
 
 /// on click event

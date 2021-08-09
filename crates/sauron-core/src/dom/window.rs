@@ -1,4 +1,3 @@
-use crate::map_msg::AttValueMapMsg;
 use crate::{
     dom::created_node::create_closure_wrap, Attribute, Cmd, Component, Dispatch,
 };
@@ -29,8 +28,9 @@ impl Window {
             for event_attr in event_listeners.iter() {
                 let event_str = event_attr.name();
                 for event_cb in event_attr.value() {
-                    let callback =
-                        event_cb.get_callback().expect("expecting a callback");
+                    let callback = event_cb
+                        .as_event_listener()
+                        .expect("expecting a callback");
 
                     let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
                         create_closure_wrap(&program, &callback);

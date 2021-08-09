@@ -4,12 +4,10 @@ use crate::{
         created_node,
         created_node::{ActiveClosure, CreatedNode},
     },
-    mt_dom::{
-        patch::{
-            AddAttributes, AppendChildren, InsertNode, RemoveAttributes,
-            RemoveNode, ReplaceNode,
-        },
-        AttValue,
+    html::attributes::AttributeValue,
+    mt_dom::patch::{
+        AddAttributes, AppendChildren, InsertNode, RemoveAttributes,
+        RemoveNode, ReplaceNode,
     },
     Dispatch, Patch,
 };
@@ -441,19 +439,22 @@ where
             for attr in attrs.iter() {
                 for att_value in attr.value() {
                     match att_value {
-                        AttValue::Plain(_) => {
+                        AttributeValue::Simple(_) => {
                             CreatedNode::remove_element_attribute(
                                 element, attr,
                             )?;
                         }
                         // it is an event listener
-                        AttValue::Event(_) => {
+                        AttributeValue::EventListener(_) => {
                             remove_event_listener_with_name(
                                 attr.name(),
                                 element,
                                 old_closures,
                             )?;
                         }
+                        AttributeValue::FunctionCall(_)
+                        | AttributeValue::Style(_)
+                        | AttributeValue::Empty => (),
                     }
                 }
             }

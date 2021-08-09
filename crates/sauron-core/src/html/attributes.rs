@@ -1,6 +1,7 @@
 //! https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
 //!
-use crate::{mt_dom::AttValue, Attribute, Event};
+use crate::Attribute;
+use crate::Event;
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
 pub use callback::Callback;
@@ -118,7 +119,7 @@ where
     V: ToString,
     C: AsRef<[V]>,
 {
-    let class_values: Vec<AttributeValue> = class_list
+    let class_values: Vec<AttributeValue<MSG>> = class_list
         .as_ref()
         .iter()
         .map(|v| AttributeValue::from_value(Value::from(v.to_string())))
@@ -223,24 +224,15 @@ pub fn empty_attr<MSG>() -> Attribute<MSG> {
 }
 
 /// merge the plain values
-pub(crate) fn merge_plain_attributes_values(
-    attr_values: &[&AttributeValue],
+pub(crate) fn merge_plain_attributes_values<MSG>(
+    attr_values: &[&AttributeValue<MSG>],
 ) -> Option<String> {
-    use std::fmt::Write;
-
     let plain_values: Vec<String> = attr_values
         .iter()
         .flat_map(|att_value| match att_value {
             AttributeValue::Simple(simple) => Some(simple.to_string()),
-            AttributeValue::Style(styles) => {
-                let mut style_str = String::new();
-                styles.iter().for_each(|s| {
-                    write!(style_str, "{};", s).expect("must write")
-                });
-                Some(style_str)
-            }
             AttributeValue::FunctionCall(fvalue) => Some(fvalue.to_string()),
-            AttributeValue::Empty => None,
+            _ => None,
         })
         .collect();
     if !plain_values.is_empty() {
@@ -250,28 +242,62 @@ pub(crate) fn merge_plain_attributes_values(
     }
 }
 
+/// merge the styles
+pub(crate) fn merge_styles_attributes_values<MSG>(
+    attr_values: &[&AttributeValue<MSG>],
+) -> Option<String> {
+    use std::fmt::Write;
+
+    let styles_values: Vec<String> = attr_values
+        .iter()
+        .flat_map(|att_value| match att_value {
+            AttributeValue::Style(styles) => {
+                let mut style_str = String::new();
+                styles.iter().for_each(|s| {
+                    write!(style_str, "{};", s).expect("must write")
+                });
+                Some(style_str)
+            }
+            _ => None,
+        })
+        .collect();
+
+    if !styles_values.is_empty() {
+        Some(styles_values.join(" "))
+    } else {
+        None
+    }
+}
+
 /// returns (callbacks, plain_attribtues, function_calls)
-pub(crate) fn partition_callbacks_from_plain_and_func_calls<MSG>(
+pub(crate) fn partition_callbacks_from_plain_styles_and_func_calls<MSG>(
     attr: &Attribute<MSG>,
 ) -> (
     Vec<&Callback<Event, MSG>>,
-    Vec<&AttributeValue>,
-    Vec<&AttributeValue>,
+    Vec<&AttributeValue<MSG>>,
+    Vec<&AttributeValue<MSG>>,
+    Vec<&AttributeValue<MSG>>,
 ) {
     let mut callbacks = vec![];
     let mut plain_values = vec![];
+    let mut styles = vec![];
     let mut func_values = vec![];
     for av in attr.value() {
         match av {
-            AttValue::Plain(plain) => {
-                if plain.is_function_call() {
-                    func_values.push(plain);
-                } else {
-                    plain_values.push(plain);
-                }
+            AttributeValue::Simple(_plain) => {
+                plain_values.push(av);
             }
-            AttValue::Event(cb) => callbacks.push(cb),
+            AttributeValue::FunctionCall(_call) => {
+                func_values.push(av);
+            }
+            AttributeValue::Style(_) => {
+                styles.push(av);
+            }
+            AttributeValue::EventListener(cb) => {
+                callbacks.push(cb);
+            }
+            _ => (),
         }
     }
-    (callbacks, plain_values, func_values)
+    (callbacks, plain_values, styles, func_values)
 }

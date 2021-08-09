@@ -1,22 +1,81 @@
-use crate::prelude::{
-    Style,
-    Value,
-};
+use crate::prelude::{Style, Value};
+use crate::Callback;
+use std::fmt::{self, Debug};
 
 /// Values of an attribute can be in these variants
-#[derive(Debug, Clone, PartialEq)]
-pub enum AttributeValue {
+pub enum AttributeValue<MSG> {
     /// an argument value, to be called as parameter, the function is called to the element
     FunctionCall(Value),
     /// a simple value, wrapper of primitive types
     Simple(Value),
     /// style values
     Style(Vec<Style>),
+    /// Event Listener
+    EventListener(Callback<MSG>),
     /// no value
     Empty,
 }
 
-impl AttributeValue {
+/// This is written manually, so we don't push
+/// constraint on MSG to be Clone
+impl<MSG> Clone for AttributeValue<MSG> {
+    fn clone(&self) -> Self {
+        match self {
+            AttributeValue::FunctionCall(this) => {
+                AttributeValue::FunctionCall(this.clone())
+            }
+            AttributeValue::Simple(this) => {
+                AttributeValue::Simple(this.clone())
+            }
+            AttributeValue::Style(this) => AttributeValue::Style(this.clone()),
+            AttributeValue::EventListener(this) => {
+                AttributeValue::EventListener(this.clone())
+            }
+            AttributeValue::Empty => AttributeValue::Empty,
+        }
+    }
+}
+
+/// This is written manually, so we don't push
+/// constraint on MSG to be Debug
+impl<MSG> Debug for AttributeValue<MSG> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            AttributeValue::FunctionCall(this) => this.fmt(f),
+            AttributeValue::Simple(this) => this.fmt(f),
+            AttributeValue::Style(this) => this.fmt(f),
+            AttributeValue::EventListener(this) => this.fmt(f),
+            AttributeValue::Empty => write!(f, "Empty"),
+        }
+    }
+}
+
+/// This is written manually, so we don't push
+/// constraint on MSG to be PartialEq
+impl<MSG> PartialEq for AttributeValue<MSG> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (
+                AttributeValue::FunctionCall(this),
+                AttributeValue::FunctionCall(other),
+            ) => this == other,
+            (AttributeValue::Simple(this), AttributeValue::Simple(other)) => {
+                this == other
+            }
+            (AttributeValue::Style(this), AttributeValue::Style(other)) => {
+                this == other
+            }
+            (
+                AttributeValue::EventListener(this),
+                AttributeValue::EventListener(other),
+            ) => this == other,
+            (AttributeValue::Empty, AttributeValue::Empty) => true,
+            (_, _) => false,
+        }
+    }
+}
+
+impl<MSG> AttributeValue<MSG> {
     /// create an attribute from Vec<Style>
     pub fn from_styles(styles: Vec<Style>) -> Self {
         AttributeValue::Style(styles)
@@ -53,6 +112,14 @@ impl AttributeValue {
         match self {
             AttributeValue::Style(_) => true,
             _ => false,
+        }
+    }
+
+    /// return the styles if the attribute value is a style
+    pub fn as_event_listener(&self) -> Option<&Callback<MSG>> {
+        match self {
+            AttributeValue::EventListener(cb) => Some(cb),
+            _ => None,
         }
     }
 

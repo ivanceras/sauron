@@ -71,8 +71,8 @@ fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
     merged_attributes
         .iter()
         .flat_map(|attr| {
-            let (_callbacks, _plain_values, func_values) =
-                attributes::partition_callbacks_from_plain_and_func_calls(
+            let (_callbacks, _plain_values, _styles, func_values) =
+                attributes::partition_callbacks_from_plain_styles_and_func_calls(
                     &attr,
                 );
 
@@ -173,12 +173,19 @@ impl<MSG> Render for Attribute<MSG> {
         _node_idx: &mut Option<usize>,
         _compressed: bool,
     ) -> fmt::Result {
-        let (_callbacks, plain_values, _func_values) =
-            attributes::partition_callbacks_from_plain_and_func_calls(&self);
+        let (_callbacks, plain_values, styles, _func_values) =
+            attributes::partition_callbacks_from_plain_styles_and_func_calls(
+                &self,
+            );
         if let Some(merged_plain_values) =
             attributes::merge_plain_attributes_values(&plain_values)
         {
             write!(buffer, "{}=\"{}\"", self.name(), merged_plain_values)?;
+        }
+        if let Some(merged_styles) =
+            attributes::merge_styles_attributes_values(&styles)
+        {
+            write!(buffer, "{}=\"{}\"", self.name(), merged_styles)?;
         }
         Ok(())
     }

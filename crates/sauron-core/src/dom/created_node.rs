@@ -1,7 +1,11 @@
 use crate::events::MountEvent;
 use crate::Callback;
-use crate::{dom::Dispatch, html, html::attributes::Special, Attribute};
-use mt_dom::AttValue;
+use crate::{
+    dom::Dispatch,
+    html,
+    html::attributes::{AttributeValue, Special},
+    Attribute,
+};
 use std::{collections::HashMap, sync::Mutex};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
@@ -122,7 +126,7 @@ impl CreatedNode {
             if *att.name() == "mount" {
                 for val in att.value().iter() {
                     match val {
-                        AttValue::Event(cb) => {
+                        AttributeValue::EventListener(cb) => {
                             let msg = cb.emit(MountEvent {
                                 target_node: element.clone().unchecked_into(),
                             });
@@ -130,9 +134,7 @@ impl CreatedNode {
                                 program.dispatch(msg);
                             }
                         }
-                        AttValue::Plain(_) => {
-                            log::warn!("mount should not be a plain value");
-                        }
+                        _ => (),
                     }
                 }
             }
@@ -248,8 +250,8 @@ impl CreatedNode {
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        let (callbacks, plain_values, func_values) =
-            html::attributes::partition_callbacks_from_plain_and_func_calls(
+        let (callbacks, plain_values, styles, func_values) =
+            html::attributes::partition_callbacks_from_plain_styles_and_func_calls(
                 attr,
             );
 
@@ -316,6 +318,14 @@ impl CreatedNode {
                     }
                 }
             }
+        } else if let Some(merged_styles) =
+            html::attributes::merge_styles_attributes_values(&styles)
+        {
+            element
+                .set_attribute(attr.name(), &merged_styles)
+                .unwrap_or_else(|_| {
+                    panic!("Error setting an attribute_ns for {:?}", element)
+                });
         } else {
             //if the merged attribute is blank of empty when string is trimmed
             //remove the attribute
