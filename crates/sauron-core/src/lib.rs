@@ -77,8 +77,8 @@ pub use mt_dom::Text;
 pub type Namespace = &'static str;
 /// tags are using static str for now, can also be enum tags
 pub type Tag = &'static str;
-/// attribute keys
-pub type AttributeKey = &'static str;
+/// attribute keys or attribute names
+pub type AttributeName = &'static str;
 
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
@@ -86,7 +86,7 @@ pub type AttributeKey = &'static str;
 pub type Node<MSG> = mt_dom::Node<
     Namespace,
     Tag,
-    AttributeKey,
+    AttributeName,
     AttributeValue,
     attributes::Callback<Event, MSG>,
 >;
@@ -95,7 +95,7 @@ pub type Node<MSG> = mt_dom::Node<
 pub type Element<MSG> = mt_dom::Element<
     Namespace,
     Tag,
-    AttributeKey,
+    AttributeName,
     AttributeValue,
     attributes::Callback<Event, MSG>,
 >;
@@ -106,7 +106,7 @@ pub type Patch<'a, MSG> = mt_dom::Patch<
     'a,
     Namespace,
     Tag,
-    AttributeKey,
+    AttributeName,
     AttributeValue,
     attributes::Callback<Event, MSG>,
 >;
@@ -114,7 +114,7 @@ pub type Patch<'a, MSG> = mt_dom::Patch<
 /// Attribute type used in sauron where the type of the Attribute name is &'static str
 pub type Attribute<MSG> = mt_dom::Attribute<
     Namespace,
-    AttributeKey,
+    AttributeName,
     AttributeValue,
     attributes::Callback<Event, MSG>,
 >;

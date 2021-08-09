@@ -1,5 +1,9 @@
 # Changelog
 
+## Unrelease
+- Modify `apply_patches` to make use of `PatchPatch` and `TreePath` from `mt-dom` to efficiently
+    traverse and find the target element to be patched.
+
 ## 0.37.0
 - Move Callback from `mt-dom` crate to here, since it is more relevant to `sauron` than `mt-dom`.
     `map_callback` and `map_msg` is done using `trait` implementation to `mt-dom's` `Node`, `Element`, `Attribute`, and `AttValue`.
