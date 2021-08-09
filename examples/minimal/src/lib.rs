@@ -2,7 +2,7 @@
 use log::trace;
 use sauron::{
     html::{
-        attributes::{attr, class, id, type_, value},
+        attributes::{attr, class, id, r#type, value},
         div,
         events::on_click,
         h1, input, text,
@@ -42,7 +42,7 @@ impl Component<Msg> for App {
                         input(
                             vec![
                                 class("client"),
-                                type_("button"),
+                                r#type("button"),
                                 value("Click me!"),
                                 on_click(|_| {
                                     trace!("Button is clicked");
@@ -66,7 +66,7 @@ impl Component<Msg> for App {
                             ))],
                         ),
                         input(
-                            vec![type_("text"), value(self.click_count)],
+                            vec![r#type("text"), value(self.click_count)],
                             vec![],
                         ),
                     ],

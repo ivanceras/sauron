@@ -2,7 +2,7 @@ use pulldown_cmark::{Alignment, CodeBlockKind, Event, Options, Parser, Tag};
 use sauron_core::{
     html::{
         attributes::{
-            attr, checked, class, empty_attr, href, id, src, title, type_,
+            attr, checked, class, empty_attr, href, id, r#type, src, title,
         },
         *,
     },
@@ -164,7 +164,7 @@ impl<MSG> MarkdownParser<MSG> {
                 }
                 Event::TaskListMarker(ref value) => {
                     self.add_node(input(
-                        vec![type_("checkbox"), checked(*value)],
+                        vec![r#type("checkbox"), checked(*value)],
                         vec![],
                     ));
                 }

@@ -1,5 +1,6 @@
-//! https://developer.mozilla.org/en-US/docs/Web/Events
-
+//! Create [events][0] Object
+//!
+//! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
 use crate::html::attributes::AttributeValue;
 use crate::{Attribute, Callback};
 use wasm_bindgen::JsCast;

@@ -1,9 +1,6 @@
 #![deny(warnings)]
 use js_sys::Date;
-use sauron::{
-    prelude::*,
-    web_sys::MouseEvent,
-};
+use sauron::{prelude::*, web_sys::MouseEvent};
 
 pub enum Msg {
     Click,
@@ -162,7 +159,7 @@ impl Component<Msg> for App {
                         text("What are you thinking right now?"),
                         input(
                             vec![
-                                type_("text"),
+                                r#type("text"),
                                 on_change(|event: InputEvent| {
                                     Msg::ChangeThought(event.value.to_string())
                                 }),

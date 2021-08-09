@@ -1,5 +1,6 @@
-//! https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
+//! Create html [attributes][0]
 //!
+//! [0]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
 use crate::Attribute;
 use crate::Event;
 pub use attribute_macros::*;
@@ -21,6 +22,12 @@ mod style;
 mod value;
 
 /// create a style attribute
+/// ```rust
+/// use sauron::prelude::*;
+/// use sauron::html::attributes::style;
+///
+/// let flex:Attribute<()> = style("display", "flex");
+/// ```
 pub fn style<V, MSG>(style_name: &'static str, value: V) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
@@ -32,12 +39,17 @@ where
 }
 
 /// A helper function which creates a style attribute by assembling the tuples into a string for the style value.
-/// ```ignore
-///  div(vec![styles([("display", "flex"), ("flex-direction", "row")])], vec![])
+/// # Example
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let html:Node<()> = div(vec![styles([("display", "flex"), ("flex-direction", "row")])], vec![]);
 /// ```
 /// is the same way of writing
-/// ```ignore
-/// div(vec![style!{"display":"flex","flex-direction":"row"}],vec![])
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let html: Node<()> = div(vec![style!{"display":"flex","flex-direction":"row"}],vec![]);
 /// ```
 pub fn styles<V, MSG, P>(pairs: P) -> Attribute<MSG>
 where

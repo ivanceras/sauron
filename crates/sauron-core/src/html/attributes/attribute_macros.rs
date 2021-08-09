@@ -1,7 +1,4 @@
-use crate::prelude::{
-    AttributeValue,
-    Value,
-};
+use crate::prelude::{AttributeValue, Value};
 use mt_dom::attr;
 
 /// declare a function with the name corresponds to attribute name for easy usage in html elements
@@ -84,7 +81,7 @@ macro_rules! declare_html_attributes_special{
         #[cfg(feature = "with-parser")]
         /// These are html attributes with names that are non proper rust identifier therefore
         /// handled differently. ie: (for, in)
-        pub const HTML_ATTRS_SPECIAL:[(&'static str,&'static str); 12] = [$((stringify!($name),$attribute),)*];
+        pub const HTML_ATTRS_SPECIAL:[(&'static str,&'static str); 8] = [$((stringify!($name),$attribute),)*];
     }
 }
 
@@ -213,18 +210,14 @@ declare_html_attributes_special! {
     accept_charset => "accept-charset";
 
     r#async => "async";
-    async_ => "async";
 
     r#for => "for";
-    for_ => "for";
 
     font_family => "font-family";
     font_size => "font-size";
     flex_direction => "flex-direction";
 
     r#loop => "loop";
-    loop_ => "loop";
 
     r#type => "type";
-    type_ => "type";
 }

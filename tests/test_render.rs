@@ -22,7 +22,7 @@ fn test_self_closing_tag() {
     let view1: Node<()> = main(
         vec![class("container")],
         vec![
-            input(vec![type_("text")], vec![]),
+            input(vec![r#type("text")], vec![]),
             img(vec![src("image1.jpg")], vec![]),
         ],
     );

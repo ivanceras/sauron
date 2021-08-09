@@ -76,7 +76,7 @@ macro_rules! declare_svg_tags_special{
         #[cfg(feature = "with-parser")]
         /// These are svg tags which the tags are non proper rust identifier, so they are handled
         /// differently
-        pub const SVG_TAGS_SPECIAL:[(&'static str,&'static str); 3] = [$((stringify!($name),$attribute),)*];
+        pub const SVG_TAGS_SPECIAL:[(&'static str,&'static str); 2] = [$((stringify!($name),$attribute),)*];
     }
 }
 
@@ -166,7 +166,6 @@ declare_common_svg_tags_and_macro! {
 declare_svg_tags_special! {
     color_profile => "color-profile";
     r#use => "use";
-    use_ => "use";
 }
 
 // These are non-common tags

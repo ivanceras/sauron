@@ -40,7 +40,7 @@ impl Component<Msg> for App {
             vec![
                 input(
                     vec![
-                        type_("button"),
+                        r#type("button"),
                         value("+"),
                         key("inc"),
                         on_click(|_| Msg::Increment),
@@ -50,7 +50,7 @@ impl Component<Msg> for App {
                 div(vec![], vec![text(self.count)]),
                 input(
                     vec![
-                        type_("button"),
+                        r#type("button"),
                         value("-"),
                         key("dec"),
                         on_click(|_| Msg::Decrement),

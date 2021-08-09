@@ -108,7 +108,7 @@ fn view(form_data: Option<FormData>) -> Node<()> {
                     },
                 ],
             ),
-            input(vec![type_("submit"), value("Submit")], vec![]),
+            input(vec![r#type("submit"), value("Submit")], vec![]),
         ],
     )
 }

@@ -93,7 +93,7 @@ impl Component<Msg> for DateTimeWidget {
             vec![
                 input(
                     vec![
-                        type_("date"),
+                        r#type("date"),
                         class("datetimebox__date"),
                         on_change(|input| Msg::DateChange(input.value)),
                         value(&self.date),
@@ -102,14 +102,14 @@ impl Component<Msg> for DateTimeWidget {
                 ),
                 input(
                     vec![
-                        type_("time"),
+                        r#type("time"),
                         class("datetimebox__time"),
                         on_change(|input| Msg::TimeChange(input.value)),
                         value(&self.time),
                     ],
                     vec![],
                 ),
-                input(vec![type_("text"), value(self.cnt)], vec![]),
+                input(vec![r#type("text"), value(self.cnt)], vec![]),
                 button(
                     vec![on_click(move |_| {
                         if let Some(program) = &program {
