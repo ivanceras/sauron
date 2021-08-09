@@ -35,11 +35,9 @@ fn node_to_tokens(node: Node) -> TokenStream {
         #[allow(unused_braces)]
         {
             #children_tokens
-            if let Some(ns) = sauron::parser::tag_namespace(#name){
-                sauron::html::html_element_ns(#name, ns, vec![#(#attributes),*], children)
-            }else{
-                sauron::html::html_element(#name, vec![#(#attributes),*], children)
-            }
+            let namespace = sauron::parser::tag_namespace(#name);
+            let self_closing = sauron::parser::is_self_closing(#name);
+            sauron::html::element_ns(namespace, #name, vec![#(#attributes),*], children, self_closing)
         }
     }});
 

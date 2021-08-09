@@ -22,6 +22,7 @@ mod style;
 mod value;
 
 /// create a style attribute
+/// # Examples
 /// ```rust
 /// use sauron::prelude::*;
 /// use sauron::html::attributes::style;
@@ -76,16 +77,24 @@ where
 }
 
 /// A helper function which creates a style attribute by assembling only the parts that passed the
-/// boolean flag
-/// ```ignore
-///    styles_flag([
-///        ("display", "block", self.is_active),
-///        ("display", "none", !self.is_active),
-///    ]),
+/// boolean flag.
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let is_active = true;
+/// let display:Attribute<()> = styles_flag([
+///         ("display", "block", is_active),
+///         ("display", "none", !is_active),
+///     ]);
 /// ```
 /// This could also be written as
-/// ```ignore
-///     styles([("display", if self.is_active { "block" }else{ "none" })])
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let is_active = true;
+/// let display:Attribute<()> =
+///     styles([("display", if is_active { "block" }else{ "none" })]);
 /// ```
 pub fn styles_flag<V, MSG, P>(trio: P) -> Attribute<MSG>
 where
@@ -101,11 +110,18 @@ where
     mt_dom::attr("style", AttributeValue::from_styles(styles))
 }
 
-/// ```ignore
-///    classes_flag([
-///        ("dashed", self.is_hidden),
-///        ("error", self.has_error),
-///    ]),
+/// A helper function which takes an array of tuple of class and a flag. The final class is
+/// assembled using only the values that has a flag which evaluates to true.
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+/// let is_hidden = true;
+/// let has_error = true;
+///
+/// let line:Attribute<()> = classes_flag([
+///        ("dashed", is_hidden),
+///        ("error", has_error),
+///    ]);
 /// ```
 pub fn classes_flag<P, S, MSG>(pair: P) -> Attribute<MSG>
 where
@@ -122,9 +138,13 @@ where
 }
 
 /// a helper function to add multiple classes to a node
+/// # Examples
 ///
-/// ```ignore
-///    div(vec![classes(["dashed", "error"])], vec![])
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let html: Node<()> =
+///    div(vec![classes(["dashed", "error"])], vec![]);
 /// ```
 pub fn classes<C, V, MSG>(class_list: C) -> Attribute<MSG>
 where
@@ -143,13 +163,17 @@ where
 /// in checkbox input type
 /// This is best called to be appended to the node since this
 /// returns an array of attributes which doesn't play well with the others
-/// Example:
-/// ```ignore
-/// input(vec![r#type("checkbox")], vec![]).attributes(attrs_flag(vec![(
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let is_checked = true;
+/// let html: Node<()> =
+///     input(vec![r#type("checkbox")], vec![]).add_attributes(attrs_flag(vec![(
 ///                             "checked",
 ///                             "checked",
 ///                             is_checked,
-///                         )])),
+///                         )]));
 /// ```
 pub fn attrs_flag<V, MSG, P>(trio: P) -> Vec<Attribute<MSG>>
 where
@@ -167,6 +191,13 @@ where
 }
 
 /// set the checked value, used checkbox and radio buttons
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let html: Node<()> =
+///     input(vec![r#type("checkbox"), checked(true)], vec![]);
+/// ```
 pub fn checked<MSG>(is_checked: bool) -> Attribute<MSG> {
     if is_checked {
         #[cfg(not(feature = "with-dom"))]
@@ -183,6 +214,13 @@ pub fn checked<MSG>(is_checked: bool) -> Attribute<MSG> {
 }
 
 /// set whether an element is disabled or not
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let html: Node<()> =
+///     input(vec![r#type("checkbox"), disabled(true)], vec![]);
+/// ```
 pub fn disabled<MSG>(is_disabled: bool) -> Attribute<MSG> {
     if is_disabled {
         attr("disabled", true)
@@ -195,6 +233,13 @@ pub fn disabled<MSG>(is_disabled: bool) -> Attribute<MSG> {
 /// this always sets the value
 /// This is for optimization purposes
 /// and will lead to some hacks in the implementation
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let html:Node<()> =
+///     div(vec![inner_html("<p>This is a paragraph <b>injected</b> into a <strong>div</strong> via <i>inner_html</i></p>")], vec![]);
+/// ```
 pub fn inner_html<V, MSG>(inner_html: V) -> Attribute<MSG>
 where
     V: Into<Value> + Clone,
@@ -206,11 +251,23 @@ where
 }
 
 /// focus the html element
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let editor:Node<()> = textarea(vec![focus(true)], vec![]);
+/// ```
 pub fn focus<MSG>(is_focus: bool) -> Attribute<MSG> {
     attr("focus", is_focus)
 }
 
 /// a utility function to convert simple value into attribute
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let data_id: Attribute<()> = attr("data-id", 42);
+/// ```
 pub fn attr<MSG, V: Into<Value>>(att: &'static str, v: V) -> Attribute<MSG> {
     mt_dom::attr(att, AttributeValue::from_value(v.into()))
 }
@@ -219,8 +276,8 @@ pub fn attr<MSG, V: Into<Value>>(att: &'static str, v: V) -> Attribute<MSG> {
 /// need to return an attribute which otherwise it can not produce
 /// example:
 /// ```rust
-/// use sauron_core::html::attributes::{title,empty_attr};
-/// use sauron_core::Attribute;
+/// use sauron::prelude::*;
+/// use sauron::html::attributes::title;
 ///
 /// let img_title = Some("this is the image");
 /// let result: Attribute<()> = if let Some(img_title) = img_title{
@@ -236,6 +293,7 @@ pub fn empty_attr<MSG>() -> Attribute<MSG> {
 }
 
 /// merge the plain values
+#[doc(hidden)]
 pub(crate) fn merge_plain_attributes_values<MSG>(
     attr_values: &[&AttributeValue<MSG>],
 ) -> Option<String> {
@@ -255,6 +313,7 @@ pub(crate) fn merge_plain_attributes_values<MSG>(
 }
 
 /// merge the styles
+#[doc(hidden)]
 pub(crate) fn merge_styles_attributes_values<MSG>(
     attr_values: &[&AttributeValue<MSG>],
 ) -> Option<String> {
@@ -282,6 +341,7 @@ pub(crate) fn merge_styles_attributes_values<MSG>(
 }
 
 /// returns (callbacks, plain_attribtues, function_calls)
+#[doc(hidden)]
 pub(crate) fn partition_callbacks_from_plain_styles_and_func_calls<MSG>(
     attr: &Attribute<MSG>,
 ) -> (

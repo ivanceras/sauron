@@ -11,7 +11,7 @@ use sauron_core::{
         attributes::{
             AttributeValue, Style, HTML_ATTRS, HTML_ATTRS_SPECIAL, HTML_STYLES,
         },
-        html_element_sc,
+        html_element_self_closing,
         tags::{
             HTML_SC_TAGS, HTML_TAGS, HTML_TAGS_NON_COMMON,
             HTML_TAGS_WITH_MACRO_NON_COMMON,
@@ -125,6 +125,11 @@ pub fn tag_namespace(tag: &str) -> Option<&'static str> {
     }
 }
 
+/// Returns true if this html tag is self closing
+pub fn is_self_closing(tag: &str) -> bool {
+    HTML_SC_TAGS.iter().any(|t| t.eq_ignore_ascii_case(tag))
+}
+
 fn extract_attributes<MSG>(
     attrs: &Vec<html5ever::Attribute>,
 ) -> Vec<Attribute<MSG>> {
@@ -195,7 +200,7 @@ fn process_node<MSG>(node: &Handle) -> Option<Node<MSG>> {
                 let children_nodes = process_children(node);
                 let attributes = extract_attributes(&attrs.borrow());
                 let is_self_closing = HTML_SC_TAGS.contains(&html_tag);
-                Some(html_element_sc(
+                Some(html_element_self_closing(
                     html_tag,
                     attributes,
                     children_nodes,

@@ -41,7 +41,7 @@ macro_rules! declare_sc_tags {
                 #[allow(non_snake_case)]
                 pub fn $name<MSG>(attrs: Vec<$crate::Attribute<MSG>>, children: Vec<$crate::Node<MSG>>) -> $crate::Node<MSG>
                     {
-                        $crate::html::html_element_sc(stringify!($name), attrs, children, true)
+                        $crate::html::html_element_self_closing(stringify!($name), attrs, children, true)
                     }
                 }
 
