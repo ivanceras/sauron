@@ -39,8 +39,12 @@ declare_units! {
     ///
     /// a helper function which append `px` into a value
     /// Example:
-    /// ```ignore
-    /// style("width", px(100))
+    /// ```rust
+    /// use sauron::prelude::*;
+    /// use sauron::html::attributes::style;
+    ///
+    /// let inline: Attribute<()> = style("width", px(100));
+    ///
     /// ```
     px;
     /// 1q is equivalent to 1/40th of 1cm.

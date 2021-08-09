@@ -10,8 +10,11 @@ pub const SVG_NAMESPACE: &str = "http://www.w3.org/2000/svg";
 
 /// creates an svg element with the tag, attributes and children.
 /// Example:
-/// ```rust,ignore
-/// svg_element("circle", vec![cx(1.0), cy(1.0), r(1.0)], vec![]);
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let circle: Node<()> = svg_element("circle", vec![cx(1.0), cy(1.0), r(1.0)], vec![]);
+/// assert_eq!(node!{<circle cx=1.0 cy=1.0 r=1.0></circle>}, circle);
 /// ```
 ///
 pub fn svg_element<MSG>(

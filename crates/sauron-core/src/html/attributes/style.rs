@@ -3,10 +3,6 @@ use std::fmt;
 
 /// css styles
 /// style can be converted into an attribute
-/// ie:
-/// ```ignore,no_run
-/// style="..."
-/// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Style {
     /// style name such as border, width, etc
