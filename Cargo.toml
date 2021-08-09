@@ -1,6 +1,6 @@
 [package]
 name = "sauron"
-version = "0.38.0"
+version = "0.39.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "A versatile web framework and library for building client-side and/or server-side web applications"
@@ -14,10 +14,10 @@ edition = "2018"
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-sauron-core = { version = "0.38", path = "crates/sauron-core", default-features = false }
-sauron-node-macro = { version = "0.38", path = "crates/sauron-node-macro", optional = true }
-sauron-markdown = { version = "0.38", path = "crates/sauron-markdown", optional = true, default-features = false }
-sauron-parse = { version = "0.38", path = "crates/sauron-parse", optional = true }
+sauron-core = { version = "0.39", path = "crates/sauron-core", default-features = false }
+sauron-node-macro = { version = "0.39", path = "crates/sauron-node-macro", optional = true }
+sauron-markdown = { version = "0.39", path = "crates/sauron-markdown", optional = true, default-features = false }
+sauron-parse = { version = "0.39", path = "crates/sauron-parse", optional = true }
 cfg-if = "0.1"
 
 [features]
@@ -77,4 +77,4 @@ members = [
 [patch.crates-io]
 #mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
 #mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "develop" }
-mt-dom = { path = "../mt-dom" }
+#mt-dom = { path = "../mt-dom" }

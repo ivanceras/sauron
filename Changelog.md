@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.39.0
+- Modify `apply_patches` to use only `TreePath` where `PatchPath` is already removed in `mt-dom`
+
 ## 0.38.0
 - Modify `apply_patches` to make use of `PatchPatch` and `TreePath` from `mt-dom` to efficiently
     traverse and find the target element to be patched.
