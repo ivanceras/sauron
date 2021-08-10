@@ -1,5 +1,6 @@
 use sauron::apply_patches::patch;
 use sauron::prelude::*;
+use sauron::Callback;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -13,23 +14,23 @@ pub enum Msg {
 }
 
 #[derive(Clone)]
-pub struct DateTimeWidget {
+pub struct DateTimeWidget<PMSG> {
     date: String,
     time: String,
-    root_node: Option<web_sys::Node>,
-    program: Option<Program<Self, Msg>>,
     cnt: i32,
+    mounted: bool,
+    time_change_listener: Vec<Callback<PMSG>>,
 }
 
-impl DateTimeWidget {
-    pub fn new(date: &str, time: &str) -> Rc<RefCell<Self>> {
-        Rc::new(RefCell::new(DateTimeWidget {
+impl<PMSG> DateTimeWidget<PMSG> {
+    pub fn new(date: &str, time: &str, mounted: bool) -> Self {
+        DateTimeWidget {
             date: date.to_string(),
             time: time.to_string(),
-            root_node: None,
-            program: None,
             cnt: 0,
-        }))
+            mounted,
+            time_change_listener: vec![],
+        }
     }
 
     fn date_time(&self) -> String {
@@ -38,53 +39,67 @@ impl DateTimeWidget {
 
     fn force_increment(&mut self) {
         self.cnt += 1;
-        let view = self.view();
-        if let Some(program) = self.program.as_mut() {
-            log::warn!("manually triggering dom_updater");
-            program.dispatch(Msg::TimeChange("11:11".to_string()));
-            program.dispatch(Msg::BtnClick)
-        }
+    }
+
+    pub fn on_time_change<F>(&mut self, f: F)
+    where
+        F: Fn(Event) -> PMSG + 'static,
+    {
+        self.time_change_listener.push(Callback::from(f));
     }
 }
 
-impl Component<Msg> for DateTimeWidget {
+impl<PMSG> Component<Msg> for DateTimeWidget<PMSG>
+where
+    PMSG: Clone + 'static,
+{
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
                 self.date = date;
                 let date_time = self.date_time();
+                for listener in self.time_change_listener.iter() {
+                    let event = web_sys::Event::new("date_change")
+                        .expect("must construct custom event");
+                    let event: Event = event.into();
+                    listener.emit(event);
+                }
                 Cmd::none()
             }
             Msg::TimeChange(time) => {
                 log::trace!("time is changed to: {}", time);
                 let date_time = self.date_time();
+                for listener in self.time_change_listener.iter() {
+                    let event = web_sys::Event::new("time_change")
+                        .expect("must construct custom event");
+                    let event: Event = event.into();
+                    listener.emit(event);
+                }
                 Cmd::none()
             }
             Msg::Mount(target_node) => {
-                log::trace!("mounted to: {:?}", target_node);
-                self.root_node = Some(target_node);
-                if let Some(root_node) = &self.root_node {
-                    self.program = Some(Program::new(self.clone(), root_node));
+                //log::debug!("Mounting attempt...");
+                if !self.mounted {
+                    log::debug!("replacing the original target");
+                    let mut self_clone = self.clone();
+                    self_clone.mounted = true;
+                    self_clone.date = "2020-02-02".to_string();
+                    self_clone.time = "22:22".to_string();
+                    Program::new_replace_mount(self_clone, &target_node);
+                    self.mounted = true;
                 }
-                self.force_increment();
                 Cmd::none()
             }
             Msg::BtnClick => {
                 log::trace!("btn is clicked..");
                 self.cnt += 1;
-                let view = self.view();
-                if let Some(program) = self.program.as_mut() {
-                    log::warn!("manually triggering dom_updater");
-                    program.dispatch(Msg::BtnClick);
-                }
                 Cmd::none()
             }
         }
     }
 
     fn view(&self) -> Node<Msg> {
-        let program = self.program.clone();
         div(
             vec![
                 class("datetimebox"),
@@ -111,12 +126,7 @@ impl Component<Msg> for DateTimeWidget {
                 ),
                 input(vec![r#type("text"), value(self.cnt)], vec![]),
                 button(
-                    vec![on_click(move |_| {
-                        if let Some(program) = &program {
-                            program.dispatch(Msg::BtnClick)
-                        }
-                        Msg::BtnClick
-                    })],
+                    vec![on_click(move |_| Msg::BtnClick)],
                     vec![text("Do something")],
                 ),
             ],

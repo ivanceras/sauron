@@ -13,19 +13,21 @@ pub enum Msg {
     Decrement,
     Mount(web_sys::Node),
     DateTimeMsg(date_time::Msg),
-    /*
-    DateTimeChange(String),
-    */
+    TimeChange,
 }
 
 pub struct App {
     count: i32,
-    date_time: Rc<RefCell<DateTimeWidget>>,
+    date_time: DateTimeWidget<Msg>,
 }
 
 impl App {
     pub fn new() -> Self {
-        let date_time = DateTimeWidget::new("2020-12-30", "10:00");
+        let mut date_time = DateTimeWidget::new("2020-12-30", "10:00", false);
+        date_time.on_time_change(|_e| {
+            log::info!("Time has changed..");
+            Msg::TimeChange
+        });
         App {
             count: 0,
             date_time,
@@ -57,7 +59,7 @@ impl Component<Msg> for App {
                     ],
                     vec![],
                 ),
-                self.date_time.borrow().view().map_msg(Msg::DateTimeMsg),
+                self.date_time.view().map_msg(Msg::DateTimeMsg),
             ],
         )
     }
@@ -76,23 +78,25 @@ impl Component<Msg> for App {
                 log::trace!("app is mounted to {:?}", target_node);
                 Cmd::none()
             }
+            // this is only here for the purpose of mounting
+            // the date time widget.
+            // We want the date-time widget to have it's own lifecycle
             Msg::DateTimeMsg(dmsg) => {
                 match dmsg {
                     date_time::Msg::Mount(_) => {
                         log::trace!("mount event pass through..");
-                        self.date_time.borrow_mut().update(dmsg);
+                        let cmd = self.date_time.update(dmsg);
                     }
                     _ => {
                         log::trace!("not wiring {:?}", dmsg);
                     }
                 }
                 Cmd::none()
-            } /*
-              Msg::DateTimeChange(date_time) => {
-                  log::trace!("date_time is changed: {}", date_time);
-                  Cmd::none()
-              }
-              */
+            }
+            Msg::TimeChange => {
+                log::debug!("Time is changed in out date time widget");
+                Cmd::none()
+            }
         }
     }
 }
