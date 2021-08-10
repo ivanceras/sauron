@@ -159,23 +159,28 @@ where
                 t4
             };
 
-            #[cfg(feature = "with-measure")]
-            {
-                let measurements = Measurements {
-                    update_dispatch_took: t2 - t1,
-                    build_view_took: t3 - t2,
-                    dom_update_took: t4 - t3,
-                    total_time: t4 - t1,
-                };
-                // tell the app on app performance measurements
-                let mut cmd_measurement =
-                    self.app.borrow_mut().measurements(measurements);
-                cmd_measurement.should_update_view = false;
+            if cmd.log_measurements {
+                #[cfg(feature = "with-measure")]
+                {
+                    let measurements = Measurements {
+                        update_dispatch_took: t2 - t1,
+                        build_view_took: t3 - t2,
+                        dom_update_took: t4 - t3,
+                        total_time: t4 - t1,
+                    };
+                    // tell the app on app performance measurements
+                    let mut cmd_measurement =
+                        self.app.borrow_mut().measurements(measurements);
+                    cmd_measurement.should_update_view = false;
 
-                cmd_measurement.emit(self);
+                    cmd_measurement.emit(self);
+                }
+            } else {
+                #[cfg(any(feature = "with-debug", feature = "with-measure"))]
+                log::info!("skipped logging measurements");
             }
         } else {
-            #[cfg(feature = "with-debug")]
+            #[cfg(any(feature = "with-debug", feature = "with-measure"))]
             log::info!("dom update is skipped here");
         }
         cmd.emit(self);

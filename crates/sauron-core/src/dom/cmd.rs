@@ -14,6 +14,11 @@ pub struct Cmd<DSP> {
     pub commands: Vec<Rc<dyn Fn(DSP)>>,
     /// this instruct the program whether or not to update the view
     pub should_update_view: bool,
+    /// tell the cmd to log the measurements of not.
+    /// set only to true for a certain MSG where you want to measure the performance
+    /// in the component update function. Otherwise, measurement calls
+    /// for other non-trivial functions are also called causing on measurements.
+    pub log_measurements: bool,
 }
 
 impl<DSP> Cmd<DSP>
@@ -28,6 +33,7 @@ where
         Self {
             commands: vec![Rc::new(f)],
             should_update_view: true,
+            log_measurements: false,
         }
     }
 
@@ -40,6 +46,7 @@ where
         Self {
             commands,
             should_update_view: true,
+            log_measurements: false,
         }
     }
 
@@ -48,6 +55,7 @@ where
         Cmd {
             commands: vec![],
             should_update_view: true,
+            log_measurements: false,
         }
     }
 
@@ -65,6 +73,7 @@ where
         Self {
             commands: vec![],
             should_update_view,
+            log_measurements: false,
         }
     }
 
@@ -72,5 +81,15 @@ where
     /// will be made to the view
     pub fn no_render() -> Self {
         Self::should_update_view(false)
+    }
+
+    /// Create a cmd which instruct the program that it should log the measurements
+    /// for each part of the dispatch process.
+    pub fn measure() -> Self {
+        Self {
+            commands: vec![],
+            should_update_view: true,
+            log_measurements: true,
+        }
     }
 }
