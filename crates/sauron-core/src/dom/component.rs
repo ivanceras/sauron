@@ -1,9 +1,8 @@
 use crate::{Cmd, Node};
-use std::fmt::Debug;
 
 /// Contains the time it took for the last app update call for the component
 #[cfg(feature = "with-measure")]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, std::fmt::Debug, PartialEq)]
 pub struct Measurements {
     /// Time it took for dispatching the Component's update function
     pub update_dispatch_took: f64,

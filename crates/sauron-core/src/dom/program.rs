@@ -168,8 +168,10 @@ where
                     total_time: t4 - t1,
                 };
                 // tell the app on app performance measurements
-                let cmd_measurement =
+                let mut cmd_measurement =
                     self.app.borrow_mut().measurements(measurements);
+                cmd_measurement.should_update_view = false;
+
                 cmd_measurement.emit(self);
             }
         } else {
