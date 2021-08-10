@@ -48,6 +48,6 @@ where
         Self: Sized + 'static,
     {
         log::debug!("Measurements: {:#?}", measurements);
-        Cmd::none()
+        Cmd::no_render()
     }
 }
