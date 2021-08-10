@@ -4,7 +4,6 @@ use std::{cell::RefCell, rc::Rc};
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;
 
-#[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
 
 /// Holds the user App and the dom updater
@@ -122,59 +121,53 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&self, msg: MSG) {
-        #[cfg(feature = "with-measure")]
         let t1 = crate::now();
         // update the app and emit the cmd returned from the update
         let cmd = self.app.borrow_mut().update(msg);
 
         if cmd.should_update_view {
             //trace!("Executing cmd..");
+            let t2 = crate::now();
+
             #[cfg(feature = "with-measure")]
-            let t2 = {
-                let t2 = crate::now();
-                log::trace!("app update took: {}ms", t2 - t1);
-                t2
-            };
+            log::trace!("app update took: {}ms", t2 - t1);
+
             // a new view is created due to the app update
             let view = self.app.borrow().view();
+            let t3 = crate::now();
+
             #[cfg(feature = "with-measure")]
-            let t3 = {
-                let t3 = crate::now();
-                log::trace!("creating app view took: {}ms", t3 - t2);
-                t3
-            };
+            log::trace!("creating app view took: {}ms", t3 - t2);
+
             // update the last DOM node tree with this new view
             self.dom_updater.borrow_mut().update_dom(self, view);
+            let t4 = crate::now();
+            log::trace!("dom update took: {}ms", t4 - t3);
+
             #[cfg(feature = "with-measure")]
-            let t4 = {
-                let t4 = crate::now();
-                log::trace!("dom update took: {}ms", t4 - t3);
+            {
                 let dispatch_duration = t4 - t1;
+
                 // 60fps is 16.667 ms per frame.
                 if dispatch_duration > 16.0 {
                     log::warn!("dispatch took: {}ms", dispatch_duration);
                 } else {
                     log::trace!("dispatch took: {}ms", dispatch_duration);
                 }
-                t4
-            };
+            }
 
             if cmd.log_measurements {
-                #[cfg(feature = "with-measure")]
-                {
-                    let measurements = Measurements {
-                        update_dispatch_took: t2 - t1,
-                        build_view_took: t3 - t2,
-                        dom_update_took: t4 - t3,
-                        total_time: t4 - t1,
-                    };
-                    // tell the app on app performance measurements
-                    let mut cmd_measurement =
-                        self.app.borrow_mut().measurements(measurements);
-                    cmd_measurement.should_update_view = false;
-
-                    cmd_measurement.emit(self);
-                }
+                let measurements = Measurements {
+                    update_dispatch_took: t2 - t1,
+                    build_view_took: t3 - t2,
+                    dom_update_took: t4 - t3,
+                    total_time: t4 - t1,
+                };
+                // tell the app on app performance measurements
+                let mut cmd_measurement =
+                    self.app.borrow_mut().measurements(measurements);
+                cmd_measurement.should_update_view = false;
+                cmd_measurement.emit(self);
             } else {
                 #[cfg(any(feature = "with-debug", feature = "with-measure"))]
                 log::info!("skipped logging measurements");

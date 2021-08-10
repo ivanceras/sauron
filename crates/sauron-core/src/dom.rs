@@ -14,7 +14,6 @@ mod util;
 mod window;
 
 pub use component::Component;
-#[cfg(feature = "with-measure")]
 pub use component::Measurements;
 pub use created_node::CreatedNode;
 pub use dispatch::Dispatch;

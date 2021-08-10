@@ -1,7 +1,6 @@
 use crate::{Cmd, Node};
 
 /// Contains the time it took for the last app update call for the component
-#[cfg(feature = "with-measure")]
 #[derive(Clone, Copy, std::fmt::Debug, PartialEq)]
 pub struct Measurements {
     /// Time it took for dispatching the Component's update function
@@ -42,7 +41,6 @@ where
     fn view(&self) -> Node<MSG>;
 
     /// This is called after dispatching and updating the dom for the component
-    #[cfg(feature = "with-measure")]
     fn measurements(&mut self, measurements: Measurements) -> Cmd<Self, MSG>
     where
         Self: Sized + 'static,
