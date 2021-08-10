@@ -14,6 +14,7 @@ mod util;
 mod window;
 
 pub use component::Component;
+pub use component::Measurements;
 pub use created_node::CreatedNode;
 pub use dispatch::Dispatch;
 pub use dom_updater::DomUpdater;

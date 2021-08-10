@@ -4,6 +4,9 @@ use std::{cell::RefCell, rc::Rc};
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;
 
+#[cfg(feature = "with-measure")]
+use crate::dom::Measurements;
+
 /// Holds the user App and the dom updater
 /// This is passed into the event listener and the dispatch program
 /// will be called after the event is triggered.
@@ -143,7 +146,7 @@ where
             // update the last DOM node tree with this new view
             self.dom_updater.borrow_mut().update_dom(self, view);
             #[cfg(feature = "with-measure")]
-            {
+            let t4 = {
                 let t4 = crate::now();
                 log::trace!("dom update took: {}ms", t4 - t3);
                 let dispatch_duration = t4 - t1;
@@ -153,7 +156,22 @@ where
                 } else {
                     log::trace!("dispatch took: {}ms", dispatch_duration);
                 }
+                t4
             };
+
+            #[cfg(feature = "with-measure")]
+            {
+                let measurements = Measurements {
+                    update_dispatch_took: t2 - t1,
+                    build_view_took: t3 - t2,
+                    dom_update_took: t4 - t3,
+                    total_time: t4 - t1,
+                };
+                // tell the app on app performance measurements
+                let cmd_measurement =
+                    self.app.borrow_mut().measurements(measurements);
+                cmd_measurement.emit(self);
+            }
         } else {
             #[cfg(feature = "with-debug")]
             log::info!("dom update is skipped here");
