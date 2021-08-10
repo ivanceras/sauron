@@ -17,3 +17,4 @@ html5ever = {version = "0.25"}
 markup5ever_rcdom = { version = "0.1" }
 thiserror = "1.0"
 log = "0.4"
+once_cell = "1.8"

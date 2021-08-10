@@ -5,6 +5,7 @@ use html5ever::{
     tendril::TendrilSink, QualName,
 };
 use markup5ever_rcdom::{Handle, NodeData, RcDom};
+use once_cell::sync::Lazy;
 use sauron_core::{
     html::{
         attributes,
@@ -26,8 +27,22 @@ use sauron_core::{
     },
     Attribute, Node,
 };
+use std::collections::HashSet;
+use std::iter::FromIterator;
 use std::{fmt, io};
 use thiserror::Error;
+
+static NAMESPACED_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
+    HashSet::from_iter(
+        SVG_TAGS
+            .iter()
+            .chain(SVG_TAGS_NON_COMMON.iter())
+            .chain(SVG_TAGS_SPECIAL.iter().map(|(_func, t)| t)),
+    )
+});
+
+static SELF_CLOSING_TAGS: Lazy<HashSet<&&'static str>> =
+    Lazy::new(|| HashSet::from_iter(HTML_SC_TAGS.iter()));
 
 /// all the possible error when parsing html string
 #[derive(Debug, Error)]
@@ -106,19 +121,7 @@ pub fn match_attribute_function(key: &str) -> Option<&'static str> {
 /// html tags don't need to have namespace while svg does, otherwise it will not be properly
 /// mounted into the DOM
 pub fn tag_namespace(tag: &str) -> Option<&'static str> {
-    let find_svg_tag = SVG_TAGS
-        .iter()
-        .chain(SVG_TAGS_NON_COMMON.iter())
-        .chain(
-            SVG_TAGS_SPECIAL
-                .iter()
-                .map(|(_func, t)| t)
-                .collect::<Vec<_>>()
-                .into_iter(),
-        )
-        .find(|t| t.eq_ignore_ascii_case(tag));
-
-    if find_svg_tag.is_some() {
+    if NAMESPACED_TAGS.contains(&tag) {
         Some(SVG_NAMESPACE)
     } else {
         None
@@ -127,7 +130,7 @@ pub fn tag_namespace(tag: &str) -> Option<&'static str> {
 
 /// Returns true if this html tag is self closing
 pub fn is_self_closing(tag: &str) -> bool {
-    HTML_SC_TAGS.iter().any(|t| t.eq_ignore_ascii_case(tag))
+    SELF_CLOSING_TAGS.contains(&tag)
 }
 
 fn extract_attributes<MSG>(
