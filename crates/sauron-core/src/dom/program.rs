@@ -65,6 +65,20 @@ where
         Program::new(app2, root_node)
     }
 
+    /// Map this program such that Program<APP,MSG> becomes Program<APP,MSG2>
+    pub fn map_msg<F, MSG2>(&self, func: F) -> Program<APP, MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + 'static,
+        MSG2: 'static,
+    {
+        let dom_updater_msg2: DomUpdater<MSG2> =
+            self.dom_updater.borrow().map_updater_msg(func);
+        Program {
+            app: Rc::clone(&self.app),
+            dom_updater: Rc::new(RefCell::new(dom_updater_msg2)),
+        }
+    }
+
     fn init_emit(&self) {
         self.app.borrow_mut().init_with_program(self.clone());
         // call the init of the component
