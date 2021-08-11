@@ -1,11 +1,12 @@
 # Changelog
 
 ## Unreleased
+ - **breaking** Program agument is not optional anymore in module `apply_patches`, `dom_updater` and `created_node`.
  - Improve rustdoc on prominent functions and modules.
  - Add measurements function to Component for letting components know how much time is spent in each of major steps in dispatching and updating the DOM.
     - Add a field `log_measurement` to `Cmd` which tells the `Program` wheter to log and call measurements.
  - Add performance optimization for `sauron-parse` crate lookup on `tag_namespace` and `self_closing_tags` by putting it in a once_cell Lazy HashSet
- - **breaking** Rename html_element_sc to html_element_self_closing
+ - **breaking** Rename `html_element_sc` to `html_element_self_closing`.
  - **breaking** Remove the use of underscore_ to html/svg tags and attributes which are also rust identifier to use the raw r#ident.
     - This includes `type` `for` `async`.
 
