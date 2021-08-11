@@ -7,7 +7,7 @@ use sauron_core::{
 };
 
 #[test]
-fn event_remove() {
+fn nodes_with_event_must_be_replaced() {
     let elem_id = "input-remove-event-test";
 
     let old: Node<()> = input(
@@ -35,10 +35,10 @@ fn event_remove() {
 
     assert_eq!(
         patch,
-        vec![RemoveAttributes::new(
-            &"input",
+        vec![ReplaceNode::new(
+            Some(&"input"),
             TreePath::start_at(0, vec![0]),
-            vec![&on("input", |_| { () })],
+            &input(vec![id(elem_id), value("End Text"),], vec![]),
         )
         .into()]
     );
@@ -171,35 +171,6 @@ fn truncate_children_different_attributes() {
 }
 
 #[test]
-fn replace_node() {
-    let old: Node<()> = div(vec![], vec![]);
-    let new = span(vec![], vec![]);
-    assert_eq!(
-        diff(&old, &new),
-        vec![ReplaceNode::new(
-            Some(&"div"),
-            TreePath::start_at(0, vec![0]),
-            &span(vec![], vec![])
-        )
-        .into()],
-        "ReplaceNode the root if the tag changed"
-    );
-
-    let old: Node<()> = div(vec![], vec![b(vec![], vec![])]);
-    let new = div(vec![], vec![strong(vec![], vec![])]);
-    assert_eq!(
-        diff(&old, &new),
-        vec![ReplaceNode::new(
-            Some(&"b"),
-            TreePath::start_at(1, vec![0, 0]),
-            &strong(vec![], vec![])
-        )
-        .into()],
-        "ReplaceNode a child node"
-    );
-}
-
-#[test]
 fn replace_node2() {
     let old: Node<()> =
         div(vec![], vec![b(vec![], vec![text("1")]), b(vec![], vec![])]);
@@ -224,25 +195,6 @@ fn replace_node2() {
             .into(),
         ],
         "ReplaceNode node with a child",
-    )
-}
-
-#[test]
-fn add_children() {
-    let old: Node<()> = div(vec![], vec![b(vec![], vec![])]); //{ <div> <b></b> </div> },
-    let new: Node<()> = div(
-        vec![],
-        vec![b(vec![], vec![]), html_element("new", vec![], vec![])],
-    ); //{ <div> <b></b> <new></new> </div> },
-    assert_eq!(
-        dbg!(diff(&old, &new)),
-        vec![AppendChildren::new(
-            &"div",
-            TreePath::start_at(0, vec![0]),
-            vec![(2, &html_element("new", vec![], vec![]))]
-        )
-        .into()],
-        "Added a new node to the root node",
     )
 }
 
@@ -436,67 +388,18 @@ fn remove_style_attributes() {
 }
 
 #[test]
-fn remove_attributes() {
-    let old: Node<()> = div(vec![id("hey-there")], vec![]);
-    let new = div(vec![], vec![]);
-    assert_eq!(
-        diff(&old, &new),
-        vec![RemoveAttributes::new(
-            &"div",
-            TreePath::start_at(0, vec![0]),
-            vec![&id("hey-there")]
-        )
-        .into()],
-        "Remove attributes",
-    );
-}
-
-#[test]
-fn remove_events() {
+fn remove_events_will_become_replace_node() {
     let old: Node<()> = div(vec![on_click(|_| println!("hi"))], vec![]);
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![RemoveAttributes::new(
-            &"div",
+        vec![ReplaceNode::new(
+            Some(&"div"),
             TreePath::start_at(0, vec![0]),
-            vec![&on_click(|_| println!("hi"))]
+            &div(vec![], vec![])
         )
         .into()],
         "Remove events",
-    );
-}
-
-#[test]
-fn change_attribute() {
-    let old: Node<()> = div(vec![id("hey-there")], vec![]); //{ <div id="hey-there"></div> },
-    let new = div(vec![id("changed")], vec![]); //{ <div id="changed"> </div> },
-
-    assert_eq!(
-        diff(&old, &new),
-        vec![AddAttributes::new(
-            &"div",
-            TreePath::start_at(0, vec![0]),
-            vec![&id("changed")]
-        )
-        .into()],
-        "Add attributes",
-    );
-}
-
-#[test]
-fn replace_text_node() {
-    let old: Node<()> = text("Old"); //{ Old },
-    let new: Node<()> = text("New"); //{ New },
-
-    assert_eq!(
-        diff(&old, &new),
-        vec![ChangeText::new(
-            &Text::new("Old"),
-            TreePath::start_at(0, vec![0]),
-            &Text::new("New")
-        )
-        .into()],
     );
 }
 

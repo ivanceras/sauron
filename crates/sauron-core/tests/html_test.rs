@@ -224,22 +224,6 @@ fn remove_attributes() {
 }
 
 #[test]
-fn remove_events() {
-    let old: Node<()> = div(vec![on_click(|_| println!("hi"))], vec![]);
-    let new = div(vec![], vec![]);
-    assert_eq!(
-        diff(&old, &new),
-        vec![RemoveAttributes::new(
-            &"div",
-            TreePath::start_at(0, vec![0]),
-            vec![&on_click(|_| println!("hi"))]
-        )
-        .into()],
-        "Remove events",
-    );
-}
-
-#[test]
 fn change_attribute() {
     let old: Node<()> = div(vec![id("hey-there")], vec![]);
     let new = div(vec![id("changed")], vec![]);

@@ -17,6 +17,9 @@ where
     fn map_callback<MSG2>(self, cb: Callback<MSG, MSG2>) -> Node<MSG2>
     where
         MSG2: 'static;
+
+    /// Return the callbacks present on this node
+    fn get_callbacks(&self) -> Vec<&Callback<Event, MSG>>;
 }
 
 /// Add mapping function for Element
@@ -72,6 +75,18 @@ where
         match self {
             Node::Element(element) => Node::Element(element.map_callback(cb)),
             Node::Text(text) => Node::Text(text),
+        }
+    }
+
+    fn get_callbacks(&self) -> Vec<&Callback<Event, MSG>> {
+        if let Some(attributes) = self.get_attributes() {
+            let callbacks = attributes
+                .iter()
+                .flat_map(|att| att.get_callback())
+                .collect();
+            callbacks
+        } else {
+            vec![]
         }
     }
 }

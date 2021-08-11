@@ -110,6 +110,7 @@ where
     MSG: 'static,
 {
     use crate::html::attributes::Special;
+    use crate::map_msg::NodeMapMsg;
 
     // check if the skip attribute is true
     // if it is true, skip diffing and no patches is created at this dom
@@ -124,12 +125,19 @@ where
     // check if the replace attribute evaluates to true,
     // if it is, a replace patch replace the old node with the new node
     // without diffing the dom tree
-    let replace = |_old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
-        new_node
+    let replace = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
+        let explicit_replace_attr = new_node
             .get_value("replace")
             .map(|v| v.as_bool())
             .flatten()
-            .unwrap_or(false)
+            .unwrap_or(false);
+
+        let old_node_has_event = !old_node.get_callbacks().is_empty();
+        let new_node_has_event = !new_node.get_callbacks().is_empty();
+        // don't recycle when old node has event while new new doesn't have
+        let forbid_recycle = old_node_has_event && !new_node_has_event;
+
+        explicit_replace_attr || forbid_recycle
     };
     mt_dom::diff::diff_with_functions(old, new, &"key", &skip, &replace)
 }
