@@ -366,18 +366,18 @@ impl CreatedNode {
 
                 key_press_func.forget();
             } else {
-                let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
+                let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
                     create_closure_wrap(program, &callback);
                 current_elm
                     .add_event_listener_with_callback(
                         event_str,
-                        closure_wrap.as_ref().unchecked_ref(),
+                        callback_wrapped.as_ref().unchecked_ref(),
                     )
                     .expect("Unable to attached event listener");
                 closures
                     .get_mut(&unique_id)
                     .expect("Unable to get closure")
-                    .push((event_str, closure_wrap));
+                    .push((event_str, callback_wrapped));
             }
         }
     }
@@ -425,19 +425,6 @@ where
     let program_clone = program.clone();
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
-        // Note:
-        // calling `event.stop_propagation()` to the containers of this element to have
-        // a more fine grain control and expected results,
-        // and for most cases this is what we want. We don't want the containing div of a button
-        // also receives that click event.
-        //event.stop_propagation();
-        //
-        // Notes:
-        // - calling event.prevent_default() prevents the reloading the page in href links, which is what we
-        // want mostly in an SPA app
-        // - calling event.prevent_default() prevent InputEvent to trigger when KeyPressEvent is
-        // also one of the event callback
-        // event.prevent_default();
         let msg = callback_clone.emit(event);
         program_clone.dispatch(msg);
     }))

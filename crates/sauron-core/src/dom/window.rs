@@ -32,16 +32,16 @@ impl Window {
                         .as_event_listener()
                         .expect("expecting a callback");
 
-                    let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
+                    let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
                         create_closure_wrap(&program, &callback);
                     window
                         .add_event_listener_with_callback(
                             event_str,
-                            closure_wrap.as_ref().unchecked_ref(),
+                            callback_wrapped.as_ref().unchecked_ref(),
                         )
                         .expect("Unable to attached event listener");
 
-                    closure_wrap.forget();
+                    callback_wrapped.forget();
                 }
             }
         })
