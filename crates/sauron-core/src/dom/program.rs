@@ -51,19 +51,6 @@ where
         program
     }
 
-    /// Create a Program with an already `Rc,RefCell` wrapped of the app.
-    /// This is used for multiple reference for the same app to have it's own rendering function
-    pub fn from_rc(app: Rc<RefCell<APP>>, root_node: &Node) -> Self {
-        let dom_updater: DomUpdater<MSG> =
-            DomUpdater::new(app.borrow().view(), root_node);
-        let program = Program {
-            app,
-            dom_updater: Rc::new(RefCell::new(dom_updater)),
-        };
-        program.init_emit();
-        program
-    }
-
     fn init_emit(&self) {
         // call the init of the component
         let cmds: Cmd<APP, MSG> = self.app.borrow().init();
