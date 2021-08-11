@@ -179,6 +179,7 @@ where
         .expect("Error in patching the dom");
 
         self.active_closures.extend(active_closures);
+
         self.current_vdom = new_vdom;
         self.set_focus_element();
     }

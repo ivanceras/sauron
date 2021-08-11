@@ -490,14 +490,17 @@ where
             replacement,
         }) => {
             let element: &Element = node.unchecked_ref();
+            // FIXME: performance bottleneck here
+            // Each element and it's descendant is created. Each call to dom to create the element
+            // has a cost of ~1ms due to bindings in wasm-bindgen, multiple call of 1000 elements can accumulate to 1s time.
+            //
+            // Possible fix: stringify and process the patch in plain javascript code.
+            // That way, all the code is done at once.
             let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
                 program,
                 replacement,
                 focused_node,
             );
-            if patch_path.node_idx == 0 {
-                *root_node = created_node.node.clone();
-            }
             if let Some(tag) = tag {
                 let target_tag = element.tag_name().to_lowercase();
                 if target_tag != **tag {
@@ -515,6 +518,13 @@ where
                 .replace_with_with_node_1(&created_node.node)
                 .expect("must replace node");
 
+            // if what we are replacing is a root node:
+            // we replace the root node here, so that's reference is updated
+            // to the newly created node
+            if patch_path.path == &[0] {
+                log::debug!("replacing root node..");
+                *root_node = created_node.node;
+            }
             Ok(created_node.closures)
         }
         Patch::RemoveNode(RemoveNode { .. }) => {

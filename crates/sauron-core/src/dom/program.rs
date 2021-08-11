@@ -142,12 +142,12 @@ where
             // update the last DOM node tree with this new view
             self.dom_updater.borrow_mut().update_dom(self, view);
             let t4 = crate::now();
+            #[cfg(feature = "with-measure")]
             log::trace!("dom update took: {}ms", t4 - t3);
 
             #[cfg(feature = "with-measure")]
             {
                 let dispatch_duration = t4 - t1;
-
                 // 60fps is 16.667 ms per frame.
                 if dispatch_duration > 16.0 {
                     log::warn!("dispatch took: {}ms", dispatch_duration);
