@@ -258,6 +258,7 @@ impl CreatedNode {
                     });
             } else {
                 match *attr.name() {
+                    // we explicitly call the `set_value` function in the html element
                     "value" => {
                         if let Some(input) =
                             element.dyn_ref::<HtmlInputElement>()
@@ -269,6 +270,7 @@ impl CreatedNode {
                             textarea.set_value(&merged_plain_values);
                         }
                     }
+                    // we explicitly call `set_checked` function on the html element
                     "checked" => {
                         if let Some(input) =
                             element.dyn_ref::<HtmlInputElement>()
@@ -301,6 +303,7 @@ impl CreatedNode {
         } else if let Some(merged_styles) =
             html::attributes::merge_styles_attributes_values(&styles)
         {
+            // set the styles
             element
                 .set_attribute(attr.name(), &merged_styles)
                 .unwrap_or_else(|_| {
