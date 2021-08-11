@@ -51,6 +51,20 @@ where
         program
     }
 
+    /// Map this program such that Program<APP,MSG> becomes Program<APP2,MSG>
+    pub fn map_program<F, APP2>(
+        &self,
+        func: F,
+        root_node: &Node,
+    ) -> Program<APP2, MSG>
+    where
+        F: Fn(&APP) -> APP2,
+        APP2: Component<MSG> + 'static,
+    {
+        let app2 = func(&*self.app.borrow());
+        Program::new(app2, root_node)
+    }
+
     fn init_emit(&self) {
         // call the init of the component
         let cmds: Cmd<APP, MSG> = self.app.borrow().init();
