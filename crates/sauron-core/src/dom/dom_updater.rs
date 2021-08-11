@@ -170,7 +170,7 @@ where
         log::debug!("patches: {:#?}", patches);
 
         let active_closures = patch(
-            Some(program),
+            program,
             &mut self.root_node,
             &mut self.active_closures,
             &mut self.focused_node,
@@ -184,14 +184,15 @@ where
         self.set_focus_element();
     }
 
-    /// Apply patches to the dom updater
-    /// Warning: only used this for debuggin purposes
+    /// Apply patches blindly to the `root_node` in this DomUpdater.
+    ///
+    /// Warning: only used this for debugging purposes
     pub fn patch_dom<DSP>(&mut self, program: &DSP, patches: Vec<Patch<MSG>>)
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
         let active_closures = patch(
-            Some(program),
+            program,
             &mut self.root_node,
             &mut self.active_closures,
             &mut self.focused_node,
@@ -200,7 +201,6 @@ where
         .expect("Error in patching the dom");
         self.active_closures.extend(active_closures);
     }
-
     /// map this DomUpdater such that the Node<MSG> will become Node<MSG2>
     pub fn map_msg<F, MSG2>(self, func: F) -> DomUpdater<MSG2>
     where

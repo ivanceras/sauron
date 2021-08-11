@@ -65,24 +65,10 @@ impl CreatedNode {
         crate::document().create_text_node(txt)
     }
 
-    /// create an element node
-    pub fn create_dom_node<DSP, MSG>(
-        program: &DSP,
-        vnode: &crate::Node<MSG>,
-        focused_node: &mut Option<Node>,
-    ) -> CreatedNode
-    where
-        MSG: 'static,
-        DSP: Clone + Dispatch<MSG> + 'static,
-    {
-        Self::create_dom_node_opt(Some(program), vnode, focused_node)
-    }
-
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
-    ///
-    pub fn create_dom_node_opt<DSP, MSG>(
-        program: Option<&DSP>,
+    pub fn create_dom_node<DSP, MSG>(
+        program: &DSP,
         vnode: &crate::Node<MSG>,
         focused_node: &mut Option<Node>,
     ) -> CreatedNode
@@ -111,7 +97,7 @@ impl CreatedNode {
     /// call the callback since browser don't allow asynchronous execution of
     /// dispatching custom events (non-native browser events)
     fn dispatch_mount_event<DSP, MSG>(
-        program: Option<&DSP>,
+        program: &DSP,
         velem: &crate::Element<MSG>,
         element: &Element,
     ) where
@@ -126,9 +112,7 @@ impl CreatedNode {
                             let msg = cb.emit(MountEvent {
                                 target_node: element.clone().unchecked_into(),
                             });
-                            if let Some(program) = program {
-                                program.dispatch(msg);
-                            }
+                            program.dispatch(msg);
                         }
                         _ => (),
                     }
@@ -140,7 +124,7 @@ impl CreatedNode {
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
     fn create_element_node<DSP, MSG>(
-        program: Option<&DSP>,
+        program: &DSP,
         velem: &crate::Element<MSG>,
         focused_node: &mut Option<Node>,
     ) -> CreatedNode
@@ -206,7 +190,7 @@ impl CreatedNode {
                     previous_node_was_text = false;
 
                     let created_child =
-                        Self::create_dom_node_opt(program, child, focused_node);
+                        Self::create_dom_node(program, child, focused_node);
                     closures.extend(created_child.closures);
 
                     element
@@ -222,7 +206,7 @@ impl CreatedNode {
 
     /// set the element attribute
     pub fn set_element_attributes<DSP, MSG>(
-        program: Option<&DSP>,
+        program: &DSP,
         closures: &mut ActiveClosure,
         element: &Element,
         attrs: &[&Attribute<MSG>],
@@ -238,7 +222,7 @@ impl CreatedNode {
 
     /// set the element attribute
     pub fn set_element_attribute<DSP, MSG>(
-        program: Option<&DSP>,
+        program: &DSP,
         closures: &mut ActiveClosure,
         element: &Element,
         attr: &Attribute<MSG>,
@@ -352,52 +336,48 @@ impl CreatedNode {
 
             closures.insert(unique_id, vec![]);
 
-            if let Some(program) = program {
-                let event_str = attr.name();
-                let current_elm: &EventTarget =
-                    element.dyn_ref().expect("unable to cast to event targe");
+            let event_str = attr.name();
+            let current_elm: &EventTarget =
+                element.dyn_ref().expect("unable to cast to event targe");
 
-                // a custom enter event which triggers the callback
-                // when the enter key is pressed
-                if *event_str == "enter" {
-                    let program_clone = program.clone();
-                    let callback_clone = callback.clone();
-                    let key_press_func: Closure<dyn FnMut(web_sys::Event)> =
-                        Closure::wrap(Box::new(
-                            move |event: web_sys::Event| {
-                                let ke: &web_sys::KeyboardEvent = event
-                                    .dyn_ref()
-                                    .expect("should be a keyboard event");
-                                if ke.key() == "Enter" {
-                                    let msg = callback_clone
-                                        .emit(Into::<Event>::into(event));
-                                    program_clone.dispatch(msg);
-                                }
-                            },
-                        ));
+            // a custom enter event which triggers the callback
+            // when the enter key is pressed
+            if *event_str == "enter" {
+                let program_clone = program.clone();
+                let callback_clone = callback.clone();
+                let key_press_func: Closure<dyn FnMut(web_sys::Event)> =
+                    Closure::wrap(Box::new(move |event: web_sys::Event| {
+                        let ke: &web_sys::KeyboardEvent = event
+                            .dyn_ref()
+                            .expect("should be a keyboard event");
+                        if ke.key() == "Enter" {
+                            let msg =
+                                callback_clone.emit(Into::<Event>::into(event));
+                            program_clone.dispatch(msg);
+                        }
+                    }));
 
-                    current_elm
-                        .add_event_listener_with_callback(
-                            "keypress",
-                            key_press_func.as_ref().unchecked_ref(),
-                        )
-                        .expect("unable to attach enter event listener");
+                current_elm
+                    .add_event_listener_with_callback(
+                        "keypress",
+                        key_press_func.as_ref().unchecked_ref(),
+                    )
+                    .expect("unable to attach enter event listener");
 
-                    key_press_func.forget();
-                } else {
-                    let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
-                        create_closure_wrap(program, &callback);
-                    current_elm
-                        .add_event_listener_with_callback(
-                            event_str,
-                            closure_wrap.as_ref().unchecked_ref(),
-                        )
-                        .expect("Unable to attached event listener");
-                    closures
-                        .get_mut(&unique_id)
-                        .expect("Unable to get closure")
-                        .push((event_str, closure_wrap));
-                }
+                key_press_func.forget();
+            } else {
+                let closure_wrap: Closure<dyn FnMut(web_sys::Event)> =
+                    create_closure_wrap(program, &callback);
+                current_elm
+                    .add_event_listener_with_callback(
+                        event_str,
+                        closure_wrap.as_ref().unchecked_ref(),
+                    )
+                    .expect("Unable to attached event listener");
+                closures
+                    .get_mut(&unique_id)
+                    .expect("Unable to get closure")
+                    .push((event_str, closure_wrap));
             }
         }
     }

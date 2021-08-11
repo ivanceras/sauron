@@ -23,7 +23,7 @@ use web_sys::{Element, Node};
 /// Note: If Program is None, it is a dumb patch, meaning
 /// there is no event listener attached or changed
 pub fn patch<DSP, MSG>(
-    program: Option<&DSP>,
+    program: &DSP,
     root_node: &mut Node,
     old_closures: &mut ActiveClosure,
     focused_node: &mut Option<Node>,
@@ -44,7 +44,7 @@ where
 
 /// patch using the tree path traversal instead of node_idx
 pub fn patch_by_traversal_path<DSP, MSG>(
-    program: Option<&DSP>,
+    program: &DSP,
     root_node: &mut Node,
     old_closures: &mut ActiveClosure,
     focused_node: &mut Option<Node>,
@@ -106,7 +106,7 @@ where
 /// Note: If Program is None, it is a dumb patch, meaning
 /// there is no event listener attached or changed
 pub fn patch_by_node_idx_traversal<DSP, MSG>(
-    program: Option<&DSP>,
+    program: &DSP,
     root_node: &mut Node,
     old_closures: &mut ActiveClosure,
     focused_node: &mut Option<Node>,
@@ -409,7 +409,7 @@ fn remove_event_listener_with_name(
 /// Note: a mutable root_node is passed here
 /// for the sole purpose of setting it when the a patch ReplaceNode at 0 is encountered.
 fn apply_patch_to_node<DSP, MSG>(
-    program: Option<&DSP>,
+    program: &DSP,
     root_node: &mut Node,
     node: &Node,
     old_closures: &mut ActiveClosure,
@@ -429,7 +429,7 @@ where
             node: for_insert,
         }) => {
             let element: &Element = node.unchecked_ref();
-            let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
+            let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
                 program,
                 &for_insert,
                 focused_node,
@@ -496,7 +496,7 @@ where
             //
             // Possible fix: stringify and process the patch in plain javascript code.
             // That way, all the code is done at once.
-            let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
+            let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
                 program,
                 replacement,
                 focused_node,
@@ -552,7 +552,7 @@ where
             let element: &Element = node.unchecked_ref();
             let mut active_closures = HashMap::new();
             for (_append_children_node_idx, new_node) in new_nodes.iter() {
-                let created_node = CreatedNode::create_dom_node_opt::<DSP, MSG>(
+                let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
                     program,
                     &new_node,
                     focused_node,
