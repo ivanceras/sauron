@@ -41,7 +41,7 @@ where
     fn view(&self) -> Node<MSG>;
 
     /// This is called after dispatching and updating the dom for the component
-    fn measurements(&mut self, measurements: Measurements) -> Cmd<Self, MSG>
+    fn measurements(&self, measurements: Measurements) -> Cmd<Self, MSG>
     where
         Self: Sized + 'static,
     {

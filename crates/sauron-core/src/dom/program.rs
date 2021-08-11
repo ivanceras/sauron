@@ -165,7 +165,7 @@ where
                 };
                 // tell the app on app performance measurements
                 let mut cmd_measurement =
-                    self.app.borrow_mut().measurements(measurements);
+                    self.app.borrow().measurements(measurements);
                 cmd_measurement.should_update_view = false;
                 cmd_measurement.emit(self);
             } else {
