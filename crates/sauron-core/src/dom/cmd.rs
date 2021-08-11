@@ -37,6 +37,15 @@ where
         }
     }
 
+    /// Map cmd such that Cmd<DPS> becoms Cmd<DSP2>
+    pub fn map_cmd<F, DSP2>(&self, _func: F) -> Cmd<DSP2>
+    where
+        DSP2: Clone + 'static,
+        F: Fn(DSP) -> DSP2 + 'static,
+    {
+        Cmd::none()
+    }
+
     /// creates a unified Cmd which batches all the other Cmds in one.
     pub fn batch(cmds: Vec<Self>) -> Self {
         let mut commands = vec![];

@@ -70,8 +70,12 @@ impl Component<Msg> for Window {
                 Cmd::none()
             }
             Msg::TabMsg(index, tab_msg) => {
-                self.tabs[index].update(tab_msg);
-                Cmd::none()
+                let cmd = self.tabs[index].update(tab_msg);
+                cmd.map_cmd(|program| {
+                    program
+                        .map_program(|_| *self, &sauron::body())
+                        .map_msg(|tmsg| Msg::TabMsg(index, tmsg))
+                })
             }
         }
     }
