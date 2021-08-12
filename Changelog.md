@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+ - Added `safe_html` to `Text` node, this indicated whether to render as text node or as innerHTML of its parent element.
+     - `ammonia` crate is used to sanitize the html text.
  - **breaking** Program agument is not optional anymore in module `apply_patches`, `dom_updater` and `created_node`.
  - Improve rustdoc on prominent functions and modules.
  - Add measurements function to Component for letting components know how much time is spent in each of major steps in dispatching and updating the DOM.
