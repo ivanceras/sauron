@@ -3,6 +3,8 @@ use crate::{Cmd, Node};
 /// Contains the time it took for the last app update call for the component
 #[derive(Clone, Copy, std::fmt::Debug, PartialEq)]
 pub struct Measurements {
+    /// The number of DOM nodes in this Component
+    pub view_node_count: usize,
     /// Time it took for dispatching the Component's update function
     pub update_dispatch_took: f64,
     /// Time it took for the Component to build it's view

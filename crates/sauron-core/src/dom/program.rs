@@ -135,6 +135,7 @@ where
 
             // a new view is created due to the app update
             let view = self.app.borrow().view();
+            let node_count = view.node_count();
             let t3 = crate::now();
 
             #[cfg(feature = "with-measure")]
@@ -159,6 +160,7 @@ where
 
             if cmd.log_measurements {
                 let measurements = Measurements {
+                    view_node_count: node_count,
                     update_dispatch_took: t2 - t1,
                     build_view_took: t3 - t2,
                     dom_update_took: t4 - t3,
