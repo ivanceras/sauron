@@ -179,10 +179,21 @@ impl CreatedNode {
                             .append_child(separator.as_ref())
                             .expect("Unable to append child");
                     }
-                    let text_node = Self::create_text_node(&txt.text);
-                    current_node
-                        .append_child(&text_node)
-                        .expect("Unable to append text node");
+
+                    if txt.safe_html {
+                        // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
+                        element
+                            .insert_adjacent_html(
+                                "beforeend",
+                                &ammonia::clean(&txt.text),
+                            )
+                            .expect("must not error");
+                    } else {
+                        let text_node = Self::create_text_node(&txt.text);
+                        current_node
+                            .append_child(&text_node)
+                            .expect("Unable to append text node");
+                    }
 
                     previous_node_was_text = true;
                 }

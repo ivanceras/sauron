@@ -1,6 +1,6 @@
 //! Provides functions and macros to build html elements
 use crate::{Attribute, Node};
-pub use mt_dom::{element, element_ns, text};
+pub use mt_dom::{element, element_ns, safe_html, text};
 
 #[macro_use]
 pub mod attributes;

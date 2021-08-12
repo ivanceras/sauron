@@ -62,7 +62,9 @@ impl<MSG> Render for Node<MSG> {
             Node::Element(element) => {
                 element.render_with_indent(buffer, indent, node_idx, compressed)
             }
-            Node::Text(text) => write!(buffer, "{}", text.text),
+            Node::Text(text) => {
+                write!(buffer, "{}", ammonia::clean(&text.text))
+            }
         }
     }
 }
