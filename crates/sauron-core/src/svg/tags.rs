@@ -92,6 +92,9 @@ macro_rules! declare_svg_tags_non_common{
         #[cfg(feature = "with-parser")]
         /// These are collection of svg tags that are non commonly used put together in this
         /// collection so as not to create import conflicts with the common tags
+        ///
+        /// Warning: These are not included in the NAMESPACED TAGS in sauron-parse
+        ///     Any attempt to use them inside of a node! macro inside svg may not work correcly
         pub const SVG_TAGS_NON_COMMON:[&'static str;6] = [$(stringify!($name),)*];
     }
 }

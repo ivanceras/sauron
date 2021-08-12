@@ -312,8 +312,6 @@ fn find_all_nodes_by_path(
 
 /// Get the "data-sauron-vdom-id" of all the desendent of this node including itself
 /// This is needed to free-up the closure that was attached ActiveClosure manually
-/// TODO: Make a test when an element is removed, all of it's descendant closure should also be
-/// removed as well.
 fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<u32> {
     let mut data_vdom_id = vec![];
 

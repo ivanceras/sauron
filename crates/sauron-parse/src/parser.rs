@@ -32,11 +32,12 @@ use std::iter::FromIterator;
 use std::{fmt, io};
 use thiserror::Error;
 
+/// Warning: This doesn't include the elements in
+/// SVG_TAGS_NON_COMMON, due to conflicts in imports
 static NAMESPACED_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
     HashSet::from_iter(
         SVG_TAGS
             .iter()
-            .chain(SVG_TAGS_NON_COMMON.iter())
             .chain(SVG_TAGS_SPECIAL.iter().map(|(_func, t)| t)),
     )
 });
@@ -120,6 +121,20 @@ pub fn match_attribute_function(key: &str) -> Option<&'static str> {
 /// if the arg tag is an SVG tag, return the svg namespace
 /// html tags don't need to have namespace while svg does, otherwise it will not be properly
 /// mounted into the DOM
+///
+/// Warning:
+///  There 6 valid svg tags that are not included here
+///  These are the following:
+///
+///    line; // since this conflicts with std::line! macro, std::line                > svg::tags::line
+///    script; // this conflicts with html::script        , html::tags::script       > svg::tags::script
+///    style; // conflics with html::attributes::style    , html::attributes::style  > svg::tags::style
+///    text; // conflicts with html::text                 , html::text               > svg::tags::text
+///    a;   // conflicts with html::a                     , html::tags::a            > svg::tags::a
+///    title;  // conflicts with html::attributes::title  , html::attributes::title  > svg::tags::title
+///
+/// FIXME: svg elements such as `line` and `text` in svg may not work correctly.
+/// Possible fix: add a flag in node macro whether it is inside an svg or not
 pub fn tag_namespace(tag: &str) -> Option<&'static str> {
     if NAMESPACED_TAGS.contains(&tag) {
         Some(SVG_NAMESPACE)
