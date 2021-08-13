@@ -16,10 +16,11 @@ pub enum FetchStatus<T> {
     Error(Option<String>),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug)]
 pub enum Msg {
     EditName(String),
-    ReceivedData(Result<Data, Response>),
+    ReceivedData(Data),
+    JsonError(serde_json::Error),
     RequestError(TypeError),
     QueryAPI,
 }
@@ -66,9 +67,11 @@ impl App {
             |v: String| {
                 let data: Result<Data, _> = serde_json::from_str(&v);
                 trace!("data: {:#?}", data);
-                data.expect("Error deserializing data")
+                match data {
+                    Ok(data) => Msg::ReceivedData(data),
+                    Err(e) => Msg::JsonError(e),
+                }
             },
-            Msg::ReceivedData,
             Msg::RequestError,
         )
     }
@@ -111,14 +114,12 @@ impl Component<Msg> for App {
                 self.data = FetchStatus::Loading;
                 cmd = self.fetch_data()
             }
-            Msg::ReceivedData(Ok(data)) => {
-                self.data = FetchStatus::Complete(data)
-            }
-            Msg::ReceivedData(Err(js_value)) => {
-                trace!("Error fetching data! {:#?}", js_value);
+            Msg::ReceivedData(data) => self.data = FetchStatus::Complete(data),
+            Msg::JsonError(err) => {
+                trace!("Error fetching data! {:#?}", err);
                 self.data = FetchStatus::Error(Some(format!(
                     "There was an error reaching the api: {:?}",
-                    js_value
+                    err
                 )));
             }
             Msg::RequestError(type_error) => {
