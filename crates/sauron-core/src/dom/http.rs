@@ -34,21 +34,6 @@ impl Http {
                 Headers,
             )| { cb.emit(response_text) };
         let err_cb = move |type_error| err_cb(type_error);
-        Self::fetch_with_response_decoder(url, text_response_decoder, err_cb)
-    }
-
-    /// API for fetching http rest request
-    pub fn fetch_with_response_decoder<APP, MSG, DECODE, ERR>(
-        url: &str,
-        text_response_decoder: DECODE,
-        err_cb: ERR,
-    ) -> Cmd<APP, MSG>
-    where
-        APP: Component<MSG> + 'static,
-        MSG: 'static,
-        DECODE: Fn((u16, String, Headers)) -> MSG + 'static,
-        ERR: Fn(TypeError) -> MSG + 'static,
-    {
         Self::fetch_with_request_and_response_decoder(
             url,
             None,
