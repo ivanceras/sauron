@@ -70,7 +70,7 @@ impl Http {
             let window =
                 web_sys::window().expect("should a refernce to window");
 
-            let promise = if let Some(ref request_init) = request_init {
+            let fetch_promise = if let Some(ref request_init) = request_init {
                 window.fetch_with_str_and_init(&url_clone, request_init)
             } else {
                 window.fetch_with_str(&url_clone)
@@ -106,7 +106,7 @@ impl Http {
                     program.dispatch(err_cb.emit(type_error));
                 });
 
-            let _ = promise.then(&cb).catch(&err_closure);
+            let _ = fetch_promise.then(&cb).catch(&err_closure);
 
             cb.forget();
             err_closure.forget();
