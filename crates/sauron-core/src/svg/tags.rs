@@ -57,7 +57,7 @@ macro_rules! declare_common_svg_tags_and_macro {
 
         #[cfg(feature = "with-parser")]
         /// These are the commonly used svg tags such as rect, circle, path, arc, ..etc.
-        pub const SVG_TAGS: [&'static str; 65] = [ $(stringify!($name),)* ];
+        pub const SVG_TAGS: [&'static str; 66] = [ $(stringify!($name),)* ];
 
     };
 }
@@ -92,10 +92,7 @@ macro_rules! declare_svg_tags_non_common{
         #[cfg(feature = "with-parser")]
         /// These are collection of svg tags that are non commonly used put together in this
         /// collection so as not to create import conflicts with the common tags
-        ///
-        /// Warning: These are not included in the NAMESPACED TAGS in sauron-parse
-        ///     Any attempt to use them inside of a node! macro inside svg may not work correcly
-        pub const SVG_TAGS_NON_COMMON:[&'static str;6] = [$(stringify!($name),)*];
+        pub const SVG_TAGS_NON_COMMON:[&'static str;5] = [$(stringify!($name),)*];
     }
 }
 
@@ -140,6 +137,7 @@ declare_common_svg_tags_and_macro! {
     hatch;
     hatchpath;
     image;
+    line;
     linearGradient;
     marker;
     mask;
@@ -176,10 +174,9 @@ declare_svg_tags_special! {
 // svg::tags::style, svg::tags::text, svg::tags::title, etc
 //
 declare_svg_tags_non_common! {
-    line; // since this conflicts with std::line! macro, std::line                > svg::tags::line
-    script; // this conflicts with html::script        , html::tags::script       > svg::tags::script
-    style; // conflics with html::attributes::style    , html::attributes::style  > svg::tags::style
-    text; // conflicts with html::text                 , html::text               > svg::tags::text
-    a;   // conflicts with html::a                     , html::tags::a            > svg::tags::a
-    title;  // conflicts with html::attributes::title  , html::attributes::title  > svg::tags::title
+    script;     //> svg::tags::script   conflicts with > html::tags::script
+    style;      //> svg::tags::style    conflicts with > html::attributes::style
+    text;       //> svg::tags::text     conflicts with > html::text
+    a;          //> svg::tags::a        conflicts with > html::tags::a
+    title;      //> svg::tags::title    conflicts with > html::attributes::title
 }

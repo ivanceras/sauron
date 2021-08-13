@@ -5,11 +5,7 @@
 #![deny(clippy::all)]
 use console_error_panic_hook;
 use js_sys::Date;
-use sauron::{
-    html::attributes::style,
-    prelude::*,
-    wasm_bindgen::JsCast,
-};
+use sauron::{html::attributes::style, prelude::*, wasm_bindgen::JsCast};
 
 #[macro_use]
 extern crate log;
@@ -69,7 +65,7 @@ impl Component<Msg> for Clock {
                     stroke_color: &'static str,
                     stroke_width_value: u32,
                     height: u32| {
-            svg::tags::line(
+            line(
                 vec![
                     x1(100),
                     y1(100),

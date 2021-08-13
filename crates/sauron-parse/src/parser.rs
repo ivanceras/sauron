@@ -32,13 +32,35 @@ use std::iter::FromIterator;
 use std::{fmt, io};
 use thiserror::Error;
 
-/// Warning: This doesn't include the elements in
-/// SVG_TAGS_NON_COMMON, due to conflicts in imports
-static NAMESPACED_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
+static ALL_SVG_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
     HashSet::from_iter(
         SVG_TAGS
             .iter()
+            .chain(SVG_TAGS_NON_COMMON.iter())
             .chain(SVG_TAGS_SPECIAL.iter().map(|(_func, t)| t)),
+    )
+});
+
+/// All of the html tags, excluding the SVG tags.
+/// This is mainly used for checking whether element should be
+/// created with namespace or not.
+///
+/// False negatives are:
+///    script; // this conflicts with html::script        , html::tags::script       > svg::tags::script
+///    style; // conflics with html::attributes::style    , html::attributes::style  > svg::tags::style
+///    text; // conflicts with html::text                 , html::text               > svg::tags::text
+///    a;   // conflicts with html::a                     , html::tags::a            > svg::tags::a
+///
+/// If used inside an svg node, svg elements scuh as text, a, style, script will not work correcly
+/// in client-side rendering.
+/// However, in server-side rendering it will work just fine.
+static ALL_HTML_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
+    HashSet::from_iter(
+        HTML_TAGS
+            .iter()
+            .chain(HTML_SC_TAGS.iter())
+            .chain(HTML_TAGS_NON_COMMON.iter())
+            .chain(HTML_TAGS_WITH_MACRO_NON_COMMON.iter()),
     )
 });
 
@@ -60,21 +82,11 @@ pub enum ParseError {
 }
 
 fn match_tag(tag: &str) -> Option<&'static str> {
-    HTML_TAGS
+    ALL_HTML_TAGS
         .iter()
-        .chain(HTML_SC_TAGS.iter())
-        .chain(HTML_TAGS_NON_COMMON.iter())
-        .chain(HTML_TAGS_WITH_MACRO_NON_COMMON.iter())
-        .chain(SVG_TAGS.iter())
-        .chain(SVG_TAGS_NON_COMMON.iter())
+        .chain(ALL_SVG_TAGS.iter())
         .find(|item| item.eq_ignore_ascii_case(&tag))
-        .map(|item| *item)
-        .or_else(|| {
-            SVG_TAGS_SPECIAL
-                .iter()
-                .find(|(_func, item)| item.eq_ignore_ascii_case(&tag))
-                .map(|(func, _item)| *func)
-        })
+        .map(|item| **item)
 }
 
 fn match_attribute(key: &str) -> Option<&'static str> {
@@ -121,23 +133,28 @@ pub fn match_attribute_function(key: &str) -> Option<&'static str> {
 /// if the arg tag is an SVG tag, return the svg namespace
 /// html tags don't need to have namespace while svg does, otherwise it will not be properly
 /// mounted into the DOM
+/// # Examples
+/// ```rust
+/// use sauron_core::prelude::*;
+/// use sauron_parse::tag_namespace;
+///     assert_eq!(None, tag_namespace("div"));
+///     assert_eq!(Some(SVG_NAMESPACE), tag_namespace("rect"));
+/// ```
 ///
-/// Warning:
-///  There 6 valid svg tags that are not included here
-///  These are the following:
-///
-///    line; // since this conflicts with std::line! macro, std::line                > svg::tags::line
-///    script; // this conflicts with html::script        , html::tags::script       > svg::tags::script
-///    style; // conflics with html::attributes::style    , html::attributes::style  > svg::tags::style
-///    text; // conflicts with html::text                 , html::text               > svg::tags::text
-///    a;   // conflicts with html::a                     , html::tags::a            > svg::tags::a
-///    title;  // conflicts with html::attributes::title  , html::attributes::title  > svg::tags::title
-///
-/// FIXME: svg elements such as `line` and `text` in svg may not work correctly.
-/// Possible fix: add a flag in node macro whether it is inside an svg or not
+/// Limitations: `script`, `style`,and `a` used inside svg will return `None`, as these are also valid html tags.
 pub fn tag_namespace(tag: &str) -> Option<&'static str> {
-    if NAMESPACED_TAGS.contains(&tag) {
-        Some(SVG_NAMESPACE)
+    let is_html = ALL_HTML_TAGS.contains(&tag);
+    let is_svg = ALL_SVG_TAGS.contains(&tag);
+    if !is_html {
+        if is_svg {
+            // we return the svg namespace only when the tag is not an html, but an svg tag
+            // False negatives:
+            // This means that script, style, a and title used inside in svg tag will not work
+            // properly, since this 3 tags are valid html tags
+            Some(SVG_NAMESPACE)
+        } else {
+            None
+        }
     } else {
         None
     }
@@ -298,5 +315,22 @@ mod tests {
         println!("node: {:#?}", node);
         let one = div(vec![], node);
         println!("one: {}", one.render_to_string());
+    }
+
+    #[test]
+    fn tag_namespace_is_none_in_html_div() {
+        assert_eq!(None, tag_namespace("div"));
+        assert_eq!(None, tag_namespace("span"));
+        assert_eq!(None, tag_namespace("a"));
+        assert_eq!(None, tag_namespace("title"));
+        assert_eq!(None, tag_namespace("style"));
+        assert_eq!(None, tag_namespace("script"));
+    }
+    #[test]
+    fn tag_namespace_in_svg_should_return_svg_namespace() {
+        assert_eq!(Some(SVG_NAMESPACE), tag_namespace("svg"));
+        assert_eq!(Some(SVG_NAMESPACE), tag_namespace("rect"));
+        assert_eq!(Some(SVG_NAMESPACE), tag_namespace("line"));
+        assert_eq!(Some(SVG_NAMESPACE), tag_namespace("circle"));
     }
 }
