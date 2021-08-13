@@ -2,16 +2,9 @@
 #![deny(clippy::all)]
 use console_error_panic_hook;
 use sauron::*;
-use wasm_bindgen::{
-    self,
-    prelude::*,
-    JsCast,
-};
+use wasm_bindgen::{self, prelude::*, JsCast};
 
-use app::{
-    App,
-    Msg,
-};
+use app::{App, Msg};
 
 #[macro_use]
 extern crate log;
@@ -35,7 +28,7 @@ impl Client {
         let root_node = document().get_element_by_id("web-app").unwrap();
 
         let app = App::new(0);
-        let program = Program::new_replace_mount(app, &root_node);
+        let program = Program::replace_mount(app, &root_node);
         let program_clone = program.clone();
         let clock: Closure<dyn Fn()> = Closure::wrap(Box::new(move || {
             program_clone.dispatch(Msg::Clock);

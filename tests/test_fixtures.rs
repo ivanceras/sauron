@@ -4,14 +4,7 @@
 //! use for doing component tests
 //!
 use log::*;
-use sauron::{
-    body,
-    html::div,
-    Cmd,
-    Component,
-    Node,
-    Program,
-};
+use sauron::{html::div, Cmd, Component, Node, Program};
 
 /// This is a simple component for the puprpose of testing
 #[derive(Copy, Clone, Debug)]
@@ -30,5 +23,5 @@ impl Component<()> for SimpleComponent {
 
 /// creates a program from SimpleComponent
 pub fn simple_program() -> Program<SimpleComponent, ()> {
-    Program::new_append_to_mount(SimpleComponent, &body())
+    Program::mount_to_body(SimpleComponent)
 }

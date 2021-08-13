@@ -86,7 +86,7 @@ where
                     self_clone.mounted = true;
                     self_clone.date = "2020-02-02".to_string();
                     self_clone.time = "22:22".to_string();
-                    Program::new_replace_mount(self_clone, &target_node);
+                    Program::replace_mount(self_clone, &target_node);
                     self.mounted = true;
                 }
                 Cmd::none()

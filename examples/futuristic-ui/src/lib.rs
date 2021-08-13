@@ -2,25 +2,14 @@
 #![recursion_limit = "256"]
 use animate_list::AnimateList;
 use frame::Frame;
-use fui_button::{
-    FuiButton,
-    Options,
-};
+use fui_button::{FuiButton, Options};
 use image::Image;
 use nav_header::NavHeader;
 use paragraph::Paragraph;
 use sauron::{
-    html::{
-        attributes::class,
-        div,
-        events::on_click,
-        text,
-    },
+    html::{attributes::class, div, events::on_click, text},
     prelude::*,
-    Cmd,
-    Component,
-    Node,
-    Program,
+    Cmd, Component, Node, Program,
 };
 use spinner::Spinner;
 use theme::Theme;
@@ -466,5 +455,5 @@ pub fn main() {
     let app_container = sauron::document()
         .get_element_by_id("app_container")
         .expect("must have the app_container in index.html");
-    Program::new_replace_mount(App::new(), &app_container);
+    Program::replace_mount(App::new(), &app_container);
 }

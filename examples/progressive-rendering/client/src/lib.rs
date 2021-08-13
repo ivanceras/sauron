@@ -196,7 +196,7 @@ pub fn main(serialized_state: String) {
             trace!("found window, will try to replace <main>");
             let document =
                 window.document().expect("should have a document on window");
-            Program::new_replace_mount(
+            Program::replace_mount(
                 app,
                 &document.query_selector_all("main").unwrap().get(0).unwrap(),
             );

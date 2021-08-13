@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+ - Rename `Program::new_replace_mount` to `Program::replace_mount`.
+    - Rename `Program::new_append_to_mount` to `Program::append_to_mount`.
  - Added `safe_html` to `Text` node, this indicated whether to render as text node or as innerHTML of its parent element.
      - `ammonia` crate is used to sanitize the html text.
  - **breaking** Program agument is not optional anymore in module `apply_patches`, `dom_updater` and `created_node`.
