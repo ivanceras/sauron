@@ -1,7 +1,6 @@
 #![deny(warnings)]
 use sauron::js_sys::TypeError;
 use sauron::prelude::*;
-use sauron::web_sys::Response;
 use serde::Deserialize;
 
 #[macro_use]
@@ -9,11 +8,12 @@ extern crate log;
 
 const DATA_URL: &'static str = "https://reqres.in/api/users";
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug)]
 pub enum Msg {
     NextPage,
     PrevPage,
-    ReceivedData(Result<Data, Response>),
+    ReceivedData(Data),
+    JsonError(serde_json::Error),
     RequestError(TypeError),
 }
 
@@ -54,12 +54,10 @@ impl App {
         let url = format!("{}?page={}", DATA_URL, self.page);
         Http::fetch_with_text_response_decoder(
             &url,
-            |v: String| {
-                let data: Result<Data, _> = serde_json::from_str(&v);
-                trace!("data: {:#?}", data);
-                data.expect("Error deserializing data")
+            |v: String| match serde_json::from_str(&v) {
+                Ok(data) => Msg::ReceivedData(data),
+                Err(err) => Msg::JsonError(err),
             },
-            Msg::ReceivedData,
             Msg::RequestError,
         )
     }
@@ -161,15 +159,15 @@ impl Component<Msg> for App {
                 }
                 self.fetch_page()
             }
-            Msg::ReceivedData(Ok(data)) => {
+            Msg::ReceivedData(data) => {
                 self.data = data;
                 Cmd::none()
             }
-            Msg::ReceivedData(Err(js_value)) => {
-                trace!("Error fetching users! {:#?}", js_value);
+            Msg::JsonError(err) => {
+                trace!("Error fetching users! {:#?}", err);
                 self.error = Some(format!(
                     "There was an error fetching the page: {:?}",
-                    js_value
+                    err
                 ));
                 Cmd::none()
             }

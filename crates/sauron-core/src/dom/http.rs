@@ -15,30 +15,24 @@ pub struct Http;
 impl Http {
     /// fetch text document from the url and decode the result with the supplied
     /// response_text_decoder function
-    pub fn fetch_with_text_response_decoder<APP, MSG, DE, CB, ERRCB, OUT>(
+    pub fn fetch_with_text_response_decoder<APP, MSG, CB, ERRCB>(
         url: &str,
-        response_text_decoder: DE,
         cb: CB,
         err_cb: ERRCB,
     ) -> Cmd<APP, MSG>
     where
-        CB: Fn(Result<OUT, Response>) -> MSG + Clone + 'static,
+        CB: Fn(String) -> MSG + Clone + 'static,
         ERRCB: Fn(TypeError) -> MSG + Clone + 'static,
-        DE: Fn(String) -> OUT + Clone + 'static,
-        OUT: 'static,
         APP: Component<MSG> + 'static,
         MSG: 'static,
     {
-        let response_text_decoder = Callback::from(response_text_decoder);
         let cb = Callback::from(cb);
-        let text_response_decoder = move |(
-            _status_code,
-            response_text,
-            _headers,
-        ): (u16, String, Headers)| {
-            let msg_value = response_text_decoder.emit(response_text);
-            cb.emit(Ok(msg_value))
-        };
+        let text_response_decoder =
+            move |(_status_code, response_text, _headers): (
+                u16,
+                String,
+                Headers,
+            )| { cb.emit(response_text) };
         let err_cb = move |type_error| err_cb(type_error);
         Self::fetch_with_response_decoder(url, text_response_decoder, err_cb)
     }
