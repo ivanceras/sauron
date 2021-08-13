@@ -75,3 +75,39 @@ fn test_inner_html_removed() {
         .into()]
     );
 }
+
+#[test]
+fn text_node_in_script_work_as_is() {
+    use sauron::prelude::*;
+    let serialized_state = "hello world";
+    let view: Node<()> = node! {
+        <html lang="en">
+            <head>
+               <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+                <script type="module">
+                    {text!("
+                              import init, {{ main }} from '/pkg/client.js';
+                              async function start() {{
+                                await init();
+                                let app_state = String.raw`{}`;
+                                main(app_state);
+                              }}
+                              start();
+                        ",serialized_state)}
+                </script>
+            </head>
+        </html>
+    };
+    let expected = r#"<html lang="en"><head><meta http-equiv="Content-type" content="text/html; charset=utf-8"/><script type="module">
+                              import init, { main } from '/pkg/client.js';
+                              async function start() {
+                                await init();
+                                let app_state = String.raw`hello world`;
+                                main(app_state);
+                              }
+                              start();
+                        </script></head></html>"#;
+    let result = view.render_to_string();
+    println!("result: {}", result);
+    assert_eq!(expected, result)
+}

@@ -183,10 +183,7 @@ impl CreatedNode {
                     if txt.safe_html {
                         // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
                         element
-                            .insert_adjacent_html(
-                                "beforeend",
-                                &ammonia::clean(&txt.text),
-                            )
+                            .insert_adjacent_html("beforeend", &txt.text)
                             .expect("must not error");
                     } else {
                         let text_node = Self::create_text_node(&txt.text);

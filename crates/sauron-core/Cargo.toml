@@ -22,7 +22,6 @@ thiserror = "1.0"
 doc-comment = "0.3"
 mt-dom = { version = "0.9", path = "../../../mt-dom" }
 serde_json = { version = "1", features = ["preserve_order"] }
-ammonia = "3.1"
 
 
 [dependencies.wasm-bindgen]
