@@ -14,37 +14,32 @@ pub struct Http;
 impl Http {
     /// fetch text document from the url and decode the result with the supplied
     /// response_text_decoder function
-    pub fn fetch_with_text_response_decoder<
-        APP,
-        MSG,
-        FetchCallback,
-        ErrorCallback,
-    >(
+    pub fn fetch_with_text_response_decoder<APP, MSG, SUCCESS, ERROR>(
         url: &str,
-        fetch_callback: FetchCallback,
-        error_callback: ErrorCallback,
+        fetch_cb: SUCCESS,
+        error_cb: ERROR,
     ) -> Cmd<APP, MSG>
     where
-        FetchCallback: Fn(String) -> MSG + Clone + 'static,
-        ErrorCallback: Fn(TypeError) -> MSG + Clone + 'static,
+        SUCCESS: Fn(String) -> MSG + Clone + 'static,
+        ERROR: Fn(TypeError) -> MSG + Clone + 'static,
         APP: Component<MSG> + 'static,
         MSG: 'static,
     {
-        let fetch_callback = Callback::from(fetch_callback);
+        let fetch_cb = Callback::from(fetch_cb);
 
-        let response_decoder_with_dispatcher =
+        let decoder_dispatcher =
             move |(response, program): (Response, Program<APP, MSG>)| {
                 let response_promise =
                     response.text().expect("must be a promise text");
 
-                let fetch_callback = fetch_callback.clone();
+                let fetch_cb = fetch_cb.clone();
 
                 let dispatcher: Closure<dyn FnMut(JsValue)> =
                     Closure::once(move |js_value: JsValue| {
                         let response_text = js_value
                             .as_string()
                             .expect("There's no string value");
-                        let msg = fetch_callback.emit(response_text);
+                        let msg = fetch_cb.emit(response_text);
                         program.dispatch(msg);
                     });
 
@@ -53,37 +48,36 @@ impl Http {
                 dispatcher.forget();
             };
 
-        let error_callback = move |type_error| error_callback(type_error);
+        let error_cb = move |type_error| error_cb(type_error);
         Self::fetch_with_request_and_response_decoder(
             url,
             None,
-            response_decoder_with_dispatcher,
-            error_callback,
+            decoder_dispatcher,
+            error_cb,
         )
     }
 
     /// API for fetching http rest request
-    /// error_callback - request failed, in cases where a network is down, server is dead, etc.
-    pub fn fetch_with_request_and_response_decoder<APP, MSG, DECODER, ERR>(
+    /// error_cb - request failed, in cases where a network is down, server is dead, etc.
+    pub fn fetch_with_request_and_response_decoder<APP, MSG, DECODER, ERROR>(
         url: &str,
         request_init: Option<RequestInit>,
-        response_decoder_with_dispatcher: DECODER,
-        error_callback: ERR,
+        decoder_dispatcher: DECODER,
+        error_cb: ERROR,
     ) -> Cmd<APP, MSG>
     where
         APP: Component<MSG> + 'static,
         MSG: 'static,
         DECODER: Fn((Response, Program<APP, MSG>)) + 'static,
-        ERR: Fn(TypeError) -> MSG + 'static,
+        ERROR: Fn(TypeError) -> MSG + 'static,
     {
         let url_clone = url.to_string();
 
-        let error_callback = Callback::from(error_callback);
-        let response_decoder_with_dispatcher_cb =
-            Callback::from(response_decoder_with_dispatcher);
+        let error_cb = Callback::from(error_cb);
+        let decoder_dispatcher_cb = Callback::from(decoder_dispatcher);
         Cmd::new(move |program| {
             let program_clone = program.clone();
-            let error_callback = error_callback.clone();
+            let error_cb = error_cb.clone();
 
             let window =
                 web_sys::window().expect("should a refernce to window");
@@ -94,27 +88,25 @@ impl Http {
                 window.fetch_with_str(&url_clone)
             };
 
-            let response_decoder_with_dispatcher_cb =
-                response_decoder_with_dispatcher_cb.clone();
-            let fetch_callback: Closure<dyn FnMut(JsValue)> =
+            let decoder_dispatcher_cb = decoder_dispatcher_cb.clone();
+            let fetch_cb_closure: Closure<dyn FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
                     let response: Response = js_value.unchecked_into();
-                    response_decoder_with_dispatcher_cb
-                        .emit((response, program_clone));
+                    decoder_dispatcher_cb.emit((response, program_clone));
                 });
 
-            let error_callback_closure: Closure<dyn FnMut(JsValue)> =
+            let error_cb_closure: Closure<dyn FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
                     let type_error: TypeError = js_value.unchecked_into();
-                    program.dispatch(error_callback.emit(type_error));
+                    program.dispatch(error_cb.emit(type_error));
                 });
 
             let _ = fetch_promise
-                .then(&fetch_callback)
-                .catch(&error_callback_closure);
+                .then(&fetch_cb_closure)
+                .catch(&error_cb_closure);
 
-            fetch_callback.forget();
-            error_callback_closure.forget();
+            fetch_cb_closure.forget();
+            error_cb_closure.forget();
         })
     }
 }
