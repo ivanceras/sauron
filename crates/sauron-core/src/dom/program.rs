@@ -87,7 +87,7 @@ where
     }
 
     /// Creates an Rc wrapped instance of Program and replace the root_node with the app view
-    pub fn new_replace_mount(app: APP, root_node: &Node) -> Self {
+    pub fn replace_mount(app: APP, root_node: &Node) -> Self {
         let program = Self::new(app, root_node);
         program.start_replace_mount();
         program.after_mounted();
@@ -95,7 +95,7 @@ where
     }
 
     ///  Instantiage an app and append the view to the root_node
-    pub fn new_append_to_mount(app: APP, root_node: &Node) -> Self {
+    pub fn append_to_mount(app: APP, root_node: &Node) -> Self {
         let program = Self::new(app, root_node);
         program.start_append_to_mount();
         program.after_mounted();
@@ -104,9 +104,13 @@ where
 
     /// Instantiate the app and then append it to the document body
     pub fn mount_to_body(app: APP) -> Self {
-        Self::new_append_to_mount(app, &crate::body())
+        Self::append_to_mount(app, &crate::body())
     }
 
+    /// Replace the body of the document with the app
+    pub fn replace_body(app: APP) -> Self {
+        Self::replace_mount(app, &crate::body())
+    }
     fn start_append_to_mount(&self) {
         self.dom_updater.borrow_mut().append_to_mount(self)
     }

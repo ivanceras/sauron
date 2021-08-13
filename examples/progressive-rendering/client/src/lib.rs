@@ -1,6 +1,5 @@
 use sauron::js_sys::TypeError;
 use sauron::prelude::*;
-use sauron::web_sys::Response;
 use serde::{Deserialize, Serialize};
 
 #[macro_use]
