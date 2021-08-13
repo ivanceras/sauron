@@ -27,14 +27,14 @@ impl Http {
     {
         let cb = Callback::from(cb);
 
-        let response_extractor =
-            move |(program, response): (Program<APP, MSG>, Response)| {
+        let response_decoder_with_dispatcher =
+            move |(response, program): (Response, Program<APP, MSG>)| {
                 let response_promise =
                     response.text().expect("must be a promise text");
 
                 let cb = cb.clone();
 
-                let decoder_and_dispatcher_cb: Closure<dyn FnMut(JsValue)> =
+                let dispatcher: Closure<dyn FnMut(JsValue)> =
                     Closure::once(move |js_value: JsValue| {
                         let response_text = js_value
                             .as_string()
@@ -43,38 +43,39 @@ impl Http {
                         program.dispatch(msg);
                     });
 
-                let _ = response_promise.then(&decoder_and_dispatcher_cb);
+                let _ = response_promise.then(&dispatcher);
 
-                decoder_and_dispatcher_cb.forget();
+                dispatcher.forget();
             };
 
         let err_cb = move |type_error| err_cb(type_error);
         Self::fetch_with_request_and_response_decoder(
             url,
             None,
-            response_extractor,
+            response_decoder_with_dispatcher,
             err_cb,
         )
     }
 
     /// API for fetching http rest request
     /// err_cb - request failed, in cases where a network is down, server is dead, etc.
-    pub fn fetch_with_request_and_response_decoder<APP, MSG, EXTRACTOR, ERR>(
+    pub fn fetch_with_request_and_response_decoder<APP, MSG, DECODER, ERR>(
         url: &str,
         request_init: Option<RequestInit>,
-        response_extractor: EXTRACTOR,
+        response_decoder_with_dispatcher: DECODER,
         err_cb: ERR,
     ) -> Cmd<APP, MSG>
     where
         APP: Component<MSG> + 'static,
         MSG: 'static,
-        EXTRACTOR: Fn((Program<APP, MSG>, Response)) + 'static,
+        DECODER: Fn((Response, Program<APP, MSG>)) + 'static,
         ERR: Fn(TypeError) -> MSG + 'static,
     {
         let url_clone = url.to_string();
 
         let err_cb = Callback::from(err_cb);
-        let response_extractor_cb = Callback::from(response_extractor);
+        let response_decoder_with_dispatcher_cb =
+            Callback::from(response_decoder_with_dispatcher);
         Cmd::new(move |program| {
             let program_clone = program.clone();
             let err_cb = err_cb.clone();
@@ -88,11 +89,13 @@ impl Http {
                 window.fetch_with_str(&url_clone)
             };
 
-            let response_extractor_cb_clone = response_extractor_cb.clone();
+            let response_decoder_with_dispatcher_cb =
+                response_decoder_with_dispatcher_cb.clone();
             let cb: Closure<dyn FnMut(JsValue)> =
                 Closure::once(move |js_value: JsValue| {
                     let response: Response = js_value.unchecked_into();
-                    response_extractor_cb_clone.emit((program_clone, response));
+                    response_decoder_with_dispatcher_cb
+                        .emit((response, program_clone));
                 });
 
             let err_closure: Closure<dyn FnMut(JsValue)> =
