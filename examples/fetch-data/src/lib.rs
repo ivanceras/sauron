@@ -7,6 +7,7 @@ use serde::Deserialize;
 extern crate log;
 
 const DATA_URL: &'static str = "https://reqres.in/api/users";
+const PER_PAGE: i32 = 4;
 
 #[derive(Debug)]
 pub enum Msg {
@@ -18,7 +19,7 @@ pub enum Msg {
 }
 
 pub struct App {
-    page: u32,
+    page: i32,
     data: Data,
     error: Option<String>,
 }
@@ -51,7 +52,8 @@ impl App {
     }
 
     fn fetch_page(&self) -> Cmd<Self, Msg> {
-        let url = format!("{}?page={}", DATA_URL, self.page);
+        let url =
+            format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
         Http::fetch_with_text_response_decoder(
             &url,
             |v: String| match serde_json::from_str(&v) {
@@ -98,7 +100,7 @@ impl Component<Msg> for App {
                             vec![
                                 class("next_page"),
                                 r#type("button"),
-                                disabled(self.page >= 2),
+                                disabled(self.page >= self.data.total_pages),
                                 value("Next Page >>"),
                                 on_click(|_| {
                                     trace!("Button is clicked");
@@ -148,10 +150,12 @@ impl Component<Msg> for App {
         trace!("App is updating from msg: {:?}", msg);
         match msg {
             Msg::NextPage => {
-                if self.page < 2 {
+                if self.page < self.data.total_pages {
                     self.page += 1;
+                    self.fetch_page()
+                } else {
+                    Cmd::none()
                 }
-                self.fetch_page()
             }
             Msg::PrevPage => {
                 if self.page > 1 {
