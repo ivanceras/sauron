@@ -3,6 +3,7 @@
 ## Unreleased
  - Make `sauron::jss!` macro to create the css without the use of indents and new lines by default.
     - This makes it easier to setup test as we don't have to deal with whitespace anymore.
+    - Added `sauron::jss_pretty!` variant to use nice indents and space on the generated css.
  - **breaking** Improve the ergonomic to `Http` api. It is now easier to receive and deserialize text response.
  - Add a code fence processor plugin for `sauron-markdown`. Developers can hook code to create a custom element out of code blocks in markdown parser.
  - Rename `Program::new_replace_mount` to `Program::replace_mount`.
