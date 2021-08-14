@@ -3,29 +3,37 @@
 //!
 use crate::html::attributes;
 
-fn make_indent(n: usize) -> String {
-    "    ".repeat(n)
+fn make_indent(n: usize, use_indents: bool) -> String {
+    if use_indents {
+        "    ".repeat(n)
+    } else {
+        String::from("")
+    }
 }
 fn process_css_map(
     indent: usize,
     namespace: Option<&str>,
     css_map: &serde_json::Map<String, serde_json::Value>,
+    use_indents: bool,
 ) -> String {
     let mut buffer = String::new();
     for (i, (classes, style_properties)) in css_map.iter().enumerate() {
-        if i > 0 {
+        if i > 0 && use_indents {
             buffer += "\n";
         }
         if let Some(namespace) = &namespace {
             buffer += &format!(
                 "{}{}",
-                make_indent(indent),
+                make_indent(indent, use_indents),
                 selector_namespaced(namespace.to_string(), classes)
             );
         } else {
-            buffer += &format!("{}{}", make_indent(indent), classes);
+            buffer +=
+                &format!("{}{}", make_indent(indent, use_indents), classes);
         }
-        buffer += " {\n";
+        if use_indents {
+            buffer += " {\n";
+        }
         if let Some(style_properties) = style_properties.as_object() {
             for (prop, value) in style_properties {
                 if value.is_object() {
@@ -33,8 +41,11 @@ fn process_css_map(
                         indent + 1,
                         namespace,
                         style_properties,
+                        use_indents,
                     );
-                    buffer += "\n";
+                    if use_indents {
+                        buffer += "\n";
+                    }
                 } else {
                     let value_str = match value {
                         serde_json::Value::String(s) => s.to_string(),
@@ -47,15 +58,18 @@ fn process_css_map(
                         }
                     };
                     buffer += &format!(
-                        "{}{}: {};\n",
-                        make_indent(indent + 1),
+                        "{}{}: {};",
+                        make_indent(indent + 1, use_indents),
                         prop,
                         value_str
                     );
+                    if use_indents {
+                        buffer += "\n";
+                    }
                 }
             }
         }
-        buffer += &make_indent(indent);
+        buffer += &make_indent(indent, use_indents);
         buffer += "}";
     }
     buffer
@@ -66,10 +80,11 @@ fn process_css_map(
 pub fn process_css(
     namespace: Option<&str>,
     json: &serde_json::Value,
+    use_indents: bool,
 ) -> String {
     let mut buffer = String::new();
     if let Some(css) = json.as_object() {
-        buffer += &process_css_map(0, namespace, &css);
+        buffer += &process_css_map(0, namespace, &css, use_indents);
     }
     buffer
 }
@@ -79,8 +94,8 @@ pub fn process_css(
 macro_rules! jss_ns {
     ($namespace: tt, $($tokens:tt)+) => {
         {
-            let json = serde_json::json!($($tokens)*);
-            $crate::jss::process_css(Some($namespace), &json)
+            let json = $crate::serde_json::json!($($tokens)*);
+            $crate::jss::process_css(Some($namespace), &json, false)
         }
     };
 }
@@ -90,8 +105,8 @@ macro_rules! jss_ns {
 macro_rules! jss {
     ($($tokens:tt)+) => {
         {
-            let json = serde_json::json!($($tokens)*);
-            $crate::jss::process_css(None, &json)
+            let json = $crate::serde_json::json!($($tokens)*);
+            $crate::jss::process_css(None, &json, false)
         }
     };
 
@@ -219,10 +234,7 @@ where
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{
-        html::attributes::class,
-        Attribute,
-    };
+    use crate::{html::attributes::class, Attribute};
 
     #[test]
     fn test_jss() {

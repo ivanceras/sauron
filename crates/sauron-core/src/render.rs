@@ -48,6 +48,13 @@ pub trait Render {
         self.render_compressed(&mut buffer).expect("must render");
         buffer
     }
+
+    /// render to string with nice indention
+    fn render_to_string_pretty(&self) -> String {
+        let mut buffer = String::new();
+        self.render(&mut buffer).expect("must render");
+        buffer
+    }
 }
 
 impl<MSG> Render for Node<MSG> {
