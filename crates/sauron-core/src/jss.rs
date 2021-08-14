@@ -32,7 +32,11 @@ fn process_css_map(
                 &format!("{}{}", make_indent(indent, use_indents), classes);
         }
         if use_indents {
-            buffer += " {\n";
+            buffer += " ";
+        }
+        buffer += "{";
+        if use_indents {
+            buffer += "\n";
         }
         if let Some(style_properties) = style_properties.as_object() {
             for (prop, value) in style_properties {
@@ -57,12 +61,21 @@ fn process_css_map(
                         )
                         }
                     };
-                    buffer += &format!(
-                        "{}{}: {};",
-                        make_indent(indent + 1, use_indents),
-                        prop,
-                        value_str
-                    );
+                    if use_indents {
+                        buffer += &format!(
+                            "{}{}: {};",
+                            make_indent(indent + 1, use_indents),
+                            prop,
+                            value_str
+                        );
+                    } else {
+                        buffer += &format!(
+                            "{}{}:{};",
+                            make_indent(indent + 1, use_indents),
+                            prop,
+                            value_str
+                        );
+                    }
                     if use_indents {
                         buffer += "\n";
                     }
@@ -100,6 +113,17 @@ macro_rules! jss_ns {
     };
 }
 
+/// create css using jss with namespace macro with correct indentions
+#[macro_export]
+macro_rules! jss_ns_pretty {
+    ($namespace: tt, $($tokens:tt)+) => {
+        {
+            let json = $crate::serde_json::json!($($tokens)*);
+            $crate::jss::process_css(Some($namespace), &json, true)
+        }
+    };
+}
+
 /// jss macro
 #[macro_export]
 macro_rules! jss {
@@ -107,6 +131,18 @@ macro_rules! jss {
         {
             let json = $crate::serde_json::json!($($tokens)*);
             $crate::jss::process_css(None, &json, false)
+        }
+    };
+
+}
+
+/// create css using jss macro with nice indentions
+#[macro_export]
+macro_rules! jss_pretty {
+    ($($tokens:tt)+) => {
+        {
+            let json = $crate::serde_json::json!($($tokens)*);
+            $crate::jss::process_css(None, &json, true)
         }
     };
 
@@ -249,6 +285,45 @@ mod test {
             },
         });
 
+        let expected = r#".layer{background-color:red;border:1px solid green;}.hide .layer{opacity:0;}"#;
+        println!("{}", css);
+        assert_eq!(expected, css);
+    }
+
+    #[test]
+    fn test_jss_ns() {
+        let css = jss_ns!("frame",{
+            ".": {
+                "display": "block",
+            },
+
+            ".layer": {
+                "background-color": "red",
+                "border": "1px solid green",
+            },
+
+            ".hide .layer": {
+                "opacity": 0,
+            },
+        });
+
+        let expected = r#".frame{display:block;}.frame__layer{background-color:red;border:1px solid green;}.frame__hide .frame__layer{opacity:0;}"#;
+        println!("{}", css);
+        assert_eq!(expected, css);
+    }
+    #[test]
+    fn test_jss_pretty() {
+        let css = jss_pretty!({
+            ".layer": {
+                "background-color": "red",
+                "border": "1px solid green",
+            },
+
+            ".hide .layer": {
+                "opacity": 0,
+            },
+        });
+
         let expected = r#".layer {
     background-color: red;
     border: 1px solid green;
@@ -261,8 +336,8 @@ mod test {
     }
 
     #[test]
-    fn test_jss_ns() {
-        let css = jss_ns!("frame",{
+    fn test_jss_ns_pretty() {
+        let css = jss_ns_pretty!("frame",{
             ".": {
                 "display": "block",
             },
@@ -314,21 +389,7 @@ mod test {
             },
         });
 
-        let expected = r#".frame {
-    display: block;
-}
-.frame__layer {
-    background-color: red;
-    border: 1px solid green;
-}
-@media screen and (max-width: 800px) {
-    .frame__layer {
-        width: 100%;
-    }
-}
-.frame__hide .frame__layer {
-    opacity: 0;
-}"#;
+        let expected = r#".frame{display:block;}.frame__layer{background-color:red;border:1px solid green;}@media screen and (max-width: 800px){.frame__layer{width:100%;}}.frame__hide .frame__layer{opacity:0;}"#;
         println!("{}", css);
         assert_eq!(expected, css);
     }
