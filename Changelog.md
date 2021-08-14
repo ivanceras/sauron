@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+ - Modify `Window::scroll_to_top` to return it as wrapped in `Cmd` to be used after an `update` call in a `Component`
+ - Add `popstate` to `events` module.
  - Make `sauron::jss!` macro to create the css without the use of indents and new lines by default.
     - This makes it easier to setup test as we don't have to deal with whitespace anymore.
     - Added `sauron::jss_pretty!` variant to use nice indents and space on the generated css.

@@ -422,8 +422,8 @@ where
 
     match patch {
         Patch::InsertNode(InsertNode {
-            tag: _,
-            patch_path: _,
+            tag,
+            patch_path,
             node: for_insert,
         }) => {
             let element: &Element = node.unchecked_ref();
@@ -433,7 +433,7 @@ where
                 focused_node,
             );
             let parent_node =
-                element.parent_node().expect("must have a parent node");
+                element.parent_node().unwrap_or_else(||panic!("must have a parent node, tag: {:?}, path: {:?}, for patch: {:#?}", tag, patch_path, for_insert));
             parent_node
                 .insert_before(&created_node.node, Some(element))
                 .expect("must remove target node");
