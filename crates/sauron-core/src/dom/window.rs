@@ -124,11 +124,17 @@ impl Window {
     }
 
     /// scroll the browser to the top of the document
-    pub fn scroll_to_top() {
-        let mut options = ScrollToOptions::new();
-        options.top(0.0);
-        options.left(0.0);
-        crate::window().scroll_to_with_scroll_to_options(&options);
+    pub fn scroll_to_top<APP, MSG>() -> Cmd<APP, MSG>
+    where
+        APP: 'static,
+        MSG: 'static,
+    {
+        Cmd::new(|_program| {
+            let mut options = ScrollToOptions::new();
+            options.top(0.0);
+            options.left(0.0);
+            crate::window().scroll_to_with_scroll_to_options(&options);
+        })
     }
 
     /// set the browser location hash

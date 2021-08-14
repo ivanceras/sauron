@@ -143,7 +143,7 @@ macro_rules! declare_html_events{
         }
 
         /// html events
-        pub const HTML_EVENTS: [&'static str; 32] = [$(stringify!($event),)*];
+        pub const HTML_EVENTS: [&'static str; 33] = [$(stringify!($event),)*];
     }
 }
 
@@ -256,6 +256,7 @@ declare_html_events! {
     on_mouseup => mouseup => to_mouse_event => MouseEvent;
     on_pointerlockchange => pointerlockchange => to_mouse_event => MouseEvent;
     on_pointerlockerror => pointerlockerror => to_mouse_event => MouseEvent;
+    on_popstate => popstate => to_webevent => web_sys::Event;
     on_select => select => to_webevent => web_sys::Event;
     on_wheel => wheel => to_mouse_event => MouseEvent;
     on_doubleclick => dblclick => to_mouse_event => MouseEvent;
