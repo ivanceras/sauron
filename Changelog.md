@@ -1,9 +1,14 @@
 # Changelog
 
 ## Unreleased
+ - Make `sauron::jss!` macro to create the css without the use of indents and new lines by default.
+    - This makes it easier to setup test as we don't have to deal with whitespace anymore.
+ - **breaking** Improve the ergonomic to `Http` api. It is now easier to receive and deserialize text response.
+ - Add a code fence processor plugin for `sauron-markdown`. Developers can hook code to create a custom element out of code blocks in markdown parser.
  - Rename `Program::new_replace_mount` to `Program::replace_mount`.
     - Rename `Program::new_append_to_mount` to `Program::append_to_mount`.
- - Added `safe_html` to `Text` node, this indicated whether to render as text node or as innerHTML of its parent element.
+    - `Program` is not optional anymore when passed to functions in modules such as `apply_patches`, `dom_updater` and `created_node`
+ - Added `safe_html` to `Text` node, this indicated whether to render as text node or as `innerHTML` of its parent element.
      - `ammonia` crate is used to sanitize the html text.
  - **breaking** Program agument is not optional anymore in module `apply_patches`, `dom_updater` and `created_node`.
  - Improve rustdoc on prominent functions and modules.
@@ -11,7 +16,7 @@
     - Add a field `log_measurement` to `Cmd` which tells the `Program` wheter to log and call measurements.
  - Add performance optimization for `sauron-parse` crate lookup on `tag_namespace` and `self_closing_tags` by putting it in a once_cell Lazy HashSet
  - **breaking** Rename `html_element_sc` to `html_element_self_closing`.
- - **breaking** Remove the use of underscore_ to html/svg tags and attributes which are also rust identifier to use the raw r#ident.
+ - **breaking** Remove the use of underscore_ to html/svg tags such as `type_`,etc and attributes which are also rust identifier to use the raw r#ident.
     - This includes `type` `for` `async`.
 
 ## 0.39.0
