@@ -18,6 +18,14 @@ pub fn markdown<MSG>(md: &str) -> Node<MSG> {
     MarkdownParser::from_md(md).node()
 }
 
+/// convert markdown text to Node with a code_fence_processor plugin
+pub fn markdown_with_code_fence_processor<MSG>(
+    md: &str,
+    code_fence_processor: fn(Option<&str>, &str) -> Node<MSG>,
+) -> Node<MSG> {
+    MarkdownParser::with_code_fence_processor(md, code_fence_processor).node()
+}
+
 /// parse a markdown string and convert it to Vec<Node>
 pub fn render_markdown<MSG>(md: &str) -> Vec<Node<MSG>> {
     MarkdownParser::from_md(md).nodes()
@@ -37,18 +45,19 @@ pub(crate) struct MarkdownParser<MSG> {
     pub(crate) title: Option<String>,
     /// indicates if the text is inside a code block
     in_code_block: bool,
-    /// current code fence
+    /// current code fence, ie: it will be `js` if code block is: ```js
     code_fence: Option<String>,
     /// if in a table head , this will convert cell into either th or td
     in_table_head: bool,
     /// a flag if the previous event is inline html or not
     is_prev_inline_html: bool,
+    /// this a function where it is run when a code fence block is detected
+    code_fence_plugin: Option<fn(Option<&str>, &str) -> Node<MSG>>,
 }
 
-impl<MSG> MarkdownParser<MSG> {
-    /// create a markdown parser from a markdown content and the link_lookup replacement
-    pub(crate) fn from_md(md: &str) -> Self {
-        let mut md_parser = MarkdownParser {
+impl<MSG> Default for MarkdownParser<MSG> {
+    fn default() -> Self {
+        MarkdownParser {
             elems: vec![],
             spine: vec![],
             numbers: HashMap::new(),
@@ -58,7 +67,25 @@ impl<MSG> MarkdownParser<MSG> {
             code_fence: None,
             in_table_head: false,
             is_prev_inline_html: false,
-        };
+            code_fence_plugin: None,
+        }
+    }
+}
+
+impl<MSG> MarkdownParser<MSG> {
+    /// create a markdown parser from a markdown content and the link_lookup replacement
+    pub(crate) fn from_md(md: &str) -> Self {
+        let mut md_parser = Self::default();
+        md_parser.do_parse(md);
+        md_parser
+    }
+
+    pub(crate) fn with_code_fence_processor(
+        md: &str,
+        code_fence_processor: fn(Option<&str>, &str) -> Node<MSG>,
+    ) -> Self {
+        let mut md_parser = Self::default();
+        md_parser.code_fence_plugin = Some(code_fence_processor);
         md_parser.do_parse(md);
         md_parser
     }
@@ -128,7 +155,21 @@ impl<MSG> MarkdownParser<MSG> {
                                     empty_attr()
                                 },
                             ],
-                            vec![text(content)],
+                            vec![if let Some(code_fence_plugin) =
+                                self.code_fence_plugin
+                            {
+                                code_fence_plugin(
+                                    match self.code_fence {
+                                        Some(ref code_fence) => {
+                                            Some(code_fence)
+                                        }
+                                        None => None,
+                                    },
+                                    &content,
+                                )
+                            } else {
+                                text(content)
+                            }],
                         ));
                     } else {
                         let content = ammonia::clean(&*content);
@@ -559,5 +600,42 @@ look like:
         view.render(&mut buffer).unwrap();
         println!("view: {}", buffer);
         assert_eq!(expected, buffer);
+    }
+
+    #[test]
+    fn test_md_with_svgbob_processor() {
+        let md = r#"
+This is <b>Markdown</b> with some <i>funky</i> __examples__.
+```bob
+      .------.       +-------+
+      | bob  | *---> | alice |
+      `------'       +-------+
+```
+        "#;
+        let node: Node<()> =
+            markdown_with_code_fence_processor(md, |code_fence, code| {
+                if let Some(code_fence) = code_fence {
+                    match code_fence {
+                        "bob" => {
+                            println!("processing svgbob...");
+                            let svg = svgbob::to_svg_string_compressed(code);
+                            safe_html(svg)
+                        }
+                        _ => {
+                            println!("unrecognized code fence: {}", code_fence);
+                            text(code)
+                        }
+                    }
+                } else {
+                    println!("no code fence");
+                    text(code)
+                }
+            });
+
+        let html = node.render_to_string();
+        println!("html: {}", html);
+        dbg!(&html);
+        let expected = r#"<p><p>This is Markdown<b></b> with some funky<i></i> <strong>examples</strong>.</p><pre><code class="bob"><svg xmlns="http://www.w3.org/2000/svg" width="248" height="64"><style>line, path, circle,rect,polygonstroke: black;stroke-width: 2;stroke-opacity: 1;fill-opacity: 1;stroke-linecap: round;stroke-linejoin: miter;}textfont-family: monospace;font-size: 14px;}rect.backdropstroke: none;fill: white;}.brokenstroke-dasharray: 8;}.filledfill: black;}.bg_filledfill: white;}.nofillfill: white;}.end_marked_arrowmarker-end: url(#arrow);}.start_marked_arrowmarker-start: url(#arrow);}.end_marked_diamondmarker-end: url(#diamond);}.start_marked_diamondmarker-start: url(#diamond);}.end_marked_circlemarker-end: url(#circle);}.start_marked_circlemarker-start: url(#circle);}.end_marked_open_circlemarker-end: url(#open_circle);}.start_marked_open_circlemarker-start: url(#open_circle);}.end_marked_big_open_circlemarker-end: url(#big_open_circle);}.start_marked_big_open_circlemarker-start: url(#big_open_circle);}</style><defs><marker id="arrow" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 0,4 4,2 0,0"></polygon></marker><marker id="diamond" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,2 2,0 4,2 2,4 0,2"></polygon></marker><marker id="circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><circle cx="4" cy="4" r="2" class="filled"></circle></marker><marker id="open_circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><circle cx="4" cy="4" r="2" class="bg_filled"></circle></marker><marker id="big_open_circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><circle cx="4" cy="4" r="3" class="bg_filled"></circle></marker></defs><rect class="backdrop" x="0" y="0" width="248" height="64"></rect><rect x="52" y="8" width="56" height="32" class="solid nofill" rx="4"></rect><text x="66" y="28" >bob</text><rect x="172" y="8" width="64" height="32" class="solid nofill" rx="0"></rect><text x="186" y="28" >alice</text><circle cx="124" cy="24" r="3" class="filled"></circle><g><line x1="128" y1="24" x2="152" y2="24" class="solid"></line><polygon points="152,20 160,24 152,28" class="filled"></polygon></g></svg></code></pre></p>"#;
+        assert_eq!(expected, html);
     }
 }

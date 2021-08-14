@@ -9,5 +9,7 @@
     unused_import_braces
 )]
 //! a library to parse markdown and convert it into sauron virtual node
-pub use markdown::{markdown, render_markdown};
+pub use markdown::{
+    markdown, markdown_with_code_fence_processor, render_markdown,
+};
 mod markdown;

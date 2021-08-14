@@ -17,6 +17,9 @@ sauron-parse = { version = "0.39", path = "../sauron-parse", optional = true }
 pulldown-cmark = { version = "0.8"}
 ammonia = "3"
 
+[dev-dependencies]
+svgbob = { path = "../../../svgbob/svgbob" }
+
 [features]
 default = ["include-html"]
 include-html = ["sauron-parse"]
