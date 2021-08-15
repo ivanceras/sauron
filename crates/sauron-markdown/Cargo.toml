@@ -18,7 +18,7 @@ pulldown-cmark = { version = "0.8"}
 ammonia = "3"
 
 [dev-dependencies]
-svgbob = "0.5"
+svgbob = "0.5.4"
 sauron = {path = "../../", features = ["with-markdown"] }
 
 [features]

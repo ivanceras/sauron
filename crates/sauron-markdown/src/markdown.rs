@@ -654,52 +654,51 @@ look like:
         assert_eq!(expected, buffer);
     }
 
-    /*
-        #[test]
-        fn test_md_with_svgbob_processor() {
-            let md = r#"
+    #[test]
+    fn test_md_with_svgbob_processor() {
+        let md = r#"
     This is <b>Markdown</b> with some <i>funky</i> __examples__.
-    ```bob
-          .------.       +-------+
-          | bob  | *---> | alice |
-          `------'       +-------+
-    ```
+```bob
+      .------.       +-------+
+      | bob  | *---> | alice |
+      `------'       +-------+
+```
             "#;
-            let node: Node<()> = markdown_with_plugins(
-                md,
-                Plugins {
-                    code_fence_processor: Some(|code_fence, code| {
-                        if let Some(code_fence) = code_fence {
-                            match code_fence {
-                                "bob" => {
-                                    println!("processing svgbob...");
-                                    let svg =
-                                        svgbob::to_svg_string_compressed(code);
-                                    Some(safe_html(svg))
-                                }
-                                _ => {
-                                    println!(
-                                        "unrecognized code fence: {}",
-                                        code_fence
-                                    );
-                                    None
-                                }
+        let node: Node<()> = markdown_with_plugins(
+            md,
+            Plugins {
+                code_fence_processor: Some(|code_fence, code| {
+                    if let Some(code_fence) = code_fence {
+                        match code_fence {
+                            "bob" => {
+                                println!("processing svgbob...");
+                                let svg =
+                                    svgbob::to_svg_string_compressed(code);
+                                Some(safe_html(svg))
                             }
-                        } else {
-                            println!("no code fence");
-                            None
+                            _ => {
+                                println!(
+                                    "unrecognized code fence: {}",
+                                    code_fence
+                                );
+                                None
+                            }
                         }
-                    }),
+                    } else {
+                        println!("no code fence");
+                        None
+                    }
+                }),
 
-                    ..Default::default()
-                },
-            );
+                ..Default::default()
+            },
+        );
 
-            let html = node.render_to_string();
-            println!("html: {}", html);
-            dbg!(&html);
-            let expected = r#"<p><p>This is Markdown<b></b> with some funky<i></i> <strong>examples</strong>.</p><pre><code class="bob"><svg xmlns="http://www.w3.org/2000/svg" width="248" height="64"><style>line, path, circle,rect,polygon{stroke:black;stroke-width:2;stroke-opacity:1;fill-opacity:1;stroke-linecap:round;stroke-linejoin:miter;}text{font-family:monospace;font-size:14px;}rect.backdrop{stroke:none;fill:white;}.broken{stroke-dasharray:8;}.filled{fill:black;}.bg_filled{fill:white;}.nofill{fill:white;}.end_marked_arrow{marker-end:url(#arrow);}.start_marked_arrow{marker-start:url(#arrow);}.end_marked_diamond{marker-end:url(#diamond);}.start_marked_diamond{marker-start:url(#diamond);}.end_marked_circle{marker-end:url(#circle);}.start_marked_circle{marker-start:url(#circle);}.end_marked_open_circle{marker-end:url(#open_circle);}.start_marked_open_circle{marker-start:url(#open_circle);}.end_marked_big_open_circle{marker-end:url(#big_open_circle);}.start_marked_big_open_circle{marker-start:url(#big_open_circle);}</style><defs><marker id="arrow" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 0,4 4,2 0,0"></polygon></marker><marker id="diamond" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,2 2,0 4,2 2,4 0,2"></polygon></marker><marker id="circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><circle cx="4" cy="4" r="2" class="filled"></circle></marker><marker id="open_circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><circle cx="4" cy="4" r="2" class="bg_filled"></circle></marker><marker id="big_open_circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><circle cx="4" cy="4" r="3" class="bg_filled"></circle></marker></defs><rect class="backdrop" x="0" y="0" width="248" height="64"></rect><rect x="52" y="8" width="56" height="32" class="solid nofill" rx="4"></rect><text x="66" y="28" >bob</text><rect x="172" y="8" width="64" height="32" class="solid nofill" rx="0"></rect><text x="186" y="28" >alice</text><circle cx="124" cy="24" r="3" class="filled"></circle><g><line x1="128" y1="24" x2="152" y2="24" class="solid"></line><polygon points="152,20 160,24 152,28" class="filled"></polygon></g></svg></code></pre></p>"#;
-            assert_eq!(expected, html);
-        }
-    */
+        let html = node.render_to_string();
+        println!("html: {}", html);
+        dbg!(&html);
+        let expected = r#"<p><pre><code>This is <b>Markdown</b> with some <i>funky</i> __examples__.
+</code></pre><pre><code class="bob"><svg xmlns="http://www.w3.org/2000/svg" width="248" height="64"><style>line, path, circle,rect,polygon{stroke:black;stroke-width:2;stroke-opacity:1;fill-opacity:1;stroke-linecap:round;stroke-linejoin:miter;}text{font-family:monospace;font-size:14px;}rect.backdrop{stroke:none;fill:white;}.broken{stroke-dasharray:8;}.filled{fill:black;}.bg_filled{fill:white;}.nofill{fill:white;}.end_marked_arrow{marker-end:url(#arrow);}.start_marked_arrow{marker-start:url(#arrow);}.end_marked_diamond{marker-end:url(#diamond);}.start_marked_diamond{marker-start:url(#diamond);}.end_marked_circle{marker-end:url(#circle);}.start_marked_circle{marker-start:url(#circle);}.end_marked_open_circle{marker-end:url(#open_circle);}.start_marked_open_circle{marker-start:url(#open_circle);}.end_marked_big_open_circle{marker-end:url(#big_open_circle);}.start_marked_big_open_circle{marker-start:url(#big_open_circle);}</style><defs><marker id="arrow" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 0,4 4,2 0,0"></polygon></marker><marker id="diamond" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,2 2,0 4,2 2,4 0,2"></polygon></marker><marker id="circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><circle cx="4" cy="4" r="2" class="filled"></circle></marker><marker id="open_circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><circle cx="4" cy="4" r="2" class="bg_filled"></circle></marker><marker id="big_open_circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><circle cx="4" cy="4" r="3" class="bg_filled"></circle></marker></defs><rect class="backdrop" x="0" y="0" width="248" height="64"></rect><rect x="52" y="8" width="56" height="32" class="solid nofill" rx="4"></rect><text x="66" y="28" >bob</text><rect x="172" y="8" width="64" height="32" class="solid nofill" rx="0"></rect><text x="186" y="28" >alice</text><circle cx="124" cy="24" r="3" class="filled"></circle><g><line x1="128" y1="24" x2="152" y2="24" class="solid"></line><polygon points="152,20 160,24 152,28" class="filled"></polygon></g></svg></code></pre></p>"#;
+        assert_eq!(expected, html);
+    }
 }
