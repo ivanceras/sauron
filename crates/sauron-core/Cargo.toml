@@ -84,7 +84,7 @@ with-dom = ["wasm-bindgen", "js-sys", "web-sys"]
 wasm-bindgen-test = "0.3"
 console_error_panic_hook = "0.1"
 console_log = "0.2"
-sauron = "0.40"
+sauron = { path = "../../" }
 
 [dev-dependencies.web-sys]
 version = "0.3"
