@@ -26,14 +26,6 @@ pub fn markdown_with_plugins<MSG>(
     MarkdownParser::with_plugins(md, plugins).node()
 }
 
-/// convert markdown text to Node with a code_fence_processor plugin
-pub fn markdown_with_code_fence_processor<MSG>(
-    md: &str,
-    code_fence_processor: fn(Option<&str>, &str) -> Option<Node<MSG>>,
-) -> Node<MSG> {
-    MarkdownParser::with_code_fence_processor(md, code_fence_processor).node()
-}
-
 /// parse a markdown string and convert it to Vec<Node>
 pub fn render_markdown<MSG>(md: &str) -> Vec<Node<MSG>> {
     MarkdownParser::from_md(md).nodes()
@@ -113,16 +105,6 @@ impl<MSG> MarkdownParser<MSG> {
     pub(crate) fn with_plugins(md: &str, plugins: Plugins<MSG>) -> Self {
         let mut md_parser = Self::default();
         md_parser.plugins = plugins;
-        md_parser.do_parse(md);
-        md_parser
-    }
-
-    pub(crate) fn with_code_fence_processor(
-        md: &str,
-        code_fence_processor: fn(Option<&str>, &str) -> Option<Node<MSG>>,
-    ) -> Self {
-        let mut md_parser = Self::default();
-        md_parser.plugins.code_fence_processor = Some(code_fence_processor);
         md_parser.do_parse(md);
         md_parser
     }
@@ -682,25 +664,35 @@ This is <b>Markdown</b> with some <i>funky</i> __examples__.
       `------'       +-------+
 ```
         "#;
-        let node: Node<()> =
-            markdown_with_code_fence_processor(md, |code_fence, code| {
-                if let Some(code_fence) = code_fence {
-                    match code_fence {
-                        "bob" => {
-                            println!("processing svgbob...");
-                            let svg = svgbob::to_svg_string_compressed(code);
-                            Some(safe_html(svg))
+        let node: Node<()> = markdown_with_plugins(
+            md,
+            Plugins {
+                code_fence_processor: Some(|code_fence, code| {
+                    if let Some(code_fence) = code_fence {
+                        match code_fence {
+                            "bob" => {
+                                println!("processing svgbob...");
+                                let svg =
+                                    svgbob::to_svg_string_compressed(code);
+                                Some(safe_html(svg))
+                            }
+                            _ => {
+                                println!(
+                                    "unrecognized code fence: {}",
+                                    code_fence
+                                );
+                                None
+                            }
                         }
-                        _ => {
-                            println!("unrecognized code fence: {}", code_fence);
-                            None
-                        }
+                    } else {
+                        println!("no code fence");
+                        None
                     }
-                } else {
-                    println!("no code fence");
-                    None
-                }
-            });
+                }),
+
+                ..Default::default()
+            },
+        );
 
         let html = node.render_to_string();
         println!("html: {}", html);
