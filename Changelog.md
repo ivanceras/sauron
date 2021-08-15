@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.40.0
  - Improve `sauron-node-macro` performance by resolving the values of `namespace` and `self_closing` tags at compile time, rather than at runtime.
  - Add plugin capability of `sauron-markdown` to easily hook user define functions such as code-highlighting.
  - Modify `Window::scroll_to_top` to return it as wrapped in `Cmd` to be used after an `update` call in a `Component`

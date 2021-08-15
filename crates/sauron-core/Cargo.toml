@@ -1,6 +1,6 @@
 [package]
 name = "sauron-core"
-version = "0.39.0"
+version = "0.40.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -84,7 +84,7 @@ with-dom = ["wasm-bindgen", "js-sys", "web-sys"]
 wasm-bindgen-test = "0.3"
 console_error_panic_hook = "0.1"
 console_log = "0.2"
-sauron = "0.39"
+sauron = "0.40"
 
 [dev-dependencies.web-sys]
 version = "0.3"
