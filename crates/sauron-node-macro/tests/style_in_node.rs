@@ -19,3 +19,33 @@ fn must_compile() {
     let expected = div(vec![id("hello")], vec![text("Hello world")]);
     assert_eq!(expected, result);
 }
+
+#[test]
+fn must_correctly_create_self_closing_tag() {
+    let result: Node<()> = node! {
+        <img src="hello.jpg"></img>
+    };
+
+    let expected = r#"<img src="hello.jpg"/>"#;
+    assert_eq!(expected, result.render_to_string());
+}
+
+#[test]
+fn must_correctly_create_non_self_closing_tag() {
+    let result: Node<()> = node! {
+        <div class="hello"></div>
+    };
+
+    let expected = r#"<div class="hello"></div>"#;
+    assert_eq!(expected, result.render_to_string());
+}
+
+#[test]
+fn must_correctly_create_tags_with_namespace() {
+    let result: Node<()> = node! {
+        <svg><rect x="1" y="1"></rect></svg>
+    };
+
+    let expected = r#"<svg><rect x="1" y="1"></rect></svg>"#;
+    assert_eq!(expected, result.render_to_string());
+}

@@ -31,15 +31,28 @@ fn node_to_tokens(node: Node) -> TokenStream {
 
     let children_tokens = children_to_tokens(node.children);
 
-    tokens.extend(quote! {{
-        #[allow(unused_braces)]
-        {
-            #children_tokens
-            let namespace = sauron::parser::tag_namespace(#name);
-            let self_closing = sauron::parser::is_self_closing(#name);
-            sauron::html::element_ns(namespace, #name, vec![#(#attributes),*], children, self_closing)
+    let self_closing = sauron_parse::parser::is_self_closing(&name);
+    let namespace = sauron_parse::parser::tag_namespace(&name);
+
+    tokens.extend(
+        if let Some(namespace) = namespace{
+            quote! {{
+                #[allow(unused_braces)]
+                {
+                    #children_tokens
+                    sauron::html::element_ns(Some(#namespace), #name, vec![#(#attributes),*], children, #self_closing)
+                }
+            }}
+        }else{
+            quote! {{
+                #[allow(unused_braces)]
+                {
+                    #children_tokens
+                    sauron::html::element_ns(None, #name, vec![#(#attributes),*], children, #self_closing)
+                }
+            }}
         }
-    }});
+    );
 
     tokens
 }

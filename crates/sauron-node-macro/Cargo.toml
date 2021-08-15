@@ -15,6 +15,7 @@ syn = { version = "1", features = ["full"] }
 syn-rsx = { version = "0.8" }
 quote = {package = "quote", version = "1.0.3"}
 proc-macro2 = { version = "1" }
+sauron-parse = { path = "../sauron-parse" }
 
 [dev-dependencies]
 sauron = { path = "../../"}
