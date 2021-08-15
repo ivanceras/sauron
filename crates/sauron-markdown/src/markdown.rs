@@ -18,10 +18,18 @@ pub fn markdown<MSG>(md: &str) -> Node<MSG> {
     MarkdownParser::from_md(md).node()
 }
 
+/// process markdown with plugins
+pub fn markdown_with_plugins<MSG>(
+    md: &str,
+    plugins: Plugins<MSG>,
+) -> Node<MSG> {
+    MarkdownParser::with_plugins(md, plugins).node()
+}
+
 /// convert markdown text to Node with a code_fence_processor plugin
 pub fn markdown_with_code_fence_processor<MSG>(
     md: &str,
-    code_fence_processor: fn(Option<&str>, &str) -> Node<MSG>,
+    code_fence_processor: fn(Option<&str>, &str) -> Option<Node<MSG>>,
 ) -> Node<MSG> {
     MarkdownParser::with_code_fence_processor(md, code_fence_processor).node()
 }
@@ -29,6 +37,29 @@ pub fn markdown_with_code_fence_processor<MSG>(
 /// parse a markdown string and convert it to Vec<Node>
 pub fn render_markdown<MSG>(md: &str) -> Vec<Node<MSG>> {
     MarkdownParser::from_md(md).nodes()
+}
+
+/// collections of plugins to be run during the processing of markdown
+#[allow(missing_debug_implementations)]
+pub struct Plugins<MSG> {
+    /// this a function where it is run when a code fence block is detected.
+    /// Return an optional new node as a result.
+    /// Should return none if the plugin can not process it.
+    pub code_fence_processor:
+        Option<fn(Option<&str>, &str) -> Option<Node<MSG>>>,
+    /// this is executed for each node in the inline html
+    /// Returns a derivative new node if applicable.
+    /// Must return None if it the node isn't suitable to be processed.
+    pub inline_html_processor: Option<fn(&Node<MSG>) -> Option<Node<MSG>>>,
+}
+
+impl<MSG> Default for Plugins<MSG> {
+    fn default() -> Self {
+        Self {
+            code_fence_processor: None,
+            inline_html_processor: None,
+        }
+    }
 }
 
 pub(crate) struct MarkdownParser<MSG> {
@@ -51,8 +82,7 @@ pub(crate) struct MarkdownParser<MSG> {
     in_table_head: bool,
     /// a flag if the previous event is inline html or not
     is_prev_inline_html: bool,
-    /// this a function where it is run when a code fence block is detected
-    code_fence_plugin: Option<fn(Option<&str>, &str) -> Node<MSG>>,
+    plugins: Plugins<MSG>,
 }
 
 impl<MSG> Default for MarkdownParser<MSG> {
@@ -67,7 +97,7 @@ impl<MSG> Default for MarkdownParser<MSG> {
             code_fence: None,
             in_table_head: false,
             is_prev_inline_html: false,
-            code_fence_plugin: None,
+            plugins: Default::default(),
         }
     }
 }
@@ -80,12 +110,19 @@ impl<MSG> MarkdownParser<MSG> {
         md_parser
     }
 
+    pub(crate) fn with_plugins(md: &str, plugins: Plugins<MSG>) -> Self {
+        let mut md_parser = Self::default();
+        md_parser.plugins = plugins;
+        md_parser.do_parse(md);
+        md_parser
+    }
+
     pub(crate) fn with_code_fence_processor(
         md: &str,
-        code_fence_processor: fn(Option<&str>, &str) -> Node<MSG>,
+        code_fence_processor: fn(Option<&str>, &str) -> Option<Node<MSG>>,
     ) -> Self {
         let mut md_parser = Self::default();
-        md_parser.code_fence_plugin = Some(code_fence_processor);
+        md_parser.plugins.code_fence_processor = Some(code_fence_processor);
         md_parser.do_parse(md);
         md_parser
     }
@@ -155,10 +192,10 @@ impl<MSG> MarkdownParser<MSG> {
                                     empty_attr()
                                 },
                             ],
-                            vec![if let Some(code_fence_plugin) =
-                                self.code_fence_plugin
+                            vec![if let Some(code_fence_processor) =
+                                self.plugins.code_fence_processor
                             {
-                                code_fence_plugin(
+                                let new_node = code_fence_processor(
                                     match self.code_fence {
                                         Some(ref code_fence) => {
                                             Some(code_fence)
@@ -166,8 +203,16 @@ impl<MSG> MarkdownParser<MSG> {
                                         None => None,
                                     },
                                     &content,
-                                )
+                                );
+                                if let Some(new_node) = new_node {
+                                    new_node
+                                } else {
+                                    // the code processor didn't detect it, turn it into a text
+                                    // node
+                                    text(content)
+                                }
                             } else {
+                                // no code fence processor just turn it into a text node
                                 text(content)
                             }],
                         ));
@@ -356,7 +401,6 @@ impl<MSG> MarkdownParser<MSG> {
     }
 
     fn process_inline_html(&mut self, inline_html: &str) {
-        println!("processing inline html: {}", inline_html);
         let allowed_attributes = HashSet::from_iter(vec!["class"]);
         let clean_html = ammonia::Builder::default()
             .generic_attributes(allowed_attributes)
@@ -364,8 +408,34 @@ impl<MSG> MarkdownParser<MSG> {
             .to_string();
         if let Ok(nodes) = sauron_parse::parse_simple(&clean_html) {
             for node in nodes {
-                self.add_node(node);
+                let new_node = self.run_inline_processor(node);
+                self.add_node(new_node);
             }
+        }
+    }
+
+    /// Run a plugin processor to elements in inline html
+    /// if it the plugin produces a Node it will be return as is.
+    /// If the plugin doesn't produce a node, return the current node
+    fn run_inline_processor(&self, mut node: Node<MSG>) -> Node<MSG> {
+        if let Some(inline_html_processor) = self.plugins.inline_html_processor
+        {
+            let new_node = inline_html_processor(&node);
+            if let Some(new_node) = new_node {
+                return new_node;
+            } else {
+                if let Some(element) = node.as_element_mut() {
+                    let mut new_children = vec![];
+                    for child in element.children.drain(..) {
+                        let new_child = self.run_inline_processor(child);
+                        new_children.push(new_child)
+                    }
+                    node.add_children_ref_mut(new_children);
+                }
+                node
+            }
+        } else {
+            node
         }
     }
 }
@@ -619,16 +689,16 @@ This is <b>Markdown</b> with some <i>funky</i> __examples__.
                         "bob" => {
                             println!("processing svgbob...");
                             let svg = svgbob::to_svg_string_compressed(code);
-                            safe_html(svg)
+                            Some(safe_html(svg))
                         }
                         _ => {
                             println!("unrecognized code fence: {}", code_fence);
-                            text(code)
+                            None
                         }
                     }
                 } else {
                     println!("no code fence");
-                    text(code)
+                    None
                 }
             });
 

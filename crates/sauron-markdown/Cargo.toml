@@ -19,6 +19,7 @@ ammonia = "3"
 
 [dev-dependencies]
 svgbob = { path = "../../../svgbob/svgbob" }
+sauron = {path = "../../", features = ["with-markdown"] }
 
 [features]
 default = ["include-html"]
