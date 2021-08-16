@@ -58,9 +58,10 @@
 - [X] ISSUE: sauron `node!` macro doesn't work on svg tags since it is using only `html_element` function which `namespace` is not supplied.
     - Fixed in `0.35.0` by checking whether a tag has a namespace.
 - [ ] Change `program: Option<&DSP>` to just `program: &DSP` since there program is needed everywhere.
-- [ ] Improve `sauron-node-macro` to call on the equivalent html function instead of `elment_ns`.
+- [X] Improve `sauron-node-macro` to call on the equivalent html function instead of `elment_ns`.
     - This would improve performance since the function already has the information whether or not it has namespace or not.
     - Mitigated with the use of `Lazy` `HashSet` look up in `sauron-parse` for faster lookup.
+    - Further improved using `sauron-parse` by resolving the value of `self-closing` and `namespace` at compile time in the `node` macro.
 - [X] Create a hashed collections in `sauron-parse` to optimize lookup of tags for namespace or self-closing
     - Created a fast lookup for `is_self_closing(tag)` amd `tag_namespace`.
 
