@@ -66,6 +66,7 @@ where
     }
 
     fn init_emit(&self) {
+        self.app.borrow_mut().init_with_program(self.clone());
         // call the init of the component
         let cmds: Cmd<APP, MSG> = self.app.borrow().init();
         // then emit the cmds, so it starts executing initial calls such (ie: fetching data,

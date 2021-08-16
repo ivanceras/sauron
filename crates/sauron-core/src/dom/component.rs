@@ -29,6 +29,13 @@ where
         Cmd::none()
     }
 
+    /// let component have access to program
+    fn init_with_program(&mut self, _program: crate::Program<Self, MSG>)
+    where
+        Self: Sized,
+    {
+    }
+
     /// optionally a component can specify it's own css style
     fn style(&self) -> Vec<String> {
         vec![]
