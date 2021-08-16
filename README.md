@@ -15,26 +15,26 @@
 with strong focus on simplicity. It is suited for developing web application which uses progressive rendering.
 
 
-#### Example
+#### Counter example
+In your `src/lib.rs`
 ```rust
-use log::trace;
-use sauron::html::attributes::attr;
 use sauron::html::text;
 use sauron::prelude::*;
-use sauron::{Cmd, Component, Node, Program};
+use sauron::{node, Cmd, Component, Node, Program};
 
 #[derive(Debug)]
 pub enum Msg {
-    Click,
+    Increment,
+    Decrement,
 }
 
 pub struct App {
-    click_count: u32,
+    count: i32,
 }
 
 impl App {
     pub fn new() -> Self {
-        App { click_count: 0 }
+        App { count: 0 }
     }
 }
 
@@ -42,28 +42,29 @@ impl Component<Msg> for App {
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
-                <h1>"Minimal example"</h1>
-                <div class="some-class" id="some-id" {attr("data-id", 1)}>
-                    <input class="client"
-                            type="button"
-                            value="Click me!"
-                            key=1
-                            on_click={|_| {
-                                trace!("Button is clicked");
-                                Msg::Click
-                            }}
-                    />
-                    <div>{text(format!("Clicked: {}", self.click_count))}</div>
-                    <input type="text" value={self.click_count}/>
-                </div>
+                <input type="button"
+                    value="+"
+                    key="inc"
+                    on_click=|_| {
+                        Msg::Increment
+                    }
+                />
+                <div class="count">{text(self.count)}</div>
+                <input type="button"
+                    value="-"
+                    key="dec"
+                    on_click=|_| {
+                        Msg::Decrement
+                    }
+                />
             </main>
         }
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-        trace!("App is updating with msg: {:?}", msg);
         match msg {
-            Msg::Click => self.click_count += 1,
+            Msg::Increment => self.count += 1,
+            Msg::Decrement => self.count -= 1,
         }
         Cmd::none()
     }
@@ -71,44 +72,50 @@ impl Component<Msg> for App {
 
 #[wasm_bindgen(start)]
 pub fn main() {
-    console_log::init_with_level(log::Level::Trace).unwrap();
-    console_error_panic_hook::set_once();
     Program::mount_to_body(App::new());
 }
 ```
-
-index.html
+`index.html`
 ```html
 <html>
   <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
-    <title>Minimal sauron app</title>
+    <title>Counter</title>
+    <style type="text/css">
+        body { font-family: verdana, arial, monospace; }
+        main {
+            width:30px;
+            height: 100px;
+            margin:auto;
+            text-align: center;
+        }
+        input, .count{
+            font-size: 40px;
+            padding: 30px;
+        }
+    </style>
+    <script type=module>
+        import init from './pkg/counter.js';
+        await init().catch(console.error);
+    </script>
   </head>
   <body>
-    <script type=module>
-        import init from './pkg/minimal.js';
-        init().catch(console.error);
-    </script>
   </body>
 </html>
 ```
-In Cargo.toml, specify the crate-type to be `cdylib`
-```toml
+In `Cargo.toml`, specify the crate-type to be `cdylib`
 
+```toml
 [package]
-name = "minimal"
+name = "counter"
 version = "0.1.0"
 edition = "2018"
 
 [lib]
 crate-type = ["cdylib"]
 
-
 [dependencies]
 sauron = "0.40"
-console_error_panic_hook = "0.1"
-log = "0.4"
-console_log = "0.2"
 ```
 
 
@@ -116,8 +123,8 @@ Build using
 ```sh
 $> wasm-pack build --target web --release
 ```
-Look at the [examples](https://github.com/ivanceras/sauron/tree/master/examples)
-and the build script for the details.
+Explore some other [examples](https://github.com/ivanceras/sauron/tree/master/examples)
+on this repo.
 
 
 #### Demo examples
@@ -126,13 +133,8 @@ and the build script for the details.
 showcasing animation, transition and timed Component update.
 - [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet CSV data viewer
 - [svg-clock](https://ivanceras.github.io/svg-clock/) - A clock drawn using SVG and window tick event.
-- [svg-graph](https://ivanceras.github.io/svg-graph/) - A simple graph using SVG
 - [ultron code-editor](https://ivanceras.github.io/ultron/) - A web-base text-editor with syntax highlighting
 
-#### Converting HTML into Sauron's syntax
-
-[html2sauron](https://ivanceras.github.io/html2sauron/) - A tool to easily convert html into
-sauron node tree for your views.
 
 #### Prerequisite:
 
@@ -140,22 +142,6 @@ sauron node tree for your views.
 cargo install wasm-pack
 cargo install basic-http-server
 ```
-
-#### Performance:
-Sauron is one of the fastest.
-
-![Benchmark](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/alt-sauron-0.28.png)
-![Benchmark](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron-0.27.png)
-
-#### Run the benchmark yourself:
-[Benchmark 1](https://ivanceras.github.io/todo-mvc-bench/)
-[Benchmark 2](https://ivanceras.github.io/todomvc-benchmark/)
-
-#### Please support this project:
- [![Become a patron](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/ivanceras)
-
-
-
 
 
 License: MIT

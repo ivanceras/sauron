@@ -1,4 +1,3 @@
-#![deny(warnings)]
 use sauron::html::text;
 use sauron::prelude::*;
 use sauron::{node, Cmd, Component, Node, Program};
