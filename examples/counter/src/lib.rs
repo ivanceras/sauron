@@ -1,3 +1,4 @@
+#![deny(warnings)]
 use sauron::html::text;
 use sauron::prelude::*;
 use sauron::{node, Cmd, Component, Node, Program};
@@ -29,7 +30,7 @@ impl Component<Msg> for App {
                         Msg::Increment
                     }
                 />
-                <div>{text(self.count)}</div>
+                <div class="count">{text(self.count)}</div>
                 <input type="button"
                     value="-"
                     key="dec"
