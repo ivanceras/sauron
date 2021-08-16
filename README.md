@@ -9,8 +9,6 @@
 
 ![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png)
 
-[Guide](https://sauron-rs.github.io/)
-
 **Sauron** is a versatile web framework and library for building client-side and/or server-side web applications
 with strong focus on simplicity. It is suited for developing web application which uses progressive rendering.
 
