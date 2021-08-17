@@ -40,9 +40,6 @@ pub use sauron_core::{
 #[cfg(feature = "sauron-parse")]
 pub use sauron_parse::parser;
 
-// reexports
-pub use sauron_core::serde_json;
-
 #[cfg(any(feature = "with-markdown", feature = "with-lite-markdown"))]
 pub use sauron_markdown::markdown;
 #[cfg(feature = "with-node-macro")]

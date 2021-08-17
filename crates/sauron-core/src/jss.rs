@@ -13,11 +13,11 @@ fn make_indent(n: usize, use_indents: bool) -> String {
 fn process_css_map(
     indent: usize,
     namespace: Option<&str>,
-    css_map: &serde_json::Map<String, serde_json::Value>,
+    css_map: json::iterators::Entries,
     use_indents: bool,
 ) -> String {
     let mut buffer = String::new();
-    for (i, (classes, style_properties)) in css_map.iter().enumerate() {
+    for (i, (classes, style_properties)) in css_map.enumerate() {
         if i > 0 && use_indents {
             buffer += "\n";
         }
@@ -38,47 +38,46 @@ fn process_css_map(
         if use_indents {
             buffer += "\n";
         }
-        if let Some(style_properties) = style_properties.as_object() {
-            for (prop, value) in style_properties {
-                if value.is_object() {
-                    buffer += &process_css_map(
-                        indent + 1,
-                        namespace,
-                        style_properties,
-                        use_indents,
-                    );
-                    if use_indents {
-                        buffer += "\n";
-                    }
-                } else {
-                    let value_str = match value {
-                        serde_json::Value::String(s) => s.to_string(),
-                        serde_json::Value::Number(v) => v.to_string(),
-                        serde_json::Value::Bool(v) => v.to_string(),
-                        _ => {
-                            panic!(
-                            "supported values are String, Number or Bool only"
+        for (prop, value) in style_properties.entries() {
+            if value.is_object() {
+                buffer += &process_css_map(
+                    indent + 1,
+                    namespace,
+                    style_properties.entries(),
+                    use_indents,
+                );
+                if use_indents {
+                    buffer += "\n";
+                }
+            } else {
+                let value_str = match value {
+                    json::JsonValue::String(s) => s.to_string(),
+                    json::JsonValue::Short(s) => s.to_string(),
+                    json::JsonValue::Number(v) => v.to_string(),
+                    json::JsonValue::Boolean(v) => v.to_string(),
+                    _ => {
+                        panic!(
+                            "supported values are String, Number or Bool only, found: {:?}", value
                         )
-                        }
-                    };
-                    if use_indents {
-                        buffer += &format!(
-                            "{}{}: {};",
-                            make_indent(indent + 1, use_indents),
-                            prop,
-                            value_str
-                        );
-                    } else {
-                        buffer += &format!(
-                            "{}{}:{};",
-                            make_indent(indent + 1, use_indents),
-                            prop,
-                            value_str
-                        );
                     }
-                    if use_indents {
-                        buffer += "\n";
-                    }
+                };
+                if use_indents {
+                    buffer += &format!(
+                        "{}{}: {};",
+                        make_indent(indent + 1, use_indents),
+                        prop,
+                        value_str
+                    );
+                } else {
+                    buffer += &format!(
+                        "{}{}:{};",
+                        make_indent(indent + 1, use_indents),
+                        prop,
+                        value_str
+                    );
+                }
+                if use_indents {
+                    buffer += "\n";
                 }
             }
         }
@@ -92,13 +91,11 @@ fn process_css_map(
 /// if class name is specified
 pub fn process_css(
     namespace: Option<&str>,
-    json: &serde_json::Value,
+    json: &json::JsonValue,
     use_indents: bool,
 ) -> String {
     let mut buffer = String::new();
-    if let Some(css) = json.as_object() {
-        buffer += &process_css_map(0, namespace, &css, use_indents);
-    }
+    buffer += &process_css_map(0, namespace, json.entries(), use_indents);
     buffer
 }
 
@@ -107,7 +104,7 @@ pub fn process_css(
 macro_rules! jss_ns {
     ($namespace: tt, $($tokens:tt)+) => {
         {
-            let json = $crate::serde_json::json!($($tokens)*);
+            let json = $crate::json::object!{$($tokens)*};
             $crate::jss::process_css(Some($namespace), &json, false)
         }
     };
@@ -118,7 +115,7 @@ macro_rules! jss_ns {
 macro_rules! jss_ns_pretty {
     ($namespace: tt, $($tokens:tt)+) => {
         {
-            let json = $crate::serde_json::json!($($tokens)*);
+            let json = $crate::json::object!($($tokens)*);
             $crate::jss::process_css(Some($namespace), &json, true)
         }
     };
@@ -129,7 +126,7 @@ macro_rules! jss_ns_pretty {
 macro_rules! jss {
     ($($tokens:tt)+) => {
         {
-            let json = $crate::serde_json::json!($($tokens)*);
+            let json = $crate::json::object!($($tokens)*);
             $crate::jss::process_css(None, &json, false)
         }
     };
@@ -141,7 +138,7 @@ macro_rules! jss {
 macro_rules! jss_pretty {
     ($($tokens:tt)+) => {
         {
-            let json = $crate::serde_json::json!($($tokens)*);
+            let json = $crate::json::object!($($tokens)*);
             $crate::jss::process_css(None, &json, true)
         }
     };
@@ -274,16 +271,16 @@ mod test {
 
     #[test]
     fn test_jss() {
-        let css = jss!({
+        let css = jss!(
             ".layer": {
                 "background-color": "red",
-                "border": "1px solid green",
+                border: "1px solid green",
             },
 
             ".hide .layer": {
-                "opacity": 0,
+                opacity: 0,
             },
-        });
+        );
 
         let expected = r#".layer{background-color:red;border:1px solid green;}.hide .layer{opacity:0;}"#;
         println!("{}", css);
@@ -292,20 +289,20 @@ mod test {
 
     #[test]
     fn test_jss_ns() {
-        let css = jss_ns!("frame",{
+        let css = jss_ns!("frame",
             ".": {
-                "display": "block",
+                display: "block",
             },
 
             ".layer": {
                 "background-color": "red",
-                "border": "1px solid green",
+                border: "1px solid green",
             },
 
             ".hide .layer": {
-                "opacity": 0,
+                opacity: 0,
             },
-        });
+        );
 
         let expected = r#".frame{display:block;}.frame__layer{background-color:red;border:1px solid green;}.frame__hide .frame__layer{opacity:0;}"#;
         println!("{}", css);
@@ -313,16 +310,16 @@ mod test {
     }
     #[test]
     fn test_jss_pretty() {
-        let css = jss_pretty!({
+        let css = jss_pretty!(
             ".layer": {
                 "background-color": "red",
-                "border": "1px solid green",
+                border: "1px solid green",
             },
 
             ".hide .layer": {
-                "opacity": 0,
+                opacity: 0,
             },
-        });
+        );
 
         let expected = r#".layer {
     background-color: red;
@@ -337,20 +334,20 @@ mod test {
 
     #[test]
     fn test_jss_ns_pretty() {
-        let css = jss_ns_pretty!("frame",{
+        let css = jss_ns_pretty!("frame",
             ".": {
-                "display": "block",
+                display: "block",
             },
 
             ".layer": {
                 "background-color": "red",
-                "border": "1px solid green",
+                border: "1px solid green",
             },
 
             ".hide .layer": {
-                "opacity": 0,
+                opacity: 0,
             },
-        });
+        );
 
         let expected = r#".frame {
     display: block;
@@ -368,7 +365,7 @@ mod test {
 
     #[test]
     fn test_jss_ns_with_media_query() {
-        let css = jss_ns!("frame",{
+        let css = jss_ns!("frame",
             ".": {
                 "display": "block",
             },
@@ -387,7 +384,7 @@ mod test {
             ".hide .layer": {
                 "opacity": 0,
             },
-        });
+        );
 
         let expected = r#".frame{display:block;}.frame__layer{background-color:red;border:1px solid green;}@media screen and (max-width: 800px){.frame__layer{width:100%;}}.frame__hide .frame__layer{opacity:0;}"#;
         println!("{}", css);

@@ -21,7 +21,7 @@ cfg-if = "0.1"
 thiserror = "1.0"
 doc-comment = "0.3"
 mt-dom = { version = "0.10" }
-serde_json = { version = "1", features = ["preserve_order"] }
+json = "0.12.4"
 
 
 [dependencies.wasm-bindgen]

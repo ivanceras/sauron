@@ -21,8 +21,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use js_sys;
 }}
 
-// reexport serde_json
-pub use serde_json;
+pub use json;
 
 cfg_if! {if #[cfg(not(feature = "with-dom"))] {
     /// When event is not needed, such as just rendering the dom
@@ -59,7 +58,6 @@ pub mod prelude {
         *,
     };
     pub use render::Render;
-    pub use serde_json;
     pub use vdom::map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg};
     #[cfg(feature = "with-dom")]
     pub use wasm_bindgen::prelude::*;

@@ -92,4 +92,11 @@
     - fixed by setting the target to web when building the wasm
 - [ ] Create a new benchmark for the js-comprehensive-benchmark suite
     - [link](https://github.com/krausest/js-framework-benchmark)
+    - [ ] Initial attempt https://github.com/ivanceras/performance-test-sauron
 - [ ] Use Weak pointer for program instead of Rc where strong reference is not needed.
+
+## Maintenance
+- [ ] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
+- [ ] Move `jss` into a new crate `sauron-jss` for keeping sauron slim.
+    - [ ] Use [json](https://github.com/maciejhirsz/json-rust) crate for `jss`.
+        - The quote on keys are optional, so this is good for use in writing css.

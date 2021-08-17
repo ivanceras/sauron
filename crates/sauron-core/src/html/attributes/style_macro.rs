@@ -3,27 +3,26 @@
 macro_rules! style {
     ($($tokens:tt)+) => {
         {
-            let json = serde_json::json!({$($tokens)*});
+            let json = json::object!($($tokens)*);
             let mut styles = vec![];
-            if let Some(style_properties) = json.as_object(){
-                for (prop,p_value) in style_properties.iter(){
-                    let value = match p_value{
-                        serde_json::Value::String(s) => $crate::html::attributes::Value::String(s.to_string()),
-                        serde_json::Value::Number(v) => {
-                            if let Some(i64_value) = v.as_i64(){
-                                $crate::html::attributes::Value::I64(i64_value)
-                            }else if let Some(f64_value) = v.as_f64(){
-                                $crate::html::attributes::Value::F64(f64_value)
-                            }else{
-                                unreachable!("should either be i64 or f64")
-                            }
+            for (prop,p_value) in json.entries(){
+                let value = match p_value{
+                    json::JsonValue::String(s) => $crate::html::attributes::Value::String(s.to_string()),
+                    json::JsonValue::Short(s) => $crate::html::attributes::Value::String(s.to_string()),
+                    json::JsonValue::Number(_v) => {
+                        if let Some(i64_value) = p_value.as_i64(){
+                            $crate::html::attributes::Value::I64(i64_value)
+                        }else if let Some(f64_value) = p_value.as_f64(){
+                            $crate::html::attributes::Value::F64(f64_value)
+                        }else{
+                            unreachable!("should either be i64 or f64")
                         }
-                        serde_json::Value::Bool(v) => $crate::html::attributes::Value::Bool(*v),
-                        _ => panic!("supported values are String, Number or Bool only"),
-                    };
-                    styles.push($crate::html::attributes::Style::new(prop, value));
+                    }
+                    json::JsonValue::Boolean(v) => $crate::html::attributes::Value::Bool(*v),
+                    _ => panic!("supported values are String, Number or Bool only"),
+                };
+                styles.push($crate::html::attributes::Style::new(prop, value));
 
-                }
             }
             $crate::mt_dom::attr(
                 "style",
@@ -409,10 +408,7 @@ pub const HTML_STYLES: [&'static str; 368] = [
 #[cfg(test)]
 mod tests {
     use crate::{
-        html::{
-            units::px,
-            *,
-        },
+        html::{units::px, *},
         Render,
     };
 

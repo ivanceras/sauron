@@ -35,3 +35,6 @@ with-measure = ["sauron/with-measure"]
 opt-level = "z"
 lto = true
 panic = "abort"
+
+[patch.crates-io]
+sauron  = { path = "../../" }
