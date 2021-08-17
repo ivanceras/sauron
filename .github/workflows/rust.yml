@@ -27,5 +27,5 @@ jobs:
       run: cargo test --all --no-default-features
 
     - name: Run tests with dom features
-      run: cargo test --all --features "with-dom with-measure with-markdown"
+      run: cargo test --all --features "with-dom with-measure"
 
