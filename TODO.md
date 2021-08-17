@@ -64,6 +64,8 @@
     - Further improved using `sauron-parse` by resolving the value of `self-closing` and `namespace` at compile time in the `node` macro.
 - [X] Create a hashed collections in `sauron-parse` to optimize lookup of tags for namespace or self-closing
     - Created a fast lookup for `is_self_closing(tag)` amd `tag_namespace`.
+- [ ] old elements that has an event attached has no way of knowing the equivalent new element has the same event attached as their callbacks are clone of closures inside of Rc
+    and no 2 closures are the same even if the have the same code.
 
 
 

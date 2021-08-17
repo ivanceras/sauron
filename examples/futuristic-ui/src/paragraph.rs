@@ -1,11 +1,5 @@
-use crate::{
-    animate_list,
-    AnimateList,
-};
-use sauron::{
-    prelude::*,
-    Node,
-};
+use crate::{animate_list, AnimateList};
+use sauron::{prelude::*, Node};
 
 #[derive(Clone, Debug)]
 pub enum Msg {
@@ -24,7 +18,9 @@ where
 {
     pub fn new_with_markdown(md: &str) -> Self {
         Paragraph {
-            animated_list: AnimateList::new_with_content(sauron::markdown(md)),
+            animated_list: AnimateList::new_with_content(
+                sauron_markdown::markdown(md),
+            ),
         }
     }
 

@@ -16,7 +16,6 @@ maintenance = { status = "actively-developed" }
 [dependencies]
 sauron-core = { version = "0.40", path = "crates/sauron-core", default-features = false }
 sauron-node-macro = { version = "0.40", path = "crates/sauron-node-macro", optional = true }
-sauron-markdown = { version = "0.40", path = "crates/sauron-markdown", optional = true, default-features = false }
 sauron-parse = { version = "0.40", path = "crates/sauron-parse", optional = true }
 cfg-if = "0.1"
 
@@ -36,9 +35,6 @@ with-debug = ["sauron-core/with-debug"]
 # lets you use node! macro to write html like code in the view
 with-node-macro = ["sauron-node-macro", "sauron-core/with-parser", "sauron-parse"]
 
-with-markdown = ["sauron-markdown/include-html"]
-# light weight markdown, html are inserted as text node
-with-lite-markdown = ["sauron-markdown"]
 
 [dev-dependencies]
 console_error_panic_hook = "0.1"
@@ -52,7 +48,6 @@ regex = "1"
 [workspace]
 members = [
     "crates/sauron-core",
-    "crates/sauron-markdown",
     "crates/sauron-parse",
     "crates/sauron-node-macro",
     "examples/arc-reactor",

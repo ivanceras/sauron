@@ -8,7 +8,8 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = { path = "../../", default-features = false, features = ["with-dom", "with-request-animation-frame", "with-markdown"]}
+sauron = "0.40"
+sauron-markdown = "0.40"
 log = "0.4"
 console_log = { version = "0.2", features = ["color"], optional = true }
 web-sys = { version = "0.3", features = ["HtmlAudioElement"] }
