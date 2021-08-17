@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+-  Switch dependency from `serde_json` to `json` on `jss` module where quotes on identifier keys are optional
+-  **breaking** move `sauron-markdown` out to a new [repository](https://github.com/ivanceras/sauron-markdown), as it has gotten bigger.
+-  Move `futuristi-ui` out of the examples and into a new [repository](https://github.com/ivanceras/futuristic-ui).
+-  Add `init_with_program` function in `Component` for allowing components to have a way access to it's own executor.
+-  Add a test to show node-recylcing bug
+
 ## 0.40.0
  - Improve `sauron-node-macro` performance by resolving the values of `namespace` and `self_closing` tags at compile time, rather than at runtime.
  - Add plugin capability of `sauron-markdown` to easily hook user define functions such as code-highlighting.

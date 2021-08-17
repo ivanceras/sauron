@@ -108,8 +108,8 @@ fn match_attribute(key: &str) -> Option<&'static str> {
 fn match_style_name(key: &str) -> Option<&'static str> {
     HTML_STYLES
         .iter()
-        .find(|name| name.eq_ignore_ascii_case(&key))
-        .map(|name| *name)
+        .find(|(_ident, name)| name.eq_ignore_ascii_case(&key))
+        .map(|(_ident, name)| *name)
 }
 
 /// return the static str of this function name
