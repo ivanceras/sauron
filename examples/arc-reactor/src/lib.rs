@@ -1,13 +1,6 @@
 // code is derived from: https://codepen.io/AsyrafHussin/pen/odVpmE?__cf_chl_jschl_tk__=b2a5d3c92297b4243deded6d24dd8727e6c0c718-1603031934-0-AXZNUeXia5wQorUjr2SzbbdAE1gNkxgtLS5ElYnE1U7Azaw8xRz0_XjMROZjlIO-pZ4HFU450aebEQvXqEIl8PNYwSH4-Ux7Wpe97dBjRl72Xftyxs8Gs0SecTOw-W87lLArzoxmu_1gGTAd02U9UolrKRXusUoaDNPp1Ue8Cchh5vhO9ayJLPkCOcy1ReT92tizsFyKDP1gKqf5V1k0ZvoYEshzezvF_Cie4qyW154U8bu40DSBjnaf734gykrvq7Ot52EPsejJnCR1w-CxEci2NHHWtR6OPgCYXEQdHk56poUkfCzo6Ml2l6jzGawh1ln-Gkb8JBCabcMh0qz0LvvRdvqvzcsCHwmbMzkCbMpe
 #![deny(warnings)]
-use sauron::{
-    node,
-    prelude::*,
-    Cmd,
-    Component,
-    Node,
-    Program,
-};
+use sauron::{node, prelude::*, Application, Cmd, Node, Program};
 
 pub enum Msg {
     Click,
@@ -21,7 +14,7 @@ impl App {
     }
 }
 
-impl Component<Msg> for App {
+impl Application<Msg> for App {
     fn style(&self) -> Vec<String> {
         let css = r#"
             body {
@@ -155,7 +148,7 @@ impl Component<Msg> for App {
                 box-shadow: 0 0 4px 2px #52fefe, 0 0 9px 3px #52fefe inset;
             }
             .reactor .circle-innner:hover {
-               background-color: #ff0000; 
+               background-color: #ff0000;
             }
 
             "#;
