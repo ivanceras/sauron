@@ -1,5 +1,6 @@
 //! Callbacks contains function that can be called at a later time.
 //! This is used in containing an event listener attached to an DOM element.
+use std::any::TypeId;
 use std::{convert::Into, fmt, rc::Rc};
 
 /// A generic sized representation of a function that can be
@@ -23,14 +24,30 @@ use std::{convert::Into, fmt, rc::Rc};
 ///         - Attributes of the same name are merged therefore cloning the attributes, hence the
 ///         callback is necessary.
 ///
-pub struct Callback<EVENT, MSG>(Rc<dyn Fn(EVENT) -> MSG>);
+pub struct Callback<EVENT, MSG> {
+    /// the function to be executed
+    func: Rc<dyn Fn(EVENT) -> MSG>,
+    /// the type type_id of the event this callback will be attached to
+    event_type_id: TypeId,
+    /// the type_id of the return type of this callback when executed.
+    msg_type_id: TypeId,
+}
 
 impl<EVENT, F, MSG> From<F> for Callback<EVENT, MSG>
 where
     F: Fn(EVENT) -> MSG + 'static,
+    MSG: 'static,
+    EVENT: 'static,
 {
     fn from(func: F) -> Self {
-        Callback(Rc::new(func))
+        println!("type_id of F: {:?}", std::any::TypeId::of::<F>());
+        println!("type_id of MSG: {:?}", std::any::TypeId::of::<MSG>());
+        println!("type_id of EVENT: {:?}", std::any::TypeId::of::<EVENT>());
+        Self {
+            func: Rc::new(func),
+            event_type_id: TypeId::of::<EVENT>(),
+            msg_type_id: TypeId::of::<MSG>(),
+        }
     }
 }
 
@@ -52,7 +69,7 @@ where
 {
     /// This method calls the actual callback.
     pub fn emit<T: Into<EVENT>>(&self, value: T) -> MSG {
-        (self.0)(value.into())
+        (self.func)(value.into())
     }
 
     /// map this callback using another callback such that
@@ -80,29 +97,24 @@ where
 /// is just cloning the pointer of the actual callback function
 impl<EVENT, MSG> Clone for Callback<EVENT, MSG> {
     fn clone(&self) -> Self {
-        Callback(Rc::clone(&self.0))
+        Self {
+            func: Rc::clone(&self.func),
+            event_type_id: self.event_type_id,
+            msg_type_id: self.msg_type_id,
+        }
     }
 }
 
-/// Note:
-/// using the #[derive(PartialEq)] needs EVENT and MSG to also be PartialEq.
+/// This is the best approximation of comparison whether 2 callbacks are equal.
 ///
-/// The reason this is manually implemented is, so that EVENT and MSG
-/// doesn't need to be PartialEq as it is part of the Callback objects and are not compared
+/// There is no 100% guarante that this is true since we can not compare 2 closures event if they
+/// have the same logic.
 ///
-/// Note: There is no 2 closures are equal, even if they are logically the same.
-/// We return true here so as to not make a diff for the callback attribute.
-/// Replacing the callback function for each view call is in-efficient.
+/// This is done by comparing the type_id of the input and type_id of the output.
+///
 impl<EVENT, MSG> PartialEq for Callback<EVENT, MSG> {
-    fn eq(&self, _rhs: &Self) -> bool {
-        true
-        // Comparing the callback is only applicable
-        // when they are a clone to each other.
-        // This defeats the purpose in logically comparing for the
-        // diffing algorthmn since all callbacks are effectively called with the closure.into()
-        // which are essentially not the same Callback even when they are derived from the same
-        // function.
-        // Also, no 2 closures are the same.
-        //Rc::ptr_eq(&self.0, &rhs.0)
+    fn eq(&self, other: &Self) -> bool {
+        self.event_type_id == other.event_type_id
+            && self.msg_type_id == other.msg_type_id
     }
 }

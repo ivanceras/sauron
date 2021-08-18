@@ -46,6 +46,7 @@ impl From<web_sys::Event> for Event {
 pub fn on<F, MSG>(event_name: &'static str, f: F) -> Attribute<MSG>
 where
     F: Fn(Event) -> MSG + 'static,
+    MSG: 'static,
 {
     mt_dom::attr(event_name, AttributeValue::EventListener(Callback::from(f)))
 }
@@ -54,6 +55,7 @@ where
 pub fn on_click<F, MSG>(f: F) -> Attribute<MSG>
 where
     F: Fn(MouseEvent) -> MSG + 'static,
+    MSG: 'static,
 {
     on("click", move |event: Event| f(to_mouse_event(event)))
 }
@@ -62,6 +64,7 @@ where
 pub fn on_enter<F, MSG>(f: F) -> Attribute<MSG>
 where
     F: Fn(KeyboardEvent) -> MSG + 'static,
+    MSG: 'static,
 {
     on("enter", move |event: Event| f(to_keyboard_event(event)))
 }
@@ -94,6 +97,7 @@ pub struct MountEvent {
 pub fn on_mount<F, MSG>(f: F) -> Attribute<MSG>
 where
     F: Fn(MountEvent) -> MSG + 'static,
+    MSG: 'static,
 {
     on("mount", move |event: Event| match event {
         Event::MountEvent(me) => f(me),
