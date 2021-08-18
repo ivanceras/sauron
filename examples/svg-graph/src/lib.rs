@@ -1,8 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    html::attributes::style,
-    prelude::*,
-};
+use sauron::{html::attributes::style, prelude::*};
 
 extern crate log;
 
@@ -20,7 +17,7 @@ impl App {
     }
 }
 
-impl Component<Msg> for App {
+impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         svg(
             vec![
