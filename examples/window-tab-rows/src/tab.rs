@@ -5,8 +5,6 @@ use sauron::{
     Component, Node,
 };
 
-use sauron::Cmd;
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
     TabClick,
@@ -45,8 +43,8 @@ impl Tab {
     }
 }
 
-impl Component<Msg> for Tab {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+impl SimpleComponent<Msg> for Tab {
+    fn update(&mut self, msg: Msg) -> Option<Msg> {
         match msg {
             Msg::TabClick => {
                 self.tab_clicks += 1;
@@ -55,7 +53,7 @@ impl Component<Msg> for Tab {
                 self.rows[index].update(row_msg);
             }
         }
-        Cmd::none()
+        None
     }
 
     fn view(&self) -> Node<Msg> {

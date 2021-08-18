@@ -65,20 +65,6 @@ where
         }
     }
 
-    /// Map this program such that Program<APP,MSG> becomes Program<APP,MSG2>
-    pub fn map_msg<F, MSG2>(&self, func: F) -> Program<APP, MSG2>
-    where
-        F: Fn(MSG) -> MSG2 + 'static,
-        MSG2: 'static,
-    {
-        let dom_updater_msg2: DomUpdater<MSG2> =
-            self.dom_updater.borrow().map_updater_msg(func);
-        Program {
-            app: Rc::clone(&self.app),
-            dom_updater: Rc::new(RefCell::new(dom_updater_msg2)),
-        }
-    }
-
     /// Map this program such that Program<APP,MSG> becomes Program<APP2,MSG2>
     pub fn map_program_msg<FM, APP2, MSG2>(
         &self,
@@ -235,6 +221,22 @@ where
         html_style.set_text_content(Some(style));
         let head = document.head().expect("must have a head");
         head.append_child(&html_style).expect("must append style");
+    }
+}
+
+impl<APP, MSG> Program<APP, MSG> {
+    /// Map this program such that Program<APP,MSG> becomes Program<APP,MSG2>
+    pub fn map_msg<F, MSG2>(&self, func: F) -> Program<APP, MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + 'static,
+        MSG2: 'static,
+    {
+        let dom_updater_msg2: DomUpdater<MSG2> =
+            self.dom_updater.borrow().map_updater_msg(func);
+        Program {
+            app: Rc::clone(&self.app),
+            dom_updater: Rc::new(RefCell::new(dom_updater_msg2)),
+        }
     }
 }
 

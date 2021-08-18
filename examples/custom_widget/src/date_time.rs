@@ -3,12 +3,14 @@ use sauron::prelude::*;
 use sauron::Callback;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
     DateChange(String),
     TimeChange(String),
+    TimeOrDateModified(String),
     Mount(web_sys::Node),
     BtnClick,
 }
@@ -41,7 +43,7 @@ impl<PMSG> DateTimeWidget<PMSG> {
         self.cnt += 1;
     }
 
-    pub fn on_time_change<F>(&mut self, f: F)
+    pub fn on_date_time_change<F>(&mut self, f: F)
     where
         F: Fn(Event) -> PMSG + 'static,
     {
@@ -49,36 +51,35 @@ impl<PMSG> DateTimeWidget<PMSG> {
     }
 }
 
-impl<PMSG> Component<Msg> for DateTimeWidget<PMSG>
+impl<PMSG> SubComponent<PMSG, Msg> for DateTimeWidget<PMSG>
 where
-    PMSG: Clone + 'static,
+    PMSG: Clone + Debug + 'static,
 {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> (Option<Msg>, Vec<PMSG>) {
         match msg {
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
-                self.date = date;
-                let date_time = self.date_time();
-                for listener in self.time_change_listener.iter() {
-                    let event = web_sys::Event::new("date_change")
-                        .expect("must construct custom event");
-                    let event: Event = event.into();
-                    listener.emit(event);
-                }
-                Cmd::none()
+                (Some(Msg::TimeOrDateModified(self.date_time())), vec![])
             }
             Msg::TimeChange(time) => {
                 log::trace!("time is changed to: {}", time);
-                let date_time = self.date_time();
+                (Some(Msg::TimeOrDateModified(self.date_time())), vec![])
+            }
+            Msg::TimeOrDateModified(date_time) => {
+                log::trace!("time or date is changed: {}", date_time);
+                let mut parent_msg = vec![];
                 for listener in self.time_change_listener.iter() {
                     let event = web_sys::Event::new("time_change")
                         .expect("must construct custom event");
                     let event: Event = event.into();
-                    listener.emit(event);
+                    let pmsg = listener.emit(event);
+                    parent_msg.push(pmsg);
                 }
-                Cmd::none()
+                log::trace!("sending this to parent: {:?}", parent_msg);
+                (None, parent_msg)
             }
             Msg::Mount(target_node) => {
+                /*
                 //log::debug!("Mounting attempt...");
                 if !self.mounted {
                     log::debug!("replacing the original target");
@@ -89,12 +90,13 @@ where
                     Program::replace_mount(self_clone, &target_node);
                     self.mounted = true;
                 }
-                Cmd::none()
+                */
+                (None, vec![])
             }
             Msg::BtnClick => {
                 log::trace!("btn is clicked..");
                 self.cnt += 1;
-                Cmd::none()
+                (None, vec![])
             }
         }
     }

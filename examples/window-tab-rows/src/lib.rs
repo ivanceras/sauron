@@ -70,12 +70,14 @@ impl Component<Msg> for Window {
                 Cmd::none()
             }
             Msg::TabMsg(index, tab_msg) => {
-                let cmd = self.tabs[index].update(tab_msg);
-                cmd.map_cmd(|program| {
-                    program
-                        .map_program(|_| *self, &sauron::body())
-                        .map_msg(|tmsg| Msg::TabMsg(index, tmsg))
-                })
+                let follow_up = self.tabs[index].update(tab_msg);
+                if let Some(follow_up) = follow_up {
+                    Cmd::new(move |program| {
+                        program.dispatch(Msg::TabMsg(index, follow_up.clone()))
+                    })
+                } else {
+                    Cmd::none()
+                }
             }
         }
     }
