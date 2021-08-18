@@ -1,16 +1,10 @@
 #![deny(warnings)]
 use log::trace;
 use sauron::{
-    html::{
-        attributes::attr,
-        text,
-    },
+    html::{attributes::attr, text},
     node,
     prelude::*,
-    Cmd,
-    Component,
-    Node,
-    Program,
+    Application, Cmd, Node, Program,
 };
 
 #[derive(Debug)]
@@ -28,7 +22,7 @@ impl App {
     }
 }
 
-impl Component<Msg> for App {
+impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
