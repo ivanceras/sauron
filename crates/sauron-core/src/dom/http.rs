@@ -1,6 +1,6 @@
 //! provides functions for retrieving data using http network request
 use crate::html::attributes::Callback;
-use crate::{Cmd, Component, Dispatch, Program};
+use crate::{Application, Cmd, Dispatch, Program};
 use js_sys::TypeError;
 use std::fmt::Debug;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
@@ -22,7 +22,7 @@ impl Http {
     where
         SUCCESS: Fn(String) -> MSG + Clone + 'static,
         ERROR: Fn(TypeError) -> MSG + Clone + 'static,
-        APP: Component<MSG> + 'static,
+        APP: Application<MSG> + 'static,
         MSG: 'static,
     {
         let fetch_cb = Callback::from(fetch_cb);
@@ -66,7 +66,7 @@ impl Http {
         error_cb: ERROR,
     ) -> Cmd<APP, MSG>
     where
-        APP: Component<MSG> + 'static,
+        APP: Application<MSG> + 'static,
         MSG: 'static,
         DECODER: Fn((Response, Program<APP, MSG>)) + 'static,
         ERROR: Fn(TypeError) -> MSG + 'static,
