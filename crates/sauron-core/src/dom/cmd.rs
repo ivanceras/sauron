@@ -9,6 +9,7 @@ use std::rc::Rc;
 /// Cmd required a DSP object which is the Program as an argument
 /// The emit function is called with the program argument.
 /// The callback is supplied with the program an is then executed/emitted.
+#[derive(Clone)]
 pub struct Cmd<DSP> {
     /// the functions that would be executed when this Cmd is emited
     pub commands: Vec<Rc<dyn Fn(DSP)>>,
@@ -37,13 +38,15 @@ where
         }
     }
 
-    /// Map cmd such that Cmd<DPS> becoms Cmd<DSP2>
-    pub fn map_cmd<F, DSP2>(&self, _func: F) -> Cmd<DSP2>
+    /// Map cmd such that Cmd<DSP> becoms Cmd<DSP2>
+    pub fn map_cmd<F, DSP2>(&self, func: F) -> Cmd<DSP2>
     where
         DSP2: Clone + 'static,
-        F: Fn(DSP) -> DSP2 + 'static,
+        F: Fn(DSP2) -> DSP + 'static,
     {
-        Cmd::none()
+        log::trace!("mapping cmd here for real...");
+        let self_clone = self.clone();
+        Cmd::new(move |program| self_clone.clone().emit(&func(program)))
     }
 
     /// creates a unified Cmd which batches all the other Cmds in one.
