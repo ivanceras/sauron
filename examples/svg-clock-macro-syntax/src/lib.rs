@@ -26,7 +26,7 @@ impl Clock {
     }
 }
 
-impl Component<Msg> for Clock {
+impl Application<Msg> for Clock {
     // we wire the window set_interval api to trigger an Msg::Tick
     // by dispatching it from the program, through the Cmd interface
     fn init(&self) -> Cmd<Self, Msg> {
