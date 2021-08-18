@@ -54,15 +54,15 @@ where
     /// Map this program such that Program<APP,MSG> becomes Program<APP2,MSG>
     pub fn map_program<F, APP2>(
         &self,
-        func: F,
-        root_node: &Node,
+        app2: Rc<RefCell<APP2>>,
     ) -> Program<APP2, MSG>
     where
-        F: Fn(&APP) -> APP2,
         APP2: Component<MSG> + 'static,
     {
-        let app2 = func(&*self.app.borrow());
-        Program::new(app2, root_node)
+        Program {
+            app: app2,
+            dom_updater: Rc::clone(&self.dom_updater),
+        }
     }
 
     /// Map this program such that Program<APP,MSG> becomes Program<APP,MSG2>
@@ -76,6 +76,26 @@ where
         Program {
             app: Rc::clone(&self.app),
             dom_updater: Rc::new(RefCell::new(dom_updater_msg2)),
+        }
+    }
+
+    /// Map this program such that Program<APP,MSG> becomes Program<APP2,MSG2>
+    pub fn map_program_msg<FM, APP2, MSG2>(
+        &self,
+        program2: Program<APP2, MSG2>,
+        func_msg: FM,
+    ) -> Program<APP2, MSG2>
+    where
+        FM: Fn(MSG) -> MSG2 + 'static,
+        APP2: Component<MSG2> + 'static,
+        MSG2: 'static,
+    {
+        let dom_updater2: DomUpdater<MSG2> =
+            self.dom_updater.borrow().map_updater_msg(func_msg);
+        let app2 = Rc::clone(&program2.app);
+        Program {
+            app: app2,
+            dom_updater: Rc::new(RefCell::new(dom_updater2)),
         }
     }
 

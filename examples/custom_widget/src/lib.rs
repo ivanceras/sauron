@@ -19,23 +19,28 @@ pub enum Msg {
 pub struct App {
     count: i32,
     date_time: DateTimeWidget<Msg>,
+    program: Option<Program<Self, Msg>>,
 }
 
 impl App {
     pub fn new() -> Self {
         let mut date_time = DateTimeWidget::new("2020-12-30", "10:00", false);
         date_time.on_time_change(|_e| {
-            log::info!("Time has changed..");
+            log::info!("App speaking... -> Time has changed..");
             Msg::TimeChange
         });
         App {
             count: 0,
             date_time,
+            program: None,
         }
     }
 }
 
 impl Component<Msg> for App {
+    fn init_with_program(&mut self, program: Program<Self, Msg>) {
+        self.program = Some(program);
+    }
     fn view(&self) -> Node<Msg> {
         div(
             vec![on_mount(|me| Msg::Mount(me.target_node))],
@@ -82,16 +87,13 @@ impl Component<Msg> for App {
             // the date time widget.
             // We want the date-time widget to have it's own lifecycle
             Msg::DateTimeMsg(dmsg) => {
-                match dmsg {
-                    date_time::Msg::Mount(_) => {
-                        log::trace!("mount event pass through..");
-                        let cmd = self.date_time.update(dmsg);
-                    }
-                    _ => {
-                        log::trace!("not wiring {:?}", dmsg);
-                    }
-                }
-                Cmd::none()
+                let this_program = self.program.as_ref().unwrap().clone();
+                let dcmd = self.date_time.update(dmsg);
+
+                dcmd.map_cmd(move |program| {
+                    program
+                        .map_program_msg(this_program.clone(), Msg::DateTimeMsg)
+                })
             }
             Msg::TimeChange => {
                 log::debug!("Time is changed in out date time widget");
