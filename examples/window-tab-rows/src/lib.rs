@@ -2,7 +2,7 @@
 use sauron::{
     html::{attributes::*, events::*, *},
     prelude::*,
-    Cmd, Component, Node, Program,
+    Application, Cmd, Node, Program,
 };
 use tab::Tab;
 
@@ -60,7 +60,7 @@ impl Window {
     }
 }
 
-impl Component<Msg> for Window {
+impl Application<Msg> for Window {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         self.window_activities += 1;
         match msg {
@@ -70,14 +70,18 @@ impl Component<Msg> for Window {
                 Cmd::none()
             }
             Msg::TabMsg(index, tab_msg) => {
-                let follow_up = self.tabs[index].update(tab_msg);
-                if let Some(follow_up) = follow_up {
-                    Cmd::new(move |program| {
-                        program.dispatch(Msg::TabMsg(index, follow_up.clone()))
+                let follow_ups = self.tabs[index].update(tab_msg);
+                let cmds = follow_ups
+                    .into_iter()
+                    .map(|follow_up| {
+                        Cmd::new(move |program| {
+                            program
+                                .dispatch(Msg::TabMsg(index, follow_up.clone()))
+                        })
                     })
-                } else {
-                    Cmd::none()
-                }
+                    .collect();
+
+                Cmd::batch(cmds)
             }
         }
     }

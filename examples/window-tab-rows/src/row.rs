@@ -1,32 +1,37 @@
+use crate::field::{self, Field, Interaction};
 use sauron::{
-    html::{attributes::*, events::*, *},
+    html::{attributes::*, *},
     prelude::*,
     Component, Node,
 };
 
-use crate::field::{self, Field};
-
-use sauron::Cmd;
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum Msg {
-    RowClick,
     FieldMsg(usize, field::Msg),
+    FieldInteracted(field::Interaction),
 }
 
 pub struct Row {
-    row_clicks: u32,
-    fields: Vec<Field>,
+    field_clicks: u32,
+    field_change: u32,
+    fields: Vec<Field<Msg>>,
     row_name: String,
 }
 
 impl Row {
     pub fn new(row_name: String) -> Self {
         Row {
-            row_clicks: 0,
-            fields: (0..10)
+            field_clicks: 0,
+            field_change: 0,
+            fields: (0..8)
                 .into_iter()
-                .map(|index| Field::new(format!("Field {}", index)))
+                .map(|index| {
+                    let mut field = Field::new(format!("Field {}", index));
+                    field.add_interaction_listener(Box::new(|action| {
+                        Msg::FieldInteracted(action)
+                    }));
+                    field
+                })
                 .collect(),
             row_name,
         }
@@ -34,21 +39,35 @@ impl Row {
 }
 
 impl Component<Msg> for Row {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Vec<Msg> {
         match msg {
-            Msg::RowClick => {
-                self.row_clicks += 1;
-            }
             Msg::FieldMsg(index, field_msg) => {
-                self.fields[index].update(field_msg);
+                let (follow_ups, pmsg_list) =
+                    self.fields[index].update(field_msg);
+
+                pmsg_list
+                    .into_iter()
+                    .chain(
+                        follow_ups
+                            .into_iter()
+                            .map(|follow_up| Msg::FieldMsg(index, follow_up)),
+                    )
+                    .collect()
+            }
+            Msg::FieldInteracted(interaction) => {
+                log::trace!("interacted: {:?}", interaction);
+                match interaction {
+                    Interaction::Click => self.field_clicks += 1,
+                    Interaction::Modify(_) => self.field_change += 1,
+                }
+                vec![]
             }
         }
-        Cmd::none()
     }
 
     fn view(&self) -> Node<Msg> {
         div(
-            vec![class("row"), on_click(|_| Msg::RowClick)],
+            vec![class("row")],
             vec![
                 text(&self.row_name),
                 input(vec![class("row-selector"), r#type("checkbox")], vec![]),
@@ -67,8 +86,8 @@ impl Component<Msg> for Row {
                 span(
                     vec![],
                     vec![text(format!(
-                        "total activities: {}",
-                        self.row_clicks
+                        "field clicks: {}, field changed: {}",
+                        self.field_clicks, self.field_change,
                     ))],
                 ),
             ],
