@@ -51,7 +51,7 @@ pub fn index(app: &App) -> Node<Msg> {
 /// jss can be used to allow you to dynamically create server side themes by manipulating the css
 /// here.
 fn style() -> String {
-    jss!({
+    jss! {
         "body": {
           "font-family": "'Avenir Next', 'Helvetica Neue', 'Segoe UI', 'Helvetica', 'Arial', 'sans-serif'",
           "margin": 0,
@@ -138,5 +138,5 @@ fn style() -> String {
           "font-weight": "bold",
           "color": "rgb(247, 76, 0)",
         },
-    })
+    }
 }
