@@ -70,8 +70,14 @@ impl Component<Msg> for Window {
                 Cmd::none()
             }
             Msg::TabMsg(index, tab_msg) => {
-                self.tabs[index].update(tab_msg);
-                Cmd::none()
+                let follow_up = self.tabs[index].update(tab_msg);
+                if let Some(follow_up) = follow_up {
+                    Cmd::new(move |program| {
+                        program.dispatch(Msg::TabMsg(index, follow_up.clone()))
+                    })
+                } else {
+                    Cmd::none()
+                }
             }
         }
     }
