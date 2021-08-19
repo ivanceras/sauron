@@ -1,7 +1,7 @@
 use crate::{assets, widgets::search_widget, ColumnDef};
 use sauron::{
     html::{attributes::*, events::*, units::*, *},
-    Application, Cmd, Node,
+    Component, Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -110,12 +110,12 @@ impl ColumnView {
     }
 }
 
-impl Application<Msg> for ColumnView {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+impl Component<Msg> for ColumnView {
+    fn update(&mut self, msg: Msg) -> Vec<Msg> {
         match msg {
             Msg::ChangeSearch(search) => {
                 trace!("Search term change: {}", search);
-                Cmd::none()
+                vec![]
             }
         }
     }

@@ -12,7 +12,7 @@ use sauron::{
         *,
     },
     prelude::*,
-    Application, Cmd, Node, Window,
+    Component, Node, Window,
 };
 use std::{
     cell::RefCell,
@@ -466,16 +466,14 @@ impl DataView {
     }
 }
 
-impl Application<Msg> for DataView {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+impl Component<Msg> for DataView {
+    fn update(&mut self, msg: Msg) -> Vec<Msg> {
         match msg {
             Msg::PageMsg(page_index, page_msg) => {
                 self.page_views[page_index].update(page_msg);
-                Cmd::none()
             }
             Msg::ColumnMsg(column_index, column_msg) => {
                 self.column_views[column_index].update(column_msg);
-                Cmd::none()
             }
             Msg::Scrolled((scroll_top, scroll_left)) => {
                 self.scroll_top = scroll_top;
@@ -485,11 +483,9 @@ impl Application<Msg> for DataView {
                     self.visible_page = visible_page;
                     self.update_visible_pages();
                 }
-                Cmd::none()
             }
             Msg::ColumnEndResize(_client_x, _client_y) => {
                 self.active_resize = None;
-                Cmd::none()
             }
             Msg::MouseMove(client_x, _client_y) => {
                 debug!("debug in column view from the window..");
@@ -509,7 +505,6 @@ impl Application<Msg> for DataView {
                         }
                     }
                 }
-                Cmd::none()
             }
             Msg::ColumnStartResize(column_index, grip, client_x, _client_y) => {
                 self.active_resize = Some((column_index, grip));
@@ -519,9 +514,9 @@ impl Application<Msg> for DataView {
                     "width of column {} is {}",
                     column_index, column_view.width
                 );
-                Cmd::none()
             }
         }
+        vec![]
     }
 
     /// A grid of 2x2  containing 4 major parts of the table

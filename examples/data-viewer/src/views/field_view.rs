@@ -9,7 +9,7 @@ use sauron::{
         units::px,
         *,
     },
-    Application, Attribute, Cmd, Node,
+    Attribute, Component, Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -312,8 +312,8 @@ impl FieldView {
     }
 }
 
-impl Application<Msg> for FieldView {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+impl Component<Msg> for FieldView {
+    fn update(&mut self, msg: Msg) -> Vec<Msg> {
         trace!("field updated: {:?}", msg);
         match msg {
             Msg::TextChange(value) => {
@@ -323,11 +323,9 @@ impl Application<Msg> for FieldView {
                     &Value::String(value),
                     &self.column.data_type_def.data_type,
                 );
-                Cmd::none()
             }
             Msg::PrimaryClicked => {
                 trace!("Primary clicked");
-                Cmd::none()
             }
             Msg::CheckedChange(_value) => {
                 let bnew = if let DataValue::Bool(bvalue) = self.new_value {
@@ -337,9 +335,9 @@ impl Application<Msg> for FieldView {
                 };
                 self.new_value = DataValue::Bool(bnew);
                 trace!("new value: {:?}", self.new_value);
-                Cmd::none()
             }
         }
+        vec![]
     }
 
     /// when viewed as row
