@@ -1,4 +1,4 @@
-use crate::{dom::dom_updater::DomUpdater, Cmd, Component, Dispatch};
+use crate::{dom::dom_updater::DomUpdater, Application, Cmd, Dispatch};
 use std::{cell::RefCell, rc::Rc};
 #[cfg(feature = "with-request-animation-frame")]
 use wasm_bindgen::closure::Closure;
@@ -36,7 +36,7 @@ where
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Component<MSG> + 'static,
+    APP: Application<MSG> + 'static,
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
@@ -57,7 +57,7 @@ where
         app2: Rc<RefCell<APP2>>,
     ) -> Program<APP2, MSG>
     where
-        APP2: Component<MSG> + 'static,
+        APP2: Application<MSG> + 'static,
     {
         Program {
             app: app2,
@@ -73,7 +73,7 @@ where
     ) -> Program<APP2, MSG2>
     where
         FM: Fn(MSG) -> MSG2 + 'static,
-        APP2: Component<MSG2> + 'static,
+        APP2: Application<MSG2> + 'static,
         MSG2: 'static,
     {
         let dom_updater2: DomUpdater<MSG2> =
@@ -245,7 +245,7 @@ impl<APP, MSG> Program<APP, MSG> {
 impl<APP, MSG> Dispatch<MSG> for Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Component<MSG> + 'static,
+    APP: Application<MSG> + 'static,
 {
     #[cfg(feature = "with-request-animation-frame")]
     fn dispatch(&self, msg: MSG) {

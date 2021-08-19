@@ -21,8 +21,6 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use js_sys;
 }}
 
-pub use json;
-
 cfg_if! {if #[cfg(not(feature = "with-dom"))] {
     /// When event is not needed, such as just rendering the dom
     /// tree in server side application
@@ -33,13 +31,14 @@ cfg_if! {if #[cfg(not(feature = "with-dom"))] {
 pub mod html;
 #[macro_use]
 pub mod svg;
-#[macro_use]
-pub mod jss;
 mod render;
 pub mod vdom;
 
 pub use render::Render;
 
+#[doc(hidden)]
+pub use jss;
+#[doc(hidden)]
 pub use mt_dom;
 
 /// Prelude simplifies the imports from sauron

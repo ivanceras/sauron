@@ -65,7 +65,7 @@ impl App {
     }
 }
 
-impl Component<Msg> for App {
+impl Application<Msg> for App {
     fn init(&self) -> Cmd<Self, Msg> {
         console_log::init_with_level(log::Level::Trace).unwrap();
         self.fetch_page()

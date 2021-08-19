@@ -3,6 +3,8 @@ use quote::quote;
 use syn::{Expr, ExprBlock, ExprForLoop, Ident, Stmt};
 use syn_rsx::{Node, NodeType, ParserConfig};
 
+pub(crate) mod lookup;
+
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match syn_rsx::parse_with_config(
         input,
@@ -31,8 +33,8 @@ fn node_to_tokens(node: Node) -> TokenStream {
 
     let children_tokens = children_to_tokens(node.children);
 
-    let self_closing = sauron_parse::parser::is_self_closing(&name);
-    let namespace = sauron_parse::parser::tag_namespace(&name);
+    let self_closing = lookup::is_self_closing(&name);
+    let namespace = lookup::tag_namespace(&name);
 
     tokens.extend(
         if let Some(namespace) = namespace{

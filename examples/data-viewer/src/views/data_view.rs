@@ -12,7 +12,7 @@ use sauron::{
         *,
     },
     prelude::*,
-    Cmd, Component, Node, Window,
+    Application, Cmd, Node, Window,
 };
 use std::{
     cell::RefCell,
@@ -466,7 +466,7 @@ impl DataView {
     }
 }
 
-impl Component<Msg> for DataView {
+impl Application<Msg> for DataView {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::PageMsg(page_index, page_msg) => {

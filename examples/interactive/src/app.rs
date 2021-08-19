@@ -33,7 +33,7 @@ impl App {
     }
 }
 
-impl Component<Msg> for App {
+impl Application<Msg> for App {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Click => {

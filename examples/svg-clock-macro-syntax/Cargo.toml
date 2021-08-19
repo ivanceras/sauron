@@ -1,5 +1,5 @@
 [package]
-name = "svg-clock"
+name = "svg-clock-macro-syntax"
 version = "0.1.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
@@ -12,7 +12,6 @@ crate-type = ["cdylib"]
 console_error_panic_hook = "0.1"
 js-sys = "0.3"
 sauron = { path = "../../" }
-lazy_static = "1.0"
 log = "0.4"
 console_log = "0.2"
 

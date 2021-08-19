@@ -99,7 +99,8 @@
 - [ ] Use Weak pointer for program instead of Rc where strong reference is not needed.
 
 ## Maintenance
-- [ ] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
-- [ ] Move `jss` into a new crate `sauron-jss` for keeping sauron slim.
-    - [ ] Use [json](https://github.com/maciejhirsz/json-rust) crate for `jss`.
+- [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
+- [X] Move `jss` into a new crate `sauron-jss` for keeping sauron slim.
+    - [x] Use [json](https://github.com/maciejhirsz/json-rust) crate for `jss`.
         - The quote on keys are optional, so this is good for use in writing css.
+- [ ] Enumerate the exported modules and structs in prelude instead of just using glob(ie: *).

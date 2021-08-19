@@ -16,7 +16,7 @@ pub struct Measurements {
 }
 
 /// The app should implement this trait for it to be handled by the Program
-pub trait Component<MSG>
+pub trait Application<MSG>
 where
     MSG: 'static,
 {
@@ -59,20 +59,32 @@ where
     }
 }
 
-/// The parent can attach event listeneres to the the sub component
-pub trait SubComponent<PMSG, MSG> {
-    /// update the sub component
-    fn update(&mut self, msg: MSG) -> (Option<MSG>, Vec<PMSG>);
+/// A component has a view and can update itself.
+/// Optionally a component can return a succeeding Msg to be done on the next
+/// update iteration.
+pub trait Component<MSG> {
+    /// update itself and can return an optional Msg to be called
+    /// on the next update loop.
+    fn update(&mut self, msg: MSG) -> Vec<MSG>;
 
-    /// view of this sub component
+    /// the view of the component
     fn view(&self) -> Node<MSG>;
 }
 
-/// A component with an update function where it may return a recurring Msg
-pub trait SimpleComponent<MSG> {
-    /// the update of the simple component and may return an optional Msg
-    fn update(&mut self, msg: MSG) -> Option<MSG>;
+/// A widget has the same capability to a Component.
+/// Paren component of a widget can listen to widget events.
+///
+/// It has a view of it's own and can update itself.
+/// It can return an Optional Msg to update itself on the next update loop.
+/// Additionally, it can trigger listeners that is hook from the parent component that uses it.
+pub trait Widget<MSG, PMSG> {
+    /// update this widget with the msg.
+    /// can optionally return a Msg for the next update.
+    ///
+    /// The Vec<PMSG> is the the msg can optionally be return to the calling component
+    /// as a result from triggering the event listeners
+    fn update(&mut self, msg: MSG) -> (Vec<MSG>, Vec<PMSG>);
 
-    /// the view of the simple component
+    /// view of this widget.
     fn view(&self) -> Node<MSG>;
 }

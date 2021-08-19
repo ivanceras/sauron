@@ -15,13 +15,13 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 js-sys = { version = "0.3", optional = true }
-lazy_static = "1.3.0"
 log = "0.4"
 cfg-if = "0.1"
 thiserror = "1.0"
 doc-comment = "0.3"
 mt-dom = { version = "0.10" }
-json = "0.12.4"
+once_cell = "1.8"
+jss = "0.3.0"
 
 
 [dependencies.wasm-bindgen]
@@ -74,11 +74,11 @@ features = [
 
 [features]
 default = ["with-dom", "with-request-animation-frame"]
-with-parser = [] #enumerates html tags and attributes
-with-measure = ["mt-dom/with-measure"]
+with-lookup = [] #enumerates html tags and attributes
+with-measure = ["mt-dom/with-measure"] # log traces for measurements in various parts of the system where performance matters.
 with-debug = [] # log debug patches
 with-request-animation-frame = [] # enable the use of request-animation-frame in calling dispatch
-with-dom = ["wasm-bindgen", "js-sys", "web-sys"]
+with-dom = ["wasm-bindgen", "js-sys", "web-sys"] # for client-side usage
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

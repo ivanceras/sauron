@@ -1,5 +1,6 @@
 use crate::{
-    dom::created_node::create_closure_wrap, Attribute, Cmd, Component, Dispatch,
+    dom::created_node::create_closure_wrap, Application, Attribute, Cmd,
+    Dispatch,
 };
 use std::fmt::Debug;
 use wasm_bindgen::{self, prelude::*, JsCast};
@@ -16,7 +17,7 @@ impl Window {
         event_listeners: Vec<Attribute<MSG>>,
     ) -> Cmd<APP, MSG>
     where
-        APP: Component<MSG> + 'static,
+        APP: Application<MSG> + 'static,
         MSG: 'static,
     {
         Cmd::new(move |program| {
@@ -58,7 +59,7 @@ impl Window {
     where
         F: Fn(i32, i32) -> MSG + Clone + 'static,
         MSG: 'static,
-        APP: Component<MSG> + 'static,
+        APP: Application<MSG> + 'static,
     {
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
             let cb_clone = cb.clone();
@@ -81,7 +82,7 @@ impl Window {
     where
         F: Fn(String) -> MSG + Clone + 'static,
         MSG: 'static,
-        APP: Component<MSG> + 'static,
+        APP: Application<MSG> + 'static,
     {
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
             let cb_clone = cb.clone();

@@ -24,7 +24,10 @@ pub struct DateTimeWidget<PMSG> {
     time_change_listener: Vec<Callback<PMSG>>,
 }
 
-impl<PMSG> DateTimeWidget<PMSG> {
+impl<PMSG> DateTimeWidget<PMSG>
+where
+    PMSG: 'static,
+{
     pub fn new(date: &str, time: &str, mounted: bool) -> Self {
         DateTimeWidget {
             date: date.to_string(),
@@ -51,19 +54,19 @@ impl<PMSG> DateTimeWidget<PMSG> {
     }
 }
 
-impl<PMSG> SubComponent<PMSG, Msg> for DateTimeWidget<PMSG>
+impl<PMSG> Widget<Msg, PMSG> for DateTimeWidget<PMSG>
 where
     PMSG: Clone + Debug + 'static,
 {
-    fn update(&mut self, msg: Msg) -> (Option<Msg>, Vec<PMSG>) {
+    fn update(&mut self, msg: Msg) -> (Vec<Msg>, Vec<PMSG>) {
         match msg {
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
-                (Some(Msg::TimeOrDateModified(self.date_time())), vec![])
+                (vec![Msg::TimeOrDateModified(self.date_time())], vec![])
             }
             Msg::TimeChange(time) => {
                 log::trace!("time is changed to: {}", time);
-                (Some(Msg::TimeOrDateModified(self.date_time())), vec![])
+                (vec![Msg::TimeOrDateModified(self.date_time())], vec![])
             }
             Msg::TimeOrDateModified(date_time) => {
                 log::trace!("time or date is changed: {}", date_time);
@@ -76,7 +79,7 @@ where
                     parent_msg.push(pmsg);
                 }
                 log::trace!("sending this to parent: {:?}", parent_msg);
-                (None, parent_msg)
+                (vec![], parent_msg)
             }
             Msg::Mount(target_node) => {
                 /*
@@ -91,12 +94,12 @@ where
                     self.mounted = true;
                 }
                 */
-                (None, vec![])
+                (vec![], vec![])
             }
             Msg::BtnClick => {
                 log::trace!("btn is clicked..");
                 self.cnt += 1;
-                (None, vec![])
+                (vec![], vec![])
             }
         }
     }

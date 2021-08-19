@@ -3,7 +3,7 @@ use crate::views::{data_view, DataView};
 use sauron::{
     html::{attributes::class, events::*, *},
     prelude::*,
-    Cmd, Component, Node, Window,
+    Application, Cmd, Node, Window,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -44,7 +44,7 @@ impl ResizeWrapper {
     }
 }
 
-impl Component<Msg> for ResizeWrapper {
+impl Application<Msg> for ResizeWrapper {
     /// Setup the resize wrapper to listen to the mouseup
     /// and mousemove event of the Window
     /// to have a continuity and ensure that the mousemouve
