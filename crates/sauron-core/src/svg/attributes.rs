@@ -1,12 +1,6 @@
 //! provides functions and macros for building svg attributes
-use crate::prelude::{
-    AttributeValue,
-    Value,
-};
-use mt_dom::{
-    attr,
-    attr_ns,
-};
+use crate::prelude::{AttributeValue, Value};
+use mt_dom::{attr, attr_ns};
 
 pub(in crate) const XLINK_NAMESPACE: &str = "http://www.w3.org/1999/xlink";
 
@@ -28,7 +22,7 @@ macro_rules! declare_xlink_attributes {
                 }
          )*
 
-        #[cfg(feature = "with-parser")]
+        #[cfg(feature = "with-lookup")]
         /// Svg attributes with xlink namespace
         pub const SVG_ATTRS_XLINK:[(&'static str,&'static str); 7] = [$((stringify!($name),$attribute),)*];
     }
@@ -44,7 +38,7 @@ macro_rules! declare_svg_attributes{
      ) => {
         declare_attributes!{ $($name;)*}
 
-        #[cfg(feature = "with-parser")]
+        #[cfg(feature = "with-lookup")]
         /// These are most commonly used svg attributes
         pub const SVG_ATTRS:[&'static str; 168] = [$(stringify!($name),)*];
     }
@@ -58,7 +52,7 @@ macro_rules! declare_svg_attributes_special{
      ) => {
         declare_attributes!{ $($name => $attribute;)*}
 
-        #[cfg(feature = "with-parser")]
+        #[cfg(feature = "with-lookup")]
         /// These are svg attributes with names that are non proper rust identifier therefore they
         /// are handled differently. ie: (color-profile, accent-height, etc)
         pub const SVG_ATTRS_SPECIAL:[(&'static str,&'static str); 76] = [$((stringify!($name),$attribute),)*];

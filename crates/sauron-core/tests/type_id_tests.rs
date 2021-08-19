@@ -16,7 +16,7 @@ fn test_type_ids() {
     let cb2 = Callback::from(|_e| Msg::Hover(2));
     let cb3 = Callback::from(|_e| Msg::Hover(3));
 
-    let other_cb = Callback::from(|_e| ParentMsg::Other);
+    let _other_cb = Callback::from(|_e| ParentMsg::Other);
 
     assert_eq!(cb2, cb3);
     assert_eq!(cb1, cb2);

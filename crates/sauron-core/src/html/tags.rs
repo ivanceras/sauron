@@ -1,4 +1,5 @@
 //! provides functionalities and macro for building html elements
+
 macro_rules! declare_tags {
     ( $(
          $(#[$attr:meta])*
@@ -48,7 +49,7 @@ macro_rules! declare_sc_tags {
              )*
         }
 
-        #[cfg(feature = "with-parser")]
+        #[cfg(feature = "with-lookup")]
         /// These are the self closing tags such as `<input/>`, `<br/>`,
         pub const HTML_SC_TAGS: [&'static str; 16] = [$(stringify!($name),)*];
     }
@@ -62,7 +63,7 @@ macro_rules! declare_common_tags_and_macro {
 
         }
 
-        #[cfg(feature = "with-parser")]
+        #[cfg(feature = "with-lookup")]
         /// These are the comonly used html tags such as div, input, buttons,.. etc
         pub const HTML_TAGS: [&'static str; 98] = [$(stringify!($name),)*];
     };
@@ -85,7 +86,7 @@ macro_rules! declare_tags_non_common{
      ) => {
         declare_tags!{ $($name;)*}
 
-        #[cfg(feature = "with-parser")]
+        #[cfg(feature = "with-lookup")]
         /// These are html tags which are non commonly used.
         /// Put together in this collection to avoid import conflicts with the commonly used
         /// ones.
@@ -102,7 +103,7 @@ macro_rules! declare_tags_and_macro_non_common{
      ) => {
         declare_tags_and_macro!{ $($name;)*}
 
-        #[cfg(feature = "with-parser")]
+        #[cfg(feature = "with-lookup")]
         /// These are html tags with macro which are non commonly used.
         /// Put together in this collection to avoid import conflicts with the commonly used
         /// ones.

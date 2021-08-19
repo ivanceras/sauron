@@ -61,7 +61,7 @@ macro_rules! declare_html_attributes{
      ) => {
         declare_attributes!{ $($name;)*}
 
-        #[cfg(feature = "with-parser")]
+        #[cfg(feature = "with-lookup")]
         /// These are most commonly used html attributes such as class, id, etc
         pub const HTML_ATTRS:[&'static str; 115] = [$(stringify!($name),)*];
     }
@@ -78,7 +78,7 @@ macro_rules! declare_html_attributes_special{
      ) => {
         declare_attributes!{ $($name => $attribute;)*}
 
-        #[cfg(feature = "with-parser")]
+        #[cfg(feature = "with-lookup")]
         /// These are html attributes with names that are non proper rust identifier therefore
         /// handled differently. ie: (for, in)
         pub const HTML_ATTRS_SPECIAL:[(&'static str,&'static str); 8] = [$((stringify!($name),$attribute),)*];
