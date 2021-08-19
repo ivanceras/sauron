@@ -38,17 +38,6 @@ where
         }
     }
 
-    /// Map cmd such that Cmd<DSP> becoms Cmd<DSP2>
-    pub fn map_cmd<F, DSP2>(&self, func: F) -> Cmd<DSP2>
-    where
-        DSP2: Clone + 'static,
-        F: Fn(DSP2) -> DSP + 'static,
-    {
-        log::trace!("mapping cmd here for real...");
-        let self_clone = self.clone();
-        Cmd::new(move |program| self_clone.clone().emit(&func(program)))
-    }
-
     /// creates a unified Cmd which batches all the other Cmds in one.
     pub fn batch(cmds: Vec<Self>) -> Self {
         let mut commands = vec![];

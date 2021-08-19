@@ -1,11 +1,20 @@
 # Changelog
 
 ## Unreleased
--  Switch dependency from `serde_json` to `json` on `jss` module where quotes on identifier keys are optional
--  **breaking** move `sauron-markdown` out to a new [repository](https://github.com/ivanceras/sauron-markdown), as it has gotten bigger.
--  Move `futuristi-ui` out of the examples and into a new [repository](https://github.com/ivanceras/futuristic-ui).
--  Add `init_with_program` function in `Component` for allowing components to have a way access to it's own executor.
--  Add a test to show node-recylcing bug
+- **breaking** Move out `jss` module into a new crate and [repository](https://github.com/ivanceras/jss), as it has gotten bigger.
+    - This also make sauron stays slim to prevent it from collapsing from its own weight.
+- **breaking** Move `sauron-markdown` out to a new [repository](https://github.com/ivanceras/sauron-markdown), as it has gotten bigger.
+- Move `futuristi-ui` out of the examples and into a new [repository](https://github.com/ivanceras/futuristic-ui).
+- Add `init_with_program` function in `Component` for allowing components to have a way access to it's own executor.
+    - This is for enabling components have access to the program
+- Add a test to show node-recylcing bug
+- Remove dependency `lazy_static` in favor of `once_cell`
+- **breaking** Move `sauron-parse` out of the repository to keep sauron being lean to prevent it from collapsing on its own weight.
+- **breaking** Rename `Component` to `Application`, use `Component` for actual components that can use subsequent updates.
+- Remove internal `style` macro in favor of `jss` crate
+- Modify the `Callback` such that there is lesser chance that node with different event will be recycled
+    - type_id of input arguments and output arguments of function is stored for future comparison on the diffing algorithm.
+- Move out `futuristic-ui` out of the examples, since it is a lot bigger to fit as an example. New [repo](https://github.com/ivanceras/futuristic-ui)
 
 ## 0.40.0
  - Improve `sauron-node-macro` performance by resolving the values of `namespace` and `self_closing` tags at compile time, rather than at runtime.

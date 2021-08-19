@@ -1,4 +1,3 @@
-use crate::map_msg::NodeMapMsg;
 use crate::{
     diff,
     dom::{
@@ -200,19 +199,6 @@ where
         )
         .expect("Error in patching the dom");
         self.active_closures.extend(active_closures);
-    }
-    /// map this DomUpdater such that the Node<MSG> will become Node<MSG2>
-    pub fn map_updater_msg<F, MSG2>(&self, func: F) -> DomUpdater<MSG2>
-    where
-        F: Fn(MSG) -> MSG2 + 'static,
-        MSG2: 'static,
-    {
-        DomUpdater {
-            current_vdom: self.current_vdom.clone().map_msg(func),
-            root_node: self.root_node.clone(),
-            active_closures: ActiveClosure::new(),
-            focused_node: None,
-        }
     }
 
     /// Return the root node of your application, the highest ancestor of all other nodes in

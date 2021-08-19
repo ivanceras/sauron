@@ -67,7 +67,5 @@ members = [
 
 
 [patch.crates-io]
-mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
-jss = { git = "https://github.com/ivanceras/jss.git", branch = "master" }
-sauron = { git = "https://github.com/ivanceras/sauron.git", branch = "develop" }
-#mt-dom = { path = "../mt-dom" }
+#mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
+#jss = { git = "https://github.com/ivanceras/jss.git", branch = "master" }
