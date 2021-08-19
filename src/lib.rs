@@ -37,10 +37,5 @@ pub use sauron_core::{
     diff, html, jss, mt_dom, svg, Attribute, Callback, Element, Node, Patch,
     Render, Text,
 };
-#[cfg(feature = "sauron-parse")]
-pub use sauron_parse::parser;
-
-#[cfg(any(feature = "with-markdown", feature = "with-lite-markdown"))]
-pub use sauron_markdown::markdown;
 #[cfg(feature = "with-node-macro")]
 pub use sauron_node_macro::node;
