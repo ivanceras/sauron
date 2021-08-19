@@ -24,7 +24,10 @@ pub struct DateTimeWidget<PMSG> {
     time_change_listener: Vec<Callback<PMSG>>,
 }
 
-impl<PMSG> DateTimeWidget<PMSG> {
+impl<PMSG> DateTimeWidget<PMSG>
+where
+    PMSG: 'static,
+{
     pub fn new(date: &str, time: &str, mounted: bool) -> Self {
         DateTimeWidget {
             date: date.to_string(),

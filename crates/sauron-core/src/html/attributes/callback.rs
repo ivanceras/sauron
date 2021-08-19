@@ -40,9 +40,6 @@ where
     EVENT: 'static,
 {
     fn from(func: F) -> Self {
-        println!("type_id of F: {:?}", std::any::TypeId::of::<F>());
-        println!("type_id of MSG: {:?}", std::any::TypeId::of::<MSG>());
-        println!("type_id of EVENT: {:?}", std::any::TypeId::of::<EVENT>());
         Self {
             func: Rc::new(func),
             event_type_id: TypeId::of::<EVENT>(),
