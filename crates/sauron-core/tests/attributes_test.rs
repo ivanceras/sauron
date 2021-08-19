@@ -1,8 +1,22 @@
 #![deny(warnings)]
-use sauron_core::{
-    html::attributes::style,
-    prelude::*,
-};
+use sauron_core::{html::attributes::style, prelude::*};
+
+#[test]
+fn test_style_macro() {
+    let actual: Node<&'static str> =
+        div(vec![style! {display:"flex",flex_direction:"row"}], vec![]);
+    let mut actual_html = String::new();
+    actual.render(&mut actual_html).unwrap();
+    let expected: Node<&'static str> = div(
+        vec![attr("style", "display:flex;flex-direction:row;")],
+        vec![],
+    );
+
+    let mut expected_html = String::new();
+    expected.render(&mut expected_html).unwrap();
+
+    assert_eq!(actual_html, expected_html);
+}
 
 #[test]
 fn test_styles() {
