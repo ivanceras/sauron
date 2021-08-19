@@ -202,22 +202,16 @@ where
         self.active_closures.extend(active_closures);
     }
     /// map this DomUpdater such that the Node<MSG> will become Node<MSG2>
-    pub fn map_msg<F, MSG2>(self, func: F) -> DomUpdater<MSG2>
+    pub fn map_updater_msg<F, MSG2>(&self, func: F) -> DomUpdater<MSG2>
     where
         F: Fn(MSG) -> MSG2 + 'static,
         MSG2: 'static,
     {
-        let DomUpdater {
-            current_vdom,
-            root_node,
-            active_closures,
-            focused_node,
-        } = self;
         DomUpdater {
-            current_vdom: current_vdom.map_msg(func),
-            root_node,
-            active_closures,
-            focused_node,
+            current_vdom: self.current_vdom.clone().map_msg(func),
+            root_node: self.root_node.clone(),
+            active_closures: ActiveClosure::new(),
+            focused_node: None,
         }
     }
 

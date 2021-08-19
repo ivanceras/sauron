@@ -58,3 +58,21 @@ where
         Cmd::no_render()
     }
 }
+
+/// The parent can attach event listeneres to the the sub component
+pub trait SubComponent<PMSG, MSG> {
+    /// update the sub component
+    fn update(&mut self, msg: MSG) -> (Option<MSG>, Vec<PMSG>);
+
+    /// view of this sub component
+    fn view(&self) -> Node<MSG>;
+}
+
+/// A component with an update function where it may return a recurring Msg
+pub trait SimpleComponent<MSG> {
+    /// the update of the simple component and may return an optional Msg
+    fn update(&mut self, msg: MSG) -> Option<MSG>;
+
+    /// the view of the simple component
+    fn view(&self) -> Node<MSG>;
+}

@@ -25,6 +25,9 @@
  - [X] **breaking** merge `Browser` to `Window`.
  - [ ] Add `and_then`, `sequence` to `Cmd` to perform a task after the preceding Cmd succeeds.
  - [ ] Create a document on why it is needed for events such as `on_click` to have a copy of the variables outside of its environment.
+ - [ ] Rethink on the naming of Component, SimpleComponent, SubComponent.
+     - Component is actually Application since it the app that is manipulated by the program(executor).
+     - Other names: Root, Component, Control, Widget
 
 ## Internal
 - [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`

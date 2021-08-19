@@ -130,7 +130,7 @@ on this repo.
 - [data-viewer](https://ivanceras.github.io/data-viewer/) - A resizable spreadsheet CSV data viewer
 - [svg-clock](https://ivanceras.github.io/svg-clock/) - A clock drawn using SVG and window tick event.
 - [ultron code-editor](https://ivanceras.github.io/ultron/) - A web-base text-editor with syntax highlighting
-- [hackernews-sauron](https://github.com/ivanceras/hackernews-sauron) - A hackernews clone showcasing the feature of sauron to write web applications that can work with our without javascript.
+- [hackernews-sauron](https://github.com/ivanceras/hackernews-sauron) - A hackernews clone showcasing the feature of sauron to write web applications that can work with or without javascript.
 
 
 #### Prerequisite:

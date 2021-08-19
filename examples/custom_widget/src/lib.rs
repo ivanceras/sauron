@@ -13,29 +13,34 @@ pub enum Msg {
     Decrement,
     Mount(web_sys::Node),
     DateTimeMsg(date_time::Msg),
-    TimeChange,
+    DateTimeChange(String),
 }
 
 pub struct App {
     count: i32,
     date_time: DateTimeWidget<Msg>,
+    program: Option<Program<Self, Msg>>,
 }
 
 impl App {
     pub fn new() -> Self {
         let mut date_time = DateTimeWidget::new("2020-12-30", "10:00", false);
-        date_time.on_time_change(|_e| {
-            log::info!("Time has changed..");
-            Msg::TimeChange
+        date_time.on_date_time_change(|_e| {
+            log::info!("App speaking... -> Time has changed..");
+            Msg::DateTimeChange("<replace with date here>".to_string())
         });
         App {
             count: 0,
             date_time,
+            program: None,
         }
     }
 }
 
 impl Component<Msg> for App {
+    fn init_with_program(&mut self, program: Program<Self, Msg>) {
+        self.program = Some(program);
+    }
     fn view(&self) -> Node<Msg> {
         div(
             vec![on_mount(|me| Msg::Mount(me.target_node))],
@@ -82,19 +87,30 @@ impl Component<Msg> for App {
             // the date time widget.
             // We want the date-time widget to have it's own lifecycle
             Msg::DateTimeMsg(dmsg) => {
-                match dmsg {
-                    date_time::Msg::Mount(_) => {
-                        log::trace!("mount event pass through..");
-                        let cmd = self.date_time.update(dmsg);
-                    }
-                    _ => {
-                        log::trace!("not wiring {:?}", dmsg);
-                    }
+                let (follow_up, pmsg_list) = self.date_time.update(dmsg);
+
+                let mut cmds: Vec<Cmd<Self, Msg>> = pmsg_list
+                    .into_iter()
+                    .map(|pmsg| {
+                        log::trace!("mapping: {:?}", pmsg);
+                        Cmd::new(move |program| {
+                            log::trace!("dispatching: {:?}", pmsg);
+                            program.dispatch(pmsg.clone())
+                        })
+                    })
+                    .collect();
+                log::trace!("created {}", cmds.len());
+
+                if let Some(follow_up) = follow_up {
+                    cmds.push(Cmd::new(move |program| {
+                        log::info!("A follow up cmd.. triggering here..");
+                        program.dispatch(Msg::DateTimeMsg(follow_up.clone()))
+                    }));
                 }
-                Cmd::none()
+                Cmd::batch(cmds)
             }
-            Msg::TimeChange => {
-                log::debug!("Time is changed in out date time widget");
+            Msg::DateTimeChange(String) => {
+                log::warn!("FINALY CALLED HERE? Time is changed in out date time widget");
                 Cmd::none()
             }
         }
