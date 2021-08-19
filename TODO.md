@@ -11,10 +11,11 @@
  - [X] Change the README example to use the node macro syntax
      - rename the old `minimal` to `minimal-alt` and use the `node-macro-syntax` in `minimal` example
  - [X] Move `sauron-syntax` into `html2sauron` project
- - [ ] Expose Cmd,Component outside of `with-dom` feature gate
+ - [ ] ~~Expose Cmd,Component outside of `with-dom` feature gate~~
      - This would allow a total isomorphic app reusing the components
-     - [ ] Make an equivalent for Program(client-side updater) for use in server-side
-        - ie: ServerRender, where Msg could be passed as a data to hydrate the view (template) before sending to the client
+     - ~~[ ] Make an equivalent for Program(client-side updater) for use in server-side~~
+       ~~ - ie: ServerRender, where Msg could be passed as a data to hydrate the view (template) before sending to the client~~
+     - We don't need to use the update function in server-side rendering. We set the state of the app by instatiating the app with appropriate data.
  - [X] Fix the render function where attributes of the same name not merged
  - [X] Change type of tag, attribute_name, style keys from `&'static str` to `&'a str`
      - This will remove the need for hardcode HTML_STYLES lookup, which could be a performance penalty
@@ -28,9 +29,9 @@
  - [X] Rethink on the naming of Component, SimpleComponent, SubComponent.
      - Component is actually Application since it the app that is manipulated by the program(executor).
      - Other names: ~~Root~~ Application, Component, ~~Control,~~ Widget
- - [ ] Merge `init` and `init_with_program`
+ - [X] Merge `init` and `init_with_program`
     - It make sense to make `init` mutable so the developer can manipulate the component at initialization stage.
-    - [ ] Make call to `init` right after the Application is mounted into the `DOM`, rather than before.
+    - [X] Make call to `init` right after the Application is mounted into the `DOM`, rather than before.
 
 ## Internal
 - [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`
@@ -110,4 +111,4 @@
     - [x] Use [json](https://github.com/maciejhirsz/json-rust) crate for `jss`.
         - The quote on keys are optional, so this is good for use in writing css.
 - [ ] Enumerate the exported modules and structs in prelude instead of just using glob(ie: *).
-- [ ] Fix the data-viewer example to use Components on the views rather than Application
+- [X] Fix the data-viewer example to use Components on the views rather than Application

@@ -15,6 +15,8 @@
 - Modify the `Callback` such that there is lesser chance that node with different event will be recycled
     - type_id of input arguments and output arguments of function is stored for future comparison on the diffing algorithm.
 - Move out `futuristic-ui` out of the examples, since it is a lot bigger to fit as an example. New [repo](https://github.com/ivanceras/futuristic-ui)
+- **breaking** `init` in `Application` not uses `&mut self` and has access to `Program`.
+    This allows the application to update its state upon initialization.
 
 ## 0.40.0
  - Improve `sauron-node-macro` performance by resolving the values of `namespace` and `self_closing` tags at compile time, rather than at runtime.
