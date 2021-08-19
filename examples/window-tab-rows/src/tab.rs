@@ -43,17 +43,21 @@ impl Tab {
     }
 }
 
-impl SimpleComponent<Msg> for Tab {
-    fn update(&mut self, msg: Msg) -> Option<Msg> {
+impl Component<Msg> for Tab {
+    fn update(&mut self, msg: Msg) -> Vec<Msg> {
         match msg {
             Msg::TabClick => {
                 self.tab_clicks += 1;
+                vec![]
             }
             Msg::RowMsg(index, row_msg) => {
-                self.rows[index].update(row_msg);
+                let follow_ups = self.rows[index].update(row_msg);
+                follow_ups
+                    .into_iter()
+                    .map(|follow_up| Msg::RowMsg(index, follow_up))
+                    .collect()
             }
         }
-        None
     }
 
     fn view(&self) -> Node<Msg> {

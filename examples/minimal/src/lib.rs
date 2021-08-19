@@ -8,7 +8,7 @@ use sauron::{
         h1, input, text,
     },
     prelude::*,
-    Cmd, Component, Node, Program,
+    Application, Cmd, Node, Program,
 };
 
 pub enum Msg {
@@ -26,7 +26,7 @@ impl App {
     }
 }
 
-impl Component<Msg> for App {
+impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         sauron::html::main(
             vec![],

@@ -13,10 +13,7 @@ mod program;
 mod util;
 mod window;
 
-pub use component::Component;
-pub use component::Measurements;
-pub use component::SimpleComponent;
-pub use component::SubComponent;
+pub use component::{Application, Component, Measurements, Widget};
 pub use created_node::CreatedNode;
 pub use dispatch::Dispatch;
 pub use dom_updater::DomUpdater;

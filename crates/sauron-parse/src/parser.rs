@@ -1,4 +1,6 @@
 //! This module parses literal html returns sauron dom tree
+//! Most of the utility function returns a &'static str version of the &str lookup
+//! for use in creating a Node<Msg> which is using &'static str as tag, attribute and style.
 
 use html5ever::{
     local_name, namespace_url, ns, parse_document, parse_fragment,
@@ -27,11 +29,13 @@ use sauron_core::{
     },
     Attribute, Node,
 };
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::{fmt, io};
 use thiserror::Error;
 
+/// All of the svg tags
 static ALL_SVG_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
     HashSet::from_iter(
         SVG_TAGS
@@ -67,6 +71,27 @@ static ALL_HTML_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
 static SELF_CLOSING_TAGS: Lazy<HashSet<&&'static str>> =
     Lazy::new(|| HashSet::from_iter(HTML_SC_TAGS.iter()));
 
+/// contains a Map(Ident, Style name) for all html styles
+static ALL_STYLES: Lazy<HashMap<&'static str, &'static str>> =
+    Lazy::new(|| HashMap::from_iter(HTML_STYLES.iter().map(|i| *i)));
+
+/// contains a Map(Ident, AttributeName) for all html attributes
+static ALL_ATTRS: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
+    HashMap::from_iter(
+        HTML_ATTRS
+            .iter()
+            .chain(SVG_ATTRS.iter())
+            .map(|att| (*att, *att))
+            .chain(
+                HTML_ATTRS_SPECIAL
+                    .iter()
+                    .chain(SVG_ATTRS_SPECIAL.iter())
+                    .chain(SVG_ATTRS_XLINK.iter())
+                    .map(|(func, att)| (*func, *att)),
+            ),
+    )
+});
+
 /// all the possible error when parsing html string
 #[derive(Debug, Error)]
 pub enum ParseError {
@@ -81,52 +106,36 @@ pub enum ParseError {
     FmtError(#[from] fmt::Error),
 }
 
+/// Match a tag in string form into a static str
 fn match_tag(tag: &str) -> Option<&'static str> {
     ALL_HTML_TAGS
         .iter()
         .chain(ALL_SVG_TAGS.iter())
-        .find(|item| item.eq_ignore_ascii_case(&tag))
+        .find(|item| **item == &tag)
         .map(|item| **item)
 }
 
-fn match_attribute(key: &str) -> Option<&'static str> {
-    HTML_ATTRS
-        .iter()
-        .chain(SVG_ATTRS.iter())
-        .find(|att| att.eq_ignore_ascii_case(&key))
-        .map(|att| *att)
-        .or_else(|| {
-            HTML_ATTRS_SPECIAL
-                .iter()
-                .chain(SVG_ATTRS_SPECIAL.iter())
-                .chain(SVG_ATTRS_XLINK.iter())
-                .find(|(_func, att)| att.eq_ignore_ascii_case(&key))
-                .map(|(func, _att)| *func)
-        })
+/// match this attribute name in ident format to the actual attribute
+pub fn match_ident_attribute(key: &str) -> Option<&'static str> {
+    ALL_ATTRS.get(key).map(|a| *a)
 }
 
-fn match_style_name(key: &str) -> Option<&'static str> {
-    HTML_STYLES
+fn match_attribute(att: &str) -> Option<&'static str> {
+    ALL_ATTRS
         .iter()
-        .find(|(_ident, name)| name.eq_ignore_ascii_case(&key))
-        .map(|(_ident, name)| *name)
+        .find(|(_k, v)| v == &&att)
+        .map(|(_k, v)| *v)
+}
+/// match this style name (in ident format) to the actual style name
+pub fn match_ident_style_name(key: &str) -> Option<&'static str> {
+    ALL_STYLES.get(key).map(|s| *s)
 }
 
-/// return the static str of this function name
-pub fn match_attribute_function(key: &str) -> Option<&'static str> {
-    HTML_ATTRS
+fn match_style_name(att: &str) -> Option<&'static str> {
+    ALL_STYLES
         .iter()
-        .chain(SVG_ATTRS.iter())
-        .find(|att| att.eq_ignore_ascii_case(key))
-        .map(|att| *att)
-        .or_else(|| {
-            HTML_ATTRS_SPECIAL
-                .iter()
-                .chain(SVG_ATTRS_SPECIAL.iter())
-                .chain(SVG_ATTRS_XLINK.iter())
-                .find(|(func, _att)| func.eq_ignore_ascii_case(key))
-                .map(|(func, _att)| *func)
-        })
+        .find(|(_k, v)| v == &&att)
+        .map(|(_k, v)| *v)
 }
 
 /// Find the namespace of this tag
@@ -300,6 +309,37 @@ pub fn parse_simple<MSG>(html: &str) -> Result<Vec<Node<MSG>>, ParseError> {
 mod tests {
     use super::*;
     use sauron_core::{html::div, Render};
+
+    #[test]
+    fn should_match_tags() {
+        assert_eq!(Some("div"), match_tag(&String::from("div")));
+        assert_eq!(Some("svg"), match_tag(&String::from("svg")));
+        assert_eq!(
+            Some("color-profile"),
+            match_tag(&String::from("color-profile"))
+        );
+    }
+    #[test]
+    fn should_match_ident_attributes() {
+        assert_eq!(Some("class"), match_ident_attribute("class"));
+        assert_eq!(Some("font-family"), match_ident_attribute("font_family"));
+        assert_eq!(Some("type"), match_ident_attribute("r#type"));
+        assert_eq!(Some("type"), match_attribute("type"));
+        assert_eq!(Some("accept-charset"), match_attribute("accept-charset"));
+        assert_eq!(
+            Some("accept-charset"),
+            match_ident_attribute("accept_charset")
+        );
+    }
+
+    #[test]
+    fn should_match_styles() {
+        assert_eq!(Some("color"), match_ident_style_name("color"));
+        assert_eq!(
+            Some("background-color"),
+            match_ident_style_name("background_color")
+        );
+    }
 
     #[test]
     fn test_html_child() {

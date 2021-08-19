@@ -1,16 +1,8 @@
 use sauron::{
-    dom::events::KeyboardEvent,
-    html::*,
-    node,
-    prelude::*,
-    Cmd,
-    Component,
+    dom::events::KeyboardEvent, html::*, node, prelude::*, Application, Cmd,
     Node,
 };
-use serde_derive::{
-    Deserialize,
-    Serialize,
-};
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Model {
@@ -49,7 +41,7 @@ pub enum Msg {
     NoOp,
 }
 
-impl Component<Msg> for Model {
+impl Application<Msg> for Model {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Add => {
@@ -157,12 +149,10 @@ impl Model {
         let entries = self
             .entries
             .iter()
-            .filter(|entry| {
-                match self.visibility {
-                    Visibility::All => true,
-                    Visibility::Active => !entry.completed,
-                    Visibility::Completed => entry.completed,
-                }
+            .filter(|entry| match self.visibility {
+                Visibility::All => true,
+                Visibility::Active => !entry.completed,
+                Visibility::Completed => entry.completed,
             })
             .collect::<Vec<_>>();
 

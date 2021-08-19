@@ -3,7 +3,7 @@ mod date_time;
 use date_time::DateTimeWidget;
 use sauron::html::text;
 use sauron::prelude::*;
-use sauron::{node, Cmd, Component, Node, Program};
+use sauron::{node, Application, Cmd, Node, Program};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -37,7 +37,7 @@ impl App {
     }
 }
 
-impl Component<Msg> for App {
+impl Application<Msg> for App {
     fn init_with_program(&mut self, program: Program<Self, Msg>) {
         self.program = Some(program);
     }
@@ -87,26 +87,25 @@ impl Component<Msg> for App {
             // the date time widget.
             // We want the date-time widget to have it's own lifecycle
             Msg::DateTimeMsg(dmsg) => {
-                let (follow_up, pmsg_list) = self.date_time.update(dmsg);
+                let (follow_ups, pmsg_list) = self.date_time.update(dmsg);
 
-                let mut cmds: Vec<Cmd<Self, Msg>> = pmsg_list
+                let cmds: Vec<Cmd<Self, Msg>> = pmsg_list
                     .into_iter()
                     .map(|pmsg| {
-                        log::trace!("mapping: {:?}", pmsg);
                         Cmd::new(move |program| {
                             log::trace!("dispatching: {:?}", pmsg);
                             program.dispatch(pmsg.clone())
                         })
                     })
+                    .chain(follow_ups.into_iter().map(|follow_up| {
+                        Cmd::new(move |program| {
+                            log::info!("A follow up cmd.. triggering here..");
+                            program
+                                .dispatch(Msg::DateTimeMsg(follow_up.clone()))
+                        })
+                    }))
                     .collect();
-                log::trace!("created {}", cmds.len());
 
-                if let Some(follow_up) = follow_up {
-                    cmds.push(Cmd::new(move |program| {
-                        log::info!("A follow up cmd.. triggering here..");
-                        program.dispatch(Msg::DateTimeMsg(follow_up.clone()))
-                    }));
-                }
                 Cmd::batch(cmds)
             }
             Msg::DateTimeChange(String) => {
