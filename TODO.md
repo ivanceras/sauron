@@ -25,9 +25,12 @@
  - [X] **breaking** merge `Browser` to `Window`.
  - [ ] Add `and_then`, `sequence` to `Cmd` to perform a task after the preceding Cmd succeeds.
  - [ ] Create a document on why it is needed for events such as `on_click` to have a copy of the variables outside of its environment.
- - [ ] Rethink on the naming of Component, SimpleComponent, SubComponent.
+ - [X] Rethink on the naming of Component, SimpleComponent, SubComponent.
      - Component is actually Application since it the app that is manipulated by the program(executor).
-     - Other names: Root, Component, Control, Widget
+     - Other names: ~~Root~~ Application, Component, ~~Control,~~ Widget
+ - [ ] Merge `init` and `init_with_program`
+    - It make sense to make `init` mutable so the developer can manipulate the component at initialization stage.
+    - [ ] Make call to `init` right after the Application is mounted into the `DOM`, rather than before.
 
 ## Internal
 - [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`
@@ -69,6 +72,9 @@
     - Created a fast lookup for `is_self_closing(tag)` amd `tag_namespace`.
 - [ ] old elements that has an event attached has no way of knowing the equivalent new element has the same event attached as their callbacks are clone of closures inside of Rc
     and no 2 closures are the same even if the have the same code.
+- [ ] add a conditional function for event attribute that if any of the other attribute is changed the event will have to be remove and re-attach.
+    - This is to mitigate the aggressive recycling of nodes which we skipp diffing for event listeners for performance reasons, as it is impractical to
+        reattach event listener at every render cycle.
 
 
 
@@ -104,3 +110,4 @@
     - [x] Use [json](https://github.com/maciejhirsz/json-rust) crate for `jss`.
         - The quote on keys are optional, so this is good for use in writing css.
 - [ ] Enumerate the exported modules and structs in prelude instead of just using glob(ie: *).
+- [ ] Fix the data-viewer example to use Components on the views rather than Application

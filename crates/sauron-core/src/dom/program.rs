@@ -1,4 +1,4 @@
-use crate::{dom::dom_updater::DomUpdater, Application, Cmd, Dispatch};
+use crate::{dom::dom_updater::DomUpdater, Application, Dispatch};
 use std::{cell::RefCell, rc::Rc};
 #[cfg(feature = "with-request-animation-frame")]
 use wasm_bindgen::closure::Closure;
@@ -47,14 +47,12 @@ where
             app: Rc::new(RefCell::new(app)),
             dom_updater: Rc::new(RefCell::new(dom_updater)),
         };
-        program.init_emit();
         program
     }
 
     fn init_emit(&self) {
-        self.app.borrow_mut().init_with_program(self.clone());
         // call the init of the component
-        let cmds: Cmd<APP, MSG> = self.app.borrow().init();
+        let cmds = self.app.borrow_mut().init(self.clone());
         // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
         // listening to events (resize, hashchange)
         cmds.emit(&self);
@@ -65,6 +63,7 @@ where
         for style in self.app.borrow().style() {
             Self::inject_style(&style);
         }
+        self.init_emit();
     }
 
     /// get the real DOM node where this app is mounted to.

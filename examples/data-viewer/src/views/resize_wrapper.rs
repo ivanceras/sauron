@@ -52,7 +52,7 @@ impl Application<Msg> for ResizeWrapper {
     /// Unliked when listen by the this view container, which the mouse
     /// can be outside of this view, which causes the mousmove event
     /// not being triggered
-    fn init(&self) -> Cmd<Self, Msg> {
+    fn init(&mut self, _program: Program<Self, Msg>) -> Cmd<Self, Msg> {
         let mut cmds = vec![Window::add_event_listeners(vec![
             on_mouseup(|event| {
                 Msg::EndResize(event.client_x(), event.client_y())

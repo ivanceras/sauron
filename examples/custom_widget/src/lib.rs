@@ -38,8 +38,9 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn init_with_program(&mut self, program: Program<Self, Msg>) {
+    fn init(&mut self, program: Program<Self, Msg>) -> Cmd<Self, Msg> {
         self.program = Some(program);
+        Cmd::none()
     }
     fn view(&self) -> Node<Msg> {
         div(

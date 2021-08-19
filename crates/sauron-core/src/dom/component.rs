@@ -1,4 +1,4 @@
-use crate::{Cmd, Node};
+use crate::{Cmd, Node, Program};
 
 /// Contains the time it took for the last app update call for the component
 #[derive(Clone, Copy, std::fmt::Debug, PartialEq)]
@@ -20,20 +20,15 @@ pub trait Application<MSG>
 where
     MSG: 'static,
 {
-    /// an implementing APP component can have an init function
-    /// which executes right after the APP is instantiated by the program
-    fn init(&self) -> Cmd<Self, MSG>
+    ///  The application can implement this method where it can modify its initial state.
+    ///  It also has access to the program which is the executor of the lifecycle of the program.
+    ///
+    ///  this method is called right after the program is mounted into the DOM.
+    fn init(&mut self, _program: Program<Self, MSG>) -> Cmd<Self, MSG>
     where
         Self: Sized + 'static,
     {
         Cmd::none()
-    }
-
-    /// let component have access to program
-    fn init_with_program(&mut self, _program: crate::Program<Self, MSG>)
-    where
-        Self: Sized,
-    {
     }
 
     /// optionally a component can specify it's own css style
