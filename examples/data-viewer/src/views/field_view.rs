@@ -9,7 +9,7 @@ use sauron::{
         units::px,
         *,
     },
-    Attribute, Cmd, Component, Node,
+    Application, Attribute, Cmd, Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -312,7 +312,7 @@ impl FieldView {
     }
 }
 
-impl Component<Msg> for FieldView {
+impl Application<Msg> for FieldView {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         trace!("field updated: {:?}", msg);
         match msg {

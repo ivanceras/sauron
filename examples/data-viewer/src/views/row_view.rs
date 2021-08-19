@@ -3,7 +3,7 @@ use restq::{ColumnDef, DataValue};
 use sauron::{
     html::{attributes::*, events::*, units::*, *},
     prelude::*,
-    Cmd, Component, Node,
+    Application, Cmd, Node,
 };
 use std::{cell::RefCell, rc::Rc};
 
@@ -146,7 +146,7 @@ impl RowView {
     }
 }
 
-impl Component<Msg> for RowView {
+impl Application<Msg> for RowView {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::FieldMsg(field_index, field_msg) => {

@@ -10,7 +10,7 @@ use sauron::{
         *,
     },
     prelude::*,
-    Cmd, Component, Node,
+    Application, Cmd, Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -242,7 +242,7 @@ impl PageView {
     }
 }
 
-impl Component<Msg> for PageView {
+impl Application<Msg> for PageView {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::RowMsg(row_index, row_msg) => {
