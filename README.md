@@ -18,7 +18,7 @@ In your `src/lib.rs`
 ```rust
 use sauron::html::text;
 use sauron::prelude::*;
-use sauron::{node, Cmd, Component, Node, Program};
+use sauron::{node, Cmd, Application, Node, Program};
 
 #[derive(Debug)]
 pub enum Msg {
@@ -36,7 +36,7 @@ impl App {
     }
 }
 
-impl Component<Msg> for App {
+impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
