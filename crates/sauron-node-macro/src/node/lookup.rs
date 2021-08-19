@@ -23,18 +23,6 @@ static ALL_SVG_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
 });
 
 /// All of the html tags, excluding the SVG tags.
-/// This is mainly used for checking whether element should be
-/// created with namespace or not.
-///
-/// False negatives are:
-///    script; // this conflicts with html::script        , html::tags::script       > svg::tags::script
-///    style; // conflics with html::attributes::style    , html::attributes::style  > svg::tags::style
-///    text; // conflicts with html::text                 , html::text               > svg::tags::text
-///    a;   // conflicts with html::a                     , html::tags::a            > svg::tags::a
-///
-/// If used inside an svg node, svg elements scuh as text, a, style, script will not work correcly
-/// in client-side rendering.
-/// However, in server-side rendering it will work just fine.
 static ALL_HTML_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
     HashSet::from_iter(
         HTML_TAGS
