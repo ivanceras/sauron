@@ -6,6 +6,7 @@ use crate::{
     html::attributes::{AttributeValue, Special},
     Attribute,
 };
+use once_cell::sync::OnceCell;
 use std::{collections::HashMap, sync::Mutex};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
@@ -13,18 +14,16 @@ use web_sys::{
     HtmlTextAreaElement, Node, Text,
 };
 
-// Used to uniquely identify elements that contain closures so that the DomUpdater can
-// look them up by their unique id.
-// When the DomUpdater sees that the element no longer exists it will drop all of it's
-// Rc'd Closures for those events.
-use lazy_static::lazy_static;
-lazy_static! {
-    /// This is the value of the data-sauron-vdom-id.
-    static ref DATA_SAURON_VDOM_ID_VALUE: Mutex<u32> = Mutex::new(0);
-}
+/// This is the value of the data-sauron-vdom-id.
+/// Used to uniquely identify elements that contain closures so that the DomUpdater can
+/// look them up by their unique id.
+/// When the DomUpdater sees that the element no longer exists it will drop all of it's
+/// Rc'd Closures for those events.
+static DATA_SAURON_VDOM_ID_VALUE: OnceCell<Mutex<u32>> = OnceCell::new();
 
 fn create_unique_identifier() -> u32 {
     let mut elem_unique_id = DATA_SAURON_VDOM_ID_VALUE
+        .get_or_init(|| Mutex::new(0))
         .lock()
         .expect("Unable to obtain lock");
     *elem_unique_id += 1;
