@@ -27,6 +27,7 @@ use sauron_core::{
     },
     Attribute, Node,
 };
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::{fmt, io};
@@ -67,6 +68,9 @@ static ALL_HTML_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
 static SELF_CLOSING_TAGS: Lazy<HashSet<&&'static str>> =
     Lazy::new(|| HashSet::from_iter(HTML_SC_TAGS.iter()));
 
+static ALL_STYLES: Lazy<HashMap<&'static str, &'static str>> =
+    Lazy::new(|| HashMap::from_iter(HTML_STYLES.iter().map(|i| *i)));
+
 /// all the possible error when parsing html string
 #[derive(Debug, Error)]
 pub enum ParseError {
@@ -85,7 +89,7 @@ fn match_tag(tag: &str) -> Option<&'static str> {
     ALL_HTML_TAGS
         .iter()
         .chain(ALL_SVG_TAGS.iter())
-        .find(|item| item.eq_ignore_ascii_case(&tag))
+        .find(|item| **item == &tag)
         .map(|item| **item)
 }
 
@@ -93,23 +97,20 @@ fn match_attribute(key: &str) -> Option<&'static str> {
     HTML_ATTRS
         .iter()
         .chain(SVG_ATTRS.iter())
-        .find(|att| att.eq_ignore_ascii_case(&key))
+        .find(|att| *att == &key)
         .map(|att| *att)
         .or_else(|| {
             HTML_ATTRS_SPECIAL
                 .iter()
                 .chain(SVG_ATTRS_SPECIAL.iter())
                 .chain(SVG_ATTRS_XLINK.iter())
-                .find(|(_func, att)| att.eq_ignore_ascii_case(&key))
+                .find(|(_func, att)| att == &key)
                 .map(|(func, _att)| *func)
         })
 }
 
 fn match_style_name(key: &str) -> Option<&'static str> {
-    HTML_STYLES
-        .iter()
-        .find(|(_ident, name)| name.eq_ignore_ascii_case(&key))
-        .map(|(_ident, name)| *name)
+    ALL_STYLES.get(key).map(|s| *s)
 }
 
 /// return the static str of this function name
@@ -117,14 +118,14 @@ pub fn match_attribute_function(key: &str) -> Option<&'static str> {
     HTML_ATTRS
         .iter()
         .chain(SVG_ATTRS.iter())
-        .find(|att| att.eq_ignore_ascii_case(key))
+        .find(|att| *att == &key)
         .map(|att| *att)
         .or_else(|| {
             HTML_ATTRS_SPECIAL
                 .iter()
                 .chain(SVG_ATTRS_SPECIAL.iter())
                 .chain(SVG_ATTRS_XLINK.iter())
-                .find(|(func, _att)| func.eq_ignore_ascii_case(key))
+                .find(|(func, _att)| func == &key)
                 .map(|(func, _att)| *func)
         })
 }
