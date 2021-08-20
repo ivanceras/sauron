@@ -40,7 +40,28 @@ impl RowView {
             is_frozen: false,
         }
     }
+}
 
+impl Component<Msg> for RowView {
+    fn update(&mut self, msg: Msg) -> Vec<Msg> {
+        match msg {
+            Msg::FieldMsg(field_index, field_msg) => {
+                self.fields[field_index].borrow_mut().update(field_msg);
+                vec![]
+            }
+            Msg::DoubleClick => vec![],
+            Msg::Click => vec![],
+        }
+    }
+
+    fn view(&self) -> Node<Msg> {
+        self.view_with_filter(|(_index, field)| {
+            field.borrow().is_normal_field()
+        })
+    }
+}
+
+impl RowView {
     /// is value of any field modified
     pub fn is_changed(&self) -> bool {
         self.fields.iter().any(|field| field.borrow().is_changed())
@@ -142,25 +163,6 @@ impl RowView {
     pub fn view_frozen(&self) -> Node<Msg> {
         self.view_with_filter(|(_index, field)| {
             field.borrow().is_frozen_row && !field.borrow().is_frozen_column
-        })
-    }
-}
-
-impl Component<Msg> for RowView {
-    fn update(&mut self, msg: Msg) -> Vec<Msg> {
-        match msg {
-            Msg::FieldMsg(field_index, field_msg) => {
-                self.fields[field_index].borrow_mut().update(field_msg);
-                vec![]
-            }
-            Msg::DoubleClick => vec![],
-            Msg::Click => vec![],
-        }
-    }
-
-    fn view(&self) -> Node<Msg> {
-        self.view_with_filter(|(_index, field)| {
-            field.borrow().is_normal_field()
         })
     }
 }

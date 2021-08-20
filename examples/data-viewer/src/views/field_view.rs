@@ -34,6 +34,49 @@ pub struct FieldView {
     pub height: i32,
 }
 
+impl Component<Msg> for FieldView {
+    fn update(&mut self, msg: Msg) -> Vec<Msg> {
+        trace!("field updated: {:?}", msg);
+        match msg {
+            Msg::TextChange(value) => {
+                debug!("text changed..{}", value);
+                //TODO: cast to the original data type
+                self.new_value = cast_data_value(
+                    &Value::String(value),
+                    &self.column.data_type_def.data_type,
+                );
+            }
+            Msg::PrimaryClicked => {
+                trace!("Primary clicked");
+            }
+            Msg::CheckedChange(_value) => {
+                let bnew = if let DataValue::Bool(bvalue) = self.new_value {
+                    !bvalue
+                } else {
+                    true
+                };
+                self.new_value = DataValue::Bool(bnew);
+                trace!("new value: {:?}", self.new_value);
+            }
+        }
+        vec![]
+    }
+
+    /// when viewed as row
+    fn view(&self) -> Node<Msg> {
+        div(
+            vec![
+                class("field_view"),
+                classes_flag(vec![
+                    ("field_view--frozen_row", self.is_frozen_row),
+                    ("field_view--frozen_column", self.is_frozen_column),
+                ]),
+            ],
+            vec![self.view_value()],
+        )
+    }
+}
+
 impl FieldView {
     pub fn new(value: &DataValue, column: &ColumnDef) -> Self {
         info!("field value: {:?}", value);
@@ -308,49 +351,6 @@ impl FieldView {
                     self.view_value()
                 },
             ],
-        )
-    }
-}
-
-impl Component<Msg> for FieldView {
-    fn update(&mut self, msg: Msg) -> Vec<Msg> {
-        trace!("field updated: {:?}", msg);
-        match msg {
-            Msg::TextChange(value) => {
-                debug!("text changed..{}", value);
-                //TODO: cast to the original data type
-                self.new_value = cast_data_value(
-                    &Value::String(value),
-                    &self.column.data_type_def.data_type,
-                );
-            }
-            Msg::PrimaryClicked => {
-                trace!("Primary clicked");
-            }
-            Msg::CheckedChange(_value) => {
-                let bnew = if let DataValue::Bool(bvalue) = self.new_value {
-                    !bvalue
-                } else {
-                    true
-                };
-                self.new_value = DataValue::Bool(bnew);
-                trace!("new value: {:?}", self.new_value);
-            }
-        }
-        vec![]
-    }
-
-    /// when viewed as row
-    fn view(&self) -> Node<Msg> {
-        div(
-            vec![
-                class("field_view"),
-                classes_flag(vec![
-                    ("field_view--frozen_row", self.is_frozen_row),
-                    ("field_view--frozen_column", self.is_frozen_column),
-                ]),
-            ],
-            vec![self.view_value()],
         )
     }
 }

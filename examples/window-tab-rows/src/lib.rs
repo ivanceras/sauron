@@ -71,17 +71,13 @@ impl Application<Msg> for Window {
             }
             Msg::TabMsg(index, tab_msg) => {
                 let follow_ups = self.tabs[index].update(tab_msg);
-                let cmds = follow_ups
-                    .into_iter()
-                    .map(|follow_up| {
-                        Cmd::new(move |program| {
-                            program
-                                .dispatch(Msg::TabMsg(index, follow_up.clone()))
-                        })
-                    })
-                    .collect();
-
-                Cmd::batch(cmds)
+                //TODO: maybe we can use partial_function here: https://docs.rs/partial_function
+                Cmd::batch_msg(
+                    follow_ups
+                        .into_iter()
+                        .map(|follow_up| Msg::TabMsg(index, follow_up))
+                        .collect(),
+                )
             }
         }
     }

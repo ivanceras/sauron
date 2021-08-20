@@ -25,7 +25,24 @@ impl ColumnView {
             is_frozen: false,
         }
     }
+}
 
+impl Component<Msg> for ColumnView {
+    fn update(&mut self, msg: Msg) -> Vec<Msg> {
+        match msg {
+            Msg::ChangeSearch(search) => {
+                trace!("Search term change: {}", search);
+                vec![]
+            }
+        }
+    }
+
+    fn view(&self) -> Node<Msg> {
+        self.column_view_controls()
+    }
+}
+
+impl ColumnView {
     /// calculated width for css style, this includes the padding,
     /// margins and borders
     pub fn css_width(&self) -> i32 {
@@ -107,20 +124,5 @@ impl ColumnView {
                 ),
             ],
         )
-    }
-}
-
-impl Component<Msg> for ColumnView {
-    fn update(&mut self, msg: Msg) -> Vec<Msg> {
-        match msg {
-            Msg::ChangeSearch(search) => {
-                trace!("Search term change: {}", search);
-                vec![]
-            }
-        }
-    }
-
-    fn view(&self) -> Node<Msg> {
-        self.column_view_controls()
     }
 }

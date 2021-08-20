@@ -52,7 +52,58 @@ impl PageView {
         page_view.set_page(data, 1, 1);
         page_view
     }
+}
 
+impl Component<Msg> for PageView {
+    fn update(&mut self, msg: Msg) -> Vec<Msg> {
+        match msg {
+            Msg::RowMsg(row_index, row_msg) => {
+                let follow_ups = self.row_views[row_index].update(row_msg);
+                // TODO: There should be a structure on this so we
+                // can make a generic call to map the Msg automatically or via macro call
+                //
+                // Note: this variant has index
+                follow_ups
+                    .into_iter()
+                    .map(|follow_up| Msg::RowMsg(row_index, follow_up))
+                    .collect()
+            }
+        }
+    }
+
+    /// A grid of 2x2  containing 4 major parts of the table
+    fn view(&self) -> Node<Msg> {
+        if self.is_visible {
+            ol(
+                vec![
+                    class("page_view"),
+                    key(format!("page_view_{}", self.current_page)),
+                ],
+                //TODO: Views should also be automatically mapped
+                self.row_views
+                    .iter()
+                    .enumerate()
+                    .filter(|(_index, row_view)| !row_view.is_frozen)
+                    .map(|(index, row_view)| {
+                        row_view
+                            .view()
+                            .map_msg(move |row_msg| Msg::RowMsg(index, row_msg))
+                    })
+                    .collect::<Vec<Node<Msg>>>(),
+            )
+        } else {
+            div(
+                vec![
+                    class("page_view__page_holder"),
+                    styles(vec![("height", px(self.height()))]),
+                ],
+                vec![],
+            )
+        }
+    }
+}
+
+impl PageView {
     pub fn set_visible(&mut self, is_visible: bool) {
         self.is_visible = is_visible;
     }
@@ -239,46 +290,5 @@ impl PageView {
                 })
                 .collect::<Vec<Node<Msg>>>(),
         )
-    }
-}
-
-impl Component<Msg> for PageView {
-    fn update(&mut self, msg: Msg) -> Vec<Msg> {
-        match msg {
-            Msg::RowMsg(row_index, row_msg) => {
-                self.row_views[row_index].update(row_msg);
-                vec![]
-            }
-        }
-    }
-
-    /// A grid of 2x2  containing 4 major parts of the table
-    fn view(&self) -> Node<Msg> {
-        if self.is_visible {
-            ol(
-                vec![
-                    class("page_view"),
-                    key(format!("page_view_{}", self.current_page)),
-                ],
-                self.row_views
-                    .iter()
-                    .enumerate()
-                    .filter(|(_index, row_view)| !row_view.is_frozen)
-                    .map(|(index, row_view)| {
-                        row_view
-                            .view()
-                            .map_msg(move |row_msg| Msg::RowMsg(index, row_msg))
-                    })
-                    .collect::<Vec<Node<Msg>>>(),
-            )
-        } else {
-            div(
-                vec![
-                    class("page_view__page_holder"),
-                    styles(vec![("height", px(self.height()))]),
-                ],
-                vec![],
-            )
-        }
     }
 }

@@ -59,6 +59,149 @@ pub struct DataView {
     start_x: i32,
 }
 
+impl Component<Msg> for DataView {
+    fn update(&mut self, msg: Msg) -> Vec<Msg> {
+        match msg {
+            Msg::PageMsg(page_index, page_msg) => {
+                self.page_views[page_index].update(page_msg);
+            }
+            Msg::ColumnMsg(column_index, column_msg) => {
+                self.column_views[column_index].update(column_msg);
+            }
+            Msg::Scrolled((scroll_top, scroll_left)) => {
+                self.scroll_top = scroll_top;
+                self.scroll_left = scroll_left;
+                let visible_page = self.visible_page();
+                if self.visible_page != visible_page {
+                    self.visible_page = visible_page;
+                    self.update_visible_pages();
+                }
+            }
+            Msg::ColumnEndResize(_client_x, _client_y) => {
+                self.active_resize = None;
+            }
+            Msg::MouseMove(client_x, _client_y) => {
+                debug!("debug in column view from the window..");
+                if let Some((column_index, active_resize)) =
+                    self.active_resize.clone()
+                {
+                    match active_resize {
+                        Grip::Left => {}
+                        Grip::Right => {
+                            let delta_x = client_x - self.start_x;
+                            let column_view =
+                                &mut self.column_views[column_index];
+                            column_view.width += delta_x;
+                            let column_width = column_view.calc_width();
+                            self.start_x = client_x;
+                            self.set_field_width(column_index, column_width);
+                        }
+                    }
+                }
+            }
+            Msg::ColumnStartResize(column_index, grip, client_x, _client_y) => {
+                self.active_resize = Some((column_index, grip));
+                let column_view = &mut self.column_views[column_index];
+                self.start_x = client_x;
+                debug!(
+                    "width of column {} is {}",
+                    column_index, column_view.width
+                );
+            }
+        }
+        vec![]
+    }
+
+    /// A grid of 2x2  containing 4 major parts of the table
+    fn view(&self) -> Node<Msg> {
+        main(
+            vec![
+                class("data_view grid"),
+                styles([
+                    ("width", px(self.allocated_width - 40)),
+                    ("min-width", px(self.calculate_min_width())),
+                ]),
+                // to ensure no reusing of table view when replaced with
+                // another table
+                key(format!("data_view_{}", self.table_name.name)),
+            ],
+            vec![
+                // TOP-LEFT: Content 1
+                section(
+                    vec![class(
+                        "data_view__spacer__frozen_column_names__immovable_frozen_columns",
+                    )],
+                    vec![
+                        div(
+                            vec![class(
+                                "data_view__spacer__frozen_column_names flex-row",
+                            )],
+                            vec![
+                                div(
+                                    vec![class(
+                                        "data_view__spacer flex-column-reverse",
+                                    )],
+                                    vec![div(
+                                        vec![class(
+                                            "data_view__spacer__multi_selector",
+                                        )],
+                                        vec![selector_box(
+                                            false,
+                                            vec![],
+                                            vec![],
+                                        )],
+                                    )],
+                                ),
+                                self.view_frozen_column_names(),
+                            ],
+                        ),
+                        // totally immovable rows/columns
+                        self.view_immovable_rows(),
+                    ],
+                ),
+                // TOP-RIGHT: Content 2
+                section(
+                    vec![
+                        class("data_view__normal_column_names__frozen_rows"),
+                        styles(vec![
+                            ("width", px(self.calculate_normal_rows_width())),
+                            ("overflow-x", "hidden".to_string()),
+                        ]),
+                    ],
+                    vec![section(
+                        vec![
+                            class("normal_column_names__frozen_rows"),
+                            styles(vec![(
+                                "margin-left",
+                                px(-self.scroll_left),
+                            )]),
+                        ],
+                        vec![
+                            // can move left and right
+                            self.view_normal_column_names(),
+                            self.view_frozen_rows(),
+                        ],
+                    )],
+                ),
+                // BOTTOM-LEFT: Content 3
+                // needed to overflow hide the frozen columns when scrolled up and down
+                section(
+                    vec![
+                        class("data_view__frozen_columns_container"),
+                        styles(vec![
+                            ("height", px(self.calculate_normal_rows_height())),
+                            ("overflow-y", "hidden".to_string()),
+                        ]),
+                    ],
+                    vec![self.view_frozen_columns()],
+                ),
+                // BOTTOM-RIGHT: Content 4
+                self.view_normal_rows(),
+            ],
+        )
+    }
+}
+
 impl DataView {
     /// Note: if the data is deformed, only the correctly formed ones will be parsed and shown
     pub fn from_csv_data(csv: Vec<u8>) -> Result<Self, Error> {
@@ -103,6 +246,8 @@ impl DataView {
         Ok(data_view)
     }
 
+    ///TODO: Make this ergonomic, something that is similar
+    ///to init in Application, but designed for Component
     pub fn init() -> Cmd<crate::App, crate::AppMsg> {
         debug!("Init in  data view for column resize");
         Window::add_event_listeners(vec![
@@ -463,148 +608,5 @@ impl DataView {
                 }
             },
         );
-    }
-}
-
-impl Component<Msg> for DataView {
-    fn update(&mut self, msg: Msg) -> Vec<Msg> {
-        match msg {
-            Msg::PageMsg(page_index, page_msg) => {
-                self.page_views[page_index].update(page_msg);
-            }
-            Msg::ColumnMsg(column_index, column_msg) => {
-                self.column_views[column_index].update(column_msg);
-            }
-            Msg::Scrolled((scroll_top, scroll_left)) => {
-                self.scroll_top = scroll_top;
-                self.scroll_left = scroll_left;
-                let visible_page = self.visible_page();
-                if self.visible_page != visible_page {
-                    self.visible_page = visible_page;
-                    self.update_visible_pages();
-                }
-            }
-            Msg::ColumnEndResize(_client_x, _client_y) => {
-                self.active_resize = None;
-            }
-            Msg::MouseMove(client_x, _client_y) => {
-                debug!("debug in column view from the window..");
-                if let Some((column_index, active_resize)) =
-                    self.active_resize.clone()
-                {
-                    match active_resize {
-                        Grip::Left => {}
-                        Grip::Right => {
-                            let delta_x = client_x - self.start_x;
-                            let column_view =
-                                &mut self.column_views[column_index];
-                            column_view.width += delta_x;
-                            let column_width = column_view.calc_width();
-                            self.start_x = client_x;
-                            self.set_field_width(column_index, column_width);
-                        }
-                    }
-                }
-            }
-            Msg::ColumnStartResize(column_index, grip, client_x, _client_y) => {
-                self.active_resize = Some((column_index, grip));
-                let column_view = &mut self.column_views[column_index];
-                self.start_x = client_x;
-                debug!(
-                    "width of column {} is {}",
-                    column_index, column_view.width
-                );
-            }
-        }
-        vec![]
-    }
-
-    /// A grid of 2x2  containing 4 major parts of the table
-    fn view(&self) -> Node<Msg> {
-        main(
-            vec![
-                class("data_view grid"),
-                styles([
-                    ("width", px(self.allocated_width - 40)),
-                    ("min-width", px(self.calculate_min_width())),
-                ]),
-                // to ensure no reusing of table view when replaced with
-                // another table
-                key(format!("data_view_{}", self.table_name.name)),
-            ],
-            vec![
-                // TOP-LEFT: Content 1
-                section(
-                    vec![class(
-                        "data_view__spacer__frozen_column_names__immovable_frozen_columns",
-                    )],
-                    vec![
-                        div(
-                            vec![class(
-                                "data_view__spacer__frozen_column_names flex-row",
-                            )],
-                            vec![
-                                div(
-                                    vec![class(
-                                        "data_view__spacer flex-column-reverse",
-                                    )],
-                                    vec![div(
-                                        vec![class(
-                                            "data_view__spacer__multi_selector",
-                                        )],
-                                        vec![selector_box(
-                                            false,
-                                            vec![],
-                                            vec![],
-                                        )],
-                                    )],
-                                ),
-                                self.view_frozen_column_names(),
-                            ],
-                        ),
-                        // totally immovable rows/columns
-                        self.view_immovable_rows(),
-                    ],
-                ),
-                // TOP-RIGHT: Content 2
-                section(
-                    vec![
-                        class("data_view__normal_column_names__frozen_rows"),
-                        styles(vec![
-                            ("width", px(self.calculate_normal_rows_width())),
-                            ("overflow-x", "hidden".to_string()),
-                        ]),
-                    ],
-                    vec![section(
-                        vec![
-                            class("normal_column_names__frozen_rows"),
-                            styles(vec![(
-                                "margin-left",
-                                px(-self.scroll_left),
-                            )]),
-                        ],
-                        vec![
-                            // can move left and right
-                            self.view_normal_column_names(),
-                            self.view_frozen_rows(),
-                        ],
-                    )],
-                ),
-                // BOTTOM-LEFT: Content 3
-                // needed to overflow hide the frozen columns when scrolled up and down
-                section(
-                    vec![
-                        class("data_view__frozen_columns_container"),
-                        styles(vec![
-                            ("height", px(self.calculate_normal_rows_height())),
-                            ("overflow-y", "hidden".to_string()),
-                        ]),
-                    ],
-                    vec![self.view_frozen_columns()],
-                ),
-                // BOTTOM-RIGHT: Content 4
-                self.view_normal_rows(),
-            ],
-        )
     }
 }
