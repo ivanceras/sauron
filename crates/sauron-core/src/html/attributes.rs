@@ -156,6 +156,64 @@ where
     Attribute::with_multiple_values(None, "class", class_values)
 }
 
+/// return a class attribute where the classnames are transformed with
+/// namespace
+/// # Example:
+/// ```rust
+/// use sauron::html::attributes::class_namespaced;
+/// use sauron::Attribute;
+/// use sauron::html::attributes::class;
+///
+/// let component = "fui";
+/// let expected: Attribute<()> = class("fui__border".to_string());
+/// assert_eq!(expected, class_namespaced(component, "border"));
+///
+/// let expected: Attribute<()> =
+///     class("fui__border fui__corner".to_string());
+/// assert_eq!(expected, class_namespaced(component, "border corner"));
+/// ```
+pub fn class_namespaced<MSG>(
+    namespace: impl ToString,
+    class_names: impl ToString,
+) -> crate::Attribute<MSG> {
+    class(jss::class_namespaced(namespace, class_names))
+}
+
+/// return a class namespaced with flag
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+/// use sauron::html::attributes::classes_flag_namespaced;
+///
+/// let component = "fui";
+/// let is_border = true;
+/// let is_corner = false;
+///
+/// let expected: Attribute<()> = class("fui__border".to_string());
+/// assert_eq!(expected, classes_flag_namespaced(component, [("border", is_border),("corner",
+/// is_corner)]));
+/// ```
+pub fn classes_flag_namespaced<P, S, MSG>(
+    namespace: impl ToString,
+    pair: P,
+) -> crate::Attribute<MSG>
+where
+    P: AsRef<[(S, bool)]>,
+    S: ToString,
+{
+    let mut transformed = vec![];
+    for (class_name, flag) in pair.as_ref() {
+        transformed.push((
+            jss::class_namespaced(
+                namespace.to_string(),
+                class_name.to_string(),
+            ),
+            *flag,
+        ));
+    }
+    classes_flag(transformed)
+}
+
 /// A helper function for setting attributes with no values such as checked
 /// in checkbox input type
 /// This is best called to be appended to the node since this
