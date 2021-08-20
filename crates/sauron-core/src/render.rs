@@ -25,20 +25,18 @@ pub trait Render {
     //
     /// render the node to a writable buffer
     fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
-        self.render_with_indent(buffer, 0, &mut Some(0), false)
+        self.render_with_indent(buffer, 0, false)
     }
 
     /// no new_lines, no indents
     fn render_compressed(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
-        self.render_with_indent(buffer, 0, &mut Some(0), true)
+        self.render_with_indent(buffer, 0, true)
     }
     /// render instance to a writable buffer with indention
-    /// node_idx is for debugging purposes
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
         indent: usize,
-        node_idx: &mut Option<usize>,
         compressed: bool,
     ) -> fmt::Result;
 
@@ -62,12 +60,11 @@ impl<MSG> Render for Node<MSG> {
         &self,
         buffer: &mut dyn fmt::Write,
         indent: usize,
-        node_idx: &mut Option<usize>,
         compressed: bool,
     ) -> fmt::Result {
         match self {
             Node::Element(element) => {
-                element.render_with_indent(buffer, indent, node_idx, compressed)
+                element.render_with_indent(buffer, indent, compressed)
             }
             Node::Text(text) => {
                 write!(buffer, "{}", &text.text)
@@ -82,7 +79,7 @@ fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
         .flat_map(|attr| {
             let (_callbacks, _plain_values, _styles, func_values) =
                 attributes::partition_callbacks_from_plain_styles_and_func_calls(
-                    &attr,
+                    attr,
                 );
 
             if *attr.name() == "inner_html" {
@@ -100,13 +97,12 @@ impl<MSG> Render for Element<MSG> {
         &self,
         buffer: &mut dyn fmt::Write,
         indent: usize,
-        node_idx: &mut Option<usize>,
         compressed: bool,
     ) -> fmt::Result {
         write!(buffer, "<{}", self.tag())?;
 
         let ref_attrs: Vec<&Attribute<MSG>> =
-            self.get_attributes().iter().map(|att| att).collect();
+            self.get_attributes().iter().collect();
         let merged_attributes: Vec<Attribute<MSG>> =
             mt_dom::merge_attributes_of_same_name(&ref_attrs);
 
@@ -115,7 +111,7 @@ impl<MSG> Render for Element<MSG> {
             // TODO: must check the attribute value for empty value
             if !attr.name().is_empty() {
                 write!(buffer, " ")?;
-                attr.render_with_indent(buffer, indent, node_idx, compressed)?;
+                attr.render_with_indent(buffer, indent, compressed)?;
             }
         }
 
@@ -135,31 +131,22 @@ impl<MSG> Render for Element<MSG> {
 
         // do not indent if it is only text child node
         if is_lone_child_text_node {
-            node_idx.as_mut().map(|idx| *idx += 1);
             first_child
                 .unwrap()
-                .render_with_indent(buffer, indent, node_idx, compressed)?;
+                .render_with_indent(buffer, indent, compressed)?;
         } else {
             // otherwise print all child nodes with each line and indented
             for child in self.get_children() {
-                node_idx.as_mut().map(|idx| *idx += 1);
                 if !compressed {
                     write!(buffer, "\n{}", "    ".repeat(indent + 1))?;
                 }
-                child.render_with_indent(
-                    buffer,
-                    indent + 1,
-                    node_idx,
-                    compressed,
-                )?;
+                child.render_with_indent(buffer, indent + 1, compressed)?;
             }
         }
 
         // do not make a new line it if is only a text child node or it has no child nodes
-        if !is_lone_child_text_node && !children.is_empty() {
-            if !compressed {
-                write!(buffer, "\n{}", "    ".repeat(indent))?;
-            }
+        if !is_lone_child_text_node && !children.is_empty() && !compressed {
+            write!(buffer, "\n{}", "    ".repeat(indent))?;
         }
 
         let inner_html = extract_inner_html(&merged_attributes);
@@ -179,12 +166,11 @@ impl<MSG> Render for Attribute<MSG> {
         &self,
         buffer: &mut dyn fmt::Write,
         _indent: usize,
-        _node_idx: &mut Option<usize>,
         _compressed: bool,
     ) -> fmt::Result {
         let (_callbacks, plain_values, styles, _func_values) =
             attributes::partition_callbacks_from_plain_styles_and_func_calls(
-                &self,
+                self,
             );
         if let Some(merged_plain_values) =
             attributes::merge_plain_attributes_values(&plain_values)
