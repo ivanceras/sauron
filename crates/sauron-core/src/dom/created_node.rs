@@ -430,8 +430,6 @@ where
     DSP: Clone + Dispatch<MSG> + 'static,
 {
     let callback_clone = callback.clone();
-    // TODO: use a weak pointer here
-    // let program_weak = Rc::downgrade(&program)
     let program_clone = program.clone();
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
