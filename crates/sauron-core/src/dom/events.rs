@@ -42,6 +42,15 @@ impl From<web_sys::Event> for Event {
     }
 }
 
+impl From<web_sys::MouseEvent> for Event {
+    fn from(mouse_event: MouseEvent) -> Self {
+        let event: web_sys::Event = mouse_event
+            .dyn_into()
+            .expect("Unable to cast mouse event into event");
+        Event::from(event)
+    }
+}
+
 /// an event builder
 pub fn on<F, MSG>(event_name: &'static str, f: F) -> Attribute<MSG>
 where
