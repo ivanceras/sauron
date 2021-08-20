@@ -1,6 +1,7 @@
 //! provides functionalities for commands to be executed by the system, such as
 //! when the application starts or after the application updates.
 //!
+use crate::Dispatch;
 use std::rc::Rc;
 
 /// Cmd is a command to be executed by the system.
@@ -40,14 +41,16 @@ where
 
     /// creates a unified Cmd which batches all the other Cmds in one.
     pub fn batch(cmds: Vec<Self>) -> Self {
+        let should_update_view = cmds.iter().any(|c| c.should_update_view);
+        let log_measurements = cmds.iter().any(|c| c.log_measurements);
         let mut commands = vec![];
         for cmd in cmds {
             commands.extend(cmd.commands);
         }
         Self {
             commands,
-            should_update_view: true,
-            log_measurements: false,
+            should_update_view,
+            log_measurements,
         }
     }
 
@@ -92,5 +95,29 @@ where
             should_update_view: true,
             log_measurements: true,
         }
+    }
+}
+
+impl<DSP> Cmd<DSP> {
+    ///  dispatch this msg on the next update loop
+    pub fn from_msg<MSG>(msg: MSG) -> Self
+    where
+        MSG: Clone + 'static,
+        DSP: Dispatch<MSG> + Clone + 'static,
+    {
+        Cmd::new(move |program: DSP| program.dispatch(msg.clone()))
+    }
+
+    /// batch dispatch this msg on the next update loop
+    pub fn batch_msg<MSG>(msg_list: Vec<MSG>) -> Self
+    where
+        MSG: Clone + 'static,
+        DSP: Dispatch<MSG> + Clone + 'static,
+    {
+        Cmd::new(move |program: DSP| {
+            for msg in msg_list.iter() {
+                program.dispatch(msg.clone());
+            }
+        })
     }
 }
