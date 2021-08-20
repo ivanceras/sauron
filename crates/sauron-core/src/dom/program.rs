@@ -43,11 +43,10 @@ where
     pub fn new(app: APP, root_node: &Node) -> Self {
         let dom_updater: DomUpdater<MSG> =
             DomUpdater::new(app.view(), root_node);
-        let program = Program {
+        Program {
             app: Rc::new(RefCell::new(app)),
             dom_updater: Rc::new(RefCell::new(dom_updater)),
-        };
-        program
+        }
     }
 
     fn init_emit(&self) {
@@ -55,7 +54,7 @@ where
         let cmds = self.app.borrow_mut().init(self.clone());
         // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
         // listening to events (resize, hashchange)
-        cmds.emit(&self);
+        cmds.emit(self);
     }
 
     /// executed after the program has been mounted

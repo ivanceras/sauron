@@ -3,7 +3,7 @@ use crate::Callback;
 use crate::{
     dom::Dispatch,
     html,
-    html::attributes::{AttributeValue, Special},
+    html::attributes::{AttributeValue, SegregatedAttributes, Special},
     Attribute,
 };
 use once_cell::sync::OnceCell;
@@ -81,13 +81,7 @@ impl CreatedNode {
                 CreatedNode::without_closures(text_node.unchecked_into())
             }
             crate::Node::Element(element_node) => {
-                let created_element: CreatedNode = Self::create_element_node(
-                    program,
-                    element_node,
-                    focused_node,
-                )
-                .into();
-                created_element
+                Self::create_element_node(program, element_node, focused_node)
             }
         }
     }
@@ -106,14 +100,11 @@ impl CreatedNode {
         for att in velem.attrs.iter() {
             if *att.name() == "mount" {
                 for val in att.value().iter() {
-                    match val {
-                        AttributeValue::EventListener(cb) => {
-                            let msg = cb.emit(MountEvent {
-                                target_node: element.clone().unchecked_into(),
-                            });
-                            program.dispatch(msg);
-                        }
-                        _ => (),
+                    if let AttributeValue::EventListener(cb) = val {
+                        let msg = cb.emit(MountEvent {
+                            target_node: element.clone().unchecked_into(),
+                        });
+                        program.dispatch(msg);
                     }
                 }
             }
@@ -133,13 +124,13 @@ impl CreatedNode {
     {
         let document = crate::document();
 
-        let element = if let Some(ref namespace) = velem.namespace() {
+        let element = if let Some(namespace) = velem.namespace() {
             document
-                .create_element_ns(Some(namespace), &velem.tag())
+                .create_element_ns(Some(namespace), velem.tag())
                 .expect("Unable to create element")
         } else {
             document
-                .create_element(&velem.tag())
+                .create_element(velem.tag())
                 .expect("Unable to create element")
         };
 
@@ -237,7 +228,12 @@ impl CreatedNode {
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        let (callbacks, plain_values, styles, func_values) =
+        let SegregatedAttributes {
+            callbacks,
+            plain_values,
+            styles,
+            function_calls,
+        } =
             html::attributes::partition_callbacks_from_plain_styles_and_func_calls(
                 attr,
             );
@@ -246,7 +242,7 @@ impl CreatedNode {
         if let Some(merged_plain_values) =
             html::attributes::merge_plain_attributes_values(&plain_values)
         {
-            if let Some(ref namespace) = attr.namespace() {
+            if let Some(namespace) = attr.namespace() {
                 // Warning NOTE: set_attribute_ns should only be called
                 // when you meant to use a namespace
                 // using this with None will error in the browser with:
@@ -326,11 +322,10 @@ impl CreatedNode {
 
         // do function calls such as set_inner_html
         if let Some(merged_func_values) =
-            html::attributes::merge_plain_attributes_values(&func_values)
+            html::attributes::merge_plain_attributes_values(&function_calls)
         {
-            match *attr.name() {
-                "inner_html" => element.set_inner_html(&merged_func_values),
-                _ => (),
+            if *attr.name() == "inner_html" {
+                element.set_inner_html(&merged_func_values);
             }
         }
 
@@ -377,7 +372,7 @@ impl CreatedNode {
                 key_press_func.forget();
             } else {
                 let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
-                    create_closure_wrap(program, &callback);
+                    create_closure_wrap(program, callback);
                 current_elm
                     .add_event_listener_with_callback(
                         event_str,
@@ -408,13 +403,10 @@ impl CreatedNode {
 
         element.remove_attribute(attr.name())?;
 
-        match *attr.name() {
-            "checked" => {
-                if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
-                    input.set_checked(false);
-                }
+        if *attr.name() == "checked" {
+            if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
+                input.set_checked(false);
             }
-            _ => (),
         }
         Ok(())
     }

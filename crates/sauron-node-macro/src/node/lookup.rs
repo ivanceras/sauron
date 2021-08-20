@@ -10,31 +10,28 @@ use sauron_core::{
     },
 };
 use std::collections::HashSet;
-use std::iter::FromIterator;
 
 /// All of the svg tags
 static ALL_SVG_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
-    HashSet::from_iter(
-        SVG_TAGS
-            .iter()
-            .chain(SVG_TAGS_NON_COMMON.iter())
-            .chain(SVG_TAGS_SPECIAL.iter().map(|(_func, t)| t)),
-    )
+    SVG_TAGS
+        .iter()
+        .chain(SVG_TAGS_NON_COMMON.iter())
+        .chain(SVG_TAGS_SPECIAL.iter().map(|(_func, t)| t))
+        .collect()
 });
 
 /// All of the html tags, excluding the SVG tags.
 static ALL_HTML_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
-    HashSet::from_iter(
-        HTML_TAGS
-            .iter()
-            .chain(HTML_SC_TAGS.iter())
-            .chain(HTML_TAGS_NON_COMMON.iter())
-            .chain(HTML_TAGS_WITH_MACRO_NON_COMMON.iter()),
-    )
+    HTML_TAGS
+        .iter()
+        .chain(HTML_SC_TAGS.iter())
+        .chain(HTML_TAGS_NON_COMMON.iter())
+        .chain(HTML_TAGS_WITH_MACRO_NON_COMMON.iter())
+        .collect()
 });
 
 static SELF_CLOSING_TAGS: Lazy<HashSet<&&'static str>> =
-    Lazy::new(|| HashSet::from_iter(HTML_SC_TAGS.iter()));
+    Lazy::new(|| HTML_SC_TAGS.iter().collect());
 
 /// Find the namespace of this tag
 /// if the arg tag is an SVG tag, return the svg namespace

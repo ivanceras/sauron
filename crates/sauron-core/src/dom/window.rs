@@ -34,7 +34,7 @@ impl Window {
                         .expect("expecting a callback");
 
                     let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
-                        create_closure_wrap(&program, &callback);
+                        create_closure_wrap(&program, callback);
                     window
                         .add_event_listener_with_callback(
                             event_str,
@@ -120,8 +120,7 @@ impl Window {
     /// The hash part are the text right after the `#` sign
     pub fn get_hash() -> String {
         let window = crate::window();
-        let hash = window.location().hash().expect("must have a hash");
-        hash
+        window.location().hash().expect("must have a hash")
     }
 
     /// scroll the browser to the top of the document

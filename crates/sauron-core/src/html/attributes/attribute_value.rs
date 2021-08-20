@@ -94,7 +94,7 @@ impl<MSG> AttributeValue<MSG> {
     /// return the value if it is a Simple variant
     pub fn get_simple(&self) -> Option<&Value> {
         match self {
-            AttributeValue::Simple(v) => Some(&v),
+            AttributeValue::Simple(v) => Some(v),
             _ => None,
         }
     }
@@ -102,17 +102,14 @@ impl<MSG> AttributeValue<MSG> {
     /// return the function call argument value if it is a FunctionCall variant
     pub fn get_function_call_value(&self) -> Option<&Value> {
         match self {
-            AttributeValue::FunctionCall(v) => Some(&v),
+            AttributeValue::FunctionCall(v) => Some(v),
             _ => None,
         }
     }
 
     /// returns true if this attribute value is a style
     pub fn is_style(&self) -> bool {
-        match self {
-            AttributeValue::Style(_) => true,
-            _ => false,
-        }
+        matches!(self, AttributeValue::Style(_))
     }
 
     /// return the styles if the attribute value is a style
@@ -133,17 +130,11 @@ impl<MSG> AttributeValue<MSG> {
 
     /// return true if this is a function call
     pub fn is_function_call(&self) -> bool {
-        match self {
-            AttributeValue::FunctionCall(_) => true,
-            _ => false,
-        }
+        matches!(self, AttributeValue::FunctionCall(_))
     }
 
     /// returns true if this attribute value is empty
     pub fn is_empty(&self) -> bool {
-        match self {
-            AttributeValue::Empty => true,
-            _ => false,
-        }
+        matches!(self, AttributeValue::Empty)
     }
 }

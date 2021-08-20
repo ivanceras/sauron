@@ -79,10 +79,10 @@ where
             let new_closures = apply_patch_to_node(
                 program,
                 root_node,
-                &element,
+                element,
                 old_closures,
                 focused_node,
-                &patch,
+                patch,
             )?;
             active_closures.extend(new_closures);
         } else {
@@ -140,10 +140,10 @@ where
             let new_closures = apply_patch_to_node(
                 program,
                 root_node,
-                &element,
+                element,
                 old_closures,
                 focused_node,
-                &patch,
+                patch,
             )?;
             active_closures.extend(new_closures);
         } else {
@@ -240,7 +240,7 @@ fn find_nodes_by_idx_recursive(
     nodes_to_find: &HashMap<usize, Option<&&'static str>>,
     nodes_to_patch: &mut HashMap<usize, Node>,
 ) -> bool {
-    if nodes_to_find.len() == 0 {
+    if nodes_to_find.is_empty() {
         return true;
     }
     let all_has_been_found = nodes_to_find.len() == nodes_to_patch.len();
@@ -252,7 +252,7 @@ fn find_nodes_by_idx_recursive(
     let child_node_count = children.length();
 
     // If the root node matches, mark it for patching
-    if let Some(_vtag) = nodes_to_find.get(&cur_node_idx) {
+    if let Some(_vtag) = nodes_to_find.get(cur_node_idx) {
         nodes_to_patch.insert(*cur_node_idx, node.clone());
     }
 
@@ -290,7 +290,7 @@ fn find_node_by_path_recursive(
 
 fn find_all_nodes_by_path(
     node: Node,
-    nodes_to_find: &Vec<(&[usize], Option<&&'static str>)>,
+    nodes_to_find: &[(&[usize], Option<&&'static str>)],
 ) -> HashMap<Vec<usize>, Node> {
     let mut nodes_to_patch: HashMap<Vec<usize>, Node> =
         HashMap::with_capacity(nodes_to_find.len());
@@ -429,7 +429,7 @@ where
             let element: &Element = node.unchecked_ref();
             let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
                 program,
-                &for_insert,
+                for_insert,
                 focused_node,
             );
             let parent_node =
@@ -510,7 +510,7 @@ where
             }
 
             if element.node_type() != Node::TEXT_NODE {
-                remove_event_listeners(&element, old_closures)?;
+                remove_event_listeners(element, old_closures)?;
             }
             element
                 .replace_with_with_node_1(&created_node.node)
@@ -519,7 +519,7 @@ where
             // if what we are replacing is a root node:
             // we replace the root node here, so that's reference is updated
             // to the newly created node
-            if patch_path.path == &[0] {
+            if patch_path.path == [0] {
                 log::debug!("replacing root node..");
                 *root_node = created_node.node;
             }
@@ -537,7 +537,7 @@ where
                     .expect("must remove target node");
                 if element.node_type() != Node::TEXT_NODE {
                     let element: &Element = node.unchecked_ref();
-                    remove_event_listeners(&element, old_closures)?;
+                    remove_event_listeners(element, old_closures)?;
                 }
             }
             Ok(active_closures)
@@ -552,7 +552,7 @@ where
             for (_append_children_node_idx, new_node) in new_nodes.iter() {
                 let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
                     program,
-                    &new_node,
+                    new_node,
                     focused_node,
                 );
                 element.append_child(&created_node.node)?;

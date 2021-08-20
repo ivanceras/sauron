@@ -395,27 +395,34 @@ pub(crate) fn merge_styles_attributes_values<MSG>(
     }
 }
 
+/// The Attributes partition into 4 different types
+pub struct SegregatedAttributes<'a, MSG> {
+    /// the callbacks of the event listeners
+    pub callbacks: Vec<&'a Callback<Event, MSG>>,
+    /// plain attribute values
+    pub plain_values: Vec<&'a AttributeValue<MSG>>,
+    /// style attribute values
+    pub styles: Vec<&'a AttributeValue<MSG>>,
+    /// function calls
+    pub function_calls: Vec<&'a AttributeValue<MSG>>,
+}
+
 /// returns (callbacks, plain_attribtues, function_calls)
 #[doc(hidden)]
 pub(crate) fn partition_callbacks_from_plain_styles_and_func_calls<MSG>(
     attr: &Attribute<MSG>,
-) -> (
-    Vec<&Callback<Event, MSG>>,
-    Vec<&AttributeValue<MSG>>,
-    Vec<&AttributeValue<MSG>>,
-    Vec<&AttributeValue<MSG>>,
-) {
+) -> SegregatedAttributes<MSG> {
     let mut callbacks = vec![];
     let mut plain_values = vec![];
     let mut styles = vec![];
-    let mut func_values = vec![];
+    let mut function_calls = vec![];
     for av in attr.value() {
         match av {
             AttributeValue::Simple(_plain) => {
                 plain_values.push(av);
             }
             AttributeValue::FunctionCall(_call) => {
-                func_values.push(av);
+                function_calls.push(av);
             }
             AttributeValue::Style(_) => {
                 styles.push(av);
@@ -426,5 +433,10 @@ pub(crate) fn partition_callbacks_from_plain_styles_and_func_calls<MSG>(
             _ => (),
         }
     }
-    (callbacks, plain_values, styles, func_values)
+    SegregatedAttributes {
+        callbacks,
+        plain_values,
+        styles,
+        function_calls,
+    }
 }

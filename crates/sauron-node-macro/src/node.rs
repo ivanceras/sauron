@@ -177,17 +177,14 @@ fn children_to_tokens(children: Vec<Node>) -> TokenStream {
     tokens
 }
 
-fn braced_for_loop<'a>(expr: &'a ExprBlock) -> Option<&'a ExprForLoop> {
+fn braced_for_loop(expr: &ExprBlock) -> Option<&ExprForLoop> {
     let len = expr.block.stmts.len();
     if len != 1 {
         None
     } else {
         let stmt = &expr.block.stmts[0];
         match stmt {
-            Stmt::Expr(expr) => match expr {
-                Expr::ForLoop(expr) => Some(expr),
-                _ => None,
-            },
+            Stmt::Expr(Expr::ForLoop(expr)) => Some(expr),
             _ => None,
         }
     }

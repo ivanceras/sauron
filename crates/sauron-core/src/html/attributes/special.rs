@@ -1,15 +1,8 @@
 //! special attributes which is treated differently
 //!
 //!
-use super::{
-    attr,
-    Attribute,
-    Value,
-};
-use crate::{
-    Element,
-    Node,
-};
+use super::{attr, Attribute, Value};
+use crate::{Element, Node};
 
 /// Special Node attributes that are treated differently
 /// such as key and skip which both greatly affects the diffing algorithm
@@ -34,7 +27,7 @@ pub trait Special {
 
 impl<MSG> Special for Node<MSG> {
     fn get_value<'a>(&'a self, att_name: &'static str) -> Option<&'a Value> {
-        self.get_attribute_value(&&att_name)
+        self.get_attribute_value(&att_name)
             .map(|att_values| {
                 att_values.first().map(|v| v.get_simple()).flatten()
             })
@@ -44,7 +37,7 @@ impl<MSG> Special for Node<MSG> {
 
 impl<MSG> Special for Element<MSG> {
     fn get_value<'a>(&'a self, att_name: &'static str) -> Option<&'a Value> {
-        self.get_attribute_value(&&att_name)
+        self.get_attribute_value(&att_name)
             .map(|att_values| {
                 att_values.first().map(|v| v.get_simple()).flatten()
             })

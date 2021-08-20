@@ -1,6 +1,7 @@
 //! This contains a trait to be able to render
 //! virtual dom into a writable buffer
 //!
+use crate::html::attributes::SegregatedAttributes;
 use crate::{html::attributes, Attribute, Element, Node};
 use std::fmt;
 
@@ -77,13 +78,13 @@ fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
     merged_attributes
         .iter()
         .flat_map(|attr| {
-            let (_callbacks, _plain_values, _styles, func_values) =
+            let SegregatedAttributes{callbacks:_, plain_values:_, styles:_, function_calls} =
                 attributes::partition_callbacks_from_plain_styles_and_func_calls(
                     attr,
                 );
 
             if *attr.name() == "inner_html" {
-                attributes::merge_plain_attributes_values(&func_values)
+                attributes::merge_plain_attributes_values(&function_calls)
             } else {
                 None
             }
@@ -168,10 +169,14 @@ impl<MSG> Render for Attribute<MSG> {
         _indent: usize,
         _compressed: bool,
     ) -> fmt::Result {
-        let (_callbacks, plain_values, styles, _func_values) =
-            attributes::partition_callbacks_from_plain_styles_and_func_calls(
-                self,
-            );
+        let SegregatedAttributes {
+            callbacks: _,
+            plain_values,
+            styles,
+            function_calls: _,
+        } = attributes::partition_callbacks_from_plain_styles_and_func_calls(
+            self,
+        );
         if let Some(merged_plain_values) =
             attributes::merge_plain_attributes_values(&plain_values)
         {

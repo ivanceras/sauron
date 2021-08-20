@@ -52,7 +52,7 @@ impl Value {
     /// Use the `to_string()` for that.
     pub fn as_str(&self) -> Option<&str> {
         match self {
-            Value::String(ref v) => Some(&v),
+            Value::String(ref v) => Some(v),
             Value::Str(v) => Some(v),
             _ => None,
         }
@@ -242,12 +242,8 @@ impl_from!([T; 12]);
 #[cfg(test)]
 mod tests {
     use crate::{
-        html::{
-            attributes::attr,
-            element,
-        },
-        Node,
-        Render,
+        html::{attributes::attr, element},
+        Node, Render,
     };
 
     #[test]
