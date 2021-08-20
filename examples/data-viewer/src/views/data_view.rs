@@ -63,10 +63,19 @@ impl Component<Msg> for DataView {
     fn update(&mut self, msg: Msg) -> Vec<Msg> {
         match msg {
             Msg::PageMsg(page_index, page_msg) => {
-                self.page_views[page_index].update(page_msg);
+                let follow_ups = self.page_views[page_index].update(page_msg);
+                follow_ups
+                    .into_iter()
+                    .map(|follow_up| Msg::PageMsg(page_index, follow_up))
+                    .collect()
             }
             Msg::ColumnMsg(column_index, column_msg) => {
-                self.column_views[column_index].update(column_msg);
+                let follow_ups =
+                    self.column_views[column_index].update(column_msg);
+                follow_ups
+                    .into_iter()
+                    .map(|follow_up| Msg::ColumnMsg(column_index, follow_up))
+                    .collect()
             }
             Msg::Scrolled((scroll_top, scroll_left)) => {
                 self.scroll_top = scroll_top;
@@ -76,9 +85,11 @@ impl Component<Msg> for DataView {
                     self.visible_page = visible_page;
                     self.update_visible_pages();
                 }
+                vec![]
             }
             Msg::ColumnEndResize(_client_x, _client_y) => {
                 self.active_resize = None;
+                vec![]
             }
             Msg::MouseMove(client_x, _client_y) => {
                 debug!("debug in column view from the window..");
@@ -98,6 +109,7 @@ impl Component<Msg> for DataView {
                         }
                     }
                 }
+                vec![]
             }
             Msg::ColumnStartResize(column_index, grip, client_x, _client_y) => {
                 self.active_resize = Some((column_index, grip));
@@ -107,9 +119,9 @@ impl Component<Msg> for DataView {
                     "width of column {} is {}",
                     column_index, column_view.width
                 );
+                vec![]
             }
         }
-        vec![]
     }
 
     /// A grid of 2x2  containing 4 major parts of the table
