@@ -99,15 +99,6 @@ where
 }
 
 impl<DSP> Cmd<DSP> {
-    ///  dispatch this msg on the next update loop
-    pub fn from_msg<MSG>(msg: MSG) -> Self
-    where
-        MSG: Clone + 'static,
-        DSP: Dispatch<MSG> + Clone + 'static,
-    {
-        Cmd::new(move |program: DSP| program.dispatch(msg.clone()))
-    }
-
     /// batch dispatch this msg on the next update loop
     pub fn batch_msg<MSG>(msg_list: Vec<MSG>) -> Self
     where
