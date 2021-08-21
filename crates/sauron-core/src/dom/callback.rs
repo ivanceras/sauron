@@ -24,8 +24,8 @@ impl<IN, OUT> fmt::Debug for Callback<IN, OUT> {
 
 impl<IN, OUT> Callback<IN, OUT> {
     /// This method calls the actual callback.
-    pub fn emit(&self, value: IN) -> OUT {
-        (self.func)(value)
+    pub fn emit(&self, input: IN) -> OUT {
+        (self.func)(input)
     }
 }
 

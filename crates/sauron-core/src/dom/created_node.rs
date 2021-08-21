@@ -4,13 +4,13 @@ use crate::{
     dom::Dispatch,
     html,
     html::attributes::{AttributeValue, SegregatedAttributes, Special},
-    Attribute,
+    Attribute, Event,
 };
 use once_cell::sync::OnceCell;
 use std::{collections::HashMap, sync::Mutex};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
-    self, Element, Event, EventTarget, HtmlElement, HtmlInputElement,
+    self, Element, EventTarget, HtmlElement, HtmlInputElement,
     HtmlTextAreaElement, Node, Text,
 };
 
@@ -101,9 +101,9 @@ impl CreatedNode {
             if *att.name() == "mount" {
                 for val in att.value().iter() {
                     if let AttributeValue::EventListener(cb) = val {
-                        let msg = cb.emit(MountEvent {
+                        let msg = cb.emit(Event::from(MountEvent {
                             target_node: element.clone().unchecked_into(),
-                        });
+                        }));
                         program.dispatch(msg);
                     }
                 }
@@ -356,8 +356,7 @@ impl CreatedNode {
                             .dyn_ref()
                             .expect("should be a keyboard event");
                         if ke.key() == "Enter" {
-                            let msg =
-                                listener_clone.emit(Into::<Event>::into(event));
+                            let msg = listener_clone.emit(Event::from(event));
                             program_clone.dispatch(msg);
                         }
                     }));
@@ -425,7 +424,7 @@ where
     let program_clone = program.clone();
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
-        let msg = listener_clone.emit(event);
+        let msg = listener_clone.emit(Event::from(event));
         program_clone.dispatch(msg);
     }))
 }

@@ -1,7 +1,7 @@
 //! Callbacks contains function that can be called at a later time.
 //! This is used in containing an event listener attached to an DOM element.
 use std::any::TypeId;
-use std::{convert::Into, fmt, rc::Rc};
+use std::{fmt, rc::Rc};
 
 /// A generic sized representation of a function that can be
 /// attached to a Node. The callback will essentially be owned by the element
@@ -65,8 +65,8 @@ where
     OUT: 'static,
 {
     /// This method calls the actual callback.
-    pub fn emit<T: Into<IN>>(&self, value: T) -> OUT {
-        (self.func)(value.into())
+    pub fn emit(&self, input: IN) -> OUT {
+        (self.func)(input)
     }
 
     /// map this callback using another callback such that
