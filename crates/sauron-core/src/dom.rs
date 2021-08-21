@@ -3,6 +3,7 @@
 //!
 mod application;
 pub mod apply_patches;
+mod callback;
 pub mod cmd;
 mod component;
 mod created_node;
@@ -15,6 +16,7 @@ mod util;
 mod window;
 
 pub use application::{Application, Measurements};
+pub use callback::Callback;
 pub use component::{Component, Container, Effects, View};
 pub use created_node::CreatedNode;
 pub use dispatch::Dispatch;

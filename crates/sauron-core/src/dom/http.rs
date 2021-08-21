@@ -1,5 +1,5 @@
 //! provides functions for retrieving data using http network request
-use crate::html::attributes::Callback;
+use crate::dom::Callback;
 use crate::{Application, Cmd, Dispatch, Program};
 use js_sys::TypeError;
 use std::fmt::Debug;

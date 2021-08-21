@@ -1,5 +1,5 @@
 use crate::html::attributes::AttributeValue;
-use crate::html::attributes::Callback;
+use crate::html::attributes::Listener;
 use crate::{Attribute, Element, Event, Node};
 
 /// Add mapping function for Node, Element, Attribute,
@@ -14,12 +14,12 @@ where
         MSG2: 'static;
 
     /// map the msg of callback of this element node
-    fn map_callback<MSG2>(self, cb: Callback<MSG, MSG2>) -> Node<MSG2>
+    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Node<MSG2>
     where
         MSG2: 'static;
 
     /// Return the callbacks present on this node
-    fn get_callbacks(&self) -> Vec<&Callback<Event, MSG>>;
+    fn get_callbacks(&self) -> Vec<&Listener<Event, MSG>>;
 }
 
 /// Add mapping function for Element
@@ -28,7 +28,7 @@ where
     MSG: 'static,
 {
     /// map_callback the return of the callback from MSG to MSG2
-    fn map_callback<MSG2>(self, cb: Callback<MSG, MSG2>) -> Element<MSG2>
+    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Element<MSG2>
     where
         MSG2: 'static;
 }
@@ -45,12 +45,12 @@ where
         MSG2: 'static;
 
     /// transform the callback of this attribute
-    fn map_callback<MSG2>(self, cb: Callback<MSG, MSG2>) -> Attribute<MSG2>
+    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Attribute<MSG2>
     where
         MSG2: 'static;
 
     /// return the callback values of this attribute
-    fn get_callback(&self) -> Vec<&Callback<Event, MSG>>;
+    fn get_callback(&self) -> Vec<&Listener<Event, MSG>>;
 }
 
 impl<MSG> NodeMapMsg<MSG> for Node<MSG>
@@ -63,12 +63,12 @@ where
         F: Fn(MSG) -> MSG2 + 'static,
         MSG2: 'static,
     {
-        let cb = Callback::from(func);
+        let cb = Listener::from(func);
         self.map_callback(cb)
     }
 
     /// map the msg of callback of this element node
-    fn map_callback<MSG2>(self, cb: Callback<MSG, MSG2>) -> Node<MSG2>
+    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Node<MSG2>
     where
         MSG2: 'static,
     {
@@ -78,7 +78,7 @@ where
         }
     }
 
-    fn get_callbacks(&self) -> Vec<&Callback<Event, MSG>> {
+    fn get_callbacks(&self) -> Vec<&Listener<Event, MSG>> {
         if let Some(attributes) = self.get_attributes() {
             let callbacks = attributes
                 .iter()
@@ -96,7 +96,7 @@ where
     MSG: 'static,
 {
     /// map_callback the return of the callback from MSG to MSG2
-    fn map_callback<MSG2>(self, cb: Callback<MSG, MSG2>) -> Element<MSG2>
+    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Element<MSG2>
     where
         MSG2: 'static,
     {
@@ -128,12 +128,12 @@ where
         F: Fn(MSG) -> MSG2 + 'static,
         MSG2: 'static,
     {
-        let cb = Callback::from(func);
+        let cb = Listener::from(func);
         self.map_callback(cb)
     }
 
     /// transform the callback of this attribute
-    fn map_callback<MSG2>(self, cb: Callback<MSG, MSG2>) -> Attribute<MSG2>
+    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Attribute<MSG2>
     where
         MSG2: 'static,
     {
@@ -149,7 +149,7 @@ where
     }
 
     /// return the callback values of this attribute
-    fn get_callback(&self) -> Vec<&Callback<Event, MSG>> {
+    fn get_callback(&self) -> Vec<&Listener<Event, MSG>> {
         self.value
             .iter()
             .filter_map(|v| v.as_event_listener())
@@ -164,7 +164,7 @@ where
     /// map the callback of this attribute using another callback
     pub fn map_callback<MSG2>(
         self,
-        cb: Callback<MSG, MSG2>,
+        cb: Listener<MSG, MSG2>,
     ) -> AttributeValue<MSG2>
     where
         MSG2: 'static,

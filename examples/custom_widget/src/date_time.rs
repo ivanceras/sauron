@@ -1,4 +1,5 @@
 use sauron::apply_patches::patch;
+use sauron::dom::Callback;
 use sauron::html::attributes;
 use sauron::prelude::*;
 use std::cell::RefCell;
@@ -21,7 +22,7 @@ pub struct DateTimeWidget<PMSG> {
     time: String,
     cnt: i32,
     mounted: bool,
-    time_change_listener: Vec<attributes::Callback<String, PMSG>>,
+    time_change_listener: Vec<Callback<String, PMSG>>,
 }
 
 impl<PMSG> DateTimeWidget<PMSG>
@@ -50,8 +51,7 @@ where
     where
         F: Fn(String) -> PMSG + 'static,
     {
-        self.time_change_listener
-            .push(attributes::Callback::from(f));
+        self.time_change_listener.push(Callback::from(f));
     }
 }
 

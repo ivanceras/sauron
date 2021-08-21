@@ -5,7 +5,7 @@ use crate::Attribute;
 use crate::Event;
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
-pub use callback::Callback;
+pub use listener::Listener;
 pub use special::{key, replace, skip, Special};
 pub use style::Style;
 pub use value::Value;
@@ -13,7 +13,7 @@ pub use value::Value;
 #[macro_use]
 mod attribute_macros;
 mod attribute_value;
-mod callback;
+mod listener;
 mod special;
 mod style;
 mod value;
@@ -397,8 +397,8 @@ pub(crate) fn merge_styles_attributes_values<MSG>(
 
 /// The Attributes partition into 4 different types
 pub struct SegregatedAttributes<'a, MSG> {
-    /// the callbacks of the event listeners
-    pub callbacks: Vec<&'a Callback<Event, MSG>>,
+    /// the listeners of the event listeners
+    pub listeners: Vec<&'a Listener<Event, MSG>>,
     /// plain attribute values
     pub plain_values: Vec<&'a AttributeValue<MSG>>,
     /// style attribute values
@@ -407,12 +407,12 @@ pub struct SegregatedAttributes<'a, MSG> {
     pub function_calls: Vec<&'a AttributeValue<MSG>>,
 }
 
-/// returns (callbacks, plain_attribtues, function_calls)
+/// returns (listeners, plain_attribtues, function_calls)
 #[doc(hidden)]
 pub(crate) fn partition_callbacks_from_plain_styles_and_func_calls<MSG>(
     attr: &Attribute<MSG>,
 ) -> SegregatedAttributes<MSG> {
-    let mut callbacks = vec![];
+    let mut listeners = vec![];
     let mut plain_values = vec![];
     let mut styles = vec![];
     let mut function_calls = vec![];
@@ -428,13 +428,13 @@ pub(crate) fn partition_callbacks_from_plain_styles_and_func_calls<MSG>(
                 styles.push(av);
             }
             AttributeValue::EventListener(cb) => {
-                callbacks.push(cb);
+                listeners.push(cb);
             }
             _ => (),
         }
     }
     SegregatedAttributes {
-        callbacks,
+        listeners,
         plain_values,
         styles,
         function_calls,

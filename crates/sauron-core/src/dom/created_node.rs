@@ -87,7 +87,7 @@ impl CreatedNode {
     }
 
     /// dispatch the mount event,
-    /// call the callback since browser don't allow asynchronous execution of
+    /// call the listener since browser don't allow asynchronous execution of
     /// dispatching custom events (non-native browser events)
     fn dispatch_mount_event<DSP, MSG>(
         program: &DSP,
@@ -229,7 +229,7 @@ impl CreatedNode {
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         let SegregatedAttributes {
-            callbacks,
+            listeners,
             plain_values,
             styles,
             function_calls,
@@ -329,8 +329,8 @@ impl CreatedNode {
             }
         }
 
-        // add callbacks using add_event_listener
-        for callback in callbacks {
+        // add listeners using add_event_listener
+        for listener in listeners {
             let unique_id = create_unique_identifier();
 
             // set the data-sauron_vdom-id this will be read later on
@@ -345,11 +345,11 @@ impl CreatedNode {
             let current_elm: &EventTarget =
                 element.dyn_ref().expect("unable to cast to event targe");
 
-            // a custom enter event which triggers the callback
+            // a custom enter event which triggers the listener
             // when the enter key is pressed
             if *event_str == "enter" {
                 let program_clone = program.clone();
-                let callback_clone = callback.clone();
+                let listener_clone = listener.clone();
                 let key_press_func: Closure<dyn FnMut(web_sys::Event)> =
                     Closure::wrap(Box::new(move |event: web_sys::Event| {
                         let ke: &web_sys::KeyboardEvent = event
@@ -357,7 +357,7 @@ impl CreatedNode {
                             .expect("should be a keyboard event");
                         if ke.key() == "Enter" {
                             let msg =
-                                callback_clone.emit(Into::<Event>::into(event));
+                                listener_clone.emit(Into::<Event>::into(event));
                             program_clone.dispatch(msg);
                         }
                     }));
@@ -372,7 +372,7 @@ impl CreatedNode {
                 key_press_func.forget();
             } else {
                 let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
-                    create_closure_wrap(program, callback);
+                    create_closure_wrap(program, listener);
                 current_elm
                     .add_event_listener_with_callback(
                         event_str,
@@ -415,17 +415,17 @@ impl CreatedNode {
 /// This wrap into a closure the function that is dispatched when the event is triggered.
 pub(crate) fn create_closure_wrap<DSP, MSG>(
     program: &DSP,
-    callback: &Listener<MSG>,
+    listener: &Listener<MSG>,
 ) -> Closure<dyn FnMut(web_sys::Event)>
 where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    let callback_clone = callback.clone();
+    let listener_clone = listener.clone();
     let program_clone = program.clone();
 
     Closure::wrap(Box::new(move |event: web_sys::Event| {
-        let msg = callback_clone.emit(event);
+        let msg = listener_clone.emit(event);
         program_clone.dispatch(msg);
     }))
 }

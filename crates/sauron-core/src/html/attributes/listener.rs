@@ -24,7 +24,7 @@ use std::{convert::Into, fmt, rc::Rc};
 ///         - Attributes of the same name are merged therefore cloning the attributes, hence the
 ///         callback is necessary.
 ///
-pub struct Callback<IN, OUT> {
+pub struct Listener<IN, OUT> {
     /// the function to be executed
     func: Rc<dyn Fn(IN) -> OUT>,
     /// the type type_id of the event this callback will be attached to
@@ -33,7 +33,7 @@ pub struct Callback<IN, OUT> {
     msg_type_id: TypeId,
 }
 
-impl<IN, F, OUT> From<F> for Callback<IN, OUT>
+impl<IN, F, OUT> From<F> for Listener<IN, OUT>
 where
     F: Fn(IN) -> OUT + 'static,
     OUT: 'static,
@@ -52,14 +52,14 @@ where
 /// using the #[derive(Debug)] needs IN and OUT to also be Debug
 ///
 /// The reason this is manually implemented is, so that IN and OUT
-/// doesn't need to be Debug as it is part of the Callback objects and are not shown.
-impl<IN, OUT> fmt::Debug for Callback<IN, OUT> {
+/// doesn't need to be Debug as it is part of the Listener objects and are not shown.
+impl<IN, OUT> fmt::Debug for Listener<IN, OUT> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "||{{..}}")
     }
 }
 
-impl<IN, OUT> Callback<IN, OUT>
+impl<IN, OUT> Listener<IN, OUT>
 where
     IN: 'static,
     OUT: 'static,
@@ -73,8 +73,8 @@ where
     /// OUT becomes MSG2
     pub fn map_callback<MSG2>(
         self,
-        cb: Callback<OUT, MSG2>,
-    ) -> Callback<IN, MSG2>
+        cb: Listener<OUT, MSG2>,
+    ) -> Listener<IN, MSG2>
     where
         MSG2: 'static,
     {
@@ -82,7 +82,7 @@ where
             let out = self.emit(input);
             cb.emit(out)
         };
-        Callback::from(func_wrap)
+        Listener::from(func_wrap)
     }
 }
 
@@ -90,9 +90,9 @@ where
 /// using the #[derive(Clone)] needs IN and OUT to also be Clone
 ///
 /// The reason this is manually implemented is, so that IN and OUT
-/// doesn't need to be Clone as it is part of the Callback objects and cloning here
+/// doesn't need to be Clone as it is part of the Listener objects and cloning here
 /// is just cloning the pointer of the actual callback function
-impl<IN, OUT> Clone for Callback<IN, OUT> {
+impl<IN, OUT> Clone for Listener<IN, OUT> {
     fn clone(&self) -> Self {
         Self {
             func: Rc::clone(&self.func),
@@ -109,7 +109,7 @@ impl<IN, OUT> Clone for Callback<IN, OUT> {
 ///
 /// This is done by comparing the type_id of the input and type_id of the output.
 ///
-impl<IN, OUT> PartialEq for Callback<IN, OUT> {
+impl<IN, OUT> PartialEq for Listener<IN, OUT> {
     fn eq(&self, other: &Self) -> bool {
         self.event_type_id == other.event_type_id
             && self.msg_type_id == other.msg_type_id

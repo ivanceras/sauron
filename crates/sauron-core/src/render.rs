@@ -78,7 +78,7 @@ fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
     merged_attributes
         .iter()
         .flat_map(|attr| {
-            let SegregatedAttributes{callbacks:_, plain_values:_, styles:_, function_calls} =
+            let SegregatedAttributes{listeners:_, plain_values:_, styles:_, function_calls} =
                 attributes::partition_callbacks_from_plain_styles_and_func_calls(
                     attr,
                 );
@@ -170,7 +170,7 @@ impl<MSG> Render for Attribute<MSG> {
         _compressed: bool,
     ) -> fmt::Result {
         let SegregatedAttributes {
-            callbacks: _,
+            listeners: _,
             plain_values,
             styles,
             function_calls: _,

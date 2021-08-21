@@ -34,7 +34,7 @@ pub type Attribute<MSG> =
 
 /// Callback where Event type is supplied
 /// for Components
-pub type Listener<MSG> = attributes::Callback<Event, MSG>;
+pub type Listener<MSG> = attributes::Listener<Event, MSG>;
 
 /// This is a sauron html specific functionality
 /// diff 2 nodes with attribute using `&'static str` instead of generic ATT
