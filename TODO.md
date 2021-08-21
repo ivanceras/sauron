@@ -66,8 +66,9 @@
         - Cmd{ commands:Vec<..>,should_update }
         - Cmd::noop() // no update operation
         - Fixed in `0.36.0`
-- [ ] Remove the Dispatch trait and pass Program as it is in dom_updater and apply_patches module
-    - There is only one implementation of `Dispatch` trait anyway, that is `Program`
+- ~~[ ] Remove the Dispatch trait and pass Program as it is in dom_updater and apply_patches module~~
+    - ~~There is only one implementation of `Dispatch` trait anyway, that is `Program`~~
+    - Dispatch serve its purpose to make the code less clutter, by passing arguments around with less generics.
 - [X] ISSUE: sauron `node!` macro doesn't work on svg tags since it is using only `html_element` function which `namespace` is not supplied.
     - Fixed in `0.35.0` by checking whether a tag has a namespace.
 - [X] Change `program: Option<&DSP>` to just `program: &DSP` since there program is needed everywhere.
@@ -82,6 +83,7 @@
 - [ ] add a conditional function for event attribute that if any of the other attribute is changed the event will have to be remove and re-attach.
     - This is to mitigate the aggressive recycling of nodes which we skipp diffing for event listeners for performance reasons, as it is impractical to
         reattach event listener at every render cycle.
+- [ ] Remove NodeIdx traversal and also remove NodeIdx in `mt-dom` TreePath, as traversal path prove to be correct.
 
 
 

@@ -1,20 +1,5 @@
 use crate::{Cmd, Node};
 
-/// Contains the time it took for the last app update call for the component
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Measurements {
-    /// The number of DOM nodes in this Component
-    pub view_node_count: usize,
-    /// Time it took for dispatching the Component's update function
-    pub update_dispatch_took: f64,
-    /// Time it took for the Component to build it's view
-    pub build_view_took: f64,
-    /// Time it took for the patching the DOM.
-    pub dom_update_took: f64,
-    /// Total time it took for the component dispatch
-    pub total_time: f64,
-}
-
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
 ///
@@ -45,6 +30,9 @@ where
     fn view(&self) -> Node<MSG>;
 
     /// This is called after dispatching and updating the dom for the component
+    /// This is for diagnostic and performance measurement purposes.
+    ///
+    /// Warning: DO NOT use for anything else other than the intended purpose
     fn measurements(&self, measurements: Measurements) -> Cmd<Self, MSG>
     where
         Self: Sized + 'static,
@@ -52,4 +40,19 @@ where
         log::debug!("Measurements: {:#?}", measurements);
         Cmd::no_render()
     }
+}
+
+/// Contains the time it took for the last app update call for the component
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Measurements {
+    /// The number of DOM nodes in this Component
+    pub view_node_count: usize,
+    /// Time it took for dispatching the Component's update function
+    pub update_dispatch_took: f64,
+    /// Time it took for the Component to build it's view
+    pub build_view_took: f64,
+    /// Time it took for the patching the DOM.
+    pub dom_update_took: f64,
+    /// Total time it took for the component dispatch
+    pub total_time: f64,
 }

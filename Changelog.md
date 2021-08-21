@@ -1,6 +1,35 @@
 # Changelog
 
 ## Unreleased
+- shorten the `data-vdom-id` that we used as marker in the DOM element
+- Improve calling on emit, The input don't need to implement Into, so we can call it right away
+- Use Callback in Cmd
+    - Repurpose the old Callback for Listener so it can contain additional fields such as TypeId of the arguments and return type of the Fn it contains,
+        A new generic Callback with only Fn as the content has now a new place in dom::callback::Callback module, this would be used for lightweight operations such as callbacks in the components
+    - Rename the type alias of Callback<Event,MSG> to Listener<MSG>
+    - Rename generics in Callback<EVENT,MSG> to Callback<IN,OUT> for a more generic application
+    - Wire the Callback into the parent Component Msg
+    - Remove unused function Cmd::from_msg
+    - Add method in Cmd to accept Msg and Vec<Msg> intended to be used for deriving an Application Cmd from Component Msg
+    - Add implementation to convert Cmd from Effects, rename Cmd::map_effects to Cmd::map_follow_ups
+    - Add batch_map function to Cmd to simultaneously map Msg list and create a Cmd
+- Rename Effects::map_follow_ups to Effects::map_msg and Cmd::map_follow_ups to Cmd::map_msg, we already know that it is mapping the follow_up and the effects is already in the same type as the component that is containing it
+    - Use effects in window-tab-rows example
+    - Use effects in custom_widget example
+    - Move effects out into its own module, Add functions for mapping effects easily
+    - Add Effects struct to contain follow_up msg and effect Msg intended for the parent component
+    - Component is just a widget which returns Effects with follow_ups, but no effects
+- Improve the `Component` system, Add 2 new types of `Components`: `Container`, and `View`
+    - Component and Widget are merged using Component as the final name, Component can now return both effects and followups
+    - map follow_up updates from components inside a component
+- **breaking** Modify and expose `request_animation_frame` to execute a rust closure,
+    and create the `request_animation_frame_for_closure` which accepts `wasm_bindgen::Closure` used internally in `Program`
+    - **breaking** Remove unused function `execute_in_request_in_animation_frame`
+- Modify `Application::init` such that program is not included in the arg, to simplfiy and make it cleaner
+- Remove `node_idx` in render, it was for debugging only
+- Add a way to convert mouse_event into Event
+- Remove outdated comment
+- Simplify the batching the follow up Msg
 
 ## 0.41.1
 - Add utility functions in html attributes which manipulates classes with namespace
