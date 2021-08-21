@@ -200,7 +200,7 @@ where
             Closure::once(move || {
                 program_clone.dispatch_inner(msg);
             });
-        crate::request_animation_frame(&closure_raf);
+        crate::dom::util::request_animation_frame_for_closure(&closure_raf);
         closure_raf.forget();
     }
 
