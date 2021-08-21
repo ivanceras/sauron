@@ -64,14 +64,14 @@ impl Component<Msg, ()> for DataView {
         match msg {
             Msg::PageMsg(page_index, page_msg) => {
                 let effects = self.page_views[page_index].update(page_msg);
-                effects.map_follow_ups(move |follow_up| {
+                effects.map_msg(move |follow_up| {
                     Msg::PageMsg(page_index, follow_up)
                 })
             }
             Msg::ColumnMsg(column_index, column_msg) => {
                 let effects =
                     self.column_views[column_index].update(column_msg);
-                effects.map_follow_ups(move |follow_up| {
+                effects.map_msg(move |follow_up| {
                     Msg::ColumnMsg(column_index, follow_up)
                 })
             }

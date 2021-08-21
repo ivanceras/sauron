@@ -71,9 +71,8 @@ impl Application<Msg> for Window {
             }
             Msg::TabMsg(index, tab_msg) => {
                 let effects = self.tabs[index].update(tab_msg);
-                let effects = effects.map_follow_ups(move |follow_up| {
-                    Msg::TabMsg(index, follow_up)
-                });
+                let effects = effects
+                    .map_msg(move |follow_up| Msg::TabMsg(index, follow_up));
                 Cmd::from(effects)
             }
         }

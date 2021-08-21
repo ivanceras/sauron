@@ -52,9 +52,7 @@ impl Component<Msg, ()> for Tab {
             }
             Msg::RowMsg(index, row_msg) => {
                 let effects = self.rows[index].update(row_msg);
-                effects.map_follow_ups(move |follow_up| {
-                    Msg::RowMsg(index, follow_up)
-                })
+                effects.map_msg(move |follow_up| Msg::RowMsg(index, follow_up))
             }
         }
     }

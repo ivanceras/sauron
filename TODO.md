@@ -89,7 +89,8 @@
     - using wasm-bindgen directly eliminates the need for Url change service wrapper
 - [ ] re-think about the `sauron-core` features:
     - [X] `with-dom` when used in client-side, default
-    - [ ] `with-ssr` when used in server-side rendering, mutually exlusive to `with-dom`
+    - ~~[]`with-ssr` when used in server-side rendering, mutually exlusive to `with-dom`~~
+        - Server-side rendering is implicit when target is not wasm.
     - [X] `no_request_animation_frame` this should be additive
         -  crate is now using `with-request-animation` feature
 - [X] `with-markdown`

@@ -39,7 +39,7 @@ impl<MSG, PMSG> Effects<MSG, PMSG> {
 
     /// map the follow up messages of this Effect such that
     /// follow ups with type Vec<MSG> will become Vec<MSG2>
-    pub fn map_follow_ups<F, MSG2>(self, f: F) -> Effects<MSG2, PMSG>
+    pub fn map_msg<F, MSG2>(self, f: F) -> Effects<MSG2, PMSG>
     where
         F: Fn(MSG) -> MSG2 + 'static,
     {

@@ -70,7 +70,7 @@ impl Application<Msg> for ResizeWrapper {
             Msg::DataViewMsg(data_view_msg) => {
                 let effects = self.data_view.update(data_view_msg);
                 //TODO: follow ups should be wired automatically
-                Cmd::from(effects.map_follow_ups(Msg::DataViewMsg))
+                Cmd::from(effects.map_msg(Msg::DataViewMsg))
             }
             Msg::EndResize(_client_x, _client_y) => {
                 self.active_resize = None;

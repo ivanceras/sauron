@@ -59,9 +59,8 @@ impl Component<Msg, ()> for PageView {
         match msg {
             Msg::RowMsg(row_index, row_msg) => {
                 let effects = self.row_views[row_index].update(row_msg);
-                effects.map_follow_ups(move |follow_up| {
-                    Msg::RowMsg(row_index, follow_up)
-                })
+                effects
+                    .map_msg(move |follow_up| Msg::RowMsg(row_index, follow_up))
             }
         }
     }

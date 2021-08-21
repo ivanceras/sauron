@@ -114,10 +114,7 @@ impl<DSP> Cmd<DSP> {
     }
 
     /// Convert effects into Cmd
-    pub fn map_follow_ups<F, PMSG, MSG>(
-        effects: Effects<MSG, PMSG>,
-        f: F,
-    ) -> Self
+    pub fn map_msg<F, PMSG, MSG>(effects: Effects<MSG, PMSG>, f: F) -> Self
     where
         DSP: Dispatch<PMSG> + Clone + 'static,
         MSG: Clone + 'static,
