@@ -1,4 +1,5 @@
 use sauron::apply_patches::patch;
+use sauron::html::attributes;
 use sauron::prelude::*;
 use sauron::Callback;
 use std::cell::RefCell;
@@ -21,7 +22,7 @@ pub struct DateTimeWidget<PMSG> {
     time: String,
     cnt: i32,
     mounted: bool,
-    time_change_listener: Vec<Callback<PMSG>>,
+    time_change_listener: Vec<attributes::Callback<String, PMSG>>,
 }
 
 impl<PMSG> DateTimeWidget<PMSG>
@@ -48,9 +49,10 @@ where
 
     pub fn on_date_time_change<F>(&mut self, f: F)
     where
-        F: Fn(Event) -> PMSG + 'static,
+        F: Fn(String) -> PMSG + 'static,
     {
-        self.time_change_listener.push(Callback::from(f));
+        self.time_change_listener
+            .push(attributes::Callback::from(f));
     }
 }
 
@@ -58,15 +60,19 @@ impl<PMSG> Widget<Msg, PMSG> for DateTimeWidget<PMSG>
 where
     PMSG: Clone + Debug + 'static,
 {
-    fn update(&mut self, msg: Msg) -> (Vec<Msg>, Vec<PMSG>) {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, PMSG> {
         match msg {
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
-                (vec![Msg::TimeOrDateModified(self.date_time())], vec![])
+                Effects::with_follow_ups(vec![Msg::TimeOrDateModified(
+                    self.date_time(),
+                )])
             }
             Msg::TimeChange(time) => {
                 log::trace!("time is changed to: {}", time);
-                (vec![Msg::TimeOrDateModified(self.date_time())], vec![])
+                Effects::with_follow_ups(vec![Msg::TimeOrDateModified(
+                    self.date_time(),
+                )])
             }
             Msg::TimeOrDateModified(date_time) => {
                 log::trace!("time or date is changed: {}", date_time);
@@ -74,32 +80,20 @@ where
                 for listener in self.time_change_listener.iter() {
                     let event = web_sys::Event::new("time_change")
                         .expect("must construct custom event");
-                    let event: Event = event.into();
-                    let pmsg = listener.emit(event);
+                    let pmsg = listener.emit(self.date_time());
                     parent_msg.push(pmsg);
                 }
                 log::trace!("sending this to parent: {:?}", parent_msg);
-                (vec![], parent_msg)
+                Effects::with_effects(parent_msg)
             }
             Msg::Mount(target_node) => {
-                /*
-                //log::debug!("Mounting attempt...");
-                if !self.mounted {
-                    log::debug!("replacing the original target");
-                    let mut self_clone = self.clone();
-                    self_clone.mounted = true;
-                    self_clone.date = "2020-02-02".to_string();
-                    self_clone.time = "22:22".to_string();
-                    Program::replace_mount(self_clone, &target_node);
-                    self.mounted = true;
-                }
-                */
-                (vec![], vec![])
+                log::debug!("widget is mounted to {:?}", target_node);
+                Effects::none()
             }
             Msg::BtnClick => {
                 log::trace!("btn is clicked..");
                 self.cnt += 1;
-                (vec![], vec![])
+                Effects::none()
             }
         }
     }

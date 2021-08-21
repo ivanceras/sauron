@@ -88,13 +88,8 @@ impl Application<Msg> for App {
             // the date time widget.
             // We want the date-time widget to have it's own lifecycle
             Msg::DateTimeMsg(dmsg) => {
-                let (follow_ups, pmsg_list) = self.date_time.update(dmsg);
-                Cmd::batch_msg(
-                    pmsg_list
-                        .into_iter()
-                        .chain(follow_ups.into_iter().map(Msg::DateTimeMsg))
-                        .collect(),
-                )
+                let effects = self.date_time.update(dmsg);
+                Cmd::map_effects(effects, Msg::DateTimeMsg)
             }
             Msg::DateTimeChange(String) => {
                 log::warn!("FINALY CALLED HERE? Time is changed in out date time widget");
