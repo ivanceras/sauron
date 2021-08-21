@@ -2,7 +2,5 @@
 
 cargo test --all --no-default-features  &&\
 cargo test --all --features "with-dom"  &&\
-wasm-pack test --firefox --headless  &&\
-
-cd crates/sauron-core/  &&\
-./test.sh
+cargo test --all --all-features &&\
+wasm-pack test --firefox --headless

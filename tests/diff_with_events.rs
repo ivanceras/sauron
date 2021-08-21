@@ -1,7 +1,5 @@
 #[macro_use]
 extern crate log;
-extern crate wasm_bindgen_test;
-extern crate web_sys;
 use sauron_core::{
     diff,
     dom::DomUpdater,

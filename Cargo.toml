@@ -42,6 +42,17 @@ log = "0.4"
 wasm-bindgen-test = "0.3"
 regex = "1"
 
+[dev-dependencies.web-sys]
+version = "0.3"
+features = [
+    "DomTokenList",
+    "HtmlInputElement",
+    "Event",
+    "MouseEvent",
+    "InputEvent",
+    "console",
+    "Performance",
+]
 
 
 [workspace]

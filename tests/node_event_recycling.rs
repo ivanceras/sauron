@@ -1,11 +1,9 @@
 #![deny(warnings)]
-extern crate log;
-extern crate wasm_bindgen_test;
-extern crate web_sys;
 use sauron_core::{
     diff,
     dom::DomUpdater,
     html::{attributes::*, events::*, *},
+    web_sys,
 };
 use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
