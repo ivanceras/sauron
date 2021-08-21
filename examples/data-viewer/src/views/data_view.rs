@@ -60,22 +60,20 @@ pub struct DataView {
 }
 
 impl Component<Msg> for DataView {
-    fn update(&mut self, msg: Msg) -> Vec<Msg> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::PageMsg(page_index, page_msg) => {
-                let follow_ups = self.page_views[page_index].update(page_msg);
-                follow_ups
-                    .into_iter()
-                    .map(|follow_up| Msg::PageMsg(page_index, follow_up))
-                    .collect()
+                let effects = self.page_views[page_index].update(page_msg);
+                effects.map_follow_ups(move |follow_up| {
+                    Msg::PageMsg(page_index, follow_up)
+                })
             }
             Msg::ColumnMsg(column_index, column_msg) => {
-                let follow_ups =
+                let effects =
                     self.column_views[column_index].update(column_msg);
-                follow_ups
-                    .into_iter()
-                    .map(|follow_up| Msg::ColumnMsg(column_index, follow_up))
-                    .collect()
+                effects.map_follow_ups(move |follow_up| {
+                    Msg::ColumnMsg(column_index, follow_up)
+                })
             }
             Msg::Scrolled((scroll_top, scroll_left)) => {
                 self.scroll_top = scroll_top;
@@ -85,11 +83,11 @@ impl Component<Msg> for DataView {
                     self.visible_page = visible_page;
                     self.update_visible_pages();
                 }
-                vec![]
+                Effects::none()
             }
             Msg::ColumnEndResize(_client_x, _client_y) => {
                 self.active_resize = None;
-                vec![]
+                Effects::none()
             }
             Msg::MouseMove(client_x, _client_y) => {
                 debug!("debug in column view from the window..");
@@ -109,7 +107,7 @@ impl Component<Msg> for DataView {
                         }
                     }
                 }
-                vec![]
+                Effects::none()
             }
             Msg::ColumnStartResize(column_index, grip, client_x, _client_y) => {
                 self.active_resize = Some((column_index, grip));
@@ -119,7 +117,7 @@ impl Component<Msg> for DataView {
                     "width of column {} is {}",
                     column_index, column_view.width
                 );
-                vec![]
+                Effects::none()
             }
         }
     }

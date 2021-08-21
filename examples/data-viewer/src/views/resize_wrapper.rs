@@ -68,14 +68,9 @@ impl Application<Msg> for ResizeWrapper {
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::DataViewMsg(data_view_msg) => {
-                let follow_ups = self.data_view.update(data_view_msg);
+                let effects = self.data_view.update(data_view_msg);
                 //TODO: follow ups should be wired automatically
-                Cmd::batch_msg(
-                    follow_ups
-                        .into_iter()
-                        .map(|follow_up| Msg::DataViewMsg(follow_up))
-                        .collect(),
-                )
+                Cmd::from(effects.map_follow_ups(Msg::DataViewMsg))
             }
             Msg::EndResize(_client_x, _client_y) => {
                 self.active_resize = None;

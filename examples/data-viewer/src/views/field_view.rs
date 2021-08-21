@@ -9,7 +9,7 @@ use sauron::{
         units::px,
         *,
     },
-    Attribute, Component, Node,
+    Attribute, Component, Effects, Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -35,7 +35,7 @@ pub struct FieldView {
 }
 
 impl Component<Msg> for FieldView {
-    fn update(&mut self, msg: Msg) -> Vec<Msg> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         trace!("field updated: {:?}", msg);
         match msg {
             Msg::TextChange(value) => {
@@ -59,7 +59,7 @@ impl Component<Msg> for FieldView {
                 trace!("new value: {:?}", self.new_value);
             }
         }
-        vec![]
+        Effects::none()
     }
 
     /// when viewed as row

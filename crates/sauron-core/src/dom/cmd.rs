@@ -113,17 +113,6 @@ impl<DSP> Cmd<DSP> {
         })
     }
 
-    /// map each item in pmsg_list such that Vec<PMSG> becomes Vec<MSG>
-    pub fn map_msgs<F, PMSG, MSG>(pmsg_list: Vec<PMSG>, f: F) -> Self
-    where
-        DSP: Dispatch<MSG> + Clone + 'static,
-        MSG: Clone + 'static,
-        PMSG: 'static,
-        F: Fn(PMSG) -> MSG + 'static,
-    {
-        Self::batch_msg(pmsg_list.into_iter().map(f).collect())
-    }
-
     /// Convert effects into Cmd
     pub fn map_follow_ups<F, PMSG, MSG>(
         effects: Effects<MSG, PMSG>,

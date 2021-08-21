@@ -3,7 +3,7 @@ use restq::{ColumnDef, DataValue};
 use sauron::{
     html::{attributes::*, events::*, units::*, *},
     prelude::*,
-    Component, Node,
+    Component, Effects, Node,
 };
 use std::{cell::RefCell, rc::Rc};
 
@@ -43,14 +43,14 @@ impl RowView {
 }
 
 impl Component<Msg> for RowView {
-    fn update(&mut self, msg: Msg) -> Vec<Msg> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::FieldMsg(field_index, field_msg) => {
                 self.fields[field_index].borrow_mut().update(field_msg);
-                vec![]
+                Effects::none()
             }
-            Msg::DoubleClick => vec![],
-            Msg::Click => vec![],
+            Msg::DoubleClick => Effects::none(),
+            Msg::Click => Effects::none(),
         }
     }
 

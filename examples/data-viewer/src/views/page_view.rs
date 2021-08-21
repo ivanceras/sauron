@@ -55,18 +55,13 @@ impl PageView {
 }
 
 impl Component<Msg> for PageView {
-    fn update(&mut self, msg: Msg) -> Vec<Msg> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::RowMsg(row_index, row_msg) => {
-                let follow_ups = self.row_views[row_index].update(row_msg);
-                // TODO: There should be a structure on this so we
-                // can make a generic call to map the Msg automatically or via macro call
-                //
-                // Note: this variant has index
-                follow_ups
-                    .into_iter()
-                    .map(|follow_up| Msg::RowMsg(row_index, follow_up))
-                    .collect()
+                let effects = self.row_views[row_index].update(row_msg);
+                effects.map_follow_ups(move |follow_up| {
+                    Msg::RowMsg(row_index, follow_up)
+                })
             }
         }
     }
