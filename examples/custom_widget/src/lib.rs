@@ -25,10 +25,8 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         let mut date_time = DateTimeWidget::new("2020-12-30", "10:00", false);
-        date_time.on_date_time_change(|_e| {
-            log::info!("App speaking... -> Time has changed..");
-            Msg::DateTimeChange("<replace with date here>".to_string())
-        });
+        date_time.on_date_time_change(Msg::DateTimeChange);
+
         App {
             count: 0,
             date_time,
@@ -91,8 +89,11 @@ impl Application<Msg> for App {
                 let effects = self.date_time.update(dmsg);
                 Cmd::map_effects(effects, Msg::DateTimeMsg)
             }
-            Msg::DateTimeChange(String) => {
-                log::warn!("FINALY CALLED HERE? Time is changed in out date time widget");
+            Msg::DateTimeChange(date_time) => {
+                log::info!(
+                    "From APP: DateTimeWidget has change the DateTime to: {}",
+                    date_time
+                );
                 Cmd::none()
             }
         }
