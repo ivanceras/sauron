@@ -1,7 +1,4 @@
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-};
+use wasm_bindgen::{closure::Closure, JsCast};
 
 /// utility function which returns the Window element
 pub fn window() -> web_sys::Window {
@@ -18,20 +15,6 @@ pub fn request_animation_frame(f: &Closure<dyn FnMut()>) {
     window()
         .request_animation_frame(f.as_ref().unchecked_ref())
         .expect("should register `requestAnimationFrame` OK");
-}
-
-/// request animation frame and execute function
-pub fn execute_in_request_animation_frame<F>(f: F) -> i32
-where
-    F: Fn() + 'static,
-{
-    let closure_raf: Closure<dyn Fn()> = Closure::wrap(Box::new(move || f()));
-    let handle = window()
-        .request_animation_frame(closure_raf.as_ref().unchecked_ref())
-        .expect("should execute in requestAnimationFrame");
-
-    closure_raf.forget();
-    handle
 }
 
 /// provides access to the document element

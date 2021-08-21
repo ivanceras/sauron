@@ -23,8 +23,7 @@ pub use events::*;
 pub use http::Http;
 pub use program::Program;
 pub use util::{
-    body, document, execute_in_request_animation_frame, history, now,
-    performance, request_animation_frame, window,
+    body, document, history, now, performance, request_animation_frame, window,
 };
 pub use window::Window;
 
