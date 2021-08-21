@@ -9,7 +9,7 @@ mod effects;
 pub trait Component<MSG> {
     /// update itself and can return an optional Msg to be called
     /// on the next update loop.
-    fn update(&mut self, msg: MSG) -> Vec<MSG>;
+    fn update(&mut self, msg: MSG) -> Effects<MSG, ()>;
 
     /// the view of the component
     fn view(&self) -> Node<MSG>;

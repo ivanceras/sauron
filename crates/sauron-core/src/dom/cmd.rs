@@ -154,7 +154,7 @@ where
     MSG: Clone + 'static,
     DSP: Dispatch<MSG> + Clone + 'static,
 {
-    /// Create a Cmd from effects
+    /// Convert Effects that has only follow ups
     fn from(effects: Effects<MSG, ()>) -> Self {
         let Effects {
             follow_ups,
