@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+
+## 0.41.1
+- Add utility functions in html attributes which manipulates classes with namespace
+
+## 0.41.0
 - **breaking** Move out `jss` module into a new crate and [repository](https://github.com/ivanceras/jss), as it has gotten bigger.
     - This also make sauron stays slim to prevent it from collapsing from its own weight.
 - **breaking** Move `sauron-markdown` out to a new [repository](https://github.com/ivanceras/sauron-markdown), as it has gotten bigger.
