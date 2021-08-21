@@ -111,4 +111,15 @@ impl<DSP> Cmd<DSP> {
             }
         })
     }
+
+    /// map each item in msg2_list such that Vec<MSG2> becomes Vec<MSG>
+    pub fn batch_map<F, MSG2, MSG>(msg2_list: Vec<MSG2>, f: F) -> Self
+    where
+        DSP: Dispatch<MSG> + Clone + 'static,
+        MSG: Clone + 'static,
+        MSG2: 'static,
+        F: Fn(MSG2) -> MSG + 'static,
+    {
+        Self::batch_msg(msg2_list.into_iter().map(f).collect())
+    }
 }
