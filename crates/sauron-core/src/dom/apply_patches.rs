@@ -318,7 +318,7 @@ fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<u32> {
     // TODO: there should be a better way to get the node-id back
     // without having to read from the actual dom node element
     if let Some(vdom_id_str) =
-        root_element.get_attribute(created_node::DATA_SAURON_VDOM_ID)
+        root_element.get_attribute(created_node::DATA_VDOM_ID)
     {
         let vdom_id = vdom_id_str
             .parse::<u32>()
