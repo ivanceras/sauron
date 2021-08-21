@@ -1,4 +1,7 @@
 use crate::Node;
+pub use effects::Effects;
+
+mod effects;
 
 /// A component has a view and can update itself.
 /// Optionally a component can return a succeeding Msg to be done on the next
@@ -10,46 +13,6 @@ pub trait Component<MSG> {
 
     /// the view of the component
     fn view(&self) -> Node<MSG>;
-}
-
-/// Msg that needs to be executed in its component on the next update loop
-pub struct Effects<MSG, PMSG> {
-    /// Msg that will be executed in its own widget
-    pub follow_ups: Vec<MSG>,
-    /// PMSG that will be executed in the calling component
-    pub effects: Vec<PMSG>,
-}
-
-impl<MSG, PMSG> Effects<MSG, PMSG> {
-    /// create a new effects with follow_ups and effects
-    pub fn new(follow_ups: Vec<MSG>, effects: Vec<PMSG>) -> Self {
-        Self {
-            follow_ups,
-            effects,
-        }
-    }
-    /// create a follow up message, but no effects
-    pub fn with_follow_ups(follow_ups: Vec<MSG>) -> Self {
-        Self {
-            follow_ups,
-            effects: vec![],
-        }
-    }
-    /// Create effects with no follow ups.
-    pub fn with_effects(effects: Vec<PMSG>) -> Self {
-        Self {
-            follow_ups: vec![],
-            effects,
-        }
-    }
-
-    /// No effects
-    pub fn none() -> Self {
-        Self {
-            follow_ups: vec![],
-            effects: vec![],
-        }
-    }
 }
 
 /// A widget has the same capability to a Component.
