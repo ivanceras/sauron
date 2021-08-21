@@ -11,7 +11,7 @@
  - [X] Change the README example to use the node macro syntax
      - rename the old `minimal` to `minimal-alt` and use the `node-macro-syntax` in `minimal` example
  - [X] Move `sauron-syntax` into `html2sauron` project
- - [ ] ~~Expose Cmd,Component outside of `with-dom` feature gate~~
+ - ~~[ ] Expose Cmd,Component outside of `with-dom` feature gate~~
      - This would allow a total isomorphic app reusing the components
      - ~~[ ] Make an equivalent for Program(client-side updater) for use in server-side~~
        ~~ - ie: ServerRender, where Msg could be passed as a data to hydrate the view (template) before sending to the client~~
@@ -33,7 +33,7 @@
     - It make sense to make `init` mutable so the developer can manipulate the component at initialization stage.
     - [X] Make call to `init` right after the Application is mounted into the `DOM`, rather than before.
     - [ ] Simplify init to not have access to `Program` since it can return a `Cmd`. It can however, modify itself.
- - [ ] Rename the type alias `Callback` into `EventCallback` or `Listener`.
+ - [X] Rename the type alias `Callback` into `EventCallback` or `Listener`.
       This way, we can use the more generic `Callback` in Components and in `Cmd`.
 
 ## Internal
@@ -54,7 +54,7 @@
 - [ ] Make each component have a reference to the root dom where it is mounted.
     - This will make local state changes to the component easier to do, as opposed to diffing the whole DOM tree.
 - [X] Unify the code of Program replace_mount, append_mount
-- [ ] replace the request_animation_frame with the code from execute_request_animation frame
+- ~~[ ] replace the request_animation_frame with the code from execute_request_animation frame~~
 - [ ] Create a function to derive Component name from the struct name of the Component
     and preprocess the jss with it before injecting it to the main program
 - [X] Clean up `CreateNode`
@@ -67,7 +67,7 @@
     - There is only one implementation of `Dispatch` trait anyway, that is `Program`
 - [X] ISSUE: sauron `node!` macro doesn't work on svg tags since it is using only `html_element` function which `namespace` is not supplied.
     - Fixed in `0.35.0` by checking whether a tag has a namespace.
-- [ ] Change `program: Option<&DSP>` to just `program: &DSP` since there program is needed everywhere.
+- [X] Change `program: Option<&DSP>` to just `program: &DSP` since there program is needed everywhere.
 - [X] Improve `sauron-node-macro` to call on the equivalent html function instead of `elment_ns`.
     - This would improve performance since the function already has the information whether or not it has namespace or not.
     - Mitigated with the use of `Lazy` `HashSet` look up in `sauron-parse` for faster lookup.
