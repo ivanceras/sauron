@@ -1,6 +1,6 @@
 use sauron::{
     html::{attributes::*, events::*, *},
-    Effects, Node, Widget,
+    Component, Effects, Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -39,7 +39,7 @@ impl<PMSG> Field<PMSG> {
     }
 }
 
-impl<PMSG> Widget<Msg, PMSG> for Field<PMSG> {
+impl<PMSG> Component<Msg, PMSG> for Field<PMSG> {
     fn update(&mut self, msg: Msg) -> Effects<Msg, PMSG> {
         match msg {
             Msg::FieldClick => {

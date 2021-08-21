@@ -15,7 +15,7 @@ mod util;
 mod window;
 
 pub use application::{Application, Measurements};
-pub use component::{Component, Container, Effects, View, Widget};
+pub use component::{Component, Container, Effects, View};
 pub use created_node::CreatedNode;
 pub use dispatch::Dispatch;
 pub use dom_updater::DomUpdater;

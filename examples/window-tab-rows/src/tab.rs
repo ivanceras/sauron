@@ -43,7 +43,7 @@ impl Tab {
     }
 }
 
-impl Widget<Msg, ()> for Tab {
+impl Component<Msg, ()> for Tab {
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::TabClick => {

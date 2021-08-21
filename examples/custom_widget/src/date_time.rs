@@ -56,7 +56,7 @@ where
     }
 }
 
-impl<PMSG> Widget<Msg, PMSG> for DateTimeWidget<PMSG>
+impl<PMSG> Component<Msg, PMSG> for DateTimeWidget<PMSG>
 where
     PMSG: Clone + Debug + 'static,
 {

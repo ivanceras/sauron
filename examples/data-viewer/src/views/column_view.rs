@@ -27,7 +27,7 @@ impl ColumnView {
     }
 }
 
-impl Component<Msg> for ColumnView {
+impl Component<Msg, ()> for ColumnView {
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::ChangeSearch(search) => {

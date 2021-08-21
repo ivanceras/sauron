@@ -54,7 +54,7 @@ impl PageView {
     }
 }
 
-impl Component<Msg> for PageView {
+impl Component<Msg, ()> for PageView {
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::RowMsg(row_index, row_msg) => {
