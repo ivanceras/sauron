@@ -2,6 +2,7 @@
 //! when the application starts or after the application updates.
 //!
 use crate::Dispatch;
+use crate::Effects;
 use std::rc::Rc;
 
 /// Cmd is a command to be executed by the system.
@@ -112,14 +113,35 @@ impl<DSP> Cmd<DSP> {
         })
     }
 
-    /// map each item in msg2_list such that Vec<MSG2> becomes Vec<MSG>
-    pub fn batch_map<F, MSG2, MSG>(msg2_list: Vec<MSG2>, f: F) -> Self
+    /// map each item in pmsg_list such that Vec<PMSG> becomes Vec<MSG>
+    pub fn map_msgs<F, PMSG, MSG>(pmsg_list: Vec<PMSG>, f: F) -> Self
     where
         DSP: Dispatch<MSG> + Clone + 'static,
         MSG: Clone + 'static,
-        MSG2: 'static,
-        F: Fn(MSG2) -> MSG + 'static,
+        PMSG: 'static,
+        F: Fn(PMSG) -> MSG + 'static,
     {
-        Self::batch_msg(msg2_list.into_iter().map(f).collect())
+        Self::batch_msg(pmsg_list.into_iter().map(f).collect())
+    }
+
+    /// Convert effects into Cmd
+    pub fn map_effects<F, PMSG, MSG>(effects: Effects<MSG, PMSG>, f: F) -> Self
+    where
+        DSP: Dispatch<PMSG> + Clone + 'static,
+        MSG: Clone + 'static,
+        PMSG: Clone + 'static,
+        F: Fn(MSG) -> PMSG + 'static,
+    {
+        let Effects {
+            follow_ups,
+            effects,
+        } = effects;
+
+        Cmd::batch_msg(
+            effects
+                .into_iter()
+                .chain(follow_ups.into_iter().map(f))
+                .collect(),
+        )
     }
 }

@@ -1,6 +1,7 @@
 //! This module provides functionalities for
 //! manipulating the actual Document Object Model in the browser
 //!
+mod application;
 pub mod apply_patches;
 pub mod cmd;
 mod component;
@@ -13,9 +14,8 @@ mod program;
 mod util;
 mod window;
 
-pub use component::{
-    Application, Component, Container, Measurements, View, Widget,
-};
+pub use application::{Application, Measurements};
+pub use component::{Component, Container, Effects, View, Widget};
 pub use created_node::CreatedNode;
 pub use dispatch::Dispatch;
 pub use dom_updater::DomUpdater;
