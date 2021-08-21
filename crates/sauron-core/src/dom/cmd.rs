@@ -1,9 +1,9 @@
 //! provides functionalities for commands to be executed by the system, such as
 //! when the application starts or after the application updates.
 //!
+use crate::Callback;
 use crate::Dispatch;
 use crate::Effects;
-use std::rc::Rc;
 
 /// Cmd is a command to be executed by the system.
 /// This is returned at the init function of a component and is executed right
@@ -14,7 +14,7 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub struct Cmd<DSP> {
     /// the functions that would be executed when this Cmd is emited
-    pub commands: Vec<Rc<dyn Fn(DSP)>>,
+    pub commands: Vec<Callback<DSP, ()>>,
     /// this instruct the program whether or not to update the view
     pub should_update_view: bool,
     /// tell the cmd to log the measurements of not.
@@ -34,7 +34,7 @@ where
         F: Fn(DSP) + 'static,
     {
         Self {
-            commands: vec![Rc::new(f)],
+            commands: vec![Callback::from(f)],
             should_update_view: true,
             log_measurements: false,
         }
@@ -68,7 +68,7 @@ where
     pub fn emit(self, program: &DSP) {
         for cb in self.commands {
             let program_clone = program.clone();
-            cb(program_clone);
+            cb.emit(program_clone);
         }
     }
 

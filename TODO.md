@@ -35,8 +35,9 @@
     - [ ] Simplify init to not have access to `Program` since it can return a `Cmd`. It can however, modify itself.
  - [X] Rename the type alias `Callback` into `EventCallback` or `Listener`.
       This way, we can use the more generic `Callback` in Components and in `Cmd`.
-      - Recreate Callback from a clean state, with no TypeId and used it in `Cmd`.
-      - Listener will have it's own dedidate struct with the TypeId.
+      - [X] Recreate Callback from a clean state, with no TypeId and used it in `Cmd`.
+      - [X] Listener will have it's own dedidate struct with the TypeId.
+      - [X] Use `Callback` in `Cmd`
 
 ## Internal
 - [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`

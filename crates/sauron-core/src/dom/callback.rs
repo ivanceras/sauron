@@ -1,4 +1,4 @@
-use std::{convert::Into, fmt, rc::Rc};
+use std::{fmt, rc::Rc};
 
 /// A generic wrapper for a closure in rust where we can transform and pass around.
 pub struct Callback<IN, OUT> {
@@ -8,8 +8,6 @@ pub struct Callback<IN, OUT> {
 impl<IN, F, OUT> From<F> for Callback<IN, OUT>
 where
     F: Fn(IN) -> OUT + 'static,
-    OUT: 'static,
-    IN: 'static,
 {
     fn from(func: F) -> Self {
         Self {
@@ -24,14 +22,10 @@ impl<IN, OUT> fmt::Debug for Callback<IN, OUT> {
     }
 }
 
-impl<IN, OUT> Callback<IN, OUT>
-where
-    IN: 'static,
-    OUT: 'static,
-{
+impl<IN, OUT> Callback<IN, OUT> {
     /// This method calls the actual callback.
-    pub fn emit<T: Into<IN>>(&self, value: T) -> OUT {
-        (self.func)(value.into())
+    pub fn emit(&self, value: IN) -> OUT {
+        (self.func)(value)
     }
 }
 
