@@ -113,7 +113,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = "0.41"
+sauron = "0.42"
 ```
 
 
