@@ -133,6 +133,21 @@ impl<DSP> Cmd<DSP> {
                 .collect(),
         )
     }
+
+    /// Create a Cmd from effects that has follow_ups and effects are both Vec<MSG>
+    pub fn from_effects<MSG>(effects: Effects<MSG, MSG>) -> Self
+    where
+        MSG: Clone + 'static,
+        DSP: Dispatch<MSG> + Clone + 'static,
+    {
+        let Effects {
+            effects,
+            mut follow_ups,
+        } = effects;
+        let mut all = effects;
+        all.append(&mut follow_ups);
+        Self::batch_msg(all)
+    }
 }
 
 impl<DSP, MSG> From<Effects<MSG, ()>> for Cmd<DSP>

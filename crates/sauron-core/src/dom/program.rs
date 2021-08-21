@@ -49,20 +49,18 @@ where
         }
     }
 
-    fn init_emit(&self) {
-        // call the init of the component
-        let cmds = self.app.borrow_mut().init(self.clone());
-        // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
-        // listening to events (resize, hashchange)
-        cmds.emit(self);
-    }
-
     /// executed after the program has been mounted
     fn after_mounted(&self) {
+        // inject the style first
         for style in self.app.borrow().style() {
             Self::inject_style(&style);
         }
-        self.init_emit();
+
+        // call the init of the component
+        let cmds = self.app.borrow_mut().init();
+        // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
+        // listening to events (resize, hashchange)
+        cmds.emit(self);
     }
 
     /// get the real DOM node where this app is mounted to.

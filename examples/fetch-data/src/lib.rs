@@ -66,7 +66,7 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self, _: Program<Self, Msg>) -> Cmd<Self, Msg> {
+    fn init(&mut self) -> Cmd<Self, Msg> {
         console_log::init_with_level(log::Level::Trace).unwrap();
         self.fetch_page()
     }

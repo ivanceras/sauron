@@ -3,7 +3,7 @@ mod date_time;
 use date_time::DateTimeWidget;
 use sauron::html::text;
 use sauron::prelude::*;
-use sauron::{node, Application, Cmd, Node, Program};
+use sauron::{node, Application, Cmd, Node};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -19,7 +19,6 @@ pub enum Msg {
 pub struct App {
     count: i32,
     date_time: DateTimeWidget<Msg>,
-    program: Option<Program<Self, Msg>>,
 }
 
 impl App {
@@ -30,14 +29,12 @@ impl App {
         App {
             count: 0,
             date_time,
-            program: None,
         }
     }
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self, program: Program<Self, Msg>) -> Cmd<Self, Msg> {
-        self.program = Some(program);
+    fn init(&mut self) -> Cmd<Self, Msg> {
         Cmd::none()
     }
     fn view(&self) -> Node<Msg> {

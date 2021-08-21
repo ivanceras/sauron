@@ -1,4 +1,4 @@
-use crate::{Cmd, Node, Program};
+use crate::{Cmd, Node};
 
 /// Contains the time it took for the last app update call for the component
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -23,10 +23,8 @@ where
     MSG: 'static,
 {
     ///  The application can implement this method where it can modify its initial state.
-    ///  It also has access to the program which is the executor of the lifecycle of the program.
-    ///
-    ///  this method is called right after the program is mounted into the DOM.
-    fn init(&mut self, _program: Program<Self, MSG>) -> Cmd<Self, MSG>
+    ///  This method is called right after the program is mounted into the DOM.
+    fn init(&mut self) -> Cmd<Self, MSG>
     where
         Self: Sized + 'static,
     {
