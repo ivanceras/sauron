@@ -15,7 +15,9 @@ pub struct Measurements {
     pub total_time: f64,
 }
 
-/// The app should implement this trait for it to be handled by the Program
+/// An Application is the root component of your program.
+/// Everything that happens in your application is done here.
+///
 pub trait Application<MSG>
 where
     MSG: 'static,

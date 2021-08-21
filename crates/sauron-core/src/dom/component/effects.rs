@@ -2,7 +2,7 @@
 pub struct Effects<MSG, PMSG> {
     /// Msg that will be executed in its own widget
     pub follow_ups: Vec<MSG>,
-    /// PMSG that will be executed in the calling component
+    /// PMSG that will be executed in the component that mounts it
     pub effects: Vec<PMSG>,
 }
 
@@ -29,7 +29,7 @@ impl<MSG, PMSG> Effects<MSG, PMSG> {
         }
     }
 
-    /// No effects
+    /// No effects, no follow ups
     pub fn none() -> Self {
         Self {
             follow_ups: vec![],
