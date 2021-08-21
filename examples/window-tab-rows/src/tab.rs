@@ -2,7 +2,7 @@ use crate::row::{self, Row};
 use sauron::{
     html::{attributes::*, events::*, *},
     prelude::*,
-    Component, Node,
+    Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -43,19 +43,18 @@ impl Tab {
     }
 }
 
-impl Component<Msg> for Tab {
-    fn update(&mut self, msg: Msg) -> Vec<Msg> {
+impl Widget<Msg, ()> for Tab {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::TabClick => {
                 self.tab_clicks += 1;
-                vec![]
+                Effects::none()
             }
             Msg::RowMsg(index, row_msg) => {
-                let follow_ups = self.rows[index].update(row_msg);
-                follow_ups
-                    .into_iter()
-                    .map(|follow_up| Msg::RowMsg(index, follow_up))
-                    .collect()
+                let effects = self.rows[index].update(row_msg);
+                effects.map_follow_ups(move |follow_up| {
+                    Msg::RowMsg(index, follow_up)
+                })
             }
         }
     }

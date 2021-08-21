@@ -2,7 +2,7 @@ use crate::field::{self, Field, Interaction};
 use sauron::{
     html::{attributes::*, *},
     prelude::*,
-    Component, Node,
+    Node,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -38,8 +38,8 @@ impl Row {
     }
 }
 
-impl Component<Msg> for Row {
-    fn update(&mut self, msg: Msg) -> Vec<Msg> {
+impl Widget<Msg, ()> for Row {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::FieldMsg(index, field_msg) => {
                 let Effects {
@@ -47,14 +47,16 @@ impl Component<Msg> for Row {
                     effects,
                 } = self.fields[index].update(field_msg);
 
-                effects
-                    .into_iter()
-                    .chain(
-                        follow_ups
-                            .into_iter()
-                            .map(|follow_up| Msg::FieldMsg(index, follow_up)),
-                    )
-                    .collect()
+                Effects::with_follow_ups(
+                    effects
+                        .into_iter()
+                        .chain(
+                            follow_ups.into_iter().map(|follow_up| {
+                                Msg::FieldMsg(index, follow_up)
+                            }),
+                        )
+                        .collect(),
+                )
             }
             Msg::FieldInteracted(interaction) => {
                 log::trace!("interacted: {:?}", interaction);
@@ -62,7 +64,7 @@ impl Component<Msg> for Row {
                     Interaction::Click => self.field_clicks += 1,
                     Interaction::Modify(_) => self.field_change += 1,
                 }
-                vec![]
+                Effects::none()
             }
         }
     }

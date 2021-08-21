@@ -70,13 +70,11 @@ impl Application<Msg> for Window {
                 Cmd::none()
             }
             Msg::TabMsg(index, tab_msg) => {
-                let follow_ups = self.tabs[index].update(tab_msg);
-                Cmd::batch_msg(
-                    follow_ups
-                        .into_iter()
-                        .map(|follow_up| Msg::TabMsg(index, follow_up))
-                        .collect(),
-                )
+                let effects = self.tabs[index].update(tab_msg);
+                let effects = effects.map_follow_ups(move |follow_up| {
+                    Msg::TabMsg(index, follow_up)
+                });
+                Cmd::from(effects)
             }
         }
     }

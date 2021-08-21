@@ -125,7 +125,10 @@ impl<DSP> Cmd<DSP> {
     }
 
     /// Convert effects into Cmd
-    pub fn map_effects<F, PMSG, MSG>(effects: Effects<MSG, PMSG>, f: F) -> Self
+    pub fn map_follow_ups<F, PMSG, MSG>(
+        effects: Effects<MSG, PMSG>,
+        f: F,
+    ) -> Self
     where
         DSP: Dispatch<PMSG> + Clone + 'static,
         MSG: Clone + 'static,
@@ -143,5 +146,20 @@ impl<DSP> Cmd<DSP> {
                 .chain(follow_ups.into_iter().map(f))
                 .collect(),
         )
+    }
+}
+
+impl<DSP, MSG> From<Effects<MSG, ()>> for Cmd<DSP>
+where
+    MSG: Clone + 'static,
+    DSP: Dispatch<MSG> + Clone + 'static,
+{
+    /// Create a Cmd from effects
+    fn from(effects: Effects<MSG, ()>) -> Self {
+        let Effects {
+            follow_ups,
+            effects: _,
+        } = effects;
+        Cmd::batch_msg(follow_ups)
     }
 }
