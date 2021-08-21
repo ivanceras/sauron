@@ -1,9 +1,9 @@
 use crate::{
     views::{column_view, page_view, ColumnView, FieldView, PageView, RowView},
     widgets::selector_box,
-    ColumnDef, DataValue, Error, Table,
+    ColumnDef, DataValue, Error,
 };
-use restq::{bytes_to_chars, table_def, CsvRows};
+use restq::{bytes_to_chars, table_def, CsvRows, TableName};
 use sauron::{
     html::{
         attributes::{class, key, styles},
@@ -37,7 +37,7 @@ pub enum Grip {
 }
 
 pub struct DataView {
-    pub table_name: Table,
+    pub table_name: TableName,
     pub data_columns: Vec<ColumnDef>,
     pub column_views: Vec<ColumnView>,
     pub page_views: Vec<PageView>,
@@ -228,8 +228,9 @@ impl DataView {
 
         let column_defs = table_def.columns.clone();
         trace!("bufread len: {}", bufread.buffer().len());
-        let rows_iter = CsvRows::new(bufread, column_defs.clone());
-        let data: Vec<Vec<DataValue>> = rows_iter.collect();
+        let rows_iter = CsvRows::new(bufread);
+        let data: Vec<Vec<restq::DataValue>> =
+            rows_iter.into_data_values(&column_defs);
         trace!("rows: {}", data.len());
         let page_view = PageView::new(&column_defs, &data);
         let data_view = DataView {
