@@ -32,6 +32,8 @@
  - [X] Merge `init` and `init_with_program`
     - It make sense to make `init` mutable so the developer can manipulate the component at initialization stage.
     - [X] Make call to `init` right after the Application is mounted into the `DOM`, rather than before.
+ - [ ] Rename the type alias `Callback` into `EventCallback` or `Listener`.
+      This way, we can use the more generic `Callback` in Components and in `Cmd`.
 
 ## Internal
 - [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`
