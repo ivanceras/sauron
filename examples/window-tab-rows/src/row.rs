@@ -42,10 +42,12 @@ impl Component<Msg> for Row {
     fn update(&mut self, msg: Msg) -> Vec<Msg> {
         match msg {
             Msg::FieldMsg(index, field_msg) => {
-                let (follow_ups, pmsg_list) =
-                    self.fields[index].update(field_msg);
+                let Effects {
+                    follow_ups,
+                    effects,
+                } = self.fields[index].update(field_msg);
 
-                pmsg_list
+                effects
                     .into_iter()
                     .chain(
                         follow_ups

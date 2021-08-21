@@ -1,6 +1,6 @@
 use sauron::{
     html::{attributes::*, events::*, *},
-    Node, Widget,
+    Effects, Node, Widget,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -40,17 +40,20 @@ impl<PMSG> Field<PMSG> {
 }
 
 impl<PMSG> Widget<Msg, PMSG> for Field<PMSG> {
-    fn update(&mut self, msg: Msg) -> (Vec<Msg>, Vec<PMSG>) {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, PMSG> {
         match msg {
             Msg::FieldClick => {
                 self.field_clicks += 1;
-                (vec![Msg::Interacted(Interaction::Click)], vec![])
+                Effects::with_follow_ups(vec![Msg::Interacted(
+                    Interaction::Click,
+                )])
             }
             Msg::InputChange(input) => {
-                (vec![Msg::Interacted(Interaction::Modify(input))], vec![])
+                Effects::with_follow_ups(vec![Msg::Interacted(
+                    Interaction::Modify(input),
+                )])
             }
-            Msg::Interacted(interaction) => (
-                vec![],
+            Msg::Interacted(interaction) => Effects::with_effects(
                 self.on_interact
                     .iter()
                     .map(|listener| listener(interaction.clone()))

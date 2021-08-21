@@ -71,7 +71,6 @@ impl Application<Msg> for Window {
             }
             Msg::TabMsg(index, tab_msg) => {
                 let follow_ups = self.tabs[index].update(tab_msg);
-                //TODO: maybe we can use partial_function here: https://docs.rs/partial_function
                 Cmd::batch_msg(
                     follow_ups
                         .into_iter()
