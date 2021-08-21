@@ -33,9 +33,8 @@ pub type Attribute<MSG> =
     mt_dom::Attribute<Namespace, AttributeName, AttributeValue<MSG>>;
 
 /// Callback where Event type is supplied
-/// TODO: rename this into EventCallback so we can use attributes::Callback as a generic callback
 /// for Components
-pub type Callback<MSG> = attributes::Callback<Event, MSG>;
+pub type Listener<MSG> = attributes::Callback<Event, MSG>;
 
 /// This is a sauron html specific functionality
 /// diff 2 nodes with attribute using `&'static str` instead of generic ATT

@@ -1,7 +1,6 @@
 use sauron::apply_patches::patch;
 use sauron::html::attributes;
 use sauron::prelude::*;
-use sauron::Callback;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Debug;

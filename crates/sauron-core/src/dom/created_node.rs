@@ -1,5 +1,5 @@
 use crate::events::MountEvent;
-use crate::Callback;
+use crate::Listener;
 use crate::{
     dom::Dispatch,
     html,
@@ -415,7 +415,7 @@ impl CreatedNode {
 /// This wrap into a closure the function that is dispatched when the event is triggered.
 pub(crate) fn create_closure_wrap<DSP, MSG>(
     program: &DSP,
-    callback: &Callback<MSG>,
+    callback: &Listener<MSG>,
 ) -> Closure<dyn FnMut(web_sys::Event)>
 where
     MSG: 'static,

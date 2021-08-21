@@ -1,5 +1,5 @@
 use crate::prelude::{Style, Value};
-use crate::Callback;
+use crate::Listener;
 use std::fmt::{self, Debug};
 
 /// Values of an attribute can be in these variants
@@ -11,7 +11,7 @@ pub enum AttributeValue<MSG> {
     /// style values
     Style(Vec<Style>),
     /// Event Listener
-    EventListener(Callback<MSG>),
+    EventListener(Listener<MSG>),
     /// no value
     Empty,
 }
@@ -113,7 +113,7 @@ impl<MSG> AttributeValue<MSG> {
     }
 
     /// return the styles if the attribute value is a style
-    pub fn as_event_listener(&self) -> Option<&Callback<MSG>> {
+    pub fn as_event_listener(&self) -> Option<&Listener<MSG>> {
         match self {
             AttributeValue::EventListener(cb) => Some(cb),
             _ => None,

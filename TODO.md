@@ -88,7 +88,7 @@
 - [X] Fetch service
 - [X] Url change service
     - using wasm-bindgen directly eliminates the need for Url change service wrapper
-- [ ] re-think about the `sauron-core` features:
+- [X] re-think about the `sauron-core` features:
     - [X] `with-dom` when used in client-side, default
     - ~~[]`with-ssr` when used in server-side rendering, mutually exlusive to `with-dom`~~
         - Server-side rendering is implicit when target is not wasm.
@@ -107,7 +107,8 @@
 - [ ] Create a new benchmark for the js-comprehensive-benchmark suite
     - [link](https://github.com/krausest/js-framework-benchmark)
     - [ ] Initial attempt https://github.com/ivanceras/performance-test-sauron
-- [ ] Use Weak pointer for program instead of Rc where strong reference is not needed.
+- ~~[ ] Use Weak pointer for program instead of Rc where strong reference is not needed.~~
+       - Program stays as long as the user is using the app.
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
@@ -117,4 +118,3 @@
 - [ ] Enumerate the exported modules and structs in prelude instead of just using glob(ie: *).
 - [X] Fix the data-viewer example to use Components on the views rather than Application
 - [ ] Revisit and use style_name identifier in usage of jss in examples
-    - [ ] Progressive-rendering
