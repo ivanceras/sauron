@@ -84,6 +84,10 @@
     - This is to mitigate the aggressive recycling of nodes which we skipp diffing for event listeners for performance reasons, as it is impractical to
         reattach event listener at every render cycle.
 - [ ] Remove NodeIdx traversal and also remove NodeIdx in `mt-dom` TreePath, as traversal path prove to be correct.
+- [X] Maybe Remove the style functionality as Components and Applications can manipulate the style in the document directly
+    - [X] Change style that it returns only a `String` instead of `Vec<String>`.
+    - [X] The injected style shall have a class name equal to the the type_id of the `APP`.
+- [X] Add `maybe_attr(name: &str, value: Option<Value>)` to set the attribute if there is a value. empty otherwise.
 
 
 

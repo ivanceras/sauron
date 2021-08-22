@@ -16,11 +16,6 @@ where
         Cmd::none()
     }
 
-    /// optionally a component can specify it's own css style
-    fn style(&self) -> Vec<String> {
-        vec![]
-    }
-
     /// Called each time an action is triggered from the view
     fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>
     where
@@ -28,6 +23,11 @@ where
 
     /// Returns a node on how the component is presented.
     fn view(&self) -> Node<MSG>;
+
+    /// optionally an Application can specify its own css style
+    fn style(&self) -> String {
+        String::new()
+    }
 
     /// This is called after dispatching and updating the dom for the component
     /// This is for diagnostic and performance measurement purposes.

@@ -15,7 +15,46 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn style(&self) -> Vec<String> {
+    fn update(&mut self, _msg: Msg) -> Cmd<Self, Msg> {
+        Cmd::none()
+    }
+
+    fn view(&self) -> Node<Msg> {
+        let trapezoid_count = 8;
+        let small_circle_count = 10;
+        node! {
+            <div class="reactor">
+              <div class="trapezoid-container">
+                {for i in 0..trapezoid_count{
+                    node!{
+                        <div class=format!("trapezoid trapezoid-{}",i+1)
+                             style=format!("transform:rotate({}deg)", i * 360 / trapezoid_count)>
+                        </div>
+                    }
+                }}
+              </div>
+
+              <div class="small-circle-container">
+                {for i in 0..small_circle_count{
+                    node!{
+                        <div class=format!("small-circle small-circle-{}",i+1)
+                             style=format!("transform:rotate({}deg)", i * 360 / small_circle_count)>
+                        </div>
+                    }
+                }}
+              </div>
+              <div class="circle-outer"></div>
+              <div class="circle-center"></div>
+              <a href="https://github.com/ivanceras/sauron/tree/master/examples/arc-reactor/src/lib.rs"
+                 alt="view code"
+                 title="view code">
+                <div class="circle-innner"></div>
+              </a>
+            </div>
+        }
+    }
+
+    fn style(&self) -> String {
         let css = r#"
             body {
                 position: absolute;
@@ -152,46 +191,7 @@ impl Application<Msg> for App {
             }
 
             "#;
-        vec![css.to_string()]
-    }
-
-    fn view(&self) -> Node<Msg> {
-        let trapezoid_count = 8;
-        let small_circle_count = 10;
-        node! {
-            <div class="reactor">
-              <div class="trapezoid-container">
-                {for i in 0..trapezoid_count{
-                    node!{
-                        <div class=format!("trapezoid trapezoid-{}",i+1)
-                             style=format!("transform:rotate({}deg)", i * 360 / trapezoid_count)>
-                        </div>
-                    }
-                }}
-              </div>
-
-              <div class="small-circle-container">
-                {for i in 0..small_circle_count{
-                    node!{
-                        <div class=format!("small-circle small-circle-{}",i+1)
-                             style=format!("transform:rotate({}deg)", i * 360 / small_circle_count)>
-                        </div>
-                    }
-                }}
-              </div>
-              <div class="circle-outer"></div>
-              <div class="circle-center"></div>
-              <a href="https://github.com/ivanceras/sauron/tree/master/examples/arc-reactor/src/lib.rs"
-                 alt="view code"
-                 title="view code">
-                <div class="circle-innner"></div>
-              </a>
-            </div>
-        }
-    }
-
-    fn update(&mut self, _msg: Msg) -> Cmd<Self, Msg> {
-        Cmd::none()
+        css.to_string()
     }
 }
 

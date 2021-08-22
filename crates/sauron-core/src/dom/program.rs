@@ -1,4 +1,5 @@
 use crate::{dom::dom_updater::DomUpdater, Application, Dispatch};
+use std::any::TypeId;
 use std::{cell::RefCell, rc::Rc};
 #[cfg(feature = "with-request-animation-frame")]
 use wasm_bindgen::closure::Closure;
@@ -51,16 +52,19 @@ where
 
     /// executed after the program has been mounted
     fn after_mounted(&self) {
-        // inject the style first
-        for style in self.app.borrow().style() {
-            Self::inject_style(&style);
-        }
-
         // call the init of the component
         let cmds = self.app.borrow_mut().init();
         // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
         // listening to events (resize, hashchange)
         cmds.emit(self);
+
+        // inject the style style after call the init of the app as
+        // it may be modifying the app state including the style
+        let style = self.app.borrow().style();
+        if !style.trim().is_empty() {
+            let type_id = TypeId::of::<APP>();
+            Self::inject_style(type_id, &style);
+        }
     }
 
     /// get the real DOM node where this app is mounted to.
@@ -169,15 +173,17 @@ where
         cmd.emit(self);
     }
 
-    fn inject_style(style: &str) {
+    fn inject_style(type_id: TypeId, style: &str) {
         use wasm_bindgen::JsCast;
+        dbg!(&type_id);
+        let type_id = format!("{:?}", type_id);
 
         let document = crate::document();
         let html_style = document
             .create_element("style")
             .expect("must be able to create style element");
         html_style
-            .set_attribute("name", "style_name")
+            .set_attribute("class", &type_id)
             .expect("must set attribute");
         let html_style: web_sys::Node = html_style.unchecked_into();
         html_style.set_text_content(Some(style));

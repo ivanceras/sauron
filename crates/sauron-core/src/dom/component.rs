@@ -16,6 +16,11 @@ pub trait Component<MSG, PMSG> {
 
     /// the view of the component
     fn view(&self) -> Node<MSG>;
+
+    /// optionally a Component can specify its own css style
+    fn style(&self) -> String {
+        String::new()
+    }
 }
 
 /// A Container have children that is set from the parent component
@@ -34,6 +39,11 @@ pub trait Container<MSG, PMSG> {
     /// The container can decide how to display the children components here, but
     /// the children nodes here can not trigger Msg that can update this component
     fn view(&self) -> Node<PMSG>;
+
+    /// optionally a Container can specify its own css style
+    fn style(&self) -> String {
+        String::new()
+    }
 }
 
 /// Just a view, no events, no update.
@@ -41,4 +51,9 @@ pub trait Container<MSG, PMSG> {
 pub trait View<MSG> {
     /// only returns a view of itself
     fn view(&self) -> Node<MSG>;
+
+    /// optionally a View can specify its own css style
+    fn style(&self) -> String {
+        String::new()
+    }
 }
