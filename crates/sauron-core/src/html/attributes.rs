@@ -245,6 +245,35 @@ where
     attributes
 }
 
+/// Set the attribute of this element if value is Some, empty attribute otherwise
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let width = Some(10);
+/// let html: Node<()> = button(vec![maybe_attr("width", width)], vec![]);
+/// let expected = r#"<button width="10"></button>"#;
+/// assert_eq!(expected, html.render_to_string());
+///
+/// let width = None::<usize>;
+/// let html: Node<()> = button(vec![maybe_attr("width", width)], vec![]);
+/// let expected = r#"<button></button>"#;
+/// assert_eq!(expected, html.render_to_string());
+/// ```
+pub fn maybe_attr<V, MSG>(
+    name: crate::AttributeName,
+    value: Option<V>,
+) -> Attribute<MSG>
+where
+    V: Into<Value>,
+{
+    if let Some(value) = value {
+        attr(name, value)
+    } else {
+        empty_attr()
+    }
+}
+
 /// set the checked value, used checkbox and radio buttons
 /// # Examples
 /// ```rust
