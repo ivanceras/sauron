@@ -55,6 +55,16 @@ where
         }
     }
 
+    /// Append more cmd into this cmd and return self
+    pub fn append(mut self, cmds: Vec<Self>) -> Self {
+        self.should_update_view = cmds.iter().any(|c| c.should_update_view);
+        self.log_measurements = cmds.iter().any(|c| c.log_measurements);
+        for cmd in cmds {
+            self.commands.extend(cmd.commands);
+        }
+        self
+    }
+
     /// A Cmd with no callback, similar to NoOp.
     pub fn none() -> Self {
         Cmd {
