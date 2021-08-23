@@ -12,6 +12,7 @@ use crate::{
     Dispatch, Patch,
 };
 use js_sys::Function;
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{Element, Node};
@@ -62,9 +63,17 @@ where
         .map(|patch| (patch.path(), patch.tag()))
         .collect();
 
+    let mut paths = vec![];
+    for patch in patches.iter() {
+        paths.push((patch.path(), patch.node_idx()));
+    }
+
     let mut active_closures = HashMap::new();
     let nodes_to_patch =
         find_all_nodes_by_path(root_node.clone(), &nodes_to_find);
+
+    let nodes_idx_to_patch = find_nodes_by_node_idx(root_node, &patches);
+    verify_same_nodes_found(&patches, &nodes_to_patch, &nodes_idx_to_patch);
 
     #[cfg(feature = "with-measure")]
     let t2 = {
@@ -187,11 +196,11 @@ where
 fn find_nodes_by_node_idx<MSG>(
     root_node: &Node,
     patches: &[Patch<MSG>],
-) -> HashMap<usize, Node> {
-    let mut nodes_to_find: HashMap<usize, Option<&&'static str>> =
-        HashMap::new();
+) -> BTreeMap<usize, Node> {
+    let mut nodes_to_find: BTreeMap<usize, Option<&&'static str>> =
+        BTreeMap::new();
 
-    let mut nodes_to_patch: HashMap<usize, Node> = HashMap::new();
+    let mut nodes_to_patch: BTreeMap<usize, Node> = BTreeMap::new();
 
     for patch in patches {
         nodes_to_find.insert(patch.node_idx(), patch.tag());
@@ -216,8 +225,8 @@ fn find_nodes_by_node_idx<MSG>(
 }
 
 fn list_nodes_not_found(
-    nodes_to_find: &HashMap<usize, Option<&&'static str>>,
-    nodes_to_patch: &HashMap<usize, Node>,
+    nodes_to_find: &BTreeMap<usize, Option<&&'static str>>,
+    nodes_to_patch: &BTreeMap<usize, Node>,
 ) -> Vec<usize> {
     let mut not_found = vec![];
     for (idx, tag) in nodes_to_find.iter() {
@@ -237,8 +246,8 @@ fn list_nodes_not_found(
 fn find_nodes_by_idx_recursive(
     node: &Node,
     cur_node_idx: &mut usize,
-    nodes_to_find: &HashMap<usize, Option<&&'static str>>,
-    nodes_to_patch: &mut HashMap<usize, Node>,
+    nodes_to_find: &BTreeMap<usize, Option<&&'static str>>,
+    nodes_to_patch: &mut BTreeMap<usize, Node>,
 ) -> bool {
     if nodes_to_find.is_empty() {
         return true;
@@ -271,6 +280,27 @@ fn find_nodes_by_idx_recursive(
     false
 }
 
+fn verify_same_nodes_found<MSG>(
+    patches: &[Patch<MSG>],
+    nodes_path_to_patch: &BTreeMap<Vec<usize>, Node>,
+    nodes_idx_to_patch: &BTreeMap<usize, Node>,
+) {
+    for patch in patches {
+        let node_idx = patch.node_idx();
+        let path = patch.path();
+        let found_by_node_idx = nodes_idx_to_patch
+            .get(&node_idx)
+            .unwrap_or_else(|| panic!("must found a node using node_idx"));
+        let found_by_path = nodes_path_to_patch
+            .get(path)
+            .unwrap_or_else(|| panic!("must found a node using path"));
+
+        if found_by_node_idx != found_by_path {
+            panic!("Found by node_ids {:?} is not the same by found by path: {:?}, \npatches: {:#?}", found_by_node_idx, found_by_path, patches);
+        }
+    }
+}
+
 fn find_node_by_path_recursive(
     node: Node,
     path: &mut Vec<usize>,
@@ -291,9 +321,8 @@ fn find_node_by_path_recursive(
 fn find_all_nodes_by_path(
     node: Node,
     nodes_to_find: &[(&[usize], Option<&&'static str>)],
-) -> HashMap<Vec<usize>, Node> {
-    let mut nodes_to_patch: HashMap<Vec<usize>, Node> =
-        HashMap::with_capacity(nodes_to_find.len());
+) -> BTreeMap<Vec<usize>, Node> {
+    let mut nodes_to_patch: BTreeMap<Vec<usize>, Node> = BTreeMap::new();
 
     for (path, tag) in nodes_to_find {
         let mut traverse_path = path.to_vec();
@@ -426,14 +455,14 @@ where
             patch_path,
             node: for_insert,
         }) => {
-            let element: &Element = node.unchecked_ref();
+            // we inser the node before this target element
+            let target_element: &Element = node.unchecked_ref();
             let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
                 program,
                 for_insert,
                 focused_node,
             );
-            log::debug!("parent node: {:?}", element.parent_node());
-            if let Some(parent_node) = element.parent_node() {
+            if let Some(parent_node) = target_element.parent_node() {
                 let parent_element: &Element = parent_node.unchecked_ref();
                 if let Some(tag) = tag {
                     let parent_tag = parent_element.tag_name().to_lowercase();
@@ -445,10 +474,10 @@ where
                     }
                 }
                 parent_node
-                    .insert_before(&created_node.node, Some(element))
+                    .insert_before(&created_node.node, Some(target_element))
                     .expect("must remove target node");
             } else {
-                panic!("unable to get parent node of element: {:?} thas has a tag: {:?} in path: {:?}, for patching: {:#?}", element, tag, patch_path, for_insert);
+                panic!("unable to get parent node of the target element: {:?} thas has a tag: {:?} in path: {:?}, for patching: {:#?}", target_element, tag, patch_path, for_insert);
             }
 
             Ok(active_closures)
@@ -533,7 +562,7 @@ where
             // we replace the root node here, so that's reference is updated
             // to the newly created node
             if patch_path.path == [0] {
-                log::debug!("replacing root node..");
+                log::warn!("------>>>replacing root node..");
                 *root_node = created_node.node;
             }
             Ok(created_node.closures)

@@ -1,1 +1,1 @@
-wasm-pack test --firefox --headless
+wasm-pack test --firefox --headless $@

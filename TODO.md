@@ -127,3 +127,8 @@
 - [ ] Enumerate the exported modules and structs in prelude instead of just using glob(ie: *).
 - [X] Fix the data-viewer example to use Components on the views rather than Application
 - [ ] Revisit and use style_name identifier in usage of jss in examples
+
+## Bug
+- [ ] When 2 nodes with multiple similar keys, multiple replace node patch is generated. But it couldn't seem to find the correct target element.
+     or the target element has no parent, therefore can not replace/insert the node.
+- [ ] Add more test for recycled nodes with keys
