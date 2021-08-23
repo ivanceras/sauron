@@ -432,11 +432,24 @@ where
                 for_insert,
                 focused_node,
             );
-            let parent_node =
-                element.parent_node().unwrap_or_else(||panic!("must have a parent node, tag: {:?}, path: {:?}, for patch: {:#?}", tag, patch_path, for_insert));
-            parent_node
-                .insert_before(&created_node.node, Some(element))
-                .expect("must remove target node");
+            log::debug!("parent node: {:?}", element.parent_node());
+            if let Some(parent_node) = element.parent_node() {
+                let parent_element: &Element = parent_node.unchecked_ref();
+                if let Some(tag) = tag {
+                    let parent_tag = parent_element.tag_name().to_lowercase();
+                    if parent_tag != **tag {
+                        panic!(
+                            "expecting a tag: {:?}, but found: {:?}",
+                            tag, parent_tag
+                        );
+                    }
+                }
+                parent_node
+                    .insert_before(&created_node.node, Some(element))
+                    .expect("must remove target node");
+            } else {
+                panic!("unable to get parent node of element: {:?} thas has a tag: {:?} in path: {:?}, for patching: {:#?}", element, tag, patch_path, for_insert);
+            }
 
             Ok(active_closures)
         }
