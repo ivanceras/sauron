@@ -27,6 +27,8 @@ use std::{fmt, rc::Rc};
 pub struct Listener<IN, OUT> {
     /// the function to be executed
     func: Rc<dyn Fn(IN) -> OUT>,
+    /// the type_id of the function
+    func_type_id: TypeId,
     /// the type type_id of the event this callback will be attached to
     event_type_id: TypeId,
     /// the type_id of the return type of this callback when executed.
@@ -42,6 +44,7 @@ where
     fn from(func: F) -> Self {
         Self {
             func: Rc::new(func),
+            func_type_id: TypeId::of::<F>(),
             event_type_id: TypeId::of::<IN>(),
             msg_type_id: TypeId::of::<OUT>(),
         }
@@ -55,7 +58,11 @@ where
 /// doesn't need to be Debug as it is part of the Listener objects and are not shown.
 impl<IN, OUT> fmt::Debug for Listener<IN, OUT> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "||{{..}}")
+        write!(
+            f,
+            "in: {:?}, out: {:?}, func: {:?}",
+            self.event_type_id, self.msg_type_id, self.func_type_id
+        )
     }
 }
 
@@ -96,6 +103,7 @@ impl<IN, OUT> Clone for Listener<IN, OUT> {
     fn clone(&self) -> Self {
         Self {
             func: Rc::clone(&self.func),
+            func_type_id: self.func_type_id,
             event_type_id: self.event_type_id,
             msg_type_id: self.msg_type_id,
         }
@@ -113,5 +121,6 @@ impl<IN, OUT> PartialEq for Listener<IN, OUT> {
     fn eq(&self, other: &Self) -> bool {
         self.event_type_id == other.event_type_id
             && self.msg_type_id == other.msg_type_id
+            && self.func_type_id == other.func_type_id
     }
 }

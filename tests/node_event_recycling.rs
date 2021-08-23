@@ -3,6 +3,7 @@ use sauron_core::{
     diff,
     dom::DomUpdater,
     html::{attributes::*, events::*, *},
+    mt_dom::patch::*,
     web_sys,
 };
 use std::{cell::RefCell, rc::Rc};
@@ -31,26 +32,34 @@ fn elements_with_different_event_should_not_be_recycle() {
         vec![],
     );
 
+    let old_clone = old.clone();
+    dbg!(&old);
+    dbg!(&old_clone);
+    assert_eq!(old, old_clone);
+
     let text_clone2 = Rc::clone(&text);
 
-    let new = input(
-        vec![
-            id(elem_id),
-            on_input(move |_event: InputEvent| {
-                *text_clone2.borrow_mut() = "New value".to_string();
-            }),
-        ],
-        vec![],
-    );
+    let cb2 = on_input(move |_event: InputEvent| {
+        *text_clone2.borrow_mut() = "New value".to_string();
+    });
+    let new = input(vec![id(elem_id), cb2.clone()], vec![]);
 
     let patches: Vec<sauron_core::Patch<()>> = diff(&old, &new);
     // FIXME: this should replace the old node with a new one since the even essentially is a new
     // one. But we have no way of knowing the closure will produce the same result of not
     log::trace!("patches: {:#?}", patches);
 
-    //FIXME: should contain ReplaceNode instead of empty.
-    //assert_ne!(patches, vec![]);
-    assert_eq!(patches, vec![]);
+    //should contain AddAttributes instead of empty.
+    assert_eq!(
+        patches,
+        vec![AddAttributes::new(
+            &"input",
+            TreePath::start_at(0, vec![0]),
+            vec![&cb2]
+        )
+        .into()]
+    );
+
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
     let body = sauron_core::body();
@@ -74,6 +83,5 @@ fn elements_with_different_event_should_not_be_recycle() {
 
     //FIXME: the new event should be triggered instead of the old one
     //Should change the text
-    //assert_eq!(&*text.borrow(), "New value");
-    assert_ne!(&*text.borrow(), "New value");
+    assert_eq!(&*text.borrow(), "New value");
 }

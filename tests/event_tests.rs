@@ -166,24 +166,19 @@ fn remove_event() {
 #[wasm_bindgen_test]
 fn remove_event_from_truncated_children() {
     console_log::init_with_level(log::Level::Trace).ok();
+    let cb = on_click(|_| log::trace!("Clicked here"));
     let old: Node<()> = div(
         vec![],
         vec![
-            button(vec![on_click(|_| log::trace!("Clicked here"))], vec![]),
-            button(vec![on_click(|_| log::trace!("Clicked here"))], vec![]),
-            button(vec![on_click(|_| log::trace!("Clicked here"))], vec![]),
-            button(vec![on_click(|_| log::trace!("Clicked here"))], vec![]),
-            button(vec![on_click(|_| log::trace!("Clicked here"))], vec![]),
+            button(vec![cb.clone()], vec![]),
+            button(vec![cb.clone()], vec![]),
+            button(vec![cb.clone()], vec![]),
+            button(vec![cb.clone()], vec![]),
+            button(vec![cb.clone()], vec![]),
         ],
     );
 
-    let new: Node<()> = div(
-        vec![],
-        vec![button(
-            vec![on_click(|_| log::trace!("Clicked here"))],
-            vec![],
-        )],
-    );
+    let new: Node<()> = div(vec![], vec![button(vec![cb.clone()], vec![])]);
 
     let body = sauron_core::body();
     let simple_program = simple_program();
@@ -233,24 +228,19 @@ fn remove_event_from_truncated_children() {
 #[wasm_bindgen_test]
 fn remove_event_from_truncated_children_some_with_no_events() {
     console_log::init_with_level(log::Level::Trace).ok();
+    let cb = on_click(|_| log::trace!("Clicked here"));
     let old: Node<()> = div(
         vec![],
         vec![
-            button(vec![on_click(|_| log::trace!("Clicked here"))], vec![]),
-            button(vec![on_click(|_| log::trace!("Clicked here"))], vec![]),
+            button(vec![cb.clone()], vec![]),
+            button(vec![cb.clone()], vec![]),
             button(vec![], vec![]),
             button(vec![], vec![]),
-            button(vec![on_click(|_| log::trace!("Clicked here"))], vec![]),
+            button(vec![cb.clone()], vec![]),
         ],
     );
 
-    let new: Node<()> = div(
-        vec![],
-        vec![button(
-            vec![on_click(|_| log::trace!("Clicked here"))],
-            vec![],
-        )],
-    );
+    let new: Node<()> = div(vec![], vec![button(vec![cb.clone()], vec![])]);
 
     let body = sauron_core::body();
     let simple_program = simple_program();
