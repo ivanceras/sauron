@@ -38,6 +38,23 @@
       - [X] Recreate Callback from a clean state, with no TypeId and used it in `Cmd`.
       - [X] Listener will have it's own dedidate struct with the TypeId.
       - [X] Use `Callback` in `Cmd`
+ - [ ] Component system declared in view.
+    - The current system needs to store all state of the Application and its member sub components, regardless if they are specific to the Aplication or not.
+    - Some component will have properties that the App don't need to store.
+    - To do this, we need to create higher level macro and function which includes Component to be a node variant.
+        ```rust
+        enum Msg{
+            FuiButtonMsg(fui_button::Msg),
+        }
+
+        fn view(&self) -> Node<Widget>{
+            <div class="wrapper">
+                <FuiButton on_click=|_|Msg::BtnClicked style="full"/>
+            </div>
+        }
+        ```
+    - The `Application` don't have to store the state of `FuiButton` component, it will be stored into the `Program` object.
+        - Issue how will be map the Msg of the sub component to convert it into the Msg of the main `Application`?
 
 ## Internal
 - [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`

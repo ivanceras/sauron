@@ -54,18 +54,22 @@ impl<MSG, PMSG> Effects<MSG, PMSG> {
         }
     }
 
-    /// follow through
-    pub fn follow_through<F, MSG2>(self, f: F) -> Effects<MSG2, ()>
+    /// map the `follow_ups` with function `f` and merge it with `effects`
+    /// to create a new effect with homogenous follow ups
+    pub fn merge<F>(self, f: F) -> Effects<PMSG, ()>
     where
-        F: Fn(MSG) -> MSG2 + 'static,
+        F: Fn(MSG) -> PMSG + 'static,
     {
         let Effects {
             follow_ups,
-            effects: _,
+            effects,
         } = self;
 
         Effects {
-            follow_ups: follow_ups.into_iter().map(f).collect(),
+            follow_ups: effects
+                .into_iter()
+                .chain(follow_ups.into_iter().map(f))
+                .collect(),
             effects: vec![],
         }
     }
