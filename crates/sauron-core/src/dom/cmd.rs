@@ -122,42 +122,6 @@ impl<DSP> Cmd<DSP> {
             }
         })
     }
-
-    /// Convert effects into Cmd
-    pub fn map_msg<F, PMSG, MSG>(effects: Effects<MSG, PMSG>, f: F) -> Self
-    where
-        DSP: Dispatch<PMSG> + Clone + 'static,
-        MSG: Clone + 'static,
-        PMSG: Clone + 'static,
-        F: Fn(MSG) -> PMSG + 'static,
-    {
-        let Effects {
-            follow_ups,
-            effects,
-        } = effects;
-
-        Cmd::batch_msg(
-            effects
-                .into_iter()
-                .chain(follow_ups.into_iter().map(f))
-                .collect(),
-        )
-    }
-
-    /// Create a Cmd from effects that has follow_ups and effects are both Vec<MSG>
-    pub fn from_effects<MSG>(effects: Effects<MSG, MSG>) -> Self
-    where
-        MSG: Clone + 'static,
-        DSP: Dispatch<MSG> + Clone + 'static,
-    {
-        let Effects {
-            effects,
-            mut follow_ups,
-        } = effects;
-        let mut all = effects;
-        all.append(&mut follow_ups);
-        Self::batch_msg(all)
-    }
 }
 
 impl<DSP, MSG> From<Effects<MSG, ()>> for Cmd<DSP>
@@ -167,6 +131,8 @@ where
 {
     /// Convert Effects that has only follow ups
     fn from(effects: Effects<MSG, ()>) -> Self {
+        // we can safely ignore the effects here
+        // as there is no content on it.
         let Effects {
             follow_ups,
             effects: _,
