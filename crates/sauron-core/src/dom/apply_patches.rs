@@ -72,8 +72,8 @@ where
     let nodes_to_patch =
         find_all_nodes_by_path(root_node.clone(), &nodes_to_find);
 
-    let nodes_idx_to_patch = find_nodes_by_node_idx(root_node, &patches);
-    verify_same_nodes_found(&patches, &nodes_to_patch, &nodes_idx_to_patch);
+    //let nodes_idx_to_patch = find_nodes_by_node_idx(root_node, &patches);
+    //verify_same_nodes_found(&patches, &nodes_to_patch, &nodes_idx_to_patch);
 
     #[cfg(feature = "with-measure")]
     let t2 = {
@@ -280,6 +280,7 @@ fn find_nodes_by_idx_recursive(
     false
 }
 
+#[allow(unused)]
 fn verify_same_nodes_found<MSG>(
     patches: &[Patch<MSG>],
     nodes_path_to_patch: &BTreeMap<Vec<usize>, Node>,

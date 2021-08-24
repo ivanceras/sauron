@@ -53,4 +53,20 @@ impl<MSG, PMSG> Effects<MSG, PMSG> {
             effects,
         }
     }
+
+    /// follow through
+    pub fn follow_through<F, MSG2>(self, f: F) -> Effects<MSG2, ()>
+    where
+        F: Fn(MSG) -> MSG2 + 'static,
+    {
+        let Effects {
+            follow_ups,
+            effects: _,
+        } = self;
+
+        Effects {
+            follow_ups: follow_ups.into_iter().map(f).collect(),
+            effects: vec![],
+        }
+    }
 }
