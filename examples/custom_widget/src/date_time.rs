@@ -63,13 +63,13 @@ where
         match msg {
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
-                Effects::with_follow_ups(vec![Msg::TimeOrDateModified(
+                Effects::with_local(vec![Msg::TimeOrDateModified(
                     self.date_time(),
                 )])
             }
             Msg::TimeChange(time) => {
                 log::trace!("time is changed to: {}", time);
-                Effects::with_follow_ups(vec![Msg::TimeOrDateModified(
+                Effects::with_local(vec![Msg::TimeOrDateModified(
                     self.date_time(),
                 )])
             }
@@ -83,7 +83,7 @@ where
                     parent_msg.push(pmsg);
                 }
                 log::trace!("sending this to parent: {:?}", parent_msg);
-                Effects::with_effects(parent_msg)
+                Effects::with_external(parent_msg)
             }
             Msg::Mount(target_node) => {
                 log::debug!("widget is mounted to {:?}", target_node);

@@ -42,21 +42,9 @@ impl Component<Msg, ()> for Row {
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::FieldMsg(index, field_msg) => {
-                let Effects {
-                    follow_ups,
-                    effects,
-                } = self.fields[index].update(field_msg);
-
-                Effects::with_follow_ups(
-                    effects
-                        .into_iter()
-                        .chain(
-                            follow_ups.into_iter().map(|follow_up| {
-                                Msg::FieldMsg(index, follow_up)
-                            }),
-                        )
-                        .collect(),
-                )
+                let effects = self.fields[index].update(field_msg);
+                effects
+                    .localize(move |follow_up| Msg::FieldMsg(index, follow_up))
             }
             Msg::FieldInteracted(interaction) => {
                 log::trace!("interacted: {:?}", interaction);

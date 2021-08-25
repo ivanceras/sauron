@@ -1,76 +1,79 @@
-/// Msg that needs to be executed in its component on the next update loop
+/// Effects are a way for component to execute subsequent updates based on certain conditions.
+/// This can be used for doing animation and incremental changes to the view to provide an effect
+/// of transition or animation.
+///
+/// Effects contains 2 types of Messages. The local messages which will be executed in its
+/// own component on the next update loop. The other type is the external effects which are Messages
+/// that are sent to the parent Component in response to an event that has been triggerred.
 pub struct Effects<MSG, PMSG> {
-    /// Msg that will be executed in its own widget
-    pub follow_ups: Vec<MSG>,
-    /// PMSG that will be executed in the component that mounts it
-    pub effects: Vec<PMSG>,
+    /// Messages that will be executed locally in the Component
+    pub local: Vec<MSG>,
+    /// effects that will be executed on the parent Component that instantiate
+    /// this component
+    pub external: Vec<PMSG>,
 }
 
 impl<MSG, PMSG> Effects<MSG, PMSG> {
-    /// create a new effects with follow_ups and effects
-    pub fn new(follow_ups: Vec<MSG>, effects: Vec<PMSG>) -> Self {
+    /// create a new Effects with local and external expects respectively
+    pub fn new(local: Vec<MSG>, external: Vec<PMSG>) -> Self {
+        Self { local, external }
+    }
+
+    /// Create an Effects with  local messages that will be executed on the next update loop on this Component
+    pub fn with_local(local: Vec<MSG>) -> Self {
         Self {
-            follow_ups,
-            effects,
+            local,
+            external: vec![],
         }
     }
-    /// create a follow up message, but no effects
-    pub fn with_follow_ups(follow_ups: Vec<MSG>) -> Self {
+    /// Create an Effects with extern messages that will be executed on the parent Component
+    pub fn with_external(external: Vec<PMSG>) -> Self {
         Self {
-            follow_ups,
-            effects: vec![],
-        }
-    }
-    /// Create effects with no follow ups.
-    pub fn with_effects(effects: Vec<PMSG>) -> Self {
-        Self {
-            follow_ups: vec![],
-            effects,
+            local: vec![],
+            external,
         }
     }
 
-    /// No effects, no follow ups
+    /// Create and empty Effects
     pub fn none() -> Self {
         Self {
-            follow_ups: vec![],
-            effects: vec![],
+            local: vec![],
+            external: vec![],
         }
     }
 
-    /// map the follow up messages of this Effect such that
-    /// follow ups with type Vec<MSG> will become Vec<MSG2>
+    /// Map the local messages of this Effects such that MSG will be transposed into
+    /// MSG2 with the use of the mapping function `f`.
+    ///
+    /// The external messages stays the same.
     pub fn map_msg<F, MSG2>(self, f: F) -> Effects<MSG2, PMSG>
     where
         F: Fn(MSG) -> MSG2 + 'static,
     {
-        let Effects {
-            follow_ups,
-            effects,
-        } = self;
+        let Effects { local, external } = self;
 
         Effects {
-            follow_ups: follow_ups.into_iter().map(f).collect(),
-            effects,
+            local: local.into_iter().map(f).collect(),
+            external,
         }
     }
 
-    /// map the `follow_ups` with function `f` and merge it with `effects`
-    /// to create a new effect with homogenous follow ups
-    pub fn merge<F>(self, f: F) -> Effects<PMSG, ()>
+    /// derives an Effects which contains only local effects by transforming the external messages
+    /// and mapping them with function `f` such that they can be of the same type as local effects
+    /// them merge them together into local effects.
+    ///
+    pub fn localize<F>(self, f: F) -> Effects<PMSG, ()>
     where
         F: Fn(MSG) -> PMSG + 'static,
     {
-        let Effects {
-            follow_ups,
-            effects,
-        } = self;
+        let Effects { local, external } = self;
 
         Effects {
-            follow_ups: effects
+            local: external
                 .into_iter()
-                .chain(follow_ups.into_iter().map(f))
+                .chain(local.into_iter().map(f))
                 .collect(),
-            effects: vec![],
+            external: vec![],
         }
     }
 }

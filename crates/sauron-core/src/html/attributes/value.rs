@@ -226,6 +226,7 @@ impl_from!((T, U, V) => 0,1,2);
 impl_from!((T, U, V,X) => 0,1,2,3);
 impl_from!((T, U, V,X,Z) => 0,1,2,3,4);
 
+//TODO: convert this into const generics
 impl_from!([T; 1]);
 impl_from!([T; 2]);
 impl_from!([T; 3]);

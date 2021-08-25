@@ -133,10 +133,7 @@ where
     fn from(effects: Effects<MSG, ()>) -> Self {
         // we can safely ignore the effects here
         // as there is no content on it.
-        let Effects {
-            follow_ups,
-            effects: _,
-        } = effects;
-        Cmd::batch_msg(follow_ups)
+        let Effects { local, external: _ } = effects;
+        Cmd::batch_msg(local)
     }
 }

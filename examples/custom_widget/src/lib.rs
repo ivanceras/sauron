@@ -84,7 +84,7 @@ impl Application<Msg> for App {
             // We want the date-time widget to have it's own lifecycle
             Msg::DateTimeMsg(dmsg) => {
                 let effects = self.date_time.update(dmsg);
-                Cmd::from(effects.merge(Msg::DateTimeMsg))
+                Cmd::from(effects.localize(Msg::DateTimeMsg))
             }
             Msg::DateTimeChange(date_time) => {
                 log::info!(

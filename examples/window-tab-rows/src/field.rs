@@ -44,16 +44,14 @@ impl<PMSG> Component<Msg, PMSG> for Field<PMSG> {
         match msg {
             Msg::FieldClick => {
                 self.field_clicks += 1;
-                Effects::with_follow_ups(vec![Msg::Interacted(
-                    Interaction::Click,
-                )])
+                Effects::with_local(vec![Msg::Interacted(Interaction::Click)])
             }
             Msg::InputChange(input) => {
-                Effects::with_follow_ups(vec![Msg::Interacted(
-                    Interaction::Modify(input),
-                )])
+                Effects::with_local(vec![Msg::Interacted(Interaction::Modify(
+                    input,
+                ))])
             }
-            Msg::Interacted(interaction) => Effects::with_effects(
+            Msg::Interacted(interaction) => Effects::with_external(
                 self.on_interact
                     .iter()
                     .map(|listener| listener(interaction.clone()))
