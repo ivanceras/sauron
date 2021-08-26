@@ -98,20 +98,16 @@ impl Application<Msg> for App {
                     ],
                     vec![],
                 ),
-                {
-                    context.map_view(
-                        |comp_id, comp_msg| Msg::DateTimeMsg(comp_id, comp_msg),
-                        DateTimeWidget::new("2021-01-01", "11:11", false)
-                            .on_date_time_change(Msg::DateTimeChange),
-                    )
-                },
-                {
-                    context.map_view(
-                        |comp_id, comp_msg| Msg::DateTimeMsg(comp_id, comp_msg),
-                        DateTimeWidget::new("2022-02-02", "12:12", false)
-                            .on_date_time_change(Msg::DateTimeChange),
-                    )
-                },
+                context.map_view(
+                    |comp_id, comp_msg| Msg::DateTimeMsg(comp_id, comp_msg),
+                    DateTimeWidget::new("2021-01-01", "11:11", false)
+                        .on_date_time_change(Msg::DateTimeChange),
+                ),
+                context.map_view(
+                    |comp_id, comp_msg| Msg::DateTimeMsg(comp_id, comp_msg),
+                    DateTimeWidget::new("2022-02-02", "12:12", false)
+                        .on_date_time_change(Msg::DateTimeChange),
+                ),
             ],
         )
     }
