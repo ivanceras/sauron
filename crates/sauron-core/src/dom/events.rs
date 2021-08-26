@@ -202,6 +202,7 @@ fn to_hashchange_event(event: Event) -> HashChangeEvent {
 }
 
 /// a custom InputEvent to contain the input string value
+#[derive(Debug)]
 pub struct InputEvent {
     /// the input value
     pub value: String,

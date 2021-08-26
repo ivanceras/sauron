@@ -26,7 +26,11 @@ pub struct Context<MSG, CMSG> {
     components: BTreeMap<usize, Box<dyn Component<CMSG, MSG>>>,
 }
 
-impl<MSG, CMSG> Context<MSG, CMSG> {
+impl<MSG, CMSG> Context<MSG, CMSG>
+where
+    MSG: 'static,
+    CMSG: 'static,
+{
     fn new() -> Self {
         Self {
             components: BTreeMap::<usize, Box<dyn Component<CMSG, MSG>>>::new(),
@@ -37,13 +41,27 @@ impl<MSG, CMSG> Context<MSG, CMSG> {
     where
         F: Fn(usize, CMSG) -> MSG + 'static,
         COMP: Component<CMSG, MSG> + 'static,
-        MSG: 'static,
-        CMSG: 'static,
     {
         let component_id = create_unique_component_id();
         let view = component.view().map_msg(move |cmsg| f(component_id, cmsg));
         self.components.insert(component_id, Box::new(component));
         view
+    }
+
+    fn update<F>(
+        &mut self,
+        f: F,
+        comp_id: usize,
+        cmsg: CMSG,
+    ) -> Effects<MSG, ()>
+    where
+        F: Fn(CMSG) -> MSG + 'static,
+    {
+        self.components
+            .get_mut(&comp_id)
+            .expect("component not found")
+            .update(cmsg)
+            .localize(f)
     }
 }
 
@@ -130,18 +148,12 @@ impl Application<Msg> for App {
             // the date time widget.
             // We want the date-time widget to have it's own lifecycle
             Msg::DateTimeMsg(comp_id, dmsg) => {
-                let effects = self
-                    .context
-                    .borrow_mut()
-                    .components
-                    .get_mut(&comp_id)
-                    .unwrap()
-                    .update(dmsg);
-
-                Cmd::from(
-                    effects
-                        .localize(move |dmsg| Msg::DateTimeMsg(comp_id, dmsg)),
-                )
+                let effects = self.context.borrow_mut().update(
+                    move |dmsg| Msg::DateTimeMsg(comp_id, dmsg),
+                    comp_id,
+                    dmsg,
+                );
+                Cmd::from(effects)
             }
             Msg::DateTimeChange(date_time) => {
                 log::info!(

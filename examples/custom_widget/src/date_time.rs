@@ -64,12 +64,14 @@ where
         match msg {
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
+                self.date = date;
                 Effects::with_local(vec![Msg::TimeOrDateModified(
                     self.date_time(),
                 )])
             }
             Msg::TimeChange(time) => {
                 log::trace!("time is changed to: {}", time);
+                self.time = time;
                 Effects::with_local(vec![Msg::TimeOrDateModified(
                     self.date_time(),
                 )])
@@ -109,7 +111,10 @@ where
                     vec![
                         r#type("date"),
                         class("datetimebox__date"),
-                        on_change(|input| Msg::DateChange(input.value)),
+                        on_change(|input| {
+                            log::trace!("input: {:?}", input);
+                            Msg::DateChange(input.value)
+                        }),
                         value(&self.date),
                     ],
                     vec![],
