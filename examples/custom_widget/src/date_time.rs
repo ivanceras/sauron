@@ -47,11 +47,12 @@ where
         self.cnt += 1;
     }
 
-    pub fn on_date_time_change<F>(&mut self, f: F)
+    pub fn on_date_time_change<F>(mut self, f: F) -> Self
     where
         F: Fn(String) -> PMSG + 'static,
     {
         self.time_change_listener.push(Callback::from(f));
+        self
     }
 }
 
