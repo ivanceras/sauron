@@ -135,6 +135,8 @@
     - [ ] Initial attempt https://github.com/ivanceras/performance-test-sauron
 - ~~[ ] Use Weak pointer for program instead of Rc where strong reference is not needed.~~
        - Program stays as long as the user is using the app.
+- [ ] Add `Program::batch_dispatch(&self, msgs: Vec<MSG>)` to call update on each of the messages before
+    calling on the view, this would improve performance when there are multiple messages to be dispatched to the application
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
