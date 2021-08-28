@@ -137,6 +137,10 @@
        - Program stays as long as the user is using the app.
 - [ ] Add `Program::batch_dispatch(&self, msgs: Vec<MSG>)` to call update on each of the messages before
     calling on the view, this would improve performance when there are multiple messages to be dispatched to the application
+- [ ] Make a benchmark for building views with more than 2000 nodes, like a text-editor.
+    - There is a huge performance regression in between 0.40 and 0.42
+    - [X] It was cause by jss `style!` macro where the lookup for style name is recreated everytime,
+          due to the use of `const` instead of `static` in a `once_cell::Lazy` declaration. This is fixed in `jss 0.3.3`
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
