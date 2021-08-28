@@ -1,41 +1,45 @@
-mod date_time;
+#![deny(warnings)]
 
 use date_time::DateTimeWidget;
-use once_cell::sync::OnceCell;
-use once_cell::unsync::Lazy;
 use sauron::html::text;
 use sauron::prelude::*;
-use sauron::{node, Application, Cmd, Node};
+use sauron::{Application, Cmd, Node};
 use std::cell::RefCell;
-use std::collections::BTreeMap;
-use std::rc::Rc;
-use std::sync::Mutex;
+use std::marker::PhantomData;
 
-pub struct Context<MSG, CMSG> {
-    components: Vec<Box<dyn Component<CMSG, MSG>>>,
+mod date_time;
+
+pub struct Context<COMP, MSG, CMSG> {
+    components: Vec<COMP>,
+    _phantom_msg: PhantomData<MSG>,
+    _phantom_cmsg: PhantomData<CMSG>,
 }
 
-impl<MSG, CMSG> Context<MSG, CMSG>
+impl<COMP, MSG, CMSG> Context<COMP, MSG, CMSG>
 where
+    COMP: Component<CMSG, MSG> + 'static,
     MSG: 'static,
     CMSG: 'static,
 {
     fn new() -> Self {
-        Self { components: vec![] }
+        Self {
+            components: vec![],
+            _phantom_msg: PhantomData,
+            _phantom_cmsg: PhantomData,
+        }
     }
 
     /// simultaneously save the component into context for the duration until the next update loop
-    fn map_view<COMP, F>(&mut self, mapper: F, component: COMP) -> Node<MSG>
+    fn map_view<F>(&mut self, mapper: F, component: COMP) -> Node<MSG>
     where
         F: Fn(usize, CMSG) -> MSG + 'static,
-        COMP: Component<CMSG, MSG> + 'static,
     {
         let component_id = self.components.len();
         log::trace!("component_id: {}", component_id);
         let view = component
             .view()
             .map_msg(move |cmsg| mapper(component_id, cmsg));
-        self.components.push(Box::new(component));
+        self.components.push(component);
         view
     }
 
@@ -72,7 +76,7 @@ pub enum Msg {
 
 pub struct App {
     count: i32,
-    context: RefCell<Context<Msg, date_time::Msg>>,
+    context: RefCell<Context<DateTimeWidget<Msg>, Msg, date_time::Msg>>,
 }
 
 impl App {

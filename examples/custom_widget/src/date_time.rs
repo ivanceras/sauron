@@ -1,11 +1,6 @@
-use sauron::apply_patches::patch;
 use sauron::dom::Callback;
-use sauron::html::attributes;
 use sauron::prelude::*;
-use std::cell::RefCell;
-use std::collections::HashMap;
 use std::fmt::Debug;
-use std::rc::Rc;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -43,10 +38,6 @@ where
         format!("{} {}", self.date, self.time)
     }
 
-    fn force_increment(&mut self) {
-        self.cnt += 1;
-    }
-
     pub fn on_date_time_change<F>(mut self, f: F) -> Self
     where
         F: Fn(String) -> PMSG + 'static,
@@ -80,8 +71,6 @@ where
                 log::trace!("time or date is changed: {}", date_time);
                 let mut parent_msg = vec![];
                 for listener in self.time_change_listener.iter() {
-                    let event = web_sys::Event::new("time_change")
-                        .expect("must construct custom event");
                     let pmsg = listener.emit(self.date_time());
                     parent_msg.push(pmsg);
                 }
