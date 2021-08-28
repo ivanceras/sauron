@@ -11,19 +11,8 @@ use std::collections::BTreeMap;
 use std::rc::Rc;
 use std::sync::Mutex;
 
-static COMPONENT_ID: OnceCell<Mutex<usize>> = OnceCell::new();
-
-fn create_unique_component_id() -> usize {
-    let mut component_id = COMPONENT_ID
-        .get_or_init(|| Mutex::new(0))
-        .lock()
-        .expect("unable to obtain lock");
-    *component_id += 1;
-    *component_id
-}
-
 pub struct Context<MSG, CMSG> {
-    components: BTreeMap<usize, Box<dyn Component<CMSG, MSG>>>,
+    components: Vec<Box<dyn Component<CMSG, MSG>>>,
 }
 
 impl<MSG, CMSG> Context<MSG, CMSG>
@@ -32,21 +21,21 @@ where
     CMSG: 'static,
 {
     fn new() -> Self {
-        Self {
-            components: BTreeMap::<usize, Box<dyn Component<CMSG, MSG>>>::new(),
-        }
+        Self { components: vec![] }
     }
 
+    /// simultaneously save the component into context for the duration until the next update loop
     fn map_view<COMP, F>(&mut self, mapper: F, component: COMP) -> Node<MSG>
     where
         F: Fn(usize, CMSG) -> MSG + 'static,
         COMP: Component<CMSG, MSG> + 'static,
     {
-        let component_id = create_unique_component_id();
+        let component_id = self.components.len();
+        log::trace!("component_id: {}", component_id);
         let view = component
             .view()
             .map_msg(move |cmsg| mapper(component_id, cmsg));
-        self.components.insert(component_id, Box::new(component));
+        self.components.push(Box::new(component));
         view
     }
 
@@ -60,10 +49,15 @@ where
         F: Fn(CMSG) -> MSG + 'static,
     {
         self.components
-            .get_mut(&comp_id)
+            .get_mut(comp_id)
             .expect("component not found")
             .update(cmsg)
             .localize(mapper)
+    }
+
+    /// resets the components
+    fn clear(&mut self) {
+        self.components.clear();
     }
 }
 
@@ -96,6 +90,8 @@ impl Application<Msg> for App {
     }
     fn view(&self) -> Node<Msg> {
         let mut context = self.context.borrow_mut();
+        // we clear the components here as stateless components are recreated at every view call.
+        context.clear();
         div(
             vec![on_mount(|me| Msg::Mount(me.target_node))],
             vec![
