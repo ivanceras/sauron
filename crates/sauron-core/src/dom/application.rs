@@ -54,6 +54,8 @@ pub struct Measurements {
     pub update_dispatch_took: f64,
     /// Time it took for the Component to build it's view
     pub build_view_took: f64,
+    /// Total number of patches applied on this update loop
+    pub total_patches: usize,
     /// Time it took for the patching the DOM.
     pub dom_update_took: f64,
     /// Total time it took for the component dispatch

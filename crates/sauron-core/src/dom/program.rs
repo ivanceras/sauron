@@ -133,7 +133,8 @@ where
             log::trace!("creating app view took: {}ms", t3 - t2);
 
             // update the last DOM node tree with this new view
-            self.dom_updater.borrow_mut().update_dom(self, view);
+            let total_patches =
+                self.dom_updater.borrow_mut().update_dom(self, view);
             let t4 = crate::now();
             #[cfg(feature = "with-measure")]
             log::trace!("dom update took: {}ms", t4 - t3);
@@ -155,13 +156,13 @@ where
                     view_node_count: node_count,
                     update_dispatch_took: t2 - t1,
                     build_view_took: t3 - t2,
+                    total_patches,
                     dom_update_took: t4 - t3,
                     total_time: t4 - t1,
                 };
                 // tell the app on app performance measurements
                 let cmd_measurement =
                     self.app.borrow().measurements(measurements).no_render();
-
                 cmd_measurement.emit(self);
             } else {
                 #[cfg(any(feature = "with-debug", feature = "with-measure"))]

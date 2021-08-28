@@ -146,7 +146,13 @@ where
     ///
     /// Then use that diff to patch the real DOM in the user's browser so that they are
     /// seeing the latest state of the application.
-    pub fn update_dom<DSP>(&mut self, program: &DSP, new_vdom: crate::Node<MSG>)
+    ///
+    /// Return the total number of patches applied
+    pub fn update_dom<DSP>(
+        &mut self,
+        program: &DSP,
+        new_vdom: crate::Node<MSG>,
+    ) -> usize
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
@@ -154,6 +160,7 @@ where
         let t1 = crate::now();
 
         let patches = diff(&self.current_vdom, &new_vdom);
+        let total_patches = patches.len();
 
         #[cfg(feature = "with-measure")]
         let _t2 = {
@@ -181,6 +188,8 @@ where
 
         self.current_vdom = new_vdom;
         self.set_focus_element();
+        //return the total number of patches
+        total_patches
     }
 
     /// Apply patches blindly to the `root_node` in this DomUpdater.
