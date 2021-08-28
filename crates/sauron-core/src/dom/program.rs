@@ -117,7 +117,7 @@ where
         // update the app and emit the cmd returned from the update
         let cmd = self.app.borrow_mut().update(msg);
 
-        if cmd.should_update_view {
+        if cmd.modifier.should_update_view {
             //trace!("Executing cmd..");
             let t2 = crate::now();
 
@@ -149,8 +149,9 @@ where
                 }
             }
 
-            if cmd.log_measurements {
+            if cmd.modifier.log_measurements {
                 let measurements = Measurements {
+                    name: cmd.modifier.measurement_name.clone(),
                     view_node_count: node_count,
                     update_dispatch_took: t2 - t1,
                     build_view_took: t3 - t2,
@@ -158,9 +159,9 @@ where
                     total_time: t4 - t1,
                 };
                 // tell the app on app performance measurements
-                let mut cmd_measurement =
-                    self.app.borrow().measurements(measurements);
-                cmd_measurement.should_update_view = false;
+                let cmd_measurement =
+                    self.app.borrow().measurements(measurements).no_render();
+
                 cmd_measurement.emit(self);
             } else {
                 #[cfg(any(feature = "with-debug", feature = "with-measure"))]

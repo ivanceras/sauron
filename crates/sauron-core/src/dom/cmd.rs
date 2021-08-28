@@ -15,6 +15,13 @@ use crate::Effects;
 pub struct Cmd<DSP> {
     /// the functions that would be executed when this Cmd is emited
     pub commands: Vec<Callback<DSP, ()>>,
+    pub(crate) modifier: Modifier,
+}
+
+/// These are collections of fields where we can modify the Cmd
+/// such as logging measurement or should update the view
+#[derive(Clone)]
+pub struct Modifier {
     /// this instruct the program whether or not to update the view
     pub should_update_view: bool,
     /// tell the cmd to log the measurements of not.
@@ -22,6 +29,27 @@ pub struct Cmd<DSP> {
     /// in the component update function. Otherwise, measurement calls
     /// for other non-trivial functions are also called causing on measurements.
     pub log_measurements: bool,
+    /// Set the measurement name for this Cmd.
+    /// This is used to distinguish measurements from other measurements in different parts of you
+    /// application
+    ///
+    /// This measurment name will be copied
+    /// into the [`Measurement`](crate::Measurement) passed in
+    /// [`Application::measurement`](crate::Application::measurement)
+    pub measurement_name: String,
+}
+
+impl Default for Modifier {
+    fn default() -> Self {
+        Self {
+            // every cmd will update the view by default
+            should_update_view: true,
+            // every cmd will not log measurement by default
+            log_measurements: false,
+            // empty string by default
+            measurement_name: String::new(),
+        }
+    }
 }
 
 impl<DSP> Cmd<DSP>
@@ -35,30 +63,35 @@ where
     {
         Self {
             commands: vec![Callback::from(f)],
-            should_update_view: true,
-            log_measurements: false,
+            modifier: Default::default(),
         }
     }
 
     /// creates a unified Cmd which batches all the other Cmds in one.
     pub fn batch(cmds: Vec<Self>) -> Self {
-        let should_update_view = cmds.iter().any(|c| c.should_update_view);
-        let log_measurements = cmds.iter().any(|c| c.log_measurements);
+        let should_update_view =
+            cmds.iter().any(|c| c.modifier.should_update_view);
+        let log_measurements = cmds.iter().any(|c| c.modifier.log_measurements);
         let mut commands = vec![];
         for cmd in cmds {
             commands.extend(cmd.commands);
         }
         Self {
             commands,
-            should_update_view,
-            log_measurements,
+            modifier: Modifier {
+                should_update_view,
+                log_measurements,
+                ..Default::default()
+            },
         }
     }
 
     /// Append more cmd into this cmd and return self
     pub fn append(mut self, cmds: Vec<Self>) -> Self {
-        self.should_update_view = cmds.iter().any(|c| c.should_update_view);
-        self.log_measurements = cmds.iter().any(|c| c.log_measurements);
+        self.modifier.should_update_view =
+            cmds.iter().any(|c| c.modifier.should_update_view);
+        self.modifier.log_measurements =
+            cmds.iter().any(|c| c.modifier.log_measurements);
         for cmd in cmds {
             self.commands.extend(cmd.commands);
         }
@@ -69,8 +102,7 @@ where
     pub fn none() -> Self {
         Cmd {
             commands: vec![],
-            should_update_view: true,
-            log_measurements: false,
+            modifier: Default::default(),
         }
     }
 
@@ -82,30 +114,31 @@ where
         }
     }
 
-    /// Creates an empty Cmd and specifies that there is NO update will be made to the
-    /// view.
-    pub fn should_update_view(should_update_view: bool) -> Self {
-        Self {
-            commands: vec![],
-            should_update_view,
-            log_measurements: false,
-        }
+    /// Modify the Cmd such that whether or not it will update the view set by `should_update_view`
+    /// when the cmd is executed in the program
+    pub fn should_update_view(mut self, should_update_view: bool) -> Self {
+        self.modifier.should_update_view = should_update_view;
+        self
     }
 
-    /// Create a cmd which instruct the program that there is NO update
-    /// will be made to the view
-    pub fn no_render() -> Self {
-        Self::should_update_view(false)
+    /// Modify the Cmd such that it will not do an update on the view when it is executed
+    pub fn no_render(mut self) -> Self {
+        self.modifier.should_update_view = false;
+        self
     }
 
-    /// Create a cmd which instruct the program that it should log the measurements
-    /// for each part of the dispatch process.
-    pub fn measure() -> Self {
-        Self {
-            commands: vec![],
-            should_update_view: true,
-            log_measurements: true,
-        }
+    /// Modify the Cmd such that it will log measurement when it is executed
+    pub fn measure(mut self) -> Self {
+        self.modifier.log_measurements = true;
+        self
+    }
+
+    /// Modify the Cmd such that it will log a measuregment when it is executed
+    /// The `measurement_name` is set to distinguish the measurements from each other.
+    pub fn measure_with_name(mut self, name: &str) -> Self {
+        self = self.measure();
+        self.modifier.measurement_name = name.to_string();
+        self
     }
 }
 

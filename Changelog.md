@@ -1,6 +1,19 @@
 # Changelog
 
-## Unreleased
+## (unreleased)
+
+ - Update to jss 0.4
+ - **breaking** Rename `Effects{follow_ups, effects}` to a more descriptive name `Effects{local, external}`
+ - **breaking** Remove `Cmd::map_msg` and `from_effects` as their functionality is moved into `Effects`.
+ - **breaking** Rename `Effects::follow_through` to `Effects::localize` since it maps the `external` fields into msg that is compatible with local messages and merge them.
+ - Change the `node_to_find` function to use `BTreeMap` so that their arrangement will be ordered/consistent, hence easier to debug
+ - Improve debugging InsertNode where it can NOT find the parent node
+ - Modify the `style` method in `Application` such that it returns a `String` rather than `Vec<String>`.
+        `Component`, `Container` and `View` can now have `style` method
+ - Add `maybe_attr` utility helper function in attributes
+ - Add `Cmd::append` method to easily add more cmd to existing cmd
+
+## 0.42.0
 - shorten the `data-vdom-id` that we used as marker in the DOM element
 - Improve calling on emit, The input don't need to implement Into, so we can call it right away
 - Use Callback in Cmd
