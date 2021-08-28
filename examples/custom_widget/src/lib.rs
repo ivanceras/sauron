@@ -37,22 +37,24 @@ where
         }
     }
 
-    fn map_view<COMP, F>(&mut self, f: F, component: COMP) -> Node<MSG>
+    fn map_view<COMP, F>(&mut self, mapper: F, component: COMP) -> Node<MSG>
     where
         F: Fn(usize, CMSG) -> MSG + 'static,
         COMP: Component<CMSG, MSG> + 'static,
     {
         let component_id = create_unique_component_id();
-        let view = component.view().map_msg(move |cmsg| f(component_id, cmsg));
+        let view = component
+            .view()
+            .map_msg(move |cmsg| mapper(component_id, cmsg));
         self.components.insert(component_id, Box::new(component));
         view
     }
 
-    fn update<F>(
+    fn update_component_with_id<F>(
         &mut self,
-        f: F,
         comp_id: usize,
         cmsg: CMSG,
+        mapper: F,
     ) -> Effects<MSG, ()>
     where
         F: Fn(CMSG) -> MSG + 'static,
@@ -61,7 +63,7 @@ where
             .get_mut(&comp_id)
             .expect("component not found")
             .update(cmsg)
-            .localize(f)
+            .localize(mapper)
     }
 }
 
@@ -117,12 +119,12 @@ impl Application<Msg> for App {
                     vec![],
                 ),
                 context.map_view(
-                    |comp_id, comp_msg| Msg::DateTimeMsg(comp_id, comp_msg),
+                    Msg::DateTimeMsg,
                     DateTimeWidget::new("2021-01-01", "11:11", false)
                         .on_date_time_change(Msg::DateTimeChange),
                 ),
                 context.map_view(
-                    |comp_id, comp_msg| Msg::DateTimeMsg(comp_id, comp_msg),
+                    Msg::DateTimeMsg,
                     DateTimeWidget::new("2022-02-02", "12:12", false)
                         .on_date_time_change(Msg::DateTimeChange),
                 ),
@@ -148,10 +150,11 @@ impl Application<Msg> for App {
             // the date time widget.
             // We want the date-time widget to have it's own lifecycle
             Msg::DateTimeMsg(comp_id, dmsg) => {
-                let effects = self.context.borrow_mut().update(
-                    move |dmsg| Msg::DateTimeMsg(comp_id, dmsg),
+                let mut context = self.context.borrow_mut();
+                let effects = context.update_component_with_id(
                     comp_id,
                     dmsg,
+                    move |dmsg| Msg::DateTimeMsg(comp_id, dmsg),
                 );
                 Cmd::from(effects)
             }
