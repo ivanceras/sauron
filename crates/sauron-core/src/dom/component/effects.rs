@@ -76,4 +76,10 @@ impl<MSG, PMSG> Effects<MSG, PMSG> {
             external: vec![],
         }
     }
+
+    /// Append this msgs to the local effects
+    pub fn append_local(mut self, local: Vec<MSG>) -> Self {
+        self.local.extend(local);
+        self
+    }
 }
