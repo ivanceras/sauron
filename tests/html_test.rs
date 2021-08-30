@@ -170,7 +170,7 @@ fn add_children() {
         vec![AppendChildren::new(
             &"div",
             TreePath::start_at(0, vec![0]),
-            vec![(2, &html_element("new", vec![], vec![]))]
+            vec![&html_element("new", vec![], vec![])]
         )
         .into()],
         "Added a new node to the root node",

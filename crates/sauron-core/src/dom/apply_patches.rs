@@ -65,15 +65,12 @@ where
 
     let mut paths = vec![];
     for patch in patches.iter() {
-        paths.push((patch.path(), patch.node_idx()));
+        paths.push(patch.path());
     }
 
     let mut active_closures = HashMap::new();
     let nodes_to_patch =
         find_all_nodes_by_path(root_node.clone(), &nodes_to_find);
-
-    //let nodes_idx_to_patch = find_nodes_by_node_idx(root_node, &patches);
-    //verify_same_nodes_found(&patches, &nodes_to_patch, &nodes_idx_to_patch);
 
     #[cfg(feature = "with-measure")]
     let t2 = {
@@ -95,7 +92,7 @@ where
             )?;
             active_closures.extend(new_closures);
         } else {
-            unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?} node_idx: {}", patch_path, patch.node_idx());
+            unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}", patch_path);
         }
     }
 
@@ -106,200 +103,6 @@ where
         t3
     };
     Ok(active_closures)
-}
-
-/// Apply all of the patches to our old root node in order to create the new root node
-/// that we desire.
-/// This is usually used after diffing two virtual nodes.
-///
-/// Note: If Program is None, it is a dumb patch, meaning
-/// there is no event listener attached or changed
-pub fn patch_by_node_idx_traversal<DSP, MSG>(
-    program: &DSP,
-    root_node: &mut Node,
-    old_closures: &mut ActiveClosure,
-    focused_node: &mut Option<Node>,
-    patches: Vec<Patch<MSG>>,
-) -> Result<ActiveClosure, JsValue>
-where
-    MSG: 'static,
-    DSP: Clone + Dispatch<MSG> + 'static,
-{
-    #[cfg(feature = "with-measure")]
-    let t1 = crate::now();
-
-    // Closure that were added to the DOM during this patch operation.
-    let mut active_closures = HashMap::new();
-
-    // finding the nodes to be patched before hand, instead of calling it
-    // in every patch loop.
-    let nodes_to_patch = find_nodes_by_node_idx(root_node, &patches);
-
-    #[cfg(feature = "with-measure")]
-    let t2 = {
-        let t2 = crate::now();
-        log::trace!("finding nodes to patch took: {}ms", t2 - t1);
-        t2
-    };
-
-    for patch in patches.iter() {
-        let patch_node_idx = patch.node_idx();
-
-        if let Some(element) = nodes_to_patch.get(&patch_node_idx) {
-            let new_closures = apply_patch_to_node(
-                program,
-                root_node,
-                element,
-                old_closures,
-                focused_node,
-                patch,
-            )?;
-            active_closures.extend(new_closures);
-        } else {
-            unreachable!(
-            "Getting here means we didn't find the element or next node that we were supposed to patch."
-            );
-        }
-    }
-
-    #[cfg(feature = "with-measure")]
-    let _t3 = {
-        let t3 = crate::now();
-        log::trace!("actual applying patch took: {}ms", t3 - t2);
-        t3
-    };
-
-    Ok(active_closures)
-}
-
-/// find the nodes to be patched
-/// each patch contains a node index, arranged in depth first tree.
-///
-/// This function is needed for optimization purposes.
-/// Instead of finding the nodes each time in the patching process.
-/// We find them before hand so as not to keep calling this function for each and every element to
-/// be patched.
-///
-/// This is also IMPORTANT such that changes to the Dom tree
-/// such as removal and insertion of nodes
-/// will not change to NodeIdx we need to find, since
-/// we already get a reference to these nodes prior to applying any of the patches.
-/// TODO: took a lot of time to lookup for nodes to find
-///
-/// Note:
-/// Worst case scenario:
-/// Finding the node that is in the bottom part of the html tree
-/// will take a long time, since it has to traverse to each of the
-/// elements are it's descendant before it could reach the elements in the bottom.
-///
-/// Complexity: O(n), where n is the total number of html nodes
-fn find_nodes_by_node_idx<MSG>(
-    root_node: &Node,
-    patches: &[Patch<MSG>],
-) -> BTreeMap<usize, Node> {
-    let mut nodes_to_find: BTreeMap<usize, Option<&&'static str>> =
-        BTreeMap::new();
-
-    let mut nodes_to_patch: BTreeMap<usize, Node> = BTreeMap::new();
-
-    for patch in patches {
-        nodes_to_find.insert(patch.node_idx(), patch.tag());
-    }
-
-    #[cfg(feature = "with-measure")]
-    log::trace!("there are {} nodes_to_find", nodes_to_find.len());
-
-    find_nodes_by_idx_recursive(
-        root_node,
-        &mut 0,
-        &nodes_to_find,
-        &mut nodes_to_patch,
-    );
-
-    let not_found = list_nodes_not_found(&nodes_to_find, &nodes_to_patch);
-    if !not_found.is_empty() {
-        log::warn!("These are not found: {:#?}", not_found);
-    }
-
-    nodes_to_patch
-}
-
-fn list_nodes_not_found(
-    nodes_to_find: &BTreeMap<usize, Option<&&'static str>>,
-    nodes_to_patch: &BTreeMap<usize, Node>,
-) -> Vec<usize> {
-    let mut not_found = vec![];
-    for (idx, tag) in nodes_to_find.iter() {
-        if nodes_to_patch.contains_key(idx) {
-            // found
-        } else {
-            log::warn!("not found.. {} - {:?}", idx, tag);
-            not_found.push(*idx);
-        }
-    }
-    not_found
-}
-
-/// find the html nodes recursively
-/// early returns true if all node has been found
-/// before completing iterating all the elements
-fn find_nodes_by_idx_recursive(
-    node: &Node,
-    cur_node_idx: &mut usize,
-    nodes_to_find: &BTreeMap<usize, Option<&&'static str>>,
-    nodes_to_patch: &mut BTreeMap<usize, Node>,
-) -> bool {
-    if nodes_to_find.is_empty() {
-        return true;
-    }
-    let all_has_been_found = nodes_to_find.len() == nodes_to_patch.len();
-    if all_has_been_found {
-        return true;
-    }
-    // Important: We use child_nodes() instead of children() because children() ignores text nodes
-    let children = node.child_nodes();
-    let child_node_count = children.length();
-
-    // If the root node matches, mark it for patching
-    if let Some(_vtag) = nodes_to_find.get(cur_node_idx) {
-        nodes_to_patch.insert(*cur_node_idx, node.clone());
-    }
-
-    for i in 0..child_node_count {
-        let child_node = children.item(i).expect("Expecting a child node");
-        *cur_node_idx += 1;
-        if find_nodes_by_idx_recursive(
-            &child_node,
-            cur_node_idx,
-            nodes_to_find,
-            nodes_to_patch,
-        ) {
-            return true;
-        }
-    }
-    false
-}
-
-#[allow(unused)]
-fn verify_same_nodes_found<MSG>(
-    patches: &[Patch<MSG>],
-    nodes_path_to_patch: &BTreeMap<Vec<usize>, Node>,
-    nodes_idx_to_patch: &BTreeMap<usize, Node>,
-) {
-    for patch in patches {
-        let node_idx = patch.node_idx();
-        let path = patch.path();
-        let found_by_node_idx = nodes_idx_to_patch
-            .get(&node_idx)
-            .unwrap_or_else(|| panic!("must found a node using node_idx"));
-        let found_by_path = nodes_path_to_patch
-            .get(path)
-            .unwrap_or_else(|| panic!("must found a node using path"));
-
-        if found_by_node_idx != found_by_path {
-            panic!("Found by node_ids {:?} is not the same by found by path: {:?}, \npatches: {:#?}", found_by_node_idx, found_by_path, patches);
-        }
-    }
 }
 
 fn find_node_by_path_recursive(
@@ -592,7 +395,7 @@ where
         }) => {
             let element: &Element = node.unchecked_ref();
             let mut active_closures = HashMap::new();
-            for (_append_children_node_idx, new_node) in new_nodes.iter() {
+            for new_node in new_nodes.iter() {
                 let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
                     program,
                     new_node,
