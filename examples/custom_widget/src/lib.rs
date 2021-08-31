@@ -31,7 +31,7 @@ where
     }
 
     /// simultaneously save the component into context for the duration until the next update loop
-    fn map_view<F>(&mut self, mapper: F, component: COMP) -> Node<MSG>
+    fn map_view<F>(&mut self, component: COMP, mapper: F) -> Node<MSG>
     where
         F: Fn(Rc<RefCell<COMP>>, CMSG) -> MSG + 'static,
     {
@@ -43,6 +43,22 @@ where
             .map_msg(move |cmsg| mapper(component_clone.clone(), cmsg));
         self.components.push(component);
         view
+    }
+
+    fn update_component<F>(
+        &mut self,
+        component: Rc<RefCell<COMP>>,
+        dmsg: CMSG,
+        mapper: F,
+    ) -> Effects<MSG, ()>
+    where
+        F: Fn(Rc<RefCell<COMP>>, CMSG) -> MSG + 'static,
+    {
+        let component_clone = component.clone();
+        component
+            .borrow_mut()
+            .update(dmsg)
+            .localize(move |dmsg| mapper(component_clone.clone(), dmsg))
     }
 }
 
@@ -98,14 +114,24 @@ impl Application<Msg> for App {
                     vec![],
                 ),
                 context.map_view(
-                    Msg::DateTimeMsg,
                     DateTimeWidget::new("2021-01-01", "11:11", false)
                         .on_date_time_change(Msg::DateTimeChange),
+                    Msg::DateTimeMsg,
                 ),
                 context.map_view(
-                    Msg::DateTimeMsg,
                     DateTimeWidget::new("2022-02-02", "12:12", false)
                         .on_date_time_change(Msg::DateTimeChange),
+                    Msg::DateTimeMsg,
+                ),
+                context.map_view(
+                    DateTimeWidget::new("3033-03-03", "13:13", false)
+                        .on_date_time_change(Msg::DateTimeChange),
+                    Msg::DateTimeMsg,
+                ),
+                context.map_view(
+                    DateTimeWidget::new("4044-04-04", "14:14", false)
+                        .on_date_time_change(Msg::DateTimeChange),
+                    Msg::DateTimeMsg,
                 ),
             ],
         )
@@ -126,11 +152,11 @@ impl Application<Msg> for App {
                 Cmd::none()
             }
             Msg::DateTimeMsg(component, dmsg) => {
-                let component_clone = component.clone();
-                let effects =
-                    component.borrow_mut().update(dmsg).localize(move |dmsg| {
-                        Msg::DateTimeMsg(component_clone.clone(), dmsg)
-                    });
+                let effects = self.context.borrow_mut().update_component(
+                    component,
+                    dmsg,
+                    Msg::DateTimeMsg,
+                );
                 Cmd::from(effects)
             }
             Msg::DateTimeChange(date_time) => {
