@@ -48,11 +48,7 @@ fn test_remove_nodes() {
     log::debug!("patches: {:#?}", patches);
     assert_eq!(
         patches,
-        vec![RemoveNode::new(
-            Some(&"li"),
-            TreePath::start_at(2, vec![0, 0, 0]),
-        )
-        .into()]
+        vec![RemoveNode::new(Some(&"li"), TreePath::new(vec![0, 0, 0]),).into()]
     );
 
     let mut old_html = String::new();

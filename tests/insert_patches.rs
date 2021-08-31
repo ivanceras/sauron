@@ -50,7 +50,7 @@ fn test_patch_insert_node() {
         patches,
         vec![InsertNode::new(
             Some(&"ul"),
-            TreePath::start_at(2, vec![0, 0, 0]),
+            TreePath::new(vec![0, 0, 0]),
             &li(vec![key(0)], vec![text("item0")])
         )
         .into()]
@@ -126,7 +126,7 @@ fn test_patch_insert_node_in_the_middle() {
         patches,
         vec![InsertNode::new(
             Some(&"ul"),
-            TreePath::start_at(4, vec![0, 0, 1]),
+            TreePath::new(vec![0, 0, 1]),
             &li(vec![key(0)], vec![text("item0")])
         )
         .into()]
@@ -206,25 +206,25 @@ fn multiple_insert_should_work() {
         vec![
             InsertNode::new(
                 Some(&"ul"),
-                TreePath::start_at(2, vec![0, 0, 0]),
+                TreePath::new(vec![0, 0, 0]),
                 &li(vec![key("c")], vec![text("itemc")])
             )
             .into(),
             InsertNode::new(
                 Some(&"ul"),
-                TreePath::start_at(2, vec![0, 0, 0]),
+                TreePath::new(vec![0, 0, 0]),
                 &li(vec![key("b")], vec![text("itemb")])
             )
             .into(),
             InsertNode::new(
                 Some(&"ul"),
-                TreePath::start_at(2, vec![0, 0, 0]),
+                TreePath::new(vec![0, 0, 0]),
                 &li(vec![key("a")], vec![text("itema")])
             )
             .into(),
             InsertNode::new(
                 Some(&"ul"),
-                TreePath::start_at(2, vec![0, 0, 0]),
+                TreePath::new(vec![0, 0, 0]),
                 &li(vec![key(0)], vec![text("item0")])
             )
             .into(),

@@ -187,26 +187,10 @@ fn remove_event_from_truncated_children() {
     assert_eq!(
         diff,
         vec![
-            RemoveNode::new(
-                Some(&"button"),
-                TreePath::start_at(2, vec![0, 1]),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"button"),
-                TreePath::start_at(3, vec![0, 2]),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"button"),
-                TreePath::start_at(4, vec![0, 3]),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"button"),
-                TreePath::start_at(5, vec![0, 4]),
-            )
-            .into(),
+            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 1]),).into(),
+            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 2]),).into(),
+            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 3]),).into(),
+            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 4]),).into(),
         ],
     );
     let mut dom_updater =
@@ -249,26 +233,10 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     assert_eq!(
         diff,
         vec![
-            RemoveNode::new(
-                Some(&"button"),
-                TreePath::start_at(2, vec![0, 1]),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"button"),
-                TreePath::start_at(3, vec![0, 2]),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"button"),
-                TreePath::start_at(4, vec![0, 3]),
-            )
-            .into(),
-            RemoveNode::new(
-                Some(&"button"),
-                TreePath::start_at(5, vec![0, 4]),
-            )
-            .into(),
+            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 1]),).into(),
+            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 2]),).into(),
+            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 3]),).into(),
+            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 4]),).into(),
         ],
         "Should be a Truncate patch"
     );
@@ -305,7 +273,7 @@ fn remove_event_from_replaced_node() {
         diff,
         vec![ReplaceNode::new(
             Some(&"div"),
-            TreePath::start_at(0, vec![0]),
+            TreePath::new(vec![0]),
             &p(vec![], vec![])
         )
         .into()],

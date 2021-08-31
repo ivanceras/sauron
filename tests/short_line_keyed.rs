@@ -81,7 +81,7 @@ fn test_unmatched_old_key() {
         vec![
             ReplaceNode::new(
                 Some(&"div"),
-                TreePath::start_at(1, vec![0, 0]),
+                TreePath::new(vec![0, 0]),
                 &node!(
                 <div class="grid__number__line" key="keyxxx">
                     <div class="grid__number">"xxx"</div>
@@ -93,19 +93,19 @@ fn test_unmatched_old_key() {
             .into(),
             ChangeText::new(
                 &Text::new("1"),
-                TreePath::start_at(9, vec![0, 1, 0, 0,]),
+                TreePath::new(vec![0, 1, 0, 0,]),
                 &Text::new("2")
             )
             .into(),
             ChangeText::new(
                 &Text::new("2"),
-                TreePath::start_at(15, vec![0, 2, 0, 0,]),
+                TreePath::new(vec![0, 2, 0, 0,]),
                 &Text::new("3")
             )
             .into(),
             ChangeText::new(
                 &Text::new("3"),
-                TreePath::start_at(27, vec![0, 3, 0, 0,]),
+                TreePath::new(vec![0, 3, 0, 0,]),
                 &Text::new("4")
             )
             .into(),

@@ -112,7 +112,7 @@ fn replace_node() {
         diff(&old, &new),
         vec![ReplaceNode::new(
             Some(&"div"),
-            TreePath::start_at(0, vec![0]),
+            TreePath::new(vec![0]),
             &span(vec![], vec![])
         )
         .into()],
@@ -125,7 +125,7 @@ fn replace_node() {
         diff(&old, &new),
         vec![ReplaceNode::new(
             Some(&"b"),
-            TreePath::start_at(1, vec![0, 0]),
+            TreePath::new(vec![0, 0]),
             &strong(vec![], vec![])
         )
         .into()],
@@ -144,13 +144,13 @@ fn replace_node() {
         vec![
             ReplaceNode::new(
                 Some(&"b"),
-                TreePath::start_at(1, vec![0, 0]),
+                TreePath::new(vec![0, 0]),
                 &i(vec![], vec![text("1")])
             )
             .into(),
             ReplaceNode::new(
                 Some(&"b"),
-                TreePath::start_at(3, vec![0, 1]),
+                TreePath::new(vec![0, 1]),
                 &i(vec![], vec![])
             )
             .into(),
@@ -169,7 +169,7 @@ fn add_children() {
         dbg!(diff(&old, &new)),
         vec![AppendChildren::new(
             &"div",
-            TreePath::start_at(0, vec![0]),
+            TreePath::new(vec![0]),
             vec![&html_element("new", vec![], vec![])]
         )
         .into()],
@@ -185,7 +185,7 @@ fn add_attributes() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            TreePath::start_at(0, vec![0]),
+            TreePath::new(vec![0]),
             vec![&id("hello")]
         )
         .into()],
@@ -199,7 +199,7 @@ fn add_attributes() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            TreePath::start_at(0, vec![0]),
+            TreePath::new(vec![0]),
             vec![&id("hello")]
         )
         .into()],
@@ -215,7 +215,7 @@ fn remove_attributes() {
         diff(&old, &new),
         vec![RemoveAttributes::new(
             &"div",
-            TreePath::start_at(0, vec![0]),
+            TreePath::new(vec![0]),
             vec![&id("hey-there")]
         )
         .into()],
@@ -232,7 +232,7 @@ fn change_attribute() {
         diff(&old, &new),
         vec![AddAttributes::new(
             &"div",
-            TreePath::start_at(0, vec![0]),
+            TreePath::new(vec![0]),
             vec![&id("changed")]
         )
         .into()],
@@ -249,7 +249,7 @@ fn replace_text_node() {
         diff(&old, &new),
         vec![ChangeText::new(
             &Text::new("Old"),
-            TreePath::start_at(0, vec![0]),
+            TreePath::new(vec![0]),
             &Text::new("New")
         )
         .into()],

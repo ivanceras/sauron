@@ -114,19 +114,19 @@ fn test1() {
         vec![
             ChangeText::new(
                 &Text::new("1"),
-                TreePath::start_at(20, vec![0, 1, 0, 0, 1, 0, 0,]),
+                TreePath::new(vec![0, 1, 0, 0, 1, 0, 0,]),
                 &Text::new("0")
             )
             .into(),
             ChangeText::new(
                 &Text::new("2"),
-                TreePath::start_at(26, vec![0, 1, 0, 0, 2, 0, 0,]),
+                TreePath::new(vec![0, 1, 0, 0, 2, 0, 0,]),
                 &Text::new("3")
             )
             .into(),
             InsertNode::new(
                 Some(&"div"),
-                TreePath::start_at(24, vec![0, 1, 0, 0, 2,]),
+                TreePath::new(vec![0, 1, 0, 0, 2,]),
                 &div(
                     vec![
                         class("grid__number__line"),
@@ -149,7 +149,7 @@ fn test1() {
             .into(),
             InsertNode::new(
                 Some(&"div"),
-                TreePath::start_at(24, vec![0, 1, 0, 0, 2,]),
+                TreePath::new(vec![0, 1, 0, 0, 2,]),
                 &div(
                     vec![
                         class("grid__number__line"),
@@ -165,14 +165,11 @@ fn test1() {
                 )
             )
             .into(),
-            RemoveNode::new(
-                Some(&"div"),
-                TreePath::start_at(6, vec![0, 1, 0, 0, 0,]),
-            )
-            .into(),
+            RemoveNode::new(Some(&"div"), TreePath::new(vec![0, 1, 0, 0, 0,]),)
+                .into(),
             ChangeText::new(
                 &Text::new("line: 0, column: 0"),
-                TreePath::start_at(37, vec![0, 1, 0, 1, 0,]),
+                TreePath::new(vec![0, 1, 0, 1, 0,]),
                 &Text::new("line: 1, column: 0")
             )
             .into(),
