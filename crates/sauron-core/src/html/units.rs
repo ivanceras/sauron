@@ -12,7 +12,17 @@ macro_rules! declare_units{
             pub fn $name<V>(v: V) -> String
             where V: Into<Value>,
                   {
-                      format!("{}{}", v.into(), stringify!($name))
+                      let value = v.into();
+                      match value{
+                          Value::Vec(values) => {
+                              values.into_iter()
+                                  .map(|v|format!("{}{}",Into::<Value>::into(v), stringify!($name)))
+                                  .collect::<Vec<_>>().join(" ")
+                          }
+                          _ => {
+                                format!("{}{}", Into::<Value>::into(value), stringify!($name))
+                          }
+                        }
                   }
         )*
     };
@@ -27,7 +37,17 @@ macro_rules! declare_units{
             pub fn $name<V>(v: V) -> String
             where V: Into<Value>,
                   {
-                      format!("{}{}", v.into(), $unit)
+                      let value = v.into();
+                      match value{
+                          Value::Vec(values) => {
+                              values.into_iter()
+                                  .map(|v|format!("{}{}",Into::<Value>::into(v), $unit))
+                                  .collect::<Vec<_>>().join(" ")
+                          }
+                          _ => {
+                                format!("{}{}", Into::<Value>::into(value), $unit)
+                          }
+                        }
                   }
         )*
     }
@@ -85,6 +105,8 @@ mod tests {
     #[test]
     fn test_units() {
         assert_eq!(px(1), "1px");
+        assert_eq!(px(-2), "-2px");
+        assert_eq!(px([0, -2, 4]), "0px -2px 4px");
         assert_eq!(mm(1), "1mm");
         assert_eq!(cm(2), "2cm");
         assert_eq!(pt(5), "5pt");
