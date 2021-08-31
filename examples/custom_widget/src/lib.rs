@@ -6,11 +6,12 @@ use sauron::prelude::*;
 use sauron::{Application, Cmd, Node};
 use std::cell::RefCell;
 use std::marker::PhantomData;
+use std::rc::Rc;
 
 mod date_time;
 
 pub struct Context<COMP, MSG, CMSG> {
-    components: Vec<COMP>,
+    components: Vec<Rc<RefCell<COMP>>>,
     _phantom_msg: PhantomData<MSG>,
     _phantom_cmsg: PhantomData<CMSG>,
 }
@@ -32,36 +33,16 @@ where
     /// simultaneously save the component into context for the duration until the next update loop
     fn map_view<F>(&mut self, mapper: F, component: COMP) -> Node<MSG>
     where
-        F: Fn(usize, CMSG) -> MSG + 'static,
+        F: Fn(Rc<RefCell<COMP>>, CMSG) -> MSG + 'static,
     {
-        let component_id = self.components.len();
-        log::trace!("component_id: {}", component_id);
+        let component = Rc::new(RefCell::new(component));
+        let component_clone = component.clone();
         let view = component
+            .borrow()
             .view()
-            .map_msg(move |cmsg| mapper(component_id, cmsg));
+            .map_msg(move |cmsg| mapper(component_clone.clone(), cmsg));
         self.components.push(component);
         view
-    }
-
-    fn update_component_with_id<F>(
-        &mut self,
-        comp_id: usize,
-        cmsg: CMSG,
-        mapper: F,
-    ) -> Effects<MSG, ()>
-    where
-        F: Fn(CMSG) -> MSG + 'static,
-    {
-        self.components
-            .get_mut(comp_id)
-            .expect("component not found")
-            .update(cmsg)
-            .localize(mapper)
-    }
-
-    /// resets the components
-    fn clear(&mut self) {
-        self.components.clear();
     }
 }
 
@@ -70,7 +51,7 @@ pub enum Msg {
     Increment,
     Decrement,
     Mount(web_sys::Node),
-    DateTimeMsg(usize, date_time::Msg),
+    DateTimeMsg(Rc<RefCell<DateTimeWidget<Msg>>>, date_time::Msg),
     DateTimeChange(String),
 }
 
@@ -94,8 +75,6 @@ impl Application<Msg> for App {
     }
     fn view(&self) -> Node<Msg> {
         let mut context = self.context.borrow_mut();
-        // we clear the components here as stateless components are recreated at every view call.
-        context.clear();
         div(
             vec![on_mount(|me| Msg::Mount(me.target_node))],
             vec![
@@ -146,16 +125,12 @@ impl Application<Msg> for App {
                 log::trace!("app is mounted to {:?}", target_node);
                 Cmd::none()
             }
-            // this is only here for the purpose of mounting
-            // the date time widget.
-            // We want the date-time widget to have it's own lifecycle
-            Msg::DateTimeMsg(comp_id, dmsg) => {
-                let mut context = self.context.borrow_mut();
-                let effects = context.update_component_with_id(
-                    comp_id,
-                    dmsg,
-                    move |dmsg| Msg::DateTimeMsg(comp_id, dmsg),
-                );
+            Msg::DateTimeMsg(component, dmsg) => {
+                let component_clone = component.clone();
+                let effects =
+                    component.borrow_mut().update(dmsg).localize(move |dmsg| {
+                        Msg::DateTimeMsg(component_clone.clone(), dmsg)
+                    });
                 Cmd::from(effects)
             }
             Msg::DateTimeChange(date_time) => {

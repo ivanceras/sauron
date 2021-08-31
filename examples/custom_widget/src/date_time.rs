@@ -11,7 +11,7 @@ pub enum Msg {
     BtnClick,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct DateTimeWidget<PMSG> {
     date: String,
     time: String,
