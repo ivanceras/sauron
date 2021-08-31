@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.43.0
 - Add `Effects::append_local` to easily chain local Msg into existing effects.
 - Remove anything that has to do with `node_idx` since `mt-dom` don't use it anymore
     - We are now using `TreePath` which provides a better way to traverse the DOM tree.
