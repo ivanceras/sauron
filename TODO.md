@@ -152,6 +152,8 @@
 - [ ] Revisit and use style_name identifier in usage of jss in examples
 
 ## Bug
-- [ ] When 2 nodes with multiple similar keys, multiple replace node patch is generated. But it couldn't seem to find the correct target element.
+- [X] When 2 nodes with multiple similar keys, multiple replace node patch is generated. But it couldn't seem to find the correct target element.
      or the target element has no parent, therefore can not replace/insert the node.
-- [ ] Add more test for recycled nodes with keys
+     - This is solved by getting the type_id of the closure.
+- [X] Add more test for recycled nodes with keys
+- [ ] When 2 text are next to each other, the second text will become a comment
