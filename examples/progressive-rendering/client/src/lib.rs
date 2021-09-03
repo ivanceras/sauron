@@ -77,7 +77,7 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn init(&self) -> Cmd<Self, Msg> {
+    fn init(&mut self) -> Cmd<Self, Msg> {
         Cmd::none()
     }
 

@@ -1,4 +1,5 @@
 use client::{App, Msg};
+use sauron::jss::jss;
 use sauron::prelude::*;
 
 /// We are creating an index page.
