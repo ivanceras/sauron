@@ -5,17 +5,17 @@
 /// Effects contains 2 types of Messages. The local messages which will be executed in its
 /// own component on the next update loop. The other type is the external effects which are Messages
 /// that are sent to the parent Component in response to an event that has been triggerred.
-pub struct Effects<MSG, PMSG> {
+pub struct Effects<MSG, XMSG> {
     /// Messages that will be executed locally in the Component
     pub local: Vec<MSG>,
     /// effects that will be executed on the parent Component that instantiate
     /// this component
-    pub external: Vec<PMSG>,
+    pub external: Vec<XMSG>,
 }
 
-impl<MSG, PMSG> Effects<MSG, PMSG> {
+impl<MSG, XMSG> Effects<MSG, XMSG> {
     /// create a new Effects with local and external expects respectively
-    pub fn new(local: Vec<MSG>, external: Vec<PMSG>) -> Self {
+    pub fn new(local: Vec<MSG>, external: Vec<XMSG>) -> Self {
         Self { local, external }
     }
 
@@ -27,7 +27,7 @@ impl<MSG, PMSG> Effects<MSG, PMSG> {
         }
     }
     /// Create an Effects with extern messages that will be executed on the parent Component
-    pub fn with_external(external: Vec<PMSG>) -> Self {
+    pub fn with_external(external: Vec<XMSG>) -> Self {
         Self {
             local: vec![],
             external,
@@ -46,7 +46,7 @@ impl<MSG, PMSG> Effects<MSG, PMSG> {
     /// MSG2 with the use of the mapping function `f`.
     ///
     /// The external messages stays the same.
-    pub fn map_msg<F, MSG2>(self, f: F) -> Effects<MSG2, PMSG>
+    pub fn map_msg<F, MSG2>(self, f: F) -> Effects<MSG2, XMSG>
     where
         F: Fn(MSG) -> MSG2 + 'static,
     {
@@ -62,9 +62,9 @@ impl<MSG, PMSG> Effects<MSG, PMSG> {
     /// and mapping them with function `f` such that they can be of the same type as local effects
     /// them merge them together into local effects.
     ///
-    pub fn localize<F>(self, f: F) -> Effects<PMSG, ()>
+    pub fn localize<F>(self, f: F) -> Effects<XMSG, ()>
     where
-        F: Fn(MSG) -> PMSG + 'static,
+        F: Fn(MSG) -> XMSG + 'static,
     {
         let Effects { local, external } = self;
 
