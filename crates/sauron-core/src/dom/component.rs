@@ -9,10 +9,10 @@ mod effects;
 /// follow ups and effects. Follow ups are executed on the next
 /// update loop of this component, while the effects are executed
 /// on the parent component that mounts it.
-pub trait Component<MSG, PMSG> {
+pub trait Component<MSG, XMSG> {
     /// Update the model of this component and return
     /// follow up and/or effects that will be executed on the next update loop
-    fn update(&mut self, msg: MSG) -> Effects<MSG, PMSG>;
+    fn update(&mut self, msg: MSG) -> Effects<MSG, XMSG>;
 
     /// the view of the component
     fn view(&self) -> Node<MSG>;
@@ -30,15 +30,15 @@ pub trait Component<MSG, PMSG> {
 ///
 /// The view in the container is set by the parent component. The container itself
 /// can not listen to events on its view
-pub trait Container<MSG, PMSG> {
+pub trait Container<MSG, XMSG> {
     /// update the model of this component and return follow ups and/or effects
     /// that will be executed on the next update loop.
-    fn update(&mut self, msg: MSG) -> Effects<MSG, PMSG>;
+    fn update(&mut self, msg: MSG) -> Effects<MSG, XMSG>;
 
     /// The container presents the children passed to it from the parent.
     /// The container can decide how to display the children components here, but
     /// the children nodes here can not trigger Msg that can update this component
-    fn view(&self) -> Node<PMSG>;
+    fn view(&self) -> Node<XMSG>;
 
     /// optionally a Container can specify its own css style
     fn style(&self) -> String {

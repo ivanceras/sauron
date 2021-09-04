@@ -16,13 +16,13 @@ pub enum Msg {
     Interacted(Interaction),
 }
 
-pub struct Field<PMSG> {
+pub struct Field<XMSG> {
     field_clicks: u32,
     field_name: String,
-    on_interact: Vec<Box<dyn Fn(Interaction) -> PMSG>>,
+    on_interact: Vec<Box<dyn Fn(Interaction) -> XMSG>>,
 }
 
-impl<PMSG> Field<PMSG> {
+impl<XMSG> Field<XMSG> {
     pub fn new(field_name: String) -> Self {
         Field {
             field_clicks: 0,
@@ -33,14 +33,14 @@ impl<PMSG> Field<PMSG> {
 
     pub fn add_interaction_listener(
         &mut self,
-        listener: Box<dyn Fn(Interaction) -> PMSG>,
+        listener: Box<dyn Fn(Interaction) -> XMSG>,
     ) {
         self.on_interact.push(listener);
     }
 }
 
-impl<PMSG> Component<Msg, PMSG> for Field<PMSG> {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, PMSG> {
+impl<XMSG> Component<Msg, XMSG> for Field<XMSG> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::FieldClick => {
                 self.field_clicks += 1;

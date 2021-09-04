@@ -12,17 +12,17 @@ pub enum Msg {
 }
 
 #[derive(Debug, Clone)]
-pub struct DateTimeWidget<PMSG> {
+pub struct DateTimeWidget<XMSG> {
     date: String,
     time: String,
     cnt: i32,
     mounted: bool,
-    time_change_listener: Vec<Callback<String, PMSG>>,
+    time_change_listener: Vec<Callback<String, XMSG>>,
 }
 
-impl<PMSG> DateTimeWidget<PMSG>
+impl<XMSG> DateTimeWidget<XMSG>
 where
-    PMSG: 'static,
+    XMSG: 'static,
 {
     pub fn new(date: &str, time: &str, mounted: bool) -> Self {
         DateTimeWidget {
@@ -40,18 +40,18 @@ where
 
     pub fn on_date_time_change<F>(mut self, f: F) -> Self
     where
-        F: Fn(String) -> PMSG + 'static,
+        F: Fn(String) -> XMSG + 'static,
     {
         self.time_change_listener.push(Callback::from(f));
         self
     }
 }
 
-impl<PMSG> Component<Msg, PMSG> for DateTimeWidget<PMSG>
+impl<XMSG> Component<Msg, XMSG> for DateTimeWidget<XMSG>
 where
-    PMSG: Clone + Debug + 'static,
+    XMSG: Clone + Debug + 'static,
 {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, PMSG> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
