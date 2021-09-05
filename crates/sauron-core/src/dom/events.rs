@@ -86,11 +86,18 @@ where
     on("scroll", move |event: Event| {
         let web_event = event.as_web().expect("must be a web event");
         let target = web_event.target().expect("can't get target");
-        let element: &web_sys::Element =
-            target.dyn_ref().expect("Cant cast to Element");
-        let scroll_top = element.scroll_top();
-        let scroll_left = element.scroll_left();
-        f((scroll_top, scroll_left))
+        if let Some(element) = target.dyn_ref::<web_sys::Element>() {
+            let scroll_top = element.scroll_top();
+            let scroll_left = element.scroll_left();
+            f((scroll_top, scroll_left))
+        } else {
+            let window = crate::window();
+            let scroll_top =
+                window.page_y_offset().expect("must get page offset") as i32;
+            let scroll_left =
+                window.page_x_offset().expect("must get page offset") as i32;
+            f((scroll_top, scroll_left))
+        }
     })
 }
 

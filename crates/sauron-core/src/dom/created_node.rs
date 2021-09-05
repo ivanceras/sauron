@@ -139,6 +139,7 @@ impl CreatedNode {
         if velem.is_focused() {
             *focused_node = Some(element.clone().unchecked_into());
             log::trace!("element is focused..{:?}", focused_node);
+            Self::set_element_focus(&element);
         }
 
         let mut closures = ActiveClosure::new();

@@ -150,6 +150,7 @@
 - [ ] Enumerate the exported modules and structs in prelude instead of just using glob(ie: *).
 - [X] Fix the data-viewer example to use Components on the views rather than Application
 - [ ] Revisit and use style_name identifier in usage of jss in examples
+- [ ] Move `html::units` to `jss` crate
 
 ## Bug
 - [X] When 2 nodes with multiple similar keys, multiple replace node patch is generated. But it couldn't seem to find the correct target element.
