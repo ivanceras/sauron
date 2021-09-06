@@ -97,14 +97,16 @@
     - Created a fast lookup for `is_self_closing(tag)` amd `tag_namespace`.
 - [ ] old elements that has an event attached has no way of knowing the equivalent new element has the same event attached as their callbacks are clone of closures inside of Rc
     and no 2 closures are the same even if the have the same code.
-- [ ] add a conditional function for event attribute that if any of the other attribute is changed the event will have to be remove and re-attach.
+- ~~[ ] add a conditional function for event attribute that if any of the other attribute is changed the event will have to be remove and re-attach.
     - This is to mitigate the aggressive recycling of nodes which we skipp diffing for event listeners for performance reasons, as it is impractical to
-        reattach event listener at every render cycle.
-- [ ] Remove NodeIdx traversal and also remove NodeIdx in `mt-dom` TreePath, as traversal path prove to be correct.
+        reattach event listener at every render cycle.~~
+    - This has been solved by using the `TypeId` of the closure of the callback.
+- [X] Remove NodeIdx traversal and also remove NodeIdx in `mt-dom` TreePath, as traversal path prove to be correct.
 - [X] Maybe Remove the style functionality as Components and Applications can manipulate the style in the document directly
     - [X] Change style that it returns only a `String` instead of `Vec<String>`.
     - [X] The injected style shall have a class name equal to the the type_id of the `APP`.
 - [X] Add `maybe_attr(name: &str, value: Option<Value>)` to set the attribute if there is a value. empty otherwise.
+- [ ] Centralize the handling of attributes tha has a state such as `value`, `checked`,.
 
 
 

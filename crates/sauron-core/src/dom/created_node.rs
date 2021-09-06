@@ -194,6 +194,7 @@ impl CreatedNode {
     }
 
     /// set the element attribute
+    #[track_caller]
     pub fn set_element_attribute<DSP, MSG>(
         program: &DSP,
         closures: &mut ActiveClosure,
@@ -347,9 +348,6 @@ impl CreatedNode {
             } else {
                 let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
                     create_closure_wrap(program, listener);
-                //TODO: Remove the old event listener
-                // with the same event_str name for a case
-                // where a node is recycled but with different event callback.
                 current_elm
                     .add_event_listener_with_callback(
                         event_str,
