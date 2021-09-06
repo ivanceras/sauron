@@ -166,7 +166,13 @@ where
     fn from(effects: Effects<MSG, ()>) -> Self {
         // we can safely ignore the effects here
         // as there is no content on it.
-        let Effects { local, external: _ } = effects;
-        Cmd::batch_msg(local)
+        let Effects {
+            local,
+            external: _,
+            modifier,
+        } = effects;
+        let mut cmd = Cmd::batch_msg(local);
+        cmd.modifier = modifier;
+        cmd
     }
 }

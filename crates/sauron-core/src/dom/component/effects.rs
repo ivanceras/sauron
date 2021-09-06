@@ -1,3 +1,5 @@
+use crate::dom::cmd::Modifier;
+
 /// Effects are a way for component to execute subsequent updates based on certain conditions.
 /// This can be used for doing animation and incremental changes to the view to provide an effect
 /// of transition or animation.
@@ -11,12 +13,17 @@ pub struct Effects<MSG, XMSG> {
     /// effects that will be executed on the parent Component that instantiate
     /// this component
     pub external: Vec<XMSG>,
+    pub(crate) modifier: Modifier,
 }
 
 impl<MSG, XMSG> Effects<MSG, XMSG> {
     /// create a new Effects with local and external expects respectively
     pub fn new(local: Vec<MSG>, external: Vec<XMSG>) -> Self {
-        Self { local, external }
+        Self {
+            local,
+            external,
+            modifier: Modifier::default(),
+        }
     }
 
     /// Create an Effects with  local messages that will be executed on the next update loop on this Component
@@ -24,6 +31,7 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
         Self {
             local,
             external: vec![],
+            modifier: Modifier::default(),
         }
     }
     /// Create an Effects with extern messages that will be executed on the parent Component
@@ -31,6 +39,7 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
         Self {
             local: vec![],
             external,
+            modifier: Modifier::default(),
         }
     }
 
@@ -39,6 +48,7 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
         Self {
             local: vec![],
             external: vec![],
+            modifier: Modifier::default(),
         }
     }
 
@@ -50,11 +60,16 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
     where
         F: Fn(MSG) -> MSG2 + 'static,
     {
-        let Effects { local, external } = self;
+        let Effects {
+            local,
+            external,
+            modifier,
+        } = self;
 
         Effects {
             local: local.into_iter().map(f).collect(),
             external,
+            modifier,
         }
     }
 
@@ -66,7 +81,11 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
     where
         F: Fn(MSG) -> XMSG + 'static,
     {
-        let Effects { local, external } = self;
+        let Effects {
+            local,
+            external,
+            modifier,
+        } = self;
 
         Effects {
             local: external
@@ -74,12 +93,25 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
                 .chain(local.into_iter().map(f))
                 .collect(),
             external: vec![],
+            modifier,
         }
     }
 
     /// Append this msgs to the local effects
     pub fn append_local(mut self, local: Vec<MSG>) -> Self {
         self.local.extend(local);
+        self
+    }
+
+    /// Modify the Effect such that it will not do an update on the view when it is executed
+    pub fn no_render(mut self) -> Self {
+        self.modifier.should_update_view = false;
+        self
+    }
+
+    /// Modify the Effect such that it will log measurement when it is executed
+    pub fn measure(mut self) -> Self {
+        self.modifier.log_measurements = true;
         self
     }
 }
