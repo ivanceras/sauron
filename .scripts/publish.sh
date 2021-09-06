@@ -6,7 +6,7 @@
 
 set -ev
 cd crates/sauron-core && cargo publish && cd - && \
-echo "sleeping for 5s" && sleep 5 &&\
+echo "sleeping for 10s" && sleep 10 &&\
 cd crates/sauron-node-macro && cargo publish && cd - &&
-echo "sleeping for 5s" && sleep 5 &&\
+echo "sleeping for 10s" && sleep 10 &&\
 cargo publish
