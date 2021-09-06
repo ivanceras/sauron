@@ -75,6 +75,7 @@ where
         match self {
             Node::Element(element) => Node::Element(element.map_callback(cb)),
             Node::Text(text) => Node::Text(text),
+            Node::Comment(comment) => Node::Comment(comment),
         }
     }
 

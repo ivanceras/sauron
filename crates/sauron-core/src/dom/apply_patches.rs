@@ -163,7 +163,7 @@ fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<usize> {
     let child_node_count = children.length();
     for i in 0..child_node_count {
         let child_node = children.item(i).expect("Expecting a child node");
-        if let Node::ELEMENT_NODE = child_node.node_type() {
+        if child_node.node_type() == Node::ELEMENT_NODE {
             let child_element = child_node.unchecked_ref::<Element>();
             let child_data_vdom_id =
                 get_node_descendant_data_vdom_id(child_element);
@@ -356,7 +356,7 @@ where
                 }
             }
 
-            if element.node_type() != Node::TEXT_NODE {
+            if element.node_type() == Node::ELEMENT_NODE {
                 remove_event_listeners(element, old_closures)?;
             }
             element
@@ -376,16 +376,12 @@ where
             let element: &Element = node.unchecked_ref();
             let parent_node =
                 element.parent_node().expect("must have a parent node");
-            if element.node_type() == Node::COMMENT_NODE {
-                //do not remove comment nodes
-            } else {
-                parent_node
-                    .remove_child(element)
-                    .expect("must remove target node");
-                if element.node_type() != Node::TEXT_NODE {
-                    let element: &Element = node.unchecked_ref();
-                    remove_event_listeners(element, old_closures)?;
-                }
+            parent_node
+                .remove_child(element)
+                .expect("must remove target node");
+            if element.node_type() == Node::ELEMENT_NODE {
+                let element: &Element = node.unchecked_ref();
+                remove_event_listeners(element, old_closures)?;
             }
             Ok(active_closures)
         }
@@ -409,6 +405,10 @@ where
         }
         Patch::ChangeText(ct) => {
             node.set_node_value(Some(&ct.new.text));
+            Ok(active_closures)
+        }
+        Patch::ChangeComment(cm) => {
+            node.set_node_value(Some(&cm.new));
             Ok(active_closures)
         }
     }

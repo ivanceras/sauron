@@ -80,6 +80,10 @@ impl CreatedNode {
                 let text_node = Self::create_text_node(&txt.text);
                 CreatedNode::without_closures(text_node.unchecked_into())
             }
+            crate::Node::Comment(comment) => {
+                let comment_node = crate::document().create_comment(comment);
+                CreatedNode::without_closures(comment_node.unchecked_into())
+            }
             crate::Node::Element(element_node) => {
                 Self::create_element_node(program, element_node, focused_node)
             }
@@ -151,51 +155,21 @@ impl CreatedNode {
             &velem.get_attributes().iter().collect::<Vec<_>>(),
         );
 
-        let mut previous_node_was_text = false;
-
         for child in velem.get_children().iter() {
-            match child {
-                crate::Node::Text(txt) => {
-                    let current_node: &web_sys::Node = element.as_ref();
+            if child.is_safe_html() {
+                let child_text = child.unwrap_text();
+                // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
+                element
+                    .insert_adjacent_html("beforeend", &child_text.text)
+                    .expect("must not error");
+            } else {
+                let created_child =
+                    Self::create_dom_node(program, child, focused_node);
 
-                    // We ensure that the text siblings are patched by preventing the browser from merging
-                    // neighboring text nodes. Originally inspired by some of React's work from 2016.
-                    //  -> https://reactjs.org/blog/2016/04/07/react-v15.html#major-changes
-                    //  -> https://github.com/facebook/react/pull/5753
-                    //
-                    // `mordor` one does not simply walk into mordor
-                    if previous_node_was_text {
-                        let separator = document.create_comment("mordor");
-                        current_node
-                            .append_child(separator.as_ref())
-                            .expect("Unable to append child");
-                    }
-
-                    if txt.safe_html {
-                        // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
-                        element
-                            .insert_adjacent_html("beforeend", &txt.text)
-                            .expect("must not error");
-                    } else {
-                        let text_node = Self::create_text_node(&txt.text);
-                        current_node
-                            .append_child(&text_node)
-                            .expect("Unable to append text node");
-                    }
-
-                    previous_node_was_text = true;
-                }
-                crate::Node::Element(_element_node) => {
-                    previous_node_was_text = false;
-
-                    let created_child =
-                        Self::create_dom_node(program, child, focused_node);
-                    closures.extend(created_child.closures);
-
-                    element
-                        .append_child(&created_child.node)
-                        .expect("Unable to append element node");
-                }
+                closures.extend(created_child.closures);
+                element
+                    .append_child(&created_child.node)
+                    .expect("Unable to append element node");
             }
         }
 

@@ -70,6 +70,9 @@ impl<MSG> Render for Node<MSG> {
             Node::Text(text) => {
                 write!(buffer, "{}", &text.text)
             }
+            Node::Comment(comment) => {
+                write!(buffer, "<!--{}-->", comment)
+            }
         }
     }
 }
@@ -195,6 +198,27 @@ impl<MSG> Render for Attribute<MSG> {
 mod test {
     use super::*;
     use crate::prelude::*;
+
+    #[test]
+    fn test_render_comments() {
+        let view: Node<()> =
+            div(vec![], vec![comment("comment1"), comment("comment2")]);
+
+        assert_eq!(
+            view.render_to_string(),
+            "<div><!--comment1--><!--comment2--></div>"
+        );
+    }
+
+    #[test]
+    fn test_render_text_siblings_should_be_separated_with_comments() {
+        let view: Node<()> = div(vec![], vec![text("text1"), text("text2")]);
+
+        assert_eq!(
+            view.render_to_string(),
+            "<div>text1<!--separator-->text2</div>"
+        );
+    }
 
     #[test]
     fn test_render_classes() {
