@@ -6,28 +6,28 @@ use crate::{
     html::attributes::{AttributeValue, SegregatedAttributes, Special},
     Attribute, Event,
 };
-use once_cell::sync::OnceCell;
-use std::{collections::HashMap, sync::Mutex};
+use std::cell::Cell;
+use std::collections::HashMap;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
     self, Element, EventTarget, HtmlElement, HtmlInputElement,
     HtmlTextAreaElement, Node, Text,
 };
 
+thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
+
 /// This is the value of the data-sauron-vdom-id.
 /// Used to uniquely identify elements that contain closures so that the DomUpdater can
 /// look them up by their unique id.
 /// When the DomUpdater sees that the element no longer exists it will drop all of it's
 /// Rc'd Closures for those events.
-static DATA_SAURON_VDOM_ID_VALUE: OnceCell<Mutex<u32>> = OnceCell::new();
-
-fn create_unique_identifier() -> u32 {
-    let mut elem_unique_id = DATA_SAURON_VDOM_ID_VALUE
-        .get_or_init(|| Mutex::new(0))
-        .lock()
-        .expect("Unable to obtain lock");
-    *elem_unique_id += 1;
-    *elem_unique_id
+fn create_unique_identifier() -> usize {
+    let id = NODE_ID_COUNTER.with(|x| {
+        let tmp = x.get();
+        x.set(tmp + 1);
+        tmp
+    });
+    id
 }
 
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -39,7 +39,7 @@ pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
 /// attached to.
 ///
 pub type ActiveClosure =
-    HashMap<u32, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
+    HashMap<usize, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
 
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.

@@ -145,7 +145,7 @@ fn find_all_nodes_by_path(
 
 /// Get the "data-sauron-vdom-id" of all the desendent of this node including itself
 /// This is needed to free-up the closure that was attached ActiveClosure manually
-fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<u32> {
+fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<usize> {
     let mut data_vdom_id = vec![];
 
     // TODO: there should be a better way to get the node-id back
@@ -154,7 +154,7 @@ fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<u32> {
         root_element.get_attribute(created_node::DATA_VDOM_ID)
     {
         let vdom_id = vdom_id_str
-            .parse::<u32>()
+            .parse::<usize>()
             .expect("unable to parse sauron_vdom-id");
         data_vdom_id.push(vdom_id);
     }
@@ -239,6 +239,7 @@ fn remove_event_listener_with_name(
 ///
 /// Note: a mutable root_node is passed here
 /// for the sole purpose of setting it when the a patch ReplaceNode at 0 is encountered.
+#[track_caller]
 fn apply_patch_to_node<DSP, MSG>(
     program: &DSP,
     root_node: &mut Node,
