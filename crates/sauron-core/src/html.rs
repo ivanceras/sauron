@@ -28,7 +28,7 @@ pub fn view_if<MSG>(flag: bool, node: Node<MSG>) -> Node<MSG> {
     if flag {
         node
     } else {
-        span(vec![], vec![])
+        comment("hidden")
     }
 }
 
