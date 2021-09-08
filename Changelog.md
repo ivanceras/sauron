@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.43.3
+- Call only measurements only when `with-measure` feature flag is enabled.
+- Use of `IntoIterator` for attributes and children of the html nodes, which allow the usage of either array or vec for a more cleaner view
+    - Improve readability on examples to array of attributes and children nodes for better readability
+- Move effects to be under `dom` module instead of under `component` module
+- increase the sleep timer to give time for crates to reflect the dep
+
+
+## 0.43.2
+- Use comment for the `view_if` instead of a blank span
+- Improve code for handling TextNodes, hacks to create comment as separator is now removed
+- Use thread_local for caching Window, Document and NodeId counter
+- Add modifier for Effects
+- Make the on_scroll work for window as well
+- Rename Generics PMSG (Parent Msg) to XMSG (External Msg)
+
+## 0.43.1
+- Fix handling of units with multiple value
+
 ## 0.43.0
 - Add `Effects::append_local` to easily chain local Msg into existing effects.
 - Remove anything that has to do with `node_idx` since `mt-dom` don't use it anymore
