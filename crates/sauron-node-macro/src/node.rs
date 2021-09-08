@@ -28,8 +28,7 @@ fn node_to_tokens(node: Node) -> TokenStream {
     let attributes = node
         .attributes
         .iter()
-        .map(|attribute| attribute_to_tokens(attribute))
-        .collect::<Vec<_>>();
+        .map(|attribute| attribute_to_tokens(attribute));
 
     let children_tokens = children_to_tokens(node.children);
 
@@ -42,7 +41,7 @@ fn node_to_tokens(node: Node) -> TokenStream {
                 #[allow(unused_braces)]
                 {
                     #children_tokens
-                    sauron::html::element_ns(Some(#namespace), #name, vec![#(#attributes),*], children, #self_closing)
+                    sauron::html::element_ns(Some(#namespace), #name, [#(#attributes),*], children, #self_closing)
                 }
             }}
         }else{
@@ -50,7 +49,7 @@ fn node_to_tokens(node: Node) -> TokenStream {
                 #[allow(unused_braces)]
                 {
                     #children_tokens
-                    sauron::html::element_ns(None, #name, vec![#(#attributes),*], children, #self_closing)
+                    sauron::html::element_ns(None, #name, [#(#attributes),*], children, #self_closing)
                 }
             }}
         }

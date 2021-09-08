@@ -54,90 +54,90 @@ pub fn index(app: &App) -> Node<Msg> {
 fn style() -> String {
     jss! {
         "body": {
-          "font-family": "'Avenir Next', 'Helvetica Neue', 'Segoe UI', 'Helvetica', 'Arial', 'sans-serif'",
-          "margin": 0,
-          "padding": 0,
+          font_family: "'Avenir Next', 'Helvetica Neue', 'Segoe UI', 'Helvetica', 'Arial', 'sans-serif'",
+          margin: 0,
+          padding: 0,
         },
 
         "header, footer": {
-          "background-color": "#FCB799",
-          "display": "flex",
-          "flex-direction": "row",
-          "justify-content": "space-between",
-          "margin": 0,
-          "padding": "1em",
-          "width": "calc(100vw - 2em)",
+          background_color: "#FCB799",
+          display: "flex",
+          flex_direction: "row",
+          justify_content: "space-between",
+          margin: 0,
+          padding: "1em",
+          width: "calc(100vw - 2em)",
         },
 
         "footer": {
-          "flex-direction": "row-reverse",
-          "position": "fixed",
-          "bottom": 0,
+          flex_direction: "row-reverse",
+          position: "fixed",
+          bottom: 0,
         },
 
         "header > section": {
-          "text-align": "right",
+          text_align: "right",
         },
 
         "header > svg": {
-          "width": "4em",
-          "height": "auto",
+          width: "4em",
+          height: "auto",
         },
 
         "header a": {
-          "display": "flex",
-          "flex-direction": "column",
-          "align-items": "center",
-          "justify-content": "center",
+          display: "flex",
+          flex_direction: "column",
+          align_items: "center",
+          justify_content: "center",
         },
 
         "h1": {
-          "margin": 0,
-          "padding": 0,
-          "font-size": "1.5em",
+          margin: 0,
+          padding: 0,
+          font_size: "1.5em",
         },
 
         "h2": {
-          "margin": 0,
-          "padding": 0,
-          "font-size": "1em",
-          "font-style": "italic",
+          margin: 0,
+          padding: 0,
+          font_size: "1em",
+          font_style: "italic",
         },
 
         ".visually-hidden": {
-          "clip": "rect(0 0 0 0)",
-          "clip-path": "inset(50%)",
-          "height": "1px",
-          "overflow": "hidden",
-          "position": "absolute",
-          "white-space": "nowrap",
-          "width": "1px",
+          clip: "rect(0 0 0 0)",
+          clip_path: "inset(50%)",
+          height: "1px",
+          overflow: "hidden",
+          position: "absolute",
+          white_space: "nowrap",
+          width: px(1),
         },
 
         "main": {
-          "padding": "2em",
-          "display": "flex",
-          "flex-direction": "column",
-          "align-items": "center",
-          "justify-content": "center",
-          "text-align": "center",
+          padding: "2em",
+          display: "flex",
+          flex_direction: "column",
+          align_items: "center",
+          justify_content: "center",
+          text_align: "center",
         },
 
         "form, form > label": {
-          "display": "flex",
-          "flex-direction": "column",
-          "font-weight": "bold",
-          "justify-content": "center",
-          "align-items": "center",
+          display: "flex",
+          flex_direction: "column",
+          font_weight: "bold",
+          justify_content: "center",
+          align_items: "center",
         },
 
         "input, button": {
-          "margin": "0.25em",
+          margin: "0.25em",
         },
 
         ".modified-name, .length": {
-          "font-weight": "bold",
-          "color": "rgb(247, 76, 0)",
+          font_weight: "bold",
+          color: "rgb(247, 76, 0)",
         },
     }
 }

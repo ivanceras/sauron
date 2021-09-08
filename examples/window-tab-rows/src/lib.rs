@@ -80,43 +80,34 @@ impl Application<Msg> for Window {
 
     fn view(&self) -> Node<Msg> {
         div(
-            vec![class("window")],
-            vec![
+            [class("window")],
+            [
                 button(
-                    vec![on_click(|_| Msg::WindowClick)],
-                    vec![text(format!(
+                    [on_click(|_| Msg::WindowClick)],
+                    [text(format!(
                         "Total window activities: {}",
                         self.window_activities
                     ))],
                 ),
                 div(
-                    vec![class("tab-list-buttons")],
-                    self.tabs
-                        .iter()
-                        .enumerate()
-                        .map(|(index, tab)| {
-                            button(
-                                vec![
-                                    class("tablink"),
-                                    styles([("background-color", &tab.color)]),
-                                    on_click(move |_| Msg::ActivateTab(index)),
-                                ],
-                                vec![text(&tab.name)],
-                            )
-                        })
-                        .collect::<Vec<Node<Msg>>>(),
+                    [class("tab-list-buttons")],
+                    self.tabs.iter().enumerate().map(|(index, tab)| {
+                        button(
+                            [
+                                class("tablink"),
+                                styles([("background-color", &tab.color)]),
+                                on_click(move |_| Msg::ActivateTab(index)),
+                            ],
+                            [text(&tab.name)],
+                        )
+                    }),
                 ),
                 div(
-                    vec![class("tab-list")],
-                    self.tabs
-                        .iter()
-                        .enumerate()
-                        .map(|(index, tab)| {
-                            Tab::view(tab).map_msg(move |tab_msg| {
-                                Msg::TabMsg(index, tab_msg)
-                            })
-                        })
-                        .collect::<Vec<Node<Msg>>>(),
+                    [class("tab-list")],
+                    self.tabs.iter().enumerate().map(|(index, tab)| {
+                        Tab::view(tab)
+                            .map_msg(move |tab_msg| Msg::TabMsg(index, tab_msg))
+                    }),
                 ),
             ],
         )

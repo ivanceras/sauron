@@ -125,7 +125,7 @@ impl Component<Msg, ()> for DataView {
     /// A grid of 2x2  containing 4 major parts of the table
     fn view(&self) -> Node<Msg> {
         main(
-            vec![
+            [
                 class("data_view grid"),
                 styles([
                     ("width", px(self.allocated_width - 40)),
@@ -135,30 +135,30 @@ impl Component<Msg, ()> for DataView {
                 // another table
                 key(format!("data_view_{}", self.table_name.name)),
             ],
-            vec![
+            [
                 // TOP-LEFT: Content 1
                 section(
-                    vec![class(
+                    [class(
                         "data_view__spacer__frozen_column_names__immovable_frozen_columns",
                     )],
-                    vec![
+                    [
                         div(
-                            vec![class(
+                            [class(
                                 "data_view__spacer__frozen_column_names flex-row",
                             )],
-                            vec![
+                            [
                                 div(
-                                    vec![class(
+                                    [class(
                                         "data_view__spacer flex-column-reverse",
                                     )],
-                                    vec![div(
-                                        vec![class(
+                                    [div(
+                                        [class(
                                             "data_view__spacer__multi_selector",
                                         )],
-                                        vec![selector_box(
+                                        [selector_box(
                                             false,
-                                            vec![],
-                                            vec![],
+                                            [],
+                                            [],
                                         )],
                                     )],
                                 ),
@@ -171,22 +171,22 @@ impl Component<Msg, ()> for DataView {
                 ),
                 // TOP-RIGHT: Content 2
                 section(
-                    vec![
+                    [
                         class("data_view__normal_column_names__frozen_rows"),
-                        styles(vec![
+                        styles([
                             ("width", px(self.calculate_normal_rows_width())),
                             ("overflow-x", "hidden".to_string()),
                         ]),
                     ],
-                    vec![section(
-                        vec![
+                    [section(
+                        [
                             class("normal_column_names__frozen_rows"),
-                            styles(vec![(
+                            styles([(
                                 "margin-left",
                                 px(-self.scroll_left),
                             )]),
                         ],
-                        vec![
+                        [
                             // can move left and right
                             self.view_normal_column_names(),
                             self.view_frozen_rows(),
@@ -196,14 +196,14 @@ impl Component<Msg, ()> for DataView {
                 // BOTTOM-LEFT: Content 3
                 // needed to overflow hide the frozen columns when scrolled up and down
                 section(
-                    vec![
+                    [
                         class("data_view__frozen_columns_container"),
-                        styles(vec![
+                        styles([
                             ("height", px(self.calculate_normal_rows_height())),
                             ("overflow-y", "hidden".to_string()),
                         ]),
                     ],
-                    vec![self.view_frozen_columns()],
+                    [self.view_frozen_columns()],
                 ),
                 // BOTTOM-RIGHT: Content 4
                 self.view_normal_rows(),
@@ -259,6 +259,7 @@ impl DataView {
 
     ///TODO: Make this ergonomic, something that is similar
     ///to init in Application, but designed for Component
+    /// perhaps subscription?
     pub fn init() -> Cmd<crate::App, crate::AppMsg> {
         debug!("Init in  data view for column resize");
         Window::add_event_listeners(vec![
@@ -463,9 +464,9 @@ impl DataView {
     fn view_frozen_columns(&self) -> Node<Msg> {
         // can move up and down
         ol(
-            vec![
+            [
                 class("data_view__frozen_columns"),
-                styles(vec![("margin-top", px(-self.scroll_top))]),
+                styles([("margin-top", px(-self.scroll_top))]),
             ],
             self.page_views
                 .iter()
@@ -485,7 +486,7 @@ impl DataView {
         // absolutely immovable frozen column and row
         // can not move in any direction
         header(
-            vec![class("data_view__frozen_column_names flex-row")],
+            [class("data_view__frozen_column_names flex-row")],
             self.column_views
                 .iter()
                 .enumerate()
@@ -501,7 +502,7 @@ impl DataView {
     /// can move left and right and always follows the alignment of the column of the normal rows
     fn view_normal_column_names(&self) -> Node<Msg> {
         header(
-            vec![class("data_view__normal_column_names flex-row")],
+            [class("data_view__normal_column_names flex-row")],
             self.column_views
                 .iter()
                 .enumerate()
@@ -519,13 +520,13 @@ impl DataView {
         column: &ColumnView,
     ) -> Node<Msg> {
         div(
-            vec![class("column_view flex-row")],
-            vec![
+            [class("column_view flex-row")],
+            [
                 column.view().map_msg(move |column_msg| {
                     Msg::ColumnMsg(index, column_msg)
                 }),
                 div(
-                    vec![
+                    [
                         class("column_view__grip column_view__grip--right"),
                         styles([("width", px(ColumnView::grip_width()))]),
                         on_mousedown(move |event| {
@@ -537,7 +538,7 @@ impl DataView {
                             )
                         }),
                     ],
-                    vec![],
+                    [],
                 ),
             ],
         )
@@ -548,7 +549,7 @@ impl DataView {
     /// These are records that has its rows and columns both frozen
     fn view_immovable_rows(&self) -> Node<Msg> {
         ol(
-            vec![class("data_view__immovable_frozen_columns")],
+            [class("data_view__immovable_frozen_columns")],
             self.page_views
                 .iter()
                 .enumerate()
@@ -565,7 +566,7 @@ impl DataView {
     fn view_frozen_rows(&self) -> Node<Msg> {
         // can move left and right, but not up and down
         ol(
-            vec![class("data_view__frozen_rows flex-column")],
+            [class("data_view__frozen_rows flex-column")],
             self.page_views
                 .iter()
                 .enumerate()
@@ -582,9 +583,9 @@ impl DataView {
     fn view_normal_rows(&self) -> Node<Msg> {
         // can move: left, right, up, down
         ol(
-            vec![
+            [
                 class("data_view__normal_rows flex-column"),
-                styles(vec![
+                styles([
                     ("width", px(self.calculate_normal_rows_width())),
                     ("height", px(self.calculate_normal_rows_height())),
                 ]),

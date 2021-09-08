@@ -29,18 +29,14 @@ impl App {
 impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         sauron::html::main(
-            vec![],
-            vec![
-                h1(vec![], vec![text("Minimal example")]),
+            [],
+            [
+                h1([], [text("Minimal example")]),
                 div(
-                    vec![
-                        class("some-class"),
-                        id("some-id"),
-                        attr("data-id", 1),
-                    ],
-                    vec![
+                    [class("some-class"), id("some-id"), attr("data-id", 1)],
+                    [
                         input(
-                            vec![
+                            [
                                 class("client"),
                                 r#type("button"),
                                 value("Click me!"),
@@ -56,19 +52,13 @@ impl Application<Msg> for App {
                                     Msg::NoOp
                                 }),
                             ],
-                            vec![],
+                            [],
                         ),
                         div(
-                            vec![],
-                            vec![text(format!(
-                                "Clicked: {}",
-                                self.click_count
-                            ))],
+                            [],
+                            [text(format!("Clicked: {}", self.click_count))],
                         ),
-                        input(
-                            vec![r#type("text"), value(self.click_count)],
-                            vec![],
-                        ),
+                        input([r#type("text"), value(self.click_count)], []),
                     ],
                 ),
             ],

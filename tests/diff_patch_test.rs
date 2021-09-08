@@ -330,8 +330,8 @@ fn add_style_attributes_1_change() {
                 None,
                 "style",
                 vec![AttributeValue::Style(vec![
-                    Style::new("display", "none".into()),
-                    Style::new("position", "absolute".into())
+                    Style::new("display", "none"),
+                    Style::new("position", "absolute")
                 ])]
             )]
         )

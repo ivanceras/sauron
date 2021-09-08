@@ -73,17 +73,13 @@ impl Application<Msg> for App {
 
     fn view(&self) -> Node<Msg> {
         div(
-            vec![],
-            vec![
+            [],
+            [
                 div(
-                    vec![
-                        class("some-class"),
-                        id("some-id"),
-                        attr("data-id", 1),
-                    ],
-                    vec![
+                    [class("some-class"), id("some-id"), attr("data-id", 1)],
+                    [
                         input(
-                            vec![
+                            [
                                 class("prev_page"),
                                 r#type("button"),
                                 disabled(self.page <= 1),
@@ -93,11 +89,11 @@ impl Application<Msg> for App {
                                     Msg::PrevPage
                                 }),
                             ],
-                            vec![],
+                            [],
                         ),
                         text(format!("Page: {}", self.page)),
                         input(
-                            vec![
+                            [
                                 class("next_page"),
                                 r#type("button"),
                                 disabled(self.page >= self.data.total_pages),
@@ -107,36 +103,24 @@ impl Application<Msg> for App {
                                     Msg::NextPage
                                 }),
                             ],
-                            vec![],
+                            [],
                         ),
                     ],
                 ),
-                div(vec![], vec![]).add_children(
-                    self.data
-                        .data
-                        .iter()
-                        .map(|user| {
-                            ul(
-                                vec![],
-                                vec![
-                                    li(vec![], vec![text(&user.id)]),
-                                    li(vec![], vec![text(&user.email)]),
-                                    li(vec![], vec![text(&user.first_name)]),
-                                    li(
-                                        vec![],
-                                        vec![img(
-                                            vec![src(&user.avatar)],
-                                            vec![],
-                                        )],
-                                    ),
-                                ],
-                            )
-                        })
-                        .collect(),
-                ),
+                div([], []).add_children(self.data.data.iter().map(|user| {
+                    ul(
+                        [],
+                        [
+                            li([], [text(&user.id)]),
+                            li([], [text(&user.email)]),
+                            li([], [text(&user.first_name)]),
+                            li([], [img([src(&user.avatar)], [])]),
+                        ],
+                    )
+                })),
                 footer(
-                    vec![class("error")],
-                    vec![if let Some(error) = &self.error {
+                    [class("error")],
+                    [if let Some(error) = &self.error {
                         text(error)
                     } else {
                         text!("")

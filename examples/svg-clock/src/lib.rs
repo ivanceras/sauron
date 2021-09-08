@@ -57,8 +57,8 @@ impl Application<Msg> for Clock {
 
     fn view(&self) -> Node<Msg> {
         let circle = circle(
-            vec![cx(100), cy(100), r(98), fill("none"), stroke("#1a202c")],
-            vec![],
+            [cx(100), cy(100), r(98), fill("none"), stroke("#1a202c")],
+            [],
         );
 
         let hand = |rotate: f64,
@@ -66,7 +66,7 @@ impl Application<Msg> for Clock {
                     stroke_width_value: u32,
                     height: u32| {
             line(
-                vec![
+                [
                     x1(100),
                     y1(100),
                     x2(100 - height),
@@ -79,7 +79,7 @@ impl Application<Msg> for Clock {
                         (rotate * 10.0).round() / 10.0
                     )),
                 ],
-                vec![],
+                [],
             )
         };
 
@@ -96,26 +96,26 @@ impl Application<Msg> for Clock {
             90.0 + ((ms / 1000.0 / 60.0 / 60.0) % 12.0) * 360.0 / 12.0;
 
         article(
-            vec![],
-            vec![
+            [],
+            [
                 h2(
-                    vec![],
-                    vec![text("Sauron clock demonstrating svg dom manipulation")]
+                    [],
+                    [text("Sauron clock demonstrating svg dom manipulation")]
                 ),
                 a(
-                    vec![href(
+                    [href(
                         "https://github.com/ivanceras/sauron/tree/master/examples/svg-clock"
                     )],
-                    vec![text("code")]
+                    [text("code")]
                 ),
                 div(
-                    vec![style("display","flex"),
+                    [style("display","flex"),
                      style("align-items", "center"),
                      style("flex-direction", "column"),
                     ],
-                    vec![svg(
-                        vec![width(400), height(400), viewBox([0, 0, 200, 200])],
-                        vec![
+                    [svg(
+                        [width(400), height(400), viewBox([0, 0, 200, 200])],
+                        [
                             circle,
                             hand(subsecond_rotate, "#e2e8f0", 10, 90),
                             hand(hour_rotate, "#2d3748", 4, 50),

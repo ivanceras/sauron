@@ -45,8 +45,8 @@ pub fn view_if<MSG>(flag: bool, node: Node<MSG>) -> Node<MSG> {
 #[inline]
 pub fn html_element<MSG>(
     tag: &'static str,
-    attrs: Vec<Attribute<MSG>>,
-    children: Vec<Node<MSG>>,
+    attrs: impl IntoIterator<Item = Attribute<MSG>>,
+    children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG> {
     element(tag, attrs, children)
 }
@@ -62,8 +62,8 @@ pub fn html_element<MSG>(
 #[inline]
 pub fn html_element_self_closing<MSG>(
     tag: &'static str,
-    attrs: Vec<Attribute<MSG>>,
-    children: Vec<Node<MSG>>,
+    attrs: impl IntoIterator<Item = Attribute<MSG>>,
+    children: impl IntoIterator<Item = Node<MSG>>,
     self_closing: bool,
 ) -> Node<MSG> {
     element_ns(None, tag, attrs, children, self_closing)
@@ -84,8 +84,8 @@ pub fn html_element_self_closing<MSG>(
 pub fn html_element_ns<MSG>(
     tag: &'static str,
     namespace: &'static str,
-    attrs: Vec<Attribute<MSG>>,
-    children: Vec<Node<MSG>>,
+    attrs: impl IntoIterator<Item = Attribute<MSG>>,
+    children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG> {
     element_ns(Some(namespace), tag, attrs, children, false)
 }

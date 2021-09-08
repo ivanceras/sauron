@@ -1,11 +1,11 @@
+#[cfg(feature = "with-measure")]
+use crate::dom::Measurements;
 use crate::{dom::dom_updater::DomUpdater, Application, Dispatch};
 use std::any::TypeId;
 use std::{cell::RefCell, rc::Rc};
 #[cfg(feature = "with-request-animation-frame")]
 use wasm_bindgen::closure::Closure;
 use web_sys::Node;
-
-use crate::dom::Measurements;
 
 /// Holds the user App and the dom updater
 /// This is passed into the event listener and the dispatch program
@@ -113,12 +113,13 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&self, msg: MSG) {
+        #[cfg(feature = "with-measure")]
         let t1 = crate::now();
         // update the app and emit the cmd returned from the update
         let cmd = self.app.borrow_mut().update(msg);
 
         if cmd.modifier.should_update_view {
-            //trace!("Executing cmd..");
+            #[cfg(feature = "with-measure")]
             let t2 = crate::now();
 
             #[cfg(feature = "with-measure")]
@@ -126,15 +127,18 @@ where
 
             // a new view is created due to the app update
             let view = self.app.borrow().view();
+            #[cfg(feature = "with-measure")]
             let node_count = view.node_count();
+            #[cfg(feature = "with-measure")]
             let t3 = crate::now();
 
             #[cfg(feature = "with-measure")]
             log::trace!("creating app view took: {}ms", t3 - t2);
 
             // update the last DOM node tree with this new view
-            let total_patches =
+            let _total_patches =
                 self.dom_updater.borrow_mut().update_dom(self, view);
+            #[cfg(feature = "with-measure")]
             let t4 = crate::now();
             #[cfg(feature = "with-measure")]
             log::trace!("dom update took: {}ms", t4 - t3);
@@ -150,16 +154,18 @@ where
                 }
             }
 
-            if cmd.modifier.log_measurements {
+            #[cfg(feature = "with-measure")]
+            if cmd.modifier.log_measurements && _total_patches > 0 {
                 let measurements = Measurements {
                     name: cmd.modifier.measurement_name.clone(),
                     view_node_count: node_count,
                     update_dispatch_took: t2 - t1,
                     build_view_took: t3 - t2,
-                    total_patches,
+                    total_patches: _total_patches,
                     dom_update_took: t4 - t3,
                     total_time: t4 - t1,
                 };
+                log::trace!("{:#?}", measurements);
                 // tell the app on app performance measurements
                 let cmd_measurement =
                     self.app.borrow().measurements(measurements).no_render();

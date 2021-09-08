@@ -69,7 +69,7 @@ impl Component<Msg, ()> for PageView {
     fn view(&self) -> Node<Msg> {
         if self.is_visible {
             ol(
-                vec![
+                [
                     class("page_view"),
                     key(format!("page_view_{}", self.current_page)),
                 ],
@@ -87,11 +87,11 @@ impl Component<Msg, ()> for PageView {
             )
         } else {
             div(
-                vec![
+                [
                     class("page_view__page_holder"),
-                    styles(vec![("height", px(self.height()))]),
+                    styles([("height", px(self.height()))]),
                 ],
-                vec![],
+                [],
             )
         }
     }
@@ -213,7 +213,7 @@ impl PageView {
     pub fn view_frozen_columns(&self) -> Node<Msg> {
         // can move up and down
         ol(
-            vec![class("page_view__frozen_columns")],
+            [class("page_view__frozen_columns")],
             self.row_views
                 .iter()
                 .enumerate()
@@ -222,12 +222,12 @@ impl PageView {
                     // The checkbox selection and the rows of the frozen
                     // columns
                     div(
-                        vec![class("page_view__frozen_columns__selector__frozen_column_rows flex-row")],
-                        vec![
+                        [class("page_view__frozen_columns__selector__frozen_column_rows flex-row")],
+                        [
                             selector_box(
                                 false,
-                                vec![],
-                                vec![styles([("width", px(30))])],
+                                [],
+                                [styles([("width", px(30))])],
                             ),
                             row_view.view_frozen_columns().map_msg(
                                 move |row_msg| Msg::RowMsg(index, row_msg),
@@ -242,21 +242,21 @@ impl PageView {
     /// frozen_row and frozen_columns
     pub fn view_immovable_rows(&self) -> Node<Msg> {
         ol(
-            vec![class("page_view__immovable_rows")],
+            [class("page_view__immovable_rows")],
             self.row_views
                 .iter()
                 .enumerate()
                 .filter(|(_index, row_view)| row_view.is_frozen)
                 .map(|(index, row_view)| {
                     div(
-                        vec![class(
+                        [class(
                             "page_view__selector_box__immovable_rows flex-row",
                         )],
-                        vec![
+                        [
                             selector_box(
                                 false,
-                                vec![class("immovable_rows__selector_box")],
-                                vec![styles([("width", px(30))])],
+                                [class("immovable_rows__selector_box")],
+                                [styles([("width", px(30))])],
                             ),
                             row_view.view_immovable_fields().map_msg(
                                 move |row_msg| Msg::RowMsg(index, row_msg),
@@ -272,7 +272,7 @@ impl PageView {
     pub fn view_frozen_rows(&self) -> Node<Msg> {
         // can move left and right, but not up and down
         div(
-            vec![class("page_view__frozen_page")],
+            [class("page_view__frozen_page")],
             self.row_views
                 .iter()
                 .enumerate()
