@@ -18,27 +18,30 @@ pub struct Effects<MSG, XMSG> {
 
 impl<MSG, XMSG> Effects<MSG, XMSG> {
     /// create a new Effects with local and external expects respectively
-    pub fn new(local: Vec<MSG>, external: Vec<XMSG>) -> Self {
+    pub fn new(
+        local: impl IntoIterator<Item = MSG>,
+        external: impl IntoIterator<Item = XMSG>,
+    ) -> Self {
         Self {
-            local,
-            external,
+            local: local.into_iter().collect(),
+            external: external.into_iter().collect(),
             modifier: Modifier::default(),
         }
     }
 
     /// Create an Effects with  local messages that will be executed on the next update loop on this Component
-    pub fn with_local(local: Vec<MSG>) -> Self {
+    pub fn with_local(local: impl IntoIterator<Item = MSG>) -> Self {
         Self {
-            local,
+            local: local.into_iter().collect(),
             external: vec![],
             modifier: Modifier::default(),
         }
     }
     /// Create an Effects with extern messages that will be executed on the parent Component
-    pub fn with_external(external: Vec<XMSG>) -> Self {
+    pub fn with_external(external: impl IntoIterator<Item = XMSG>) -> Self {
         Self {
             local: vec![],
-            external,
+            external: external.into_iter().collect(),
             modifier: Modifier::default(),
         }
     }
@@ -98,7 +101,10 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
     }
 
     /// Append this msgs to the local effects
-    pub fn append_local(mut self, local: Vec<MSG>) -> Self {
+    pub fn append_local(
+        mut self,
+        local: impl IntoIterator<Item = MSG>,
+    ) -> Self {
         self.local.extend(local);
         self
     }

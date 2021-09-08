@@ -26,13 +26,13 @@ mod value;
 ///
 /// let flex:Attribute<()> = style("display", "flex");
 /// ```
-pub fn style<V, MSG>(style_name: &'static str, value: V) -> Attribute<MSG>
-where
-    V: Into<Value> + Clone,
-{
+pub fn style<MSG>(
+    style_name: impl ToString,
+    value: impl Into<Value>,
+) -> Attribute<MSG> {
     mt_dom::attr(
         "style",
-        AttributeValue::from_styles(vec![Style::new(style_name, value.into())]),
+        AttributeValue::from_styles([Style::new(style_name, value.into())]),
     )
 }
 
@@ -49,27 +49,22 @@ where
 ///
 /// let html: Node<()> = div(vec![style!{"display":"flex","flex-direction":"row"}],vec![]);
 /// ```
-pub fn styles<V, MSG, P>(pairs: P) -> Attribute<MSG>
-where
-    V: Into<Value> + Clone,
-    P: AsRef<[(&'static str, V)]>,
-{
-    let mut styles = vec![];
-    for (key, value) in pairs.as_ref() {
-        styles.push(Style::new(*key, Into::<Value>::into(value.clone())));
-    }
+pub fn styles<MSG>(
+    pairs: impl IntoIterator<Item = (impl ToString, impl Into<Value>)>,
+) -> Attribute<MSG> {
+    let styles = pairs.into_iter().map(|(key, value)| {
+        Style::new(key.to_string(), Into::<Value>::into(value))
+    });
     mt_dom::attr("style", AttributeValue::from_styles(styles))
 }
 
 /// A helper function to build styles by accepting pairs
-pub fn styles_values<MSG, P>(pairs: P) -> Attribute<MSG>
-where
-    P: AsRef<[(&'static str, Value)]>,
-{
-    let mut styles = vec![];
-    for (key, value) in pairs.as_ref() {
-        styles.push(Style::new(*key, value.clone()));
-    }
+pub fn styles_values<MSG>(
+    pairs: impl IntoIterator<Item = (impl ToString, impl Into<Value>)>,
+) -> Attribute<MSG> {
+    let styles = pairs
+        .into_iter()
+        .map(|(key, value)| Style::new(key.to_string(), value));
     mt_dom::attr("style", AttributeValue::from_styles(styles))
 }
 
@@ -93,17 +88,16 @@ where
 /// let display:Attribute<()> =
 ///     styles([("display", if is_active { "block" }else{ "none" })]);
 /// ```
-pub fn styles_flag<V, MSG, P>(trio: P) -> Attribute<MSG>
-where
-    V: Into<Value> + Clone,
-    P: AsRef<[(&'static str, V, bool)]>,
-{
-    let mut styles = vec![];
-    for (key, value, flag) in trio.as_ref() {
-        if *flag {
-            styles.push(Style::new(*key, Into::<Value>::into(value.clone())));
+pub fn styles_flag<MSG>(
+    trio: impl IntoIterator<Item = (impl ToString, impl Into<Value>, bool)>,
+) -> Attribute<MSG> {
+    let styles = trio.into_iter().filter_map(|(key, value, flag)| {
+        if flag {
+            Some(Style::new(key, value))
+        } else {
+            None
         }
-    }
+    });
     mt_dom::attr("style", AttributeValue::from_styles(styles))
 }
 
@@ -120,17 +114,17 @@ where
 ///        ("error", has_error),
 ///    ]);
 /// ```
-pub fn classes_flag<P, S, MSG>(pair: P) -> Attribute<MSG>
-where
-    P: AsRef<[(S, bool)]>,
-    S: ToString,
-{
-    let mut class_list = Vec::with_capacity(pair.as_ref().len());
-    for (class, flag) in pair.as_ref() {
-        if *flag {
-            class_list.push(class.to_string());
+pub fn classes_flag<MSG>(
+    pair: impl IntoIterator<Item = (impl ToString, bool)>,
+) -> Attribute<MSG> {
+    let class_list = pair.into_iter().filter_map(|(class, flag)| {
+        if flag {
+            Some(class.to_string())
+        } else {
+            None
         }
-    }
+    });
+
     classes(class_list)
 }
 
@@ -143,16 +137,13 @@ where
 /// let html: Node<()> =
 ///    div(vec![classes(["dashed", "error"])], vec![]);
 /// ```
-pub fn classes<C, V, MSG>(class_list: C) -> Attribute<MSG>
-where
-    V: ToString,
-    C: AsRef<[V]>,
-{
-    let class_values: Vec<AttributeValue<MSG>> = class_list
-        .as_ref()
-        .iter()
-        .map(|v| AttributeValue::from_value(Value::from(v.to_string())))
-        .collect();
+pub fn classes<MSG>(
+    class_list: impl IntoIterator<Item = impl ToString>,
+) -> Attribute<MSG> {
+    let class_values = class_list
+        .into_iter()
+        .map(|v| AttributeValue::from_value(Value::from(v.to_string())));
+
     Attribute::with_multiple_values(None, "class", class_values)
 }
 
@@ -193,25 +184,18 @@ pub fn class_namespaced<MSG>(
 /// assert_eq!(expected, classes_flag_namespaced(component, [("border", is_border),("corner",
 /// is_corner)]));
 /// ```
-pub fn classes_flag_namespaced<P, S, MSG>(
+pub fn classes_flag_namespaced<MSG>(
     namespace: impl ToString,
-    pair: P,
-) -> crate::Attribute<MSG>
-where
-    P: AsRef<[(S, bool)]>,
-    S: ToString,
-{
-    let mut transformed = vec![];
-    for (class_name, flag) in pair.as_ref() {
-        transformed.push((
-            jss::class_namespaced(
-                namespace.to_string(),
-                class_name.to_string(),
-            ),
-            *flag,
-        ));
-    }
-    classes_flag(transformed)
+    pair: impl IntoIterator<Item = (impl ToString, bool)>,
+) -> crate::Attribute<MSG> {
+    let class_list = pair.into_iter().filter_map(|(class_name, flag)| {
+        if flag {
+            Some(jss::class_namespaced(namespace.to_string(), class_name))
+        } else {
+            None
+        }
+    });
+    classes(class_list)
 }
 
 /// A helper function for setting attributes with no values such as checked
@@ -230,19 +214,16 @@ where
 ///                             is_checked,
 ///                         )]));
 /// ```
-pub fn attrs_flag<V, MSG, P>(trio: P) -> Vec<Attribute<MSG>>
-where
-    V: Into<Value> + Clone,
-    P: AsRef<[(&'static str, V, bool)]>,
-{
-    let mut attributes: Vec<Attribute<MSG>> =
-        Vec::with_capacity(trio.as_ref().len());
-    for (key, value, flag) in trio.as_ref() {
-        if *flag {
-            attributes.push(attr(key, value.clone()));
+pub fn attrs_flag<MSG>(
+    trio: impl IntoIterator<Item = (&'static str, impl Into<Value>, bool)>,
+) -> impl IntoIterator<Item = Attribute<MSG>> {
+    trio.into_iter().filter_map(|(key, value, flag)| {
+        if flag {
+            Some(attr(key, value.into()))
+        } else {
+            None
         }
-    }
-    attributes
+    })
 }
 
 /// Set the attribute of this element if value is Some, empty attribute otherwise
@@ -260,13 +241,10 @@ where
 /// let expected = r#"<button></button>"#;
 /// assert_eq!(expected, html.render_to_string());
 /// ```
-pub fn maybe_attr<V, MSG>(
+pub fn maybe_attr<MSG>(
     name: crate::AttributeName,
-    value: Option<V>,
-) -> Attribute<MSG>
-where
-    V: Into<Value>,
-{
+    value: Option<impl Into<Value>>,
+) -> Attribute<MSG> {
     if let Some(value) = value {
         attr(name, value)
     } else {

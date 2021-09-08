@@ -54,7 +54,7 @@ impl Default for Modifier {
 
 impl<DSP> Cmd<DSP>
 where
-    DSP: Clone + 'static,
+    DSP: 'static,
 {
     /// creates a new Cmd from a function
     pub fn new<F>(f: F) -> Self
@@ -68,12 +68,17 @@ where
     }
 
     /// creates a unified Cmd which batches all the other Cmds in one.
-    pub fn batch(cmds: Vec<Self>) -> Self {
-        let should_update_view =
-            cmds.iter().any(|c| c.modifier.should_update_view);
-        let log_measurements = cmds.iter().any(|c| c.modifier.log_measurements);
+    pub fn batch(cmds: impl IntoIterator<Item = Self>) -> Self {
         let mut commands = vec![];
+        let mut should_update_view = false;
+        let mut log_measurements = false;
         for cmd in cmds {
+            if cmd.modifier.should_update_view {
+                should_update_view = true;
+            }
+            if cmd.modifier.log_measurements {
+                log_measurements = true;
+            }
             commands.extend(cmd.commands);
         }
         Self {
@@ -87,12 +92,14 @@ where
     }
 
     /// Append more cmd into this cmd and return self
-    pub fn append(mut self, cmds: Vec<Self>) -> Self {
-        self.modifier.should_update_view =
-            cmds.iter().any(|c| c.modifier.should_update_view);
-        self.modifier.log_measurements =
-            cmds.iter().any(|c| c.modifier.log_measurements);
+    pub fn append(mut self, cmds: impl IntoIterator<Item = Self>) -> Self {
         for cmd in cmds {
+            if cmd.modifier.should_update_view {
+                self.modifier.should_update_view = true;
+            }
+            if cmd.modifier.log_measurements {
+                self.modifier.log_measurements = true;
+            }
             self.commands.extend(cmd.commands);
         }
         self
@@ -103,14 +110,6 @@ where
         Cmd {
             commands: vec![],
             modifier: Default::default(),
-        }
-    }
-
-    /// Executes the Cmd
-    pub fn emit(self, program: &DSP) {
-        for cb in self.commands {
-            let program_clone = program.clone();
-            cb.emit(program_clone);
         }
     }
 
@@ -139,6 +138,19 @@ where
         self = self.measure();
         self.modifier.measurement_name = name.to_string();
         self
+    }
+}
+
+impl<DSP> Cmd<DSP>
+where
+    DSP: Clone + 'static,
+{
+    /// Executes the Cmd
+    pub fn emit(self, program: &DSP) {
+        for cb in self.commands {
+            let program_clone = program.clone();
+            cb.emit(program_clone);
+        }
     }
 }
 

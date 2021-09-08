@@ -77,8 +77,8 @@ impl<MSG> PartialEq for AttributeValue<MSG> {
 
 impl<MSG> AttributeValue<MSG> {
     /// create an attribute from Vec<Style>
-    pub fn from_styles(styles: Vec<Style>) -> Self {
-        AttributeValue::Style(styles)
+    pub fn from_styles(styles: impl IntoIterator<Item = Style>) -> Self {
+        AttributeValue::Style(styles.into_iter().collect())
     }
 
     /// create an attribute value from simple value

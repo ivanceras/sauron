@@ -54,8 +54,7 @@ impl<XMSG> Component<Msg, XMSG> for Field<XMSG> {
             Msg::Interacted(interaction) => Effects::with_external(
                 self.on_interact
                     .iter()
-                    .map(|listener| listener(interaction.clone()))
-                    .collect(),
+                    .map(|listener| listener(interaction.clone())),
             ),
         }
     }

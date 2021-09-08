@@ -21,10 +21,10 @@ pub struct Style {
 
 impl Style {
     /// create a style with name and value
-    pub fn new(name: impl ToString, value: Value) -> Self {
+    pub fn new(name: impl ToString, value: impl Into<Value>) -> Self {
         Style {
             name: name.to_string(),
-            value,
+            value: value.into(),
         }
     }
 }
