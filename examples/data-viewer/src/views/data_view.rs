@@ -259,6 +259,7 @@ impl DataView {
 
     ///TODO: Make this ergonomic, something that is similar
     ///to init in Application, but designed for Component
+    /// perhaps subscription?
     pub fn init() -> Cmd<crate::App, crate::AppMsg> {
         debug!("Init in  data view for column resize");
         Window::add_event_listeners(vec![
