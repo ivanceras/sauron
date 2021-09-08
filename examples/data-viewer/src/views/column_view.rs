@@ -81,7 +81,7 @@ impl ColumnView {
         }
         let self_width = self.width;
         div(
-            vec![
+            [
                 class("column_view__controls flex-column"),
                 classes_flag([(
                     "column_view__controls--frozen",
@@ -92,9 +92,9 @@ impl ColumnView {
                     ("width", px(controls_width)),
                 ]),
             ],
-            vec![
+            [
                 div(
-                    vec![
+                    [
                         class("column_controls flex-row"),
                         styles([
                             ("width", px(self_width)),
@@ -102,22 +102,22 @@ impl ColumnView {
                             ("padding-right", px(Self::side_padding_width())),
                         ]),
                     ],
-                    vec![
+                    [
                         div(
-                            vec![class("column_controls__column_name")],
-                            vec![text(&self.column.column.name)],
+                            [class("column_controls__column_name")],
+                            [text(&self.column.column.name)],
                         ),
                         div(
-                            vec![class("column_controls__sort_btn")],
-                            vec![assets::sort_btn_asc(18, 18, "#888")],
+                            [class("column_controls__sort_btn")],
+                            [assets::sort_btn_asc(18, 18, "#888")],
                         ),
                     ],
                 ),
                 div(
-                    vec![class("column_view__search")],
-                    vec![search_widget(
+                    [class("column_view__search")],
+                    [search_widget(
                         self.width,
-                        vec![on_input(|input| {
+                        [on_input(|input| {
                             Msg::ChangeSearch(input.value.to_string())
                         })],
                     )],

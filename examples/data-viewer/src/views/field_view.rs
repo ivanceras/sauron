@@ -65,14 +65,14 @@ impl Component<Msg, ()> for FieldView {
     /// when viewed as row
     fn view(&self) -> Node<Msg> {
         div(
-            vec![
+            [
                 class("field_view"),
-                classes_flag(vec![
+                classes_flag([
                     ("field_view--frozen_row", self.is_frozen_row),
                     ("field_view--frozen_column", self.is_frozen_column),
                 ]),
             ],
-            vec![self.view_value()],
+            [self.view_value()],
         )
     }
 }
@@ -124,7 +124,7 @@ impl FieldView {
     }
 
     fn css_classes(&self) -> Attribute<Msg> {
-        classes_flag(vec![
+        classes_flag([
             ("field_view__value", true),
             ("field_view__value--frozen_row", self.is_frozen_row),
             ("field_view__value--frozen_column", self.is_frozen_column),
@@ -133,11 +133,11 @@ impl FieldView {
     }
 
     fn css_size(&self) -> Attribute<Msg> {
-        styles(vec![("width", px(self.width)), ("height", px(self.height))])
+        styles([("width", px(self.width)), ("height", px(self.height))])
     }
 
     fn css_padding(&self) -> Attribute<Msg> {
-        styles(vec![(
+        styles([(
             "padding",
             [
                 px(Self::padding_top()),
@@ -157,13 +157,13 @@ impl FieldView {
             DataValue::U32(v) => text_link(
                 v.to_string(),
                 format!("#{}", v),
-                vec![classes, size, padding, on_click(|_| Msg::PrimaryClicked)],
+                [classes, size, padding, on_click(|_| Msg::PrimaryClicked)],
             ),
 
             DataValue::S32(v) => text_link(
                 v.to_string(),
                 format!("#{}", v),
-                vec![classes, size, padding, on_click(|_| Msg::PrimaryClicked)],
+                [classes, size, padding, on_click(|_| Msg::PrimaryClicked)],
             ),
             _ => {
                 trace!("todo primary: {:?}", self.value);
@@ -181,16 +181,16 @@ impl FieldView {
             DataValue::Nil => match self.column.data_type_def.data_type {
                 DataType::Bool => checkbox(
                     false,
-                    vec![classes, size, padding],
-                    vec![on_change(|input| {
+                    [classes, size, padding],
+                    [on_change(|input| {
                         Msg::CheckedChange(input.value.to_string())
                     })],
                 ),
-                _ => textbox("", vec![r#type("text"), classes]),
+                _ => textbox("", [r#type("text"), classes]),
             },
             DataValue::Text(v) => textbox(
                 v,
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -199,7 +199,7 @@ impl FieldView {
             ),
             DataValue::Uuid(v) => textbox(
                 v.to_string(),
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -208,14 +208,14 @@ impl FieldView {
             ),
             DataValue::Bool(v) => checkbox(
                 *v,
-                vec![classes, size, padding],
-                vec![on_change(|input| {
+                [classes, size, padding],
+                [on_change(|input| {
                     Msg::CheckedChange(input.value.to_string())
                 })],
             ),
             DataValue::S8(v) => numberbox(
                 v,
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -224,7 +224,7 @@ impl FieldView {
             ),
             DataValue::S16(v) => numberbox(
                 v,
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -233,7 +233,7 @@ impl FieldView {
             ),
             DataValue::S32(v) => numberbox(
                 v,
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -242,7 +242,7 @@ impl FieldView {
             ),
             DataValue::S64(v) => numberbox(
                 v,
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -251,7 +251,7 @@ impl FieldView {
             ),
             DataValue::U8(v) => numberbox(
                 v,
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -260,7 +260,7 @@ impl FieldView {
             ),
             DataValue::U16(v) => numberbox(
                 v,
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -269,7 +269,7 @@ impl FieldView {
             ),
             DataValue::U32(v) => numberbox(
                 v,
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -278,7 +278,7 @@ impl FieldView {
             ),
             DataValue::U64(v) => numberbox(
                 v,
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -287,7 +287,7 @@ impl FieldView {
             ),
             DataValue::F32(v) => numberbox(
                 v,
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -296,7 +296,7 @@ impl FieldView {
             ),
             DataValue::F64(v) => numberbox(
                 v,
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -305,7 +305,7 @@ impl FieldView {
             ),
             DataValue::Utc(v) => datebox(
                 v.format("%Y-%m-%d").to_string(),
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -314,7 +314,7 @@ impl FieldView {
             ),
             DataValue::Local(v) => datebox(
                 v.format("%Y-%m-%d").to_string(),
-                vec![
+                [
                     classes,
                     size,
                     padding,
@@ -330,9 +330,9 @@ impl FieldView {
 
     pub fn view_in_detail(&self) -> Node<Msg> {
         div(
-            vec![
+            [
                 class("field_view--detail flex-row"),
-                classes_flag(vec![
+                classes_flag([
                     ("field_view--detail--frozen_row", self.is_frozen_row),
                     (
                         "field_view--detail--frozen_column",
@@ -340,10 +340,10 @@ impl FieldView {
                     ),
                 ]),
             ],
-            vec![
+            [
                 label(
-                    vec![class("field_view__column--detail")],
-                    vec![text(&self.column.column.name)],
+                    [class("field_view__column--detail")],
+                    [text(&self.column.column.name)],
                 ),
                 if self.column.is_primary() {
                     self.view_value_as_primary()

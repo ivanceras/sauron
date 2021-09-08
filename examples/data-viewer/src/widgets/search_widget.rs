@@ -1,13 +1,8 @@
 use crate::assets;
 
 use sauron::{
-    html::{
-        attributes::*,
-        units::px,
-        *,
-    },
-    Attribute,
-    Node,
+    html::{attributes::*, units::px, *},
+    Attribute, Node,
 };
 
 pub struct SearchWidget {}
@@ -17,26 +12,26 @@ pub struct SearchIcon {}
 impl SearchWidget {
     pub fn new<MSG: Clone>(
         width: i32,
-        attributes: Vec<Attribute<MSG>>,
+        attributes: impl IntoIterator<Item = Attribute<MSG>>,
     ) -> Node<MSG> {
         let mut input_width = width - SearchIcon::css_width();
         if input_width < 0 {
             input_width = 0;
         }
         div(
-            vec![class("search_widget flex-row")],
-            vec![
+            [class("search_widget flex-row")],
+            [
                 div(
-                    vec![class("search_widget__search_icon")],
-                    vec![assets::svg_search_icon(18, 18, "#888")],
+                    [class("search_widget__search_icon")],
+                    [assets::svg_search_icon(18, 18, "#888")],
                 ),
                 input(
-                    vec![
+                    [
                         r#type("text"),
                         class("search_widget__column_filter"),
                         styles([("width", px(input_width))]),
                     ],
-                    vec![],
+                    [],
                 )
                 .add_attributes(attributes),
             ],

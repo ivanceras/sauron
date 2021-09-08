@@ -91,13 +91,13 @@ where
 
     fn view(&self) -> Node<Msg> {
         div(
-            vec![
+            [
                 class("datetimebox"),
                 on_mount(|me| Msg::Mount(me.target_node)),
             ],
-            vec![
+            [
                 input(
-                    vec![
+                    [
                         r#type("date"),
                         class("datetimebox__date"),
                         on_change(|input| {
@@ -106,21 +106,21 @@ where
                         }),
                         value(&self.date),
                     ],
-                    vec![],
+                    [],
                 ),
                 input(
-                    vec![
+                    [
                         r#type("time"),
                         class("datetimebox__time"),
                         on_change(|input| Msg::TimeChange(input.value)),
                         value(&self.time),
                     ],
-                    vec![],
+                    [],
                 ),
-                input(vec![r#type("text"), value(self.cnt)], vec![]),
+                input([r#type("text"), value(self.cnt)], []),
                 button(
-                    vec![on_click(move |_| Msg::BtnClick)],
-                    vec![text("Do something")],
+                    [on_click(move |_| Msg::BtnClick)],
+                    [text("Do something")],
                 ),
             ],
         )

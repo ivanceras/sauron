@@ -62,13 +62,13 @@ impl<XMSG> Component<Msg, XMSG> for Field<XMSG> {
 
     fn view(&self) -> Node<Msg> {
         input(
-            vec![
+            [
                 r#type("text"),
                 class("field"),
                 on_click(|_| Msg::FieldClick),
                 on_input(|input| Msg::InputChange(input.value)),
             ],
-            vec![text(format!("{} ({})", self.field_name, self.field_clicks))],
+            [text(format!("{} ({})", self.field_name, self.field_clicks))],
         )
     }
 }

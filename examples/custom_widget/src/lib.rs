@@ -40,26 +40,26 @@ impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         let mut context = self.context.borrow_mut();
         div(
-            vec![on_mount(|me| Msg::Mount(me.target_node))],
-            vec![
+            [on_mount(|me| Msg::Mount(me.target_node))],
+            [
                 input(
-                    vec![
+                    [
                         r#type("button"),
                         value("+"),
                         key("inc"),
                         on_click(|_| Msg::Increment),
                     ],
-                    vec![],
+                    [],
                 ),
-                div(vec![], vec![text(self.count)]),
+                div([], [text(self.count)]),
                 input(
-                    vec![
+                    [
                         r#type("button"),
                         value("-"),
                         key("dec"),
                         on_click(|_| Msg::Decrement),
                     ],
-                    vec![],
+                    [],
                 ),
                 context.map_view(
                     DateTimeWidget::new("2021-01-01", "11:11", false)

@@ -59,25 +59,21 @@ impl Component<Msg, ()> for Row {
 
     fn view(&self) -> Node<Msg> {
         div(
-            vec![class("row")],
-            vec![
+            [class("row")],
+            [
                 text(&self.row_name),
-                input(vec![class("row-selector"), r#type("checkbox")], vec![]),
+                input([class("row-selector"), r#type("checkbox")], []),
                 div(
-                    vec![],
-                    self.fields
-                        .iter()
-                        .enumerate()
-                        .map(|(index, field)| {
-                            field.view().map_msg(move |field_msg| {
-                                Msg::FieldMsg(index, field_msg)
-                            })
+                    [],
+                    self.fields.iter().enumerate().map(|(index, field)| {
+                        field.view().map_msg(move |field_msg| {
+                            Msg::FieldMsg(index, field_msg)
                         })
-                        .collect::<Vec<Node<Msg>>>(),
+                    }),
                 ),
                 span(
-                    vec![],
-                    vec![text(format!(
+                    [],
+                    [text(format!(
                         "field clicks: {}, field changed: {}",
                         self.field_clicks, self.field_change,
                     ))],

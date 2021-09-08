@@ -1,17 +1,13 @@
 #![deny(warnings)]
 use sauron::{
     diff,
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
+    html::{attributes::*, events::*, *},
     Node,
 };
 
 fn main() {
     let old: Node<()> = div(
-        vec![
+        [
             class("some-class"),
             id("some-id"),
             on_click(|_| {
@@ -22,10 +18,10 @@ fn main() {
                 println!("i've been clicked");
             }),
         ],
-        vec![input(vec![class("client"), r#type("checkbox")], vec![])],
+        [input([class("client"), r#type("checkbox")], [])],
     );
     let new = div(
-        vec![
+        [
             class("some-class2"),
             id("some-id2"),
             on_click(|_| {
@@ -36,7 +32,7 @@ fn main() {
                 println!("i've been clicked2");
             }),
         ],
-        vec![input(vec![class("client"), r#type("checkbox")], vec![])],
+        [input([class("client"), r#type("checkbox")], [])],
     );
     println!("{:#?}", old);
     println!("{:#?}", new);

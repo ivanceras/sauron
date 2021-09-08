@@ -93,7 +93,7 @@ impl RowView {
         F: Fn(&(usize, &Rc<RefCell<FieldView>>)) -> bool,
     {
         li(
-            vec![
+            [
                 class("row_view flex-row"),
                 // IMPORTANT: key is needed here to avoid sauron
                 // reusing dom elements of similar rows, this is needed
@@ -101,11 +101,11 @@ impl RowView {
                 // since events attached in a dom are not compared
                 // and is not replaced.
                 key(format!("row_{}", self.index)),
-                classes_flag(vec![
+                classes_flag([
                     ("row_view--frozen_row", self.is_frozen),
                     ("row_view--modified", self.is_changed()),
                 ]),
-                styles(vec![("height", px(Self::row_height()))]),
+                styles([("height", px(Self::row_height()))]),
                 on_click(|_| Msg::Click),
                 on_dblclick(|_| Msg::DoubleClick),
             ],

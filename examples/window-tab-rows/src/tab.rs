@@ -59,7 +59,7 @@ impl Component<Msg, ()> for Tab {
 
     fn view(&self) -> Node<Msg> {
         div(
-            vec![
+            [
                 class("tab tabcontent"),
                 styles([("background-color", &self.color)]),
                 styles_flag([
@@ -67,25 +67,20 @@ impl Component<Msg, ()> for Tab {
                     ("display", "none", !self.is_active),
                 ]),
             ],
-            vec![
+            [
                 button(
-                    vec![on_click(|_| Msg::TabClick)],
-                    vec![text(format!(
+                    [on_click(|_| Msg::TabClick)],
+                    [text(format!(
                         "{} is clicked for {} times",
                         self.name, self.tab_clicks
                     ))],
                 ),
                 div(
-                    vec![class("rows")],
-                    self.rows
-                        .iter()
-                        .enumerate()
-                        .map(|(index, row)| {
-                            row.view().map_msg(move |row_msg| {
-                                Msg::RowMsg(index, row_msg)
-                            })
-                        })
-                        .collect::<Vec<Node<Msg>>>(),
+                    [class("rows")],
+                    self.rows.iter().enumerate().map(|(index, row)| {
+                        row.view()
+                            .map_msg(move |row_msg| Msg::RowMsg(index, row_msg))
+                    }),
                 ),
             ],
         )

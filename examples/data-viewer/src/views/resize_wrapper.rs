@@ -113,11 +113,11 @@ impl Application<Msg> for ResizeWrapper {
 
     fn view(&self) -> Node<Msg> {
         main(
-            vec![class("resize_wrapper grid")],
-            vec![
+            [class("resize_wrapper grid")],
+            [
                 self.data_view.view().map_msg(Msg::DataViewMsg),
                 div(
-                    vec![
+                    [
                         class(
                             "resize_wrapper__resize_grip resize_wrapper__resize_grip--right",
                         ),
@@ -129,10 +129,10 @@ impl Application<Msg> for ResizeWrapper {
                             )
                         }),
                     ],
-                    vec![],
+                    [],
                 ),
                 div(
-                    vec![
+                    [
                         class(
                             "resize_wrapper__resize_grip resize_wrapper__resize_grip--bottom",
                         ),
@@ -144,10 +144,10 @@ impl Application<Msg> for ResizeWrapper {
                             )
                         }),
                     ],
-                    vec![],
+                    [],
                 ),
                 div(
-                    vec![
+                    [
                         class(
                             "resize_wrapper__resize_grip resize_wrapper__resize_grip--bottom_right",
                         ),
@@ -159,13 +159,13 @@ impl Application<Msg> for ResizeWrapper {
                             )
                         }),
                     ],
-                    vec![],
+                    [],
                 ),
                 a(
-                    vec![html::attributes::href(
+                    [html::attributes::href(
                         "https://github.com/ivanceras/sauron/tree/master/examples/data-viewer/"
                     )],
-                    vec![text("code")]
+                    [text("code")]
                 ),
             ],
         )
