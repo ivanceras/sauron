@@ -122,26 +122,19 @@ where
             #[cfg(feature = "with-measure")]
             let t2 = crate::now();
 
-            #[cfg(feature = "with-measure")]
-            log::trace!("app update took: {}ms", t2 - t1);
-
             // a new view is created due to the app update
             let view = self.app.borrow().view();
+
             #[cfg(feature = "with-measure")]
             let node_count = view.node_count();
             #[cfg(feature = "with-measure")]
             let t3 = crate::now();
-
-            #[cfg(feature = "with-measure")]
-            log::trace!("creating app view took: {}ms", t3 - t2);
 
             // update the last DOM node tree with this new view
             let _total_patches =
                 self.dom_updater.borrow_mut().update_dom(self, view);
             #[cfg(feature = "with-measure")]
             let t4 = crate::now();
-            #[cfg(feature = "with-measure")]
-            log::trace!("dom update took: {}ms", t4 - t3);
 
             #[cfg(feature = "with-measure")]
             {
@@ -149,8 +142,6 @@ where
                 // 60fps is 16.667 ms per frame.
                 if dispatch_duration > 16.0 {
                     log::warn!("dispatch took: {}ms", dispatch_duration);
-                } else {
-                    log::trace!("dispatch took: {}ms", dispatch_duration);
                 }
             }
 
@@ -165,18 +156,11 @@ where
                     dom_update_took: t4 - t3,
                     total_time: t4 - t1,
                 };
-                log::trace!("{:#?}", measurements);
                 // tell the app on app performance measurements
                 let cmd_measurement =
                     self.app.borrow().measurements(measurements).no_render();
                 cmd_measurement.emit(self);
-            } else {
-                #[cfg(any(feature = "with-debug", feature = "with-measure"))]
-                log::info!("skipped logging measurements");
             }
-        } else {
-            #[cfg(any(feature = "with-debug", feature = "with-measure"))]
-            log::info!("dom update is skipped here");
         }
         cmd.emit(self);
     }

@@ -55,9 +55,6 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    #[cfg(feature = "with-measure")]
-    let t1 = crate::now();
-
     let nodes_to_find: Vec<(&[usize], Option<&&'static str>)> = patches
         .iter()
         .map(|patch| (patch.path(), patch.tag()))
@@ -71,13 +68,6 @@ where
     let mut active_closures = HashMap::new();
     let nodes_to_patch =
         find_all_nodes_by_path(root_node.clone(), &nodes_to_find);
-
-    #[cfg(feature = "with-measure")]
-    let t2 = {
-        let t2 = crate::now();
-        log::trace!("finding nodes to patch took: {}ms", t2 - t1);
-        t2
-    };
 
     for patch in patches.iter() {
         let patch_path = patch.path();
@@ -96,12 +86,6 @@ where
         }
     }
 
-    #[cfg(feature = "with-measure")]
-    let _t3 = {
-        let t3 = crate::now();
-        log::trace!("actual applying patch took: {}ms", t3 - t2);
-        t3
-    };
     Ok(active_closures)
 }
 
@@ -367,7 +351,6 @@ where
             // we replace the root node here, so that's reference is updated
             // to the newly created node
             if patch_path.path == [0] {
-                log::warn!("------>>>replacing root node..");
                 *root_node = created_node.node;
             }
             Ok(created_node.closures)
