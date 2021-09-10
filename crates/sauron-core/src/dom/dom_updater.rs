@@ -156,21 +156,8 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
-        #[cfg(feature = "with-measure")]
-        let t1 = crate::now();
-
         let patches = diff(&self.current_vdom, &new_vdom);
         let total_patches = patches.len();
-
-        #[cfg(feature = "with-measure")]
-        let _t2 = {
-            let t2 = crate::now();
-            log::trace!("vdom diffing took: {}ms", t2 - t1);
-            t2
-        };
-
-        #[cfg(feature = "with-measure")]
-        log::trace!("applying {} patches", patches.len());
 
         #[cfg(feature = "with-debug")]
         log::debug!("patches: {:#?}", patches);
