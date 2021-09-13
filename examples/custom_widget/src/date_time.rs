@@ -16,7 +16,6 @@ pub struct DateTimeWidget<XMSG> {
     date: String,
     time: String,
     cnt: i32,
-    mounted: bool,
     time_change_listener: Vec<Callback<String, XMSG>>,
 }
 
@@ -24,12 +23,11 @@ impl<XMSG> DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
-    pub fn new(date: &str, time: &str, mounted: bool) -> Self {
+    pub fn new(date: &str, time: &str) -> Self {
         DateTimeWidget {
             date: date.to_string(),
             time: time.to_string(),
             cnt: 0,
-            mounted,
             time_change_listener: vec![],
         }
     }

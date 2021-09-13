@@ -62,22 +62,22 @@ impl Application<Msg> for App {
                     [],
                 ),
                 context.map_view(
-                    DateTimeWidget::new("2021-01-01", "11:11", false)
+                    DateTimeWidget::new("2021-01-01", "11:11")
                         .on_date_time_change(Msg::DateTimeChange),
                     Msg::DateTimeMsg,
                 ),
                 context.map_view(
-                    DateTimeWidget::new("2022-02-02", "12:12", false)
+                    DateTimeWidget::new("2022-02-02", "12:12")
                         .on_date_time_change(Msg::DateTimeChange),
                     Msg::DateTimeMsg,
                 ),
                 context.map_view(
-                    DateTimeWidget::new("3033-03-03", "13:13", false)
+                    DateTimeWidget::new("3033-03-03", "13:13")
                         .on_date_time_change(Msg::DateTimeChange),
                     Msg::DateTimeMsg,
                 ),
                 context.map_view(
-                    DateTimeWidget::new("4044-04-04", "14:14", false)
+                    DateTimeWidget::new("4044-04-04", "14:14")
                         .on_date_time_change(Msg::DateTimeChange),
                     Msg::DateTimeMsg,
                 ),
