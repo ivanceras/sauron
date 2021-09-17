@@ -116,13 +116,26 @@ crate-type = ["cdylib"]
 sauron = "0.43"
 ```
 
+#### Prerequisite:
+
+```sh
+cargo install wasm-pack
+cargo install basic-http-server
+```
+
 
 Build using
 ```sh
-$> wasm-pack build --target web --release
+wasm-pack build --target web --release
 ```
-Explore some other [examples](https://github.com/ivanceras/sauron/tree/master/examples)
-on this repo.
+Serve using
+```
+basic-http-server -a 0.0.0.0:4000
+```
+Then navigate to http://localhost:4000
+
+For more details on the commands to build and serve, look on [examples](https://github.com/ivanceras/sauron/tree/master/examples) on this repo, each
+has scripts on how to build and run them.
 
 
 #### Demo examples
@@ -132,13 +145,6 @@ on this repo.
 - [ultron code-editor](https://ivanceras.github.io/ultron/) - A web-base text-editor with syntax highlighting
 - [hackernews-sauron](https://github.com/ivanceras/hackernews-sauron) - A hackernews clone showcasing the feature of sauron to write web applications that can work with or without javascript.
 
-
-#### Prerequisite:
-
-```sh
-cargo install wasm-pack
-cargo install basic-http-server
-```
 
 
 License: MIT

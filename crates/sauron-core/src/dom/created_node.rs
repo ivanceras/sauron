@@ -346,6 +346,10 @@ impl CreatedNode {
 
                 key_press_func.forget();
             } else {
+                // This is where all of the UI events is wired in this part of the code.
+                // All event listener is added to this element.
+                // The callback to this listener emits an Msg which is then \
+                // dispatched to the `program` which then triggers update view cycle.
                 let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
                     create_closure_wrap(program, listener);
                 current_elm
