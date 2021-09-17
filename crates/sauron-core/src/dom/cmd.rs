@@ -154,6 +154,8 @@ where
 
 impl<DSP> Cmd<DSP> {
     /// batch dispatch this msg on the next update loop
+    ///
+    /// TODO: make an fn: `Program::dispatch_multi(msgs: Vec<MSG>, modifier: Modifier)`
     pub fn batch_msg<MSG>(msg_list: Vec<MSG>) -> Self
     where
         MSG: 'static,

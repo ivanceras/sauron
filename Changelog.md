@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.43.5
+- Change `Cmd` such that it uses `FnOnce`, which doesn't require `MSG` to be a `Clone`.
+
+## 0.43.4
+- Remove log::trace on with-measure flag, it is not needed anymore since the details is already passed in the Measurements object
+
 ## 0.43.3
 - Call only measurements only when `with-measure` feature flag is enabled.
 - Use of `IntoIterator` for attributes and children of the html nodes, which allow the usage of either array or vec for a more cleaner view
