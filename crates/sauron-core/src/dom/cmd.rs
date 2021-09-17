@@ -1,7 +1,6 @@
 //! provides functionalities for commands to be executed by the system, such as
 //! when the application starts or after the application updates.
 //!
-use crate::Callback;
 use crate::Dispatch;
 use crate::Effects;
 
@@ -11,10 +10,9 @@ use crate::Effects;
 /// Cmd required a DSP object which is the Program as an argument
 /// The emit function is called with the program argument.
 /// The callback is supplied with the program an is then executed/emitted.
-#[derive(Clone)]
 pub struct Cmd<DSP> {
     /// the functions that would be executed when this Cmd is emited
-    pub commands: Vec<Callback<DSP, ()>>,
+    pub commands: Vec<Box<dyn FnOnce(DSP)>>,
     pub(crate) modifier: Modifier,
 }
 
@@ -59,10 +57,10 @@ where
     /// creates a new Cmd from a function
     pub fn new<F>(f: F) -> Self
     where
-        F: Fn(DSP) + 'static,
+        F: FnOnce(DSP) + 'static,
     {
         Self {
-            commands: vec![Callback::from(f)],
+            commands: vec![Box::new(f)],
             modifier: Default::default(),
         }
     }
@@ -149,7 +147,7 @@ where
     pub fn emit(self, program: &DSP) {
         for cb in self.commands {
             let program_clone = program.clone();
-            cb.emit(program_clone);
+            cb(program_clone);
         }
     }
 }
@@ -158,12 +156,12 @@ impl<DSP> Cmd<DSP> {
     /// batch dispatch this msg on the next update loop
     pub fn batch_msg<MSG>(msg_list: Vec<MSG>) -> Self
     where
-        MSG: Clone + 'static,
+        MSG: 'static,
         DSP: Dispatch<MSG> + Clone + 'static,
     {
         Cmd::new(move |program: DSP| {
-            for msg in msg_list.iter() {
-                program.dispatch(msg.clone());
+            for msg in msg_list.into_iter() {
+                program.dispatch(msg);
             }
         })
     }
@@ -171,7 +169,7 @@ impl<DSP> Cmd<DSP> {
 
 impl<DSP, MSG> From<Effects<MSG, ()>> for Cmd<DSP>
 where
-    MSG: Clone + 'static,
+    MSG: 'static,
     DSP: Dispatch<MSG> + Clone + 'static,
 {
     /// Convert Effects that has only follow ups
