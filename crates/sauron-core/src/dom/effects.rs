@@ -120,4 +120,15 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
         self.modifier.log_measurements = true;
         self
     }
+
+    /// Merge all the internal objects of this Vec of Effects to produce only one.
+    pub fn merge_all(all_effects: Vec<Self>) -> Self {
+        let mut local = vec![];
+        let mut external = vec![];
+        for effect in all_effects {
+            local.extend(effect.local);
+            external.extend(effect.external);
+        }
+        Effects::new(local, external)
+    }
 }

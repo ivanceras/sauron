@@ -1,5 +1,6 @@
 #[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
+use crate::Cmd;
 use crate::{dom::dom_updater::DomUpdater, Application, Dispatch};
 use std::any::TypeId;
 use std::{cell::RefCell, rc::Rc};
@@ -112,11 +113,18 @@ where
     /// - The returned Cmd from the component update is then emitted.
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
-    fn dispatch_inner(&self, msg: MSG) {
+    fn dispatch_inner(&self, msgs: Vec<MSG>) {
         #[cfg(feature = "with-measure")]
         let t1 = crate::now();
+        #[cfg(feature = "with-measure")]
+        let msg_count = msgs.len();
         // update the app and emit the cmd returned from the update
-        let cmd = self.app.borrow_mut().update(msg);
+        let mut all_cmd = vec![];
+        for msg in msgs {
+            let cmd = self.app.borrow_mut().update(msg);
+            all_cmd.push(cmd);
+        }
+        let cmd = Cmd::batch(all_cmd);
 
         if cmd.modifier.should_update_view {
             #[cfg(feature = "with-measure")]
@@ -149,6 +157,7 @@ where
             if cmd.modifier.log_measurements && _total_patches > 0 {
                 let measurements = Measurements {
                     name: cmd.modifier.measurement_name.clone(),
+                    msg_count,
                     view_node_count: node_count,
                     update_dispatch_took: t2 - t1,
                     build_view_took: t3 - t2,
@@ -192,18 +201,22 @@ where
     APP: Application<MSG> + 'static,
 {
     #[cfg(feature = "with-request-animation-frame")]
-    fn dispatch(&self, msg: MSG) {
+    fn dispatch_multiple(&self, msgs: Vec<MSG>) {
         let program_clone = self.clone();
         let closure_raf: Closure<dyn FnMut() + 'static> =
             Closure::once(move || {
-                program_clone.dispatch_inner(msg);
+                program_clone.dispatch_inner(msgs);
             });
         crate::dom::util::request_animation_frame_for_closure(&closure_raf);
         closure_raf.forget();
     }
 
     #[cfg(not(feature = "with-request-animation-frame"))]
+    fn dispatch_multiple(&self, msgs: Vec<MSG>) {
+        self.dispatch_inner(msgs)
+    }
+
     fn dispatch(&self, msg: MSG) {
-        self.dispatch_inner(msg)
+        self.dispatch_multiple(vec![msg])
     }
 }

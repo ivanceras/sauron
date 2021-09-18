@@ -43,11 +43,14 @@ where
 }
 
 /// Contains the time it took for the last app update call for the component
+/// TODO: Maybe rename to Diagnostics
 #[derive(Clone, Debug, PartialEq)]
 pub struct Measurements {
     /// The application can name this measurement to determine where this measurement is coming
     /// from.
     pub name: String,
+    /// The number of msg processed in the update loop
+    pub msg_count: usize,
     /// The number of DOM nodes in this Component
     pub view_node_count: usize,
     /// Time it took for dispatching the Component's update function

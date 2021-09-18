@@ -162,9 +162,7 @@ impl<DSP> Cmd<DSP> {
         DSP: Dispatch<MSG> + Clone + 'static,
     {
         Cmd::new(move |program: DSP| {
-            for msg in msg_list.into_iter() {
-                program.dispatch(msg);
-            }
+            program.dispatch_multiple(msg_list);
         })
     }
 }

@@ -12,4 +12,7 @@ pub trait Dispatch<MSG> {
     /// which will produce patches.
     /// These patched will then be applied to the browser DOM.
     fn dispatch(&self, msg: MSG);
+
+    /// dispatch multiple msg
+    fn dispatch_multiple(&self, msgs: Vec<MSG>);
 }
