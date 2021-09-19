@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.43.6
+ - Add dispatch_multiple to dispatch multiple MSG at once, which add performance benefit of not having the compute the view in between updates,
+    but only when all of the MSG has been dispatched
+
 ## 0.43.5
 - Change `Cmd` such that it uses `FnOnce`, which doesn't require `MSG` to be a `Clone`.
 
