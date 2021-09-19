@@ -7,7 +7,7 @@ use sauron::{
 };
 use std::{cell::RefCell, rc::Rc};
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum Msg {
     FieldMsg(usize, field_view::Msg),
     DoubleClick,

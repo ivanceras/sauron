@@ -20,7 +20,7 @@ use std::{
     rc::Rc,
 };
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum Msg {
     ColumnMsg(usize, column_view::Msg),
     PageMsg(usize, page_view::Msg),

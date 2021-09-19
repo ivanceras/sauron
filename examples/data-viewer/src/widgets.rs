@@ -84,9 +84,6 @@ pub(crate) fn selector_box<MSG>(
 pub fn search_widget<MSG>(
     width: i32,
     attributes: impl IntoIterator<Item = Attribute<MSG>>,
-) -> Node<MSG>
-where
-    MSG: Clone,
-{
+) -> Node<MSG> {
     SearchWidget::new(width, attributes)
 }

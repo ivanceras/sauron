@@ -6,7 +6,7 @@ use sauron::{
     Application, Cmd, Node, Window,
 };
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum Msg {
     DataViewMsg(data_view::Msg),
     MouseMove(i32, i32),

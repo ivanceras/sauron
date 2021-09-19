@@ -12,7 +12,7 @@ use sauron::{
     Attribute, Component, Effects, Node,
 };
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum Msg {
     TextChange(String),
     PrimaryClicked,

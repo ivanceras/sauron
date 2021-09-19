@@ -13,7 +13,7 @@ use sauron::{
     Component, Node,
 };
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum Msg {
     RowMsg(usize, row_view::Msg),
 }

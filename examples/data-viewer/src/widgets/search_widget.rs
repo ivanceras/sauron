@@ -10,7 +10,7 @@ pub struct SearchWidget {}
 pub struct SearchIcon {}
 
 impl SearchWidget {
-    pub fn new<MSG: Clone>(
+    pub fn new<MSG>(
         width: i32,
         attributes: impl IntoIterator<Item = Attribute<MSG>>,
     ) -> Node<MSG> {

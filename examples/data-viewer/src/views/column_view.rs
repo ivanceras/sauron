@@ -4,7 +4,7 @@ use sauron::{
     Component, Effects, Node,
 };
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum Msg {
     ChangeSearch(String),
 }
