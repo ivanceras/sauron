@@ -1,14 +1,14 @@
 # Changelog
 
 ## 0.43.6
- - Add dispatch_multiple to dispatch multiple MSG at once, which add performance benefit of not having the compute the view in between updates,
+ - Add `Dispatch::dispatch_multiple` to dispatch multiple MSG at once, which add performance benefit of not having the compute the view in between updates,
     but only when all of the MSG has been dispatched
 
 ## 0.43.5
 - Change `Cmd` such that it uses `FnOnce`, which doesn't require `MSG` to be a `Clone`.
 
 ## 0.43.4
-- Remove log::trace on with-measure flag, it is not needed anymore since the details is already passed in the Measurements object
+- Remove `log::trace` on `with-measure` feature flag, it is not needed anymore since the details is already passed in the Measurements object
 
 ## 0.43.3
 - Call only measurements only when `with-measure` feature flag is enabled.
@@ -23,7 +23,7 @@
 - Improve code for handling TextNodes, hacks to create comment as separator is now removed
 - Use thread_local for caching Window, Document and NodeId counter
 - Add modifier for Effects
-- Make the on_scroll work for window as well
+- Make the `on_scroll` work for window as well
 - Rename Generics PMSG (Parent Msg) to XMSG (External Msg)
 
 ## 0.43.1
