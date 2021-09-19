@@ -5,7 +5,7 @@ use sauron::{
     Node,
 };
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum Msg {
     FieldMsg(usize, field::Msg),
     FieldInteracted(field::Interaction),

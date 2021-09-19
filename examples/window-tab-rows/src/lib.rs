@@ -10,7 +10,7 @@ mod field;
 mod row;
 mod tab;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum Msg {
     WindowClick,
     ActivateTab(usize),

@@ -9,7 +9,7 @@ pub enum Interaction {
     Modify(String),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq)]
 pub enum Msg {
     FieldClick,
     InputChange(String),
