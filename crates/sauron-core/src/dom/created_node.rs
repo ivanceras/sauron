@@ -10,8 +10,8 @@ use std::cell::Cell;
 use std::collections::HashMap;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
-    self, Element, EventTarget, HtmlElement, HtmlInputElement,
-    HtmlTextAreaElement, Node, Text,
+    self, Element, EventTarget, HtmlDetailsElement, HtmlElement,
+    HtmlInputElement, HtmlTextAreaElement, Node, Text,
 };
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
@@ -249,6 +249,26 @@ impl CreatedNode {
                             textarea.set_value(&merged_plain_values);
                         }
                     }
+                    // explicitly call set_open for details
+                    "open" => {
+                        log::trace!("attribute open in sauron: {:?}", element);
+                        if let Some(details) =
+                            element.dyn_ref::<HtmlDetailsElement>()
+                        {
+                            log::trace!("in sauron details open..");
+                            let is_open: bool = plain_values
+                                .first()
+                                .map(|v| {
+                                    v.get_simple()
+                                        .map(|v| v.as_bool())
+                                        .flatten()
+                                })
+                                .flatten()
+                                .unwrap_or(false);
+                            log::trace!("is_open: {}", is_open);
+                            details.set_open(is_open);
+                        }
+                    }
                     // we explicitly call `set_checked` function on the html element
                     "checked" => {
                         if let Some(input) =
@@ -385,6 +405,10 @@ impl CreatedNode {
         if *attr.name() == "checked" {
             if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
                 input.set_checked(false);
+            }
+        } else if *attr.name() == "open" {
+            if let Some(details) = element.dyn_ref::<HtmlDetailsElement>() {
+                details.set_open(false);
             }
         }
         Ok(())

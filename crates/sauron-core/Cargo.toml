@@ -50,6 +50,7 @@ features = [
     "InputEvent",
     "Headers",
     "HtmlCollection",
+    "HtmlDetailsElement",
     "HtmlElement",
     "HtmlHeadElement",
     "HtmlInputElement",
