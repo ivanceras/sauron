@@ -163,7 +163,7 @@ macro_rules! declare_html_events{
         }
 
         /// html events
-        pub const HTML_EVENTS: [&'static str; 33] = [$(stringify!($event),)*];
+        pub const HTML_EVENTS: [&'static str; 34] = [$(stringify!($event),)*];
     }
 }
 
@@ -284,6 +284,7 @@ declare_html_events! {
     on_keydown => keydown => to_keyboard_event => KeyboardEvent;
     on_keypress => keypress => to_keyboard_event => KeyboardEvent;
     on_keyup => keyup => to_keyboard_event => KeyboardEvent;
+    on_toggle => toggle => to_webevent => web_sys::Event;
     on_focus => focus => to_webevent => web_sys::Event;
     on_blur => blur => to_webevent => web_sys::Event;
     on_reset => reset => to_webevent => web_sys::Event;

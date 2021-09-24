@@ -402,14 +402,18 @@ impl CreatedNode {
 
         element.remove_attribute(attr.name())?;
 
-        if *attr.name() == "checked" {
-            if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
-                input.set_checked(false);
+        match *attr.name() {
+            "checked" => {
+                if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
+                    input.set_checked(false);
+                }
             }
-        } else if *attr.name() == "open" {
-            if let Some(details) = element.dyn_ref::<HtmlDetailsElement>() {
-                details.set_open(false);
+            "open" => {
+                if let Some(details) = element.dyn_ref::<HtmlDetailsElement>() {
+                    details.set_open(false);
+                }
             }
+            _ => (),
         }
         Ok(())
     }
