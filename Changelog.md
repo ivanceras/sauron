@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.43.7
+- Add support for details/disclosure element and its open attribute
+- Add toggle event.
+
 ## 0.43.6
  - Add `Dispatch::dispatch_multiple` to dispatch multiple MSG at once, which add performance benefit of not having the compute the view in between updates,
     but only when all of the MSG has been dispatched
