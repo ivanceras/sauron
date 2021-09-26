@@ -21,8 +21,6 @@ use web_sys::{Element, Node};
 /// that we desire.
 /// This is usually used after diffing two virtual nodes.
 ///
-/// Note: If Program is None, it is a dumb patch, meaning
-/// there is no event listener attached or changed
 pub fn patch<DSP, MSG>(
     program: &DSP,
     root_node: &mut Node,

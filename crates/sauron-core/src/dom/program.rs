@@ -113,17 +113,20 @@ where
     /// - The returned Cmd from the component update is then emitted.
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
+    ///
+    ///
+    /// TODO: split this function into 2.
+    /// - update the app with msgs (use a request_idle_callback)
+    /// - compute the view and update the dom (use request_animation_frame )
     fn dispatch_inner(&self, msgs: Vec<MSG>) {
         #[cfg(feature = "with-measure")]
         let t1 = crate::now();
         #[cfg(feature = "with-measure")]
         let msg_count = msgs.len();
         // update the app and emit the cmd returned from the update
-        let mut all_cmd = vec![];
-        for msg in msgs {
-            let cmd = self.app.borrow_mut().update(msg);
-            all_cmd.push(cmd);
-        }
+        let all_cmd = msgs
+            .into_iter()
+            .map(|msg| self.app.borrow_mut().update(msg));
         let cmd = Cmd::batch(all_cmd);
 
         if cmd.modifier.should_update_view {

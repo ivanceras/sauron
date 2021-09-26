@@ -19,6 +19,11 @@ pub trait Component<MSG, XMSG> {
     fn style(&self) -> String {
         String::new()
     }
+
+    /// Component can have component id to identify themselves
+    fn get_component_id(&self) -> Option<&String> {
+        None
+    }
 }
 
 /// A Container have children that is set from the parent component
