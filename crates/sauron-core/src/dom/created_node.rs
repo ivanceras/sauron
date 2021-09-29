@@ -10,8 +10,9 @@ use std::cell::Cell;
 use std::collections::HashMap;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
-    self, Element, EventTarget, HtmlDetailsElement, HtmlElement,
-    HtmlInputElement, HtmlTextAreaElement, Node, Text,
+    self, Element, EventTarget, HtmlButtonElement, HtmlDetailsElement,
+    HtmlElement, HtmlInputElement, HtmlMenuItemElement, HtmlTextAreaElement,
+    Node, Text,
 };
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
@@ -237,55 +238,38 @@ impl CreatedNode {
                     });
             } else {
                 match *attr.name() {
-                    // we explicitly call the `set_value` function in the html element
                     "value" => {
-                        if let Some(input) =
-                            element.dyn_ref::<HtmlInputElement>()
-                        {
-                            input.set_value(&merged_plain_values);
-                        } else if let Some(textarea) =
-                            element.dyn_ref::<HtmlTextAreaElement>()
-                        {
-                            textarea.set_value(&merged_plain_values);
-                        }
+                        Self::set_value(element, &merged_plain_values);
                     }
-                    // explicitly call set_open for details
                     "open" => {
-                        log::trace!("attribute open in sauron: {:?}", element);
-                        if let Some(details) =
-                            element.dyn_ref::<HtmlDetailsElement>()
-                        {
-                            log::trace!("in sauron details open..");
-                            let is_open: bool = plain_values
-                                .first()
-                                .map(|v| {
-                                    v.get_simple()
-                                        .map(|v| v.as_bool())
-                                        .flatten()
-                                })
-                                .flatten()
-                                .unwrap_or(false);
-                            log::trace!("is_open: {}", is_open);
-                            details.set_open(is_open);
-                        }
+                        let is_open: bool = plain_values
+                            .first()
+                            .map(|v| {
+                                v.get_simple().map(|v| v.as_bool()).flatten()
+                            })
+                            .flatten()
+                            .unwrap_or(false);
+                        Self::set_open(element, is_open);
                     }
-                    // we explicitly call `set_checked` function on the html element
                     "checked" => {
-                        if let Some(input) =
-                            element.dyn_ref::<HtmlInputElement>()
-                        {
-                            let checked: bool = plain_values
-                                .first()
-                                .map(|av| {
-                                    av.get_simple()
-                                        .map(|v| v.as_bool())
-                                        .flatten()
-                                })
-                                .flatten()
-                                .unwrap_or(false);
-
-                            input.set_checked(checked);
-                        }
+                        let is_checked: bool = plain_values
+                            .first()
+                            .map(|av| {
+                                av.get_simple().map(|v| v.as_bool()).flatten()
+                            })
+                            .flatten()
+                            .unwrap_or(false);
+                        Self::set_checked(element, is_checked)
+                    }
+                    "disabled" => {
+                        let is_disabled: bool = plain_values
+                            .first()
+                            .map(|av| {
+                                av.get_simple().map(|v| v.as_bool()).flatten()
+                            })
+                            .flatten()
+                            .unwrap_or(false);
+                        Self::set_disabled(element, is_disabled);
                     }
                     _ => {
                         element
@@ -392,6 +376,77 @@ impl CreatedNode {
         html_element.focus().expect("must focus")
     }
 
+    /// explicitly call `set_checked` function on the html element
+    /// since setting the attribute to false will not unchecked it
+    fn set_checked(element: &Element, is_checked: bool) {
+        if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
+            input.set_checked(is_checked);
+        } else if let Some(menu_item) = element.dyn_ref::<HtmlMenuItemElement>()
+        {
+            menu_item.set_checked(is_checked);
+        }
+    }
+
+    /// explicitly call set_open for details
+    /// since setting the attribute `open` to false will not close it.
+    fn set_open(element: &Element, is_open: bool) {
+        if let Some(details) = element.dyn_ref::<HtmlDetailsElement>() {
+            details.set_open(is_open);
+        }
+    }
+
+    /// explicitly call on `set_disabled`
+    /// since setting the attribute `disabled` false will not enable it.
+    // TODO:
+    // HtmlFieldSetElement
+    // HtmlLinkElement
+    // HtmlOptGroupElement
+    // HtmlOptionElement
+    // HtmlSelectElement
+    // HtmlStyleElement
+    // HtmlTextAreaElement
+    // StyleSheet
+    fn set_disabled(element: &Element, is_disabled: bool) {
+        if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
+            input.set_disabled(is_disabled);
+        } else if let Some(btn) = element.dyn_ref::<HtmlButtonElement>() {
+            btn.set_disabled(is_disabled);
+        } else if let Some(menu_item) = element.dyn_ref::<HtmlMenuItemElement>()
+        {
+            menu_item.set_disabled(is_disabled);
+        }
+    }
+
+    /// we explicitly call the `set_value` function in the html element
+    //
+    // TODO:
+    //    web_sys::Attr::set_value
+    //    web_sys::AudioParam::set_value
+    //    web_sys::DomTokenList::set_value
+    //    web_sys::HtmlButtonElement::set_value
+    //    web_sys::HtmlDataElement::set_value
+    //    web_sys::HtmlInputElement::set_value
+    //    web_sys::HtmlLiElement::set_value
+    //    web_sys::HtmlMeterElement::set_value
+    //    web_sys::HtmlOptionElement::set_value
+    //    web_sys::HtmlOutputElement::set_value
+    //    web_sys::HtmlParamElement::set_value
+    //    web_sys::HtmlProgressElement::set_value
+    //    web_sys::HtmlSelectElement::set_value
+    //    web_sys::HtmlTextAreaElement::set_value
+    //    web_sys::RadioNodeList::set_value
+    //    web_sys::SvgAngle::set_value
+    //    web_sys::SvgLength::set_value
+    //    web_sys::SvgNumber::set_value
+    fn set_value(element: &Element, value: &str) {
+        if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
+            input.set_value(value);
+        } else if let Some(textarea) = element.dyn_ref::<HtmlTextAreaElement>()
+        {
+            textarea.set_value(value);
+        }
+    }
+
     /// remove element attribute,
     /// takes care of special case such as checked
     pub fn remove_element_attribute<MSG>(
@@ -403,15 +458,17 @@ impl CreatedNode {
         element.remove_attribute(attr.name())?;
 
         match *attr.name() {
-            "checked" => {
-                if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
-                    input.set_checked(false);
-                }
+            "value" => {
+                Self::set_value(element, "");
             }
             "open" => {
-                if let Some(details) = element.dyn_ref::<HtmlDetailsElement>() {
-                    details.set_open(false);
-                }
+                Self::set_open(element, false);
+            }
+            "checked" => {
+                Self::set_checked(element, false);
+            }
+            "disabled" => {
+                Self::set_disabled(element, false);
             }
             _ => (),
         }
