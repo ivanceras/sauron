@@ -78,6 +78,10 @@ fn attribute_to_tokens(attribute: &Node) -> TokenStream {
                         quote::quote! {
                             sauron::events::#name(#value)
                         }
+                    } else if name.eq("disabled") {
+                       quote::quote! {
+                           sauron::html::attributes::disabled(#value)
+                       } 
                     } else {
                         let name = convert_name(&name);
                         quote::quote! {
