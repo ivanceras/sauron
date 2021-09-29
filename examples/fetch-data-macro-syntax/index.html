@@ -1,0 +1,21 @@
+
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <title>Fetch data example app</title>
+    <style type="text/css">
+        body {
+            font-family: "Fira Sans", "Courier New", Courier,"Lucida Sans Typewriter","Lucida Typewriter",monospace;
+        }
+    </style>
+  </head>
+  <body>
+    <script type=module>
+        import init from './pkg/fetch_data_macro_syntax.js';
+        async function start(){
+            await init().catch(console.error);
+        }
+        start();
+    </script>
+  </body>
+</html>

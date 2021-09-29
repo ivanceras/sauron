@@ -65,6 +65,7 @@ members = [
     "examples/minimal",
     "examples/minimal-macro-syntax",
     "examples/fetch-data",
+    "examples/fetch-data-macro-syntax",
     "examples/interactive",
     "examples/ssr-forms",
     "examples/todomvc",
