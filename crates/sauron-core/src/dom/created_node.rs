@@ -11,8 +11,9 @@ use std::collections::HashMap;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
     self, Element, EventTarget, HtmlButtonElement, HtmlDetailsElement,
-    HtmlElement, HtmlInputElement, HtmlMenuItemElement, HtmlTextAreaElement,
-    Node, Text,
+    HtmlElement, HtmlFieldSetElement, HtmlInputElement, HtmlLinkElement,
+    HtmlMenuItemElement, HtmlOptGroupElement, HtmlOptionElement,
+    HtmlSelectElement, HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
@@ -377,7 +378,11 @@ impl CreatedNode {
     }
 
     /// explicitly call `set_checked` function on the html element
-    /// since setting the attribute to false will not unchecked it
+    /// since setting the attribute to false will not unchecked it.
+    ///
+    /// There are only 2 elements where set_checked is applicable:
+    /// - input
+    /// - menuitem
     fn set_checked(element: &Element, is_checked: bool) {
         if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
             input.set_checked(is_checked);
@@ -389,6 +394,12 @@ impl CreatedNode {
 
     /// explicitly call set_open for details
     /// since setting the attribute `open` to false will not close it.
+    ///
+    /// TODO: HtmlDialogElement ( but it is not supported on firefox and in safarit, only works on chrome)
+    ///
+    /// Applies to:
+    ///  - dialog
+    ///  - details
     fn set_open(element: &Element, is_open: bool) {
         if let Some(details) = element.dyn_ref::<HtmlDetailsElement>() {
             details.set_open(is_open);
@@ -397,20 +408,40 @@ impl CreatedNode {
 
     /// explicitly call on `set_disabled`
     /// since setting the attribute `disabled` false will not enable it.
-    // TODO:
-    // HtmlFieldSetElement
-    // HtmlLinkElement
-    // HtmlOptGroupElement
-    // HtmlOptionElement
-    // HtmlSelectElement
-    // HtmlStyleElement
-    // HtmlTextAreaElement
-    // StyleSheet
+    ///
+    /// These are 10 elements that we can call `set_disabled` function to.
+    /// - input
+    /// - button
+    /// - textarea
+    /// - style
+    /// - link
+    /// - select
+    /// - option
+    /// - optgroup
+    /// - fieldset
+    /// - menuitem
     fn set_disabled(element: &Element, is_disabled: bool) {
         if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
             input.set_disabled(is_disabled);
         } else if let Some(btn) = element.dyn_ref::<HtmlButtonElement>() {
             btn.set_disabled(is_disabled);
+        } else if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>()
+        {
+            text_area.set_disabled(is_disabled);
+        } else if let Some(style_elem) = element.dyn_ref::<HtmlStyleElement>() {
+            style_elem.set_disabled(is_disabled);
+        } else if let Some(link_elem) = element.dyn_ref::<HtmlLinkElement>() {
+            link_elem.set_disabled(is_disabled);
+        } else if let Some(select) = element.dyn_ref::<HtmlSelectElement>() {
+            select.set_disabled(is_disabled);
+        } else if let Some(option) = element.dyn_ref::<HtmlOptionElement>() {
+            option.set_disabled(is_disabled);
+        } else if let Some(opt_group) = element.dyn_ref::<HtmlOptGroupElement>()
+        {
+            opt_group.set_disabled(is_disabled);
+        } else if let Some(field_set) = element.dyn_ref::<HtmlFieldSetElement>()
+        {
+            field_set.set_disabled(is_disabled);
         } else if let Some(menu_item) = element.dyn_ref::<HtmlMenuItemElement>()
         {
             menu_item.set_disabled(is_disabled);
@@ -418,6 +449,8 @@ impl CreatedNode {
     }
 
     /// we explicitly call the `set_value` function in the html element
+    ///
+    /// Note: for most of other elements, setting the attribute value will do just fine.
     //
     // TODO:
     //    web_sys::Attr::set_value
@@ -425,7 +458,6 @@ impl CreatedNode {
     //    web_sys::DomTokenList::set_value
     //    web_sys::HtmlButtonElement::set_value
     //    web_sys::HtmlDataElement::set_value
-    //    web_sys::HtmlInputElement::set_value
     //    web_sys::HtmlLiElement::set_value
     //    web_sys::HtmlMeterElement::set_value
     //    web_sys::HtmlOptionElement::set_value
@@ -433,7 +465,6 @@ impl CreatedNode {
     //    web_sys::HtmlParamElement::set_value
     //    web_sys::HtmlProgressElement::set_value
     //    web_sys::HtmlSelectElement::set_value
-    //    web_sys::HtmlTextAreaElement::set_value
     //    web_sys::RadioNodeList::set_value
     //    web_sys::SvgAngle::set_value
     //    web_sys::SvgLength::set_value
