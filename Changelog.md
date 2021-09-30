@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.43.8
  - Add support for `disabled` attribute to be explicitly called on their corresponding DOM html element functions to explicitly set the boolean value.
      - This allows the users to use `disabled=true` when using the `node!` macro with the intuitive expected result as opposed to the default value in html which only checks
         for the presence of the attribute.
