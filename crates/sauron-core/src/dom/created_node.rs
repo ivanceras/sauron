@@ -196,6 +196,10 @@ impl CreatedNode {
     }
 
     /// set the element attribute
+    ///
+    /// Note: this is called in a loop, so setting the attributes, and style will not be on
+    /// the same call, but on a subsequent call to each other. Using the if-else-if here for
+    /// attributes, style, function_call.
     #[track_caller]
     pub fn set_element_attribute<DSP, MSG>(
         program: &DSP,
