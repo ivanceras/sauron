@@ -1,12 +1,7 @@
 #![deny(warnings)]
 use chrono::Local;
-use sauron::{
-    html::{
-        attributes::*,
-        *,
-    },
-    *,
-};
+use sauron::prelude::*;
+use sauron::html::attributes;
 use serde_derive::{
     Deserialize,
     Serialize,
@@ -30,7 +25,7 @@ fn view(form_data: Option<FormData>) -> Node<()> {
     form(
         [
             action("/submission"),
-            method("GET"),
+            attributes::method("GET"),
             class("some-class"),
             id("some-id"),
             attr("form_data-id", 1),
@@ -46,7 +41,7 @@ fn view(form_data: Option<FormData>) -> Node<()> {
                     text("Your name is: "),
                     input(
                         [
-                            name("name"),
+                            attributes::name("name"),
                             r#type("text"),
                             placeholder("John Smith"),
                         ],
@@ -67,7 +62,7 @@ fn view(form_data: Option<FormData>) -> Node<()> {
                         [],
                         [textarea(
                             [
-                                name("biography"),
+                                attributes::name("biography"),
                                 rows(10),
                                 cols(80),
                                 placeholder("I'm a..."),
@@ -91,7 +86,7 @@ fn view(form_data: Option<FormData>) -> Node<()> {
                     text("What are you thinking right now?"),
                     input(
                         [
-                            name("thought"),
+                            attributes::name("thought"),
                             r#type("text"),
                             placeholder("Elephants..."),
                         ],
