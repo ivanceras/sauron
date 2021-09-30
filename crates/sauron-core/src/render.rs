@@ -180,15 +180,37 @@ impl<MSG> Render for Attribute<MSG> {
         } = attributes::partition_callbacks_from_plain_styles_and_func_calls(
             self,
         );
-        if let Some(merged_plain_values) =
-            attributes::merge_plain_attributes_values(&plain_values)
-        {
-            write!(buffer, "{}=\"{}\"", self.name(), merged_plain_values)?;
-        }
-        if let Some(merged_styles) =
-            attributes::merge_styles_attributes_values(&styles)
-        {
-            write!(buffer, "{}=\"{}\"", self.name(), merged_styles)?;
+
+        // These are attribute values which specifies the state of the element
+        // regardless of it's value.
+        // This is counter-intuitive to what we are trying to do, therefore
+        // we use something that if the value is false, we skip the attribute from being part
+        // of the render which then satisfies our intent to the the browser behavior.
+        //
+        // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fe-disabled
+        let boolean_attributes = ["open", "checked", "disabled"];
+
+        let bool_value: bool = plain_values
+            .first()
+            .map(|v| v.get_simple().map(|v| v.as_bool()).flatten())
+            .flatten()
+            .unwrap_or(false);
+
+        // skip this attribute if the boolean attributes evaluates to false
+        let should_skip_attribute =
+            boolean_attributes.contains(self.name()) && !bool_value;
+
+        if !should_skip_attribute {
+            if let Some(merged_plain_values) =
+                attributes::merge_plain_attributes_values(&plain_values)
+            {
+                write!(buffer, "{}=\"{}\"", self.name(), merged_plain_values)?;
+            }
+            if let Some(merged_styles) =
+                attributes::merge_styles_attributes_values(&styles)
+            {
+                write!(buffer, "{}=\"{}\"", self.name(), merged_styles)?;
+            }
         }
         Ok(())
     }

@@ -6,6 +6,18 @@ use sauron::{
 };
 
 #[test]
+fn test_disabled() {
+    let view: Node<()> = node! { <input type="text" disabled=false/>};
+    assert_eq!(view.render_to_string(), r#"<input type="text" />"#);
+}
+
+#[test]
+fn test_checked() {
+    let view: Node<()> = node! { <input type="text" checked=false/>};
+    assert_eq!(view.render_to_string(), r#"<input type="text" />"#);
+}
+
+#[test]
 fn test_render() {
     let view1: Node<()> = main(
         vec![class("container")],

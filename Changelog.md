@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+ - Add support for `disabled` attribute to be explicitly called on their corresponding DOM html element functions to explicitly set the boolean value.
+     - This allows the users to use `disabled=true` when using the `node!` macro with the intuitive expected result as opposed to the default value in html which only checks
+        for the presence of the attribute.
+ - Improve the `Render::render_to_string` function to skip attributes: `open`, `checked`, `disabled` when the value evaluates to false as the mere presence of this attribute alone will
+    make the attribute the same as evaluated to true. We mitigate this counter-intuitive behavior of the browser such that we use the 2 states of the boolean value, where `true` will
+    make the attribute be in effect, while `false` skip the attribute and/or render the element attribute in the opposite state.
+ - Improve `Cmd` accumulation in dispatch inner using functional code
+
 ## 0.43.7
 - Add support for details/disclosure element and its open attribute
 - Add toggle event.
