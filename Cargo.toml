@@ -61,6 +61,8 @@ members = [
     "crates/sauron-node-macro",
     "examples/arc-reactor",
     "examples/counter",
+    "examples/custom-elements",
+    "examples/custom-elements-macro-syntax",
     "examples/custom_widget",
     "examples/minimal",
     "examples/minimal-macro-syntax",

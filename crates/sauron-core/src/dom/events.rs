@@ -9,7 +9,9 @@ pub use web_sys::ClipboardEvent;
 pub use web_sys::{
     AnimationEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TransitionEvent,
 };
-use web_sys::{EventTarget, HtmlInputElement, HtmlTextAreaElement};
+use web_sys::{
+    EventTarget, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
+};
 
 /// Map the Event to DomEvent, which are browser events
 #[derive(Debug, Clone, PartialEq)]
@@ -231,6 +233,8 @@ fn to_input_event(event: Event) -> InputEvent {
         InputEvent::new(input.value(), web_event)
     } else if let Some(textarea) = target.dyn_ref::<HtmlTextAreaElement>() {
         InputEvent::new(textarea.value(), web_event)
+    } else if let Some(select) = target.dyn_ref::<HtmlSelectElement>() {
+        InputEvent::new(select.value(), web_event)
     } else {
         panic!("fail in mapping event into input event");
     }
