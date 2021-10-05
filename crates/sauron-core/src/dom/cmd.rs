@@ -65,7 +65,8 @@ where
         }
     }
 
-    /// creates a unified Cmd which batches all the other Cmds in one.
+    /// When you need the runtime to perform couple of commands, you can batch
+    /// then together.
     pub fn batch(cmds: impl IntoIterator<Item = Self>) -> Self {
         let mut commands = vec![];
         let mut should_update_view = false;
@@ -103,7 +104,7 @@ where
         self
     }
 
-    /// A Cmd with no callback, similar to NoOp.
+    /// Tell the runtime that there are no commands.
     pub fn none() -> Self {
         Cmd {
             commands: vec![],
@@ -118,13 +119,13 @@ where
         self
     }
 
-    /// Modify the Cmd such that it will not do an update on the view when it is executed
+    /// Modify the command such that it will not do an update on the view when it is executed.
     pub fn no_render(mut self) -> Self {
         self.modifier.should_update_view = false;
         self
     }
 
-    /// Modify the Cmd such that it will log measurement when it is executed
+    /// Modify the command such that it will log measurement when it is executed
     pub fn measure(mut self) -> Self {
         self.modifier.log_measurements = true;
         self
@@ -153,9 +154,9 @@ where
 }
 
 impl<DSP> Cmd<DSP> {
-    /// batch dispatch this msg on the next update loop
+    /// Tell the runtime to execute subsequent update of the App with the message list.
+    /// A single call to update the view is then executed thereafter.
     ///
-    /// TODO: make an fn: `Program::dispatch_multi(msgs: Vec<MSG>, modifier: Modifier)`
     pub fn batch_msg<MSG>(msg_list: Vec<MSG>) -> Self
     where
         MSG: 'static,

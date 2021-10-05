@@ -16,6 +16,9 @@ where
         Cmd::none()
     }
 
+    /// Update the component with a message.
+    /// The update function returns a Cmd, which can be executed by the runtime.
+    ///
     /// Called each time an action is triggered from the view
     fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>
     where

@@ -1,6 +1,4 @@
-use sauron::html::text;
 use sauron::prelude::*;
-use sauron::{node, Application, Cmd, Node, Program};
 
 #[derive(Debug)]
 pub enum Msg {
