@@ -21,6 +21,7 @@ cfg-if = "0.1"
 [features]
 default = ["with-dom", "with-node-macro", "with-request-animation-frame"]
 with-dom = ["sauron-core/with-dom"]
+with-lookup = ["sauron-core/with-lookup"]
 
 # request-animation-frame should be ON all the time, otherwise
 # your webapp will have a very poor UI responsiveness
