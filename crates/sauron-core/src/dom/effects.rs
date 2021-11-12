@@ -29,6 +29,16 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
         }
     }
 
+    /// split the local and external MSG of this effect
+    pub fn unzip(self) -> (Vec<MSG>, Vec<XMSG>) {
+        let Self {
+            local,
+            external,
+            modifier: _,
+        } = self;
+        (local, external)
+    }
+
     /// Create an Effects with  local messages that will be executed on the next update loop on this Component
     pub fn with_local(local: impl IntoIterator<Item = MSG>) -> Self {
         Self {
@@ -130,5 +140,16 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
             external.extend(effect.external);
         }
         Effects::new(local, external)
+    }
+
+    /// Extern the local and external MSG of this Effect
+    pub fn extend(
+        mut self,
+        local: impl IntoIterator<Item = MSG>,
+        external: impl IntoIterator<Item = XMSG>,
+    ) -> Self {
+        self.local.extend(local);
+        self.external.extend(external);
+        self
     }
 }
