@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.43.10
+- Add `unzip` and `extend` method to `Effects`
+
 ## 0.43.9
 - Add support for `<select>` element in converting to event into `InputEvent`.
 - Add example using `custom-elements`.
