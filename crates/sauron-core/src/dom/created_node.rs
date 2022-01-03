@@ -464,11 +464,9 @@ impl CreatedNode {
     //    web_sys::HtmlDataElement::set_value
     //    web_sys::HtmlLiElement::set_value
     //    web_sys::HtmlMeterElement::set_value
-    //    web_sys::HtmlOptionElement::set_value
     //    web_sys::HtmlOutputElement::set_value
     //    web_sys::HtmlParamElement::set_value
     //    web_sys::HtmlProgressElement::set_value
-    //    web_sys::HtmlSelectElement::set_value
     //    web_sys::RadioNodeList::set_value
     //    web_sys::SvgAngle::set_value
     //    web_sys::SvgLength::set_value
@@ -479,6 +477,12 @@ impl CreatedNode {
         } else if let Some(textarea) = element.dyn_ref::<HtmlTextAreaElement>()
         {
             textarea.set_value(value);
+        } else if let Some(select) = element.dyn_ref::<HtmlSelectElement>()
+        {
+            select.set_value(value);
+        } else if let Some(option) = element.dyn_ref::<HtmlOptionElement>()
+        {
+            option.set_value(value);
         }
     }
 
