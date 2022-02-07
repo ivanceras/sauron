@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.43.11
+-  Correctly set value on HtmlSelectElement and HtmlOptionElement
+
 ## 0.43.10
 - Add `unzip` and `extend` method to `Effects`
 
