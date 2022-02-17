@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.44.0
+- Refactor on apply_patches due to changes in mt-dom (collapsing the Patch struct)
+
 ## 0.43.11
 -  Correctly set value on HtmlSelectElement and HtmlOptionElement
 
