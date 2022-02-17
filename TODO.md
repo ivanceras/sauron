@@ -21,8 +21,9 @@
      - This will remove the need for hardcode HTML_STYLES lookup, which could be a performance penalty
  - [ ] Add the RealWorld example
      - Use the elm base code https://github.com/rtfeldman/elm-spa-example
- - [ ] **breaking** ~put back `style` as a normal attribute~, to avoid possible confusion to new users.
+ ~~- [ ] **breaking** ~put back `style` as a normal attribute~, to avoid possible confusion to new users.
      - Cancelled, since style is treated differently in attributes.
+     ~~
  - [X] **breaking** merge `Browser` to `Window`.
  - [ ] Add `and_then`, `sequence` to `Cmd` to perform a task after the preceding Cmd succeeds.
  - [ ] Create a document on why it is needed for events such as `on_click` to have a copy of the variables outside of its environment.
@@ -32,7 +33,7 @@
  - [X] Merge `init` and `init_with_program`
     - It make sense to make `init` mutable so the developer can manipulate the component at initialization stage.
     - [X] Make call to `init` right after the Application is mounted into the `DOM`, rather than before.
-    - [ ] Simplify init to not have access to `Program` since it can return a `Cmd`. It can however, modify itself.
+    - [X] Simplify `Application::init` to not have access to `Program` since it can return a `Cmd`. It can however, modify itself.
  - [X] Rename the type alias `Callback` into `EventCallback` or `Listener`.
       This way, we can use the more generic `Callback` in Components and in `Cmd`.
       - [X] Recreate Callback from a clean state, with no TypeId and used it in `Cmd`.
@@ -106,7 +107,7 @@
     - [X] Change style that it returns only a `String` instead of `Vec<String>`.
     - [X] The injected style shall have a class name equal to the the type_id of the `APP`.
 - [X] Add `maybe_attr(name: &str, value: Option<Value>)` to set the attribute if there is a value. empty otherwise.
-- [ ] Centralize the handling of attributes tha has a state such as `value`, `checked`,.
+- [X] Centralize the handling of attributes tha has a state such as `value`, `checked`,.
 
 
 
@@ -137,9 +138,10 @@
     - [ ] Initial attempt https://github.com/ivanceras/performance-test-sauron
 - ~~[ ] Use Weak pointer for program instead of Rc where strong reference is not needed.~~
        - Program stays as long as the user is using the app.
-- [ ] Add `Program::batch_dispatch(&self, msgs: Vec<MSG>)` to call update on each of the messages before
+- [X] Add `Program::batch_dispatch(&self, msgs: Vec<MSG>)` to call update on each of the messages before
     calling on the view, this would improve performance when there are multiple messages to be dispatched to the application
-- [ ] Make a benchmark for building views with more than 2000 nodes, like a text-editor.
+    - [X] implemented with `dispatch_multiple`
+- [X] Make a benchmark for building views with more than 2000 nodes, like a text-editor.
     - There is a huge performance regression in between 0.40 and 0.42
     - [X] It was cause by jss `style!` macro where the lookup for style name is recreated everytime,
           due to the use of `const` instead of `static` in a `once_cell::Lazy` declaration. This is fixed in `jss 0.3.3`
@@ -159,4 +161,4 @@
      or the target element has no parent, therefore can not replace/insert the node.
      - This is solved by getting the type_id of the closure.
 - [X] Add more test for recycled nodes with keys
-- [ ] When 2 text are next to each other, the second text will become a comment
+- [X] When 2 text are next to each other, the second text will become a comment
