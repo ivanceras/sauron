@@ -2,7 +2,7 @@
 
 use crate::mt_dom::TreePath;
 use sauron::prelude::*;
-use sauron_core::html::{attributes::*, events::*, *};
+
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;

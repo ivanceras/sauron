@@ -1,6 +1,6 @@
 use crate::mt_dom::TreePath;
 use sauron::prelude::*;
-use sauron_core::html::{attributes::*, events::*, *};
+
 
 #[test]
 fn comments_next_to_each_other() {
