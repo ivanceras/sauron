@@ -86,10 +86,10 @@ fn node_patched_properly() {
     log::debug!("patches: {:#?}", patches);
     assert_eq!(
         patches,
-        vec![
-            RemoveNode::new(Some(&"article"), TreePath::new(vec![0, 0, 1]))
-                .into()
-        ]
+        vec![Patch::remove_node(
+            Some(&"article"),
+            TreePath::new(vec![0, 0, 1])
+        )]
     );
 
     let mut old_html = String::new();
@@ -168,10 +168,10 @@ fn node_patched_properly_remove_from_start() {
     log::debug!("patches: {:#?}", patches);
     assert_eq!(
         patches,
-        vec![
-            RemoveNode::new(Some(&"article"), TreePath::new(vec![0, 0, 0]))
-                .into()
-        ]
+        vec![Patch::remove_node(
+            Some(&"article"),
+            TreePath::new(vec![0, 0, 0])
+        )]
     );
 
     let mut old_html = String::new();
@@ -252,13 +252,12 @@ fn node_patched_properly_text_changed() {
     assert_eq!(
         patches,
         vec![
-            Patch::ChangeText(ChangeText::new(
-                &Text::new("item3"),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 2, 0]),
+                &Text::new("item3"),
                 &Text::new("item3 with changes")
-            )),
-            RemoveNode::new(Some(&"article"), TreePath::new(vec![0, 0, 0]))
-                .into()
+            ),
+            Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0, 0]))
         ]
     );
 
@@ -346,18 +345,17 @@ fn mixed_keyed_and_non_keyed_elements() {
     assert_eq!(
         patches,
         vec![
-            Patch::ChangeText(ChangeText::new(
-                &Text::new("item3"),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 2, 0,]),
+                &Text::new("item3"),
                 &Text::new("item3 with changes")
-            )),
-            RemoveNode::new(Some(&"article"), TreePath::new(vec![0, 0, 0]),)
-                .into(),
-            Patch::ChangeText(ChangeText::new(
-                &Text::new("3 items left"),
+            ),
+            Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0, 0]),),
+            Patch::change_text(
                 TreePath::new(vec![0, 1, 0]),
+                &Text::new("3 items left"),
                 &Text::new("2 items left")
-            ))
+            )
         ]
     );
 

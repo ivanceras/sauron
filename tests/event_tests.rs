@@ -187,10 +187,10 @@ fn remove_event_from_truncated_children() {
     assert_eq!(
         diff,
         vec![
-            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 1]),).into(),
-            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 2]),).into(),
-            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 3]),).into(),
-            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 4]),).into(),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 1]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 2]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 3]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 4]),),
         ],
     );
     let mut dom_updater =
@@ -233,10 +233,10 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     assert_eq!(
         diff,
         vec![
-            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 1]),).into(),
-            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 2]),).into(),
-            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 3]),).into(),
-            RemoveNode::new(Some(&"button"), TreePath::new(vec![0, 4]),).into(),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 1]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 2]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 3]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 4]),),
         ],
         "Should be a Truncate patch"
     );
@@ -271,12 +271,11 @@ fn remove_event_from_replaced_node() {
     log::info!("{:#?}", diff);
     assert_eq!(
         diff,
-        vec![ReplaceNode::new(
+        vec![Patch::replace_node(
             Some(&"div"),
             TreePath::new(vec![0]),
             &p(vec![], vec![])
-        )
-        .into()],
+        )],
     );
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);

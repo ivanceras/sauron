@@ -1,9 +1,6 @@
 #![deny(warnings)]
-use sauron_core::{
-    html::{attributes::*, *},
-    mt_dom::patch::*,
-    *,
-};
+use crate::mt_dom::TreePath;
+use sauron::prelude::*;
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -48,7 +45,10 @@ fn test_remove_nodes() {
     log::debug!("patches: {:#?}", patches);
     assert_eq!(
         patches,
-        vec![RemoveNode::new(Some(&"li"), TreePath::new(vec![0, 0, 0]),).into()]
+        vec![Patch::remove_node(
+            Some(&"li"),
+            TreePath::new(vec![0, 0, 0]),
+        )]
     );
 
     let mut old_html = String::new();

@@ -1,9 +1,7 @@
 #![deny(warnings)]
-use sauron::{
-    html::{attributes::*, *},
-    mt_dom::patch::*,
-    *,
-};
+use crate::mt_dom::TreePath;
+use sauron::prelude::*;
+use sauron_core::html::{attributes::*, events::*, *};
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -112,19 +110,17 @@ fn test1() {
     assert_eq!(
         patch,
         vec![
-            ChangeText::new(
+            Patch::change_text(
                 &Text::new("1"),
                 TreePath::new(vec![0, 1, 0, 0, 1, 0, 0,]),
                 &Text::new("0")
-            )
-            .into(),
-            ChangeText::new(
+            ),
+            Patch::change_text(
                 &Text::new("2"),
                 TreePath::new(vec![0, 1, 0, 0, 2, 0, 0,]),
                 &Text::new("3")
-            )
-            .into(),
-            InsertNode::new(
+            ),
+            Patch::insert_node(
                 Some(&"div"),
                 TreePath::new(vec![0, 1, 0, 0, 2,]),
                 &div(
@@ -145,9 +141,8 @@ fn test1() {
                         ),
                     ]
                 ),
-            )
-            .into(),
-            InsertNode::new(
+            ),
+            Patch::insert_node(
                 Some(&"div"),
                 TreePath::new(vec![0, 1, 0, 0, 2,]),
                 &div(
@@ -163,16 +158,16 @@ fn test1() {
                         ),
                     ]
                 )
-            )
-            .into(),
-            RemoveNode::new(Some(&"div"), TreePath::new(vec![0, 1, 0, 0, 0,]),)
-                .into(),
-            ChangeText::new(
+            ),
+            Patch::remove_node(
+                Some(&"div"),
+                TreePath::new(vec![0, 1, 0, 0, 0,]),
+            ),
+            Patch::change_text(
                 &Text::new("line: 0, column: 0"),
                 TreePath::new(vec![0, 1, 0, 1, 0,]),
                 &Text::new("line: 1, column: 0")
-            )
-            .into(),
+            ),
         ]
     );
 

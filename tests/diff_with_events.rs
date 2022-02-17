@@ -35,12 +35,11 @@ fn nodes_with_event_should_not_recycle() {
     log::info!("{:#?}", diff);
     assert_eq!(
         diff,
-        vec![ReplaceNode::new(
+        vec![Patch::replace_node(
             Some(&"div"),
             TreePath::new(vec![0, 0]),
             &div(vec![class("child")], vec![])
-        )
-        .into()]
+        )]
     );
 }
 
@@ -58,12 +57,11 @@ fn remove_event_from_replaced_node() {
     log::info!("{:#?}", diff);
     assert_eq!(
         diff,
-        vec![ReplaceNode::new(
+        vec![Patch::replace_node(
             Some(&"div"),
             TreePath::new(vec![0]),
             &p(vec![], vec![])
-        )
-        .into()],
+        )],
     );
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);

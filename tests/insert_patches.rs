@@ -1,8 +1,9 @@
 #![deny(warnings)]
 use sauron_core::{
+    diff,
     html::{attributes::*, *},
     mt_dom::patch::*,
-    *,
+    DomUpdater, Node,
 };
 
 use test_fixtures::simple_program;
@@ -48,12 +49,11 @@ fn test_patch_insert_node() {
     log::debug!("patches: {:#?}", patches);
     assert_eq!(
         patches,
-        vec![InsertNode::new(
+        vec![Patch::insert_node(
             Some(&"ul"),
             TreePath::new(vec![0, 0, 0]),
             &li(vec![key(0)], vec![text("item0")])
-        )
-        .into()]
+        )]
     );
 
     let mut old_html = String::new();
@@ -124,12 +124,11 @@ fn test_patch_insert_node_in_the_middle() {
     log::debug!("patches: {:#?}", patches);
     assert_eq!(
         patches,
-        vec![InsertNode::new(
+        vec![Patch::insert_node(
             Some(&"ul"),
             TreePath::new(vec![0, 0, 1]),
             &li(vec![key(0)], vec![text("item0")])
-        )
-        .into()]
+        )]
     );
 
     let mut old_html = String::new();
@@ -204,30 +203,26 @@ fn multiple_insert_should_work() {
     assert_eq!(
         patches,
         vec![
-            InsertNode::new(
+            Patch::insert_node(
                 Some(&"ul"),
                 TreePath::new(vec![0, 0, 0]),
                 &li(vec![key("c")], vec![text("itemc")])
-            )
-            .into(),
-            InsertNode::new(
+            ),
+            Patch::insert_node(
                 Some(&"ul"),
                 TreePath::new(vec![0, 0, 0]),
                 &li(vec![key("b")], vec![text("itemb")])
-            )
-            .into(),
-            InsertNode::new(
+            ),
+            Patch::insert_node(
                 Some(&"ul"),
                 TreePath::new(vec![0, 0, 0]),
                 &li(vec![key("a")], vec![text("itema")])
-            )
-            .into(),
-            InsertNode::new(
+            ),
+            Patch::insert_node(
                 Some(&"ul"),
                 TreePath::new(vec![0, 0, 0]),
                 &li(vec![key(0)], vec![text("item0")])
-            )
-            .into(),
+            ),
         ]
     );
 

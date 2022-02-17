@@ -1,10 +1,6 @@
-use sauron_core::{
-    diff,
-    html::{attributes::*, events::*, *},
-    mt_dom::comment,
-    mt_dom::patch::*,
-    Attribute, Node, *,
-};
+use crate::mt_dom::TreePath;
+use sauron::prelude::*;
+use sauron_core::html::{attributes::*, events::*, *};
 
 #[test]
 fn comments_next_to_each_other() {
@@ -19,13 +15,12 @@ fn comments_next_to_each_other() {
     assert_eq!(
         patch,
         vec![
-            ChangeComment::new(
-                &"mordor".to_string(),
+            Patch::change_comment(
                 TreePath::new(vec![0, 1]),
+                &"mordor".to_string(),
                 &"world".to_string()
-            )
-            .into(),
-            RemoveNode::new(None, TreePath::new(vec![0, 2]),).into()
+            ),
+            Patch::remove_node(None, TreePath::new(vec![0, 2]),)
         ]
     );
 }

@@ -1,5 +1,6 @@
 #![deny(warnings)]
-use sauron_core::{mt_dom::patch::*, prelude::*};
+use crate::mt_dom::TreePath;
+use sauron_core::prelude::*;
 
 #[test]
 fn test_macros() {
@@ -110,12 +111,11 @@ fn replace_node() {
     let new: Node<()> = span(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![ReplaceNode::new(
+        vec![Patch::replace_node(
             Some(&"div"),
             TreePath::new(vec![0]),
             &span(vec![], vec![])
-        )
-        .into()],
+        )],
         "ReplaceNode the root if the tag changed"
     );
 
@@ -123,12 +123,11 @@ fn replace_node() {
     let new: Node<()> = div(vec![], vec![strong(vec![], vec![])]);
     assert_eq!(
         diff(&old, &new),
-        vec![ReplaceNode::new(
+        vec![Patch::replace_node(
             Some(&"b"),
             TreePath::new(vec![0, 0]),
             &strong(vec![], vec![])
-        )
-        .into()],
+        )],
     );
 
     let old: Node<()> =
@@ -142,18 +141,16 @@ fn replace_node() {
     assert_eq!(
         patch,
         vec![
-            ReplaceNode::new(
+            Patch::replace_node(
                 Some(&"b"),
                 TreePath::new(vec![0, 0]),
                 &i(vec![], vec![text("1")])
-            )
-            .into(),
-            ReplaceNode::new(
+            ),
+            Patch::replace_node(
                 Some(&"b"),
                 TreePath::new(vec![0, 1]),
                 &i(vec![], vec![])
-            )
-            .into(),
+            ),
         ],
     )
 }
@@ -167,12 +164,11 @@ fn add_children() {
     ); //{ <div> <b></b> <new></new> </div> },
     assert_eq!(
         dbg!(diff(&old, &new)),
-        vec![AppendChildren::new(
+        vec![Patch::append_children(
             &"div",
             TreePath::new(vec![0]),
             vec![&html_element("new", vec![], vec![])]
-        )
-        .into()],
+        )],
         "Added a new node to the root node",
     )
 }
@@ -183,12 +179,11 @@ fn add_attributes() {
     let new = div(vec![id("hello")], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![AddAttributes::new(
+        vec![Patch::add_attributes(
             &"div",
             TreePath::new(vec![0]),
             vec![&id("hello")]
-        )
-        .into()],
+        )],
         "Add attributes",
     );
 
@@ -197,12 +192,11 @@ fn add_attributes() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![AddAttributes::new(
+        vec![Patch::add_attributes(
             &"div",
             TreePath::new(vec![0]),
             vec![&id("hello")]
-        )
-        .into()],
+        )],
         "Change attribute",
     );
 }
@@ -213,12 +207,11 @@ fn remove_attributes() {
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![RemoveAttributes::new(
+        vec![Patch::remove_attributes(
             &"div",
             TreePath::new(vec![0]),
             vec![&id("hey-there")]
-        )
-        .into()],
+        )],
         "Remove attributes",
     );
 }
@@ -230,12 +223,11 @@ fn change_attribute() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![AddAttributes::new(
+        vec![Patch::add_attributes(
             &"div",
             TreePath::new(vec![0]),
             vec![&id("changed")]
-        )
-        .into()],
+        )],
         "Add attributes",
     );
 }
@@ -247,12 +239,11 @@ fn replace_text_node() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![ChangeText::new(
-            &Text::new("Old"),
+        vec![Patch::change_text(
             TreePath::new(vec![0]),
+            &Text::new("Old"),
             &Text::new("New")
-        )
-        .into()],
+        )],
         "ReplaceNode text node",
     );
 }

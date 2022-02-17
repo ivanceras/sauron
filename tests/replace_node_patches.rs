@@ -1,8 +1,9 @@
 #![deny(warnings)]
 use sauron_core::{
+    diff,
     html::{attributes::*, *},
     mt_dom::patch::*,
-    *,
+    DomUpdater, Node, Patch, Render,
 };
 
 use test_fixtures::simple_program;
@@ -48,24 +49,21 @@ fn test_multiple_replace() {
     assert_eq!(
         patches,
         vec![
-            ReplaceNode::new(
+            Patch::replace_node(
                 Some(&"li"),
                 TreePath::new(vec![0, 0, 0]),
                 &li(vec![key(10)], vec![text("item10")]),
-            )
-            .into(),
-            ReplaceNode::new(
+            ),
+            Patch::replace_node(
                 Some(&"li"),
                 TreePath::new(vec![0, 0, 1]),
                 &li(vec![key(20)], vec![text("item20")]),
-            )
-            .into(),
-            ReplaceNode::new(
+            ),
+            Patch::replace_node(
                 Some(&"li"),
                 TreePath::new(vec![0, 0, 2]),
                 &li(vec![key(30)], vec![text("item30")]),
-            )
-            .into(),
+            ),
         ]
     );
 
@@ -136,7 +134,7 @@ fn test_multiple_replace_and_parent_is_replaced_too() {
     log::debug!("patches: {:#?}", patches);
     assert_eq!(
         patches,
-        vec![ReplaceNode::new(
+        vec![Patch::replace_node(
             Some(&"main"),
             TreePath::new(vec![0]),
             &main(
@@ -150,8 +148,7 @@ fn test_multiple_replace_and_parent_is_replaced_too() {
                     ],
                 )],
             )
-        )
-        .into()]
+        )]
     );
 
     let mut old_html = String::new();

@@ -5,10 +5,6 @@ use crate::{
         created_node::{ActiveClosure, CreatedNode},
     },
     html::attributes::AttributeValue,
-    mt_dom::patch::{
-        AddAttributes, AppendChildren, InsertNode, RemoveAttributes,
-        RemoveNode, ReplaceNode,
-    },
     Dispatch, Patch,
 };
 use js_sys::Function;
@@ -237,11 +233,11 @@ where
     let mut active_closures = ActiveClosure::new();
 
     match patch {
-        Patch::InsertNode(InsertNode {
+        Patch::InsertNode {
             tag,
             patch_path,
             node: for_insert,
-        }) => {
+        } => {
             // we inser the node before this target element
             let target_element: &Element = node.unchecked_ref();
             let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
@@ -269,7 +265,7 @@ where
 
             Ok(active_closures)
         }
-        Patch::AddAttributes(AddAttributes { attrs, .. }) => {
+        Patch::AddAttributes { attrs, .. } => {
             let element: &Element = node.unchecked_ref();
             CreatedNode::set_element_attributes(
                 program,
@@ -280,7 +276,7 @@ where
 
             Ok(active_closures)
         }
-        Patch::RemoveAttributes(RemoveAttributes { attrs, .. }) => {
+        Patch::RemoveAttributes { attrs, .. } => {
             let element: &Element = node.unchecked_ref();
             for attr in attrs.iter() {
                 for att_value in attr.value() {
@@ -311,11 +307,11 @@ where
         // including the associated closures of the descendant of replaced node
         // before it is actully replaced in the DOM
         //
-        Patch::ReplaceNode(ReplaceNode {
+        Patch::ReplaceNode {
             tag,
             patch_path,
             replacement,
-        }) => {
+        } => {
             let element: &Element = node.unchecked_ref();
             // FIXME: performance bottleneck here
             // Each element and it's descendant is created. Each call to dom to create the element
@@ -353,7 +349,7 @@ where
             }
             Ok(created_node.closures)
         }
-        Patch::RemoveNode(RemoveNode { .. }) => {
+        Patch::RemoveNode { .. } => {
             let element: &Element = node.unchecked_ref();
             let parent_node =
                 element.parent_node().expect("must have a parent node");
@@ -366,11 +362,11 @@ where
             }
             Ok(active_closures)
         }
-        Patch::AppendChildren(AppendChildren {
+        Patch::AppendChildren {
             tag: _,
             patch_path: _,
             children: new_nodes,
-        }) => {
+        } => {
             let element: &Element = node.unchecked_ref();
             let mut active_closures = HashMap::new();
             for new_node in new_nodes.iter() {
@@ -384,12 +380,12 @@ where
             }
             Ok(active_closures)
         }
-        Patch::ChangeText(ct) => {
-            node.set_node_value(Some(&ct.new.text));
+        Patch::ChangeText { new, .. } => {
+            node.set_node_value(Some(&new.text));
             Ok(active_closures)
         }
-        Patch::ChangeComment(cm) => {
-            node.set_node_value(Some(&cm.new));
+        Patch::ChangeComment { new, .. } => {
+            node.set_node_value(Some(&new));
             Ok(active_closures)
         }
     }

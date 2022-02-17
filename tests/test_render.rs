@@ -1,9 +1,12 @@
 #![deny(warnings)]
+use sauron::Render;
 use sauron::{
+    diff,
     html::{attributes::*, *},
     mt_dom::patch::*,
-    *,
+    Node, Patch,
 };
+use sauron_node_macro::node;
 
 #[test]
 fn test_disabled() {
@@ -57,12 +60,11 @@ fn test_inner_html_patch() {
     let patch = diff(&view1, &view2);
     assert_eq!(
         patch,
-        vec![AddAttributes::new(
+        vec![Patch::add_attributes(
             &"article",
             TreePath::new(vec![0, 0]),
             vec![&inner_html("<h1>Lorep Ipsum</h1>")]
-        )
-        .into()]
+        )]
     );
 }
 
@@ -79,12 +81,11 @@ fn test_inner_html_removed() {
     let patch = diff(&view1, &view2);
     assert_eq!(
         patch,
-        vec![RemoveAttributes::new(
+        vec![Patch::remove_attributes(
             &"article",
             TreePath::new(vec![0, 0]),
             vec![&inner_html("<h1>Lorep Ipsum</h1>")]
-        )
-        .into()]
+        )]
     );
 }
 

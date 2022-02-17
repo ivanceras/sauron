@@ -1,9 +1,7 @@
 #![deny(warnings)]
-use sauron_core::{
-    html::{attributes::*, *},
-    mt_dom::patch::*,
-    *,
-};
+use crate::mt_dom::TreePath;
+use sauron::prelude::*;
+use sauron_core::html::{attributes::*, events::*, *};
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -119,31 +117,27 @@ fn subsequent_updates() {
     assert_eq!(
         patches1,
         vec![
-            ChangeText::new(
-                &Text::new("0"),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 0, 0, 0,]),
+                &Text::new("0"),
                 &Text::new("1")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("1"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 1, 0, 0,]),
+                &Text::new("1"),
                 &Text::new("2")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("2"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 2, 0, 0,]),
+                &Text::new("2"),
                 &Text::new("3")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("3"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 3, 0, 0,]),
+                &Text::new("3"),
                 &Text::new("4")
-            )
-            .into(),
-            InsertNode::new(
+            ),
+            Patch::insert_node(
                 Some(&"section"),
                 TreePath::new(vec![0, 0, 0]),
                 &div(
@@ -154,7 +148,6 @@ fn subsequent_updates() {
                     ],
                 )
             )
-            .into()
         ]
     );
 
@@ -320,37 +313,32 @@ fn subsequent_updates() {
     assert_eq!(
         patches2,
         vec![
-            ChangeText::new(
-                &Text::new("0"),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 0, 0, 0,]),
+                &Text::new("0"),
                 &Text::new("1")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("1"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 1, 0, 0,]),
+                &Text::new("1"),
                 &Text::new("2")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("2"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 2, 0, 0,]),
+                &Text::new("2"),
                 &Text::new("3")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("3"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 3, 0, 0,]),
+                &Text::new("3"),
                 &Text::new("4")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("4"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 4, 0, 0,]),
+                &Text::new("4"),
                 &Text::new("5")
-            )
-            .into(),
-            InsertNode::new(
+            ),
+            Patch::insert_node(
                 Some(&"section"),
                 TreePath::new(vec![0, 0, 0,]),
                 &div(
@@ -361,7 +349,6 @@ fn subsequent_updates() {
                     ],
                 )
             )
-            .into()
         ]
     );
 
@@ -471,43 +458,37 @@ fn subsequent_updates() {
     assert_eq!(
         patches3,
         vec![
-            ChangeText::new(
-                &Text::new("0"),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 0, 0, 0,]),
+                &Text::new("0"),
                 &Text::new("1")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("1"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 1, 0, 0,]),
+                &Text::new("1"),
                 &Text::new("2")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("2"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 2, 0, 0,]),
+                &Text::new("2"),
                 &Text::new("3")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("3"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 3, 0, 0,]),
+                &Text::new("3"),
                 &Text::new("4")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("4"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 4, 0, 0,]),
+                &Text::new("4"),
                 &Text::new("5")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("5"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 0, 5, 0, 0,]),
+                &Text::new("5"),
                 &Text::new("6")
-            )
-            .into(),
-            InsertNode::new(
+            ),
+            Patch::insert_node(
                 Some(&"section"),
                 TreePath::new(vec![0, 0, 0,]),
                 &div(
@@ -518,7 +499,6 @@ fn subsequent_updates() {
                     ],
                 )
             )
-            .into()
         ]
     );
 

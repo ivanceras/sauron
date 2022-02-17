@@ -1,5 +1,7 @@
 #![deny(warnings)]
-use sauron::{mt_dom::patch::*, *};
+use crate::mt_dom::TreePath;
+use sauron::prelude::*;
+use sauron_core::html::{attributes::*, events::*, *};
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -111,19 +113,17 @@ fn multiple_match_on_keyed_elements() {
     assert_eq!(
         patches,
         vec![
-            ChangeText::new(
-                &Text::new("2"),
+            Patch::change_text(
                 TreePath::new(vec![0, 1, 0, 0, 2, 0, 0,]),
+                &Text::new("2"),
                 &Text::new("1")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("3"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 1, 0, 0, 3, 0, 0,]),
+                &Text::new("3"),
                 &Text::new("4")
-            )
-            .into(),
-            InsertNode::new(
+            ),
+            Patch::insert_node(
                 Some(&"div"),
                 TreePath::new(vec![0, 1, 0, 0, 3,]),
                 &node!(
@@ -137,9 +137,8 @@ fn multiple_match_on_keyed_elements() {
                        </div>
                     </div>
                 )
-            )
-            .into(),
-            InsertNode::new(
+            ),
+            Patch::insert_node(
                 Some(&"div"),
                 TreePath::new(vec![0, 1, 0, 0, 3,]),
                 &node!(
@@ -150,16 +149,16 @@ fn multiple_match_on_keyed_elements() {
                        </div>
                     </div>
                 )
-            )
-            .into(),
-            RemoveNode::new(Some(&"div"), TreePath::new(vec![0, 1, 0, 0, 1,]),)
-                .into(),
-            ChangeText::new(
-                &Text::new("line: 1, column: 0"),
+            ),
+            Patch::remove_node(
+                Some(&"div"),
+                TreePath::new(vec![0, 1, 0, 0, 1,]),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 1, 0, 1, 0,]),
+                &Text::new("line: 1, column: 0"),
                 &Text::new("line: 2, column: 0")
-            )
-            .into(),
+            ),
         ]
     );
 

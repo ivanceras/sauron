@@ -1,6 +1,6 @@
 #![deny(warnings)]
-use sauron::{mt_dom::patch::*, *};
-use sauron_core::Node;
+use crate::mt_dom::TreePath;
+use sauron::prelude::*;
 
 #[test]
 fn test_unmatched_old_key() {
@@ -79,7 +79,7 @@ fn test_unmatched_old_key() {
     assert_eq!(
         patches,
         vec![
-            ReplaceNode::new(
+            Patch::replace_node(
                 Some(&"div"),
                 TreePath::new(vec![0, 0]),
                 &node!(
@@ -89,26 +89,22 @@ fn test_unmatched_old_key() {
                         <div>"\n"</div>
                     </div>
                 </div>)
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("1"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 1, 0, 0,]),
+                &Text::new("1"),
                 &Text::new("2")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("2"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 2, 0, 0,]),
+                &Text::new("2"),
                 &Text::new("3")
-            )
-            .into(),
-            ChangeText::new(
-                &Text::new("3"),
+            ),
+            Patch::change_text(
                 TreePath::new(vec![0, 3, 0, 0,]),
+                &Text::new("3"),
                 &Text::new("4")
-            )
-            .into(),
+            ),
         ]
     );
 }

@@ -52,10 +52,11 @@ fn elements_with_different_event_should_not_be_recycle() {
     //should contain AddAttributes instead of empty.
     assert_eq!(
         patches,
-        vec![
-            AddAttributes::new(&"input", TreePath::new(vec![0]), vec![&cb2])
-                .into()
-        ]
+        vec![Patch::add_attributes(
+            &"input",
+            TreePath::new(vec![0]),
+            vec![&cb2]
+        )]
     );
 
     let input_event = web_sys::InputEvent::new("input").unwrap();

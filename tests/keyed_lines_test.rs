@@ -1,9 +1,8 @@
 #![deny(warnings)]
-use sauron::{
-    html::{attributes::*, *},
-    mt_dom::patch::*,
-    node, *,
-};
+
+use crate::mt_dom::TreePath;
+use sauron::prelude::*;
+use sauron_core::html::{attributes::*, events::*, *};
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -169,48 +168,41 @@ fn test_lines() {
     dom_updater.patch_dom(
         &simple_program,
         vec![
-            ChangeText::new(
+            Patch::change_text(
                 &Text::new("0"),
                 TreePath::new(vec![0, 1, 0, 0, 0, 0, 0]),
                 &Text::new("1"),
-            )
-            .into(),
-            ChangeText::new(
+            ),
+            Patch::change_text(
                 &Text::new("1"),
                 TreePath::new(vec![0, 1, 0, 0, 1, 0, 0]),
                 &Text::new("2"),
-            )
-            .into(),
-            ChangeText::new(
+            ),
+            Patch::change_text(
                 &Text::new("2"),
                 TreePath::new(vec![0, 1, 0, 0, 2, 0, 0]),
                 &Text::new("3"),
-            )
-            .into(),
-            ChangeText::new(
+            ),
+            Patch::change_text(
                 &Text::new("3"),
                 TreePath::new(vec![0, 1, 0, 0, 3, 0, 0]),
                 &Text::new("4"),
-            )
-            .into(),
-            ChangeText::new(
+            ),
+            Patch::change_text(
                 &Text::new("4"),
                 TreePath::new(vec![0, 1, 0, 0, 4, 0, 0]),
                 &Text::new("5"),
-            )
-            .into(),
-            InsertNode::new(
+            ),
+            Patch::insert_node(
                 Some(&"div"),
                 TreePath::new(vec![0, 1, 0, 0, 0]),
                 &inserted,
-            )
-            .into(),
-            ChangeText::new(
+            ),
+            Patch::change_text(
                 &Text::new("line: 0, column: 0"),
                 TreePath::new(vec![0, 1, 0, 1, 0]),
                 &Text::new("line: 1, column: 0"),
-            )
-            .into(),
+            ),
         ],
     );
 }
