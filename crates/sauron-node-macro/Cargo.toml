@@ -1,6 +1,6 @@
 [package]
 name = "sauron-node-macro"
-version = "0.43.11"
+version = "0.44.0"
 authors = ["John-John Tedro <udoprog@tedro.se>", "Jovansonlee Cesar <ivanceras@gmail.com>"]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -8,7 +8,7 @@ repository = "https://github.com/ivanceras/sauron"
 documentation = "https://docs.rs/sauron-node-macro"
 readme = "../../README.md"
 keywords = ["html", "dom", "web"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 syn = { version = "1", features = ["full"] }
@@ -16,7 +16,7 @@ syn-rsx = { version = "0.8" }
 quote = {package = "quote", version = "1.0.3"}
 proc-macro2 = { version = "1" }
 once_cell = "1.8"
-sauron-core = {version = "0.43.11", path = "../sauron-core", features = ["with-lookup"] }
+sauron-core = {version = "0.44.0", path = "../sauron-core", features = ["with-lookup"] }
 
 [dev-dependencies]
 sauron = { path = "../../"}
