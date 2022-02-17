@@ -169,28 +169,28 @@ fn test_lines() {
         &simple_program,
         vec![
             Patch::change_text(
-                &Text::new("0"),
                 TreePath::new(vec![0, 1, 0, 0, 0, 0, 0]),
+                &Text::new("0"),
                 &Text::new("1"),
             ),
             Patch::change_text(
-                &Text::new("1"),
                 TreePath::new(vec![0, 1, 0, 0, 1, 0, 0]),
+                &Text::new("1"),
                 &Text::new("2"),
             ),
             Patch::change_text(
-                &Text::new("2"),
                 TreePath::new(vec![0, 1, 0, 0, 2, 0, 0]),
+                &Text::new("2"),
                 &Text::new("3"),
             ),
             Patch::change_text(
-                &Text::new("3"),
                 TreePath::new(vec![0, 1, 0, 0, 3, 0, 0]),
+                &Text::new("3"),
                 &Text::new("4"),
             ),
             Patch::change_text(
-                &Text::new("4"),
                 TreePath::new(vec![0, 1, 0, 0, 4, 0, 0]),
+                &Text::new("4"),
                 &Text::new("5"),
             ),
             Patch::insert_node(
@@ -199,8 +199,8 @@ fn test_lines() {
                 &inserted,
             ),
             Patch::change_text(
-                &Text::new("line: 0, column: 0"),
                 TreePath::new(vec![0, 1, 0, 1, 0]),
+                &Text::new("line: 0, column: 0"),
                 &Text::new("line: 1, column: 0"),
             ),
         ],

@@ -1,7 +1,6 @@
 #![deny(warnings)]
 use crate::mt_dom::TreePath;
 use sauron::prelude::*;
-use sauron::Render;
 use sauron_core::html::{attributes::*, events::*, *};
 
 #[test]
@@ -400,8 +399,8 @@ fn text_changed_in_keyed_elements() {
         patch,
         vec![
             Patch::change_text(
-                &Text::new("item3"),
                 TreePath::new(vec![0, 0, 2, 0]),
+                &Text::new("item3"),
                 &Text::new("item3 with changes")
             ),
             Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0, 0]),),

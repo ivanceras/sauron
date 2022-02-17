@@ -109,18 +109,18 @@ fn new_lines_ignored() {
         patches,
         vec![
             Patch::change_text(
-                &Text::new("0"),
                 TreePath::new(vec![0, 1, 0, 0, 0, 0, 0,]),
+                &Text::new("0"),
                 &Text::new("1")
             ),
             Patch::change_text(
-                &Text::new("2"),
                 TreePath::new(vec![0, 1, 0, 0, 2, 0, 0,]),
+                &Text::new("2"),
                 &Text::new("3")
             ),
             Patch::change_text(
-                &Text::new("3"),
                 TreePath::new(vec![0, 1, 0, 0, 3, 0, 0,]),
+                &Text::new("3"),
                 &Text::new("4")
             ),
             Patch::insert_node(
@@ -156,8 +156,8 @@ fn new_lines_ignored() {
                 TreePath::new(vec![0, 1, 0, 0, 1,]),
             ),
             Patch::change_text(
-                &Text::new("line: 0, column: 0"),
                 TreePath::new(vec![0, 1, 0, 1, 0,]),
+                &Text::new("line: 0, column: 0"),
                 &Text::new("line: 1, column: 0")
             ),
         ]

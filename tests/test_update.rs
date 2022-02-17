@@ -111,13 +111,13 @@ fn test1() {
         patch,
         vec![
             Patch::change_text(
-                &Text::new("1"),
                 TreePath::new(vec![0, 1, 0, 0, 1, 0, 0,]),
+                &Text::new("1"),
                 &Text::new("0")
             ),
             Patch::change_text(
-                &Text::new("2"),
                 TreePath::new(vec![0, 1, 0, 0, 2, 0, 0,]),
+                &Text::new("2"),
                 &Text::new("3")
             ),
             Patch::insert_node(
@@ -164,8 +164,8 @@ fn test1() {
                 TreePath::new(vec![0, 1, 0, 0, 0,]),
             ),
             Patch::change_text(
-                &Text::new("line: 0, column: 0"),
                 TreePath::new(vec![0, 1, 0, 1, 0,]),
+                &Text::new("line: 0, column: 0"),
                 &Text::new("line: 1, column: 0")
             ),
         ]

@@ -6,6 +6,7 @@ use sauron_core::{
     DomUpdater, Node,
 };
 
+use sauron_core::Render;
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 
