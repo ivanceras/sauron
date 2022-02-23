@@ -4,9 +4,11 @@
 use crate::html::attributes::{self, AttributeValue};
 use crate::Event;
 pub use leaf::Leaf;
+pub use node_trait::NodeTrait;
 
 pub mod leaf;
 pub(crate) mod map_msg;
+mod node_trait;
 
 /// namespace type in node, which could be change to an enum
 pub type Namespace = &'static str;

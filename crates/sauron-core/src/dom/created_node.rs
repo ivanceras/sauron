@@ -1,7 +1,7 @@
 use crate::events::MountEvent;
 use crate::vdom;
-use crate::vdom::map_msg::NodeMapMsg;
 use crate::vdom::Listener;
+use crate::vdom::NodeTrait;
 use crate::{
     dom::Dispatch,
     dom::Event,

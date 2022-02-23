@@ -1,5 +1,6 @@
 //! Provides functions and macros to build html elements
 use crate::vdom::leaf;
+use crate::vdom::NodeTrait;
 use crate::vdom::{Attribute, Node};
 pub use mt_dom::{element, element_ns};
 
@@ -33,43 +34,6 @@ pub fn view_if<MSG>(flag: bool, node: Node<MSG>) -> Node<MSG> {
     }
 }
 
-/// Creates an html element
-///
-/// # Examples
-/// ```rust
-/// use sauron::prelude::*;
-///
-/// let container:Node<()> = html_element("div", vec![class("container")], vec![]);
-/// assert_eq!(node!{<div class="container"></div>},container);
-/// ```
-///
-#[inline]
-pub fn html_element<MSG>(
-    tag: &'static str,
-    attrs: impl IntoIterator<Item = Attribute<MSG>>,
-    children: impl IntoIterator<Item = Node<MSG>>,
-) -> Node<MSG> {
-    element(tag, attrs, children)
-}
-
-/// Create a self closing html element.
-/// # Examples
-/// ```ignore
-/// use sauron::prelude::*;
-///
-/// let photo:Node<()> = html_element_self_closing("img", vec![class("pic")], vec![], true);
-/// assert_eq!(node!{<img class="pic"/>}, photo);
-/// ```
-#[inline]
-pub fn html_element_self_closing<MSG>(
-    tag: &'static str,
-    attrs: impl IntoIterator<Item = Attribute<MSG>>,
-    children: impl IntoIterator<Item = Node<MSG>>,
-    self_closing: bool,
-) -> Node<MSG> {
-    element_ns(None, tag, attrs, children, self_closing)
-}
-
 /// Creates an html element with the element tag name and namespace
 /// This is specifically used for creating svg element where a namespace is needed, otherwise the
 /// browser will not render it correctly.
@@ -78,17 +42,30 @@ pub fn html_element_self_closing<MSG>(
 /// use sauron::prelude::*;
 ///
 /// let html:Node<()> =
-///     html_element_ns("svg","http://www.w3.org/2000/svg", vec![width(200), height(200), xmlns("http://www.w3.org/2000/svg")], vec![]);
+///     html_element(Some("http://www.w3.org/2000/svg"),"svg", vec![width(200), height(200), xmlns("http://www.w3.org/2000/svg")], vec![], false);
 /// assert_eq!(node!{<svg width=200 height=200 xmlns="http://www.w3.org/2000/svg"></svg>}, html);
 /// ```
 #[inline]
-pub fn html_element_ns<MSG>(
+pub fn html_element<MSG>(
+    namespace: Option<&'static str>,
     tag: &'static str,
-    namespace: &'static str,
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
+    self_closing: bool,
 ) -> Node<MSG> {
-    element_ns(Some(namespace), tag, attrs, children, false)
+    // we do a correction to children where text node siblings are next to each other by inserting
+    // a comment separator in between them, to prevent the browser from merging the 2 text node
+    // together
+    let mut corrected_children: Vec<Node<MSG>> = vec![];
+    for child in children {
+        if let Some(last) = corrected_children.last() {
+            if last.is_text() {
+                corrected_children.push(comment("separator"));
+            }
+        }
+        corrected_children.push(child);
+    }
+    element_ns(namespace, tag, attrs, corrected_children, self_closing)
 }
 
 /// creates a text node using a formatter

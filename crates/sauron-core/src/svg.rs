@@ -23,5 +23,5 @@ pub fn svg_element<MSG>(
     attrs: impl IntoIterator<Item = vdom::Attribute<MSG>>,
     children: impl IntoIterator<Item = vdom::Node<MSG>>,
 ) -> vdom::Node<MSG> {
-    crate::html::html_element_ns(tag, SVG_NAMESPACE, attrs, children)
+    crate::html::html_element(Some(SVG_NAMESPACE), tag, attrs, children, false)
 }

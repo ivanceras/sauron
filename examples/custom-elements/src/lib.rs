@@ -48,6 +48,7 @@ impl Application<Msg> for App {
 impl App {
     fn view_date(&self, year: i32, month: i32) -> Node<Msg> {
         html_element(
+            None,
             "intl-date",
             [
                 attr("lang", &self.language),
@@ -55,6 +56,7 @@ impl App {
                 attr("month", month),
             ],
             [],
+            false,
         )
     }
 }
