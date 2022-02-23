@@ -1,26 +1,17 @@
 #[macro_use]
 extern crate criterion;
 
-use criterion::{
-    Criterion,
-    Fun,
-};
+use criterion::{Criterion, Fun};
 
 use sauron_core::{
     diff,
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     Node,
 };
 
 use std::{
     collections::hash_map::DefaultHasher,
-    hash::{
-        Hash,
-        Hasher,
-    },
+    hash::{Hash, Hasher},
 };
 
 const LOREM: &str = "
