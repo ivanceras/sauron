@@ -2,6 +2,8 @@
 //! virtual dom into a writable buffer
 //!
 use crate::html::attributes::SegregatedAttributes;
+use crate::vdom::map_msg::NodeMapMsg;
+use crate::vdom::Leaf;
 use crate::{html::attributes, Attribute, Element, Node};
 use std::fmt;
 
@@ -56,7 +58,10 @@ pub trait Render {
     }
 }
 
-impl<MSG> Render for Node<MSG> {
+impl<MSG> Render for Node<MSG>
+where
+    MSG: 'static,
+{
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
@@ -67,10 +72,29 @@ impl<MSG> Render for Node<MSG> {
             Node::Element(element) => {
                 element.render_with_indent(buffer, indent, compressed)
             }
-            Node::Text(text) => {
-                write!(buffer, "{}", &text.text)
+            Node::Leaf(leaf) => {
+                leaf.render_with_indent(buffer, indent, compressed)
             }
-            Node::Comment(comment) => {
+        }
+    }
+}
+
+impl Render for Leaf {
+    fn render_with_indent(
+        &self,
+        buffer: &mut dyn fmt::Write,
+        _indent: usize,
+        _compressed: bool,
+    ) -> fmt::Result {
+        match self {
+            Leaf::Text(text) => {
+                write!(buffer, "{}", text)
+            }
+            Leaf::SafeHtml(html) => {
+                //TODO: html escape this one
+                write!(buffer, "{}", html)
+            }
+            Leaf::Comment(comment) => {
                 write!(buffer, "<!--{}-->", comment)
             }
         }
@@ -96,7 +120,10 @@ fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
         .join(" ")
 }
 
-impl<MSG> Render for Element<MSG> {
+impl<MSG> Render for Element<MSG>
+where
+    MSG: 'static,
+{
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,

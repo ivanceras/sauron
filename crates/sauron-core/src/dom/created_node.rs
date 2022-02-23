@@ -1,9 +1,11 @@
 use crate::events::MountEvent;
+use crate::vdom::map_msg::NodeMapMsg;
 use crate::Listener;
 use crate::{
     dom::Dispatch,
     html,
     html::attributes::{AttributeValue, SegregatedAttributes, Special},
+    vdom::Leaf,
     Attribute, Event,
 };
 use std::cell::Cell;
@@ -78,13 +80,16 @@ impl CreatedNode {
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         match vnode {
-            crate::Node::Text(txt) => {
-                let text_node = Self::create_text_node(&txt.text);
+            crate::Node::Leaf(Leaf::Text(txt)) => {
+                let text_node = Self::create_text_node(&txt);
                 CreatedNode::without_closures(text_node.unchecked_into())
             }
-            crate::Node::Comment(comment) => {
+            crate::Node::Leaf(Leaf::Comment(comment)) => {
                 let comment_node = crate::document().create_comment(comment);
                 CreatedNode::without_closures(comment_node.unchecked_into())
+            }
+            crate::Node::Leaf(Leaf::SafeHtml(_safe_html)) => {
+                panic!("safe html must have already been dealt in create_element node");
             }
             crate::Node::Element(element_node) => {
                 Self::create_element_node(program, element_node, focused_node)
@@ -159,10 +164,10 @@ impl CreatedNode {
 
         for child in velem.get_children().iter() {
             if child.is_safe_html() {
-                let child_text = child.unwrap_text();
+                let child_text = child.unwrap_safe_html();
                 // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
                 element
-                    .insert_adjacent_html("beforeend", &child_text.text)
+                    .insert_adjacent_html("beforeend", &child_text)
                     .expect("must not error");
             } else {
                 let created_child =
@@ -477,11 +482,9 @@ impl CreatedNode {
         } else if let Some(textarea) = element.dyn_ref::<HtmlTextAreaElement>()
         {
             textarea.set_value(value);
-        } else if let Some(select) = element.dyn_ref::<HtmlSelectElement>()
-        {
+        } else if let Some(select) = element.dyn_ref::<HtmlSelectElement>() {
             select.set_value(value);
-        } else if let Some(option) = element.dyn_ref::<HtmlOptionElement>()
-        {
+        } else if let Some(option) = element.dyn_ref::<HtmlOptionElement>() {
             option.set_value(value);
         }
     }

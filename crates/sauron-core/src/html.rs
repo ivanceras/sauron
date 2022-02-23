@@ -1,6 +1,7 @@
 //! Provides functions and macros to build html elements
+use crate::vdom::leaf;
 use crate::{Attribute, Node};
-pub use mt_dom::{comment, element, element_ns, safe_html, text};
+pub use mt_dom::{element, element_ns};
 
 #[macro_use]
 pub mod attributes;
@@ -105,4 +106,37 @@ macro_rules! text {
     ( $($arg: tt)* ) => {
         $crate::html::text(format!($($arg)*))
     };
+}
+
+/// Create a text node element
+/// # Example
+/// ```rust
+/// ```
+pub fn text<S, MSG>(s: S) -> Node<MSG>
+where
+    S: ToString,
+{
+    Node::Leaf(leaf::text(s))
+}
+
+/// Create an html and instruct the DOM renderer and/or DOM patcher that the operation is safe.
+///
+/// Note: this operation doesn't sanitize the html code. It is your responsibility
+/// as a programmer to sanitize the input here.
+/// # Example
+/// ```rust
+/// ```
+pub fn safe_html<S, MSG>(s: S) -> Node<MSG>
+where
+    S: ToString,
+{
+    Node::Leaf(leaf::safe_html(s))
+}
+
+/// create a comment node
+pub fn comment<S, MSG>(s: S) -> Node<MSG>
+where
+    S: ToString,
+{
+    Node::Leaf(leaf::comment(s))
 }

@@ -64,5 +64,4 @@ pub mod prelude {
     pub use web_sys;
 }
 
-pub use mt_dom::Text;
 pub use vdom::*;
