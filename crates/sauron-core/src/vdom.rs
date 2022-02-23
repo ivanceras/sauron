@@ -5,7 +5,7 @@ use crate::html::attributes::{self, AttributeValue};
 use crate::Event;
 pub use leaf::Leaf;
 
-pub(crate) mod leaf;
+pub mod leaf;
 pub(crate) mod map_msg;
 
 /// namespace type in node, which could be change to an enum
@@ -48,7 +48,7 @@ where
     MSG: 'static,
 {
     use crate::html::attributes::Special;
-    use crate::map_msg::NodeMapMsg;
+    use map_msg::NodeMapMsg;
 
     // check if the skip attribute is true
     // if it is true, skip diffing and no patches is created at this dom

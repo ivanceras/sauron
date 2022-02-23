@@ -1,6 +1,6 @@
 //! Provides functions and macros to build html elements
 use crate::vdom::leaf;
-use crate::{Attribute, Node};
+use crate::vdom::{Attribute, Node};
 pub use mt_dom::{element, element_ns};
 
 #[macro_use]

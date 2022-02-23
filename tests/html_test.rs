@@ -239,10 +239,10 @@ fn replace_text_node() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::change_text(
+        vec![Patch::replace_leaf(
             TreePath::new(vec![0]),
-            &Text::new("Old"),
-            &Text::new("New")
+            &leaf::text("Old"),
+            &leaf::text("New")
         )],
         "ReplaceNode text node",
     );

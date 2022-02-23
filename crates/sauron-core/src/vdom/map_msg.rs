@@ -1,6 +1,6 @@
 use crate::html::attributes::AttributeValue;
 use crate::html::attributes::Listener;
-use crate::{Attribute, Element, Event, Node};
+use crate::vdom::{Attribute, Element, Event, Node};
 
 /// Add mapping function for Node, Element, Attribute,
 pub trait NodeMapMsg<MSG>

@@ -1,12 +1,13 @@
 //! provides functionalities related to patching the DOM in the browser.
 use crate::{
+    dom::Dispatch,
     dom::{
         created_node,
         created_node::{ActiveClosure, CreatedNode},
     },
     html::attributes::AttributeValue,
     vdom::Leaf,
-    Dispatch, Patch,
+    vdom::Patch,
 };
 use js_sys::Function;
 use std::collections::BTreeMap;

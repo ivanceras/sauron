@@ -2,7 +2,6 @@
 use crate::mt_dom::TreePath;
 use sauron::prelude::*;
 
-
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 
@@ -110,15 +109,15 @@ fn test1() {
     assert_eq!(
         patch,
         vec![
-            Patch::change_text(
+            Patch::replace_leaf(
                 TreePath::new(vec![0, 1, 0, 0, 1, 0, 0,]),
-                &Text::new("1"),
-                &Text::new("0")
+                &leaf::text("1"),
+                &leaf::text("0")
             ),
-            Patch::change_text(
+            Patch::replace_leaf(
                 TreePath::new(vec![0, 1, 0, 0, 2, 0, 0,]),
-                &Text::new("2"),
-                &Text::new("3")
+                &leaf::text("2"),
+                &leaf::text("3")
             ),
             Patch::insert_node(
                 Some(&"div"),
@@ -163,10 +162,10 @@ fn test1() {
                 Some(&"div"),
                 TreePath::new(vec![0, 1, 0, 0, 0,]),
             ),
-            Patch::change_text(
+            Patch::replace_leaf(
                 TreePath::new(vec![0, 1, 0, 1, 0,]),
-                &Text::new("line: 0, column: 0"),
-                &Text::new("line: 1, column: 0")
+                &leaf::text("line: 0, column: 0"),
+                &leaf::text("line: 1, column: 0")
             ),
         ]
     );

@@ -1,3 +1,6 @@
+//! Leaf node for html dom tree
+//!
+
 /// A leaf node value of html dom tree
 #[derive(PartialEq, Debug, Clone)]
 pub enum Leaf {

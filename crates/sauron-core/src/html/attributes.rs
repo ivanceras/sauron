@@ -1,7 +1,8 @@
 //! Create html [attributes][0]
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
-use crate::Attribute;
+use crate::vdom;
+use crate::vdom::Attribute;
 use crate::Event;
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
@@ -166,7 +167,7 @@ pub fn classes<MSG>(
 pub fn class_namespaced<MSG>(
     namespace: impl ToString,
     class_names: impl ToString,
-) -> crate::Attribute<MSG> {
+) -> vdom::Attribute<MSG> {
     class(jss::class_namespaced(namespace, class_names))
 }
 
@@ -187,7 +188,7 @@ pub fn class_namespaced<MSG>(
 pub fn classes_flag_namespaced<MSG>(
     namespace: impl ToString,
     pair: impl IntoIterator<Item = (impl ToString, bool)>,
-) -> crate::Attribute<MSG> {
+) -> vdom::Attribute<MSG> {
     let class_list = pair.into_iter().filter_map(|(class_name, flag)| {
         if flag {
             Some(jss::class_namespaced(namespace.to_string(), class_name))
@@ -242,7 +243,7 @@ pub fn attrs_flag<MSG>(
 /// assert_eq!(expected, html.render_to_string());
 /// ```
 pub fn maybe_attr<MSG>(
-    name: crate::AttributeName,
+    name: vdom::AttributeName,
     value: Option<impl Into<Value>>,
 ) -> Attribute<MSG> {
     if let Some(value) = value {

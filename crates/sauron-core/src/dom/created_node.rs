@@ -1,12 +1,14 @@
 use crate::events::MountEvent;
+use crate::vdom;
 use crate::vdom::map_msg::NodeMapMsg;
-use crate::Listener;
+use crate::vdom::Listener;
 use crate::{
     dom::Dispatch,
+    dom::Event,
     html,
     html::attributes::{AttributeValue, SegregatedAttributes, Special},
+    vdom::Attribute,
     vdom::Leaf,
-    Attribute, Event,
 };
 use std::cell::Cell;
 use std::collections::HashMap;
@@ -72,7 +74,7 @@ impl CreatedNode {
     /// together with potentially related closures) for this virtual node.
     pub fn create_dom_node<DSP, MSG>(
         program: &DSP,
-        vnode: &crate::Node<MSG>,
+        vnode: &vdom::Node<MSG>,
         focused_node: &mut Option<Node>,
     ) -> CreatedNode
     where
@@ -80,18 +82,18 @@ impl CreatedNode {
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         match vnode {
-            crate::Node::Leaf(Leaf::Text(txt)) => {
+            vdom::Node::Leaf(Leaf::Text(txt)) => {
                 let text_node = Self::create_text_node(&txt);
                 CreatedNode::without_closures(text_node.unchecked_into())
             }
-            crate::Node::Leaf(Leaf::Comment(comment)) => {
+            vdom::Node::Leaf(Leaf::Comment(comment)) => {
                 let comment_node = crate::document().create_comment(comment);
                 CreatedNode::without_closures(comment_node.unchecked_into())
             }
-            crate::Node::Leaf(Leaf::SafeHtml(_safe_html)) => {
+            vdom::Node::Leaf(Leaf::SafeHtml(_safe_html)) => {
                 panic!("safe html must have already been dealt in create_element node");
             }
-            crate::Node::Element(element_node) => {
+            vdom::Node::Element(element_node) => {
                 Self::create_element_node(program, element_node, focused_node)
             }
         }
@@ -102,7 +104,7 @@ impl CreatedNode {
     /// dispatching custom events (non-native browser events)
     fn dispatch_mount_event<DSP, MSG>(
         program: &DSP,
-        velem: &crate::Element<MSG>,
+        velem: &vdom::Element<MSG>,
         element: &Element,
     ) where
         MSG: 'static,
@@ -126,7 +128,7 @@ impl CreatedNode {
     /// children, it's children's children, etc.
     fn create_element_node<DSP, MSG>(
         program: &DSP,
-        velem: &crate::Element<MSG>,
+        velem: &vdom::Element<MSG>,
         focused_node: &mut Option<Node>,
     ) -> CreatedNode
     where

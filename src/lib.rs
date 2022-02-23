@@ -34,8 +34,8 @@ pub mod prelude {
     pub use sauron_node_macro::node;
 }
 pub use sauron_core::{
-    diff, html, jss, mt_dom, svg, Attribute, Element, Listener, Node, Patch,
-    Render,
+    html, jss::jss, jss::jss_ns, mt_dom, svg, vdom::diff, vdom::Attribute,
+    vdom::Element, vdom::Listener, vdom::Node, vdom::Patch, Render,
 };
 #[cfg(feature = "with-node-macro")]
 pub use sauron_node_macro::node;

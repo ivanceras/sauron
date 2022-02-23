@@ -1,6 +1,6 @@
 use crate::{
-    dom::created_node::create_closure_wrap, Application, Attribute, Cmd,
-    Dispatch,
+    dom::created_node::create_closure_wrap, dom::Cmd, dom::Dispatch,
+    vdom::Attribute, Application,
 };
 use std::fmt::Debug;
 use wasm_bindgen::{self, prelude::*, JsCast};
