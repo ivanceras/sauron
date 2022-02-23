@@ -1,10 +1,6 @@
 #![deny(warnings)]
-use sauron_core::{
-    diff,
-    html::{attributes::*, *},
-    mt_dom::patch::*,
-    DomUpdater, Node, Patch, Render,
-};
+use crate::mt_dom::TreePath;
+use sauron::prelude::*;
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;

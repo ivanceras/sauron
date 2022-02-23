@@ -244,7 +244,8 @@ impl_from!([T; 12]);
 mod tests {
     use crate::{
         html::{attributes::attr, element},
-        Node, Render,
+        vdom::Node,
+        Render,
     };
 
     #[test]

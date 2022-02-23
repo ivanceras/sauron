@@ -1,12 +1,8 @@
 #[macro_use]
 extern crate log;
-use sauron_core::{
-    diff,
-    dom::DomUpdater,
-    html::{attributes::*, events::*, *},
-    mt_dom::patch::*,
-    Node,
-};
+use crate::mt_dom::TreePath;
+use sauron::prelude::*;
+
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 
@@ -53,7 +49,7 @@ fn remove_event_from_replaced_node() {
 
     let body = sauron_core::body();
     let simple_program = simple_program();
-    let diff = sauron_core::diff(&old, &new);
+    let diff = diff(&old, &new);
     log::info!("{:#?}", diff);
     assert_eq!(
         diff,

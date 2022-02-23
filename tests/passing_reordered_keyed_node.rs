@@ -1,9 +1,5 @@
 #![deny(warnings)]
-use sauron_core::{
-    html::{attributes::*, *},
-    *,
-};
-
+use sauron::prelude::*;
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 

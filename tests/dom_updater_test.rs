@@ -1,13 +1,5 @@
 #![deny(warnings)]
-use sauron_core::{
-    html::{
-        attributes::{id, value},
-        div,
-        events::*,
-        input,
-    },
-    web_sys, DomUpdater, Node,
-};
+use sauron::prelude::*;
 use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
