@@ -6,10 +6,10 @@ use crate::vdom::Attribute;
 use crate::Event;
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
+pub use jss::Value;
 pub use listener::Listener;
 pub use special::{key, replace, skip, Special};
 pub use style::Style;
-pub use value::Value;
 
 #[macro_use]
 mod attribute_macros;
@@ -17,7 +17,6 @@ mod attribute_value;
 mod listener;
 mod special;
 mod style;
-mod value;
 
 /// create a style attribute
 /// # Examples

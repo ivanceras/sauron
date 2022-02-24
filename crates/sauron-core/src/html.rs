@@ -2,12 +2,12 @@
 use crate::vdom::leaf;
 use crate::vdom::NodeTrait;
 use crate::vdom::{Attribute, Node};
+pub use jss::units;
 pub use mt_dom::{element, element_ns};
 
 #[macro_use]
 pub mod attributes;
 pub mod tags;
-pub mod units;
 
 #[cfg(feature = "with-dom")]
 pub use crate::dom::events;
