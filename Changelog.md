@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.45.0
+- The Leaf node of vdom formerly integerated in mt-dom::Node is now defined in the crate.
+- `Value` and `units` is now from `jss` crate.
+    - `Value` enum don't have bytes anymore since it is not useful in dom context
+
 ## 0.44.0
 - Refactor on apply_patches due to changes in mt-dom (collapsing the Patch struct)
 
