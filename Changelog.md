@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.45.1
+- limit the export for `units` so as not to conflict with html tags and attributes
+
 ## 0.45.0
 - The Leaf node of vdom formerly integerated in mt-dom::Node is now defined in the crate.
 - `Value` and `units` is now from `jss` crate.
