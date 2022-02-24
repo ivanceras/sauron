@@ -49,7 +49,7 @@ pub mod prelude {
         html::{
             attributes::{attr, *},
             tags::{commons::*, *},
-            units::*,
+            units::{self, ch, em, percent, pt, px, rem},
             *,
         },
         svg::{attributes::*, tags::commons::*, *},
