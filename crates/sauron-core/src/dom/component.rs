@@ -1,5 +1,5 @@
 use crate::dom::effects::Effects;
-use crate::Node;
+use crate::vdom::Node;
 
 /// A component has a view and can update itself.
 ///

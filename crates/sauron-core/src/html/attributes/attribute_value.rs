@@ -1,5 +1,5 @@
 use crate::prelude::{Style, Value};
-use crate::Listener;
+use crate::vdom::Listener;
 use std::fmt::{self, Debug};
 
 /// Values of an attribute can be in these variants

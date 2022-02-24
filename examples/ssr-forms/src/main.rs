@@ -1,16 +1,10 @@
 #![deny(warnings)]
 use chrono::Local;
-use sauron::prelude::*;
 use sauron::html::attributes;
-use serde_derive::{
-    Deserialize,
-    Serialize,
-};
-use warp::{
-    http::Response,
-    Filter,
-};
+use sauron::prelude::*;
+use serde_derive::{Deserialize, Serialize};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use warp::{http::Response, Filter};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct FormData {
@@ -71,10 +65,7 @@ fn view(form_data: Option<FormData>) -> Node<()> {
                         )],
                     ),
                     if let Some(form_data) = &form_data {
-                        p(
-                            [],
-                            [text(format!("{}", form_data.biography))],
-                        )
+                        p([], [text(format!("{}", form_data.biography))])
                     } else {
                         text("")
                     },
@@ -130,7 +121,5 @@ async fn main() {
 
     let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
     println!("serve at http://{}:{}", socket.ip(), socket.port());
-    warp::serve(submission.or(index))
-        .run(socket)
-        .await;
+    warp::serve(submission.or(index)).run(socket).await;
 }

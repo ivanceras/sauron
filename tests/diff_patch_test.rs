@@ -1,7 +1,7 @@
 #![deny(warnings)]
 use crate::mt_dom::TreePath;
 use sauron::prelude::*;
-use sauron_core::html::{attributes::*};
+use sauron_core::html::attributes::*;
 
 #[test]
 fn nodes_with_event_must_be_replaced() {
@@ -398,10 +398,10 @@ fn text_changed_in_keyed_elements() {
     assert_eq!(
         patch,
         vec![
-            Patch::change_text(
+            Patch::replace_leaf(
                 TreePath::new(vec![0, 0, 2, 0]),
-                &Text::new("item3"),
-                &Text::new("item3 with changes")
+                &leaf::text("item3"),
+                &leaf::text("item3 with changes")
             ),
             Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0, 0]),),
         ]

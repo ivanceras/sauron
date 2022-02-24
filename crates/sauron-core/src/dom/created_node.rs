@@ -1,10 +1,14 @@
 use crate::events::MountEvent;
-use crate::Listener;
+use crate::vdom;
+use crate::vdom::Listener;
+use crate::vdom::NodeTrait;
 use crate::{
     dom::Dispatch,
+    dom::Event,
     html,
     html::attributes::{AttributeValue, SegregatedAttributes, Special},
-    Attribute, Event,
+    vdom::Attribute,
+    vdom::Leaf,
 };
 use std::cell::Cell;
 use std::collections::HashMap;
@@ -70,7 +74,7 @@ impl CreatedNode {
     /// together with potentially related closures) for this virtual node.
     pub fn create_dom_node<DSP, MSG>(
         program: &DSP,
-        vnode: &crate::Node<MSG>,
+        vnode: &vdom::Node<MSG>,
         focused_node: &mut Option<Node>,
     ) -> CreatedNode
     where
@@ -78,15 +82,18 @@ impl CreatedNode {
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         match vnode {
-            crate::Node::Text(txt) => {
-                let text_node = Self::create_text_node(&txt.text);
+            vdom::Node::Leaf(Leaf::Text(txt)) => {
+                let text_node = Self::create_text_node(&txt);
                 CreatedNode::without_closures(text_node.unchecked_into())
             }
-            crate::Node::Comment(comment) => {
+            vdom::Node::Leaf(Leaf::Comment(comment)) => {
                 let comment_node = crate::document().create_comment(comment);
                 CreatedNode::without_closures(comment_node.unchecked_into())
             }
-            crate::Node::Element(element_node) => {
+            vdom::Node::Leaf(Leaf::SafeHtml(_safe_html)) => {
+                panic!("safe html must have already been dealt in create_element node");
+            }
+            vdom::Node::Element(element_node) => {
                 Self::create_element_node(program, element_node, focused_node)
             }
         }
@@ -97,7 +104,7 @@ impl CreatedNode {
     /// dispatching custom events (non-native browser events)
     fn dispatch_mount_event<DSP, MSG>(
         program: &DSP,
-        velem: &crate::Element<MSG>,
+        velem: &vdom::Element<MSG>,
         element: &Element,
     ) where
         MSG: 'static,
@@ -121,7 +128,7 @@ impl CreatedNode {
     /// children, it's children's children, etc.
     fn create_element_node<DSP, MSG>(
         program: &DSP,
-        velem: &crate::Element<MSG>,
+        velem: &vdom::Element<MSG>,
         focused_node: &mut Option<Node>,
     ) -> CreatedNode
     where
@@ -159,10 +166,10 @@ impl CreatedNode {
 
         for child in velem.get_children().iter() {
             if child.is_safe_html() {
-                let child_text = child.unwrap_text();
+                let child_text = child.unwrap_safe_html();
                 // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
                 element
-                    .insert_adjacent_html("beforeend", &child_text.text)
+                    .insert_adjacent_html("beforeend", &child_text)
                     .expect("must not error");
             } else {
                 let created_child =
@@ -477,11 +484,9 @@ impl CreatedNode {
         } else if let Some(textarea) = element.dyn_ref::<HtmlTextAreaElement>()
         {
             textarea.set_value(value);
-        } else if let Some(select) = element.dyn_ref::<HtmlSelectElement>()
-        {
+        } else if let Some(select) = element.dyn_ref::<HtmlSelectElement>() {
             select.set_value(value);
-        } else if let Some(option) = element.dyn_ref::<HtmlOptionElement>()
-        {
+        } else if let Some(option) = element.dyn_ref::<HtmlOptionElement>() {
             option.set_value(value);
         }
     }

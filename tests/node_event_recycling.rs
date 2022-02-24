@@ -1,11 +1,6 @@
 #![deny(warnings)]
-use sauron_core::{
-    diff,
-    dom::DomUpdater,
-    html::{attributes::*, events::*, *},
-    mt_dom::patch::*,
-    web_sys,
-};
+use sauron::mt_dom::TreePath;
+use sauron::prelude::*;
 use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -44,7 +39,7 @@ fn elements_with_different_event_should_not_be_recycle() {
     });
     let new = input(vec![id(elem_id), cb2.clone()], vec![]);
 
-    let patches: Vec<sauron_core::Patch<()>> = diff(&old, &new);
+    let patches: Vec<Patch<()>> = diff(&old, &new);
     // FIXME: this should replace the old node with a new one since the even essentially is a new
     // one. But we have no way of knowing the closure will produce the same result of not
     log::trace!("patches: {:#?}", patches);

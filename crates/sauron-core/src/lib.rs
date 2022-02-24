@@ -58,11 +58,9 @@ pub mod prelude {
     };
     pub use render::Render;
     pub use vdom::map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg};
+    pub use vdom::{diff, Attribute, Element, Listener, Node, Patch};
     #[cfg(feature = "with-dom")]
     pub use wasm_bindgen::prelude::*;
     #[cfg(feature = "with-dom")]
     pub use web_sys;
 }
-
-pub use mt_dom::Text;
-pub use vdom::*;

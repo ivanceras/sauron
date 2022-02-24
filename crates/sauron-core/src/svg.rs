@@ -2,6 +2,7 @@
 pub use mt_dom::{element, element_ns};
 pub mod attributes;
 pub mod tags;
+use crate::vdom;
 
 pub use tags::commons::*;
 
@@ -19,8 +20,8 @@ pub const SVG_NAMESPACE: &str = "http://www.w3.org/2000/svg";
 ///
 pub fn svg_element<MSG>(
     tag: &'static str,
-    attrs: impl IntoIterator<Item = crate::Attribute<MSG>>,
-    children: impl IntoIterator<Item = crate::Node<MSG>>,
-) -> crate::Node<MSG> {
-    crate::html::html_element_ns(tag, SVG_NAMESPACE, attrs, children)
+    attrs: impl IntoIterator<Item = vdom::Attribute<MSG>>,
+    children: impl IntoIterator<Item = vdom::Node<MSG>>,
+) -> vdom::Node<MSG> {
+    crate::html::html_element(Some(SVG_NAMESPACE), tag, attrs, children, false)
 }

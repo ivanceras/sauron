@@ -160,14 +160,17 @@ fn add_children() {
     let old: Node<()> = div(vec![], vec![b(vec![], vec![])]); //{ <div> <b></b> </div> },
     let new = div(
         vec![],
-        vec![b(vec![], vec![]), html_element("new", vec![], vec![])],
+        vec![
+            b(vec![], vec![]),
+            html_element(None, "new", vec![], vec![], false),
+        ],
     ); //{ <div> <b></b> <new></new> </div> },
     assert_eq!(
         dbg!(diff(&old, &new)),
         vec![Patch::append_children(
             &"div",
             TreePath::new(vec![0]),
-            vec![&html_element("new", vec![], vec![])]
+            vec![&html_element(None, "new", vec![], vec![], false)]
         )],
         "Added a new node to the root node",
     )
@@ -239,10 +242,10 @@ fn replace_text_node() {
 
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::change_text(
+        vec![Patch::replace_leaf(
             TreePath::new(vec![0]),
-            &Text::new("Old"),
-            &Text::new("New")
+            &leaf::text("Old"),
+            &leaf::text("New")
         )],
         "ReplaceNode text node",
     );

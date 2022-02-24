@@ -1,13 +1,5 @@
 #![deny(warnings)]
-use sauron_core::{
-    dom::CreatedNode,
-    html::{attributes::*, div, events::*},
-    svg::{
-        attributes::{cx, cy, r, xmlns},
-        circle, svg,
-    },
-    Node, *,
-};
+use sauron::prelude::*;
 use std::{cell::Cell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen::JsCast;

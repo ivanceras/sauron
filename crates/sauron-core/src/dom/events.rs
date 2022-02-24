@@ -2,7 +2,7 @@
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
 use crate::html::attributes::AttributeValue;
-use crate::{Attribute, Listener};
+use crate::{vdom::Attribute, vdom::Listener};
 use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
@@ -138,7 +138,7 @@ macro_rules! declare_events {
                 concat!("attach an [",stringify!($name),"](https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/",stringify!($name),") event to the html element"),
                 $(#[$attr])*
                 #[inline]
-                pub fn $name<CB, MSG>(cb: CB) -> crate::Attribute<MSG>
+                pub fn $name<CB, MSG>(cb: CB) -> crate::vdom::Attribute<MSG>
                     where CB: Fn($ret) -> MSG + 'static,
                           MSG: 'static,
                     {

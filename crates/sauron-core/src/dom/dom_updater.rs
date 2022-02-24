@@ -1,11 +1,12 @@
 use crate::{
-    diff,
     dom::{
         apply_patches::patch,
         created_node::{ActiveClosure, CreatedNode},
         Dispatch,
     },
-    Patch,
+    vdom,
+    vdom::diff,
+    vdom::Patch,
 };
 use wasm_bindgen::JsCast;
 use web_sys::{self, Element, Node};
@@ -14,7 +15,7 @@ use web_sys::{self, Element, Node};
 /// and a new incoming Node that represents our latest DOM state.
 pub struct DomUpdater<MSG> {
     /// the current vdom representation
-    pub current_vdom: crate::Node<MSG>,
+    pub current_vdom: vdom::Node<MSG>,
     /// the equivalent actual DOM element where the App is mounted into
     pub root_node: Node,
 
@@ -29,10 +30,7 @@ pub struct DomUpdater<MSG> {
 
 impl<MSG> DomUpdater<MSG> {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.
-    pub fn new(
-        current_vdom: crate::Node<MSG>,
-        mount: &Node,
-    ) -> DomUpdater<MSG> {
+    pub fn new(current_vdom: vdom::Node<MSG>, mount: &Node) -> DomUpdater<MSG> {
         DomUpdater {
             current_vdom,
             root_node: mount.clone(),
@@ -114,7 +112,7 @@ where
     /// in mount element.
     pub fn new_append_to_mount<DSP>(
         program: &DSP,
-        current_vdom: crate::Node<MSG>,
+        current_vdom: vdom::Node<MSG>,
         mount: &Element,
     ) -> DomUpdater<MSG>
     where
@@ -131,7 +129,7 @@ where
     /// element.
     pub fn new_replace_mount<DSP>(
         program: &DSP,
-        current_vdom: crate::Node<MSG>,
+        current_vdom: vdom::Node<MSG>,
         mount: Element,
     ) -> DomUpdater<MSG>
     where
@@ -151,7 +149,7 @@ where
     pub fn update_dom<DSP>(
         &mut self,
         program: &DSP,
-        new_vdom: crate::Node<MSG>,
+        new_vdom: vdom::Node<MSG>,
     ) -> usize
     where
         DSP: Dispatch<MSG> + Clone + 'static,

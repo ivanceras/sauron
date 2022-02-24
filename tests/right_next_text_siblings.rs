@@ -1,7 +1,6 @@
 use crate::mt_dom::TreePath;
 use sauron::prelude::*;
 
-
 #[test]
 fn comments_next_to_each_other() {
     let old: Node<()> = div(
@@ -15,10 +14,10 @@ fn comments_next_to_each_other() {
     assert_eq!(
         patch,
         vec![
-            Patch::change_comment(
+            Patch::replace_leaf(
                 TreePath::new(vec![0, 1]),
-                &"mordor".to_string(),
-                &"world".to_string()
+                &leaf::comment("mordor".to_string()),
+                &leaf::comment("world".to_string())
             ),
             Patch::remove_node(None, TreePath::new(vec![0, 2]),)
         ]

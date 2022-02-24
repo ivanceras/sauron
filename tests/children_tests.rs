@@ -1,8 +1,5 @@
 #![deny(warnings)]
-use sauron_core::{
-    svg::{attributes::*, *},
-    Node,
-};
+use sauron::prelude::*;
 
 #[test]
 fn children() {

@@ -1,12 +1,6 @@
 #![deny(warnings)]
-
-use sauron_core::{
-    diff,
-    dom::DomUpdater,
-    html::{attributes::*, events::*, *},
-    mt_dom::patch::*,
-    web_sys, Node,
-};
+use sauron::mt_dom::TreePath;
+use sauron::prelude::*;
 use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -182,7 +176,7 @@ fn remove_event_from_truncated_children() {
 
     let body = sauron_core::body();
     let simple_program = simple_program();
-    let diff = sauron_core::diff(&old, &new);
+    let diff = diff(&old, &new);
     log::debug!("{:#?}", diff);
     assert_eq!(
         diff,
@@ -228,7 +222,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
 
     let body = sauron_core::body();
     let simple_program = simple_program();
-    let diff = sauron_core::diff(&old, &new);
+    let diff = diff(&old, &new);
     log::debug!("{:#?}", diff);
     assert_eq!(
         diff,
@@ -267,7 +261,7 @@ fn remove_event_from_replaced_node() {
 
     let body = sauron_core::body();
     let simple_program = simple_program();
-    let diff = sauron_core::diff(&old, &new);
+    let diff = diff(&old, &new);
     log::info!("{:#?}", diff);
     assert_eq!(
         diff,

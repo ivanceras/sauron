@@ -1,11 +1,13 @@
 //! provides functionalities related to patching the DOM in the browser.
 use crate::{
+    dom::Dispatch,
     dom::{
         created_node,
         created_node::{ActiveClosure, CreatedNode},
     },
     html::attributes::AttributeValue,
-    Dispatch, Patch,
+    vdom::Leaf,
+    vdom::Patch,
 };
 use js_sys::Function;
 use std::collections::BTreeMap;
@@ -380,13 +382,22 @@ where
             }
             Ok(active_closures)
         }
-        Patch::ChangeText { new, .. } => {
-            node.set_node_value(Some(&new.text));
-            Ok(active_closures)
-        }
-        Patch::ChangeComment { new, .. } => {
-            node.set_node_value(Some(&new));
-            Ok(active_closures)
-        }
+        Patch::ReplaceLeaf { new, .. } => match new {
+            Leaf::Text(new_text) => {
+                node.set_node_value(Some(&new_text));
+                Ok(active_closures)
+            }
+            Leaf::SafeHtml(safe_html) => {
+                let element: &Element = node.unchecked_ref();
+                element
+                    .insert_adjacent_html("beforeend", &safe_html)
+                    .expect("error inserting html");
+                Ok(active_closures)
+            }
+            Leaf::Comment(new_comment) => {
+                node.set_node_value(Some(&new_comment));
+                Ok(active_closures)
+            }
+        },
     }
 }
