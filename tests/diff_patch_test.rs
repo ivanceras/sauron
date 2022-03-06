@@ -34,7 +34,7 @@ fn nodes_with_event_must_be_replaced() {
         patch,
         vec![Patch::replace_node(
             Some(&"input"),
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             &input(vec![id(elem_id), value("End Text"),], vec![]),
         )]
     );
@@ -49,7 +49,7 @@ fn change_class_attribute() {
         diff(&old, &new),
         vec![Patch::add_attributes(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&Attribute::with_multiple_values(
                 None,
                 "class",
@@ -91,10 +91,10 @@ fn truncate_children() {
     assert_eq!(
         dbg!(diff(&old, &new)),
         vec![
-            Patch::remove_node(Some(&"div"), TreePath::new(vec![0, 3]),),
-            Patch::remove_node(Some(&"div"), TreePath::new(vec![0, 4]),),
-            Patch::remove_node(Some(&"div"), TreePath::new(vec![0, 5]),),
-            Patch::remove_node(Some(&"div"), TreePath::new(vec![0, 6]),),
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![3]),),
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![4]),),
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![5]),),
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![6]),),
         ],
         "Should truncate children"
     );
@@ -132,23 +132,23 @@ fn truncate_children_different_attributes() {
         vec![
             Patch::add_attributes(
                 &"div",
-                TreePath::new(vec![0, 0]),
+                TreePath::new(vec![0]),
                 vec![&class("class5")]
             ),
             Patch::add_attributes(
                 &"div",
-                TreePath::new(vec![0, 1]),
+                TreePath::new(vec![1]),
                 vec![&class("class6")]
             ),
             Patch::add_attributes(
                 &"div",
-                TreePath::new(vec![0, 2]),
+                TreePath::new(vec![2]),
                 vec![&class("class7")]
             ),
-            Patch::remove_node(Some(&"div"), TreePath::new(vec![0, 3]),),
-            Patch::remove_node(Some(&"div"), TreePath::new(vec![0, 4]),),
-            Patch::remove_node(Some(&"div"), TreePath::new(vec![0, 5]),),
-            Patch::remove_node(Some(&"div"), TreePath::new(vec![0, 6]),),
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![3]),),
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![4]),),
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![5]),),
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![6]),),
         ],
         "Should truncate children"
     );
@@ -167,12 +167,12 @@ fn replace_node2() {
         vec![
             Patch::replace_node(
                 Some(&"b"),
-                TreePath::new(vec![0, 0]),
+                TreePath::new(vec![0]),
                 &i(vec![], vec![text("1")])
             ),
             Patch::replace_node(
                 Some(&"b"),
-                TreePath::new(vec![0, 1]),
+                TreePath::new(vec![1]),
                 &i(vec![], vec![])
             ),
         ],
@@ -189,8 +189,8 @@ fn remove_nodes1() {
     assert_eq!(
         dbg!(diff(&old, &new)),
         vec![
-            Patch::remove_node(Some(&"b"), TreePath::new(vec![0, 0]),),
-            Patch::remove_node(Some(&"span"), TreePath::new(vec![0, 1]),),
+            Patch::remove_node(Some(&"b"), TreePath::new(vec![0]),),
+            Patch::remove_node(Some(&"span"), TreePath::new(vec![1]),),
         ],
         "Remove all child nodes at and after child sibling index 1",
     );
@@ -220,8 +220,8 @@ fn remove_nodes2() {
     assert_eq!(
         dbg!(diff(&old, &new)),
         vec![
-            Patch::remove_node(Some(&"i"), TreePath::new(vec![0, 0, 1]),),
-            Patch::remove_node(Some(&"strong"), TreePath::new(vec![0, 1]),),
+            Patch::remove_node(Some(&"i"), TreePath::new(vec![0, 1]),),
+            Patch::remove_node(Some(&"strong"), TreePath::new(vec![1]),),
         ],
         "Remove a child and a grandchild node",
     );
@@ -243,10 +243,10 @@ fn remove_nodes3() {
     assert_eq!(
         dbg!(diff(&old, &new)),
         vec![
-            Patch::remove_node(Some(&"i"), TreePath::new(vec![0, 0, 1]),),
+            Patch::remove_node(Some(&"i"), TreePath::new(vec![0, 1]),),
             Patch::replace_node(
                 Some(&"b"),
-                TreePath::new(vec![0, 1]),
+                TreePath::new(vec![1]),
                 &i(vec![], vec![])
             ),
         ],
@@ -262,7 +262,7 @@ fn add_attributes() {
         diff(&old, &new),
         vec![Patch::add_attributes(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&id("hello")]
         )],
         "Add attributes",
@@ -275,7 +275,7 @@ fn add_attributes() {
         diff(&old, &new),
         vec![Patch::add_attributes(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&id("hello")]
         )],
         "Change attribute",
@@ -290,7 +290,7 @@ fn add_style_attributes() {
         diff(&old, &new),
         vec![Patch::add_attributes(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&style("display", "none")]
         )],
         "Add attributes",
@@ -311,7 +311,7 @@ fn add_style_attributes_1_change() {
         diff(&old, &new),
         vec![Patch::add_attributes(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&Attribute::with_multiple_values(
                 None,
                 "style",
@@ -345,7 +345,7 @@ fn remove_style_attributes() {
         diff(&old, &new),
         vec![Patch::remove_attributes(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&style("display", "block")]
         )],
         "Add attributes",
@@ -360,7 +360,7 @@ fn remove_events_will_become_replace_node() {
         diff(&old, &new),
         vec![Patch::replace_node(
             Some(&"div"),
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             &div(vec![], vec![])
         )],
         "Remove events",
@@ -399,11 +399,11 @@ fn text_changed_in_keyed_elements() {
         patch,
         vec![
             Patch::replace_leaf(
-                TreePath::new(vec![0, 0, 2, 0]),
+                TreePath::new(vec![0, 2, 0]),
                 &leaf::text("item3"),
                 &leaf::text("item3 with changes")
             ),
-            Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0, 0]),),
+            Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0]),),
         ]
     );
 }
@@ -430,7 +430,7 @@ fn multiple_style_calls() {
         patches,
         vec![Patch::add_attributes(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![
                 &style("font-family", "monospace1"),
                 &style("display", "flex")

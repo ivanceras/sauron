@@ -15,11 +15,11 @@ fn comments_next_to_each_other() {
         patch,
         vec![
             Patch::replace_leaf(
-                TreePath::new(vec![0, 1]),
+                TreePath::new(vec![1]),
                 &leaf::comment("mordor".to_string()),
                 &leaf::comment("world".to_string())
             ),
-            Patch::remove_node(None, TreePath::new(vec![0, 2]),)
+            Patch::remove_node(None, TreePath::new(vec![2]),)
         ]
     );
 }

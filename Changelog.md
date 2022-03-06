@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.46.0
+- change in mt-dom TreePath where root node is now at [], while first element in the dom is at [0].
+
 ## 0.45.2
 - change in Patch variants InsertNode -> InsertBeforeNode, added InsertAfterNode.
 

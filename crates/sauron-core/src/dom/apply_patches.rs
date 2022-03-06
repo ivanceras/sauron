@@ -110,8 +110,6 @@ fn find_all_nodes_by_path(
 
     for (path, tag) in nodes_to_find {
         let mut traverse_path = path.to_vec();
-        let root_idx = traverse_path.remove(0);
-        assert_eq!(0, root_idx, "path should start at 0");
         if let Some(found) =
             find_node_by_path_recursive(node.clone(), &mut traverse_path)
         {

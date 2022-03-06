@@ -81,7 +81,7 @@ fn test_unmatched_old_key() {
         vec![
             Patch::replace_node(
                 Some(&"div"),
-                TreePath::new(vec![0, 0]),
+                TreePath::new(vec![0]),
                 &node!(
                 <div class="grid__number__line" key="keyxxx">
                     <div class="grid__number">"xxx"</div>
@@ -91,17 +91,17 @@ fn test_unmatched_old_key() {
                 </div>)
             ),
             Patch::replace_leaf(
-                TreePath::new(vec![0, 1, 0, 0,]),
+                TreePath::new(vec![1, 0, 0,]),
                 &leaf::text("1"),
                 &leaf::text("2")
             ),
             Patch::replace_leaf(
-                TreePath::new(vec![0, 2, 0, 0,]),
+                TreePath::new(vec![2, 0, 0,]),
                 &leaf::text("2"),
                 &leaf::text("3")
             ),
             Patch::replace_leaf(
-                TreePath::new(vec![0, 3, 0, 0,]),
+                TreePath::new(vec![3, 0, 0,]),
                 &leaf::text("3"),
                 &leaf::text("4")
             ),

@@ -113,7 +113,7 @@ fn replace_node() {
         diff(&old, &new),
         vec![Patch::replace_node(
             Some(&"div"),
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             &span(vec![], vec![])
         )],
         "ReplaceNode the root if the tag changed"
@@ -125,7 +125,7 @@ fn replace_node() {
         diff(&old, &new),
         vec![Patch::replace_node(
             Some(&"b"),
-            TreePath::new(vec![0, 0]),
+            TreePath::new(vec![0]),
             &strong(vec![], vec![])
         )],
     );
@@ -143,12 +143,12 @@ fn replace_node() {
         vec![
             Patch::replace_node(
                 Some(&"b"),
-                TreePath::new(vec![0, 0]),
+                TreePath::new(vec![0]),
                 &i(vec![], vec![text("1")])
             ),
             Patch::replace_node(
                 Some(&"b"),
-                TreePath::new(vec![0, 1]),
+                TreePath::new(vec![1]),
                 &i(vec![], vec![])
             ),
         ],
@@ -169,7 +169,7 @@ fn add_children() {
         dbg!(diff(&old, &new)),
         vec![Patch::append_children(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&html_element(None, "new", vec![], vec![], false)]
         )],
         "Added a new node to the root node",
@@ -184,7 +184,7 @@ fn add_attributes() {
         diff(&old, &new),
         vec![Patch::add_attributes(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&id("hello")]
         )],
         "Add attributes",
@@ -197,7 +197,7 @@ fn add_attributes() {
         diff(&old, &new),
         vec![Patch::add_attributes(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&id("hello")]
         )],
         "Change attribute",
@@ -212,7 +212,7 @@ fn remove_attributes() {
         diff(&old, &new),
         vec![Patch::remove_attributes(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&id("hey-there")]
         )],
         "Remove attributes",
@@ -228,7 +228,7 @@ fn change_attribute() {
         diff(&old, &new),
         vec![Patch::add_attributes(
             &"div",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&id("changed")]
         )],
         "Add attributes",
@@ -243,7 +243,7 @@ fn replace_text_node() {
     assert_eq!(
         diff(&old, &new),
         vec![Patch::replace_leaf(
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             &leaf::text("Old"),
             &leaf::text("New")
         )],

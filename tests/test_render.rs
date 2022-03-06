@@ -62,7 +62,7 @@ fn test_inner_html_patch() {
         patch,
         vec![Patch::add_attributes(
             &"article",
-            TreePath::new(vec![0, 0]),
+            TreePath::new(vec![0]),
             vec![&inner_html("<h1>Lorep Ipsum</h1>")]
         )]
     );
@@ -83,7 +83,7 @@ fn test_inner_html_removed() {
         patch,
         vec![Patch::remove_attributes(
             &"article",
-            TreePath::new(vec![0, 0]),
+            TreePath::new(vec![0]),
             vec![&inner_html("<h1>Lorep Ipsum</h1>")]
         )]
     );
