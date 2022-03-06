@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.47.0
+- Use TreePath for finding and traversing nodes.
+
 ## 0.46.1
 - bump minor last release was using sauron-core 0.45 for sauron-node-macro
 
