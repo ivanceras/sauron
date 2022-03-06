@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.46.1
+- bump minor last release was using sauron-core 0.45 for sauron-node-macro
+
 ## 0.46.0
 - change in mt-dom TreePath where root node is now at [], while first element in the dom is at [0].
 
