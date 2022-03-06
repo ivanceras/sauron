@@ -10,6 +10,7 @@ use crate::{
     vdom::Patch,
 };
 use js_sys::Function;
+use mt_dom::TreePath;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use wasm_bindgen::{JsCast, JsValue};
@@ -51,7 +52,7 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    let nodes_to_find: Vec<(&[usize], Option<&&'static str>)> = patches
+    let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
         .iter()
         .map(|patch| (patch.path(), patch.tag()))
         .collect();
@@ -87,12 +88,12 @@ where
 
 fn find_node_by_path_recursive(
     node: Node,
-    path: &mut Vec<usize>,
+    path: &mut TreePath,
 ) -> Option<Node> {
     if path.is_empty() {
         Some(node)
     } else {
-        let idx = path.remove(0);
+        let idx = path.remove_first();
         let children = node.child_nodes();
         if let Some(child) = children.item(idx as u32) {
             find_node_by_path_recursive(child, path)
@@ -104,16 +105,16 @@ fn find_node_by_path_recursive(
 
 fn find_all_nodes_by_path(
     node: Node,
-    nodes_to_find: &[(&[usize], Option<&&'static str>)],
-) -> BTreeMap<Vec<usize>, Node> {
-    let mut nodes_to_patch: BTreeMap<Vec<usize>, Node> = BTreeMap::new();
+    nodes_to_find: &[(&TreePath, Option<&&'static str>)],
+) -> BTreeMap<TreePath, Node> {
+    let mut nodes_to_patch: BTreeMap<TreePath, Node> = BTreeMap::new();
 
     for (path, tag) in nodes_to_find {
-        let mut traverse_path = path.to_vec();
+        let mut traverse_path: TreePath = (*path).clone();
         if let Some(found) =
             find_node_by_path_recursive(node.clone(), &mut traverse_path)
         {
-            nodes_to_patch.insert(path.to_vec(), found);
+            nodes_to_patch.insert((*path).clone(), found);
         } else {
             log::warn!("can not find: {:?} {:?}", path, tag);
         }
