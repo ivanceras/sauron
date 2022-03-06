@@ -235,18 +235,13 @@ where
     let mut active_closures = ActiveClosure::new();
 
     match patch {
-        Patch::InsertNode {
+        Patch::InsertBeforeNode {
             tag,
             patch_path,
-            node: for_insert,
+            nodes: for_inserts,
         } => {
             // we inser the node before this target element
             let target_element: &Element = node.unchecked_ref();
-            let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
-                program,
-                for_insert,
-                focused_node,
-            );
             if let Some(parent_node) = target_element.parent_node() {
                 let parent_element: &Element = parent_node.unchecked_ref();
                 if let Some(tag) = tag {
@@ -258,15 +253,64 @@ where
                         );
                     }
                 }
-                parent_node
-                    .insert_before(&created_node.node, Some(target_element))
-                    .expect("must remove target node");
+
+                for for_insert in for_inserts {
+                    let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
+                        program,
+                        for_insert,
+                        focused_node,
+                    );
+                    parent_node
+                        .insert_before(&created_node.node, Some(target_element))
+                        .expect("must remove target node");
+                }
             } else {
-                panic!("unable to get parent node of the target element: {:?} thas has a tag: {:?} in path: {:?}, for patching: {:#?}", target_element, tag, patch_path, for_insert);
+                panic!("unable to get parent node of the target element: {:?} thas has a tag: {:?} in path: {:?}, for patching: {:#?}", target_element, tag, patch_path, for_inserts);
             }
 
             Ok(active_closures)
         }
+
+        Patch::InsertAfterNode {
+            tag,
+            patch_path,
+            nodes: for_inserts,
+        } => {
+            // we inser the node before this target element
+            let target_element: &Element = node.unchecked_ref();
+            if let Some(parent_node) = target_element.parent_node() {
+                let parent_element: &Element = parent_node.unchecked_ref();
+                if let Some(tag) = tag {
+                    let parent_tag = parent_element.tag_name().to_lowercase();
+                    if parent_tag != **tag {
+                        panic!(
+                            "expecting a tag: {:?}, but found: {:?}",
+                            tag, parent_tag
+                        );
+                    }
+                }
+
+                for for_insert in for_inserts {
+                    let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
+                        program,
+                        for_insert,
+                        focused_node,
+                    );
+                    let created_element: &Element = created_node
+                        .node
+                        .dyn_ref()
+                        .expect("only elements is supported for now");
+                    target_element
+                        .insert_adjacent_element("afterend", &created_element)
+                        .expect("must remove target node");
+                }
+            } else {
+                panic!("unable to get parent node of the target element: {:?} thas has a tag: {:?} in path: {:?}, for patching: {:#?}", target_element, tag, patch_path, for_inserts);
+            }
+
+            Ok(active_closures)
+        }
+
         Patch::AddAttributes { attrs, .. } => {
             let element: &Element = node.unchecked_ref();
             CreatedNode::set_element_attributes(
