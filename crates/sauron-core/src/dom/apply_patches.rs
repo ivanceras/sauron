@@ -31,27 +31,6 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    patch_by_traversal_path(
-        program,
-        root_node,
-        old_closures,
-        focused_node,
-        patches,
-    )
-}
-
-/// patch using the tree path traversal instead of node_idx
-pub fn patch_by_traversal_path<DSP, MSG>(
-    program: &DSP,
-    root_node: &mut Node,
-    old_closures: &mut ActiveClosure,
-    focused_node: &mut Option<Node>,
-    patches: Vec<Patch<MSG>>,
-) -> Result<ActiveClosure, JsValue>
-where
-    MSG: 'static,
-    DSP: Clone + Dispatch<MSG> + 'static,
-{
     let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
         .iter()
         .map(|patch| (patch.path(), patch.tag()))
@@ -63,8 +42,7 @@ where
     }
 
     let mut active_closures = HashMap::new();
-    let nodes_to_patch =
-        find_all_nodes_by_path(root_node.clone(), &nodes_to_find);
+    let nodes_to_patch = find_all_nodes(root_node.clone(), &nodes_to_find);
 
     for patch in patches.iter() {
         let patch_path = patch.path();
@@ -86,24 +64,21 @@ where
     Ok(active_closures)
 }
 
-fn find_node_by_path_recursive(
-    node: Node,
-    path: &mut TreePath,
-) -> Option<Node> {
+fn find_node(node: Node, path: &mut TreePath) -> Option<Node> {
     if path.is_empty() {
         Some(node)
     } else {
         let idx = path.remove_first();
         let children = node.child_nodes();
         if let Some(child) = children.item(idx as u32) {
-            find_node_by_path_recursive(child, path)
+            find_node(child, path)
         } else {
             None
         }
     }
 }
 
-fn find_all_nodes_by_path(
+fn find_all_nodes(
     node: Node,
     nodes_to_find: &[(&TreePath, Option<&&'static str>)],
 ) -> BTreeMap<TreePath, Node> {
@@ -111,9 +86,7 @@ fn find_all_nodes_by_path(
 
     for (path, tag) in nodes_to_find {
         let mut traverse_path: TreePath = (*path).clone();
-        if let Some(found) =
-            find_node_by_path_recursive(node.clone(), &mut traverse_path)
-        {
+        if let Some(found) = find_node(node.clone(), &mut traverse_path) {
             nodes_to_patch.insert((*path).clone(), found);
         } else {
             log::warn!("can not find: {:?} {:?}", path, tag);
