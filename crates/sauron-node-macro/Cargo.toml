@@ -16,7 +16,7 @@ syn-rsx = { version = "0.8" }
 quote = {package = "quote", version = "1.0.3"}
 proc-macro2 = { version = "1" }
 once_cell = "1.8"
-sauron-core = {version = "0.45", path = "../sauron-core", features = ["with-lookup"] }
+sauron-core = {version = "0.46", path = "../sauron-core", features = ["with-lookup"] }
 
 [dev-dependencies]
 sauron = { path = "../../"}
