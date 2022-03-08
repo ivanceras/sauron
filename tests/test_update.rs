@@ -109,19 +109,19 @@ fn test1() {
     assert_eq!(
         patch,
         vec![
-            Patch::replace_leaf(
-                TreePath::new(vec![0, 1, 0, 0, 1, 0, 0,]),
-                &leaf::text("1"),
-                &leaf::text("0")
+            Patch::replace_node(
+                None,
+                TreePath::new(vec![1, 0, 0, 1, 0, 0,]),
+                &text("0")
             ),
-            Patch::replace_leaf(
-                TreePath::new(vec![0, 1, 0, 0, 2, 0, 0,]),
-                &leaf::text("2"),
-                &leaf::text("3")
+            Patch::replace_node(
+                None,
+                TreePath::new(vec![1, 0, 0, 2, 0, 0,]),
+                &text("3")
             ),
             Patch::insert_node(
                 Some(&"div"),
-                TreePath::new(vec![0, 1, 0, 0, 2,]),
+                TreePath::new(vec![1, 0, 0, 2,]),
                 &div(
                     vec![
                         class("grid__number__line"),
@@ -143,7 +143,7 @@ fn test1() {
             ),
             Patch::insert_node(
                 Some(&"div"),
-                TreePath::new(vec![0, 1, 0, 0, 2,]),
+                TreePath::new(vec![1, 0, 0, 2,]),
                 &div(
                     vec![
                         class("grid__number__line"),
@@ -158,14 +158,11 @@ fn test1() {
                     ]
                 )
             ),
-            Patch::remove_node(
-                Some(&"div"),
-                TreePath::new(vec![0, 1, 0, 0, 0,]),
-            ),
-            Patch::replace_leaf(
-                TreePath::new(vec![0, 1, 0, 1, 0,]),
-                &leaf::text("line: 0, column: 0"),
-                &leaf::text("line: 1, column: 0")
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![1, 0, 0, 0,]),),
+            Patch::replace_node(
+                None,
+                TreePath::new(vec![1, 0, 1, 0,]),
+                &text("line: 1, column: 0")
             ),
         ]
     );

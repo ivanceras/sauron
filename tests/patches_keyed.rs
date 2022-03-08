@@ -85,7 +85,7 @@ fn node_patched_properly() {
         patches,
         vec![Patch::remove_node(
             Some(&"article"),
-            TreePath::new(vec![0, 0, 1])
+            TreePath::new(vec![0, 1])
         )]
     );
 
@@ -167,7 +167,7 @@ fn node_patched_properly_remove_from_start() {
         patches,
         vec![Patch::remove_node(
             Some(&"article"),
-            TreePath::new(vec![0, 0, 0])
+            TreePath::new(vec![0, 0])
         )]
     );
 
@@ -249,12 +249,12 @@ fn node_patched_properly_text_changed() {
     assert_eq!(
         patches,
         vec![
-            Patch::replace_leaf(
-                TreePath::new(vec![0, 0, 2, 0]),
-                &leaf::text("item3"),
-                &leaf::text("item3 with changes")
+            Patch::replace_node(
+                None,
+                TreePath::new(vec![0, 2, 0]),
+                &text("item3 with changes")
             ),
-            Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0, 0]))
+            Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0]))
         ]
     );
 
@@ -342,16 +342,16 @@ fn mixed_keyed_and_non_keyed_elements() {
     assert_eq!(
         patches,
         vec![
-            Patch::replace_leaf(
-                TreePath::new(vec![0, 0, 2, 0,]),
-                &leaf::text("item3"),
-                &leaf::text("item3 with changes")
+            Patch::replace_node(
+                None,
+                TreePath::new(vec![0, 2, 0,]),
+                &text("item3 with changes")
             ),
-            Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0, 0]),),
-            Patch::replace_leaf(
-                TreePath::new(vec![0, 1, 0]),
-                &leaf::text("3 items left"),
-                &leaf::text("2 items left")
+            Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0]),),
+            Patch::replace_node(
+                None,
+                TreePath::new(vec![1, 0]),
+                &text("2 items left")
             )
         ]
     );

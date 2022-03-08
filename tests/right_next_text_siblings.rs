@@ -14,10 +14,10 @@ fn comments_next_to_each_other() {
     assert_eq!(
         patch,
         vec![
-            Patch::replace_leaf(
+            Patch::replace_node(
+                None,
                 TreePath::new(vec![1]),
-                &leaf::comment("mordor".to_string()),
-                &leaf::comment("world".to_string())
+                &comment("world".to_string())
             ),
             Patch::remove_node(None, TreePath::new(vec![2]),)
         ]

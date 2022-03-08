@@ -33,7 +33,7 @@ fn nodes_with_event_should_not_recycle() {
         diff,
         vec![Patch::replace_node(
             Some(&"div"),
-            TreePath::new(vec![0, 0]),
+            TreePath::new(vec![0]),
             &div(vec![class("child")], vec![])
         )]
     );
@@ -55,7 +55,7 @@ fn remove_event_from_replaced_node() {
         diff,
         vec![Patch::replace_node(
             Some(&"div"),
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             &p(vec![], vec![])
         )],
     );

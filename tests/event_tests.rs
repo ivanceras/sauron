@@ -181,10 +181,10 @@ fn remove_event_from_truncated_children() {
     assert_eq!(
         diff,
         vec![
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 1]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 2]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 3]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 4]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![1]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![2]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![3]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![4]),),
         ],
     );
     let mut dom_updater =
@@ -227,10 +227,10 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     assert_eq!(
         diff,
         vec![
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 1]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 2]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 3]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![0, 4]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![1]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![2]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![3]),),
+            Patch::remove_node(Some(&"button"), TreePath::new(vec![4]),),
         ],
         "Should be a Truncate patch"
     );
@@ -267,7 +267,7 @@ fn remove_event_from_replaced_node() {
         diff,
         vec![Patch::replace_node(
             Some(&"div"),
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             &p(vec![], vec![])
         )],
     );

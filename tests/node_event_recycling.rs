@@ -49,7 +49,7 @@ fn elements_with_different_event_should_not_be_recycle() {
         patches,
         vec![Patch::add_attributes(
             &"input",
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             vec![&cb2]
         )]
     );

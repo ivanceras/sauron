@@ -108,20 +108,20 @@ fn new_lines_ignored() {
     assert_eq!(
         patches,
         vec![
-            Patch::replace_leaf(
+            Patch::replace_node(
+                None,
                 TreePath::new(vec![1, 0, 0, 0, 0, 0,]),
-                &leaf::text("0"),
-                &leaf::text("1")
+                &text("1")
             ),
-            Patch::replace_leaf(
+            Patch::replace_node(
+                None,
                 TreePath::new(vec![1, 0, 0, 2, 0, 0,]),
-                &leaf::text("2"),
-                &leaf::text("3")
+                &text("3")
             ),
-            Patch::replace_leaf(
+            Patch::replace_node(
+                None,
                 TreePath::new(vec![1, 0, 0, 3, 0, 0,]),
-                &leaf::text("3"),
-                &leaf::text("4")
+                &text("4")
             ),
             Patch::insert_node(
                 Some(&"div"),
@@ -152,10 +152,10 @@ fn new_lines_ignored() {
                 )
             ),
             Patch::remove_node(Some(&"div"), TreePath::new(vec![1, 0, 0, 1,]),),
-            Patch::replace_leaf(
+            Patch::replace_node(
+                None,
                 TreePath::new(vec![1, 0, 1, 0,]),
-                &leaf::text("line: 0, column: 0"),
-                &leaf::text("line: 1, column: 0")
+                &text("line: 1, column: 0")
             ),
         ]
     );

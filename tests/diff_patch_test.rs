@@ -398,10 +398,10 @@ fn text_changed_in_keyed_elements() {
     assert_eq!(
         patch,
         vec![
-            Patch::replace_leaf(
+            Patch::replace_node(
+                None,
                 TreePath::new(vec![0, 2, 0]),
-                &leaf::text("item3"),
-                &leaf::text("item3 with changes")
+                &text("item3 with changes")
             ),
             Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0]),),
         ]

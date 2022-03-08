@@ -6,7 +6,6 @@ use crate::{
         created_node::{ActiveClosure, CreatedNode},
     },
     html::attributes::AttributeValue,
-    vdom::Leaf,
     vdom::Patch,
 };
 use js_sys::Function;
@@ -362,7 +361,7 @@ where
             // if what we are replacing is a root node:
             // we replace the root node here, so that's reference is updated
             // to the newly created node
-            if patch_path.path == [0] {
+            if patch_path.path.is_empty() {
                 *root_node = created_node.node;
             }
             Ok(created_node.closures)
@@ -398,22 +397,5 @@ where
             }
             Ok(active_closures)
         }
-        Patch::ReplaceLeaf { new, .. } => match new {
-            Leaf::Text(new_text) => {
-                node.set_node_value(Some(&new_text));
-                Ok(active_closures)
-            }
-            Leaf::SafeHtml(safe_html) => {
-                let element: &Element = node.unchecked_ref();
-                element
-                    .insert_adjacent_html("beforeend", &safe_html)
-                    .expect("error inserting html");
-                Ok(active_closures)
-            }
-            Leaf::Comment(new_comment) => {
-                node.set_node_value(Some(&new_comment));
-                Ok(active_closures)
-            }
-        },
     }
 }

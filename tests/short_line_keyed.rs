@@ -90,20 +90,20 @@ fn test_unmatched_old_key() {
                     </div>
                 </div>)
             ),
-            Patch::replace_leaf(
+            Patch::replace_node(
+                None,
                 TreePath::new(vec![1, 0, 0,]),
-                &leaf::text("1"),
-                &leaf::text("2")
+                &text("2")
             ),
-            Patch::replace_leaf(
+            Patch::replace_node(
+                None,
                 TreePath::new(vec![2, 0, 0,]),
-                &leaf::text("2"),
-                &leaf::text("3")
+                &text("3")
             ),
-            Patch::replace_leaf(
+            Patch::replace_node(
+                None,
                 TreePath::new(vec![3, 0, 0,]),
-                &leaf::text("3"),
-                &leaf::text("4")
+                &text("4")
             ),
         ]
     );

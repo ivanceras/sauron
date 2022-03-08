@@ -112,19 +112,19 @@ fn multiple_match_on_keyed_elements() {
     assert_eq!(
         patches,
         vec![
-            Patch::replace_leaf(
-                TreePath::new(vec![0, 1, 0, 0, 2, 0, 0,]),
-                &leaf::text("2"),
-                &leaf::text("1")
+            Patch::replace_node(
+                None,
+                TreePath::new(vec![1, 0, 0, 2, 0, 0,]),
+                &text("1")
             ),
-            Patch::replace_leaf(
-                TreePath::new(vec![0, 1, 0, 0, 3, 0, 0,]),
-                &leaf::text("3"),
-                &leaf::text("4")
+            Patch::replace_node(
+                None,
+                TreePath::new(vec![1, 0, 0, 3, 0, 0,]),
+                &text("4")
             ),
             Patch::insert_node(
                 Some(&"div"),
-                TreePath::new(vec![0, 1, 0, 0, 3,]),
+                TreePath::new(vec![1, 0, 0, 3,]),
                 &node!(
                     <div class="grid__number__line" key="623356695095054844">
                        <div class="grid__number">"2"</div>
@@ -139,7 +139,7 @@ fn multiple_match_on_keyed_elements() {
             ),
             Patch::insert_node(
                 Some(&"div"),
-                TreePath::new(vec![0, 1, 0, 0, 3,]),
+                TreePath::new(vec![1, 0, 0, 3,]),
                 &node!(
                     <div class="grid__number__line" key="4638962052468762037">
                        <div class="grid__number">"3"</div>
@@ -149,14 +149,11 @@ fn multiple_match_on_keyed_elements() {
                     </div>
                 )
             ),
-            Patch::remove_node(
-                Some(&"div"),
-                TreePath::new(vec![0, 1, 0, 0, 1,]),
-            ),
-            Patch::replace_leaf(
-                TreePath::new(vec![0, 1, 0, 1, 0,]),
-                &leaf::text("line: 1, column: 0"),
-                &leaf::text("line: 2, column: 0")
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![1, 0, 0, 1,]),),
+            Patch::replace_node(
+                None,
+                TreePath::new(vec![1, 0, 1, 0,]),
+                &text("line: 2, column: 0")
             ),
         ]
     );

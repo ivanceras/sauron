@@ -47,17 +47,17 @@ fn test_multiple_replace() {
         vec![
             Patch::replace_node(
                 Some(&"li"),
-                TreePath::new(vec![0, 0, 0]),
+                TreePath::new(vec![0, 0]),
                 &li(vec![key(10)], vec![text("item10")]),
             ),
             Patch::replace_node(
                 Some(&"li"),
-                TreePath::new(vec![0, 0, 1]),
+                TreePath::new(vec![0, 1]),
                 &li(vec![key(20)], vec![text("item20")]),
             ),
             Patch::replace_node(
                 Some(&"li"),
-                TreePath::new(vec![0, 0, 2]),
+                TreePath::new(vec![0, 2]),
                 &li(vec![key(30)], vec![text("item30")]),
             ),
         ]
@@ -132,7 +132,7 @@ fn test_multiple_replace_and_parent_is_replaced_too() {
         patches,
         vec![Patch::replace_node(
             Some(&"main"),
-            TreePath::new(vec![0]),
+            TreePath::new(vec![]),
             &main(
                 vec![class("parent_replaced"), key("parent-new")],
                 vec![ul(
