@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.48.0
+- Remove the branch for patching the variant of Patch ReplaceLeaf since it is superseeded by ReplaceNode variant.
+- Fix all the test including the wasm test this time
+
 ## 0.47.0
 - Use TreePath for finding and traversing nodes.
 
