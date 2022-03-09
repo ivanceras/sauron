@@ -45,21 +45,18 @@ fn test_multiple_replace() {
     assert_eq!(
         patches,
         vec![
-            Patch::replace_node(
-                Some(&"li"),
-                TreePath::new(vec![0, 0]),
-                &li(vec![key(10)], vec![text("item10")]),
-            ),
-            Patch::replace_node(
-                Some(&"li"),
-                TreePath::new(vec![0, 1]),
-                &li(vec![key(20)], vec![text("item20")]),
-            ),
-            Patch::replace_node(
-                Some(&"li"),
-                TreePath::new(vec![0, 2]),
-                &li(vec![key(30)], vec![text("item30")]),
-            ),
+            Patch::remove_node(Some(&"li"), TreePath::new(vec![0, 0]),),
+            Patch::remove_node(Some(&"li"), TreePath::new(vec![0, 1]),),
+            Patch::remove_node(Some(&"li"), TreePath::new(vec![0, 2]),),
+            Patch::append_children(
+                &"ul",
+                TreePath::new(vec![0]),
+                vec![
+                    &li(vec![key(10)], vec![text("item10")]),
+                    &li(vec![key(20)], vec![text("item20")]),
+                    &li(vec![key(30)], vec![text("item30")]),
+                ]
+            )
         ]
     );
 

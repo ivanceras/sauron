@@ -117,39 +117,37 @@ fn multiple_match_on_keyed_elements() {
                 TreePath::new(vec![1, 0, 0, 2, 0, 0,]),
                 &text("1")
             ),
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![1, 0, 0, 1,]),),
             Patch::replace_node(
                 None,
                 TreePath::new(vec![1, 0, 0, 3, 0, 0,]),
                 &text("4")
             ),
-            Patch::insert_node(
+            Patch::insert_before_node(
                 Some(&"div"),
                 TreePath::new(vec![1, 0, 0, 3,]),
-                &node!(
-                    <div class="grid__number__line" key="623356695095054844">
-                       <div class="grid__number">"2"</div>
-                       <div class="grid__line">
-                          <div>"C"</div>
-                          <div>"J"</div>
-                          <div>"K"</div>
-                          <div>"\n"</div>
-                       </div>
-                    </div>
-                )
+                vec![
+                    &node!(
+                        <div class="grid__number__line" key="623356695095054844">
+                           <div class="grid__number">"2"</div>
+                           <div class="grid__line">
+                              <div>"C"</div>
+                              <div>"J"</div>
+                              <div>"K"</div>
+                              <div>"\n"</div>
+                           </div>
+                        </div>
+                    ),
+                    &node!(
+                        <div class="grid__number__line" key="4638962052468762037">
+                           <div class="grid__number">"3"</div>
+                           <div class="grid__line">
+                              <div>"\n"</div>
+                           </div>
+                        </div>
+                    )
+                ]
             ),
-            Patch::insert_node(
-                Some(&"div"),
-                TreePath::new(vec![1, 0, 0, 3,]),
-                &node!(
-                    <div class="grid__number__line" key="4638962052468762037">
-                       <div class="grid__number">"3"</div>
-                       <div class="grid__line">
-                          <div>"\n"</div>
-                       </div>
-                    </div>
-                )
-            ),
-            Patch::remove_node(Some(&"div"), TreePath::new(vec![1, 0, 0, 1,]),),
             Patch::replace_node(
                 None,
                 TreePath::new(vec![1, 0, 1, 0,]),

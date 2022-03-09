@@ -80,20 +80,21 @@ fn test_unmatched_old_key() {
         patches,
         vec![
             Patch::replace_node(
+                None,
+                TreePath::new(vec![1, 0, 0,]),
+                &text("2")
+            ),
+            Patch::remove_node(Some(&"div"), TreePath::new(vec![0]),),
+            Patch::insert_before_node(
                 Some(&"div"),
-                TreePath::new(vec![0]),
-                &node!(
+                TreePath::new(vec![1]),
+                vec![&node!(
                 <div class="grid__number__line" key="keyxxx">
                     <div class="grid__number">"xxx"</div>
                     <div class="grid__line">
                         <div>"\n"</div>
                     </div>
-                </div>)
-            ),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1, 0, 0,]),
-                &text("2")
+                </div>)]
             ),
             Patch::replace_node(
                 None,

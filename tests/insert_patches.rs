@@ -45,7 +45,7 @@ fn test_patch_insert_node() {
     assert_eq!(
         patches,
         vec![Patch::insert_node(
-            Some(&"ul"),
+            Some(&"li"),
             TreePath::new(vec![0, 0]),
             &li(vec![key(0)], vec![text("item0")])
         )]
@@ -120,7 +120,7 @@ fn test_patch_insert_node_in_the_middle() {
     assert_eq!(
         patches,
         vec![Patch::insert_node(
-            Some(&"ul"),
+            Some(&"li"),
             TreePath::new(vec![0, 1]),
             &li(vec![key(0)], vec![text("item0")])
         )]
@@ -197,28 +197,16 @@ fn multiple_insert_should_work() {
     log::debug!("patches: {:#?}", patches);
     assert_eq!(
         patches,
-        vec![
-            Patch::insert_node(
-                Some(&"ul"),
-                TreePath::new(vec![0, 0]),
-                &li(vec![key("c")], vec![text("itemc")])
-            ),
-            Patch::insert_node(
-                Some(&"ul"),
-                TreePath::new(vec![0, 0]),
-                &li(vec![key("b")], vec![text("itemb")])
-            ),
-            Patch::insert_node(
-                Some(&"ul"),
-                TreePath::new(vec![0, 0]),
-                &li(vec![key("a")], vec![text("itema")])
-            ),
-            Patch::insert_node(
-                Some(&"ul"),
-                TreePath::new(vec![0, 0]),
-                &li(vec![key(0)], vec![text("item0")])
-            ),
-        ]
+        vec![Patch::insert_before_node(
+            Some(&"li"),
+            TreePath::new(vec![0, 0]),
+            vec![
+                &li(vec![key("c")], vec![text("itemc")]),
+                &li(vec![key("b")], vec![text("itemb")]),
+                &li(vec![key("a")], vec![text("itema")]),
+                &li(vec![key(0)], vec![text("item0")]),
+            ]
+        ),]
     );
 
     let mut old_html = String::new();

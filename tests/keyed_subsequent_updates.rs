@@ -121,6 +121,17 @@ fn subsequent_updates() {
                 TreePath::new(vec![0, 0, 0, 0,]),
                 &text("1")
             ),
+            Patch::insert_node(
+                Some(&"div"),
+                TreePath::new(vec![0, 0]),
+                &div(
+                    vec![key("hashXXX")],
+                    vec![
+                        div(vec![], vec![text("0")]),
+                        div(vec![], vec![text("lineXXX")]),
+                    ],
+                )
+            ),
             Patch::replace_node(
                 None,
                 TreePath::new(vec![0, 1, 0, 0,]),
@@ -136,17 +147,6 @@ fn subsequent_updates() {
                 TreePath::new(vec![0, 3, 0, 0,]),
                 &text("4")
             ),
-            Patch::insert_node(
-                Some(&"section"),
-                TreePath::new(vec![0, 0]),
-                &div(
-                    vec![key("hashXXX")],
-                    vec![
-                        div(vec![], vec![text("0")]),
-                        div(vec![], vec![text("lineXXX")]),
-                    ],
-                )
-            )
         ]
     );
 
@@ -317,6 +317,17 @@ fn subsequent_updates() {
                 TreePath::new(vec![0, 0, 0, 0,]),
                 &text("1")
             ),
+            Patch::insert_node(
+                Some(&"div"),
+                TreePath::new(vec![0, 0,]),
+                &div(
+                    vec![key("hashYYY")],
+                    vec![
+                        div(vec![], vec![text("0")]),
+                        div(vec![], vec![text("lineYYY")]),
+                    ],
+                )
+            ),
             Patch::replace_node(
                 None,
                 TreePath::new(vec![0, 1, 0, 0,]),
@@ -337,17 +348,6 @@ fn subsequent_updates() {
                 TreePath::new(vec![0, 4, 0, 0,]),
                 &text("5")
             ),
-            Patch::insert_node(
-                Some(&"section"),
-                TreePath::new(vec![0, 0,]),
-                &div(
-                    vec![key("hashYYY")],
-                    vec![
-                        div(vec![], vec![text("0")]),
-                        div(vec![], vec![text("lineYYY")]),
-                    ],
-                )
-            )
         ]
     );
 
@@ -462,6 +462,17 @@ fn subsequent_updates() {
                 TreePath::new(vec![0, 0, 0, 0,]),
                 &text("1")
             ),
+            Patch::insert_node(
+                Some(&"div"),
+                TreePath::new(vec![0, 0,]),
+                &div(
+                    vec![key("hashZZZ")],
+                    vec![
+                        div(vec![], vec![text("0")]),
+                        div(vec![], vec![text("\n")]),
+                    ],
+                )
+            ),
             Patch::replace_node(
                 None,
                 TreePath::new(vec![0, 1, 0, 0,]),
@@ -487,17 +498,6 @@ fn subsequent_updates() {
                 TreePath::new(vec![0, 5, 0, 0,]),
                 &text("6")
             ),
-            Patch::insert_node(
-                Some(&"section"),
-                TreePath::new(vec![0, 0,]),
-                &div(
-                    vec![key("hashZZZ")],
-                    vec![
-                        div(vec![], vec![text("0")]),
-                        div(vec![], vec![text("\n")]),
-                    ],
-                )
-            )
         ]
     );
 
