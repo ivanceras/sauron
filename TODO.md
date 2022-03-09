@@ -67,7 +67,7 @@
         - [X] map `DomUpdater<MSG>` to `DomUpdater<MSG2>`
         - Issue mapping fields of Program that are in `Rc<RefCell>` seems not that simple
             as the Rc value of dom_updater is to be borrowed and will have a borrow checker issue
-- [ ] Merge `Program` and `DomUpdater`
+- ~~[ ] Merge `Program` and `DomUpdater`~~
     - Issue: DomUpdater has multiple fields, which would then be wrap with `Rc<RefCell>` individually
 - [ ] Change the `'static` of trait implementation by specifying the lifetime
         - ref: https://stackoverflow.com/questions/52187644/lifetime-must-be-valid-for-the-static-lifetime-so-that-the-types-are-compatible
