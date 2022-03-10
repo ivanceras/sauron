@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.49.1
+- Fix the ordering of inserting nodes when applying patch InsertAfterNode.
+
+## 0.49.0
+- fix assertion in apply_patch for InsertNode variants
+
 ## 0.48.0
 - Remove the branch for patching the variant of Patch ReplaceLeaf since it is superseeded by ReplaceNode variant.
 - Fix all the test including the wasm test this time
