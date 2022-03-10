@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.49.2
+- fix: a bug, closures for the elements created in InsertBeforeNode and InsertAfterNode variant for Patch is not added to the active closures
+
 ## 0.49.1
 - Fix the ordering of inserting nodes when applying patch InsertAfterNode.
 
