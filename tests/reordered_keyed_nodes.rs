@@ -62,7 +62,5 @@ fn failing_reordered_keys() {
         .expect("must exist");
 
     let expected1 = "<main class=\"reordered\"><ul class=\"todo\"><li key=\"3\">item3</li><li key=\"2\">item2</li><li key=\"1\">item1</li></ul></main>";
-    //FIXME: it reflect the new update
-    //assert_eq!(expected1, container.outer_html());
-    assert_ne!(expected1, container.outer_html());
+    assert_eq!(expected1, container.outer_html());
 }

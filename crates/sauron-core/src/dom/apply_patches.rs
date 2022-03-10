@@ -258,7 +258,7 @@ where
                 }
             }
 
-            for for_insert in for_inserts {
+            for for_insert in for_inserts.iter().rev() {
                 let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
                     program,
                     for_insert,
