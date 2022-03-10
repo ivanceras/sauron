@@ -233,6 +233,8 @@ where
                     parent_node
                         .insert_before(&created_node.node, Some(target_element))
                         .expect("must remove target node");
+
+                    active_closures.extend(created_node.closures);
                 }
             } else {
                 panic!("unable to get parent node of the target element: {:?} thas has a tag: {:?} in path: {:?}, for patching: {:#?}", target_element, tag, patch_path, for_inserts);
@@ -271,6 +273,7 @@ where
                 target_element
                     .insert_adjacent_element("afterend", &created_element)
                     .expect("must remove target node");
+                active_closures.extend(created_node.closures);
             }
             Ok(active_closures)
         }
