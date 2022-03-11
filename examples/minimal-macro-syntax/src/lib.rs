@@ -1,11 +1,5 @@
 #![deny(warnings)]
-use log::trace;
-use sauron::{
-    html::{attributes::attr, text},
-    node,
-    prelude::*,
-    Application, Cmd, Node, Program,
-};
+use sauron::prelude::*;
 
 #[derive(Debug)]
 pub enum Msg {
@@ -33,7 +27,7 @@ impl Application<Msg> for App {
                             value="Click me!"
                             key=1
                             on_click={|_| {
-                                trace!("Button is clicked");
+                                log::trace!("Button is clicked");
                                 Msg::Click
                             }}
                     />
@@ -45,7 +39,7 @@ impl Application<Msg> for App {
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-        trace!("App is updating with msg: {:?}", msg);
+        log::trace!("App is updating with msg: {:?}", msg);
         match msg {
             Msg::Click => self.click_count += 1,
         }
