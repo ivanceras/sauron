@@ -16,23 +16,20 @@ with strong focus on simplicity. It is suited for developing web application whi
 #### Counter example
 In your `src/lib.rs`
 ```rust
-use sauron::html::text;
 use sauron::prelude::*;
-use sauron::{node, Cmd, Application, Node, Program};
 
 #[derive(Debug)]
-pub enum Msg {
-    Increment,
-    Decrement,
+enum Msg {
+    Click,
 }
 
-pub struct App {
-    count: i32,
+struct App {
+    click_count: u32,
 }
 
 impl App {
     pub fn new() -> Self {
-        App { count: 0 }
+        App { click_count: 0 }
     }
 }
 
@@ -40,29 +37,28 @@ impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
-                <input type="button"
-                    value="+"
-                    key="inc"
-                    on_click=|_| {
-                        Msg::Increment
-                    }
-                />
-                <div class="count">{text(self.count)}</div>
-                <input type="button"
-                    value="-"
-                    key="dec"
-                    on_click=|_| {
-                        Msg::Decrement
-                    }
-                />
+                <h1>"Minimal example"</h1>
+                <div class="some-class" id="some-id" {attr("data-id", 1)}>
+                    <input class="client"
+                            type="button"
+                            value="Click me!"
+                            key=1
+                            on_click={|_| {
+                                log::trace!("Button is clicked");
+                                Msg::Click
+                            }}
+                    />
+                    <div>{text(format!("Clicked: {}", self.click_count))}</div>
+                    <input type="text" value={self.click_count}/>
+                </div>
             </main>
         }
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+        log::trace!("App is updating with msg: {:?}", msg);
         match msg {
-            Msg::Increment => self.count += 1,
-            Msg::Decrement => self.count -= 1,
+            Msg::Click => self.click_count += 1,
         }
         Cmd::none()
     }
@@ -70,9 +66,13 @@ impl Application<Msg> for App {
 
 #[wasm_bindgen(start)]
 pub fn main() {
+    console_log::init_with_level(log::Level::Trace).unwrap();
+    console_error_panic_hook::set_once();
     Program::mount_to_body(App::new());
 }
+
 ```
+
 `index.html`
 ```html
 <html>

@@ -2,11 +2,11 @@
 use sauron::prelude::*;
 
 #[derive(Debug)]
-pub enum Msg {
+enum Msg {
     Click,
 }
 
-pub struct App {
+struct App {
     click_count: u32,
 }
 
