@@ -106,9 +106,10 @@ impl CreatedNode {
                     custom_element
                         .define(
                             vdom_custom_element.tag,
-                            &Function::new_no_args(
-                                "console.log('In constructor')",
-                            ),
+                            &Function::new_no_args(&format!(
+                                "console.log('defining: {}')",
+                                vdom_custom_element.tag
+                            )),
                         )
                         .expect("must define the custom element");
                 }
