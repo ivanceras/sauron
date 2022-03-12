@@ -76,12 +76,12 @@ impl<MSG> Render for Node<MSG> {
     }
 }
 
-impl Render for Leaf {
+impl<MSG> Render for Leaf<MSG> {
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
-        _indent: usize,
-        _compressed: bool,
+        indent: usize,
+        compressed: bool,
     ) -> fmt::Result {
         match self {
             Leaf::Text(text) => {
@@ -93,6 +93,9 @@ impl Render for Leaf {
             }
             Leaf::Comment(comment) => {
                 write!(buffer, "<!--{}-->", comment)
+            }
+            Leaf::CustomElement(element) => {
+                element.render_with_indent(buffer, indent, compressed)
             }
         }
     }

@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::events::MountEvent;
 use crate::vdom;
 use crate::vdom::Listener;
@@ -10,9 +11,11 @@ use crate::{
     vdom::Attribute,
     vdom::Leaf,
 };
+use js_sys::Function;
 use std::cell::Cell;
 use std::collections::HashMap;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
+use web_sys::ElementDefinitionOptions;
 use web_sys::{
     self, Element, EventTarget, HtmlButtonElement, HtmlDetailsElement,
     HtmlElement, HtmlFieldSetElement, HtmlInputElement, HtmlLinkElement,
@@ -92,6 +95,29 @@ impl CreatedNode {
             }
             vdom::Node::Leaf(Leaf::SafeHtml(_safe_html)) => {
                 panic!("safe html must have already been dealt in create_element node");
+            }
+            vdom::Node::Leaf(Leaf::CustomElement(vdom_custom_element)) => {
+                let custom_element = crate::window().custom_elements();
+
+                let existing = custom_element.get(vdom_custom_element.tag);
+
+                // define the custom element only when it is not yet defined
+                if existing.is_undefined() {
+                    custom_element
+                        .define(
+                            vdom_custom_element.tag,
+                            &Function::new_no_args(
+                                "console.log('In constructor')",
+                            ),
+                        )
+                        .expect("must define the custom element");
+                }
+
+                Self::create_element_node(
+                    program,
+                    vdom_custom_element,
+                    focused_node,
+                )
             }
             vdom::Node::Element(element_node) => {
                 Self::create_element_node(program, element_node, focused_node)

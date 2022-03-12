@@ -1,6 +1,6 @@
 use crate::html::attributes::AttributeValue;
 use crate::html::attributes::Listener;
-use crate::vdom::{Attribute, Element, Event, Node};
+use crate::vdom::{Attribute, Element, Event, Leaf, Node};
 
 /// Add mapping function for Node, Element, Attribute,
 pub trait NodeMapMsg<MSG>
@@ -74,7 +74,14 @@ where
     {
         match self {
             Node::Element(element) => Node::Element(element.map_callback(cb)),
-            Node::Leaf(leaf) => Node::Leaf(leaf),
+            Node::Leaf(leaf) => match leaf {
+                Leaf::Text(txt) => Node::Leaf(Leaf::Text(txt)),
+                Leaf::SafeHtml(this) => Node::Leaf(Leaf::SafeHtml(this)),
+                Leaf::Comment(this) => Node::Leaf(Leaf::Comment(this)),
+                Leaf::CustomElement(this) => {
+                    Node::Leaf(Leaf::CustomElement(this.map_callback(cb)))
+                }
+            },
         }
     }
 

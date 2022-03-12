@@ -1,7 +1,8 @@
 //! Provides functions and macros to build html elements
+use crate::vdom;
 use crate::vdom::leaf;
 use crate::vdom::NodeTrait;
-use crate::vdom::{Attribute, Node};
+use crate::vdom::{Attribute, Element, Leaf, Node};
 pub use jss::units;
 pub use mt_dom::{element, element_ns};
 
@@ -66,6 +67,28 @@ pub fn html_element<MSG>(
         corrected_children.push(child);
     }
     element_ns(namespace, tag, attrs, corrected_children, self_closing)
+}
+
+/// create a custom html element
+///
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let my_clock:Node<()> =
+///     custom_element("my-clock", [attr("time", "now")], [button([],[text("a clock")])]);
+///
+/// let expected = "<my-clock time=\"now\"><button>a clock</button></my-clock>";
+/// assert_eq!(expected, my_clock.render_to_string());
+/// ```
+pub fn custom_element<MSG>(
+    custom_tag: vdom::Tag,
+    attrs: impl IntoIterator<Item = Attribute<MSG>>,
+    children: impl IntoIterator<Item = Node<MSG>>,
+) -> Node<MSG> {
+    Node::Leaf(Leaf::CustomElement(Element::new(
+        None, custom_tag, attrs, children, false,
+    )))
 }
 
 /// creates a text node using a formatter
