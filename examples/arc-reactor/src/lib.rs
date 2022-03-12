@@ -1,7 +1,7 @@
 // code is derived from: https://codepen.io/AsyrafHussin/pen/odVpmE?__cf_chl_jschl_tk__=b2a5d3c92297b4243deded6d24dd8727e6c0c718-1603031934-0-AXZNUeXia5wQorUjr2SzbbdAE1gNkxgtLS5ElYnE1U7Azaw8xRz0_XjMROZjlIO-pZ4HFU450aebEQvXqEIl8PNYwSH4-Ux7Wpe97dBjRl72Xftyxs8Gs0SecTOw-W87lLArzoxmu_1gGTAd02U9UolrKRXusUoaDNPp1Ue8Cchh5vhO9ayJLPkCOcy1ReT92tizsFyKDP1gKqf5V1k0ZvoYEshzezvF_Cie4qyW154U8bu40DSBjnaf734gykrvq7Ot52EPsejJnCR1w-CxEci2NHHWtR6OPgCYXEQdHk56poUkfCzo6Ml2l6jzGawh1ln-Gkb8JBCabcMh0qz0LvvRdvqvzcsCHwmbMzkCbMpe
 #![deny(warnings)]
 use sauron::jss;
-use sauron::{node, prelude::*, Application, Cmd, Node, Program};
+use sauron::{node, prelude::*, units::deg, Application, Cmd, Node, Program};
 
 pub enum Msg {
     Click,
@@ -29,7 +29,7 @@ impl Application<Msg> for App {
                 {for i in 0..trapezoid_count{
                     node!{
                         <div class=format!("trapezoid trapezoid-{}",i+1)
-                             style=format!("transform:rotate({}deg)", i * 360 / trapezoid_count)>
+                             style=format!("transform:rotate({})", deg(i * 360 / trapezoid_count))>
                         </div>
                     }
                 }}
@@ -39,7 +39,7 @@ impl Application<Msg> for App {
                 {for i in 0..small_circle_count{
                     node!{
                         <div class=format!("small-circle small-circle-{}",i+1)
-                             style=format!("transform:rotate({}deg)", i * 360 / small_circle_count)>
+                             style=format!("transform:rotate({})", deg(i * 360 / small_circle_count))>
                         </div>
                     }
                 }}
