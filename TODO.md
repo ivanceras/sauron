@@ -128,6 +128,7 @@
     - [X] expose the `sauron-md` as `sauron::markdown` module, behind a feature flag
 - [X] Add example using markdown
 - [X] Make use of `serde_json` to parse `style` into components
+- [ ] Add an example where a program is a custom html element, that way sauron could be used as a way to migrate parts of an existing html/js code base.
 
 
 ## Performance
