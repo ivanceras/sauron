@@ -156,4 +156,4 @@ Navigate to http://127.0.0.1:4000 to see the 'hello' message.
 There you have it, you've built the bare minimum web application using sauron.
 
 Well, the result is pretty underwhelming. We could just create a completely static html page with "hello" on it.
-Head over to [`intermediate example`]("./intermediate-example.md") where sauron really shines.
+Head over to [`intermediate example`](./intermediate-example.md) where sauron really shines.
