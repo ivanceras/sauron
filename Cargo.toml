@@ -58,27 +58,12 @@ features = [
 
 [workspace]
 members = [
-    "crates/sauron-core",
-    "crates/sauron-node-macro",
-    "examples/arc-reactor",
-    "examples/counter",
-    "examples/custom-elements",
-    "examples/custom-elements-macro-syntax",
-    "examples/custom_widget",
-    "examples/minimal",
-    "examples/minimal-macro-syntax",
-    "examples/fetch-data",
-    "examples/fetch-data-macro-syntax",
-    "examples/interactive",
-    "examples/ssr-forms",
-    "examples/todomvc",
-    "examples/todomvc-macro-syntax",
-    "examples/window-tab-rows",
-    "examples/svg-clock",
-    "examples/svg-clock-macro-syntax",
-    "examples/svg-graph",
-    "examples/data-viewer",
+    "crates/*",
+    "examples/*",
 ]
+# progressive-rendering example has its own workspace
+exclude = ["examples/progressive-rendering"]
+
 
 
 [patch.crates-io]
