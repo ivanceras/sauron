@@ -159,5 +159,5 @@ Finally, serve the files using `basic-http-server`
 basic-http-server
 ```
 
-By default, the page is served in port `4000`
+By default, the page is served in port `4000`.
 Navigate your browser to http://127.0.0.1:400 to see the app.
