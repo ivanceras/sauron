@@ -141,6 +141,7 @@ We need to reference this file in our page. Let's create `index.html` in our pro
 Take note, that we are using `<script type=module>`.
 Another thing to take note is that we referencing `./pkg/hello.js` from the `./pkg` folder.
 If you changed the package name of the crate, you will also need to change the filename here.
+Behind the scene, `./pkg/hello.js` will take care of loading `./pkg/hello_bg.wasm` in the background.
 
 Recompile our webapp, issue this command everytime you have changes to the rust code.
 ```shell

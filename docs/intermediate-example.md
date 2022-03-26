@@ -147,17 +147,22 @@ You can put your styles as usual.
   </body>
 </html>
 ```
+Make sure that the filename of the javascript file (`./pkg/counter.js`) in the `import` file matches the package name of your web app (`counter`).
+Double check this part of the code especially if you change the package name of your web app.
 
 Compile the web app by issuing the command:
 
 ```shell
 wasm-pack build --release --target=web
 ```
-Finally, serve the files using `basic-http-server`
+You need to issue this command everytime you modify the rust code.
+
+
+Finally, serve the files using `basic-http-server` at port `4004`
 
 ```shell
-basic-http-server
+basic-http-server -a 0.0.0.0:4004
 ```
 
-By default, the page is served in port `4000`.
-Navigate your browser to http://127.0.0.1:400 to see the app.
+Then navigate your browser http://localhost:4004 to see and interact with the app.
+
