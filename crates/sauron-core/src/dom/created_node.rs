@@ -6,7 +6,6 @@ use crate::{
     dom::Dispatch,
     dom::Event,
     html,
-    html::attributes,
     html::attributes::{AttributeValue, SegregatedAttributes, Special},
     vdom::Attribute,
     vdom::Leaf,
@@ -15,12 +14,10 @@ use std::cell::Cell;
 use std::collections::HashMap;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
-    self, Element, EventTarget, HtmlButtonElement, HtmlDataElement,
-    HtmlDetailsElement, HtmlElement, HtmlFieldSetElement, HtmlInputElement,
-    HtmlLiElement, HtmlLinkElement, HtmlMenuItemElement, HtmlMeterElement,
-    HtmlOptGroupElement, HtmlOptionElement, HtmlOutputElement,
-    HtmlParamElement, HtmlProgressElement, HtmlSelectElement, HtmlStyleElement,
-    HtmlTextAreaElement, Node, Text,
+    self, Element, EventTarget, HtmlButtonElement, HtmlDetailsElement,
+    HtmlElement, HtmlFieldSetElement, HtmlInputElement, HtmlLinkElement,
+    HtmlMenuItemElement, HtmlOptGroupElement, HtmlOptionElement,
+    HtmlSelectElement, HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
@@ -254,7 +251,7 @@ impl CreatedNode {
             } else {
                 match *attr.name() {
                     "value" => {
-                        Self::set_value(element, &plain_values);
+                        Self::set_value(element, &merged_plain_values);
                     }
                     "open" => {
                         let is_open: bool = plain_values
@@ -435,73 +432,62 @@ impl CreatedNode {
     /// - fieldset
     /// - menuitem
     fn set_disabled(element: &Element, is_disabled: bool) {
-        if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlButtonElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlTextAreaElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlStyleElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlLinkElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlSelectElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlOptionElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlOptGroupElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlFieldSetElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlMenuItemElement>() {
-            elm.set_disabled(is_disabled);
+        if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
+            input.set_disabled(is_disabled);
+        } else if let Some(btn) = element.dyn_ref::<HtmlButtonElement>() {
+            btn.set_disabled(is_disabled);
+        } else if let Some(text_area) = element.dyn_ref::<HtmlTextAreaElement>()
+        {
+            text_area.set_disabled(is_disabled);
+        } else if let Some(style_elem) = element.dyn_ref::<HtmlStyleElement>() {
+            style_elem.set_disabled(is_disabled);
+        } else if let Some(link_elem) = element.dyn_ref::<HtmlLinkElement>() {
+            link_elem.set_disabled(is_disabled);
+        } else if let Some(select) = element.dyn_ref::<HtmlSelectElement>() {
+            select.set_disabled(is_disabled);
+        } else if let Some(option) = element.dyn_ref::<HtmlOptionElement>() {
+            option.set_disabled(is_disabled);
+        } else if let Some(opt_group) = element.dyn_ref::<HtmlOptGroupElement>()
+        {
+            opt_group.set_disabled(is_disabled);
+        } else if let Some(field_set) = element.dyn_ref::<HtmlFieldSetElement>()
+        {
+            field_set.set_disabled(is_disabled);
+        } else if let Some(menu_item) = element.dyn_ref::<HtmlMenuItemElement>()
+        {
+            menu_item.set_disabled(is_disabled);
         }
     }
 
     /// we explicitly call the `set_value` function in the html element
     ///
     /// Note: for most of other elements, setting the attribute value will do just fine.
-    fn set_value<MSG>(
-        element: &Element,
-        values: &[&attributes::AttributeValue<MSG>],
-    ) {
-        let value_str = html::attributes::merge_plain_attributes_values(values)
-            .expect("must have a merged plain attribute values");
-
-        let value_i32: i32 = values
-            .first()
-            .map(|v| v.get_simple().map(|v| v.as_i32()).flatten())
-            .flatten()
-            .unwrap_or(0);
-
-        let value_f64: f64 = values
-            .first()
-            .map(|v| v.get_simple().map(|v| v.as_f64()).flatten())
-            .flatten()
-            .unwrap_or(0.0);
-
-        if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
-            elm.set_value(&value_str);
-        } else if let Some(elm) = element.dyn_ref::<HtmlTextAreaElement>() {
-            elm.set_value(&value_str);
-        } else if let Some(elm) = element.dyn_ref::<HtmlSelectElement>() {
-            elm.set_value(&value_str);
-        } else if let Some(elm) = element.dyn_ref::<HtmlOptionElement>() {
-            elm.set_value(&value_str);
-        } else if let Some(elm) = element.dyn_ref::<HtmlButtonElement>() {
-            elm.set_value(&value_str);
-        } else if let Some(elm) = element.dyn_ref::<HtmlDataElement>() {
-            elm.set_value(&value_str);
-        } else if let Some(elm) = element.dyn_ref::<HtmlLiElement>() {
-            elm.set_value(value_i32);
-        } else if let Some(elm) = element.dyn_ref::<HtmlMeterElement>() {
-            elm.set_value(value_f64);
-        } else if let Some(elm) = element.dyn_ref::<HtmlOutputElement>() {
-            elm.set_value(&value_str);
-        } else if let Some(elm) = element.dyn_ref::<HtmlParamElement>() {
-            elm.set_value(&value_str);
-        } else if let Some(elm) = element.dyn_ref::<HtmlProgressElement>() {
-            elm.set_value(value_f64);
+    //
+    // TODO:
+    //    web_sys::Attr::set_value
+    //    web_sys::AudioParam::set_value
+    //    web_sys::DomTokenList::set_value
+    //    web_sys::HtmlButtonElement::set_value
+    //    web_sys::HtmlDataElement::set_value
+    //    web_sys::HtmlLiElement::set_value
+    //    web_sys::HtmlMeterElement::set_value
+    //    web_sys::HtmlOutputElement::set_value
+    //    web_sys::HtmlParamElement::set_value
+    //    web_sys::HtmlProgressElement::set_value
+    //    web_sys::RadioNodeList::set_value
+    //    web_sys::SvgAngle::set_value
+    //    web_sys::SvgLength::set_value
+    //    web_sys::SvgNumber::set_value
+    fn set_value(element: &Element, value: &str) {
+        if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
+            input.set_value(value);
+        } else if let Some(textarea) = element.dyn_ref::<HtmlTextAreaElement>()
+        {
+            textarea.set_value(value);
+        } else if let Some(select) = element.dyn_ref::<HtmlSelectElement>() {
+            select.set_value(value);
+        } else if let Some(option) = element.dyn_ref::<HtmlOptionElement>() {
+            option.set_value(value);
         }
     }
 
@@ -512,8 +498,24 @@ impl CreatedNode {
         attr: &Attribute<MSG>,
     ) -> Result<(), JsValue> {
         log::trace!("removing attribute: {}", attr.name());
+
         element.remove_attribute(attr.name())?;
 
+        match *attr.name() {
+            "value" => {
+                Self::set_value(element, "");
+            }
+            "open" => {
+                Self::set_open(element, false);
+            }
+            "checked" => {
+                Self::set_checked(element, false);
+            }
+            "disabled" => {
+                Self::set_disabled(element, false);
+            }
+            _ => (),
+        }
         Ok(())
     }
 }
