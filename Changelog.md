@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.49.3
+- support setting the attribute value for;
+    - HtmlLiElement
+    - HtmlMeterElement
+    - HtmlMenuItemElement
+    - HtmlProgressElement
+    - HtmlParamElement
+    - HtmlOutputElement
+    - HtmlDataElement
+
 ## 0.49.2
 - fix: a bug, closures for the elements created in InsertBeforeNode and InsertAfterNode variant for Patch is not added to the active closures
 
