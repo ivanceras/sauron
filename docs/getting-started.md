@@ -1,8 +1,12 @@
 # Getting started
 
 Let's build a simple web application with sauron.
+This will just display a text "hello" in the page.
+
+## Pre-requisite
+
 Make sure you have all the prerequisite installed.
-- rust
+- rust and cargo
 - wasm-pack
 - basic-http-server
 
@@ -106,9 +110,11 @@ pub fn main() {
     Program::mount_to_body(App);
 }
 ```
+Take notice of the `view` method. Here we are using `node!` macro which takes html-like syntax to be used to display our app.
+We implement the `Application` trait for our `App` so that we can implement the required methods necessary to tell sauron how out app behaves.
 
 To compile, we issue the command:
-```
+```shell
 wasm-pack build --release --target=web
 ```
 As mentioned earlier,`wasm-pack` helps us simplify the process of compiling rust for targetting web applications.
@@ -132,10 +138,22 @@ We need to reference this file in our page. Let's create `index.html` in our pro
   </body>
 </html>
 ```
-Finally, we serve the files using `basic-http-server`
+Take note, that we are using `<script type=module>`.
+Another thing to take note is that we referencing `./pkg/hello.js` from the `./pkg` folder.
+If you changed the package name of the crate, you will also need to change the filename here.
+
+Recompile our webapp, issue this command everytime you have changes to the rust code.
+```shell
+wasm-pack build --release --target=web
 ```
+
+Finally, we serve the files using `basic-http-server`
+```shell
 basic-http-server
 ```
 By default, it serves the page in port `4000`
 Navigate to http://127.0.0.1:4000 to see the 'hello' message.
 There you have it, you've built the bare minimum web application using sauron.
+
+Well, the result is pretty underwhelming. We could just create a completely static html page with "hello" on it.
+Head over to [`intermediate example`]("./intermediate-example.md") where sauron really shines.

@@ -134,6 +134,8 @@ basic-http-server -a 0.0.0.0:4000
 ```
 Then navigate to http://localhost:4000
 
+Head over to the [`getting-started.md`](docs/getting-started.md) for the full tutorial.
+
 For more details on the commands to build and serve, look on [examples](https://github.com/ivanceras/sauron/tree/master/examples) on this repo, each
 has scripts on how to build and run them.
 

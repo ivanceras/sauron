@@ -1,17 +1,17 @@
 use sauron::prelude::*;
 
-#[derive(Debug)]
-pub enum Msg {
+enum Msg {
     Increment,
     Decrement,
+    Reset,
 }
 
-pub struct App {
+struct App {
     count: i32,
 }
 
 impl App {
-    pub fn new() -> Self {
+    fn new() -> Self {
         App { count: 0 }
     }
 }
@@ -22,15 +22,13 @@ impl Application<Msg> for App {
             <main>
                 <input type="button"
                     value="+"
-                    key="inc"
                     on_click=|_| {
                         Msg::Increment
                     }
                 />
-                <div class="count">{text(self.count)}</div>
+                <button class="count" on_click=|_|{Msg::Reset} >{text(self.count)}</button>
                 <input type="button"
                     value="-"
-                    key="dec"
                     on_click=|_| {
                         Msg::Decrement
                     }
@@ -43,12 +41,13 @@ impl Application<Msg> for App {
         match msg {
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,
+            Msg::Reset => self.count = 0,
         }
         Cmd::none()
     }
 }
 
 #[wasm_bindgen(start)]
-pub fn main() {
+pub fn start() {
     Program::mount_to_body(App::new());
 }
