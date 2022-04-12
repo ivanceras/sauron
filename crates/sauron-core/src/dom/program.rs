@@ -75,6 +75,22 @@ where
     }
 
     /// Creates an Rc wrapped instance of Program and replace the root_node with the app view
+    /// # Example
+    /// ```rust,ignore
+    /// # use sauron::prelude::*;
+    /// # use sauron::document;
+    /// struct App{}
+    /// # impl Application<()> for App{
+    /// #     fn view(&self) -> Node<()>{
+    /// #         text("hello")
+    /// #     }
+    /// #     fn update(&mut self, _: ()) -> Cmd<Self, ()> {
+    /// #         Cmd::none()
+    /// #     }
+    /// # }
+    /// let mount = document().query_selector(".container").ok().flatten().unwrap();
+    /// Program::replace_mount(App{}, &mount);
+    /// ```
     pub fn replace_mount(app: APP, root_node: &Node) -> Self {
         let program = Self::new(app, root_node);
         program.start_replace_mount();
@@ -83,6 +99,22 @@ where
     }
 
     ///  Instantiage an app and append the view to the root_node
+    /// # Example
+    /// ```rust,ignore
+    /// # use sauron::prelude::*;
+    /// # use sauron::document;
+    /// struct App{}
+    /// # impl Application<()> for App{
+    /// #     fn view(&self) -> Node<()>{
+    /// #         text("hello")
+    /// #     }
+    /// #     fn update(&mut self, _: ()) -> Cmd<Self, ()> {
+    /// #         Cmd::none()
+    /// #     }
+    /// # }
+    /// let mount = document().query_selector("#app").ok().flatten().unwrap();
+    /// Program::append_to_mount(App{}, &mount);
+    /// ```
     pub fn append_to_mount(app: APP, root_node: &Node) -> Self {
         let program = Self::new(app, root_node);
         program.start_append_to_mount();
@@ -91,6 +123,21 @@ where
     }
 
     /// Instantiate the app and then append it to the document body
+    /// # Example
+    /// ```rust,ignore
+    /// # use sauron::prelude::*;
+    /// # use sauron::document;
+    /// struct App{}
+    /// # impl Application<()> for App{
+    /// #     fn view(&self) -> Node<()>{
+    /// #         text("hello")
+    /// #     }
+    /// #     fn update(&mut self, _: ()) -> Cmd<Self, ()> {
+    /// #         Cmd::none()
+    /// #     }
+    /// # }
+    /// Program::mount_to_body(App{});
+    /// ```
     pub fn mount_to_body(app: APP) -> Self {
         Self::append_to_mount(app, &crate::body())
     }

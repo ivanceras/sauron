@@ -1,5 +1,9 @@
+//! vdom stands for virtual-dom.
 //! This module contains types that are derived from mt-dom
-//! where we assign concrete types into the generics
+//! where we assign concrete types into the generics.
+//!
+//! All the code in this module are run in purely rust environment, that is there is NO code here
+//! involves accessing the real DOM.
 //!
 use crate::html::attributes::{self, AttributeValue};
 use crate::Event;
