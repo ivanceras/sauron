@@ -4,6 +4,7 @@
  - [X] Make a module that isolate the `with-dom` features.
  - [X] Rework the dumb patch taking the advantage of feature gating the dom capability.
  - [ ] Add documentation to functions
+     - Add examples to usage of methods in `Program`.
  - [ ] Loosen the lifetime requirement of the `Fn` inside `Callback` from `'static` to a generic one eg: `'c`
      - [X] Done in `mt-dom` branch: non-static-lifetime
  - [X] Deprecate the tag macro since it complicates the conflict in reexporting the functions
