@@ -36,9 +36,12 @@
     // Check out src/lib.rs to see how you use this on the rust side.
     //
     customElements.define('intl-date',
-        class extends HTMLElement {
+        class IntlDate extends HTMLElement {
             // things required by Custom Elements
-            constructor() { super(); }
+            constructor() { 
+                super(); 
+                this.some_props = "I'm now set";
+            }
             connectedCallback() { this.setTextContent(); }
             attributeChangedCallback() { this.setTextContent(); }
             static get observedAttributes() { return ['lang','year','month']; }
@@ -46,19 +49,68 @@
             // Our function to set the textContent based on attributes.
             setTextContent()
             {
+                console.log("some props: {}", this.some_props);
+
                 const lang = this.getAttribute('lang');
                 const year = this.getAttribute('year');
                 const month = this.getAttribute('month');
-                this.textContent = localizeDate(lang, year, month);
+                //this.textContent = localizeDate(lang, year, month);
+                let text = document.createTextNode(localizeDate(lang, year, month));
+                while (this.hasChildNodes()) {
+                  this.removeChild(this.firstChild);
+                }
+                this.appendChild(text);
             }
         }
     );
+        function changeLanguage(){
+            console.log("changing the language..");
+            let elm =  document.getElementById("id1");
+            elm.setAttribute("lang", "us-US");
+        }
 
     </script>
     <script type=module>
-        import init from './pkg/custom_elements.js';
-        init().catch(console.error);
-    </script>
+        import init, { AppCE } from './pkg/custom_elements.js';
+        await init().catch(console.error);
 
+        function defineCustomElement(custom_tag){
+            customElements.define(custom_tag,
+                class extends HTMLElement{
+                    constructor(){
+                        super();
+                        console.log("this: {}", this);
+                        this.instance = new AppCE(this);
+                    }
+                    
+                    static get observedAttributes(){
+                        console.log("called observedAttributes");
+                        let attrs = AppCE.observed_attributes();
+                        console.log("attrs:", attrs);
+                        return attrs;
+                    }
+
+                    connectedCallback(){
+                        this.instance.connected_callback();
+                    }
+                    disconnectedCallback(){
+                        this.instance.disconnected_callback();
+                    }
+                    adoptedCallback(){
+                        this.instance.adopted_callback();
+                    }
+                    attributeChangedCallback(){
+                        this.instance.attribute_changed_callback();
+                    }
+
+                }
+            );
+        }
+
+        defineCustomElement('local-date');
+
+    </script>
+    <local-date id="id1" lang="ph" year="2022" month="12"></local-date>
+    <button onclick="changeLanguage()">Change language</button>
 </body>
 </html>

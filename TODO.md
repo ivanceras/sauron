@@ -130,6 +130,8 @@
 - [X] Add example using markdown
 - [X] Make use of `serde_json` to parse `style` into components
 - [ ] Add an example where a program is a custom html element, that way sauron could be used as a way to migrate parts of an existing html/js code base.
+    - [ ] Custom element which is defiend as a web component where it can be used by some other Application.
+    - [ ] The App should be serializable and each of the fields will become an html attribute which
 
 
 ## Performance

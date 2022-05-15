@@ -321,7 +321,7 @@ where
         // before it is actully replaced in the DOM
         //
         Patch::ReplaceNode {
-            tag,
+            tag: _,
             patch_path,
             replacement,
         } => {
@@ -337,16 +337,6 @@ where
                 replacement,
                 focused_node,
             );
-            if let Some(tag) = tag {
-                let target_tag = element.tag_name().to_lowercase();
-                if target_tag != **tag {
-                    panic!(
-                        "expecting a tag: {:?}, but found: {:?}",
-                        tag, target_tag
-                    );
-                }
-            }
-
             if element.node_type() == Node::ELEMENT_NODE {
                 remove_event_listeners(element, old_closures)?;
             }

@@ -69,8 +69,7 @@ where
     }
 
     /// get the real DOM node where this app is mounted to.
-    #[allow(unused)]
-    fn root_node(&self) -> web_sys::Node {
+    pub fn root_node(&self) -> web_sys::Node {
         self.dom_updater.borrow().root_node()
     }
 
@@ -146,7 +145,8 @@ where
     pub fn replace_body(app: APP) -> Self {
         Self::replace_mount(app, &crate::body())
     }
-    fn start_append_to_mount(&self) {
+    /// Do the actual appending of app to the specified mount
+    pub fn start_append_to_mount(&self) {
         self.dom_updater.borrow_mut().append_to_mount(self)
     }
 

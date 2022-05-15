@@ -79,12 +79,12 @@ where
             root_element
                 .replace_with_with_node_1(&created_node.node)
                 .expect("Could not append child to mount");
+            self.root_node = created_node.node;
         } else {
             self.root_node
                 .append_child(&created_node.node)
                 .expect("Could not append child to mount");
         }
-        self.root_node = created_node.node;
         self.active_closures = created_node.closures;
         self.set_focus_element();
     }
