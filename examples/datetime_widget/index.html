@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <title>Custom widget</title>
+  </head>
+  <body>
+    <script type=module>
+        import init, { DateTimeCustomElement } from './pkg/datetime_widget.js';
+
+        await init().catch(console.error);
+
+        customElements.define("date-time",
+            class extends HTMLElement{
+                constructor(){
+                    super();
+                    this.instance = new DateTimeCustomElement(this);
+                }
+                
+                static get observedAttributes(){
+                    return DateTimeCustomElement.observed_attributes();
+                }
+
+                connectedCallback(){
+                    this.instance.connected_callback();
+                }
+                disconnectedCallback(){
+                    this.instance.disconnected_callback();
+                }
+                adoptedCallback(){
+                    this.instance.adopted_callback();
+                }
+                attributeChangedCallback(){
+                    this.instance.attribute_changed_callback();
+                }
+
+            }
+        );
+    </script>
+    <date-time date="2022-05-16" time="15:46"></date-time>
+  </body>
+</html>

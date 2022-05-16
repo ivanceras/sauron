@@ -132,6 +132,12 @@
 - [ ] Add an example where a program is a custom html element, that way sauron could be used as a way to migrate parts of an existing html/js code base.
     - [ ] Custom element which is defiend as a web component where it can be used by some other Application.
     - [ ] The App should be serializable and each of the fields will become an html attribute which
+    - [ ] There is an issue with the patch not being able to find the element to be patch when using custom element
+        due to the reason that the root_node stored in the dom updater is not the first element of the view, but rather
+        the root_node in the dom updater is the first element of the view.
+        The old technique was the replace the root node with the created first element but this is not ideal when used for custom_element since we need to get the attributes from the custom element
+        Possible solution:
+            - Add a mount_node to the dom_updater alongside with the root_node
 
 
 ## Performance
