@@ -16,8 +16,11 @@ use web_sys::{self, Element, Node};
 pub struct DomUpdater<MSG> {
     /// the current vdom representation
     pub current_vdom: vdom::Node<MSG>,
-    /// the equivalent actual DOM element where the App is mounted into
-    pub root_node: Node,
+    /// the first element of the app view, where the patch is generated is relative to
+    pub root_node: Option<Node>,
+
+    /// the actual DOM element where the APP is mounted to.
+    pub mount_node: Node,
 
     /// The closures that are currently attached to elements in the page.
     ///
@@ -33,7 +36,8 @@ impl<MSG> DomUpdater<MSG> {
     pub fn new(current_vdom: vdom::Node<MSG>, mount: &Node) -> DomUpdater<MSG> {
         DomUpdater {
             current_vdom,
-            root_node: mount.clone(),
+            root_node: None,
+            mount_node: mount.clone(),
             active_closures: ActiveClosure::new(),
             focused_node: None,
         }
@@ -75,16 +79,16 @@ where
             &mut self.focused_node,
         );
         if replace {
-            let root_element: &Element = self.root_node.unchecked_ref();
-            root_element
+            let mount_element: &Element = self.mount_node.unchecked_ref();
+            mount_element
                 .replace_with_with_node_1(&created_node.node)
                 .expect("Could not append child to mount");
-            self.root_node = created_node.node;
         } else {
-            self.root_node
+            self.mount_node
                 .append_child(&created_node.node)
                 .expect("Could not append child to mount");
         }
+        self.root_node = Some(created_node.node);
         self.active_closures = created_node.closures;
         self.set_focus_element();
     }
@@ -96,7 +100,7 @@ where
         }
     }
 
-    /// Mount the current_vdom replacing the actual browser DOM specified in the root_node
+    /// Mount the current_vdom replacing the actual browser DOM specified in the mount_node
     /// This also gets the closures that was created when mounting the vdom to their
     /// actual DOM counterparts.
     pub fn replace_mount<DSP>(&mut self, program: &DSP)
@@ -159,10 +163,11 @@ where
 
         #[cfg(feature = "with-debug")]
         log::debug!("patches: {:#?}", patches);
+        let mut root_node = self.root_node();
 
         let active_closures = patch(
             program,
-            &mut self.root_node,
+            &mut root_node,
             &mut self.active_closures,
             &mut self.focused_node,
             patches,
@@ -184,9 +189,10 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
+        let mut root_node = self.root_node();
         let active_closures = patch(
             program,
-            &mut self.root_node,
+            &mut root_node,
             &mut self.active_closures,
             &mut self.focused_node,
             patches,
@@ -200,6 +206,17 @@ where
     pub fn root_node(&self) -> Node {
         // Note that we're cloning the `web_sys::Node`, not the DOM element.
         // So we're effectively cloning a pointer here, which is fast.
-        self.root_node.clone()
+        self.root_node
+            .as_ref()
+            .expect("must have a root_node")
+            .clone()
+    }
+
+    /// Return the root node of your application, the highest ancestor of all other nodes in
+    /// your real DOM tree.
+    pub fn mount_node(&self) -> Node {
+        // Note that we're cloning the `web_sys::Node`, not the DOM element.
+        // So we're effectively cloning a pointer here, which is fast.
+        self.mount_node.clone()
     }
 }

@@ -42,9 +42,9 @@ where
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
-    pub fn new(app: APP, root_node: &Node) -> Self {
+    pub fn new(app: APP, mount_node: &Node) -> Self {
         let dom_updater: DomUpdater<MSG> =
-            DomUpdater::new(app.view(), root_node);
+            DomUpdater::new(app.view(), mount_node);
         Program {
             app: Rc::new(RefCell::new(app)),
             dom_updater: Rc::new(RefCell::new(dom_updater)),
@@ -73,6 +73,10 @@ where
         self.dom_updater.borrow().root_node()
     }
 
+    /// return the node where the app is mounted into
+    pub fn mount_node(&self) -> web_sys::Node {
+        self.dom_updater.borrow().mount_node()
+    }
     /// Creates an Rc wrapped instance of Program and replace the root_node with the app view
     /// # Example
     /// ```rust,ignore
@@ -90,8 +94,8 @@ where
     /// let mount = document().query_selector(".container").ok().flatten().unwrap();
     /// Program::replace_mount(App{}, &mount);
     /// ```
-    pub fn replace_mount(app: APP, root_node: &Node) -> Self {
-        let program = Self::new(app, root_node);
+    pub fn replace_mount(app: APP, mount_node: &Node) -> Self {
+        let program = Self::new(app, mount_node);
         program.start_replace_mount();
         program.after_mounted();
         program
@@ -114,8 +118,8 @@ where
     /// let mount = document().query_selector("#app").ok().flatten().unwrap();
     /// Program::append_to_mount(App{}, &mount);
     /// ```
-    pub fn append_to_mount(app: APP, root_node: &Node) -> Self {
-        let program = Self::new(app, root_node);
+    pub fn append_to_mount(app: APP, mount_node: &Node) -> Self {
+        let program = Self::new(app, mount_node);
         program.start_append_to_mount();
         program.after_mounted();
         program
@@ -152,6 +156,20 @@ where
 
     fn start_replace_mount(&self) {
         self.dom_updater.borrow_mut().replace_mount(self)
+    }
+
+    /// explicity update the dom
+    pub fn update_dom(&self) {
+        let view = self.app.borrow().view();
+        log::info!("view: {:#?}", view);
+        log::info!(
+            "current vdom: {:#?}",
+            self.dom_updater.borrow().current_vdom
+        );
+
+        // update the last DOM node tree with this new view
+        let _total_patches =
+            self.dom_updater.borrow_mut().update_dom(self, view);
     }
 
     /// This is called when an event is triggered in the html DOM.
