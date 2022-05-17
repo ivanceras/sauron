@@ -161,12 +161,6 @@ where
     /// explicity update the dom
     pub fn update_dom(&self) {
         let view = self.app.borrow().view();
-        log::info!("view: {:#?}", view);
-        log::info!(
-            "current vdom: {:#?}",
-            self.dom_updater.borrow().current_vdom
-        );
-
         // update the last DOM node tree with this new view
         let _total_patches =
             self.dom_updater.borrow_mut().update_dom(self, view);
