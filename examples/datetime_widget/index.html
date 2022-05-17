@@ -1,3 +1,4 @@
+<!doctype html>
 <html>
   <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
@@ -5,37 +6,14 @@
   </head>
   <body>
     <script type=module>
-        import init, { DateTimeCustomElement } from './pkg/datetime_widget.js';
-
+        import init, * as components from './pkg/datetime_widget.js';
+        /// attached the components in the window, so we access them from other scripts
+        /// This is important, otherwise the register_custom_element will not work
+        /// This must be called before the init function
+        window.components = components;
         await init().catch(console.error);
-
-        customElements.define("date-time",
-            class extends HTMLElement{
-                constructor(){
-                    super();
-                    this.instance = new DateTimeCustomElement(this);
-                }
-                
-                static get observedAttributes(){
-                    return DateTimeCustomElement.observed_attributes();
-                }
-
-                connectedCallback(){
-                    this.instance.connected_callback();
-                }
-                disconnectedCallback(){
-                    this.instance.disconnected_callback();
-                }
-                adoptedCallback(){
-                    this.instance.adopted_callback();
-                }
-                attributeChangedCallback(){
-                    this.instance.attribute_changed_callback();
-                }
-
-            }
-        );
     </script>
     <date-time date="2022-05-16" time="15:46"></date-time>
+    <date-time date="2022-12-22" time="22:22"></date-time>
   </body>
 </html>

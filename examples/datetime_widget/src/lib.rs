@@ -7,14 +7,17 @@ use std::collections::BTreeMap;
 
 mod date_time;
 
+#[derive(Debug, Clone)]
+pub struct Msg(date_time::Msg);
+
 #[wasm_bindgen]
-pub struct DateTimeCustomElement {
+pub struct DateTimeWidgetCustomElement {
     is_mounted: bool,
-    program: Program<DateTimeWidget, date_time::Msg>,
+    program: Program<DateTimeWidget<Msg>, Msg>,
 }
 
 #[wasm_bindgen]
-impl DateTimeCustomElement {
+impl DateTimeWidgetCustomElement {
     #[wasm_bindgen(constructor)]
     pub fn new(node: JsValue) -> Self {
         log::info!("constructor..");
@@ -30,7 +33,7 @@ impl DateTimeCustomElement {
 
     #[wasm_bindgen(method)]
     pub fn observed_attributes() -> JsValue {
-        JsValue::from_serde(&DateTimeWidget::observed_attributes())
+        JsValue::from_serde(&DateTimeWidget::<Msg>::observed_attributes())
             .expect("must parse from serde")
     }
 
@@ -50,12 +53,10 @@ impl DateTimeCustomElement {
                 attribute_values.insert(attr_name, attr_value);
             }
         }
-        {
-            self.program
-                .app
-                .borrow_mut()
-                .attribute_changed(attribute_values);
-        }
+        self.program
+            .app
+            .borrow_mut()
+            .attribute_changed(attribute_values);
         self.program.update_dom();
     }
 
@@ -78,8 +79,28 @@ impl DateTimeCustomElement {
     }
 }
 
+impl Application<Msg> for DateTimeWidget<Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+        Cmd::from(
+            <Self as Component<date_time::Msg, Msg>>::update(self, msg.0)
+                .localize(Msg),
+        )
+    }
+
+    fn view(&self) -> Node<Msg> {
+        <Self as Component<date_time::Msg, Msg>>::view(self).map_msg(Msg)
+    }
+}
+
+#[wasm_bindgen(module = "/define_custom_element.js")]
+extern "C" {
+    pub fn register_custom_element(custom_tag: &str, adapter: &str);
+}
+
 #[wasm_bindgen(start)]
 pub fn main() {
     console_log::init_with_level(log::Level::Trace).unwrap();
     console_error_panic_hook::set_once();
+    register_custom_element("date-time", "DateTimeWidgetCustomElement");
+    log::info!("loaded...");
 }
