@@ -23,10 +23,10 @@ pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
 fn fragment_to_tokens(nodes: Vec<Node>) -> TokenStream {
     let mut tokens = TokenStream::new();
     let children_tokens = children_to_tokens(nodes);
-    tokens.extend(quote! {
+    tokens.extend(quote! {{
         #children_tokens
         sauron::html::fragment(children)
-    });
+    }});
     tokens
 }
 
