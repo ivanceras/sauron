@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+- Add support for creating fragment in a node
+The `node!` macro can now be used to return a view which uses multiple top level tags.
+Example:
+```rust
+node!{
+    <h1>"Header"</h1>
+    <main>"The content goes here"</main>
+}
+```
+
 ## 0.49.3
 - support setting the attribute value for;
     - HtmlLiElement

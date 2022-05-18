@@ -76,7 +76,7 @@ impl<MSG> Render for Node<MSG> {
     }
 }
 
-impl Render for Leaf {
+impl<MSG> Render for Leaf<MSG> {
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
@@ -93,6 +93,15 @@ impl Render for Leaf {
             }
             Leaf::Comment(comment) => {
                 write!(buffer, "<!--{}-->", comment)
+            }
+            Leaf::Fragment(fragment) => {
+                for frag in fragment.iter() {
+                    frag.render_with_indent(buffer, _indent, _compressed)?;
+                }
+                Ok(())
+            }
+            Leaf::DocType(doctype) => {
+                write!(buffer, "<!doctype {}>", doctype)
             }
         }
     }

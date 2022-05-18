@@ -41,6 +41,7 @@ features = [
     "ClipboardEvent",
     "console",
     "Document",
+    "DocumentFragment",
     "Element",
     "Event",
     "HtmlElement",
