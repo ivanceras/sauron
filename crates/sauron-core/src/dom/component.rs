@@ -1,5 +1,6 @@
 use crate::dom::effects::Effects;
 use crate::vdom::Node;
+use std::collections::BTreeMap;
 
 /// A component has a view and can update itself.
 ///
@@ -23,6 +24,19 @@ pub trait Component<MSG, XMSG> {
     /// Component can have component id to identify themselves
     fn get_component_id(&self) -> Option<&String> {
         None
+    }
+
+    /// returns the attributes that is observed by this component
+    fn observed_attributes() -> Vec<&'static str> {
+        vec![]
+    }
+
+    /// This will be invoked when a component is used as a custom element
+    /// and the attributes of the custom-element has been modified
+    fn attribute_changed(
+        &mut self,
+        _attributes_values: BTreeMap<String, String>,
+    ) {
     }
 }
 

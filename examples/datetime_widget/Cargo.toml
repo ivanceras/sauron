@@ -1,5 +1,5 @@
 [package]
-name = "custom-elements-macro-syntax"
+name = "datetime_widget"
 version = "0.1.0"
 authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
 edition = "2018"

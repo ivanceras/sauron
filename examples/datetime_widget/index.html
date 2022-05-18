@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <title>Custom widget</title>
+  </head>
+  <body>
+    <script type=module>
+        import init, * as components from './pkg/datetime_widget.js';
+        /// attached the components in the window, so we access them from other scripts
+        /// This is important, otherwise the register_custom_element will not work
+        /// This must be called before the init function
+        window.components = components;
+        await init().catch(console.error);
+    </script>
+  </body>
+</html>

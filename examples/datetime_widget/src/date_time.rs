@@ -1,5 +1,6 @@
 use sauron::dom::Callback;
 use sauron::prelude::*;
+use std::collections::BTreeMap;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
@@ -17,6 +18,17 @@ pub struct DateTimeWidget<XMSG> {
     time: String,
     cnt: i32,
     time_change_listener: Vec<Callback<String, XMSG>>,
+}
+
+impl<XMSG> Default for DateTimeWidget<XMSG> {
+    fn default() -> Self {
+        Self {
+            date: String::new(),
+            time: String::new(),
+            cnt: 0,
+            time_change_listener: vec![],
+        }
+    }
 }
 
 impl<XMSG> DateTimeWidget<XMSG>
@@ -49,6 +61,20 @@ impl<XMSG> Component<Msg, XMSG> for DateTimeWidget<XMSG>
 where
     XMSG: Clone + Debug + 'static,
 {
+    fn observed_attributes() -> Vec<&'static str> {
+        vec!["date", "time"]
+    }
+
+    fn attribute_changed(&mut self, attributes: BTreeMap<String, String>) {
+        for (key, value) in attributes {
+            match &*key {
+                "date" => self.date = value,
+                "time" => self.time = value,
+                _ => log::info!("unused attribute: {}", key),
+            }
+        }
+    }
+
     fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::DateChange(date) => {
