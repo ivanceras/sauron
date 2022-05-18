@@ -72,6 +72,49 @@ impl CreatedNode {
         crate::document().create_text_node(txt)
     }
 
+    fn create_leaf_node<DSP, MSG>(
+        program: &DSP,
+        leaf: &Leaf<MSG>,
+        focused_node: &mut Option<Node>,
+    ) -> CreatedNode
+    where
+        MSG: 'static,
+        DSP: Clone + Dispatch<MSG> + 'static,
+    {
+        match leaf {
+            Leaf::Text(txt) => {
+                let text_node = Self::create_text_node(&txt);
+                CreatedNode::without_closures(text_node.unchecked_into())
+            }
+            Leaf::Comment(comment) => {
+                let comment_node = crate::document().create_comment(comment);
+                CreatedNode::without_closures(comment_node.unchecked_into())
+            }
+            Leaf::SafeHtml(_safe_html) => {
+                panic!("safe html must have already been dealt in create_element node");
+            }
+            Leaf::DocType(_doctype) => {
+                panic!("It looks like you are using doctype in the middle of an app,
+                    doctype is only used in rendering");
+            }
+            Leaf::Fragment(nodes) => {
+                let document = crate::document();
+                let doc_fragment = document.create_document_fragment();
+                let mut closures = ActiveClosure::new();
+                for vnode in nodes {
+                    let created_node =
+                        Self::create_dom_node(program, vnode, focused_node);
+                    closures.extend(created_node.closures);
+                    doc_fragment
+                        .append_child(&created_node.node)
+                        .expect("Unable to append node to document fragment");
+                }
+                let node: Node = doc_fragment.unchecked_into();
+                CreatedNode { node, closures }
+            }
+        }
+    }
+
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
     pub fn create_dom_node<DSP, MSG>(
@@ -84,16 +127,8 @@ impl CreatedNode {
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         match vnode {
-            vdom::Node::Leaf(Leaf::Text(txt)) => {
-                let text_node = Self::create_text_node(&txt);
-                CreatedNode::without_closures(text_node.unchecked_into())
-            }
-            vdom::Node::Leaf(Leaf::Comment(comment)) => {
-                let comment_node = crate::document().create_comment(comment);
-                CreatedNode::without_closures(comment_node.unchecked_into())
-            }
-            vdom::Node::Leaf(Leaf::SafeHtml(_safe_html)) => {
-                panic!("safe html must have already been dealt in create_element node");
+            vdom::Node::Leaf(leaf_node) => {
+                Self::create_leaf_node(program, leaf_node, focused_node)
             }
             vdom::Node::Element(element_node) => {
                 Self::create_element_node(program, element_node, focused_node)
