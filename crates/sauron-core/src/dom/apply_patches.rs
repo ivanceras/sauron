@@ -30,8 +30,6 @@ where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    log::info!("patches: {:#?}", patches);
-
     let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
         .iter()
         .map(|patch| (patch.path(), patch.tag()))

@@ -109,6 +109,9 @@
     - [X] The injected style shall have a class name equal to the the type_id of the `APP`.
 - [X] Add `maybe_attr(name: &str, value: Option<Value>)` to set the attribute if there is a value. empty otherwise.
 - [X] Centralize the handling of attributes tha has a state such as `value`, `checked`,.
+- [ ] Issue with not finding the nodes to be patched
+    - This issue manifested in `performance-test-sauron` repo
+    - Suspecting it has to do with `mount_node` and `root_node` as replace and append could have a different behavior in the 2.
 
 
 
