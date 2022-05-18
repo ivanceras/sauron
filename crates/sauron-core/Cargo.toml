@@ -1,6 +1,6 @@
 [package]
 name = "sauron-core"
-version = "0.49.3"
+version = "0.49.4"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -42,6 +42,7 @@ features = [
     "console",
     "CustomElementRegistry",
     "Document",
+    "DocumentFragment",
     "Element",
     "Event",
     "HtmlElement",

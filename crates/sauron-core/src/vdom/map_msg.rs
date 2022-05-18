@@ -1,6 +1,6 @@
 use crate::html::attributes::AttributeValue;
 use crate::html::attributes::Listener;
-use crate::vdom::{Attribute, Element, Event, Node};
+use crate::vdom::{Attribute, Element, Event, Leaf, Node};
 
 /// Add mapping function for Node, Element, Attribute,
 pub trait NodeMapMsg<MSG>
@@ -74,7 +74,7 @@ where
     {
         match self {
             Node::Element(element) => Node::Element(element.map_callback(cb)),
-            Node::Leaf(leaf) => Node::Leaf(leaf),
+            Node::Leaf(leaf) => Node::Leaf(leaf.map_callback(cb)),
         }
     }
 
@@ -179,6 +179,26 @@ where
                 AttributeValue::EventListener(this.map_callback(cb))
             }
             AttributeValue::Empty => AttributeValue::Empty,
+        }
+    }
+}
+
+impl<MSG> Leaf<MSG>
+where
+    MSG: 'static,
+{
+    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Leaf<MSG2>
+    where
+        MSG2: 'static,
+    {
+        match self {
+            Self::Text(v) => Leaf::Text(v),
+            Self::SafeHtml(v) => Leaf::SafeHtml(v),
+            Self::Comment(v) => Leaf::Comment(v),
+            Self::Fragment(v) => Leaf::Fragment(
+                v.into_iter().map(|n| n.map_callback(cb.clone())).collect(),
+            ),
+            Self::DocType(v) => Leaf::DocType(v),
         }
     }
 }

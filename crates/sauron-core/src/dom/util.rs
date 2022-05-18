@@ -23,6 +23,7 @@ where
     closure_raf.forget();
 }
 
+#[allow(unused)]
 /// utility function which executes the agument closure in a request animation frame
 pub(crate) fn request_animation_frame_for_closure(f: &Closure<dyn FnMut()>) {
     window()

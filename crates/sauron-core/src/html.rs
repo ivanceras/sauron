@@ -88,6 +88,8 @@ macro_rules! text {
 /// Create a text node element
 /// # Example
 /// ```rust
+/// use sauron::prelude::*;
+/// let node: Node<()> = text("hi");
 /// ```
 pub fn text<S, MSG>(s: S) -> Node<MSG>
 where
@@ -102,6 +104,9 @@ where
 /// as a programmer to sanitize the input here.
 /// # Example
 /// ```rust
+/// use sauron::prelude::*;
+///
+/// let node: Node<()> = safe_html("<div>In a safe html</div>");
 /// ```
 pub fn safe_html<S, MSG>(s: S) -> Node<MSG>
 where
@@ -111,9 +116,30 @@ where
 }
 
 /// create a comment node
+/// # Example
+/// ```rust
+/// use sauron::prelude::*;
+/// let node: Node<()> = comment("This is a comment");
+/// ```
 pub fn comment<S, MSG>(s: S) -> Node<MSG>
 where
     S: ToString,
 {
     Node::Leaf(leaf::comment(s))
+}
+
+/// fragment is a list of nodes
+/// # Example
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let node: Node<()> = fragment([div([],[]), span([],[])]);
+/// ```
+pub fn fragment<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
+    Node::Leaf(leaf::fragment(nodes))
+}
+
+/// create a doctype
+pub fn doctype<MSG>(s: impl ToString) -> Node<MSG> {
+    Node::Leaf(leaf::doctype(s))
 }

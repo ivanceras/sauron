@@ -6,17 +6,28 @@ use syn_rsx::{Node, NodeType, ParserConfig};
 pub(crate) mod lookup;
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
-    match syn_rsx::parse_with_config(
-        input,
-        ParserConfig::new()
-            .number_of_top_level_nodes(1)
-            .type_of_top_level_nodes(NodeType::Element),
-    ) {
-        Ok(mut nodes) => node_to_tokens(
-            nodes.pop().expect("unable to convert node to tokens"),
-        ),
+    match syn_rsx::parse_with_config(input, ParserConfig::new()) {
+        Ok(mut nodes) => {
+            if nodes.len() == 1 {
+                let node =
+                    nodes.pop().expect("unable to convert node to tokens");
+                node_to_tokens(node)
+            } else {
+                fragment_to_tokens(nodes)
+            }
+        }
         Err(error) => error.to_compile_error(),
     }
+}
+
+fn fragment_to_tokens(nodes: Vec<Node>) -> TokenStream {
+    let mut tokens = TokenStream::new();
+    let children_tokens = children_to_tokens(nodes);
+    tokens.extend(quote! {{
+        #children_tokens
+        sauron::html::fragment(children)
+    }});
+    tokens
 }
 
 fn node_to_tokens(node: Node) -> TokenStream {
@@ -133,6 +144,22 @@ fn children_to_tokens(children: Vec<Node>) -> TokenStream {
                         .expect("expecting a string on a text node");
                     tokens.extend(quote! {
                         #receiver.push(sauron::html::text(#s));
+                    });
+                }
+                NodeType::Comment => {
+                    let s = child
+                        .value_as_string()
+                        .expect("expecting a string on a comment node");
+                    tokens.extend(quote! {
+                        #receiver.push(sauron::html::comment(#s));
+                    });
+                }
+                NodeType::Doctype => {
+                    let value = child
+                        .value_as_string()
+                        .expect("expecting a string value on a doctype");
+                    tokens.extend(quote! {
+                        #receiver.push(sauron::html::doctype(#value));
                     });
                 }
                 NodeType::Block => match child.value {
