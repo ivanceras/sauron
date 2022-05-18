@@ -138,3 +138,8 @@ where
 pub fn fragment<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
     Node::Leaf(leaf::fragment(nodes))
 }
+
+/// create a doctype
+pub fn doctype<MSG>(s: impl ToString) -> Node<MSG> {
+    Node::Leaf(leaf::doctype(s))
+}

@@ -111,3 +111,8 @@ pub fn comment<MSG>(s: impl ToString) -> Leaf<MSG> {
 pub fn fragment<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Leaf<MSG> {
     Leaf::Fragment(nodes.into_iter().collect())
 }
+
+/// create a doctype leaf
+pub fn doctype<MSG>(s: impl ToString) -> Leaf<MSG> {
+    Leaf::DocType(s.to_string())
+}

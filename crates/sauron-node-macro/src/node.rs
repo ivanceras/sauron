@@ -146,6 +146,22 @@ fn children_to_tokens(children: Vec<Node>) -> TokenStream {
                         #receiver.push(sauron::html::text(#s));
                     });
                 }
+                NodeType::Comment => {
+                    let s = child
+                        .value_as_string()
+                        .expect("expecting a string on a comment node");
+                    tokens.extend(quote! {
+                        #receiver.push(sauron::html::comment(#s));
+                    });
+                }
+                NodeType::Doctype => {
+                    let value = child
+                        .value_as_string()
+                        .expect("expecting a string value on a doctype");
+                    tokens.extend(quote! {
+                        #receiver.push(sauron::html::doctype(#value));
+                    });
+                }
                 NodeType::Block => match child.value {
                     Some(syn::Expr::Block(expr)) => {
                         match braced_for_loop(&expr) {
