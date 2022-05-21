@@ -1,5 +1,5 @@
 [package]
-name = "datetime_widget"
+name = "datetime_widget_usage"
 version = "0.1.0"
 authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
 edition = "2018"
@@ -8,7 +8,8 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = { path = "../../" }
+sauron = { path = "../../../" }
+datetime_widget =  { path = "../datetime_widget" }
 log = "0.4"
 console_log = "0.2"
 console_error_panic_hook = "0.1"

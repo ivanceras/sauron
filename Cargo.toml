@@ -61,8 +61,12 @@ members = [
     "crates/*",
     "examples/*",
 ]
+
 # progressive-rendering example has its own workspace
-exclude = ["examples/progressive-rendering"]
+exclude = [
+    "examples/custom-element", 
+    "examples/progressive-rendering"
+]
 
 
 
