@@ -5,7 +5,7 @@ extern "C" {
     /// register using custom element define
     /// # Example:
     /// ```rust
-    ///  register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
+    ///  sauron::register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
     /// ```
     pub fn register_custom_element(
         custom_tag: &str,
