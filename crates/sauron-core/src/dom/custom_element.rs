@@ -4,7 +4,7 @@ use crate::prelude::*;
 extern "C" {
     /// register using custom element define
     /// # Example:
-    /// ```rust
+    /// ```rust,ignore
     ///  sauron::register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
     /// ```
     pub fn register_custom_element(
