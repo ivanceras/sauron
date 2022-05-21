@@ -12,6 +12,19 @@
         /// This must be called before the init function
         window.components = components;
         await init().catch(console.error);
+
+        function dateTimeChange(e){
+            console.log("date time is changed", e);
+        }
+
+        function dateTimeClicked(e){
+            console.log("date time is clicked",e);
+        }
+
+        window.dateTimeChange = dateTimeChange;
+        window.dateTimeClicked = dateTimeClicked;
     </script>
+
+    <date-time date="2022-02-22" time="22:22" onchange="dateTimeChange()" onclick="dateTimeClicked()"></date-time>
   </body>
 </html>

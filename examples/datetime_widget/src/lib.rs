@@ -53,7 +53,7 @@ impl DateTimeWidgetCustomElement {
         self.program
             .app
             .borrow_mut()
-            .attribute_changed(attribute_values);
+            .attributes_changed(attribute_values);
     }
 
     #[wasm_bindgen(method)]
@@ -77,10 +77,19 @@ impl DateTimeWidgetCustomElement {
 
 impl Application<CustomMsg> for DateTimeWidget<CustomMsg> {
     fn update(&mut self, msg: CustomMsg) -> Cmd<Self, CustomMsg> {
-        Cmd::from(
-            <Self as Component<date_time::Msg, CustomMsg>>::update(self, msg.0)
+        let mount_attributes = self.attributes_for_mount();
+        Cmd::batch([
+            Cmd::from(
+                <Self as Component<date_time::Msg, CustomMsg>>::update(
+                    self, msg.0,
+                )
                 .localize(CustomMsg),
-        )
+            ),
+            Cmd::new(|program| {
+                log::info!("mount attributes: {:?}", mount_attributes);
+                program.update_mount_attributes(mount_attributes);
+            }),
+        ])
     }
 
     fn view(&self) -> Node<CustomMsg> {
@@ -91,12 +100,27 @@ impl Application<CustomMsg> for DateTimeWidget<CustomMsg> {
 
 #[wasm_bindgen(module = "/define_custom_element.js")]
 extern "C" {
-    pub fn register_custom_element(custom_tag: &str, adapter: &str);
+    /// register using custom element define
+    /// # Example:
+    /// ```rust
+    ///  register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
+    /// ```
+    pub fn register_custom_element(
+        custom_tag: &str,
+        adapter: &str,
+        superClass: &str,
+    );
 }
 
+/// registers the custom element
+/// This must be called upon loading the wasm
 #[wasm_bindgen]
 pub fn register_components() {
-    register_custom_element("date-time", "DateTimeWidgetCustomElement");
+    register_custom_element(
+        "date-time",
+        "DateTimeWidgetCustomElement",
+        "HTMLElement",
+    );
 }
 
 pub enum AppMsg {

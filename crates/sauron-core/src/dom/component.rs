@@ -33,10 +33,16 @@ pub trait Component<MSG, XMSG> {
 
     /// This will be invoked when a component is used as a custom element
     /// and the attributes of the custom-element has been modified
-    fn attribute_changed(
+    fn attributes_changed(
         &mut self,
         _attributes_values: BTreeMap<String, String>,
     ) {
+    }
+
+    /// This will be invoked when a component needs to set the attributes for the
+    /// mounted element of this component
+    fn attributes_for_mount(&self) -> BTreeMap<String, String> {
+        BTreeMap::new()
     }
 }
 

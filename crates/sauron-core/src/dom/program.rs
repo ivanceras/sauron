@@ -3,9 +3,11 @@ use crate::dom::Measurements;
 use crate::Cmd;
 use crate::{dom::dom_updater::DomUpdater, Application, Dispatch};
 use std::any::TypeId;
+use std::collections::BTreeMap;
 use std::{cell::RefCell, rc::Rc};
 #[cfg(feature = "with-request-animation-frame")]
 use wasm_bindgen::closure::Closure;
+use wasm_bindgen::JsCast;
 use web_sys::Node;
 
 /// Holds the user App and the dom updater
@@ -164,6 +166,20 @@ where
         // update the last DOM node tree with this new view
         let _total_patches =
             self.dom_updater.borrow_mut().update_dom(self, view);
+    }
+
+    /// update the attributes at the mounted element
+    pub fn update_mount_attributes(
+        &self,
+        attributes_value: BTreeMap<String, String>,
+    ) {
+        let mount_node = self.mount_node();
+        let mount_element: &web_sys::Element = mount_node.unchecked_ref();
+        for (attr, value) in attributes_value.iter() {
+            mount_element
+                .set_attribute(attr, value)
+                .expect("unable to set attribute in the mount element");
+        }
     }
 
     /// This is called when an event is triggered in the html DOM.

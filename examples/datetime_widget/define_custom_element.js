@@ -1,6 +1,6 @@
-export function register_custom_element(custom_tag, adapter){
+export function register_custom_element(custom_tag, adapter, superClass){
     window.customElements.define(custom_tag,
-                class extends HTMLElement{
+                class extends window[superClass]{
                     constructor(){
                         super();
                         this.instance = new window.components[adapter](this);

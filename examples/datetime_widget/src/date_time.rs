@@ -2,6 +2,7 @@ use sauron::dom::Callback;
 use sauron::prelude::*;
 use std::collections::BTreeMap;
 use std::fmt::Debug;
+use std::iter::FromIterator;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -65,7 +66,8 @@ where
         vec!["date", "time"]
     }
 
-    fn attribute_changed(&mut self, attributes: BTreeMap<String, String>) {
+    /// this is called when the attributes in the mount is changed
+    fn attributes_changed(&mut self, attributes: BTreeMap<String, String>) {
         for (key, value) in attributes {
             match &*key {
                 "date" => self.date = value,
@@ -73,6 +75,11 @@ where
                 _ => log::info!("unused attribute: {}", key),
             }
         }
+    }
+
+    /// This is called when the attributes for the mount is to be set
+    fn attributes_for_mount(&self) -> BTreeMap<String, String> {
+        BTreeMap::from_iter([("value".to_string(), self.date_time())])
     }
 
     fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
