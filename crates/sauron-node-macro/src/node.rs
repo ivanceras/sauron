@@ -46,26 +46,27 @@ fn node_to_tokens(node: Node) -> TokenStream {
     let self_closing = lookup::is_self_closing(&name);
     let namespace = lookup::tag_namespace(&name);
 
-    tokens.extend(
-        if let Some(namespace) = namespace{
-            quote! {{
-                #[allow(unused_braces)]
-                {
-                    #children_tokens
-                    sauron::html::element_ns(Some(#namespace), #name, [#(#attributes),*], children, #self_closing)
-                }
-            }}
-        }else{
-            quote! {{
-                #[allow(unused_braces)]
-                {
-                    #children_tokens
-                    sauron::html::element_ns(None, #name, [#(#attributes),*], children, #self_closing)
-                }
-            }}
-        }
-    );
-
+    if let Some(namespace) = namespace {
+        tokens.extend(
+                quote! {{
+                    #[allow(unused_braces)]
+                    {
+                        #children_tokens
+                        sauron::html::element_ns(Some(#namespace), #name, [#(#attributes),*], children, #self_closing)
+                    }
+                }}
+            );
+    } else {
+        tokens.extend(
+                quote! {{
+                    #[allow(unused_braces)]
+                    {
+                        #children_tokens
+                        sauron::html::element_ns(None, #name, [#(#attributes),*], children, #self_closing)
+                    }
+                }}
+            );
+    }
     tokens
 }
 
