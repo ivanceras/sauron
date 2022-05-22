@@ -12,7 +12,6 @@ pub struct CustomMsg(date_time::Msg);
 
 #[wasm_bindgen]
 pub struct DateTimeWidgetCustomElement {
-    is_mounted: bool,
     program: Program<DateTimeWidget<CustomMsg>, CustomMsg>,
 }
 
@@ -23,7 +22,6 @@ impl DateTimeWidgetCustomElement {
         log::info!("constructor..");
         let root_node: &web_sys::Node = node.unchecked_ref();
         Self {
-            is_mounted: false,
             program: Program::new(DateTimeWidget::default(), root_node),
         }
     }
@@ -59,18 +57,15 @@ impl DateTimeWidgetCustomElement {
     #[wasm_bindgen(method)]
     pub fn connected_callback(&mut self) {
         self.program.start_append_to_mount();
-        self.is_mounted = true;
         log::info!("Component is connected..");
         self.program.update_dom();
     }
     #[wasm_bindgen(method)]
     pub fn disconnected_callback(&mut self) {
-        self.is_mounted = false;
         log::info!("Component is disconnected..");
     }
     #[wasm_bindgen(method)]
     pub fn adopted_callback(&mut self) {
-        self.is_mounted = true;
         log::info!("Component is adopted..");
     }
 }
