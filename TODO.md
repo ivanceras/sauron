@@ -141,8 +141,8 @@
         The old technique was the replace the root node with the created first element but this is not ideal when used for custom_element since we need to get the attributes from the custom element
         Possible solution:
             - Add a mount_node to the dom_updater alongside with the root_node
-    - [ ] custom element would be appended to the `shadowRoot`
-        - [ ] Usage of custom element inside another sauron component should skip the custom-element internal DOM elements
+    - [X] custom element would be appended to the `shadowRoot`
+        - [X] Usage of custom element inside another sauron component should skip the custom-element internal DOM elements
     - [ ] custom element should also need access to the `textContent` of the tag for further processing
 
 
