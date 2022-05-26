@@ -44,9 +44,14 @@ where
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
-    pub fn new(app: APP, mount_node: &Node) -> Self {
+    pub fn new(
+        app: APP,
+        mount_node: &Node,
+        replace: bool,
+        use_shadow: bool,
+    ) -> Self {
         let dom_updater: DomUpdater<MSG> =
-            DomUpdater::new(app.view(), mount_node);
+            DomUpdater::new(app.view(), mount_node, replace, use_shadow);
         Program {
             app: Rc::new(RefCell::new(app)),
             dom_updater: Rc::new(RefCell::new(dom_updater)),
@@ -97,9 +102,8 @@ where
     /// Program::replace_mount(App{}, &mount);
     /// ```
     pub fn replace_mount(app: APP, mount_node: &Node) -> Self {
-        let program = Self::new(app, mount_node);
-        program.start_replace_mount();
-        program.after_mounted();
+        let program = Self::new(app, mount_node, true, false);
+        program.mount();
         program
     }
 
@@ -121,9 +125,8 @@ where
     /// Program::append_to_mount(App{}, &mount);
     /// ```
     pub fn append_to_mount(app: APP, mount_node: &Node) -> Self {
-        let program = Self::new(app, mount_node);
-        program.start_append_to_mount();
-        program.after_mounted();
+        let program = Self::new(app, mount_node, false, false);
+        program.mount();
         program
     }
 
@@ -147,17 +150,10 @@ where
         Self::append_to_mount(app, &crate::body())
     }
 
-    /// Replace the body of the document with the app
-    pub fn replace_body(app: APP) -> Self {
-        Self::replace_mount(app, &crate::body())
-    }
-    /// Do the actual appending of app to the specified mount
-    pub fn start_append_to_mount(&self) {
-        self.dom_updater.borrow_mut().append_to_mount(self)
-    }
-
-    fn start_replace_mount(&self) {
-        self.dom_updater.borrow_mut().replace_mount(self)
+    /// Do the actual mounting of the view to the specified mount node
+    pub fn mount(&self) {
+        self.dom_updater.borrow_mut().mount(self);
+        self.after_mounted();
     }
 
     /// explicity update the dom

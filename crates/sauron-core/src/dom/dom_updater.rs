@@ -29,17 +29,30 @@ pub struct DomUpdater<MSG> {
     pub active_closures: ActiveClosure,
     /// after mounting or update dispatch call, the element will be focused
     pub focused_node: Option<Node>,
+
+    /// if the mount node is replaced by the root_node
+    pub replace: bool,
+
+    /// whether or not to use shadow root of the mount_node
+    pub use_shadow: bool,
 }
 
 impl<MSG> DomUpdater<MSG> {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.
-    pub fn new(current_vdom: vdom::Node<MSG>, mount: &Node) -> DomUpdater<MSG> {
+    pub(crate) fn new(
+        current_vdom: vdom::Node<MSG>,
+        mount: &Node,
+        replace: bool,
+        use_shadow: bool,
+    ) -> DomUpdater<MSG> {
         DomUpdater {
             current_vdom,
             root_node: None,
             mount_node: mount.clone(),
             active_closures: ActiveClosure::new(),
             focused_node: None,
+            replace,
+            use_shadow,
         }
     }
 
@@ -57,19 +70,9 @@ impl<MSG> DomUpdater<MSG>
 where
     MSG: 'static,
 {
-    /// Mount the current_vdom appending to the actual browser DOM specified in the root_node
-    /// This also gets the closures that was created when mounting the vdom to their
-    /// actual DOM counterparts.
-    pub fn append_to_mount<DSP>(&mut self, program: &DSP)
-    where
-        DSP: Dispatch<MSG> + Clone + 'static,
-    {
-        self.mount(program, false);
-    }
-
     /// each element and it's descendant in the vdom is created into
     /// an actual DOM node.
-    fn mount<DSP>(&mut self, program: &DSP, replace: bool)
+    pub fn mount<DSP>(&mut self, program: &DSP)
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
@@ -78,15 +81,36 @@ where
             &self.current_vdom,
             &mut self.focused_node,
         );
-        if replace {
+
+        //TODO: maybe remove replace the mount
+        if self.replace {
             let mount_element: &Element = self.mount_node.unchecked_ref();
             mount_element
                 .replace_with_with_node_1(&created_node.node)
                 .expect("Could not append child to mount");
         } else {
-            self.mount_node
-                .append_child(&created_node.node)
-                .expect("Could not append child to mount");
+            if self.use_shadow {
+                let mount_element: &web_sys::Element =
+                    self.mount_node.unchecked_ref();
+                mount_element
+                    .attach_shadow(&web_sys::ShadowRootInit::new(
+                        web_sys::ShadowRootMode::Open,
+                    ))
+                    .expect("unable to attached shadow");
+                let mount_shadow =
+                    mount_element.shadow_root().expect("must have a shadow");
+
+                let mount_shadow_node: &web_sys::Node =
+                    mount_shadow.unchecked_ref();
+
+                mount_shadow_node
+                    .append_child(&created_node.node)
+                    .expect("could not append child to mount shadow");
+            } else {
+                self.mount_node
+                    .append_child(&created_node.node)
+                    .expect("Could not append child to mount");
+            }
         }
         self.root_node = Some(created_node.node);
         self.active_closures = created_node.closures;
@@ -98,16 +122,6 @@ where
             let focused_element: &Element = focused_node.unchecked_ref();
             CreatedNode::set_element_focus(focused_element);
         }
-    }
-
-    /// Mount the current_vdom replacing the actual browser DOM specified in the mount_node
-    /// This also gets the closures that was created when mounting the vdom to their
-    /// actual DOM counterparts.
-    pub fn replace_mount<DSP>(&mut self, program: &DSP)
-    where
-        DSP: Dispatch<MSG> + Clone + 'static,
-    {
-        self.mount(program, true);
     }
 
     /// Create a new `DomUpdater`.
@@ -122,25 +136,8 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
-        let mut dom_updater = Self::new(current_vdom, mount);
-        dom_updater.append_to_mount(program);
-        dom_updater
-    }
-
-    /// Create a new `DomUpdater`.
-    ///
-    /// A root `Node` will be created and it will replace your passed in mount
-    /// element.
-    pub fn new_replace_mount<DSP>(
-        program: &DSP,
-        current_vdom: vdom::Node<MSG>,
-        mount: Element,
-    ) -> DomUpdater<MSG>
-    where
-        DSP: Dispatch<MSG> + Clone + 'static,
-    {
-        let mut dom_updater = Self::new(current_vdom, &mount);
-        dom_updater.replace_mount(program);
+        let mut dom_updater = Self::new(current_vdom, mount, false, false);
+        dom_updater.mount(program);
         dom_updater
     }
 
