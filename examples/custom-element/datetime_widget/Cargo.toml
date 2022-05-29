@@ -2,10 +2,12 @@
 name = "datetime_widget"
 version = "0.1.0"
 authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 sauron = { path = "../../../" }
 log = "0.4"
 console_log = "0.2"
 console_error_panic_hook = "0.1"
+concat-idents = "1.1.3"
+quote = "1"

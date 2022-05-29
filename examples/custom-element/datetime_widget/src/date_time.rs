@@ -58,9 +58,10 @@ where
     }
 }
 
-impl<XMSG> Component<Msg, XMSG> for DateTimeWidget<XMSG>
+#[sauron::custom_element("date-time")]
+impl<XMSG> sauron::Component<Msg, XMSG> for DateTimeWidget<XMSG>
 where
-    XMSG: Clone + Debug + 'static,
+    XMSG: 'static,
 {
     fn observed_attributes() -> Vec<&'static str> {
         vec!["date", "time"]
@@ -105,7 +106,6 @@ where
                     let pmsg = listener.emit(self.date_time());
                     parent_msg.push(pmsg);
                 }
-                log::trace!("sending this to parent: {:?}", parent_msg);
                 Effects::with_external(parent_msg)
             }
             Msg::Mount(target_node) => {

@@ -7,6 +7,7 @@ mod callback;
 pub mod cmd;
 mod component;
 mod created_node;
+#[macro_use]
 mod custom_element;
 mod dispatch;
 mod dom_updater;

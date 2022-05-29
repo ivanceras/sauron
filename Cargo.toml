@@ -16,6 +16,7 @@ maintenance = { status = "actively-developed" }
 [dependencies]
 sauron-core = { version = "0.49", path = "crates/sauron-core", default-features = false }
 sauron-node-macro = { version = "0.49", path = "crates/sauron-node-macro", optional = true }
+sauron-component-macro = { version = "0.49", path = "crates/sauron-component-macro"}
 cfg-if = "0.1"
 
 [features]

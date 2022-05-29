@@ -1,0 +1,13 @@
+[package]
+name = "sauron-component-macro"
+version = "0.49.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "1.0.95"
+quote = "1"
+proc-macro2 = "1"
+proc-macro-crate = "1.1.3"
