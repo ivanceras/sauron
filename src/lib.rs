@@ -26,10 +26,10 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use sauron_core::{Component, Cmd, Program};
     pub use sauron_core::js_sys;
 }}
-pub use sauron_component_macro::custom_element;
 
 /// reexport prelude from sauron core
 pub mod prelude {
+    pub use sauron_component_macro::custom_element;
     pub use sauron_core::prelude::*;
     #[cfg(feature = "with-node-macro")]
     pub use sauron_node_macro::node;

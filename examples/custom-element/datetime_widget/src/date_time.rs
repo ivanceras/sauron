@@ -58,7 +58,7 @@ where
     }
 }
 
-#[sauron::custom_element("date-time")]
+#[custom_element("date-time")]
 impl<XMSG> sauron::Component<Msg, XMSG> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
