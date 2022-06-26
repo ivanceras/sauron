@@ -22,7 +22,7 @@ pub fn index(app: &App) -> Node<Msg> {
                         await init();
                         main(`{}`);
                       }}
-                      start();
+                      await start();
                 ",serialized_state)}
             </script>
             <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0"/>
