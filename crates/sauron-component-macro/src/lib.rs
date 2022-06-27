@@ -131,10 +131,6 @@ pub fn custom_element(
                     ])
                 }
 
-                fn style(&self) -> String {
-                    <Self as Component<#component_msg, #derive_msg>>::style(self)
-                }
-
                 fn view(&self) -> Node<#derive_msg> {
                     <Self as Component<#component_msg, #derive_msg>>::view(self)
                         .map_msg(#derive_msg)
