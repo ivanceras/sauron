@@ -117,6 +117,32 @@ where
         self.set_focus_element();
     }
 
+    /// inject style element to the mount node
+    pub fn inject_style_to_mount<DSP>(&self, program: &DSP, style: &str)
+    where
+        DSP: Dispatch<MSG> + Clone + 'static,
+    {
+        let style_node =
+            crate::html::tags::style([], [crate::html::text(style)]);
+        let created_node =
+            CreatedNode::create_dom_node(program, &style_node, &mut None);
+        if self.use_shadow {
+            let mount_element: &web_sys::Element =
+                self.mount_node.unchecked_ref();
+            let mount_shadow =
+                mount_element.shadow_root().expect("must have a shadow");
+
+            let mount_shadow_node: &web_sys::Node =
+                mount_shadow.unchecked_ref();
+
+            mount_shadow_node
+                .append_child(&created_node.node)
+                .expect("could not append child to mount shadow");
+        } else {
+            panic!("injecting style to non shadow mount is not supported");
+        }
+    }
+
     fn set_focus_element(&self) {
         if let Some(focused_node) = &self.focused_node {
             let focused_element: &Element = focused_node.unchecked_ref();

@@ -248,6 +248,7 @@ where
         cmd.emit(self);
     }
 
+    /// Inject a style to the global document
     fn inject_style(type_id: TypeId, style: &str) {
         use wasm_bindgen::JsCast;
         dbg!(&type_id);
@@ -264,6 +265,11 @@ where
         html_style.set_text_content(Some(style));
         let head = document.head().expect("must have a head");
         head.append_child(&html_style).expect("must append style");
+    }
+
+    /// Inject a style to the mount node
+    pub fn inject_style_to_mount(&self, style: &str) {
+        self.dom_updater.borrow().inject_style_to_mount(self, style);
     }
 }
 

@@ -1,4 +1,5 @@
 use sauron::dom::Callback;
+use sauron::jss;
 use sauron::prelude::*;
 use std::collections::BTreeMap;
 use std::fmt::Debug;
@@ -116,6 +117,18 @@ where
                 log::trace!("btn is clicked..");
                 self.cnt += 1;
                 Effects::none()
+            }
+        }
+    }
+
+    fn style(&self) -> String {
+        jss! {
+            "button": {
+              "background": "#1E88E5",
+              "color": "white",
+              "padding": "2rem 4rem",
+              "border": 0,
+              "font-size": "1.5rem",
             }
         }
     }

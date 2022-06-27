@@ -97,8 +97,11 @@ pub fn custom_element(
 
                 #[wasm_bindgen(method)]
                 pub fn connected_callback(&mut self) {
+                    use std::ops::Deref;
                     self.program.mount();
                     log::info!("Component is connected..");
+                    let component_style = <#component<#derive_msg> as Component<#component_msg, #derive_msg>>::style(self.program.app.borrow().deref());
+                    self.program.inject_style_to_mount(&component_style);
                     self.program.update_dom();
                 }
                 #[wasm_bindgen(method)]
@@ -126,6 +129,10 @@ pub fn custom_element(
                             program.update_mount_attributes(mount_attributes);
                         }),
                     ])
+                }
+
+                fn style(&self) -> String {
+                    <Self as Component<#component_msg, #derive_msg>>::style(self)
                 }
 
                 fn view(&self) -> Node<#derive_msg> {
