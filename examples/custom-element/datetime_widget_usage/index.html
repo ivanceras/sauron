@@ -10,7 +10,7 @@
         /// attached the components in the window, so we access them from other scripts
         /// This is important, otherwise the register_custom_element will not work
         /// This must be called before the init function
-        window.components = components;
+        window.components = Object.assign(window.components, components);
         await init().catch(console.error);
 
         function dateTimeChange(e){
@@ -27,5 +27,6 @@
 
     <date-time date="2022-02-22" time="22:22" onchange="dateTimeChange()" onclick="dateTimeClicked()"></date-time>
     <button>Some button</button>
+    <date-app>
   </body>
 </html>
