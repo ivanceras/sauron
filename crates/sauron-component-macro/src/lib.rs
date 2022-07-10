@@ -5,7 +5,6 @@ pub fn custom_element(
     attr: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
-    let mut tokens = proc_macro2::TokenStream::new();
     let custom_tag: proc_macro2::Literal =
         syn::parse(attr).expect("must be a literal");
     let impl_item: syn::ItemImpl = syn::parse(item)
@@ -19,8 +18,17 @@ pub fn custom_element(
     let component: &syn::PathSegment =
         &path.segments.last().expect("must have a last segment");
     assert_eq!("Component", component.ident.to_string());
-    let component_msg = get_component_msg(component);
 
+    impl_component(&impl_item, &custom_tag, component)
+}
+
+fn impl_component(
+    impl_item: &syn::ItemImpl,
+    custom_tag: &proc_macro2::Literal,
+    component: &syn::PathSegment,
+) -> proc_macro::TokenStream {
+    let mut tokens = proc_macro2::TokenStream::new();
+    let component_msg = get_component_msg(&component);
     let self_type = &impl_item.self_ty;
     if let syn::Type::Path(type_path) = self_type.as_ref() {
         let path_segment = &type_path.path.segments[0];
