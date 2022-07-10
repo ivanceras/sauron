@@ -17,9 +17,17 @@ pub fn custom_element(
 
     let component: &syn::PathSegment =
         &path.segments.last().expect("must have a last segment");
-    assert_eq!("Component", component.ident.to_string());
 
-    impl_component(&impl_item, &custom_tag, component)
+    let component_ident = component.ident.to_string();
+
+    match &*component_ident {
+        "Component" => impl_component(&impl_item, &custom_tag, component),
+        "Application" => {
+            println!("This is an application..");
+            impl_application(&impl_item, &custom_tag, component)
+        }
+        _ => panic!("unsupported trait implementation: {}", component_ident),
+    }
 }
 
 fn impl_component(
@@ -76,19 +84,20 @@ fn impl_component(
 
                 #[wasm_bindgen(method)]
                 pub fn observed_attributes() -> JsValue {
-                    JsValue::from_serde(&#component::<#derive_msg>::observed_attributes())
+                    JsValue::from_serde(&<#component::<#derive_msg> as Component<#component_msg, #derive_msg>>::observed_attributes())
                         .expect("must parse from serde")
                 }
 
                 #[wasm_bindgen(method)]
                 pub fn attribute_changed_callback(&self) {
+                    use std::ops::DerefMut;
                     use sauron::wasm_bindgen::JsCast;
                     log::info!("attribute changed...");
                     let mount_node = self.program.mount_node();
                     let mount_element: &web_sys::Element = mount_node.unchecked_ref();
                     let attribute_names = mount_element.get_attribute_names();
                     let len = attribute_names.length();
-                    let mut attribute_values: BTreeMap<String, String> = BTreeMap::new();
+                    let mut attribute_values: std::collections::BTreeMap<String, String> = std::collections::BTreeMap::new();
                     for i in 0..len {
                         let name = attribute_names.get(i);
                         let attr_name =
@@ -97,10 +106,7 @@ fn impl_component(
                             attribute_values.insert(attr_name, attr_value);
                         }
                     }
-                    self.program
-                        .app
-                        .borrow_mut()
-                        .attributes_changed(attribute_values);
+                    <#component<#derive_msg> as Component<#component_msg, #derive_msg>>::attributes_changed(self.program.app.borrow_mut().deref_mut(), attribute_values);
                 }
 
                 #[wasm_bindgen(method)]
@@ -125,7 +131,7 @@ fn impl_component(
 
             impl Application<#derive_msg> for #component<#derive_msg> {
                 fn update(&mut self, msg: #derive_msg) -> Cmd<Self, #derive_msg> {
-                    let mount_attributes = self.attributes_for_mount();
+                    let mount_attributes = <Self as Component<#component_msg, #derive_msg>>::attributes_for_mount(self);
                     Cmd::batch([
                         Cmd::from(
                             <Self as Component<#component_msg, #derive_msg>>::update(
@@ -147,6 +153,112 @@ fn impl_component(
 
             #[wasm_bindgen]
             pub fn register(){
+                sauron::register_custom_element(#custom_tag, #derive_component_str, "HTMLElement");
+            }
+
+        });
+    } else {
+        panic!("Expecting a Path");
+    }
+    tokens.into()
+}
+
+fn impl_application(
+    impl_item: &syn::ItemImpl,
+    custom_tag: &proc_macro2::Literal,
+    component: &syn::PathSegment,
+) -> proc_macro::TokenStream {
+    let mut tokens = proc_macro2::TokenStream::new();
+    let app_msg = get_component_msg(&component);
+    let self_type = &impl_item.self_ty;
+    if let syn::Type::Path(type_path) = self_type.as_ref() {
+        let path_segment = &type_path.path.segments[0];
+        let app = &path_segment.ident;
+        let derive_component = proc_macro2::Ident::new(
+            &format!("_{}__CustomElement", app),
+            proc_macro2::Span::call_site(),
+        );
+
+        let derive_component_str = derive_component.to_string();
+
+        tokens.extend(quote! {
+
+            #impl_item
+
+            #[allow(non_camel_case_types)]
+            #[wasm_bindgen]
+            pub struct #derive_component{
+                program: Program<#app, #app_msg>,
+            }
+
+            #[wasm_bindgen]
+            impl #derive_component {
+                #[wasm_bindgen(constructor)]
+                pub fn new(node: JsValue) -> Self {
+                    use sauron::wasm_bindgen::JsCast;
+                    log::info!("constructor..");
+                    let mount_node: &web_sys::Node = node.unchecked_ref();
+                    Self {
+                        program: Program::new(
+                            #app::default(),
+                            mount_node,
+                            false,
+                            true,
+                        ),
+                    }
+                }
+
+                #[wasm_bindgen(method)]
+                pub fn observed_attributes() -> JsValue {
+                    JsValue::from_serde(&<#app as Application<#app_msg>>::observed_attributes())
+                        .expect("must parse from serde")
+                }
+
+                #[wasm_bindgen(method)]
+                pub fn attribute_changed_callback(&self) {
+                    use sauron::wasm_bindgen::JsCast;
+                    log::info!("attribute changed...");
+                    let mount_node = self.program.mount_node();
+                    let mount_element: &web_sys::Element = mount_node.unchecked_ref();
+                    let attribute_names = mount_element.get_attribute_names();
+                    let len = attribute_names.length();
+                    let mut attribute_values: std::collections::BTreeMap<String, String> = std::collections::BTreeMap::new();
+                    for i in 0..len {
+                        let name = attribute_names.get(i);
+                        let attr_name =
+                            name.as_string().expect("must be a string attribute");
+                        if let Some(attr_value) = mount_element.get_attribute(&attr_name) {
+                            attribute_values.insert(attr_name, attr_value);
+                        }
+                    }
+                    self.program
+                        .app
+                        .borrow_mut()
+                        .attributes_changed(attribute_values);
+                }
+
+                #[wasm_bindgen(method)]
+                pub fn connected_callback(&mut self) {
+                    use std::ops::Deref;
+                    self.program.mount();
+                    log::info!("Application is connected..");
+                    let component_style = <#app as Application<#app_msg>>::style(self.program.app.borrow().deref());
+                    self.program.inject_style_to_mount(&component_style);
+                    self.program.update_dom();
+                }
+                #[wasm_bindgen(method)]
+                pub fn disconnected_callback(&mut self) {
+                    log::info!("Application is disconnected..");
+                }
+                #[wasm_bindgen(method)]
+                pub fn adopted_callback(&mut self) {
+                    log::info!("Application is adopted..");
+                }
+
+            }
+
+            #[wasm_bindgen]
+            pub fn register_application(){
                 sauron::register_custom_element(#custom_tag, #derive_component_str, "HTMLElement");
             }
 

@@ -6,6 +6,7 @@ enum AppMsg {}
 #[derive(Default)]
 pub struct App {}
 
+#[custom_element("lee-app")]
 impl Application<AppMsg> for App {
     fn update(&mut self, _msg: AppMsg) -> Cmd<Self, AppMsg> {
         Cmd::none()
