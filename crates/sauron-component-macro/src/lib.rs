@@ -22,10 +22,7 @@ pub fn custom_element(
 
     match &*component_ident {
         "Component" => impl_component(&impl_item, &custom_tag, component),
-        "Application" => {
-            println!("This is an application..");
-            impl_application(&impl_item, &custom_tag, component)
-        }
+        "Application" => impl_application(&impl_item, &custom_tag, component),
         _ => panic!("unsupported trait implementation: {}", component_ident),
     }
 }
@@ -242,8 +239,8 @@ fn impl_application(
                     use std::ops::Deref;
                     self.program.mount();
                     log::info!("Application is connected..");
-                    let component_style = <#app as Application<#app_msg>>::style(self.program.app.borrow().deref());
-                    self.program.inject_style_to_mount(&component_style);
+                    let app_style = self.program.app.borrow().style();
+                    self.program.inject_style_to_mount(&app_style);
                     self.program.update_dom();
                 }
                 #[wasm_bindgen(method)]
