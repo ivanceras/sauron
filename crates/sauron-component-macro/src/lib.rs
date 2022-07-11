@@ -27,13 +27,14 @@ pub fn custom_element(
     }
 }
 
+/// Generate the component registration for component that has a Component trait implementation
 fn impl_component(
     impl_item: &syn::ItemImpl,
     custom_tag: &proc_macro2::Literal,
     component: &syn::PathSegment,
 ) -> proc_macro::TokenStream {
     let mut tokens = proc_macro2::TokenStream::new();
-    let component_msg = get_component_msg(&component);
+    let component_msg = get_msg_generic_ident(&component);
     let self_type = &impl_item.self_ty;
     if let syn::Type::Path(type_path) = self_type.as_ref() {
         let path_segment = &type_path.path.segments[0];
@@ -160,13 +161,14 @@ fn impl_component(
     tokens.into()
 }
 
+/// Generate the code for registering the application as a custom component
 fn impl_application(
     impl_item: &syn::ItemImpl,
     custom_tag: &proc_macro2::Literal,
     component: &syn::PathSegment,
 ) -> proc_macro::TokenStream {
     let mut tokens = proc_macro2::TokenStream::new();
-    let app_msg = get_component_msg(&component);
+    let app_msg = get_msg_generic_ident(&component);
     let self_type = &impl_item.self_ty;
     if let syn::Type::Path(type_path) = self_type.as_ref() {
         let path_segment = &type_path.path.segments[0];
@@ -266,7 +268,7 @@ fn impl_application(
     tokens.into()
 }
 
-fn get_component_msg(component: &syn::PathSegment) -> proc_macro2::Ident {
+fn get_msg_generic_ident(component: &syn::PathSegment) -> proc_macro2::Ident {
     let component_msg =
         if let syn::PathArguments::AngleBracketed(component_msg) =
             &component.arguments
