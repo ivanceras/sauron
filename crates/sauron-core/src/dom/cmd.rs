@@ -90,8 +90,13 @@ where
         }
     }
 
+    /// Add a cmd
+    pub fn push(&mut self, cmd: Self) {
+        self.append([cmd])
+    }
+
     /// Append more cmd into this cmd and return self
-    pub fn append(mut self, cmds: impl IntoIterator<Item = Self>) -> Self {
+    pub fn append(&mut self, cmds: impl IntoIterator<Item = Self>) {
         for cmd in cmds {
             if cmd.modifier.should_update_view {
                 self.modifier.should_update_view = true;
@@ -101,7 +106,6 @@ where
             }
             self.commands.extend(cmd.commands);
         }
-        self
     }
 
     /// Tell the runtime that there are no commands.
