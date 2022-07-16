@@ -7,4 +7,4 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = "0.49.0"
+sauron = "0.50.0"
