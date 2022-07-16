@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.50.1
+- bump `mt-dom` to 0.20.0
+
 ## 0.50.0
 - **BREAKING** make the `Cmd::append` accept `&mut self` and modify it rather then return a Self
 - Add support for defining custom elements a.k.a web components
