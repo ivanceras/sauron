@@ -19,7 +19,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = "0.49"
+sauron = "0.50.0"
 ```
 
 In this example we will show 3 buttons where can click to increment/decrement and reset the count.

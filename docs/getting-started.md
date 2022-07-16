@@ -81,7 +81,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = "0.49"
+sauron = "0.50.0"
 ```
 Next, we modify `src/lib.rs` with our application code.
 This will just display a "hello" text inside a paragraph.
@@ -133,7 +133,7 @@ We need to reference this file in our page. Let's create `index.html` in our pro
   <body>
     <script type=module>
       import init from './pkg/hello.js';
-      init().catch(console.error);
+      await init().catch(console.error);
     </script>
   </body>
 </html>

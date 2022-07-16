@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.50.0
 - **BREAKING** make the `Cmd::append` accept `&mut self` and modify it rather then return a Self
 - Add support for defining custom elements a.k.a web components
 - Add support for creating fragment in a node
