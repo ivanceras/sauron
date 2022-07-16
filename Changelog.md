@@ -3,6 +3,7 @@
 ## 0.50.0
 - **BREAKING** make the `Cmd::append` accept `&mut self` and modify it rather then return a Self
 - Add support for defining custom elements a.k.a web components
+    - [DateTime widget example](https://github.com/ivanceras/sauron/tree/master/examples/custom-element)
 - Add support for creating fragment in a node
 The `node!` macro can now be used to return a view which uses multiple top level tags.
 Example:

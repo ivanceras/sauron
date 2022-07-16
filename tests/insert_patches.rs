@@ -44,10 +44,10 @@ fn test_patch_insert_node() {
     log::debug!("patches: {:#?}", patches);
     assert_eq!(
         patches,
-        vec![Patch::insert_node(
+        vec![Patch::insert_before_node(
             Some(&"li"),
             TreePath::new(vec![0, 0]),
-            &li(vec![key(0)], vec![text("item0")])
+            vec![&li(vec![key(0)], vec![text("item0")])]
         )]
     );
 
@@ -119,10 +119,10 @@ fn test_patch_insert_node_in_the_middle() {
     log::debug!("patches: {:#?}", patches);
     assert_eq!(
         patches,
-        vec![Patch::insert_node(
+        vec![Patch::insert_before_node(
             Some(&"li"),
             TreePath::new(vec![0, 1]),
-            &li(vec![key(0)], vec![text("item0")])
+            vec![&li(vec![key(0)], vec![text("item0")])]
         )]
     );
 

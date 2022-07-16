@@ -192,10 +192,10 @@ fn test_lines() {
                 TreePath::new(vec![1, 0, 0, 4, 0, 0]),
                 &text("5"),
             ),
-            Patch::insert_node(
+            Patch::insert_before_node(
                 Some(&"div"),
                 TreePath::new(vec![1, 0, 0, 0]),
-                &inserted,
+                vec![&inserted],
             ),
             Patch::replace_node(
                 None,

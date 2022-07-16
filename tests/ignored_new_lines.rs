@@ -113,10 +113,10 @@ fn new_lines_ignored() {
                 TreePath::new(vec![1, 0, 0, 0, 0, 0,]),
                 &text("1")
             ),
-            Patch::insert_node(
+            Patch::insert_before_node(
                 Some(&"div"),
                 TreePath::new(vec![1, 0, 0, 0,]),
-                &div(
+                vec![&div(
                     vec![class("grid__number__line")],
                     vec![
                         div(vec![class("grid__number")], vec![text(0)]),
@@ -125,7 +125,7 @@ fn new_lines_ignored() {
                             vec![div(vec![], vec![text("\n")])]
                         ),
                     ]
-                )
+                )]
             ),
             Patch::replace_node(
                 None,
@@ -133,10 +133,10 @@ fn new_lines_ignored() {
                 &text("3")
             ),
             Patch::remove_node(Some(&"div"), TreePath::new(vec![1, 0, 0, 1,]),),
-            Patch::insert_node(
+            Patch::insert_before_node(
                 Some(&"div"),
                 TreePath::new(vec![1, 0, 0, 2,]),
-                &div(
+                vec![&div(
                     vec![class("grid__number__line")],
                     vec![
                         div(vec![class("grid__number")], vec![text(2)]),
@@ -145,7 +145,7 @@ fn new_lines_ignored() {
                             vec![div(vec![], vec![text("\n")])]
                         ),
                     ]
-                )
+                )]
             ),
             Patch::replace_node(
                 None,
