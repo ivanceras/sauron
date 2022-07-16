@@ -1,6 +1,13 @@
 [package]
 name = "sauron-component-macro"
 version = "0.50.0"
+authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
+license = "MIT"
+description = "An html library for building client side webapps"
+repository = "https://github.com/ivanceras/sauron"
+documentation = "https://docs.rs/sauron-node-macro"
+readme = "../../README.md"
+keywords = ["html", "dom", "web"]
 edition = "2021"
 
 [lib]
