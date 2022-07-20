@@ -1,5 +1,5 @@
 use client::{App, Msg};
-use sauron::jss::jss;
+use sauron::jss;
 use sauron::prelude::*;
 
 /// We are creating an index page.
@@ -10,6 +10,7 @@ pub fn index(app: &App) -> Node<Msg> {
     let view = app.view();
     let style = style();
     node! {
+        <!doctype html>
         <html lang="en">
           <head>
             <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>

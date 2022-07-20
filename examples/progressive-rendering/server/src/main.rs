@@ -43,7 +43,7 @@ async fn main() {
         let api_data = fake_api_call(name.clone());
         let app = App::with_name_and_data(&name, api_data);
 
-        let rendered_index_page = page::index(&app).render_to_string();
+        let rendered_index_page = page::index(&app).render_to_string_pretty();
 
         Response::builder().body(rendered_index_page)
     };

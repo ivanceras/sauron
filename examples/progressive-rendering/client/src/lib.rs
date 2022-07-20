@@ -164,6 +164,11 @@ impl App {
                     <article>
                         <p>"Hello, "<span class="modified-name">{text(&data.modified_name)}</span></p>
                         <p>"Hey, did you know that’s "<span class="length">{text(&data.length)}</span>" characters long?"</p>
+                        <p>"and also you can access a server-rendered page here:"
+                            <a href=format!("/{}", &data.modified_name)>
+                                <span class="modified-name">{text(&data.modified_name)}</span>
+                            </a>
+                        </p>
                     </article>
                 }
             }

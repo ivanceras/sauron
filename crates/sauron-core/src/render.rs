@@ -56,6 +56,19 @@ pub trait Render {
         self.render(&mut buffer).expect("must render");
         buffer
     }
+
+    /// add an indent if applicable
+    fn maybe_indent(
+        &self,
+        buffer: &mut dyn fmt::Write,
+        indent: usize,
+        compressed: bool,
+    ) -> fmt::Result {
+        if !compressed {
+            write!(buffer, "\n{}", "    ".repeat(indent))?;
+        }
+        Ok(())
+    }
 }
 
 impl<MSG> Render for Node<MSG> {
@@ -80,8 +93,8 @@ impl<MSG> Render for Leaf<MSG> {
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
-        _indent: usize,
-        _compressed: bool,
+        indent: usize,
+        compressed: bool,
     ) -> fmt::Result {
         match self {
             Leaf::Text(text) => {
@@ -95,8 +108,11 @@ impl<MSG> Render for Leaf<MSG> {
                 write!(buffer, "<!--{}-->", comment)
             }
             Leaf::Fragment(fragment) => {
-                for frag in fragment.iter() {
-                    frag.render_with_indent(buffer, _indent, _compressed)?;
+                for (i, frag) in fragment.iter().enumerate() {
+                    if i > 0 {
+                        self.maybe_indent(buffer, indent, compressed)?;
+                    }
+                    frag.render_with_indent(buffer, indent, compressed)?;
                 }
                 Ok(())
             }
@@ -171,16 +187,14 @@ impl<MSG> Render for Element<MSG> {
         } else {
             // otherwise print all child nodes with each line and indented
             for child in self.get_children() {
-                if !compressed {
-                    write!(buffer, "\n{}", "    ".repeat(indent + 1))?;
-                }
+                self.maybe_indent(buffer, indent + 1, compressed)?;
                 child.render_with_indent(buffer, indent + 1, compressed)?;
             }
         }
 
         // do not make a new line it if is only a text child node or it has no child nodes
-        if !is_lone_child_text_node && !children.is_empty() && !compressed {
-            write!(buffer, "\n{}", "    ".repeat(indent))?;
+        if !is_lone_child_text_node && !children.is_empty() {
+            self.maybe_indent(buffer, indent, compressed)?;
         }
 
         let inner_html = extract_inner_html(&merged_attributes);
