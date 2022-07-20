@@ -7,6 +7,8 @@ use crate::vdom::NodeTrait;
 use crate::{html::attributes, vdom::Attribute, vdom::Element, vdom::Node};
 use std::fmt;
 
+const DEFAULT_INDENT_SIZE: usize = 2;
+
 /// render node, elements to a writable buffer
 pub trait Render {
     // ISSUE: sublte difference in `render` and `render_to_string`:
@@ -65,7 +67,11 @@ pub trait Render {
         compressed: bool,
     ) -> fmt::Result {
         if !compressed {
-            write!(buffer, "\n{}", "    ".repeat(indent))?;
+            write!(
+                buffer,
+                "\n{}",
+                " ".repeat(DEFAULT_INDENT_SIZE).repeat(indent)
+            )?;
         }
         Ok(())
     }
