@@ -299,4 +299,23 @@ where
     fn dispatch(&self, msg: MSG) {
         self.dispatch_multiple(vec![msg])
     }
+
+    fn dispatch_with_delay(&self, msg: MSG, timeout: i32) -> Option<i32> {
+        let program_clone = self.clone();
+        let window = crate::window();
+        let closure_delay: Closure<dyn FnMut() + 'static> =
+            Closure::once(move || {
+                program_clone.dispatch(msg);
+            });
+
+        let timeout_id = window
+            .set_timeout_with_callback_and_timeout_and_arguments_0(
+                closure_delay.as_ref().unchecked_ref(),
+                timeout,
+            )
+            .expect("should register the setTimeout call");
+
+        closure_delay.forget();
+        Some(timeout_id)
+    }
 }

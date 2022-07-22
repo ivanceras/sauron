@@ -15,4 +15,7 @@ pub trait Dispatch<MSG> {
 
     /// dispatch multiple msg
     fn dispatch_multiple(&self, msgs: Vec<MSG>);
+
+    /// dispatch the message after elapsed `timeout` ms
+    fn dispatch_with_delay(&self, msg: MSG, timeout: i32) -> Option<i32>;
 }
