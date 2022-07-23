@@ -45,6 +45,23 @@ impl<MSG> Special for Element<MSG> {
     }
 }
 
+/// creates a key attribute using a formatter
+/// # Examples
+/// ```rust
+/// use sauron::prelude::*;
+///
+/// let number = 42;
+/// let button:Node<()> = button([key!("content-{}", 42)], [text("Click")]);
+///
+/// assert_eq!(node!{<button key=format!("content-42")>"Click"</button>}, button);
+/// ```
+#[macro_export]
+macro_rules! key {
+    ( $($arg: tt)* ) => {
+        $crate::html::attributes::key(format!($($arg)*))
+    };
+}
+
 /// key attributes is used to match
 /// old element and new element when diffing
 pub fn key<V, MSG>(v: V) -> Attribute<MSG>
