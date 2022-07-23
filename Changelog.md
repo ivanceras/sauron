@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.50.3
+- Add `key!` macro which combines `key` and `format!` macro to easily format key attribute value.
+
 ## 0.50.2
 - Add `Progam::dispatch_with_delay` to dispatch an MSG at a later time.
 
