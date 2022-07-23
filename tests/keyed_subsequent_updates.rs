@@ -154,25 +154,25 @@ fn subsequent_updates() {
     old.render(&mut old_html).expect("must render");
     log::trace!("old html: {}", old_html);
     let expected_old = r#"<main class="editor">
-    <section class="lines">
-        <div key="hash0">
-            <div>0</div>
-            <div>line0</div>
-        </div>
-        <div key="hash1">
-            <div>1</div>
-            <div>line1</div>
-        </div>
-        <div key="hash2">
-            <div>2</div>
-            <div>line2</div>
-        </div>
-        <div key="hash3">
-            <div>3</div>
-            <div>line3</div>
-        </div>
-    </section>
-    <footer>line:0, col:0</footer>
+  <section class="lines">
+    <div key="hash0">
+      <div>0</div>
+      <div>line0</div>
+    </div>
+    <div key="hash1">
+      <div>1</div>
+      <div>line1</div>
+    </div>
+    <div key="hash2">
+      <div>2</div>
+      <div>line2</div>
+    </div>
+    <div key="hash3">
+      <div>3</div>
+      <div>line3</div>
+    </div>
+  </section>
+  <footer>line:0, col:0</footer>
 </main>"#;
 
     assert_eq!(old_html, expected_old);
