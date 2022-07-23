@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.50.2
+- Add `Progam::dispatch_with_delay` to dispatch an MSG at a later time.
+
 ## 0.50.1
 - bump `mt-dom` to 0.20.0
 
