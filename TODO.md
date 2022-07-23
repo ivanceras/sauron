@@ -178,3 +178,9 @@
      - This is solved by getting the type_id of the closure.
 - [X] Add more test for recycled nodes with keys
 - [X] When 2 text are next to each other, the second text will become a comment
+
+## Limitations
+- In rust, no two closures, even if identical, have the same type. Therefore closure can not be check for equality.
+    - In sauron node are matched and reused aggressively, except when the keys are different then the node is discarded.
+    - If we don't reuse nodes with event listeners aggressively, then we would have a performance penalty, since every recreation of the node with event listener will have to discard and create a new one for it, even if it is matching itself.
+    - Adding `key` attribute provides a good trade off.
