@@ -41,7 +41,7 @@ where
     }
 
     let mut active_closures = HashMap::new();
-    let nodes_to_patch = find_all_nodes(root_node.clone(), &nodes_to_find);
+    let nodes_to_patch = find_all_nodes(&root_node, &nodes_to_find);
 
     for patch in patches.iter() {
         let patch_path = patch.path();
@@ -63,14 +63,14 @@ where
     Ok(active_closures)
 }
 
-fn find_node(node: Node, path: &mut TreePath) -> Option<Node> {
+fn find_node(node: &Node, path: &mut TreePath) -> Option<Node> {
     if path.is_empty() {
-        Some(node)
+        Some(node.clone())
     } else {
         let idx = path.remove_first();
         let children = node.child_nodes();
         if let Some(child) = children.item(idx as u32) {
-            find_node(child, path)
+            find_node(&child, path)
         } else {
             None
         }
@@ -78,17 +78,22 @@ fn find_node(node: Node, path: &mut TreePath) -> Option<Node> {
 }
 
 fn find_all_nodes(
-    node: Node,
+    node: &Node,
     nodes_to_find: &[(&TreePath, Option<&&'static str>)],
 ) -> BTreeMap<TreePath, Node> {
     let mut nodes_to_patch: BTreeMap<TreePath, Node> = BTreeMap::new();
 
     for (path, tag) in nodes_to_find {
         let mut traverse_path: TreePath = (*path).clone();
-        if let Some(found) = find_node(node.clone(), &mut traverse_path) {
+        if let Some(found) = find_node(node, &mut traverse_path) {
             nodes_to_patch.insert((*path).clone(), found);
         } else {
-            log::warn!("can not find: {:?} {:?}", path, tag);
+            log::warn!(
+                "can not find: {:?} {:?} root_node: {:?}",
+                path,
+                tag,
+                node
+            );
         }
     }
     nodes_to_patch
@@ -349,6 +354,8 @@ where
             // to the newly created node
             if patch_path.path.is_empty() {
                 *root_node = created_node.node;
+                #[cfg(feature = "with-debug")]
+                log::info!("the root_node is replaced with {:?}", root_node);
             }
             Ok(created_node.closures)
         }

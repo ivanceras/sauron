@@ -186,11 +186,14 @@ where
 
         #[cfg(feature = "with-debug")]
         log::debug!("patches: {:#?}", patches);
-        let mut root_node = self.root_node();
+
+        //Note: it is important that root_node points to the original mutable reference here
+        // since it can be replaced with a new root Node(the top-level node of the view) when patching
+        let root_node = self.root_node.as_mut().expect("must have a root_node");
 
         let active_closures = patch(
             program,
-            &mut root_node,
+            root_node,
             &mut self.active_closures,
             &mut self.focused_node,
             patches,
@@ -212,27 +215,16 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
-        let mut root_node = self.root_node();
+        let root_node = self.root_node.as_mut().expect("must have a root_node");
         let active_closures = patch(
             program,
-            &mut root_node,
+            root_node,
             &mut self.active_closures,
             &mut self.focused_node,
             patches,
         )
         .expect("Error in patching the dom");
         self.active_closures.extend(active_closures);
-    }
-
-    /// Return the root node of your application, the highest ancestor of all other nodes in
-    /// your real DOM tree.
-    pub fn root_node(&self) -> Node {
-        // Note that we're cloning the `web_sys::Node`, not the DOM element.
-        // So we're effectively cloning a pointer here, which is fast.
-        self.root_node
-            .as_ref()
-            .expect("must have a root_node")
-            .clone()
     }
 
     /// Return the root node of your application, the highest ancestor of all other nodes in

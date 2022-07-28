@@ -75,11 +75,6 @@ where
         }
     }
 
-    /// get the real DOM node where this app is mounted to.
-    pub fn root_node(&self) -> web_sys::Node {
-        self.dom_updater.borrow().root_node()
-    }
-
     /// return the node where the app is mounted into
     pub fn mount_node(&self) -> web_sys::Node {
         self.dom_updater.borrow().mount_node()
