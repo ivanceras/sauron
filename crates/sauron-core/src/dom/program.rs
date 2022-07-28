@@ -287,8 +287,7 @@ where
             Closure::once(move || {
                 program_clone.dispatch_inner(msgs);
             });
-        crate::dom::util::request_animation_frame_for_closure(&closure_raf);
-        closure_raf.forget();
+        crate::dom::util::request_animation_frame_for_closure(closure_raf);
     }
 
     #[cfg(not(feature = "with-request-animation-frame"))]
@@ -300,6 +299,7 @@ where
         self.dispatch_multiple(vec![msg])
     }
 
+    #[cfg(feature = "with-request-animation-frame")]
     fn dispatch_with_delay(&self, msg: MSG, timeout: i32) -> Option<i32> {
         let program_clone = self.clone();
         let window = crate::window();

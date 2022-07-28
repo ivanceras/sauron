@@ -17,18 +17,15 @@ where
     F: FnMut() + 'static,
 {
     let closure_raf: Closure<dyn FnMut() + 'static> = Closure::once(f);
-    window()
-        .request_animation_frame(closure_raf.as_ref().unchecked_ref())
-        .expect("should register `requestAnimationFrame` OK");
-    closure_raf.forget();
+    request_animation_frame_for_closure(closure_raf)
 }
 
-#[allow(unused)]
 /// utility function which executes the agument closure in a request animation frame
-pub(crate) fn request_animation_frame_for_closure(f: &Closure<dyn FnMut()>) {
+pub(crate) fn request_animation_frame_for_closure(f: Closure<dyn FnMut()>) {
     window()
         .request_animation_frame(f.as_ref().unchecked_ref())
         .expect("should register `requestAnimationFrame` OK");
+    f.forget()
 }
 
 thread_local!(static DOCUMENT: web_sys::Document = window().document().expect("should have a document on window"));
