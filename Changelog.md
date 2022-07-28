@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.50.5
+- feat: remove the feature `with-request-animation-frame` as it is now always used by default
+
 ## 0.50.4
 - fix: the passed root_node must point to the original root_node, as there is a possibility that the top level node will be replaced with a new top-level view node
 - refactor: reuse the call to other function in creating request animation call
