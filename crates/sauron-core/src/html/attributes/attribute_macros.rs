@@ -73,7 +73,7 @@ macro_rules! declare_html_attributes{
 macro_rules! declare_html_attributes_special{
     ( $(
          $(#[$attr:meta])*
-         $name:ident => $attribute:tt;
+         $name:ident : $attribute:tt;
        )*
      ) => {
         declare_attributes!{ $($name => $attribute;)*}
@@ -207,17 +207,12 @@ declare_html_attributes! {
 
 // attributes with dash
 declare_html_attributes_special! {
-    accept_charset => "accept-charset";
-
-    r#async => "async";
-
-    r#for => "for";
-
-    font_family => "font-family";
-    font_size => "font-size";
-    flex_direction => "flex-direction";
-
-    r#loop => "loop";
-
-    r#type => "type";
+    accept_charset : "accept-charset";
+    r#async : "async";
+    r#for : "for";
+    font_family : "font-family";
+    font_size : "font-size";
+    flex_direction : "flex-direction";
+    r#loop : "loop";
+    r#type : "type";
 }
