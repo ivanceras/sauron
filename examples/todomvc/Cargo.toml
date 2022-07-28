@@ -26,5 +26,4 @@ features = ["Storage"]
 
 [features]
 with-measure = ["sauron/with-measure"]
-with-request-animation-frame = ["sauron/with-request-animation-frame"]
 with-storage = [] # enable disable storage

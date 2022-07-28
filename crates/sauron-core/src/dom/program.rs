@@ -5,7 +5,6 @@ use crate::{dom::dom_updater::DomUpdater, Application, Dispatch};
 use std::any::TypeId;
 use std::collections::BTreeMap;
 use std::{cell::RefCell, rc::Rc};
-#[cfg(feature = "with-request-animation-frame")]
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::Node;
@@ -275,7 +274,6 @@ where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
-    #[cfg(feature = "with-request-animation-frame")]
     fn dispatch_multiple(&self, msgs: Vec<MSG>) {
         let program_clone = self.clone();
         let closure_raf: Closure<dyn FnMut() + 'static> =
@@ -285,16 +283,10 @@ where
         crate::dom::util::request_animation_frame_for_closure(closure_raf);
     }
 
-    #[cfg(not(feature = "with-request-animation-frame"))]
-    fn dispatch_multiple(&self, msgs: Vec<MSG>) {
-        self.dispatch_inner(msgs)
-    }
-
     fn dispatch(&self, msg: MSG) {
         self.dispatch_multiple(vec![msg])
     }
 
-    #[cfg(feature = "with-request-animation-frame")]
     fn dispatch_with_delay(&self, msg: MSG, timeout: i32) -> Option<i32> {
         let program_clone = self.clone();
         let window = crate::window();

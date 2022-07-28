@@ -20,13 +20,9 @@ sauron-component-macro = { version = "0.50", path = "crates/sauron-component-mac
 cfg-if = "0.1"
 
 [features]
-default = ["with-dom", "with-node-macro", "with-request-animation-frame"]
+default = ["with-dom", "with-node-macro"]
 with-dom = ["sauron-core/with-dom"]
 with-lookup = ["sauron-core/with-lookup"]
-
-# request-animation-frame should be ON all the time, otherwise
-# your webapp will have a very poor UI responsiveness
-with-request-animation-frame = ["sauron-core/with-request-animation-frame"]
 
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]

@@ -96,11 +96,10 @@ features = [
 
 
 [features]
-default = ["with-dom", "with-request-animation-frame"]
+default = ["with-dom"]
 with-lookup = [] #enumerates html tags and attributes
 with-measure = ["mt-dom/with-measure"] # log traces for measurements in various parts of the system where performance matters.
 with-debug = [] # log debug patches
-with-request-animation-frame = [] # enable the use of request-animation-frame in calling dispatch
 with-dom = ["wasm-bindgen", "js-sys", "web-sys"] # for client-side usage
 
 [dev-dependencies]
