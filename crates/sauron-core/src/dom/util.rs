@@ -28,6 +28,23 @@ pub(crate) fn request_animation_frame_for_closure(f: Closure<dyn FnMut()>) {
     f.forget()
 }
 
+/// execute the function at a certain specified timeout in ms
+pub fn delay_exec(
+    closure_delay: Closure<dyn FnMut()>,
+    timeout: i32,
+) -> Option<i32> {
+    let timeout_id = window()
+        .set_timeout_with_callback_and_timeout_and_arguments_0(
+            closure_delay.as_ref().unchecked_ref(),
+            timeout,
+        )
+        .expect("should register the setTimeout call");
+
+    closure_delay.forget();
+
+    Some(timeout_id)
+}
+
 thread_local!(static DOCUMENT: web_sys::Document = window().document().expect("should have a document on window"));
 /// provides access to the document element
 pub fn document() -> web_sys::Document {
