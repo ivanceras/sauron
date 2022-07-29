@@ -32,8 +32,8 @@ pub struct Modifier {
     /// application
     ///
     /// This measurment name will be copied
-    /// into the [`Measurement`](crate::Measurement) passed in
-    /// [`Application::measurement`](crate::Application::measurement)
+    /// into the [`Measurements`](crate::dom::Measurements) passed in
+    /// [`Application::measurements`](crate::Application::measurements)
     pub measurement_name: String,
 }
 

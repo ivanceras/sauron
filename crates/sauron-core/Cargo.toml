@@ -127,3 +127,8 @@ version = "0.3"
 name = "nodes_benchmark"
 harness = false
 
+
+[package.metadata.docs.rs]
+all-features = true
+default-target = "wasm32-unknown-unknown"
+

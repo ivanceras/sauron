@@ -13,7 +13,7 @@ pub enum Leaf<MSG> {
     /// a vec of nodes
     Fragment(Vec<Node<MSG>>),
     /// doctype: html, math, svg
-    /// https://www.w3.org/QA/2002/04/valid-dtd-list.html
+    /// <https://www.w3.org/QA/2002/04/valid-dtd-list.html>
     DocType(String),
 }
 
