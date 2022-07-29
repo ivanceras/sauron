@@ -4,7 +4,7 @@
 
 
 [![Latest Version](https://img.shields.io/crates/v/sauron.svg)](https://crates.io/crates/sauron)
-[![Build Status](https://travis-ci.org/ivanceras/sauron.svg?branch=master)](https://travis-ci.org/ivanceras/sauron)
+[![Build Status](https://img.shields.io/github/workflow/status/ivanceras/sauron/Rust)](https://github.com/ivanceras/sauron/actions/workflows/rust.yml)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 ![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png)
