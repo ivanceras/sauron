@@ -191,3 +191,13 @@ where
         cmd
     }
 }
+
+impl<DSP, MSG> From<Vec<Effects<MSG, ()>>> for Cmd<DSP>
+where
+    MSG: 'static,
+    DSP: Dispatch<MSG> + Clone + 'static,
+{
+    fn from(effects: Vec<Effects<MSG, ()>>) -> Self {
+        Cmd::from(Effects::merge_all(effects))
+    }
+}
