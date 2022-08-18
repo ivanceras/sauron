@@ -29,7 +29,7 @@ pub use events::*;
 pub use http::Http;
 pub use program::Program;
 pub use util::{
-    body, delay_exec, document, history, now, performance,
+    async_delay, body, delay_exec, document, history, now, performance,
     request_animation_frame, window,
 };
 pub use window::Window;

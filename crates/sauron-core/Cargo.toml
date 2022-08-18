@@ -15,6 +15,7 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 js-sys = { version = "0.3", optional = true }
+wasm-bindgen-futures = { version = "0.4.31", optional = true}
 log = "0.4"
 cfg-if = "0.1"
 thiserror = "1.0"
@@ -100,7 +101,7 @@ default = ["with-dom"]
 with-lookup = [] #enumerates html tags and attributes
 with-measure = ["mt-dom/with-measure"] # log traces for measurements in various parts of the system where performance matters.
 with-debug = [] # log debug patches
-with-dom = ["wasm-bindgen", "js-sys", "web-sys"] # for client-side usage
+with-dom = ["wasm-bindgen", "js-sys", "web-sys", "wasm-bindgen-futures"] # for client-side usage
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

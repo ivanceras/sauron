@@ -38,6 +38,7 @@ console_error_panic_hook = "0.1"
 console_log = "0.2"
 log = "0.4"
 wasm-bindgen-test = "0.3"
+wasm-bindgen-futures = "0.4.31"
 regex = "1"
 
 [dev-dependencies.web-sys]
