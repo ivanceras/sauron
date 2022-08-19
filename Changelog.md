@@ -1,6 +1,6 @@
 # Changelog
 
-## (Unreleased)
+## 0.50.6
 - feat: add utility function `async_delay` for putting delay inside of async functions
 
 ## 0.50.5
