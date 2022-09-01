@@ -2,6 +2,7 @@
 use sauron::js_sys::TypeError;
 use sauron::prelude::*;
 use serde::Deserialize;
+use wasm_bindgen_futures::spawn_local;
 
 #[macro_use]
 extern crate log;
@@ -54,14 +55,19 @@ impl App {
     fn fetch_page(&self) -> Cmd<Self, Msg> {
         let url =
             format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
-        Http::fetch_with_text_response_decoder(
-            &url,
-            |v: String| match serde_json::from_str(&v) {
-                Ok(data) => Msg::ReceivedData(data),
-                Err(err) => Msg::JsonError(err),
-            },
-            Msg::RequestError,
-        )
+
+        Cmd::new(|program| {
+            spawn_local(async move{
+                let msg = match Http::fetch_with_text_response_decoder(&url).await {
+                    Ok(v) => match serde_json::from_str(&v) {
+                        Ok(data) => Msg::ReceivedData(data),
+                        Err(err) => Msg::JsonError(err),
+                    },
+                    Err(e) => Msg::RequestError(e),
+                };
+                program.dispatch(msg);
+            });
+        })
     }
 }
 
