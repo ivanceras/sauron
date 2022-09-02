@@ -2,6 +2,7 @@ use wasm_bindgen::{closure::Closure, JsCast};
 use js_sys::Promise;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::JsFuture;
+pub use wasm_bindgen_futures::spawn_local;
 
 thread_local!(static WINDOW: web_sys::Window = web_sys::window().expect("no global `window` exists"));
 /// utility function which returns the Window element

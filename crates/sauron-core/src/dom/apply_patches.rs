@@ -230,16 +230,21 @@ where
                 }
 
                 for for_insert in for_inserts {
-                    let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
+                    let created_nodes = CreatedNode::create_dom_node::<DSP, MSG>(
                         program,
                         for_insert,
                         focused_node,
                     );
-                    parent_node
-                        .insert_before(&created_node.node, Some(target_element))
-                        .expect("must remove target node");
+                    for created_node in created_nodes {
+                        parent_node
+                            .insert_before(
+                                &created_node.node,
+                                Some(target_element),
+                            )
+                            .expect("must remove target node");
 
-                    active_closures.extend(created_node.closures);
+                        active_closures.extend(created_node.closures);
+                    }
                 }
             } else {
                 panic!("unable to get parent node of the target element: {:?} thas has a tag: {:?} in path: {:?}, for patching: {:#?}", target_element, tag, patch_path, for_inserts);
@@ -266,19 +271,21 @@ where
             }
 
             for for_insert in for_inserts.iter().rev() {
-                let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
+                let created_nodes = CreatedNode::create_dom_node::<DSP, MSG>(
                     program,
                     for_insert,
                     focused_node,
                 );
-                let created_element: &Element = created_node
-                    .node
-                    .dyn_ref()
-                    .expect("only elements is supported for now");
-                target_element
-                    .insert_adjacent_element("afterend", &created_element)
-                    .expect("must remove target node");
-                active_closures.extend(created_node.closures);
+                for created_node in created_nodes {
+                    let created_element: &Element = created_node
+                        .node
+                        .dyn_ref()
+                        .expect("only elements is supported for now");
+                    target_element
+                        .insert_adjacent_element("afterend", &created_element)
+                        .expect("must remove target node");
+                    active_closures.extend(created_node.closures);
+                }
             }
             Ok(active_closures)
         }
@@ -337,7 +344,7 @@ where
             //
             // Possible fix: stringify and process the patch in plain javascript code.
             // That way, all the code is done at once.
-            let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
+            let created_nodes = CreatedNode::create_dom_node::<DSP, MSG>(
                 program,
                 replacement,
                 focused_node,
@@ -345,19 +352,25 @@ where
             if element.node_type() == Node::ELEMENT_NODE {
                 remove_event_listeners(element, old_closures)?;
             }
-            element
-                .replace_with_with_node_1(&created_node.node)
-                .expect("must replace node");
+            for created_node in created_nodes {
+                element
+                    .replace_with_with_node_1(&created_node.node)
+                    .expect("must replace node");
 
-            // if what we are replacing is a root node:
-            // we replace the root node here, so that's reference is updated
-            // to the newly created node
-            if patch_path.path.is_empty() {
-                *root_node = created_node.node;
-                #[cfg(feature = "with-debug")]
-                log::info!("the root_node is replaced with {:?}", root_node);
+                // if what we are replacing is a root node:
+                // we replace the root node here, so that's reference is updated
+                // to the newly created node
+                if patch_path.path.is_empty() {
+                    *root_node = created_node.node;
+                    #[cfg(feature = "with-debug")]
+                    log::info!(
+                        "the root_node is replaced with {:?}",
+                        root_node
+                    );
+                }
+                active_closures.extend(created_node.closures);
             }
-            Ok(created_node.closures)
+            Ok(active_closures)
         }
         Patch::RemoveNode { .. } => {
             let element: &Element = node.unchecked_ref();
@@ -380,13 +393,15 @@ where
             let element: &Element = node.unchecked_ref();
             let mut active_closures = HashMap::new();
             for new_node in new_nodes.iter() {
-                let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
+                let created_nodes = CreatedNode::create_dom_node::<DSP, MSG>(
                     program,
                     new_node,
                     focused_node,
                 );
-                element.append_child(&created_node.node)?;
-                active_closures.extend(created_node.closures);
+                for created_node in created_nodes {
+                    element.append_child(&created_node.node)?;
+                    active_closures.extend(created_node.closures);
+                }
             }
             Ok(active_closures)
         }

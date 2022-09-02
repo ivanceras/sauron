@@ -179,6 +179,7 @@
      - This is solved by getting the type_id of the closure.
 - [X] Add more test for recycled nodes with keys
 - [X] When 2 text are next to each other, the second text will become a comment
+- [ ] Runtime errors when using fragments
 
 ## Limitations
 - In rust, no two closures, even if identical, have the same type. Therefore closure can not be check for equality.

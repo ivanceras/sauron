@@ -76,11 +76,15 @@ where
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
-        let created_node = CreatedNode::create_dom_node(
+        let mut created_nodes = CreatedNode::create_dom_node(
             program,
             &self.current_vdom,
             &mut self.focused_node,
         );
+
+        // should only return 1 node
+        assert_eq!(created_nodes.len(), 1);
+        let created_node = created_nodes.remove(0);
 
         //TODO: maybe remove replace the mount
         if self.replace {
@@ -124,8 +128,11 @@ where
     {
         let style_node =
             crate::html::tags::style([], [crate::html::text(style)]);
-        let created_node =
+        let created_nodes =
             CreatedNode::create_dom_node(program, &style_node, &mut None);
+        // should only have 1 node
+        assert_eq!(created_nodes.len(), 1);
+        let created_node = &created_nodes[0];
         if self.use_shadow {
             let mount_element: &web_sys::Element =
                 self.mount_node.unchecked_ref();
