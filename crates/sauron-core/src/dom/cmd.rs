@@ -3,6 +3,8 @@
 //!
 use crate::Dispatch;
 use crate::Effects;
+use std::future::Future;
+use wasm_bindgen_futures::spawn_local;
 
 /// Cmd is a command to be executed by the system.
 /// This is returned at the init function of a component and is executed right
@@ -155,6 +157,7 @@ where
             cb(program_clone);
         }
     }
+
 }
 
 impl<DSP> Cmd<DSP> {
@@ -168,6 +171,18 @@ impl<DSP> Cmd<DSP> {
     {
         Cmd::new(move |program: DSP| {
             program.dispatch_multiple(msg_list);
+        })
+    }
+
+    /// creates a Cmd from a Future which has an MSG Output
+    pub fn from_async<MSG>(msg_fut: impl Future<Output = MSG> + 'static) -> Self
+    where DSP: Dispatch<MSG> + Clone + 'static
+    {
+        Cmd::new(|program:DSP|{
+            spawn_local(async move{
+                let msg = msg_fut.await;
+                program.dispatch(msg)
+            });
         })
     }
 }

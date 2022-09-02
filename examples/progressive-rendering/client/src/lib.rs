@@ -61,18 +61,19 @@ impl App {
     }
     fn fetch_data(&self) -> Cmd<Self, Msg> {
         let url = format!("{}/{}", DATA_URL, self.name);
-        Http::fetch_with_text_response_decoder(
-            &url,
-            |v: String| {
-                let data: Result<Data, _> = serde_json::from_str(&v);
-                trace!("data: {:#?}", data);
-                match data {
-                    Ok(data) => Msg::ReceivedData(data),
-                    Err(e) => Msg::JsonError(e),
+        Cmd::from_async(async move{
+            match Http::fetch_with_text_response_decoder(&url).await{
+                Ok(v) => {
+                    let data: Result<Data, _> = serde_json::from_str(&v);
+                    trace!("data: {:#?}", data);
+                    match data {
+                        Ok(data) => Msg::ReceivedData(data),
+                        Err(e) => Msg::JsonError(e),
+                    }
                 }
-            },
-            Msg::RequestError,
-        )
+                Err(e) => Msg::RequestError(e),
+            }
+        })
     }
 }
 
