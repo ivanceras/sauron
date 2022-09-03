@@ -27,12 +27,15 @@ pub trait Component<MSG, XMSG> {
     }
 
     /// returns the attributes that is observed by this component
+    /// These are the names of the attributes the component is interested in
     fn observed_attributes() -> Vec<&'static str> {
         vec![]
     }
 
     /// This will be invoked when a component is used as a custom element
     /// and the attributes of the custom-element has been modified
+    ///
+    /// if the listed attributes in the observed attributes are modified
     fn attributes_changed(
         &mut self,
         _attributes_values: BTreeMap<String, String>,
