@@ -54,6 +54,10 @@ fn impl_component(
 
             #impl_item
 
+            pub const CUSTOM_TAG: &str = #custom_tag;
+            pub const DERIVE_COMPONENT: &str = #derive_component_str;
+            pub const SUPER_CLASS: &str = "HTMLElement";
+
             #[allow(non_camel_case_types)]
             pub struct #derive_msg(#component_msg);
 
@@ -149,9 +153,9 @@ fn impl_component(
                 }
             }
 
-            #[wasm_bindgen]
+            //#[wasm_bindgen]
             pub fn register(){
-                sauron::register_custom_element(#custom_tag, #derive_component_str, "HTMLElement");
+                sauron::register_custom_element(CUSTOM_TAG, DERIVE_COMPONENT, SUPER_CLASS);
             }
 
         });
