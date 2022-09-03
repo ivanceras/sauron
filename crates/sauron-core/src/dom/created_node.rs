@@ -102,14 +102,12 @@ impl CreatedNode {
                 let doc_fragment = document.create_document_fragment();
                 let mut closures = ActiveClosure::new();
                 for vnode in nodes {
-                    let created_nodes =
+                    let created_node =
                         Self::create_dom_node(program, vnode, focused_node);
-                    for created_node in created_nodes {
-                        closures.extend(created_node.closures);
-                        doc_fragment.append_child(&created_node.node).expect(
-                            "Unable to append node to document fragment",
-                        );
-                    }
+                    closures.extend(created_node.closures);
+                    doc_fragment
+                        .append_child(&created_node.node)
+                        .expect("Unable to append node to document fragment");
                 }
                 let node: Node = doc_fragment.unchecked_into();
                 CreatedNode { node, closures }
@@ -123,28 +121,21 @@ impl CreatedNode {
         program: &DSP,
         vnode: &vdom::Node<MSG>,
         focused_node: &mut Option<Node>,
-    ) -> Vec<CreatedNode>
+    ) -> CreatedNode
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         match vnode {
             vdom::Node::Leaf(leaf_node) => {
-                vec![Self::create_leaf_node(program, leaf_node, focused_node)]
+                Self::create_leaf_node(program, leaf_node, focused_node)
             }
             vdom::Node::Element(element_node) => {
-                vec![Self::create_element_node(
-                    program,
-                    element_node,
-                    focused_node,
-                )]
+                Self::create_element_node(program, element_node, focused_node)
             }
-            vdom::Node::NodeList(node_list) => node_list
-                .into_iter()
-                .flat_map(|node| {
-                    Self::create_dom_node(program, node, focused_node)
-                })
-                .collect(),
+            vdom::Node::NodeList(_node_list) => {
+                panic!("Node list must have already been unrolled");
+            }
         }
     }
 
@@ -221,15 +212,13 @@ impl CreatedNode {
                     .insert_adjacent_html("beforeend", &child_text)
                     .expect("must not error");
             } else {
-                let created_children =
+                let created_child =
                     Self::create_dom_node(program, child, focused_node);
 
-                for created_child in created_children {
-                    closures.extend(created_child.closures);
-                    element
-                        .append_child(&created_child.node)
-                        .expect("Unable to append element node");
-                }
+                closures.extend(created_child.closures);
+                element
+                    .append_child(&created_child.node)
+                    .expect("Unable to append element node");
             }
         }
 
