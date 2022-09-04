@@ -1,4 +1,5 @@
 use crate::dom::effects::Effects;
+use crate::html::text;
 use crate::vdom::Node;
 use std::collections::BTreeMap;
 
@@ -16,6 +17,14 @@ pub trait Component<MSG, XMSG> {
     /// the view of the component
     fn view(&self) -> Node<MSG>;
 
+    /// a view of the component containing children nodex
+    fn view_with_children(
+        &self,
+        _children: impl IntoIterator<Item = Node<XMSG>>,
+    ) -> Node<MSG> {
+        text(" a stub ")
+    }
+
     /// optionally a Component can specify its own css style
     fn style(&self) -> String {
         String::new()
@@ -25,12 +34,13 @@ pub trait Component<MSG, XMSG> {
     fn get_component_id(&self) -> Option<&String> {
         None
     }
+}
 
+/// a trait for implementing CustomElement in the DOM with custom tag
+pub trait CustomElement {
     /// returns the attributes that is observed by this component
     /// These are the names of the attributes the component is interested in
-    fn observed_attributes() -> Vec<&'static str> {
-        vec![]
-    }
+    fn observed_attributes() -> Vec<&'static str>;
 
     /// This will be invoked when a component is used as a custom element
     /// and the attributes of the custom-element has been modified
@@ -38,9 +48,8 @@ pub trait Component<MSG, XMSG> {
     /// if the listed attributes in the observed attributes are modified
     fn attributes_changed(
         &mut self,
-        _attributes_values: BTreeMap<String, String>,
-    ) {
-    }
+        attributes_values: BTreeMap<String, String>,
+    );
 
     /// This will be invoked when a component needs to set the attributes for the
     /// mounted element of this component
@@ -64,7 +73,7 @@ pub trait Container<MSG, XMSG> {
     /// The container presents the children passed to it from the parent.
     /// The container can decide how to display the children components here, but
     /// the children nodes here can not trigger Msg that can update this component
-    fn view(&self) -> Node<XMSG>;
+    fn view(&self, content: impl IntoIterator<Item = Node<XMSG>>) -> Node<MSG>;
 
     /// optionally a Container can specify its own css style
     fn style(&self) -> String {

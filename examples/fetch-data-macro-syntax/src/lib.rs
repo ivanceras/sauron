@@ -1,6 +1,7 @@
 #![deny(warnings)]
 use sauron::js_sys::TypeError;
 use sauron::prelude::*;
+use sauron::jss;
 use serde::Deserialize;
 
 #[macro_use]
@@ -157,6 +158,14 @@ impl Application<Msg> for App {
                     type_error
                 ));
                 Cmd::none()
+            }
+        }
+    }
+
+    fn style(&self) -> String {
+        jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
             }
         }
     }

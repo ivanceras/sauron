@@ -1,6 +1,7 @@
 use sauron::{
     dom::events::KeyboardEvent,
     html::{attributes::*, *},
+    jss,
     prelude::*,
     Application, Cmd, Node,
 };
@@ -119,6 +120,14 @@ impl Application<Msg> for Model {
                 self.info_footer(),
             ],
         )
+    }
+
+    fn style(&self) -> String {
+        jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+            }
+        }
     }
 }
 

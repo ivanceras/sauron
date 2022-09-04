@@ -9,6 +9,7 @@ use sauron::{
     },
     prelude::*,
     Application, Cmd, Node, Program,
+    jss,
 };
 use wasm_bindgen_futures::spawn_local;
 
@@ -56,6 +57,14 @@ impl Application<Msg> for App {
             Msg::NoOp => (),
         }
         Cmd::none()
+    }
+
+    fn style(&self) -> String {
+        jss!{
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+            }
+        }
     }
 }
 

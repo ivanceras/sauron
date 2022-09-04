@@ -1,5 +1,6 @@
 use sauron::js_sys::TypeError;
 use sauron::prelude::*;
+use sauron::jss;
 use serde::{Deserialize, Serialize};
 
 #[macro_use]
@@ -132,6 +133,14 @@ impl Application<Msg> for App {
         };
         cmd
     }
+
+    fn style(&self) -> String {
+        jss! {
+            "body": {
+            }
+        }
+    }
+
 }
 
 impl App {

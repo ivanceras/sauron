@@ -59,32 +59,11 @@ where
     }
 }
 
-#[custom_element("date-time")]
+//#[custom_element("date-time")]
 impl<XMSG> sauron::Component<Msg, XMSG> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
-    fn observed_attributes() -> Vec<&'static str> {
-        vec!["date", "time"]
-    }
-
-    /// this is called when the attributes in the mount is changed
-    fn attributes_changed(&mut self, attributes: BTreeMap<String, String>) {
-        for (key, value) in attributes {
-            match &*key {
-                "date" => self.date = value,
-                "time" => self.time = value,
-                _ => log::info!("unused attribute: {}", key),
-            }
-        }
-    }
-
-    /// This is called when the attributes for the mount is to be set
-    /// this is called every after update
-    fn attributes_for_mount(&self) -> BTreeMap<String, String> {
-        BTreeMap::from_iter([("value".to_string(), self.date_time())])
-    }
-
     fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::DateChange(date) => {
@@ -172,4 +151,34 @@ where
             ],
         )
     }
+}
+
+impl<XMSG> sauron::CustomElement for DateTimeWidget<XMSG>
+where
+    XMSG: 'static,
+{
+    fn observed_attributes() -> Vec<&'static str> {
+        vec!["date", "time"]
+    }
+
+    /// this is called when the attributes in the mount is changed
+    fn attributes_changed(&mut self, attributes: BTreeMap<String, String>) {
+        for (key, value) in attributes {
+            match &*key {
+                "date" => self.date = value,
+                "time" => self.time = value,
+                _ => log::info!("unused attribute: {}", key),
+            }
+        }
+    }
+
+    /// This is called when the attributes for the mount is to be set
+    /// this is called every after update
+    fn attributes_for_mount(&self) -> BTreeMap<String, String> {
+        BTreeMap::from_iter([("value".to_string(), self.date_time())])
+    }
+}
+
+pub fn register() {
+    log::info!("registering data time");
 }

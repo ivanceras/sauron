@@ -1,6 +1,7 @@
 #![deny(warnings)]
 use sauron::{
     html::{attributes::*, events::*, *},
+    jss,
     prelude::*,
     Application, Cmd, Node, Program,
 };
@@ -111,6 +112,14 @@ impl Application<Msg> for Window {
                 ),
             ],
         )
+    }
+
+    fn style(&self) -> String {
+        jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+            }
+        }
     }
 }
 

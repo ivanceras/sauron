@@ -19,6 +19,10 @@ impl Application<AppMsg> for App {
             </div>
         }
     }
+
+    fn style(&self) -> String {
+        "".to_string()
+    }
 }
 
 #[wasm_bindgen(start)]

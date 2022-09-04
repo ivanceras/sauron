@@ -91,8 +91,11 @@ impl<MSG> Render for Node<MSG> {
             Node::Leaf(leaf) => {
                 leaf.render_with_indent(buffer, indent, compressed)
             }
-            Node::NodeList(_elements) => {
-                panic!("Node list should have been unrolled");
+            Node::NodeList(node_list) => {
+                for node in node_list {
+                    node.render_with_indent(buffer, indent, compressed)?;
+                }
+                Ok(())
             }
         }
     }

@@ -1,5 +1,4 @@
 use crate::{dom::Cmd, vdom::Node};
-use std::collections::BTreeMap;
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
@@ -29,9 +28,7 @@ where
     fn view(&self) -> Node<MSG>;
 
     /// optionally an Application can specify its own css style
-    fn style(&self) -> String {
-        String::new()
-    }
+    fn style(&self) -> String;
 
     /// This is called after dispatching and updating the dom for the component
     /// This is for diagnostic and performance measurement purposes.
@@ -43,25 +40,6 @@ where
     {
         log::debug!("Measurements: {:#?}", measurements);
         Cmd::none().no_render()
-    }
-
-    /// returns the attributes that is observed by this component
-    fn observed_attributes() -> Vec<&'static str> {
-        vec![]
-    }
-
-    /// This will be invoked when a component is used as a custom element
-    /// and the attributes of the custom-element has been modified
-    fn attributes_changed(
-        &mut self,
-        _attributes_values: BTreeMap<String, String>,
-    ) {
-    }
-
-    /// This will be invoked when a component needs to set the attributes for the
-    /// mounted element of this component
-    fn attributes_for_mount(&self) -> BTreeMap<String, String> {
-        BTreeMap::new()
     }
 }
 

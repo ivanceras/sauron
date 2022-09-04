@@ -19,7 +19,7 @@ mod window;
 
 pub use application::{Application, Measurements};
 pub use callback::Callback;
-pub use component::{Component, Container, View};
+pub use component::{Component, Container, CustomElement, View};
 pub use created_node::CreatedNode;
 pub use custom_element::register_custom_element;
 pub use dispatch::Dispatch;

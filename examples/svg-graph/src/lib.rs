@@ -303,6 +303,14 @@ impl Application<Msg> for App {
         )
     }
 
+    fn style(&self) -> String {
+        jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+            }
+        }
+    }
+
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Click => self.click_count += 1,
