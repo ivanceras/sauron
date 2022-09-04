@@ -1,4 +1,5 @@
 use quote::quote;
+use quote::ToTokens;
 
 #[proc_macro_attribute]
 pub fn custom_element(
@@ -22,6 +23,7 @@ pub fn custom_element(
 
     match &*component_ident {
         "Component" => impl_component(&impl_item, &custom_tag, component),
+        "Container" => impl_component(&impl_item, &custom_tag, component),
         "Application" => panic!("Application trait is not supported"),
         _ => panic!("unsupported trait implementation: {}", component_ident),
     }
@@ -31,7 +33,7 @@ fn impl_simple_component(
     impl_item: &syn::ItemImpl,
     custom_tag: &proc_macro2::Literal,
     component: &proc_macro2::Ident,
-    component_msg: &proc_macro2::Ident,
+    component_msg: &syn::PathSegment,
     derive_component: &proc_macro2::Ident,
     derive_msg: &proc_macro2::Ident,
 ) -> proc_macro2::TokenStream {
@@ -155,11 +157,10 @@ fn impl_component(
 ) -> proc_macro::TokenStream {
     let self_type = &impl_item.self_ty;
     if let syn::Type::Path(type_path) = self_type.as_ref() {
-        let component_msg_list = extract_ident_from_path_segment(&component);
-        dbg!(&component_msg_list);
+        let (msg, component_msg) = extract_path_component_msg(&component);
+        dbg!(&component_msg);
 
-        let path_segment = &type_path.path.segments[0];
-        let component = &path_segment.ident;
+        let component = &type_path.path.segments[0].ident;
         let derive_component = proc_macro2::Ident::new(
             &format!("_{}__CustomElement", component),
             proc_macro2::Span::call_site(),
@@ -170,31 +171,24 @@ fn impl_component(
         );
 
         dbg!(&derive_msg);
-        assert!(!component_msg_list.is_empty());
-
-        let component_msg = &component_msg_list[0];
         dbg!(&component_msg);
-        if component_msg_list.len() == 1 {
-            let tokens = impl_simple_component(
-                impl_item,
-                custom_tag,
-                component,
-                component_msg,
-                &derive_component,
-                &derive_msg,
-            );
-            tokens.into()
-        } else {
-            panic!("Complex component with more than 1 level deep Generics is not yet supported!");
-        }
+        let tokens = impl_simple_component(
+            impl_item,
+            custom_tag,
+            component,
+            component_msg,
+            &derive_component,
+            &derive_msg,
+        );
+        tokens.into()
     } else {
         panic!("Expecting a Path");
     }
 }
 
-fn extract_ident_from_path_segment(
+fn extract_path_component_msg(
     path_segment: &syn::PathSegment,
-) -> Vec<proc_macro2::Ident> {
+) -> (&proc_macro2::Ident, &syn::PathSegment) {
     if let syn::PathArguments::AngleBracketed(component_msg) =
         &path_segment.arguments
     {
@@ -204,34 +198,23 @@ fn extract_ident_from_path_segment(
         let first_arg = component_msg_iter
             .next()
             .expect("must have a first component msg");
-        extract_ident_from_generic_argument(&first_arg)
-    } else {
-        println!("not an AngleBracketed");
-        vec![]
-    }
-}
 
-fn extract_ident_from_generic_argument(
-    generic_arg: &syn::GenericArgument,
-) -> Vec<proc_macro2::Ident> {
-    if let syn::GenericArgument::Type(type_) = generic_arg {
-        if let syn::Type::Path(type_path) = type_ {
-            let path_segment: &syn::PathSegment = type_path
-                .path
-                .segments
-                .last()
-                .expect("must have a generic path segment");
-            let ident = path_segment.ident.clone();
-            let sub_idents = extract_ident_from_path_segment(path_segment);
-
-            let mut all_idents = vec![];
-            all_idents.push(ident);
-            all_idents.extend(sub_idents);
-            all_idents
+        if let syn::GenericArgument::Type(type_) = first_arg {
+            if let syn::Type::Path(type_path) = type_ {
+                let path_segment: &syn::PathSegment = type_path
+                    .path
+                    .segments
+                    .last()
+                    .expect("must have a generic path segment");
+                println!("last path segment: {:#?}", path_segment);
+                return (&path_segment.ident, path_segment);
+            } else {
+                panic!("expecting a type path");
+            }
         } else {
-            panic!("expecting a type path");
+            panic!("expecting a generic argument type");
         }
     } else {
-        panic!("expecting a generic argument type");
+        panic!("not an AngleBracketed");
     }
 }
