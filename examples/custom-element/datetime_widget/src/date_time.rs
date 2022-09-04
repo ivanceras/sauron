@@ -179,6 +179,105 @@ where
     }
 }
 
+struct DateTimeWidgetWrapApp {
+    widget: DateTimeWidget<Msg>,
+}
+
+impl Application<Msg> for DateTimeWidgetWrapApp {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+        let effects: Effects<Msg, Msg> = self.widget.update(msg);
+        let local_effects: Effects<Msg, ()> = effects.localize(|xmsg| xmsg);
+        let mount_attributes = self.widget.attributes_for_mount();
+        Cmd::batch([
+            Cmd::from(local_effects),
+            Cmd::new(|program| {
+                program.update_mount_attributes(mount_attributes);
+            }),
+        ])
+    }
+
+    fn view(&self) -> Node<Msg> {
+        self.widget.view()
+    }
+
+    fn style(&self) -> String {
+        self.widget.style()
+    }
+}
+
+#[wasm_bindgen]
+pub struct DateTimeWidgetCustomElement {
+    program: Program<DateTimeWidgetWrapApp, Msg>,
+}
+
+#[wasm_bindgen]
+impl DateTimeWidgetCustomElement {
+    #[wasm_bindgen(constructor)]
+    pub fn new(node: JsValue) -> Self {
+        use sauron::wasm_bindgen::JsCast;
+        let mount_node: &web_sys::Node = node.unchecked_ref();
+        Self {
+            program: Program::new(
+                DateTimeWidgetWrapApp {
+                    widget: DateTimeWidget::default(),
+                },
+                mount_node,
+                false,
+                true,
+            ),
+        }
+    }
+
+    #[wasm_bindgen(method)]
+    pub fn observed_attributes() -> JsValue {
+        let attributes = DateTimeWidget::<Msg>::observed_attributes();
+        JsValue::from_serde(&attributes).expect("must be serde")
+    }
+
+    #[wasm_bindgen(method)]
+    pub fn attribute_changed_callback(&self) {
+        use sauron::wasm_bindgen::JsCast;
+        use std::ops::DerefMut;
+        let mount_node = self.program.mount_node();
+        let mount_element: &web_sys::Element = mount_node.unchecked_ref();
+        let attribute_names = mount_element.get_attribute_names();
+        let len = attribute_names.length();
+        let mut attribute_values: std::collections::BTreeMap<String, String> =
+            std::collections::BTreeMap::new();
+        for i in 0..len {
+            let name = attribute_names.get(i);
+            let attr_name =
+                name.as_string().expect("must be a string attribute");
+            if let Some(attr_value) = mount_element.get_attribute(&attr_name) {
+                attribute_values.insert(attr_name, attr_value);
+            }
+        }
+        self.program
+            .app
+            .borrow_mut()
+            .deref_mut()
+            .widget
+            .attributes_changed(attribute_values);
+    }
+
+    #[wasm_bindgen(method)]
+    pub fn connected_callback(&mut self) {
+        self.program.mount();
+        let component_style = self.program.app.borrow().style();
+        self.program.inject_style_to_mount(&component_style);
+        self.program.update_dom();
+    }
+
+    #[wasm_bindgen(method)]
+    pub fn disconnected_callback(&mut self) {}
+    #[wasm_bindgen(method)]
+    pub fn adopted_callback(&mut self) {}
+}
+
 pub fn register() {
-    log::info!("registering data time");
+    sauron::register_custom_element(
+        "date-time",
+        "DateTimeWidgetCustomElement",
+        "HTMLElement",
+    );
 }
