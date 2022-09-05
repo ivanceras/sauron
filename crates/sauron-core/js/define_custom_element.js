@@ -1,4 +1,3 @@
-
 // create a custom element with the custom_tag
 // `custom_tag` - a user defined tag with a dash separator
 //          example: my-button, advance-element, ui-editor
@@ -12,24 +11,25 @@ export function register_custom_element(custom_tag, adapter, superClass){
         class extends window[superClass]{
             constructor(){
                 super();
+                console.log("outer html: {}", this.outerHTML);
                 this.instance = new window[adapter](this);
             }
 
             static get observedAttributes(){
-                return window[adapter].observed_attributes();
+                return window[adapter].observedAttributes;
             }
 
             connectedCallback(){
-                this.instance.connected_callback();
+                this.instance.connectedCallback();
             }
             disconnectedCallback(){
-                this.instance.disconnected_callback();
+                this.instance.disconnectedCallback();
             }
             adoptedCallback(){
-                this.instance.adopted_callback();
+                this.instance.adoptedCallback();
             }
             attributeChangedCallback(){
-                this.instance.attribute_changed_callback();
+                this.instance.attributeChangedCallback();
             }
 
         }

@@ -228,13 +228,13 @@ impl DateTimeWidgetCustomElement {
         }
     }
 
-    #[wasm_bindgen(method)]
+    #[wasm_bindgen(getter, static_method_of = Self, js_name = observedAttributes)]
     pub fn observed_attributes() -> JsValue {
         let attributes = DateTimeWidget::<Msg>::observed_attributes();
         JsValue::from_serde(&attributes).expect("must be serde")
     }
 
-    #[wasm_bindgen(method)]
+    #[wasm_bindgen(method, js_name = attributeChangedCallback)]
     pub fn attribute_changed_callback(&self) {
         use sauron::wasm_bindgen::JsCast;
         use std::ops::DerefMut;
@@ -260,7 +260,7 @@ impl DateTimeWidgetCustomElement {
             .attributes_changed(attribute_values);
     }
 
-    #[wasm_bindgen(method)]
+    #[wasm_bindgen(method, js_name = connectedCallback)]
     pub fn connected_callback(&mut self) {
         self.program.mount();
         let component_style = self.program.app.borrow().style();
@@ -268,9 +268,10 @@ impl DateTimeWidgetCustomElement {
         self.program.update_dom();
     }
 
-    #[wasm_bindgen(method)]
+    #[wasm_bindgen(method, js_name = disconnectedCallback)]
     pub fn disconnected_callback(&mut self) {}
-    #[wasm_bindgen(method)]
+
+    #[wasm_bindgen(method, js_name = adoptedCallback)]
     pub fn adopted_callback(&mut self) {}
 }
 
