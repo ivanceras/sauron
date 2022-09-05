@@ -65,3 +65,31 @@ pub struct Measurements {
     /// Total time it took for the component dispatch
     pub total_time: f64,
 }
+
+/// Auto implementation of Application trait for Component that
+/// has no external MSG
+impl<COMP, MSG> Application<MSG> for COMP
+where
+    COMP: crate::Component<MSG, ()> + 'static,
+    COMP: crate::CustomElement,
+    MSG: 'static,
+{
+    fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
+        let effects = <Self as crate::Component<MSG, ()>>::update(self, msg);
+        let mount_attributes = self.attributes_for_mount();
+        Cmd::batch([
+            Cmd::from(effects),
+            Cmd::new(|program| {
+                program.update_mount_attributes(mount_attributes);
+            }),
+        ])
+    }
+
+    fn view(&self) -> Node<MSG> {
+        <Self as crate::Component<MSG, ()>>::view(&self)
+    }
+
+    fn style(&self) -> String {
+        <Self as crate::Component<MSG, ()>>::style(&self)
+    }
+}
