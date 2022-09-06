@@ -93,3 +93,28 @@ where
         <Self as crate::Component<MSG, ()>>::style(&self)
     }
 }
+
+/// Auto implementation of Component trait for Container,
+/// which in turn creates an Auto implementation trait for of Application for Container
+impl<CONT, MSG> crate::Component<MSG, ()> for CONT
+where
+    CONT: crate::Container<MSG, ()>,
+    CONT: crate::CustomElement,
+{
+    fn update(&mut self, msg: MSG) -> crate::Effects<MSG, ()> {
+        <Self as crate::Container<MSG, ()>>::update(self, msg)
+    }
+
+    fn view(&self) -> Node<MSG> {
+        // converting the component to container loses ability
+        // for the container to contain children components
+        <Self as crate::Container<MSG, ()>>::view(
+            &self,
+            [crate::prelude::text("A stub for container here!..")],
+        )
+    }
+
+    fn style(&self) -> String {
+        <Self as crate::Container<MSG, ()>>::style(&self)
+    }
+}

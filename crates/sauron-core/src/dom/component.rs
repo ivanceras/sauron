@@ -1,5 +1,4 @@
 use crate::dom::effects::Effects;
-use crate::html::text;
 use crate::vdom::Node;
 use std::collections::BTreeMap;
 
@@ -16,14 +15,6 @@ pub trait Component<MSG, XMSG> {
 
     /// the view of the component
     fn view(&self) -> Node<MSG>;
-
-    /// a view of the component containing children nodex
-    fn view_with_children(
-        &self,
-        _children: impl IntoIterator<Item = Node<XMSG>>,
-    ) -> Node<MSG> {
-        text(" a stub ")
-    }
 
     /// optionally a Component can specify its own css style
     fn style(&self) -> String {
@@ -76,18 +67,6 @@ pub trait Container<MSG, XMSG> {
     fn view(&self, content: impl IntoIterator<Item = Node<XMSG>>) -> Node<MSG>;
 
     /// optionally a Container can specify its own css style
-    fn style(&self) -> String {
-        String::new()
-    }
-}
-
-/// Just a view, no events, no update.
-/// The properties of the component is set directly from the parent
-pub trait View<MSG> {
-    /// only returns a view of itself
-    fn view(&self) -> Node<MSG>;
-
-    /// optionally a View can specify its own css style
     fn style(&self) -> String {
         String::new()
     }
