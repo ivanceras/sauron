@@ -179,35 +179,9 @@ where
     }
 }
 
-struct DateTimeWidgetWrapApp {
-    widget: DateTimeWidget<Msg>,
-}
-
-impl Application<Msg> for DateTimeWidgetWrapApp {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-        let effects: Effects<Msg, Msg> = self.widget.update(msg);
-        let local_effects: Effects<Msg, ()> = effects.localize(|xmsg| xmsg);
-        let mount_attributes = self.widget.attributes_for_mount();
-        Cmd::batch([
-            Cmd::from(local_effects),
-            Cmd::new(|program| {
-                program.update_mount_attributes(mount_attributes);
-            }),
-        ])
-    }
-
-    fn view(&self) -> Node<Msg> {
-        self.widget.view()
-    }
-
-    fn style(&self) -> String {
-        self.widget.style()
-    }
-}
-
 #[wasm_bindgen]
 pub struct DateTimeWidgetCustomElement {
-    program: Program<DateTimeWidgetWrapApp, Msg>,
+    program: Program<DateTimeWidget<()>, Msg>,
 }
 
 #[wasm_bindgen]
@@ -218,9 +192,7 @@ impl DateTimeWidgetCustomElement {
         let mount_node: &web_sys::Node = node.unchecked_ref();
         Self {
             program: Program::new(
-                DateTimeWidgetWrapApp {
-                    widget: DateTimeWidget::default(),
-                },
+                DateTimeWidget::<()>::default(),
                 mount_node,
                 false,
                 true,
@@ -256,14 +228,15 @@ impl DateTimeWidgetCustomElement {
             .app
             .borrow_mut()
             .deref_mut()
-            .widget
             .attributes_changed(attribute_values);
     }
 
     #[wasm_bindgen(method, js_name = connectedCallback)]
     pub fn connected_callback(&mut self) {
         self.program.mount();
-        let component_style = self.program.app.borrow().style();
+        let component_style = <DateTimeWidget<()> as Application<Msg>>::style(
+            &self.program.app.borrow(),
+        );
         self.program.inject_style_to_mount(&component_style);
         self.program.update_dom();
     }
