@@ -32,6 +32,11 @@ export function register_custom_element(custom_tag, adapter, superClass){
                 this.instance.attributeChangedCallback();
             }
 
+            appendChild(child){
+                console.log("appending a child:", child);
+                this.instance.appendChild(child);
+            }
+
         }
     );
 }

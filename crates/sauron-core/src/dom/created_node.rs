@@ -164,6 +164,13 @@ impl CreatedNode {
         }
     }
 
+    fn is_custom_element(tag: &str) -> bool {
+        let custom_element = crate::window().custom_elements();
+        let existing = custom_element.get(tag);
+        // define the custom element only when it is not yet defined
+        !existing.is_undefined()
+    }
+
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
     fn create_element_node<DSP, MSG>(
@@ -176,6 +183,10 @@ impl CreatedNode {
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         let document = crate::document();
+
+        if Self::is_custom_element(velem.tag()) {
+            log::info!("This is a custom element: {}", velem.tag());
+        }
 
         let element = if let Some(namespace) = velem.namespace() {
             document

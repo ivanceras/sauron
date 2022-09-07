@@ -108,10 +108,7 @@ where
     fn view(&self) -> Node<MSG> {
         // converting the component to container loses ability
         // for the container to contain children components
-        <Self as crate::Container<MSG, ()>>::view(
-            &self,
-            [crate::prelude::text("A stub for container here!..")],
-        )
+        <Self as crate::Container<MSG, ()>>::view(&self, [])
     }
 
     fn style(&self) -> String {

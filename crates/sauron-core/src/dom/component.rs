@@ -70,4 +70,7 @@ pub trait Container<MSG, XMSG> {
     fn style(&self) -> String {
         String::new()
     }
+
+    /// containers can append children
+    fn append_child(&mut self, child: Node<XMSG>);
 }
