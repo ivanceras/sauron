@@ -158,7 +158,6 @@ fn impl_component(
     let self_type = &impl_item.self_ty;
     if let syn::Type::Path(type_path) = self_type.as_ref() {
         let (msg, component_msg) = extract_path_component_msg(&component);
-        dbg!(&component_msg);
 
         let component = &type_path.path.segments[0].ident;
         let derive_component = proc_macro2::Ident::new(
@@ -170,8 +169,6 @@ fn impl_component(
             proc_macro2::Span::call_site(),
         );
 
-        dbg!(&derive_msg);
-        dbg!(&component_msg);
         let tokens = impl_simple_component(
             impl_item,
             custom_tag,
@@ -192,7 +189,6 @@ fn extract_path_component_msg(
     if let syn::PathArguments::AngleBracketed(component_msg) =
         &path_segment.arguments
     {
-        println!("component_msg: {:#?}", component_msg);
         assert!(component_msg.args.len() > 0);
         let mut component_msg_iter = component_msg.args.iter();
         let first_arg = component_msg_iter
@@ -206,7 +202,6 @@ fn extract_path_component_msg(
                     .segments
                     .last()
                     .expect("must have a generic path segment");
-                println!("last path segment: {:#?}", path_segment);
                 return (&path_segment.ident, path_segment);
             } else {
                 panic!("expecting a type path");

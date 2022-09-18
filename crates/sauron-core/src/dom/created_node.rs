@@ -185,7 +185,7 @@ impl CreatedNode {
         let document = crate::document();
 
         if Self::is_custom_element(velem.tag()) {
-            log::info!("This is a custom element: {}", velem.tag());
+            //log::info!("This is a custom element: {}", velem.tag());
         }
 
         let element = if let Some(namespace) = velem.namespace() {
