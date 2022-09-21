@@ -19,7 +19,7 @@ mod window;
 
 pub use application::{Application, Measurements};
 pub use callback::Callback;
-pub use component::{Component, Container, View};
+pub use component::{Component, Container, CustomElement};
 pub use created_node::CreatedNode;
 pub use custom_element::register_custom_element;
 pub use dispatch::Dispatch;
@@ -30,7 +30,7 @@ pub use http::Http;
 pub use program::Program;
 pub use util::{
     async_delay, body, delay_exec, document, history, now, performance,
-    request_animation_frame, window,
+    request_animation_frame, spawn_local, window,
 };
 pub use window::Window;
 

@@ -7,6 +7,7 @@ use sauron::{
         events::on_click,
         h1, input, text,
     },
+    jss,
     prelude::*,
     Application, Cmd, Node, Program,
 };
@@ -71,6 +72,14 @@ impl Application<Msg> for App {
             Msg::NoOp => (),
         }
         Cmd::none()
+    }
+
+    fn style(&self) -> String {
+        jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+            }
+        }
     }
 }
 

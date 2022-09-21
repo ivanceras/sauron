@@ -29,15 +29,14 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
 
 /// reexport prelude from sauron core
 pub mod prelude {
-    pub use sauron_component_macro::custom_element;
     pub use sauron_core::prelude::*;
     #[cfg(feature = "with-node-macro")]
     pub use sauron_node_macro::node;
 }
 pub use sauron_core::{
-    html, jss::jss, jss::jss_ns, jss::jss_pretty, jss::units, mt_dom, svg,
-    vdom::diff, vdom::Attribute, vdom::Element, vdom::Listener, vdom::Node,
-    vdom::Patch, Render,
+    html, jss::jss, jss::jss_ns, jss::jss_ns_pretty, jss::jss_pretty,
+    jss::units, mt_dom, svg, vdom::diff, vdom::Attribute, vdom::Element,
+    vdom::Listener, vdom::Node, vdom::Patch, Render,
 };
 #[cfg(feature = "with-node-macro")]
 pub use sauron_node_macro::node;

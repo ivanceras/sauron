@@ -1,4 +1,5 @@
 #![deny(warnings)]
+use sauron::jss;
 use sauron::prelude::*;
 
 #[derive(Debug)]
@@ -44,6 +45,13 @@ impl Application<Msg> for App {
             Msg::Click => self.click_count += 1,
         }
         Cmd::none()
+    }
+    fn style(&self) -> String {
+        jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+            }
+        }
     }
 }
 

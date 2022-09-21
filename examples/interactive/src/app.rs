@@ -1,6 +1,6 @@
 #![deny(warnings)]
 use js_sys::Date;
-use sauron::{prelude::*, web_sys::MouseEvent};
+use sauron::{jss, prelude::*, web_sys::MouseEvent};
 
 pub enum Msg {
     Click,
@@ -170,5 +170,13 @@ impl Application<Msg> for App {
                 ),
             ],
         )
+    }
+
+    fn style(&self) -> String {
+        jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+            }
+        }
     }
 }

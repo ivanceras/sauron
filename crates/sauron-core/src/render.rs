@@ -91,6 +91,12 @@ impl<MSG> Render for Node<MSG> {
             Node::Leaf(leaf) => {
                 leaf.render_with_indent(buffer, indent, compressed)
             }
+            Node::NodeList(node_list) => {
+                for node in node_list {
+                    node.render_with_indent(buffer, indent, compressed)?;
+                }
+                Ok(())
+            }
         }
     }
 }

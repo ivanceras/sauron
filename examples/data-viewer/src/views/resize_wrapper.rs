@@ -1,7 +1,7 @@
 use crate::views::{data_view, DataView};
-
 use sauron::{
     html::{attributes::class, events::*, *},
+    jss,
     prelude::*,
     Application, Cmd, Node, Window,
 };
@@ -169,5 +169,13 @@ impl Application<Msg> for ResizeWrapper {
                 ),
             ],
         )
+    }
+
+    fn style(&self) -> String {
+        jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+            }
+        }
     }
 }

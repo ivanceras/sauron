@@ -59,32 +59,10 @@ where
     }
 }
 
-#[custom_element("date-time")]
 impl<XMSG> sauron::Component<Msg, XMSG> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
-    fn observed_attributes() -> Vec<&'static str> {
-        vec!["date", "time"]
-    }
-
-    /// this is called when the attributes in the mount is changed
-    fn attributes_changed(&mut self, attributes: BTreeMap<String, String>) {
-        for (key, value) in attributes {
-            match &*key {
-                "date" => self.date = value,
-                "time" => self.time = value,
-                _ => log::info!("unused attribute: {}", key),
-            }
-        }
-    }
-
-    /// This is called when the attributes for the mount is to be set
-    /// this is called every after update
-    fn attributes_for_mount(&self) -> BTreeMap<String, String> {
-        BTreeMap::from_iter([("value".to_string(), self.date_time())])
-    }
-
     fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::DateChange(date) => {
@@ -172,4 +150,107 @@ where
             ],
         )
     }
+}
+
+impl<XMSG> sauron::CustomElement for DateTimeWidget<XMSG>
+where
+    XMSG: 'static,
+{
+    fn observed_attributes() -> Vec<&'static str> {
+        vec!["date", "time"]
+    }
+
+    /// this is called when the attributes in the mount is changed
+    fn attributes_changed(&mut self, attributes: BTreeMap<String, String>) {
+        for (key, value) in attributes {
+            match &*key {
+                "date" => self.date = value,
+                "time" => self.time = value,
+                _ => log::info!("unused attribute: {}", key),
+            }
+        }
+    }
+
+    /// This is called when the attributes for the mount is to be set
+    /// this is called every after update
+    fn attributes_for_mount(&self) -> BTreeMap<String, String> {
+        BTreeMap::from_iter([("value".to_string(), self.date_time())])
+    }
+}
+
+#[wasm_bindgen]
+pub struct DateTimeWidgetCustomElement {
+    program: Program<DateTimeWidget<()>, Msg>,
+}
+
+#[wasm_bindgen]
+impl DateTimeWidgetCustomElement {
+    #[wasm_bindgen(constructor)]
+    pub fn new(node: JsValue) -> Self {
+        use sauron::wasm_bindgen::JsCast;
+        let mount_node: &web_sys::Node = node.unchecked_ref();
+        Self {
+            program: Program::new(
+                DateTimeWidget::<()>::default(),
+                mount_node,
+                false,
+                true,
+            ),
+        }
+    }
+
+    #[wasm_bindgen(getter, static_method_of = Self, js_name = observedAttributes)]
+    pub fn observed_attributes() -> JsValue {
+        let attributes = DateTimeWidget::<Msg>::observed_attributes();
+        JsValue::from_serde(&attributes).expect("must be serde")
+    }
+
+    #[wasm_bindgen(method, js_name = attributeChangedCallback)]
+    pub fn attribute_changed_callback(&self) {
+        use sauron::wasm_bindgen::JsCast;
+        use std::ops::DerefMut;
+        let mount_node = self.program.mount_node();
+        let mount_element: &web_sys::Element = mount_node.unchecked_ref();
+        let attribute_names = mount_element.get_attribute_names();
+        let len = attribute_names.length();
+        let mut attribute_values: std::collections::BTreeMap<String, String> =
+            std::collections::BTreeMap::new();
+        for i in 0..len {
+            let name = attribute_names.get(i);
+            let attr_name =
+                name.as_string().expect("must be a string attribute");
+            if let Some(attr_value) = mount_element.get_attribute(&attr_name) {
+                attribute_values.insert(attr_name, attr_value);
+            }
+        }
+        self.program
+            .app
+            .borrow_mut()
+            .deref_mut()
+            .attributes_changed(attribute_values);
+    }
+
+    #[wasm_bindgen(method, js_name = connectedCallback)]
+    pub fn connected_callback(&mut self) {
+        self.program.mount();
+        let component_style = <DateTimeWidget<()> as Application<Msg>>::style(
+            &self.program.app.borrow(),
+        );
+        self.program.inject_style_to_mount(&component_style);
+        self.program.update_dom();
+    }
+
+    #[wasm_bindgen(method, js_name = disconnectedCallback)]
+    pub fn disconnected_callback(&mut self) {}
+
+    #[wasm_bindgen(method, js_name = adoptedCallback)]
+    pub fn adopted_callback(&mut self) {}
+}
+
+pub fn register() {
+    sauron::register_custom_element(
+        "date-time",
+        "DateTimeWidgetCustomElement",
+        "HTMLElement",
+    );
 }

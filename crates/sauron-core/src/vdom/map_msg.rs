@@ -75,6 +75,12 @@ where
         match self {
             Node::Element(element) => Node::Element(element.map_callback(cb)),
             Node::Leaf(leaf) => Node::Leaf(leaf.map_callback(cb)),
+            Node::NodeList(node_list) => Node::NodeList(
+                node_list
+                    .into_iter()
+                    .map(|node| node.map_callback(cb.clone()))
+                    .collect(),
+            ),
         }
     }
 

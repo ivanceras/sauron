@@ -357,7 +357,8 @@ where
                 #[cfg(feature = "with-debug")]
                 log::info!("the root_node is replaced with {:?}", root_node);
             }
-            Ok(created_node.closures)
+            active_closures.extend(created_node.closures);
+            Ok(active_closures)
         }
         Patch::RemoveNode { .. } => {
             let element: &Element = node.unchecked_ref();

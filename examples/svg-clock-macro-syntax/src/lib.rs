@@ -5,7 +5,7 @@
 #![deny(clippy::all)]
 use console_error_panic_hook;
 use js_sys::Date;
-use sauron::{prelude::*, wasm_bindgen::JsCast};
+use sauron::{jss, prelude::*, wasm_bindgen::JsCast};
 
 #[macro_use]
 extern crate log;
@@ -110,6 +110,25 @@ impl Application<Msg> for Clock {
                     </svg>
                 </div>
             </article>
+        }
+    }
+
+    fn style(&self) -> String {
+        jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+                margin: 0,
+                padding: 0,
+                width: px(100),
+                height: px(100),
+            },
+
+            "article": {
+                display: "flex",
+                flex_direction: "column",
+                align_items: "center",
+                justify_content: "center",
+            }
         }
     }
 }

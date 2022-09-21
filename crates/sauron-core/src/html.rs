@@ -143,3 +143,8 @@ pub fn fragment<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
 pub fn doctype<MSG>(s: impl ToString) -> Node<MSG> {
     Node::Leaf(leaf::doctype(s))
 }
+
+/// create a node which contains a list of nodes
+pub fn node_list<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
+    Node::NodeList(nodes.into_iter().collect())
+}

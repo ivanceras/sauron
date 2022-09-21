@@ -13,19 +13,19 @@ pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
                     nodes.pop().expect("unable to convert node to tokens");
                 node_to_tokens(node)
             } else {
-                fragment_to_tokens(nodes)
+                node_list_to_tokens(nodes)
             }
         }
         Err(error) => error.to_compile_error(),
     }
 }
 
-fn fragment_to_tokens(nodes: Vec<Node>) -> TokenStream {
+fn node_list_to_tokens(nodes: Vec<Node>) -> TokenStream {
     let mut tokens = TokenStream::new();
     let children_tokens = children_to_tokens(nodes);
     tokens.extend(quote! {{
         #children_tokens
-        sauron::html::fragment(children)
+        sauron::html::node_list(children)
     }});
     tokens
 }

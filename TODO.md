@@ -57,6 +57,11 @@
         ```
     - The `Application` don't have to store the state of `FuiButton` component, it will be stored into the `Program` object.
         - Issue how will be map the Msg of the sub component to convert it into the Msg of the main `Application`?
+    - [ ] Merge the Container and Component which the view is now requires to have children components
+    - [X] Add a CustomElement trait which facilitates the component to be a custom element
+    - [ ] Rethink of the sauron-component-macro
+        - [ ] Redo it, maybe we don't need it and then manually implement all the Components
+        - [ ] Make Application trait for internal usage only
 
 ## Internal
 - [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`
@@ -162,6 +167,7 @@
     - There is a huge performance regression in between 0.40 and 0.42
     - [X] It was cause by jss `style!` macro where the lookup for style name is recreated everytime,
           due to the use of `const` instead of `static` in a `once_cell::Lazy` declaration. This is fixed in `jss 0.3.3`
+- [ ] Create the dom nodes in depth-first-traversal
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
@@ -179,6 +185,7 @@
      - This is solved by getting the type_id of the closure.
 - [X] Add more test for recycled nodes with keys
 - [X] When 2 text are next to each other, the second text will become a comment
+- [ ] Runtime errors when using fragments
 
 ## Limitations
 - In rust, no two closures, even if identical, have the same type. Therefore closure can not be check for equality.

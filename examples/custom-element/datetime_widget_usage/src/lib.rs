@@ -6,7 +6,6 @@ enum AppMsg {}
 #[derive(Default)]
 pub struct App {}
 
-#[custom_element("date-app")]
 impl Application<AppMsg> for App {
     fn update(&mut self, _msg: AppMsg) -> Cmd<Self, AppMsg> {
         Cmd::none()
@@ -20,6 +19,10 @@ impl Application<AppMsg> for App {
             </div>
         }
     }
+
+    fn style(&self) -> String {
+        "".to_string()
+    }
 }
 
 #[wasm_bindgen(start)]
@@ -28,6 +31,5 @@ pub fn main() {
     console_error_panic_hook::set_once();
     log::info!("loaded...");
     datetime_widget::date_time::register();
-    register_application();
     Program::mount_to_body(App::default());
 }

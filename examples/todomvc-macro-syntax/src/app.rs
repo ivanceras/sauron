@@ -1,6 +1,6 @@
 use sauron::{
-    dom::events::KeyboardEvent, html::*, node, prelude::*, Application, Cmd,
-    Node,
+    dom::events::KeyboardEvent, html::*, jss, node, prelude::*, Application,
+    Cmd, Node,
 };
 use serde_derive::{Deserialize, Serialize};
 
@@ -116,6 +116,14 @@ impl Application<Msg> for Model {
                     </section>
                     {self.info_footer()}
             </div>
+        }
+    }
+
+    fn style(&self) -> String {
+        jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+            }
         }
     }
 }

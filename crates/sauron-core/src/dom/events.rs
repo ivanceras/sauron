@@ -121,7 +121,7 @@ where
         Event::MountEvent(me) => f(me),
         _ => {
             log::warn!("was expecting a mount event");
-            unreachable!()
+            panic!("not a mount event!")
         }
     })
 }
@@ -199,7 +199,7 @@ fn to_transition_event(event: Event) -> TransitionEvent {
 fn to_webevent(event: Event) -> web_sys::Event {
     match event {
         Event::WebEvent(event) => event,
-        _ => unreachable!(),
+        _ => panic!("not a web_event"),
     }
 }
 

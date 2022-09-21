@@ -1,3 +1,4 @@
+use sauron::jss;
 use sauron::prelude::*;
 
 enum Msg {
@@ -44,6 +45,27 @@ impl Application<Msg> for App {
             Msg::Reset => self.count = 0,
         }
         Cmd::none()
+    }
+
+    fn style(&self) -> String {
+        jss! {
+            "body":{
+                font_family: "verdana, arial, monospace",
+            },
+
+            "main":{
+                width:px(30),
+                height: px(100),
+                margin: "auto",
+                text_align: "center",
+            },
+
+            "input, .count":{
+                font_size: px(40),
+                padding: px(30),
+                margin: px(30),
+            }
+        }
     }
 }
 

@@ -1,5 +1,4 @@
 use crate::{dom::Cmd, vdom::Node};
-use std::collections::BTreeMap;
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
@@ -29,9 +28,7 @@ where
     fn view(&self) -> Node<MSG>;
 
     /// optionally an Application can specify its own css style
-    fn style(&self) -> String {
-        String::new()
-    }
+    fn style(&self) -> String;
 
     /// This is called after dispatching and updating the dom for the component
     /// This is for diagnostic and performance measurement purposes.
@@ -43,25 +40,6 @@ where
     {
         log::debug!("Measurements: {:#?}", measurements);
         Cmd::none().no_render()
-    }
-
-    /// returns the attributes that is observed by this component
-    fn observed_attributes() -> Vec<&'static str> {
-        vec![]
-    }
-
-    /// This will be invoked when a component is used as a custom element
-    /// and the attributes of the custom-element has been modified
-    fn attributes_changed(
-        &mut self,
-        _attributes_values: BTreeMap<String, String>,
-    ) {
-    }
-
-    /// This will be invoked when a component needs to set the attributes for the
-    /// mounted element of this component
-    fn attributes_for_mount(&self) -> BTreeMap<String, String> {
-        BTreeMap::new()
     }
 }
 
@@ -86,4 +64,54 @@ pub struct Measurements {
     pub dom_update_took: f64,
     /// Total time it took for the component dispatch
     pub total_time: f64,
+}
+
+/// Auto implementation of Application trait for Component that
+/// has no external MSG
+impl<COMP, MSG> Application<MSG> for COMP
+where
+    COMP: crate::Component<MSG, ()> + 'static,
+    COMP: crate::CustomElement,
+    MSG: 'static,
+{
+    fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
+        let effects = <Self as crate::Component<MSG, ()>>::update(self, msg);
+        let mount_attributes = self.attributes_for_mount();
+        Cmd::batch([
+            Cmd::from(effects),
+            Cmd::new(|program| {
+                program.update_mount_attributes(mount_attributes);
+            }),
+        ])
+    }
+
+    fn view(&self) -> Node<MSG> {
+        <Self as crate::Component<MSG, ()>>::view(&self)
+    }
+
+    fn style(&self) -> String {
+        <Self as crate::Component<MSG, ()>>::style(&self)
+    }
+}
+
+/// Auto implementation of Component trait for Container,
+/// which in turn creates an Auto implementation trait for of Application for Container
+impl<CONT, MSG> crate::Component<MSG, ()> for CONT
+where
+    CONT: crate::Container<MSG, ()>,
+    CONT: crate::CustomElement,
+{
+    fn update(&mut self, msg: MSG) -> crate::Effects<MSG, ()> {
+        <Self as crate::Container<MSG, ()>>::update(self, msg)
+    }
+
+    fn view(&self) -> Node<MSG> {
+        // converting the component to container loses ability
+        // for the container to contain children components
+        <Self as crate::Container<MSG, ()>>::view(&self, [])
+    }
+
+    fn style(&self) -> String {
+        <Self as crate::Container<MSG, ()>>::style(&self)
+    }
 }
