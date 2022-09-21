@@ -3,7 +3,7 @@
 
 #![deny(warnings)]
 #![deny(clippy::all)]
-use console_error_panic_hook;
+
 use js_sys::Date;
 use sauron::{jss, prelude::*, wasm_bindgen::JsCast};
 
@@ -18,8 +18,8 @@ pub struct Clock {
     date: Date,
 }
 
-impl Clock {
-    pub fn new() -> Self {
+impl Default for Clock {
+    fn default() -> Self {
         Clock {
             date: Date::new_0(),
         }
@@ -145,5 +145,5 @@ pub fn main() {
     console_error_panic_hook::set_once();
     trace!("starting svg clock..");
 
-    Program::mount_to_body(Clock::new());
+    Program::mount_to_body(Clock::default());
 }

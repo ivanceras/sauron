@@ -20,7 +20,7 @@ struct Entry {
     id: usize,
 }
 
-#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Visibility {
     All,
     Active,
@@ -210,7 +210,7 @@ impl Model {
                         autofocus=true
                         value={self.value.to_string()}
                         on_input={|v: InputEvent| {
-                            Msg::Update(v.value.to_string())
+                            Msg::Update(v.value)
                         }}
                         on_keypress={|event: KeyboardEvent| {
                             if event.key() == "Enter" {
@@ -245,7 +245,7 @@ impl Model {
                        <label on_doubleclick={move |_| {
                                Msg::ToggleEdit(entry_id)
                            }}>
-                           {text(format!("{}", entry.description))}
+                           {text(entry.description.to_string())}
                        </label>
                        <button class="destroy"
                              on_click={move |_| Msg::Delete(entry_id)}>
@@ -256,7 +256,7 @@ impl Model {
                         hidden={!entry.editing}
                         value={&entry.description}
                         on_input={move |input: InputEvent| {
-                            Msg::UpdateEntry(entry_id, input.value.to_string())
+                            Msg::UpdateEntry(entry_id, input.value)
                         }}
                         on_blur={move |_| Msg::EditingEntry(entry_id, false)}
                         on_keypress={move |event: KeyboardEvent| {

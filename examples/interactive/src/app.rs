@@ -52,7 +52,7 @@ impl Application<Msg> for App {
                 self.biography = bio;
             }
             Msg::ChangeThought(thought) => {
-                if thought.len() > 0 {
+                if !thought.is_empty() {
                     self.thought = Some(thought);
                 } else {
                     self.thought = None;
@@ -79,7 +79,7 @@ impl Application<Msg> for App {
                             [
                                 r#type("text"),
                                 on_input(|event: InputEvent| {
-                                    Msg::ChangeName(event.value.to_string())
+                                    Msg::ChangeName(event.value)
                                 }),
                                 placeholder("John Smith"),
                             ],
@@ -135,9 +135,7 @@ impl Application<Msg> for App {
                                     rows(10),
                                     cols(80),
                                     on_input(|event: InputEvent| {
-                                        Msg::ChangeBiography(
-                                            event.value.to_string(),
-                                        )
+                                        Msg::ChangeBiography(event.value)
                                     }),
                                     placeholder("I'm a..."),
                                 ],
@@ -155,7 +153,7 @@ impl Application<Msg> for App {
                             [
                                 r#type("text"),
                                 on_change(|event: InputEvent| {
-                                    Msg::ChangeThought(event.value.to_string())
+                                    Msg::ChangeThought(event.value)
                                 }),
                                 placeholder("Elephants..."),
                             ],

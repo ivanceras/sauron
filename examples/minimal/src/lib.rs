@@ -1,4 +1,5 @@
-//#![deny(warnings)]
+#![deny(warnings)]
+#![deny(clippy::all)]
 use log::trace;
 use sauron::{
     html::{
@@ -17,14 +18,9 @@ pub enum Msg {
     NoOp,
 }
 
+#[derive(Default)]
 pub struct App {
     click_count: u32,
-}
-
-impl App {
-    pub fn new() -> Self {
-        App { click_count: 0 }
-    }
 }
 
 impl Application<Msg> for App {
@@ -87,5 +83,5 @@ impl Application<Msg> for App {
 pub fn main() {
     console_log::init_with_level(log::Level::Trace).unwrap();
     console_error_panic_hook::set_once();
-    Program::mount_to_body(App::new());
+    Program::mount_to_body(App::default());
 }

@@ -84,7 +84,7 @@ fn click_event() {
 
     let click_event = web_sys::MouseEvent::new("click").unwrap();
 
-    let div = document.get_element_by_id(&elem_id).unwrap();
+    let div = document.get_element_by_id(elem_id).unwrap();
 
     (EventTarget::from(div))
         .dispatch_event(&click_event)

@@ -3,7 +3,7 @@ use sauron::{
     Component, Effects, Node,
 };
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Interaction {
     Click,
     Modify(String),

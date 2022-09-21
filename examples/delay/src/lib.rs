@@ -1,8 +1,9 @@
-//#![deny(warnings)]
+#![deny(warnings)]
+#![deny(clippy::all)]
 use log::trace;
 use sauron::{
     html::{
-        attributes::{attr, class, id, r#type, value},
+        attributes::{class, r#type, value},
         div,
         events::on_click,
         h1, input, text,
@@ -18,13 +19,8 @@ pub enum Msg {
     NoOp,
 }
 
+#[derive(Default)]
 pub struct App {}
-
-impl App {
-    pub fn new() -> Self {
-        App {}
-    }
-}
 
 impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
@@ -85,5 +81,5 @@ async fn some_async_function(){
 pub fn main() {
     console_log::init_with_level(log::Level::Trace).unwrap();
     console_error_panic_hook::set_once();
-    Program::mount_to_body(App::new());
+    Program::mount_to_body(App::default());
 }

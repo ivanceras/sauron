@@ -7,13 +7,8 @@ pub enum Msg {
     Click,
 }
 
+#[derive(Default)]
 pub struct App;
-
-impl App {
-    pub fn new() -> Self {
-        App
-    }
-}
 
 impl Application<Msg> for App {
     fn update(&mut self, _msg: Msg) -> Cmd<Self, Msg> {
@@ -199,5 +194,5 @@ impl Application<Msg> for App {
 pub fn main() {
     console_log::init_with_level(log::Level::Trace).unwrap();
     console_error_panic_hook::set_once();
-    Program::mount_to_body(App::new());
+    Program::mount_to_body(App::default());
 }

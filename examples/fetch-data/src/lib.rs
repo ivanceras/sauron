@@ -7,7 +7,7 @@ use serde::Deserialize;
 #[macro_use]
 extern crate log;
 
-const DATA_URL: &'static str = "https://reqres.in/api/users";
+const DATA_URL: &str = "https://reqres.in/api/users";
 const PER_PAGE: i32 = 4;
 
 #[derive(Debug)]

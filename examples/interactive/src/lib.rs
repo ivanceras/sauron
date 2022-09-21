@@ -1,6 +1,5 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
-use console_error_panic_hook;
 use sauron::*;
 use wasm_bindgen::{self, prelude::*, JsCast};
 
