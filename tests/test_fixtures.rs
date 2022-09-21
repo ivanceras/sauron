@@ -19,6 +19,10 @@ impl Application<()> for SimpleComponent {
     fn view(&self) -> Node<()> {
         div(vec![], vec![])
     }
+
+    fn style(&self) -> String {
+        String::new()
+    }
 }
 
 /// creates a program from SimpleComponent

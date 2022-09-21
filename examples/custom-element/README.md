@@ -1,6 +1,7 @@
 # Custom element
 
-This demonstrate the use of custom-element in sauron
+This demonstrate the use of custom-element aka web-components in sauron.
+This feature is still highly experimental
 
 ## Running
 ```

@@ -5,8 +5,6 @@
 #
 
 set -ev
-cd crates/sauron-component-macro && cargo publish && cd - && \
-echo "sleeping" && sleep 20 &&\
 cd crates/sauron-core && cargo publish && cd - && \
 echo "sleeping" && sleep 20 &&\
 cd crates/sauron-node-macro && cargo publish && cd - &&
