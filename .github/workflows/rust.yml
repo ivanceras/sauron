@@ -35,7 +35,7 @@ jobs:
       run: cargo test --all --features "with-dom with-measure"
 
     - name: Run clippy with all features
-      run: cargo clippy --all --all-features
+      run: cargo clippy --all-features
 
     - name: Run test on wasm bindgen
       run: wasm-pack test --firefox --headless
