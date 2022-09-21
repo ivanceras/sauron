@@ -3,14 +3,23 @@
 use log::trace;
 use sauron::{
     html::{
-        attributes::{class, r#type, value},
+        attributes::{
+            class,
+            r#type,
+            value,
+        },
         div,
         events::on_click,
-        h1, input, text,
+        h1,
+        input,
+        text,
     },
-    prelude::*,
-    Application, Cmd, Node, Program,
     jss,
+    prelude::*,
+    Application,
+    Cmd,
+    Node,
+    Program,
 };
 use wasm_bindgen_futures::spawn_local;
 
@@ -56,7 +65,7 @@ impl Application<Msg> for App {
     }
 
     fn style(&self) -> String {
-        jss!{
+        jss! {
             "body": {
                 font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
             }
@@ -64,17 +73,17 @@ impl Application<Msg> for App {
     }
 }
 
-async fn some_async_function(){
-        let t1 = sauron::now();
-        log::debug!("t1: {}", t1);
-        async_delay(1000).await;
-        let t2 = sauron::now();
-        log::debug!("t2: {}", t2);
-        log::debug!("elapsed: {}", t2 - t1);
-        async_delay(5000).await;
-        let t3 = sauron::now();
-        log::debug!("t3: {}", t3);
-        log::debug!("elapsed: {}", t3 - t2);
+async fn some_async_function() {
+    let t1 = sauron::now();
+    log::debug!("t1: {}", t1);
+    async_delay(1000).await;
+    let t2 = sauron::now();
+    log::debug!("t2: {}", t2);
+    log::debug!("elapsed: {}", t2 - t1);
+    async_delay(5000).await;
+    let t3 = sauron::now();
+    log::debug!("t3: {}", t3);
+    log::debug!("elapsed: {}", t3 - t2);
 }
 
 #[wasm_bindgen(start)]

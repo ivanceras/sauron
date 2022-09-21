@@ -1,4 +1,7 @@
-use crate::{dom::Cmd, vdom::Node};
+use crate::{
+    dom::Cmd,
+    vdom::Node,
+};
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.

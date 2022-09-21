@@ -1,19 +1,30 @@
 //! provides functionalities related to patching the DOM in the browser.
 use crate::{
-    dom::Dispatch,
     dom::{
         created_node,
-        created_node::{ActiveClosure, CreatedNode},
+        created_node::{
+            ActiveClosure,
+            CreatedNode,
+        },
+        Dispatch,
     },
     html::attributes::AttributeValue,
     vdom::Patch,
 };
 use js_sys::Function;
 use mt_dom::TreePath;
-use std::collections::BTreeMap;
-use std::collections::HashMap;
-use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{Element, Node};
+use std::collections::{
+    BTreeMap,
+    HashMap,
+};
+use wasm_bindgen::{
+    JsCast,
+    JsValue,
+};
+use web_sys::{
+    Element,
+    Node,
+};
 
 /// Apply all of the patches to our old root node in order to create the new root node
 /// that we desire.

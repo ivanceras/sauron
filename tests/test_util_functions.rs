@@ -9,7 +9,6 @@ wasm_bindgen_test_configure!(run_in_browser);
 // diffing and patching.
 #[wasm_bindgen_test]
 async fn test_delays() {
-
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -22,5 +21,4 @@ async fn test_delays() {
     let elapsed = t2 - t1;
     log::debug!("elapsed: {}", elapsed);
     assert!(elapsed >= 5000.0);
-
 }

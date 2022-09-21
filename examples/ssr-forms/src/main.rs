@@ -1,10 +1,22 @@
 #![deny(warnings)]
 use chrono::Local;
-use sauron::html::attributes;
-use sauron::prelude::*;
-use serde_derive::{Deserialize, Serialize};
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-use warp::{http::Response, Filter};
+use sauron::{
+    html::attributes,
+    prelude::*,
+};
+use serde_derive::{
+    Deserialize,
+    Serialize,
+};
+use std::net::{
+    IpAddr,
+    Ipv4Addr,
+    SocketAddr,
+};
+use warp::{
+    http::Response,
+    Filter,
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct FormData {

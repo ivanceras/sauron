@@ -1,12 +1,21 @@
 #[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
-use crate::Cmd;
-use crate::{dom::dom_updater::DomUpdater, Application, Dispatch};
-use std::any::TypeId;
-use std::collections::BTreeMap;
-use std::{cell::RefCell, rc::Rc};
-use wasm_bindgen::closure::Closure;
-use wasm_bindgen::JsCast;
+use crate::{
+    dom::dom_updater::DomUpdater,
+    Application,
+    Cmd,
+    Dispatch,
+};
+use std::{
+    any::TypeId,
+    cell::RefCell,
+    collections::BTreeMap,
+    rc::Rc,
+};
+use wasm_bindgen::{
+    closure::Closure,
+    JsCast,
+};
 use web_sys::Node;
 
 /// Holds the user App and the dom updater
@@ -78,6 +87,7 @@ where
     pub fn mount_node(&self) -> web_sys::Node {
         self.dom_updater.borrow().mount_node()
     }
+
     /// Creates an Rc wrapped instance of Program and replace the root_node with the app view
     /// # Example
     /// ```rust,ignore

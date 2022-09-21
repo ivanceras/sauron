@@ -1,5 +1,7 @@
-use crate::dom::effects::Effects;
-use crate::vdom::Node;
+use crate::{
+    dom::effects::Effects,
+    vdom::Node,
+};
 use std::collections::BTreeMap;
 
 /// A component has a view and can update itself.

@@ -1,6 +1,16 @@
-use crate::html::attributes::AttributeValue;
-use crate::html::attributes::Listener;
-use crate::vdom::{Attribute, Element, Event, Leaf, Node};
+use crate::{
+    html::attributes::{
+        AttributeValue,
+        Listener,
+    },
+    vdom::{
+        Attribute,
+        Element,
+        Event,
+        Leaf,
+        Node,
+    },
+};
 
 /// Add mapping function for Node, Element, Attribute,
 pub trait NodeMapMsg<MSG>
@@ -75,12 +85,14 @@ where
         match self {
             Node::Element(element) => Node::Element(element.map_callback(cb)),
             Node::Leaf(leaf) => Node::Leaf(leaf.map_callback(cb)),
-            Node::NodeList(node_list) => Node::NodeList(
-                node_list
-                    .into_iter()
-                    .map(|node| node.map_callback(cb.clone()))
-                    .collect(),
-            ),
+            Node::NodeList(node_list) => {
+                Node::NodeList(
+                    node_list
+                        .into_iter()
+                        .map(|node| node.map_callback(cb.clone()))
+                        .collect(),
+                )
+            }
         }
     }
 
@@ -201,9 +213,11 @@ where
             Self::Text(v) => Leaf::Text(v),
             Self::SafeHtml(v) => Leaf::SafeHtml(v),
             Self::Comment(v) => Leaf::Comment(v),
-            Self::Fragment(v) => Leaf::Fragment(
-                v.into_iter().map(|n| n.map_callback(cb.clone())).collect(),
-            ),
+            Self::Fragment(v) => {
+                Leaf::Fragment(
+                    v.into_iter().map(|n| n.map_callback(cb.clone())).collect(),
+                )
+            }
             Self::DocType(v) => Leaf::DocType(v),
         }
     }

@@ -1,10 +1,19 @@
 //! This contains a trait to be able to render
 //! virtual dom into a writable buffer
 //!
-use crate::html::attributes::SegregatedAttributes;
-use crate::vdom::Leaf;
-use crate::vdom::NodeTrait;
-use crate::{html::attributes, vdom::Attribute, vdom::Element, vdom::Node};
+use crate::{
+    html::{
+        attributes,
+        attributes::SegregatedAttributes,
+    },
+    vdom::{
+        Attribute,
+        Element,
+        Leaf,
+        Node,
+        NodeTrait,
+    },
+};
 use std::fmt;
 
 const DEFAULT_INDENT_SIZE: usize = 2;

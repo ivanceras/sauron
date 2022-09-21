@@ -1,8 +1,10 @@
 //! provides functionalities for commands to be executed by the system, such as
 //! when the application starts or after the application updates.
 //!
-use crate::Dispatch;
-use crate::Effects;
+use crate::{
+    Dispatch,
+    Effects,
+};
 use std::future::Future;
 use wasm_bindgen_futures::spawn_local;
 
@@ -157,7 +159,6 @@ where
             cb(program_clone);
         }
     }
-
 }
 
 impl<DSP> Cmd<DSP> {
@@ -176,10 +177,11 @@ impl<DSP> Cmd<DSP> {
 
     /// creates a Cmd from a Future which has an MSG Output
     pub fn from_async<MSG>(msg_fut: impl Future<Output = MSG> + 'static) -> Self
-    where DSP: Dispatch<MSG> + Clone + 'static
+    where
+        DSP: Dispatch<MSG> + Clone + 'static,
     {
-        Cmd::new(|program:DSP|{
-            spawn_local(async move{
+        Cmd::new(|program: DSP| {
+            spawn_local(async move {
                 let msg = msg_fut.await;
                 program.dispatch(msg)
             });

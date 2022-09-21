@@ -1,16 +1,28 @@
 //! Create [events][0] Object
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
-use crate::html::attributes::AttributeValue;
-use crate::{vdom::Attribute, vdom::Listener};
+use crate::{
+    html::attributes::AttributeValue,
+    vdom::{
+        Attribute,
+        Listener,
+    },
+};
 use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
 pub use web_sys::{
-    AnimationEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TransitionEvent,
+    AnimationEvent,
+    HashChangeEvent,
+    KeyboardEvent,
+    MouseEvent,
+    TransitionEvent,
 };
 use web_sys::{
-    EventTarget, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
+    EventTarget,
+    HtmlInputElement,
+    HtmlSelectElement,
+    HtmlTextAreaElement,
 };
 
 /// Map the Event to DomEvent, which are browser events
@@ -117,11 +129,13 @@ where
     F: Fn(MountEvent) -> MSG + 'static,
     MSG: 'static,
 {
-    on("mount", move |event: Event| match event {
-        Event::MountEvent(me) => f(me),
-        _ => {
-            log::warn!("was expecting a mount event");
-            panic!("not a mount event!")
+    on("mount", move |event: Event| {
+        match event {
+            Event::MountEvent(me) => f(me),
+            _ => {
+                log::warn!("was expecting a mount event");
+                panic!("not a mount event!")
+            }
         }
     })
 }

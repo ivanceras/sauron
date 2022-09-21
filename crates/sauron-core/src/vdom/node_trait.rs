@@ -31,12 +31,14 @@ impl<MSG> NodeTrait for Node<MSG> {
             _ => false,
         }
     }
+
     fn unwrap_text(&self) -> &str {
         match self {
             Self::Leaf(ref leaf) => leaf.unwrap_text(),
             _ => panic!("not a leaf node"),
         }
     }
+
     fn unwrap_safe_html(&self) -> &str {
         match self {
             Self::Leaf(ref leaf) => leaf.unwrap_safe_html(),

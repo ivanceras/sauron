@@ -47,6 +47,7 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
             modifier: Modifier::default(),
         }
     }
+
     /// Create an Effects with extern messages that will be executed on the parent Component
     pub fn with_external(external: impl IntoIterator<Item = XMSG>) -> Self {
         Self {

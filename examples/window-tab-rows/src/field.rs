@@ -1,6 +1,12 @@
 use sauron::{
-    html::{attributes::*, events::*, *},
-    Component, Effects, Node,
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
+    Component,
+    Effects,
+    Node,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -51,11 +57,13 @@ impl<XMSG> Component<Msg, XMSG> for Field<XMSG> {
                     input,
                 ))])
             }
-            Msg::Interacted(interaction) => Effects::with_external(
-                self.on_interact
-                    .iter()
-                    .map(|listener| listener(interaction.clone())),
-            ),
+            Msg::Interacted(interaction) => {
+                Effects::with_external(
+                    self.on_interact
+                        .iter()
+                        .map(|listener| listener(interaction.clone())),
+                )
+            }
         }
     }
 

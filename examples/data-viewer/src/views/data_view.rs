@@ -1,22 +1,46 @@
 use crate::{
-    views::{column_view, page_view, ColumnView, FieldView, PageView, RowView},
+    views::{
+        column_view,
+        page_view,
+        ColumnView,
+        FieldView,
+        PageView,
+        RowView,
+    },
     widgets::selector_box,
-    ColumnDef, DataValue, Error,
+    ColumnDef,
+    DataValue,
+    Error,
 };
-use restq::{bytes_to_chars, table_def, CsvRows, TableName};
+use restq::{
+    bytes_to_chars,
+    table_def,
+    CsvRows,
+    TableName,
+};
 use sauron::{
     html::{
-        attributes::{class, key, styles},
+        attributes::{
+            class,
+            key,
+            styles,
+        },
         events::*,
         units::*,
         *,
     },
     prelude::*,
-    Component, Node, Window,
+    Component,
+    Node,
+    Window,
 };
 use std::{
     cell::RefCell,
-    io::{BufRead, BufReader, Cursor},
+    io::{
+        BufRead,
+        BufReader,
+        Cursor,
+    },
     rc::Rc,
 };
 

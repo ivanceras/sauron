@@ -1,6 +1,14 @@
-use crate::prelude::{Style, Value};
-use crate::vdom::Listener;
-use std::fmt::{self, Debug};
+use crate::{
+    prelude::{
+        Style,
+        Value,
+    },
+    vdom::Listener,
+};
+use std::fmt::{
+    self,
+    Debug,
+};
 
 /// Values of an attribute can be in these variants
 pub enum AttributeValue<MSG> {

@@ -1,7 +1,10 @@
 //! Callbacks contains function that can be called at a later time.
 //! This is used in containing an event listener attached to an DOM element.
-use std::any::TypeId;
-use std::{fmt, rc::Rc};
+use std::{
+    any::TypeId,
+    fmt,
+    rc::Rc,
+};
 
 /// A generic sized representation of a function that can be
 /// attached to a Node. The callback will essentially be owned by the element

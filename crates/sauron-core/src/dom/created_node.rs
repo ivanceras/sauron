@@ -1,25 +1,56 @@
-use crate::events::MountEvent;
-use crate::vdom;
-use crate::vdom::Listener;
-use crate::vdom::NodeTrait;
 use crate::{
-    dom::Dispatch,
-    dom::Event,
+    dom::{
+        Dispatch,
+        Event,
+    },
+    events::MountEvent,
     html,
-    html::attributes::{AttributeValue, SegregatedAttributes, Special},
-    vdom::Attribute,
-    vdom::Leaf,
+    html::attributes::{
+        AttributeValue,
+        SegregatedAttributes,
+        Special,
+    },
+    vdom,
+    vdom::{
+        Attribute,
+        Leaf,
+        Listener,
+        NodeTrait,
+    },
 };
-use std::cell::Cell;
-use std::collections::HashMap;
-use wasm_bindgen::{closure::Closure, JsCast, JsValue};
+use std::{
+    cell::Cell,
+    collections::HashMap,
+};
+use wasm_bindgen::{
+    closure::Closure,
+    JsCast,
+    JsValue,
+};
 use web_sys::{
-    self, Element, EventTarget, HtmlButtonElement, HtmlDataElement,
-    HtmlDetailsElement, HtmlElement, HtmlFieldSetElement, HtmlInputElement,
-    HtmlLiElement, HtmlLinkElement, HtmlMenuItemElement, HtmlMeterElement,
-    HtmlOptGroupElement, HtmlOptionElement, HtmlOutputElement,
-    HtmlParamElement, HtmlProgressElement, HtmlSelectElement, HtmlStyleElement,
-    HtmlTextAreaElement, Node, Text,
+    self,
+    Element,
+    EventTarget,
+    HtmlButtonElement,
+    HtmlDataElement,
+    HtmlDetailsElement,
+    HtmlElement,
+    HtmlFieldSetElement,
+    HtmlInputElement,
+    HtmlLiElement,
+    HtmlLinkElement,
+    HtmlMenuItemElement,
+    HtmlMeterElement,
+    HtmlOptGroupElement,
+    HtmlOptionElement,
+    HtmlOutputElement,
+    HtmlParamElement,
+    HtmlProgressElement,
+    HtmlSelectElement,
+    HtmlStyleElement,
+    HtmlTextAreaElement,
+    Node,
+    Text,
 };
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));

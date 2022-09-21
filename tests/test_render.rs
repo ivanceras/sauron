@@ -1,10 +1,14 @@
 #![deny(warnings)]
-use sauron::Render;
 use sauron::{
     diff,
-    html::{attributes::*, *},
+    html::{
+        attributes::*,
+        *,
+    },
     mt_dom::patch::*,
-    Node, Patch,
+    Node,
+    Patch,
+    Render,
 };
 use sauron_node_macro::node;
 

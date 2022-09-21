@@ -1,6 +1,11 @@
 use sauron::{
-    html::{attributes::*, units::px, *},
-    Attribute, Node,
+    html::{
+        attributes::*,
+        units::px,
+        *,
+    },
+    Attribute,
+    Node,
 };
 use search_widget::SearchWidget;
 

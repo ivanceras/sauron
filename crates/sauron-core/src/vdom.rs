@@ -5,8 +5,13 @@
 //! All the code in this module are run in purely rust environment, that is there is NO code here
 //! involves accessing the real DOM.
 //!
-use crate::html::attributes::{self, AttributeValue};
-use crate::Event;
+use crate::{
+    html::attributes::{
+        self,
+        AttributeValue,
+    },
+    Event,
+};
 pub use leaf::Leaf;
 pub use node_trait::NodeTrait;
 

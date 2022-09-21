@@ -8,7 +8,8 @@ indent_style = "Block"
 imports_indent = "Block"
 reorder_imports = true
 reorder_impl_items = true
-merge_imports = true
+
+imports_granularity="Crate"
 ## I want to be able to delete unused imports easily
 imports_layout = "Vertical"
 ## Default value is false, yet clipy keeps nagging on this

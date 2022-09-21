@@ -1,8 +1,15 @@
 //! special attributes which is treated differently
 //!
 //!
-use super::{attr, Attribute, Value};
-use crate::vdom::{Element, Node};
+use super::{
+    attr,
+    Attribute,
+    Value,
+};
+use crate::vdom::{
+    Element,
+    Node,
+};
 
 /// Special Node attributes that are treated differently
 /// such as key and skip which both greatly affects the diffing algorithm

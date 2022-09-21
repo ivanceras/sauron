@@ -1,15 +1,24 @@
 use crate::{
     dom::{
         apply_patches::patch,
-        created_node::{ActiveClosure, CreatedNode},
+        created_node::{
+            ActiveClosure,
+            CreatedNode,
+        },
         Dispatch,
     },
     vdom,
-    vdom::diff,
-    vdom::Patch,
+    vdom::{
+        diff,
+        Patch,
+    },
 };
 use wasm_bindgen::JsCast;
-use web_sys::{self, Element, Node};
+use web_sys::{
+    self,
+    Element,
+    Node,
+};
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.

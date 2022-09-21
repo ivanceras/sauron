@@ -1,9 +1,16 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
 use sauron::*;
-use wasm_bindgen::{self, prelude::*, JsCast};
+use wasm_bindgen::{
+    self,
+    prelude::*,
+    JsCast,
+};
 
-use app::{App, Msg};
+use app::{
+    App,
+    Msg,
+};
 
 #[macro_use]
 extern crate log;

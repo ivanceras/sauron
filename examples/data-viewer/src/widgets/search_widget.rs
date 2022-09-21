@@ -1,8 +1,13 @@
 use crate::assets;
 
 use sauron::{
-    html::{attributes::*, units::px, *},
-    Attribute, Node,
+    html::{
+        attributes::*,
+        units::px,
+        *,
+    },
+    Attribute,
+    Node,
 };
 
 pub struct SearchWidget {}

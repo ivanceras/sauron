@@ -1,7 +1,9 @@
 #![deny(warnings)]
-use sauron::js_sys::TypeError;
-use sauron::prelude::*;
-use sauron::jss;
+use sauron::{
+    js_sys::TypeError,
+    jss,
+    prelude::*,
+};
 use serde::Deserialize;
 
 #[macro_use]
@@ -56,16 +58,17 @@ impl App {
         let url =
             format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
 
-        Cmd::from_async(async move{
-                match Http::fetch_with_text_response_decoder(&url).await {
-                    Ok(v) => match serde_json::from_str(&v) {
+        Cmd::from_async(async move {
+            match Http::fetch_with_text_response_decoder(&url).await {
+                Ok(v) => {
+                    match serde_json::from_str(&v) {
                         Ok(data) => Msg::ReceivedData(data),
                         Err(err) => Msg::JsonError(err),
-                    },
-                    Err(e) => Msg::RequestError(e),
+                    }
                 }
+                Err(e) => Msg::RequestError(e),
             }
-        )
+        })
     }
 }
 

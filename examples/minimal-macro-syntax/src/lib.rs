@@ -1,6 +1,8 @@
 #![deny(warnings)]
-use sauron::jss;
-use sauron::prelude::*;
+use sauron::{
+    jss,
+    prelude::*,
+};
 
 #[derive(Debug)]
 enum Msg {
@@ -46,6 +48,7 @@ impl Application<Msg> for App {
         }
         Cmd::none()
     }
+
     fn style(&self) -> String {
         jss! {
             "body": {

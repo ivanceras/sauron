@@ -1,9 +1,18 @@
 #![deny(warnings)]
 pub use error::Error;
 use log::Level;
-pub use restq::{ast::ddl::DataTypeDef, ColumnDef, DataType, DataValue};
+pub use restq::{
+    ast::ddl::DataTypeDef,
+    ColumnDef,
+    DataType,
+    DataValue,
+};
 use sauron::prelude::*;
-use views::{resize_wrapper, DataView, ResizeWrapper};
+use views::{
+    resize_wrapper,
+    DataView,
+    ResizeWrapper,
+};
 
 #[macro_use]
 extern crate log;

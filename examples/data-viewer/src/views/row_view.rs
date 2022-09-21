@@ -1,11 +1,27 @@
-use crate::views::{field_view, FieldView};
-use restq::{ColumnDef, DataValue};
-use sauron::{
-    html::{attributes::*, events::*, units::*, *},
-    prelude::*,
-    Component, Effects, Node,
+use crate::views::{
+    field_view,
+    FieldView,
 };
-use std::{cell::RefCell, rc::Rc};
+use restq::{
+    ColumnDef,
+    DataValue,
+};
+use sauron::{
+    html::{
+        attributes::*,
+        events::*,
+        units::*,
+        *,
+    },
+    prelude::*,
+    Component,
+    Effects,
+    Node,
+};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+};
 
 #[derive(Debug, PartialEq)]
 pub enum Msg {

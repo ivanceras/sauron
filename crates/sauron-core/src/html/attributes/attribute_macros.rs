@@ -1,4 +1,7 @@
-use crate::prelude::{AttributeValue, Value};
+use crate::prelude::{
+    AttributeValue,
+    Value,
+};
 use mt_dom::attr;
 
 /// declare a function with the name corresponds to attribute name for easy usage in html elements

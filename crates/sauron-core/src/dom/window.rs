@@ -1,11 +1,22 @@
 use crate::{
-    dom::created_node::create_closure_wrap, dom::Cmd, dom::Dispatch,
-    vdom::Attribute, Application,
+    dom::{
+        created_node::create_closure_wrap,
+        Cmd,
+        Dispatch,
+    },
+    vdom::Attribute,
+    Application,
 };
 use std::fmt::Debug;
-use wasm_bindgen::{self, prelude::*, JsCast};
-use web_sys::EventTarget;
-use web_sys::ScrollToOptions;
+use wasm_bindgen::{
+    self,
+    prelude::*,
+    JsCast,
+};
+use web_sys::{
+    EventTarget,
+    ScrollToOptions,
+};
 
 /// Provides access to the Browser window
 #[derive(Copy, Clone, Debug)]

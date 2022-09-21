@@ -22,6 +22,7 @@ impl<MSG> Leaf<MSG> {
     pub fn is_text(&self) -> bool {
         matches!(self, Self::Text(_))
     }
+
     /// returns true if this is a safe html text node
     pub fn is_safe_html(&self) -> bool {
         matches!(self, Self::SafeHtml(_))

@@ -1,7 +1,11 @@
 #![deny(warnings)]
 use sauron::{
     diff,
-    html::{attributes::*, events::*, *},
+    html::{
+        attributes::*,
+        events::*,
+        *,
+    },
     Node,
 };
 
