@@ -72,8 +72,7 @@ where
     let skip = |_old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
         new_node
             .get_value("skip")
-            .map(|v| v.as_bool())
-            .flatten()
+            .and_then(|v| v.as_bool())
             .unwrap_or(false)
     };
 
@@ -83,8 +82,7 @@ where
     let replace = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
         let explicit_replace_attr = new_node
             .get_value("replace")
-            .map(|v| v.as_bool())
-            .flatten()
+            .and_then(|v| v.as_bool())
             .unwrap_or(false);
 
         let old_node_has_event = !old_node.get_callbacks().is_empty();

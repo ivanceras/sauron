@@ -21,7 +21,7 @@ macro_rules! declare_attributes {
                 $(#[$attr])*
                 #[inline]
                 #[allow(non_snake_case)]
-                pub fn $name<V, MSG>(v: V) -> crate::vdom::Attribute<MSG>
+                pub fn $name<V, MSG>(v: V) -> $crate::vdom::Attribute<MSG>
                     where V: Into<Value>,
                     {
                         attr(stringify!($name), AttributeValue::from_value(v.into()))
@@ -41,7 +41,7 @@ macro_rules! declare_attributes {
                 $(#[$attr])*
                 #[inline]
                 #[allow(non_snake_case)]
-                pub fn $name<V, MSG>(v: V) -> crate::vdom::Attribute<MSG>
+                pub fn $name<V, MSG>(v: V) -> $crate::vdom::Attribute<MSG>
                     where V: Into<Value>,
                     {
                         attr($attribute, AttributeValue::from_value(v.into()))

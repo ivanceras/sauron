@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+ (origin/reusable-components) breaking: remove the use of sauron-component-macro
+ fix: use mt-dom 0.21.0
+ feat: add a function to check whether a tag is a custom-element, add append_child to Container trait
+ feat: improve the implementation for macro for implementing components
+ fix: remove #[wasm_bindgen] anotation for register, since it will conflict with other functions for wasm
+ feat: expose jss_ns_pretty
+ feat: add node_list
+ feature: add Cmd::async function to create cmd from Future types
+ refactor: more simplification to Http module by using async/await with JsFutures from wasm-bindgen-futures
+ refactor: use wasm-bindgen-future, async and await instead of Closures
+
 ## 0.50.6
 - feat: add utility function `async_delay` for putting delay inside of async functions
 

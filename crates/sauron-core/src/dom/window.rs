@@ -62,11 +62,10 @@ impl Window {
         APP: Application<MSG> + 'static,
     {
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
-            let cb_clone = cb.clone();
             let resize_callback: Closure<dyn Fn(web_sys::Event)> =
                 Closure::wrap(Box::new(move |_| {
                     let (window_width, window_height) = Self::get_size();
-                    let msg = cb_clone(window_width, window_height);
+                    let msg = cb(window_width, window_height);
                     program.dispatch(msg);
                 }));
             crate::window()
@@ -85,11 +84,10 @@ impl Window {
         APP: Application<MSG> + 'static,
     {
         let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
-            let cb_clone = cb.clone();
             let hashchange_callback: Closure<dyn Fn(web_sys::Event)> =
                 Closure::wrap(Box::new(move |_| {
                     let hash = Self::get_hash();
-                    let msg = cb_clone(hash);
+                    let msg = cb(hash);
                     program.dispatch(msg);
                 }));
             crate::window().set_onhashchange(Some(

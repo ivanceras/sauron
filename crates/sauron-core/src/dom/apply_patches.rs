@@ -41,7 +41,7 @@ where
     }
 
     let mut active_closures = HashMap::new();
-    let nodes_to_patch = find_all_nodes(&root_node, &nodes_to_find);
+    let nodes_to_patch = find_all_nodes(root_node, &nodes_to_find);
 
     for patch in patches.iter() {
         let patch_path = patch.path();
@@ -276,7 +276,7 @@ where
                     .dyn_ref()
                     .expect("only elements is supported for now");
                 target_element
-                    .insert_adjacent_element("afterend", &created_element)
+                    .insert_adjacent_element("afterend", created_element)
                     .expect("must remove target node");
                 active_closures.extend(created_node.closures);
             }

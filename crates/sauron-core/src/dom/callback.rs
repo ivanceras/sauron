@@ -38,7 +38,9 @@ impl<IN, OUT> Clone for Callback<IN, OUT> {
 }
 
 impl<IN, OUT> PartialEq for Callback<IN, OUT> {
-    fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.func, &other.func)
+    fn eq(&self, _other: &Self) -> bool {
+        // this always returns false anyways
+        //Rc::ptr_eq(&self.func, &other.func)
+        false
     }
 }

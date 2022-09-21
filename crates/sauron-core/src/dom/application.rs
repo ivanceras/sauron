@@ -86,11 +86,11 @@ where
     }
 
     fn view(&self) -> Node<MSG> {
-        <Self as crate::Component<MSG, ()>>::view(&self)
+        <Self as crate::Component<MSG, ()>>::view(self)
     }
 
     fn style(&self) -> String {
-        <Self as crate::Component<MSG, ()>>::style(&self)
+        <Self as crate::Component<MSG, ()>>::style(self)
     }
 }
 
@@ -108,10 +108,10 @@ where
     fn view(&self) -> Node<MSG> {
         // converting the component to container loses ability
         // for the container to contain children components
-        <Self as crate::Container<MSG, ()>>::view(&self, [])
+        <Self as crate::Container<MSG, ()>>::view(self, [])
     }
 
     fn style(&self) -> String {
-        <Self as crate::Container<MSG, ()>>::style(&self)
+        <Self as crate::Container<MSG, ()>>::style(self)
     }
 }

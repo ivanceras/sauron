@@ -43,9 +43,9 @@ impl Http {
             web_sys::window().expect("should a refernce to window");
 
         let fetch_promise = if let Some(ref request_init) = request_init {
-            window.fetch_with_str_and_init(&url, request_init)
+            window.fetch_with_str_and_init(url, request_init)
         } else {
-            window.fetch_with_str(&url)
+            window.fetch_with_str(url)
         };
 
         match JsFuture::from(fetch_promise).await{

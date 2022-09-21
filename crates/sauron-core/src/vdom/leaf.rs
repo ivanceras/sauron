@@ -20,17 +20,11 @@ pub enum Leaf<MSG> {
 impl<MSG> Leaf<MSG> {
     /// returns true if this a text node
     pub fn is_text(&self) -> bool {
-        match self {
-            Self::Text(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Text(_))
     }
     /// returns true if this is a safe html text node
     pub fn is_safe_html(&self) -> bool {
-        match self {
-            Self::SafeHtml(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::SafeHtml(_))
     }
 
     /// unwrap the text content if this a text node,

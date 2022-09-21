@@ -36,10 +36,7 @@ fn node_to_tokens(node: Node) -> TokenStream {
     // NodeType::Element nodes can't have no name
     let name = node.name_as_string().expect("node should have a name");
 
-    let attributes = node
-        .attributes
-        .iter()
-        .map(|attribute| attribute_to_tokens(attribute));
+    let attributes = node.attributes.iter().map(attribute_to_tokens);
 
     let children_tokens = children_to_tokens(node.children);
 

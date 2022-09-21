@@ -14,7 +14,7 @@ use web_sys::{
 };
 
 /// Map the Event to DomEvent, which are browser events
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Event {
     /// native dome events web_sys::Events
     WebEvent(web_sys::Event),
@@ -105,7 +105,7 @@ where
 
 /// an event when a virtual Node is mounted the field node is the actual
 /// dom node where the virtual Node is created in the actual dom
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MountEvent {
     /// the node where the virtual node is materialized into the actual dom
     pub target_node: web_sys::Node,

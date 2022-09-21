@@ -248,8 +248,7 @@ impl<MSG> Render for Attribute<MSG> {
 
         let bool_value: bool = plain_values
             .first()
-            .map(|v| v.get_simple().map(|v| v.as_bool()).flatten())
-            .flatten()
+            .and_then(|v| v.get_simple().and_then(|v| v.as_bool()))
             .unwrap_or(false);
 
         // skip this attribute if the boolean attributes evaluates to false

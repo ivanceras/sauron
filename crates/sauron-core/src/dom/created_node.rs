@@ -30,12 +30,11 @@ thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
 /// When the DomUpdater sees that the element no longer exists it will drop all of it's
 /// Rc'd Closures for those events.
 fn create_unique_identifier() -> usize {
-    let id = NODE_ID_COUNTER.with(|x| {
+    NODE_ID_COUNTER.with(|x| {
         let tmp = x.get();
         x.set(tmp + 1);
         tmp
-    });
-    id
+    })
 }
 
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -83,7 +82,7 @@ impl CreatedNode {
     {
         match leaf {
             Leaf::Text(txt) => {
-                let text_node = Self::create_text_node(&txt);
+                let text_node = Self::create_text_node(txt);
                 CreatedNode::without_closures(text_node.unchecked_into())
             }
             Leaf::Comment(comment) => {
@@ -220,7 +219,7 @@ impl CreatedNode {
                 let child_text = child.unwrap_safe_html();
                 // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
                 element
-                    .insert_adjacent_html("beforeend", &child_text)
+                    .insert_adjacent_html("beforeend", child_text)
                     .expect("must not error");
             } else {
                 let created_child =
@@ -308,30 +307,27 @@ impl CreatedNode {
                     "open" => {
                         let is_open: bool = plain_values
                             .first()
-                            .map(|v| {
-                                v.get_simple().map(|v| v.as_bool()).flatten()
+                            .and_then(|v| {
+                                v.get_simple().and_then(|v| v.as_bool())
                             })
-                            .flatten()
                             .unwrap_or(false);
                         Self::set_open(element, is_open);
                     }
                     "checked" => {
                         let is_checked: bool = plain_values
                             .first()
-                            .map(|av| {
-                                av.get_simple().map(|v| v.as_bool()).flatten()
+                            .and_then(|av| {
+                                av.get_simple().and_then(|v| v.as_bool())
                             })
-                            .flatten()
                             .unwrap_or(false);
                         Self::set_checked(element, is_checked)
                     }
                     "disabled" => {
                         let is_disabled: bool = plain_values
                             .first()
-                            .map(|av| {
-                                av.get_simple().map(|v| v.as_bool()).flatten()
+                            .and_then(|av| {
+                                av.get_simple().and_then(|v| v.as_bool())
                             })
-                            .flatten()
                             .unwrap_or(false);
                         Self::set_disabled(element, is_disabled);
                     }
@@ -550,13 +546,11 @@ impl CreatedNode {
     ) {
         let value_i32 = values
             .first()
-            .map(|v| v.get_simple().map(|v| v.as_i32()).flatten())
-            .flatten();
+            .and_then(|v| v.get_simple().and_then(|v| v.as_i32()));
 
         let value_f64 = values
             .first()
-            .map(|v| v.get_simple().map(|v| v.as_f64()).flatten())
-            .flatten();
+            .and_then(|v| v.get_simple().and_then(|v| v.as_f64()));
 
         if let Some(value_i32) = value_i32 {
             Self::set_value_i32(element, value_i32);

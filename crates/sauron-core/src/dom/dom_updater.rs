@@ -88,29 +88,27 @@ where
             mount_element
                 .replace_with_with_node_1(&created_node.node)
                 .expect("Could not append child to mount");
+        } else if self.use_shadow {
+            let mount_element: &web_sys::Element =
+                self.mount_node.unchecked_ref();
+            mount_element
+                .attach_shadow(&web_sys::ShadowRootInit::new(
+                    web_sys::ShadowRootMode::Open,
+                ))
+                .expect("unable to attached shadow");
+            let mount_shadow =
+                mount_element.shadow_root().expect("must have a shadow");
+
+            let mount_shadow_node: &web_sys::Node =
+                mount_shadow.unchecked_ref();
+
+            mount_shadow_node
+                .append_child(&created_node.node)
+                .expect("could not append child to mount shadow");
         } else {
-            if self.use_shadow {
-                let mount_element: &web_sys::Element =
-                    self.mount_node.unchecked_ref();
-                mount_element
-                    .attach_shadow(&web_sys::ShadowRootInit::new(
-                        web_sys::ShadowRootMode::Open,
-                    ))
-                    .expect("unable to attached shadow");
-                let mount_shadow =
-                    mount_element.shadow_root().expect("must have a shadow");
-
-                let mount_shadow_node: &web_sys::Node =
-                    mount_shadow.unchecked_ref();
-
-                mount_shadow_node
-                    .append_child(&created_node.node)
-                    .expect("could not append child to mount shadow");
-            } else {
-                self.mount_node
-                    .append_child(&created_node.node)
-                    .expect("Could not append child to mount");
-            }
+            self.mount_node
+                .append_child(&created_node.node)
+                .expect("Could not append child to mount");
         }
         self.root_node = Some(created_node.node);
         self.active_closures = created_node.closures;
