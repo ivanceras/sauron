@@ -14,6 +14,10 @@ impl Application<()> for App {
     fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
         Cmd::none()
     }
+
+    fn style(&self) -> String {
+        String::new()
+    }
 }
 
 #[wasm_bindgen(start)]
