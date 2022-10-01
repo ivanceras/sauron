@@ -165,11 +165,12 @@ impl<DSP> Cmd<DSP> {
     /// Tell the runtime to execute subsequent update of the App with the message list.
     /// A single call to update the view is then executed thereafter.
     ///
-    pub fn batch_msg<MSG>(msg_list: Vec<MSG>) -> Self
+    pub fn batch_msg<MSG>(msg_list: impl IntoIterator<Item = MSG>) -> Self
     where
         MSG: 'static,
         DSP: Dispatch<MSG> + Clone + 'static,
     {
+        let msg_list = msg_list.into_iter().collect();
         Cmd::new(move |program: DSP| {
             program.dispatch_multiple(msg_list);
         })

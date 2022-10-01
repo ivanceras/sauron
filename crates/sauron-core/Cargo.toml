@@ -54,6 +54,7 @@ features = [
     "Headers",
     "HtmlButtonElement",
     "HtmlCollection",
+    "HtmlDocument",
     "HtmlDetailsElement",
     "HtmlElement",
     "HtmlHeadElement",
