@@ -1,8 +1,21 @@
 #[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
-use crate::{dom::dom_updater::DomUpdater, Application, Cmd, Dispatch};
-use std::{any::TypeId, cell::RefCell, collections::BTreeMap, rc::Rc};
-use wasm_bindgen::{closure::Closure, JsCast};
+use crate::{
+    dom::dom_updater::DomUpdater,
+    Application,
+    Cmd,
+    Dispatch,
+};
+use std::{
+    any::TypeId,
+    cell::RefCell,
+    collections::BTreeMap,
+    rc::Rc,
+};
+use wasm_bindgen::{
+    closure::Closure,
+    JsCast,
+};
 use web_sys::Node;
 
 /// Holds the user App and the dom updater
