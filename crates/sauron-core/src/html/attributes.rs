@@ -1,21 +1,12 @@
 //! Create html [attributes][0]
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
-use crate::{
-    vdom,
-    vdom::Attribute,
-    Event,
-};
+use crate::{vdom, vdom::Attribute, Event};
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
 pub use jss::Value;
 pub use listener::Listener;
-pub use special::{
-    key,
-    replace,
-    skip,
-    Special,
-};
+pub use special::{key, replace, skip, skip_criteria, Special};
 pub use style::Style;
 
 #[macro_use]
@@ -368,14 +359,10 @@ pub(crate) fn merge_plain_attributes_values<MSG>(
 ) -> Option<String> {
     let plain_values: Vec<String> = attr_values
         .iter()
-        .flat_map(|att_value| {
-            match att_value {
-                AttributeValue::Simple(simple) => Some(simple.to_string()),
-                AttributeValue::FunctionCall(fvalue) => {
-                    Some(fvalue.to_string())
-                }
-                _ => None,
-            }
+        .flat_map(|att_value| match att_value {
+            AttributeValue::Simple(simple) => Some(simple.to_string()),
+            AttributeValue::FunctionCall(fvalue) => Some(fvalue.to_string()),
+            _ => None,
         })
         .collect();
     if !plain_values.is_empty() {
@@ -394,17 +381,15 @@ pub(crate) fn merge_styles_attributes_values<MSG>(
 
     let styles_values: Vec<String> = attr_values
         .iter()
-        .flat_map(|att_value| {
-            match att_value {
-                AttributeValue::Style(styles) => {
-                    let mut style_str = String::new();
-                    styles.iter().for_each(|s| {
-                        write!(style_str, "{};", s).expect("must write")
-                    });
-                    Some(style_str)
-                }
-                _ => None,
+        .flat_map(|att_value| match att_value {
+            AttributeValue::Style(styles) => {
+                let mut style_str = String::new();
+                styles.iter().for_each(|s| {
+                    write!(style_str, "{};", s).expect("must write")
+                });
+                Some(style_str)
             }
+            _ => None,
         })
         .collect();
 

@@ -1,15 +1,8 @@
 //! special attributes which is treated differently
 //!
 //!
-use super::{
-    attr,
-    Attribute,
-    Value,
-};
-use crate::vdom::{
-    Element,
-    Node,
-};
+use super::{attr, Attribute, Value};
+use crate::vdom::{Element, Node};
 
 /// Special Node attributes that are treated differently
 /// such as key and skip which both greatly affects the diffing algorithm
@@ -77,6 +70,15 @@ where
 /// and its descendants are skip entirely
 pub fn skip<MSG>(v: bool) -> Attribute<MSG> {
     attr("skip", v)
+}
+
+/// if the value of this attribute of the old element and the new element is the same
+/// the diffing of this element and its descentdants are skip entirely
+pub fn skip_criteria<V, MSG>(v: V) -> Attribute<MSG>
+where
+    V: Into<Value>,
+{
+    attr("skip_criteria", v.into())
 }
 
 /// if the value is true, then this node is made to replace the old
