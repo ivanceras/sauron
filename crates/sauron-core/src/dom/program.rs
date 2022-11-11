@@ -4,6 +4,7 @@ use crate::{dom::dom_updater::DomUpdater, Application, Cmd, Dispatch};
 use std::{any::TypeId, cell::RefCell, collections::BTreeMap, rc::Rc};
 use wasm_bindgen::{closure::Closure, JsCast};
 use web_sys::Node;
+use wasm_bindgen_futures::spawn_local;
 
 /// Holds the user App and the dom updater
 /// This is passed into the event listener and the dispatch program
@@ -180,15 +181,16 @@ where
     /// TODO: split this function into 2.
     /// - update the app with msgs (use a request_idle_callback)
     /// - compute the view and update the dom (use request_animation_frame )
-    fn dispatch_inner(&self, msgs: Vec<MSG>) {
+    async fn dispatch_inner(&self, msgs: Vec<MSG>) {
         #[cfg(feature = "with-measure")]
         let t1 = crate::now();
         #[cfg(feature = "with-measure")]
         let msg_count = msgs.len();
-        // update the app and emit the cmd returned from the update
-        let all_cmd = msgs
-            .into_iter()
-            .map(|msg| self.app.borrow_mut().update(msg));
+        let mut all_cmd = Vec::with_capacity(msgs.len());
+        for msg in msgs{
+            let c = self.app.borrow_mut().update(msg).await;
+            all_cmd.push(c);
+        }
         let cmd = Cmd::batch(all_cmd);
 
         if cmd.modifier.should_update_view {
@@ -273,11 +275,7 @@ where
 {
     fn dispatch_multiple(&self, msgs: Vec<MSG>) {
         let program_clone = self.clone();
-        let closure_raf: Closure<dyn FnMut() + 'static> =
-            Closure::once(move || {
-                program_clone.dispatch_inner(msgs);
-            });
-        crate::dom::util::request_animation_frame_for_closure(closure_raf);
+        spawn_local(async move {program_clone.dispatch_inner(msgs).await});
     }
 
     fn dispatch(&self, msg: MSG) {

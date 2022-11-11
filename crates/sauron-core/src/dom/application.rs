@@ -1,8 +1,10 @@
 use crate::{dom::Cmd, vdom::Node};
+use async_trait::async_trait;
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
 ///
+#[async_trait(?Send)]
 pub trait Application<MSG>
 where
     MSG: 'static,
@@ -20,7 +22,7 @@ where
     /// The update function returns a Cmd, which can be executed by the runtime.
     ///
     /// Called each time an action is triggered from the view
-    fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>
+    async fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>
     where
         Self: Sized + 'static;
 
@@ -68,14 +70,15 @@ pub struct Measurements {
 
 /// Auto implementation of Application trait for Component that
 /// has no external MSG
+#[async_trait(?Send)]
 impl<COMP, MSG> Application<MSG> for COMP
 where
     COMP: crate::Component<MSG, ()> + 'static,
     COMP: crate::CustomElement,
     MSG: 'static,
 {
-    fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
-        let effects = <Self as crate::Component<MSG, ()>>::update(self, msg);
+    async fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
+        let effects = <Self as crate::Component<MSG, ()>>::update(self, msg).await;
         let mount_attributes = self.attributes_for_mount();
         Cmd::batch([
             Cmd::from(effects),
@@ -96,13 +99,15 @@ where
 
 /// Auto implementation of Component trait for Container,
 /// which in turn creates an Auto implementation trait for of Application for Container
+#[async_trait(?Send)]
 impl<CONT, MSG> crate::Component<MSG, ()> for CONT
 where
     CONT: crate::Container<MSG, ()>,
     CONT: crate::CustomElement,
+    MSG: 'static,
 {
-    fn update(&mut self, msg: MSG) -> crate::Effects<MSG, ()> {
-        <Self as crate::Container<MSG, ()>>::update(self, msg)
+    async fn update(&mut self, msg: MSG) -> crate::Effects<MSG, ()> {
+        <Self as crate::Container<MSG, ()>>::update(self, msg).await
     }
 
     fn view(&self) -> Node<MSG> {
