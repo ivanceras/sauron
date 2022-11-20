@@ -1,24 +1,14 @@
 use crate::{
     dom::{
         apply_patches::patch,
-        created_node::{
-            ActiveClosure,
-            CreatedNode,
-        },
+        created_node::{ActiveClosure, CreatedNode},
         Dispatch,
     },
     vdom,
-    vdom::{
-        diff,
-        Patch,
-    },
+    vdom::diff,
 };
 use wasm_bindgen::JsCast;
-use web_sys::{
-    self,
-    Element,
-    Node,
-};
+use web_sys::{self, Element, Node};
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
@@ -180,7 +170,7 @@ where
     /// seeing the latest state of the application.
     ///
     /// Return the total number of patches applied
-    pub fn update_dom<DSP>(
+    pub async fn update_dom<DSP>(
         &mut self,
         program: &DSP,
         new_vdom: vdom::Node<MSG>,
@@ -218,7 +208,7 @@ where
     /// Apply patches blindly to the `root_node` in this DomUpdater.
     ///
     /// Warning: only used this for debugging purposes
-    pub fn patch_dom<DSP>(&mut self, program: &DSP, patches: Vec<Patch<MSG>>)
+    pub async fn patch_dom<DSP>(&mut self, program: &DSP, patches: Vec<Patch<MSG>>)
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {

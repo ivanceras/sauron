@@ -1,10 +1,13 @@
+#![allow(unused)]
 #[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
+use crate::dom::util;
 use crate::{dom::dom_updater::DomUpdater, Application, Cmd, Dispatch};
 use std::{any::TypeId, cell::RefCell, collections::BTreeMap, rc::Rc};
 use wasm_bindgen::{closure::Closure, JsCast};
 use web_sys::Node;
 use wasm_bindgen_futures::spawn_local;
+
 
 /// Holds the user App and the dom updater
 /// This is passed into the event listener and the dispatch program
@@ -19,6 +22,8 @@ where
     pub app: Rc<RefCell<APP>>,
     /// The dom_updater responsible to updating the actual document in the browser
     pub dom_updater: Rc<RefCell<DomUpdater<MSG>>>,
+    /// the pending msg updates due to app being borrowed at the moment
+    pending_updates: Rc<RefCell<Vec<MSG>>>,
 }
 
 impl<APP, MSG> Clone for Program<APP, MSG>
@@ -29,6 +34,7 @@ where
         Program {
             app: Rc::clone(&self.app),
             dom_updater: Rc::clone(&self.dom_updater),
+            pending_updates: Rc::clone(&self.pending_updates),
         }
     }
 }
@@ -51,6 +57,7 @@ where
         Program {
             app: Rc::new(RefCell::new(app)),
             dom_updater: Rc::new(RefCell::new(dom_updater)),
+            pending_updates: Rc::new(RefCell::new(vec![])),
         }
     }
 
@@ -148,14 +155,6 @@ where
         self.after_mounted();
     }
 
-    /// explicity update the dom
-    pub fn update_dom(&self) {
-        let view = self.app.borrow().view();
-        // update the last DOM node tree with this new view
-        let _total_patches =
-            self.dom_updater.borrow_mut().update_dom(self, view);
-    }
-
     /// update the attributes at the mounted element
     pub fn update_mount_attributes(
         &self,
@@ -167,6 +166,77 @@ where
             mount_element
                 .set_attribute(attr, value)
                 .expect("unable to set attribute in the mount element");
+        }
+    }
+
+    async fn dispatch_updates(&self, msgs: Vec<MSG>) -> Cmd<APP, MSG>{
+        let mut all_cmd = Vec::with_capacity(msgs.len());
+        for msg in msgs{
+            if let Ok(mut app) = self.app.try_borrow_mut(){
+                //execute pending first
+                for pending_msg in self.pending_updates.borrow_mut().drain(..){
+                    log::debug!("Executing pending msg..");
+                    let c = app.update(pending_msg).await;
+                    all_cmd.push(c);
+                }
+                let c = app.update(msg).await;
+                all_cmd.push(c);
+            }else{
+                log::warn!("TODO: must keep the msg in a storage for later update otherwise lost here..");
+                if let Ok(mut pending_updates) = self.pending_updates.try_borrow_mut(){
+                    log::info!("SUCCESS: pending msg stored successfully");
+                    pending_updates.push(msg);
+                }else{
+                    log::error!("ERROR: unable to save this pending msg here..");
+                }
+            }
+        }
+        Cmd::batch(all_cmd)
+    }
+
+    async fn dispatch_dom_changes(&self, _log_measurements: bool, _measurement_name: &str, _msg_count: usize, _t1: f64) {
+        #[cfg(feature = "with-measure")]
+        let t2 = crate::now();
+
+        // a new view is created due to the app update
+        let view = self.app.try_borrow().expect("unable to immutable borrow app").view();
+
+        #[cfg(feature = "with-measure")]
+        let node_count = view.node_count();
+        #[cfg(feature = "with-measure")]
+        let t3 = crate::now();
+
+        // update the last DOM node tree with this new view
+        let _total_patches =
+            self.dom_updater.try_borrow_mut().expect("unable to borrow dom updater").update_dom(self, view).await;
+        #[cfg(feature = "with-measure")]
+        let t4 = crate::now();
+
+        #[cfg(feature = "with-measure")]
+        {
+            let dispatch_duration = t4 - _t1;
+            // 60fps is 16.667 ms per frame.
+            if dispatch_duration > 16.0 {
+                log::warn!("dispatch took: {}ms", dispatch_duration);
+            }
+        }
+
+        #[cfg(feature = "with-measure")]
+        if _log_measurements && _total_patches > 0 {
+            let measurements = Measurements {
+                name: _measurement_name.to_string(),
+                msg_count: _msg_count,
+                view_node_count: node_count,
+                update_dispatch_took: t2 - _t1,
+                build_view_took: t3 - t2,
+                total_patches: _total_patches,
+                dom_update_took: t4 - t3,
+                total_time: t4 - _t1,
+            };
+            // tell the app on app performance measurements
+            let cmd_measurement =
+                self.app.try_borrow().expect("unable to immutable borrow app").measurements(measurements).no_render();
+            cmd_measurement.emit(self);
         }
     }
 
@@ -182,61 +252,15 @@ where
     /// - update the app with msgs (use a request_idle_callback)
     /// - compute the view and update the dom (use request_animation_frame )
     async fn dispatch_inner(&self, msgs: Vec<MSG>) {
-        #[cfg(feature = "with-measure")]
         let t1 = crate::now();
-        #[cfg(feature = "with-measure")]
+
         let msg_count = msgs.len();
-        let mut all_cmd = Vec::with_capacity(msgs.len());
-        for msg in msgs{
-            let c = self.app.borrow_mut().update(msg).await;
-            all_cmd.push(c);
-        }
-        let cmd = Cmd::batch(all_cmd);
+        let cmd = self.dispatch_updates(msgs).await;
 
         if cmd.modifier.should_update_view {
-            #[cfg(feature = "with-measure")]
-            let t2 = crate::now();
-
-            // a new view is created due to the app update
-            let view = self.app.borrow().view();
-
-            #[cfg(feature = "with-measure")]
-            let node_count = view.node_count();
-            #[cfg(feature = "with-measure")]
-            let t3 = crate::now();
-
-            // update the last DOM node tree with this new view
-            let _total_patches =
-                self.dom_updater.borrow_mut().update_dom(self, view);
-            #[cfg(feature = "with-measure")]
-            let t4 = crate::now();
-
-            #[cfg(feature = "with-measure")]
-            {
-                let dispatch_duration = t4 - t1;
-                // 60fps is 16.667 ms per frame.
-                if dispatch_duration > 16.0 {
-                    log::warn!("dispatch took: {}ms", dispatch_duration);
-                }
-            }
-
-            #[cfg(feature = "with-measure")]
-            if cmd.modifier.log_measurements && _total_patches > 0 {
-                let measurements = Measurements {
-                    name: cmd.modifier.measurement_name.clone(),
-                    msg_count,
-                    view_node_count: node_count,
-                    update_dispatch_took: t2 - t1,
-                    build_view_took: t3 - t2,
-                    total_patches: _total_patches,
-                    dom_update_took: t4 - t3,
-                    total_time: t4 - t1,
-                };
-                // tell the app on app performance measurements
-                let cmd_measurement =
-                    self.app.borrow().measurements(measurements).no_render();
-                cmd_measurement.emit(self);
-            }
+            let log_measurements = cmd.modifier.log_measurements;
+            let measurement_name = &cmd.modifier.measurement_name;
+            self.dispatch_dom_changes(log_measurements, measurement_name, msg_count, t1).await;
         }
         cmd.emit(self);
     }

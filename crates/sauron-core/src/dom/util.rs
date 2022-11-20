@@ -1,3 +1,4 @@
+#![allow(unused)]
 use js_sys::Promise;
 use wasm_bindgen::{
     closure::Closure,
@@ -31,6 +32,20 @@ where
 pub(crate) fn request_animation_frame_for_closure(f: Closure<dyn FnMut()>) {
     window()
         .request_animation_frame(f.as_ref().unchecked_ref())
+        .expect("should register `requestAnimationFrame` OK");
+    f.forget()
+}
+
+pub fn request_idle_callback<F>(f: F)
+    where F: FnMut() + 'static,
+{
+        let closure_raf: Closure<dyn FnMut() + 'static> = Closure::once(f);
+        request_idle_callback_for_closure(closure_raf)
+}
+
+pub(crate) fn request_idle_callback_for_closure(f: Closure<dyn FnMut()>) {
+    window()
+        .request_idle_callback(f.as_ref().unchecked_ref())
         .expect("should register `requestAnimationFrame` OK");
     f.forget()
 }
