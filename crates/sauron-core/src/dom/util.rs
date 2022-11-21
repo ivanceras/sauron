@@ -36,25 +36,26 @@ pub(crate) fn request_animation_frame_for_closure(f: Closure<dyn FnMut()>) {
     f.forget()
 }
 
-pub fn request_idle_callback<F>(f: F)
-    where F: FnMut() + 'static,
+pub fn request_idle_callback<F>(f: F) -> Result<u32, JsValue>
+    where F: Fn(JsValue) + 'static,
 {
-        let closure_raf: Closure<dyn FnMut() + 'static> = Closure::once(f);
+        let closure_raf: Closure<dyn Fn(JsValue) + 'static> = Closure::wrap(Box::new(f));
         request_idle_callback_for_closure(closure_raf)
 }
 
-pub(crate) fn request_idle_callback_for_closure(f: Closure<dyn FnMut()>) {
-    window()
+pub(crate) fn request_idle_callback_for_closure(f: Closure<dyn Fn(JsValue)>) -> Result<u32, JsValue>{
+    let handle = window()
         .request_idle_callback(f.as_ref().unchecked_ref())
         .expect("should register `requestAnimationFrame` OK");
-    f.forget()
+    f.forget();
+    Ok(handle)
 }
 
 /// execute the function at a certain specified timeout in ms
 pub fn delay_exec(
     closure_delay: Closure<dyn FnMut()>,
     timeout: i32,
-) -> Option<i32> {
+) -> i32 {
     let timeout_id = window()
         .set_timeout_with_callback_and_timeout_and_arguments_0(
             closure_delay.as_ref().unchecked_ref(),
@@ -64,26 +65,28 @@ pub fn delay_exec(
 
     closure_delay.forget();
 
-    Some(timeout_id)
+    timeout_id
 }
 
-fn future_delay(timeout: i32) -> JsFuture {
+fn future_delay(timeout: i32) -> (JsFuture, Option<i32>) {
+    let mut handle = None;
     let promise = Promise::new(&mut |resolve, _reject| {
-        delay_exec(
+        handle = Some(delay_exec(
             Closure::once(move || {
                 resolve
                     .call0(&JsValue::NULL)
                     .expect("must be able to call resolve");
             }),
             timeout,
-        );
+        ));
     });
-    JsFuture::from(promise)
+    (JsFuture::from(promise), handle)
 }
 
 /// simulate a delay using promise in js
 pub async fn async_delay(timeout: i32) {
-    future_delay(timeout).await.expect("must not error");
+    let (fut, _handle) = future_delay(timeout);
+    fut.await.expect("must not error");
 }
 
 thread_local!(static DOCUMENT: web_sys::Document = window().document().expect("should have a document on window"));

@@ -9,6 +9,7 @@ use crate::{
 };
 use wasm_bindgen::JsCast;
 use web_sys::{self, Element, Node};
+use crate::vdom::Patch;
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
@@ -208,7 +209,7 @@ where
     /// Apply patches blindly to the `root_node` in this DomUpdater.
     ///
     /// Warning: only used this for debugging purposes
-    pub async fn patch_dom<DSP>(&mut self, program: &DSP, patches: Vec<Patch<MSG>>)
+    pub async fn patch_dom<'a, DSP>(&mut self, program: &DSP, patches: Vec<Patch<'a, MSG>>)
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {

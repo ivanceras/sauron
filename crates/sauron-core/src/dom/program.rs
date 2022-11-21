@@ -2,12 +2,75 @@
 #[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
 use crate::dom::util;
+use crate::vdom::Node;
 use crate::{dom::dom_updater::DomUpdater, Application, Cmd, Dispatch};
 use std::{any::TypeId, cell::RefCell, collections::BTreeMap, rc::Rc};
 use wasm_bindgen::{closure::Closure, JsCast};
-use web_sys::Node;
 use wasm_bindgen_futures::spawn_local;
+use wasm_bindgen::JsValue;
+use once_cell::sync::OnceCell;
+use async_delay::Throttle;
+use std::collections::VecDeque;
 
+
+pub struct AppWrapper<APP,MSG>{
+    pub app: APP,
+    pending_updates: VecDeque<MSG>,
+}
+
+impl<APP,MSG> AppWrapper<APP,MSG>
+    where MSG: 'static,
+        APP: Application<MSG> + 'static,
+    {
+
+    fn new(app: APP) -> Self{
+        Self{
+            app,
+            pending_updates: VecDeque::new(),
+        }
+    }
+
+    async fn dispatch_updates(&mut self, deadline: f64) -> Cmd<APP, MSG>{
+        let t1 = crate::now();
+        let mut all_cmd = vec![];
+        let mut i = 0;
+        while let Some(pending_msg) = self.pending_updates.pop_front(){
+            log::debug!("Executing pending msg item {}", i);
+            let c = self.app.update(pending_msg).await;
+            all_cmd.push(c);
+            let t2 = crate::now();
+            let elapsed = t2 - t1;
+            if elapsed > deadline{
+                log::warn!("elapsed time: {}ms", elapsed);
+                log::warn!("we should be breaking at {}..", i);
+                break;
+            }
+            i += 1;
+        }
+        Cmd::batch(all_cmd)
+    }
+
+    fn init(&mut self) -> Cmd<APP,MSG>{
+        self.app.init()
+    }
+
+    fn style(&self) -> String {
+        self.app.style()
+    }
+
+    fn view(&self) -> Node<MSG>{
+        self.app.view()
+    }
+
+    fn add_pending(&mut self, msgs: impl IntoIterator<Item = MSG>) {
+        self.pending_updates.extend(msgs)
+    }
+
+    #[cfg(feature = "with-measure")]
+    fn measurements(&self, measurements: Measurements) -> Cmd<APP,MSG>{
+        self.app.measurements(measurements)
+    }
+}
 
 /// Holds the user App and the dom updater
 /// This is passed into the event listener and the dispatch program
@@ -19,11 +82,10 @@ where
     /// holds the user application
     // Note: This needs to be in Rc<RefCell<_>> to allow interior mutability
     // from a non-mutable reference
-    pub app: Rc<RefCell<APP>>,
+    pub app_wrap: Rc<RefCell<AppWrapper<APP, MSG>>>,
     /// The dom_updater responsible to updating the actual document in the browser
     pub dom_updater: Rc<RefCell<DomUpdater<MSG>>>,
-    /// the pending msg updates due to app being borrowed at the moment
-    pending_updates: Rc<RefCell<Vec<MSG>>>,
+    throttle: Rc<Throttle>,
 }
 
 impl<APP, MSG> Clone for Program<APP, MSG>
@@ -32,9 +94,9 @@ where
 {
     fn clone(&self) -> Self {
         Program {
-            app: Rc::clone(&self.app),
+            app_wrap: Rc::clone(&self.app_wrap),
             dom_updater: Rc::clone(&self.dom_updater),
-            pending_updates: Rc::clone(&self.pending_updates),
+            throttle: Rc::clone(&self.throttle),
         }
     }
 }
@@ -48,30 +110,30 @@ where
     /// and root node, but doesn't mount it yet.
     pub fn new(
         app: APP,
-        mount_node: &Node,
+        mount_node: &web_sys::Node,
         replace: bool,
         use_shadow: bool,
     ) -> Self {
         let dom_updater: DomUpdater<MSG> =
             DomUpdater::new(app.view(), mount_node, replace, use_shadow);
         Program {
-            app: Rc::new(RefCell::new(app)),
+            app_wrap: Rc::new(RefCell::new(AppWrapper::new(app))),
             dom_updater: Rc::new(RefCell::new(dom_updater)),
-            pending_updates: Rc::new(RefCell::new(vec![])),
+            throttle: Rc::new(Throttle::from_interval(5)),
         }
     }
 
     /// executed after the program has been mounted
     fn after_mounted(&self) {
         // call the init of the component
-        let cmds = self.app.borrow_mut().init();
+        let cmds = self.app_wrap.borrow_mut().init();
         // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
         // listening to events (resize, hashchange)
         cmds.emit(self);
 
         // inject the style style after call the init of the app as
         // it may be modifying the app state including the style
-        let style = self.app.borrow().style();
+        let style = self.app_wrap.borrow().style();
         if !style.trim().is_empty() {
             let type_id = TypeId::of::<APP>();
             Self::inject_style(type_id, &style);
@@ -100,7 +162,7 @@ where
     /// let mount = document().query_selector(".container").ok().flatten().unwrap();
     /// Program::replace_mount(App{}, &mount);
     /// ```
-    pub fn replace_mount(app: APP, mount_node: &Node) -> Self {
+    pub fn replace_mount(app: APP, mount_node: &web_sys::Node) -> Self {
         let program = Self::new(app, mount_node, true, false);
         program.mount();
         program
@@ -123,7 +185,7 @@ where
     /// let mount = document().query_selector("#app").ok().flatten().unwrap();
     /// Program::append_to_mount(App{}, &mount);
     /// ```
-    pub fn append_to_mount(app: APP, mount_node: &Node) -> Self {
+    pub fn append_to_mount(app: APP, mount_node: &web_sys::Node) -> Self {
         let program = Self::new(app, mount_node, false, false);
         program.mount();
         program
@@ -155,6 +217,16 @@ where
         self.after_mounted();
     }
 
+    /// explicity update the dom
+    pub fn update_dom(&self) {
+        let view = self.app_wrap.borrow().view();
+        // update the last DOM node tree with this new view
+        let mut dom_updater = self.dom_updater.borrow_mut();
+        let _total_patches =
+            dom_updater
+            .update_dom(self, view);
+    }
+
     /// update the attributes at the mounted element
     pub fn update_mount_attributes(
         &self,
@@ -169,29 +241,8 @@ where
         }
     }
 
-    async fn dispatch_updates(&self, msgs: Vec<MSG>) -> Cmd<APP, MSG>{
-        let mut all_cmd = Vec::with_capacity(msgs.len());
-        for msg in msgs{
-            if let Ok(mut app) = self.app.try_borrow_mut(){
-                //execute pending first
-                for pending_msg in self.pending_updates.borrow_mut().drain(..){
-                    log::debug!("Executing pending msg..");
-                    let c = app.update(pending_msg).await;
-                    all_cmd.push(c);
-                }
-                let c = app.update(msg).await;
-                all_cmd.push(c);
-            }else{
-                log::warn!("TODO: must keep the msg in a storage for later update otherwise lost here..");
-                if let Ok(mut pending_updates) = self.pending_updates.try_borrow_mut(){
-                    log::info!("SUCCESS: pending msg stored successfully");
-                    pending_updates.push(msg);
-                }else{
-                    log::error!("ERROR: unable to save this pending msg here..");
-                }
-            }
-        }
-        Cmd::batch(all_cmd)
+    async fn dispatch_updates(&self, deadline: f64) -> Cmd<APP, MSG>{
+        self.app_wrap.borrow_mut().dispatch_updates(deadline).await
     }
 
     async fn dispatch_dom_changes(&self, _log_measurements: bool, _measurement_name: &str, _msg_count: usize, _t1: f64) {
@@ -199,7 +250,7 @@ where
         let t2 = crate::now();
 
         // a new view is created due to the app update
-        let view = self.app.try_borrow().expect("unable to immutable borrow app").view();
+        let view = self.app_wrap.borrow().view();
 
         #[cfg(feature = "with-measure")]
         let node_count = view.node_count();
@@ -208,7 +259,7 @@ where
 
         // update the last DOM node tree with this new view
         let _total_patches =
-            self.dom_updater.try_borrow_mut().expect("unable to borrow dom updater").update_dom(self, view).await;
+            self.dom_updater.borrow_mut().update_dom(self, view).await;
         #[cfg(feature = "with-measure")]
         let t4 = crate::now();
 
@@ -235,7 +286,7 @@ where
             };
             // tell the app on app performance measurements
             let cmd_measurement =
-                self.app.try_borrow().expect("unable to immutable borrow app").measurements(measurements).no_render();
+                self.app_wrap.borrow().measurements(measurements).no_render();
             cmd_measurement.emit(self);
         }
     }
@@ -251,18 +302,24 @@ where
     /// TODO: split this function into 2.
     /// - update the app with msgs (use a request_idle_callback)
     /// - compute the view and update the dom (use request_animation_frame )
-    async fn dispatch_inner(&self, msgs: Vec<MSG>) {
+    async fn dispatch_inner(&self, deadline: f64) {
         let t1 = crate::now();
 
-        let msg_count = msgs.len();
-        let cmd = self.dispatch_updates(msgs).await;
+        let msg_count = 0;
+        let cmd = self.throttle.call(move||{
+            self.dispatch_updates(deadline)
+        }).await;
 
-        if cmd.modifier.should_update_view {
-            let log_measurements = cmd.modifier.log_measurements;
-            let measurement_name = &cmd.modifier.measurement_name;
-            self.dispatch_dom_changes(log_measurements, measurement_name, msg_count, t1).await;
+        if let Some(cmd) = cmd{
+            if cmd.modifier.should_update_view {
+                let log_measurements = cmd.modifier.log_measurements;
+                let measurement_name = &cmd.modifier.measurement_name;
+                self.dispatch_dom_changes(log_measurements, measurement_name, msg_count, t1).await;
+            }
+            cmd.emit(self);
+        }else{
+            log::info!("no cmd here...");
         }
-        cmd.emit(self);
     }
 
     /// Inject a style to the global document
@@ -288,6 +345,7 @@ where
     pub fn inject_style_to_mount(&self, style: &str) {
         self.dom_updater.borrow().inject_style_to_mount(self, style);
     }
+
 }
 
 /// This will be called when the actual event is triggered.
@@ -297,16 +355,40 @@ where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
+    ///TODO: store the msgs in a queue
+    /// and an executor to execute those msgs
+    /// with an alloted time of say 10ms to execute.
+    /// if there is no more time, then dom patching should be commence and resume.
     fn dispatch_multiple(&self, msgs: Vec<MSG>) {
-        let program_clone = self.clone();
-        spawn_local(async move {program_clone.dispatch_inner(msgs).await});
+        self.app_wrap.borrow_mut().add_pending(msgs);
+        let program = self.clone();
+        #[cfg(feature = "with-ric")]
+        let handle = util::request_idle_callback(move|v: JsValue|{
+            let deadline = if let Ok(deadline) = v.dyn_into::<web_sys::IdleDeadline>() {
+                deadline.time_remaining()
+            } else {
+                panic!("must have a deadline");
+            };
+            log::info!("deadline: {:.2}", deadline);
+            let program = program.clone();
+            spawn_local(async move{
+                program.dispatch_inner(deadline).await;
+            });
+        });
+
+        #[cfg(not(feature = "with-ric"))]
+        spawn_local(async move{
+            program.dispatch_inner(10.0).await;
+        });
     }
+
+
 
     fn dispatch(&self, msg: MSG) {
         self.dispatch_multiple(vec![msg])
     }
 
-    fn dispatch_with_delay(&self, msg: MSG, timeout: i32) -> Option<i32> {
+    fn dispatch_with_delay(&self, msg: MSG, timeout: i32) ->i32 {
         let program_clone = self.clone();
         crate::dom::util::delay_exec(
             Closure::once(move || {

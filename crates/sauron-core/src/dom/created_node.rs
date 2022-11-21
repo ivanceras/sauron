@@ -1,56 +1,20 @@
 use crate::{
-    dom::{
-        Dispatch,
-        Event,
-    },
+    dom::{Dispatch, Event},
     events::MountEvent,
     html,
-    html::attributes::{
-        AttributeValue,
-        SegregatedAttributes,
-        Special,
-    },
+    html::attributes::{AttributeValue, SegregatedAttributes, Special},
     vdom,
-    vdom::{
-        Attribute,
-        Leaf,
-        Listener,
-        NodeTrait,
-    },
+    vdom::{Attribute, Leaf, Listener, NodeTrait},
 };
-use std::{
-    cell::Cell,
-    collections::HashMap,
-};
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-    JsValue,
-};
+use std::{cell::Cell, collections::HashMap};
+use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
-    self,
-    Element,
-    EventTarget,
-    HtmlButtonElement,
-    HtmlDataElement,
-    HtmlDetailsElement,
-    HtmlElement,
-    HtmlFieldSetElement,
-    HtmlInputElement,
-    HtmlLiElement,
-    HtmlLinkElement,
-    HtmlMenuItemElement,
-    HtmlMeterElement,
-    HtmlOptGroupElement,
-    HtmlOptionElement,
-    HtmlOutputElement,
-    HtmlParamElement,
-    HtmlProgressElement,
-    HtmlSelectElement,
-    HtmlStyleElement,
-    HtmlTextAreaElement,
-    Node,
-    Text,
+    self, Element, EventTarget, HtmlButtonElement, HtmlDataElement,
+    HtmlDetailsElement, HtmlElement, HtmlFieldSetElement, HtmlInputElement,
+    HtmlLiElement, HtmlLinkElement, HtmlMenuItemElement, HtmlMeterElement,
+    HtmlOptGroupElement, HtmlOptionElement, HtmlOutputElement,
+    HtmlParamElement, HtmlProgressElement, HtmlSelectElement, HtmlStyleElement,
+    HtmlTextAreaElement, Node, Text,
 };
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
@@ -510,6 +474,8 @@ impl CreatedNode {
     /// - optgroup
     /// - fieldset
     /// - menuitem
+    ///
+    /// TODO: use macro to simplify this code
     fn set_disabled(element: &Element, is_disabled: bool) {
         if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
             elm.set_disabled(is_disabled);
@@ -536,6 +502,7 @@ impl CreatedNode {
 
     /// we explicitly call the `set_value` function in the html element
     ///
+    /// TODO: use macro to simplify this code
     fn set_value_str(element: &Element, value: &str) {
         if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
             elm.set_value(value);
