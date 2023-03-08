@@ -45,11 +45,12 @@ impl Row {
     }
 }
 
+#[async_trait(?Send)]
 impl Component<Msg, ()> for Row {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::FieldMsg(index, field_msg) => {
-                let effects = self.fields[index].update(field_msg);
+                let effects = self.fields[index].update(field_msg).await;
                 effects
                     .localize(move |follow_up| Msg::FieldMsg(index, follow_up))
             }

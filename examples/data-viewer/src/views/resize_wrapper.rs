@@ -54,6 +54,7 @@ impl ResizeWrapper {
     }
 }
 
+#[async_trait(?Send)]
 impl Application<Msg> for ResizeWrapper {
     /// Setup the resize wrapper to listen to the mouseup
     /// and mousemove event of the Window
@@ -75,10 +76,10 @@ impl Application<Msg> for ResizeWrapper {
         Cmd::batch(cmds)
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::DataViewMsg(data_view_msg) => {
-                let effects = self.data_view.update(data_view_msg);
+                let effects = self.data_view.update(data_view_msg).await;
                 //TODO: follow ups should be wired automatically
                 Cmd::from(effects.map_msg(Msg::DataViewMsg))
             }

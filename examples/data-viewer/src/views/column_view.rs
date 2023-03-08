@@ -13,6 +13,7 @@ use sauron::{
     Component,
     Effects,
     Node,
+    prelude::*,
 };
 
 #[derive(Debug, PartialEq)]
@@ -38,8 +39,9 @@ impl ColumnView {
     }
 }
 
+#[async_trait(?Send)]
 impl Component<Msg, ()> for ColumnView {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::ChangeSearch(search) => {
                 trace!("Search term change: {}", search);

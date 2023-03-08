@@ -7,6 +7,7 @@ use sauron::{
     Component,
     Effects,
     Node,
+    prelude::*,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -45,8 +46,9 @@ impl<XMSG> Field<XMSG> {
     }
 }
 
+#[async_trait(?Send)]
 impl<XMSG> Component<Msg, XMSG> for Field<XMSG> {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
+    async fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::FieldClick => {
                 self.field_clicks += 1;

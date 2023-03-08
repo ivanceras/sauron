@@ -52,8 +52,9 @@ pub enum Msg {
     NoOp,
 }
 
+#[async_trait(?Send)]
 impl Application<Msg> for Model {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Add => {
                 self.entries.push(Entry::new(&self.value, self.uid));

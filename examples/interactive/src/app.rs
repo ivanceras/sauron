@@ -37,8 +37,10 @@ impl App {
     }
 }
 
+
+#[async_trait(?Send)]
 impl Application<Msg> for App {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Click => {
                 self.click_count += 1;

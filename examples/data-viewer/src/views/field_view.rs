@@ -18,6 +18,7 @@ use sauron::{
         units::px,
         *,
     },
+    prelude::*,
     Attribute,
     Component,
     Effects,
@@ -46,8 +47,9 @@ pub struct FieldView {
     pub height: i32,
 }
 
+#[async_trait(?Send)]
 impl Component<Msg, ()> for FieldView {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         trace!("field updated: {:?}", msg);
         match msg {
             Msg::TextChange(value) => {

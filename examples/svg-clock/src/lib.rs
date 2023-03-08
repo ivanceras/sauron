@@ -5,12 +5,7 @@
 #![deny(clippy::all)]
 
 use js_sys::Date;
-use sauron::{
-    html::attributes::style,
-    jss,
-    prelude::*,
-    wasm_bindgen::JsCast,
-};
+use sauron::{html::attributes::style, jss, prelude::*, wasm_bindgen::JsCast};
 
 #[macro_use]
 extern crate log;
@@ -31,6 +26,7 @@ impl Default for Clock {
     }
 }
 
+#[async_trait(?Send)]
 impl Application<Msg> for Clock {
     // we wire the window set_interval api to trigger an Msg::Tick
     // by dispatching it from the program, through the Cmd interface
@@ -51,7 +47,7 @@ impl Application<Msg> for Clock {
         })
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Tick => {
                 self.date = Date::new_0();

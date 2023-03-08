@@ -1,7 +1,4 @@
-use sauron::{
-    jss,
-    prelude::*,
-};
+use sauron::{jss, prelude::*};
 
 enum Msg {
     Increment,
@@ -19,6 +16,7 @@ impl App {
     }
 }
 
+#[async_trait(?Send)]
 impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         node! {
@@ -40,7 +38,7 @@ impl Application<Msg> for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,

@@ -3,25 +3,14 @@
 use log::trace;
 use sauron::{
     html::{
-        attributes::{
-            attr,
-            class,
-            id,
-            r#type,
-            value,
-        },
+        attributes::{attr, class, id, r#type, value},
         div,
         events::on_click,
-        h1,
-        input,
-        text,
+        h1, input, text,
     },
     jss,
     prelude::*,
-    Application,
-    Cmd,
-    Node,
-    Program,
+    Application, Cmd, Node, Program,
 };
 
 pub enum Msg {
@@ -34,6 +23,7 @@ pub struct App {
     click_count: u32,
 }
 
+#[async_trait(?Send)]
 impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         sauron::html::main(
@@ -73,7 +63,7 @@ impl Application<Msg> for App {
         )
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Click => self.click_count += 1,
             Msg::NoOp => (),

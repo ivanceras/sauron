@@ -65,11 +65,12 @@ impl PageView {
     }
 }
 
+#[async_trait(?Send)]
 impl Component<Msg, ()> for PageView {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::RowMsg(row_index, row_msg) => {
-                let effects = self.row_views[row_index].update(row_msg);
+                let effects = self.row_views[row_index].update(row_msg).await;
                 effects
                     .map_msg(move |follow_up| Msg::RowMsg(row_index, follow_up))
             }

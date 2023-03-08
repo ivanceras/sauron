@@ -31,6 +31,7 @@ pub enum Msg {
 #[derive(Default)]
 pub struct App {}
 
+#[async_trait(?Send)]
 impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         sauron::html::main(
@@ -56,7 +57,7 @@ impl Application<Msg> for App {
         )
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Click => spawn_local(some_async_function()),
             Msg::NoOp => (),

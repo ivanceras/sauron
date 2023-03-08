@@ -1,8 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    jss,
-    prelude::*,
-};
+use sauron::{jss, prelude::*};
 
 #[derive(Debug)]
 enum Msg {
@@ -19,6 +16,7 @@ impl App {
     }
 }
 
+#[async_trait(?Send)]
 impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         node! {
@@ -41,7 +39,7 @@ impl Application<Msg> for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         log::trace!("App is updating with msg: {:?}", msg);
         match msg {
             Msg::Click => self.click_count += 1,

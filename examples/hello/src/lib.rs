@@ -2,6 +2,7 @@ use sauron::prelude::*;
 
 struct App;
 
+#[async_trait(?Send)]
 impl Application<()> for App {
     fn view(&self) -> Node<()> {
         node! {
@@ -11,7 +12,7 @@ impl Application<()> for App {
         }
     }
 
-    fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
+    async fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
         Cmd::none()
     }
 

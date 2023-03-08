@@ -18,8 +18,9 @@ pub enum Msg {
 #[derive(Default)]
 pub struct App;
 
+#[async_trait(?Send)]
 impl Application<Msg> for App {
-    fn update(&mut self, _msg: Msg) -> Cmd<Self, Msg> {
+    async fn update(&mut self, _msg: Msg) -> Cmd<Self, Msg> {
         Cmd::none()
     }
 

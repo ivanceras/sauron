@@ -50,15 +50,16 @@ impl Tab {
     }
 }
 
+#[async_trait(?Send)]
 impl Component<Msg, ()> for Tab {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::TabClick => {
                 self.tab_clicks += 1;
                 Effects::none()
             }
             Msg::RowMsg(index, row_msg) => {
-                let effects = self.rows[index].update(row_msg);
+                let effects = self.rows[index].update(row_msg).await;
                 effects.map_msg(move |follow_up| Msg::RowMsg(index, follow_up))
             }
         }

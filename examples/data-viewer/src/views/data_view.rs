@@ -83,18 +83,19 @@ pub struct DataView {
     start_x: i32,
 }
 
+#[async_trait(?Send)]
 impl Component<Msg, ()> for DataView {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::PageMsg(page_index, page_msg) => {
-                let effects = self.page_views[page_index].update(page_msg);
+                let effects = self.page_views[page_index].update(page_msg).await;
                 effects.map_msg(move |follow_up| {
                     Msg::PageMsg(page_index, follow_up)
                 })
             }
             Msg::ColumnMsg(column_index, column_msg) => {
                 let effects =
-                    self.column_views[column_index].update(column_msg);
+                    self.column_views[column_index].update(column_msg).await;
                 effects.map_msg(move |follow_up| {
                     Msg::ColumnMsg(column_index, follow_up)
                 })

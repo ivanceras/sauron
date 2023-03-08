@@ -58,11 +58,12 @@ impl RowView {
     }
 }
 
+#[async_trait(?Send)]
 impl Component<Msg, ()> for RowView {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::FieldMsg(field_index, field_msg) => {
-                self.fields[field_index].borrow_mut().update(field_msg);
+                self.fields[field_index].borrow_mut().update(field_msg).await;
                 Effects::none()
             }
             Msg::DoubleClick => Effects::none(),
