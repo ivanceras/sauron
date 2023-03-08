@@ -25,7 +25,8 @@ mt-dom = { version = "0.21.0" }
 once_cell = "1.8"
 jss = { version = "0.5.1"}
 async-trait = "0.1.58"
-async-delay = { path = "../../../async-delay" }
+#async-delay = { path = "../../../async-delay" }
+async-delay = { git = "https://github.com/ivanceras/async-delay", branch = "master" }
 
 
 [dependencies.wasm-bindgen]
