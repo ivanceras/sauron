@@ -10,7 +10,7 @@ mod test_fixtures;
 
 wasm_bindgen_test_configure!(run_in_browser);
 #[wasm_bindgen_test]
-fn test_patch_insert_node() {
+async fn test_patch_insert_node() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -72,7 +72,7 @@ fn test_patch_insert_node() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".test1")
@@ -85,7 +85,7 @@ fn test_patch_insert_node() {
 }
 
 #[wasm_bindgen_test]
-fn test_patch_insert_node_in_the_middle() {
+async fn test_patch_insert_node_in_the_middle() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -147,7 +147,7 @@ fn test_patch_insert_node_in_the_middle() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".test_middle")
@@ -160,7 +160,7 @@ fn test_patch_insert_node_in_the_middle() {
 }
 
 #[wasm_bindgen_test]
-fn multiple_insert_should_work() {
+async fn multiple_insert_should_work() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -230,7 +230,7 @@ fn multiple_insert_should_work() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".test5")

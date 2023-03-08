@@ -56,7 +56,7 @@ fn on_input_test() {
 }
 
 #[wasm_bindgen_test]
-fn added_event() {
+async fn added_event() {
     console_log::init_with_level(log::Level::Trace).ok();
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -91,7 +91,7 @@ fn added_event() {
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);
     // update to new dom with no event attached
-    dom_updater.update_dom(&simple_program, new);
+    dom_updater.update_dom(&simple_program, new).await;
 
     let input_element =
         sauron_core::document().get_element_by_id(&elem_id).unwrap();
@@ -108,7 +108,7 @@ fn added_event() {
 }
 
 #[wasm_bindgen_test]
-fn remove_event() {
+async fn remove_event() {
     console_log::init_with_level(log::Level::Trace).ok();
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -145,7 +145,7 @@ fn remove_event() {
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);
     // update to new dom with no event attached
-    dom_updater.update_dom(&simple_program, new);
+    dom_updater.update_dom(&simple_program, new).await;
 
     let input_element =
         sauron_core::document().get_element_by_id(&elem_id).unwrap();
@@ -163,7 +163,7 @@ fn remove_event() {
 }
 
 #[wasm_bindgen_test]
-fn remove_event_from_truncated_children() {
+async fn remove_event_from_truncated_children() {
     console_log::init_with_level(log::Level::Trace).ok();
     let cb = on_click(|_| log::trace!("Clicked here"));
     let old: Node<()> = div(
@@ -199,7 +199,7 @@ fn remove_event_from_truncated_children() {
         5,
         "There should be 5 events attached to the DomUpdater"
     );
-    dom_updater.update_dom(&simple_program, new);
+    dom_updater.update_dom(&simple_program, new).await;
 
     assert_eq!(
         dom_updater.active_closure_len(),
@@ -209,7 +209,7 @@ fn remove_event_from_truncated_children() {
 }
 
 #[wasm_bindgen_test]
-fn remove_event_from_truncated_children_some_with_no_events() {
+async fn remove_event_from_truncated_children_some_with_no_events() {
     console_log::init_with_level(log::Level::Trace).ok();
     let cb = on_click(|_| log::trace!("Clicked here"));
     let old: Node<()> = div(
@@ -246,7 +246,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
         3,
         "There should be 3 events attached to the DomUpdater"
     );
-    dom_updater.update_dom(&simple_program, new);
+    dom_updater.update_dom(&simple_program, new).await;
 
     assert_eq!(
         dom_updater.active_closure_len(),
@@ -256,7 +256,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
 }
 
 #[wasm_bindgen_test]
-fn remove_event_from_replaced_node() {
+async fn remove_event_from_replaced_node() {
     console_log::init_with_level(log::Level::Trace).ok();
 
     let old: Node<()> =
@@ -283,7 +283,7 @@ fn remove_event_from_replaced_node() {
         1,
         "There should be 1 event attached to the DomUpdater"
     );
-    dom_updater.update_dom(&simple_program, new);
+    dom_updater.update_dom(&simple_program, new).await;
 
     assert_eq!(
         dom_updater.active_closure_len(),

@@ -1,9 +1,6 @@
 #![deny(warnings)]
 use sauron::prelude::*;
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 use web_sys::InputEvent;
@@ -16,7 +13,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 // We test a simple case here, since diff_patch.rs is responsible for testing more complex
 // diffing and patching.
 #[wasm_bindgen_test]
-fn patches_dom() {
+async fn patches_dom() {
     console_error_panic_hook::set_once();
 
     let document = web_sys::window().unwrap().document().unwrap();
@@ -30,7 +27,7 @@ fn patches_dom() {
     );
 
     let new_vdom = div(vec![id("patched")], vec![]); //html! { <div id="patched"></div> };
-    dom_updater.update_dom(&simple_program, new_vdom);
+    dom_updater.update_dom(&simple_program, new_vdom).await;
 
     assert_eq!(document.query_selector("#patched").unwrap().is_some(), true);
 }
@@ -39,7 +36,7 @@ fn patches_dom() {
 // from the new DOM node are stored by the DomUpdater otherwise they'll get dropped and
 // won't work.
 #[wasm_bindgen_test]
-fn updates_active_closure_on_replace() {
+async fn updates_active_closure_on_replace() {
     console_error_panic_hook::set_once();
 
     let body = sauron_core::body();
@@ -68,7 +65,7 @@ fn updates_active_closure_on_replace() {
     // New node replaces old node.
     // We are testing that we've stored this new node's closures even though `new` will be dropped
     // at the end of this block.
-    dom_updater.update_dom(&simple_program, replace_node);
+    dom_updater.update_dom(&simple_program, replace_node).await;
 
     let input_event = InputEvent::new("input").unwrap();
 
@@ -87,7 +84,7 @@ fn updates_active_closure_on_replace() {
 // from the new DOM node are stored by the DomUpdater otherwise they'll get dropped and
 // won't work.
 #[wasm_bindgen_test]
-fn updates_active_closures_on_append() {
+async fn updates_active_closures_on_append() {
     console_error_panic_hook::set_once();
 
     let body = sauron_core::body();
@@ -122,7 +119,7 @@ fn updates_active_closures_on_append() {
         // New node gets appended into the DOM.
         // We are testing that we've stored this new node's closures even though `new` will be dropped
         // at the end of this block.
-        dom_updater.update_dom(&simple_program, append_node);
+        dom_updater.update_dom(&simple_program, append_node).await;
     }
 
     let input_event = InputEvent::new("input").unwrap();

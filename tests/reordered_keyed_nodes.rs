@@ -8,7 +8,7 @@ mod test_fixtures;
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-fn failing_reordered_keys() {
+async fn failing_reordered_keys() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -54,7 +54,7 @@ fn failing_reordered_keys() {
         &sauron_core::body(),
     );
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".reordered")

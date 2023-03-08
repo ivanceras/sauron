@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 #[macro_use]
 extern crate log;
 use crate::mt_dom::TreePath;
@@ -40,7 +42,7 @@ fn nodes_with_event_should_not_recycle() {
 }
 
 #[wasm_bindgen_test]
-fn remove_event_from_replaced_node() {
+async fn remove_event_from_replaced_node() {
     console_log::init_with_level(log::Level::Trace).ok();
 
     let old: Node<()> = div(vec![on_click(|_| trace!("I'm a div"))], vec![]);
@@ -66,7 +68,7 @@ fn remove_event_from_replaced_node() {
         1,
         "There should be 1 event attached to the DomUpdater"
     );
-    dom_updater.update_dom(&simple_program, new);
+    dom_updater.update_dom(&simple_program, new).await;
 
     assert_eq!(
         dom_updater.active_closure_len(),

@@ -11,7 +11,7 @@ mod test_fixtures;
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-fn test_lines() {
+async fn test_lines() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
     let _document = web_sys::window().unwrap().document().unwrap();
@@ -164,44 +164,46 @@ fn test_lines() {
         &sauron_core::body(),
     );
 
-    dom_updater.patch_dom(
-        &simple_program,
-        vec![
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1, 0, 0, 0, 0, 0]),
-                &text("1"),
-            ),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1, 0, 0, 1, 0, 0]),
-                &text("2"),
-            ),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1, 0, 0, 2, 0, 0]),
-                &text("3"),
-            ),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1, 0, 0, 3, 0, 0]),
-                &text("4"),
-            ),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1, 0, 0, 4, 0, 0]),
-                &text("5"),
-            ),
-            Patch::insert_before_node(
-                Some(&"div"),
-                TreePath::new(vec![1, 0, 0, 0]),
-                vec![&inserted],
-            ),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1, 0, 1, 0]),
-                &text("line: 1, column: 0"),
-            ),
-        ],
-    );
+    dom_updater
+        .patch_dom(
+            &simple_program,
+            vec![
+                Patch::replace_node(
+                    None,
+                    TreePath::new(vec![1, 0, 0, 0, 0, 0]),
+                    &text("1"),
+                ),
+                Patch::replace_node(
+                    None,
+                    TreePath::new(vec![1, 0, 0, 1, 0, 0]),
+                    &text("2"),
+                ),
+                Patch::replace_node(
+                    None,
+                    TreePath::new(vec![1, 0, 0, 2, 0, 0]),
+                    &text("3"),
+                ),
+                Patch::replace_node(
+                    None,
+                    TreePath::new(vec![1, 0, 0, 3, 0, 0]),
+                    &text("4"),
+                ),
+                Patch::replace_node(
+                    None,
+                    TreePath::new(vec![1, 0, 0, 4, 0, 0]),
+                    &text("5"),
+                ),
+                Patch::insert_before_node(
+                    Some(&"div"),
+                    TreePath::new(vec![1, 0, 0, 0]),
+                    vec![&inserted],
+                ),
+                Patch::replace_node(
+                    None,
+                    TreePath::new(vec![1, 0, 1, 0]),
+                    &text("line: 1, column: 0"),
+                ),
+            ],
+        )
+        .await;
 }

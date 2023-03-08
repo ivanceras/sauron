@@ -15,7 +15,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 ///  The solution is therefore to not put key to elements that
 ///  are meant to be discarded  and can easily be construcated
 #[wasm_bindgen_test]
-fn test1() {
+async fn test1() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -172,7 +172,7 @@ fn test1() {
         &sauron_core::body(),
     );
 
-    dom_updater.patch_dom(&simple_program, patch);
+    dom_updater.patch_dom(&simple_program, patch).await;
 
     let app_node = crate::document()
         .query_selector(".app")

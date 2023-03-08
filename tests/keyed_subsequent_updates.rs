@@ -17,7 +17,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 // sauron/crates/sauron-core/src/dom/apply_patches.rs:109:32
 
 #[wasm_bindgen_test]
-fn subsequent_updates() {
+async fn subsequent_updates() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -215,7 +215,7 @@ fn subsequent_updates() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1.clone());
+    dom_updater.update_dom(&simple_program, update1.clone()).await;
 
     let container = document
         .query_selector(".editor")
@@ -351,7 +351,7 @@ fn subsequent_updates() {
         ]
     );
 
-    dom_updater.update_dom(&simple_program, update2.clone());
+    dom_updater.update_dom(&simple_program, update2.clone()).await;
 
     let container = document
         .query_selector(".editor")
@@ -501,7 +501,7 @@ fn subsequent_updates() {
         ]
     );
 
-    dom_updater.update_dom(&simple_program, update3.clone());
+    dom_updater.update_dom(&simple_program, update3.clone()).await;
 
     let container = document
         .query_selector(".editor")

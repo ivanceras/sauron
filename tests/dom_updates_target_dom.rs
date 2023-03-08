@@ -10,7 +10,7 @@ mod test_fixtures;
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-fn multiple_match_on_keyed_elements() {
+async fn multiple_match_on_keyed_elements() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -166,7 +166,7 @@ fn multiple_match_on_keyed_elements() {
         &sauron_core::body(),
     );
 
-    dom_updater.patch_dom(&simple_program, patches);
+    dom_updater.patch_dom(&simple_program, patches).await;
 
     let app_node = crate::document()
         .query_selector(".app")

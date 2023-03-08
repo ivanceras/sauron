@@ -1,8 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    mt_dom::TreePath,
-    prelude::*,
-};
+use sauron::{mt_dom::TreePath, prelude::*};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 
@@ -11,7 +8,7 @@ mod test_fixtures;
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-fn insert_multiple_before_nodes() {
+async fn insert_multiple_before_nodes() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -77,7 +74,7 @@ fn insert_multiple_before_nodes() {
     let expected = "<main class=\"before_nodes_test1\"><ul class=\"todo\"><li key=\"1\">item1</li><li key=\"2\">item2</li><li key=\"3\">item3</li></ul></main>";
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".before_nodes_test1")
@@ -90,7 +87,7 @@ fn insert_multiple_before_nodes() {
 }
 
 #[wasm_bindgen_test]
-fn insert_multiple_after_nodes() {
+async fn insert_multiple_after_nodes() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -157,7 +154,7 @@ fn insert_multiple_after_nodes() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".after_nodes_test1")

@@ -12,7 +12,7 @@ mod test_fixtures;
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-fn patches_text() {
+async fn patches_text() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -66,7 +66,7 @@ fn patches_text() {
         </section>\
         </main>";
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
     let result = container.outer_html();
     log::info!("result: {}", result);
     println!("result: {}", result);

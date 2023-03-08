@@ -9,7 +9,7 @@ mod test_fixtures;
 
 wasm_bindgen_test_configure!(run_in_browser);
 #[wasm_bindgen_test]
-fn test_multiple_replace() {
+async fn test_multiple_replace() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -79,7 +79,7 @@ fn test_multiple_replace() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".multi_replace")
@@ -92,7 +92,7 @@ fn test_multiple_replace() {
 }
 
 #[wasm_bindgen_test]
-fn test_multiple_replace_and_parent_is_replaced_too() {
+async fn test_multiple_replace_and_parent_is_replaced_too() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -163,7 +163,7 @@ fn test_multiple_replace_and_parent_is_replaced_too() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".parent_replaced")

@@ -1,8 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    mt_dom::TreePath,
-    prelude::*,
-};
+use sauron::{mt_dom::TreePath, prelude::*};
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -12,7 +9,7 @@ mod test_fixtures;
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-fn node_mounted_properly() {
+async fn node_mounted_properly() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -55,7 +52,7 @@ fn node_mounted_properly() {
 }
 
 #[wasm_bindgen_test]
-fn node_patched_properly() {
+async fn node_patched_properly() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -115,7 +112,7 @@ fn node_patched_properly() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".container2")
@@ -132,7 +129,7 @@ fn node_patched_properly() {
 }
 
 #[wasm_bindgen_test]
-fn node_patched_properly_remove_from_start() {
+async fn node_patched_properly_remove_from_start() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -198,7 +195,7 @@ fn node_patched_properly_remove_from_start() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".test3")
@@ -216,7 +213,7 @@ fn node_patched_properly_remove_from_start() {
 }
 
 #[wasm_bindgen_test]
-fn node_patched_properly_text_changed() {
+async fn node_patched_properly_text_changed() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -285,7 +282,7 @@ fn node_patched_properly_text_changed() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".test4")
@@ -303,7 +300,7 @@ fn node_patched_properly_text_changed() {
 }
 
 #[wasm_bindgen_test]
-fn mixed_keyed_and_non_keyed_elements() {
+async fn mixed_keyed_and_non_keyed_elements() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -384,7 +381,7 @@ fn mixed_keyed_and_non_keyed_elements() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    dom_updater.update_dom(&simple_program, update1).await;
 
     let container = document
         .query_selector(".test5")

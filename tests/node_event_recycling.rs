@@ -15,7 +15,7 @@ mod test_fixtures;
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-fn elements_with_different_event_should_not_be_recycle() {
+async fn elements_with_different_event_should_not_be_recycle() {
     console_log::init_with_level(log::Level::Trace).ok();
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -67,7 +67,7 @@ fn elements_with_different_event_should_not_be_recycle() {
         DomUpdater::new_append_to_mount(&simple_program, old.clone(), &body);
 
     // update to new dom with no event attached
-    dom_updater.patch_dom(&simple_program, patches);
+    dom_updater.patch_dom(&simple_program, patches).await;
 
     let input_element =
         sauron_core::document().get_element_by_id(elem_id).unwrap();

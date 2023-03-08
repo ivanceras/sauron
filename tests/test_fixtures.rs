@@ -11,13 +11,15 @@ use sauron::{
     Node,
     Program,
 };
+use async_trait::async_trait;
 
 /// This is a simple component for the puprpose of testing
 #[derive(Copy, Clone, Debug)]
 pub struct SimpleComponent;
 
+#[async_trait(?Send)]
 impl Application<()> for SimpleComponent {
-    fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
+    async fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
         trace!("updating in SimpleComponent");
         Cmd::none()
     }
