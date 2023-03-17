@@ -39,6 +39,7 @@ log = "0.4"
 wasm-bindgen-test = "0.3"
 wasm-bindgen-futures = "0.4.31"
 regex = "1"
+async-trait = "0.1.58"
 
 [dev-dependencies.web-sys]
 version = "0.3"
@@ -62,7 +63,9 @@ members = [
 # progressive-rendering example has its own workspace
 exclude = [
     "examples/custom-element", 
-    "examples/progressive-rendering"
+    "examples/progressive-rendering",
+   # "examples/fetch-data",
+   # "examples/fetch-data-macro-syntax"
 ]
 
 
