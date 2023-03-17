@@ -10,7 +10,7 @@ use crate::{
 };
 use js_sys::Function;
 use mt_dom::TreePath;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{Element, Node};
 
@@ -21,10 +21,10 @@ use web_sys::{Element, Node};
 pub fn patch<DSP, MSG>(
     program: &DSP,
     root_node: &mut Node,
-    old_closures: &mut ActiveClosure,
+    active_closures: &mut ActiveClosure,
     focused_node: &mut Option<Node>,
     patches: Vec<Patch<MSG>>,
-) -> Result<ActiveClosure, JsValue>
+) -> Result<(), JsValue>
 where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
@@ -39,27 +39,27 @@ where
         paths.push(patch.path());
     }
 
-    let mut active_closures = HashMap::new();
     let nodes_to_patch = find_all_nodes(root_node, &nodes_to_find);
 
+    //TODO: spawn all the apply patch here to to it asynchronously
+    // can be done with Promise.all (https://docs.rs/js-sys/0.3.61/js_sys/struct.Promise.html#method.all)
     for patch in patches.iter() {
         let patch_path = patch.path();
         if let Some(element) = nodes_to_patch.get(patch_path) {
-            let new_closures = apply_patch_to_node(
+            apply_patch_to_node(
                 program,
                 root_node,
                 element,
-                old_closures,
+                active_closures,
                 focused_node,
                 patch,
             )?;
-            active_closures.extend(new_closures);
         } else {
             unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}", patch_path);
         }
     }
 
-    Ok(active_closures)
+    Ok(())
 }
 
 fn find_node(node: &Node, path: &mut TreePath) -> Option<Node> {
@@ -131,18 +131,18 @@ fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<usize> {
 /// remove all the event listeners for this node
 fn remove_event_listeners(
     node: &Element,
-    old_closures: &mut ActiveClosure,
+    active_closures: &mut ActiveClosure,
 ) -> Result<(), JsValue> {
     let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
     for vdom_id in all_descendant_vdom_id {
-        if let Some(old_closure) = old_closures.get(&vdom_id) {
+        if let Some(old_closure) = active_closures.get(&vdom_id) {
             for (event, oc) in old_closure.iter() {
                 let func: &Function = oc.as_ref().unchecked_ref();
                 node.remove_event_listener_with_callback(event, func)?;
             }
 
             // remove closure active_closure in dom_updater to free up memory
-            old_closures
+            active_closures
                 .remove(&vdom_id)
                 .expect("Unable to remove old closure");
         } else {
@@ -159,11 +159,11 @@ fn remove_event_listeners(
 fn remove_event_listener_with_name(
     event_name: &'static str,
     node: &Element,
-    old_closures: &mut ActiveClosure,
+    active_closures: &mut ActiveClosure,
 ) -> Result<(), JsValue> {
     let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
     for vdom_id in all_descendant_vdom_id {
-        if let Some(old_closure) = old_closures.get_mut(&vdom_id) {
+        if let Some(old_closure) = active_closures.get_mut(&vdom_id) {
             for (event, oc) in old_closure.iter() {
                 if *event == event_name {
                     let func: &Function = oc.as_ref().unchecked_ref();
@@ -175,7 +175,7 @@ fn remove_event_listener_with_name(
 
             // remove closure active_closure in dom_updater to free up memory
             if old_closure.is_empty() {
-                old_closures
+                active_closures
                     .remove(&vdom_id)
                     .expect("Unable to remove old closure");
             }
@@ -199,16 +199,14 @@ fn apply_patch_to_node<DSP, MSG>(
     program: &DSP,
     root_node: &mut Node,
     node: &Node,
-    old_closures: &mut ActiveClosure,
+    active_closures: &mut ActiveClosure,
     focused_node: &mut Option<Node>,
     patch: &Patch<MSG>,
-) -> Result<ActiveClosure, JsValue>
+) -> Result<(), JsValue>
 where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
-    let mut active_closures = ActiveClosure::new();
-
     match patch {
         Patch::InsertBeforeNode {
             tag,
@@ -243,8 +241,6 @@ where
             } else {
                 panic!("unable to get parent node of the target element: {:?} thas has a tag: {:?} in path: {:?}, for patching: {:#?}", target_element, tag, patch_path, for_inserts);
             }
-
-            Ok(active_closures)
         }
 
         Patch::InsertAfterNode {
@@ -279,19 +275,16 @@ where
                     .expect("must remove target node");
                 active_closures.extend(created_node.closures);
             }
-            Ok(active_closures)
         }
 
         Patch::AddAttributes { attrs, .. } => {
             let element: &Element = node.unchecked_ref();
             CreatedNode::set_element_attributes(
                 program,
-                &mut active_closures,
+                active_closures,
                 element,
                 attrs,
             );
-
-            Ok(active_closures)
         }
         Patch::RemoveAttributes { attrs, .. } => {
             let element: &Element = node.unchecked_ref();
@@ -308,7 +301,7 @@ where
                             remove_event_listener_with_name(
                                 attr.name(),
                                 element,
-                                old_closures,
+                                active_closures,
                             )?;
                         }
                         AttributeValue::FunctionCall(_)
@@ -317,7 +310,6 @@ where
                     }
                 }
             }
-            Ok(active_closures)
         }
 
         // This also removes the associated closures and event listeners to the node being replaced
@@ -342,7 +334,7 @@ where
                 focused_node,
             );
             if element.node_type() == Node::ELEMENT_NODE {
-                remove_event_listeners(element, old_closures)?;
+                remove_event_listeners(element, active_closures)?;
             }
             element
                 .replace_with_with_node_1(&created_node.node)
@@ -357,7 +349,6 @@ where
                 log::info!("the root_node is replaced with {:?}", root_node);
             }
             active_closures.extend(created_node.closures);
-            Ok(active_closures)
         }
         Patch::RemoveNode { .. } => {
             let element: &Element = node.unchecked_ref();
@@ -368,9 +359,8 @@ where
                 .expect("must remove target node");
             if element.node_type() == Node::ELEMENT_NODE {
                 let element: &Element = node.unchecked_ref();
-                remove_event_listeners(element, old_closures)?;
+                remove_event_listeners(element, active_closures)?;
             }
-            Ok(active_closures)
         }
         Patch::AppendChildren {
             tag: _,
@@ -378,7 +368,6 @@ where
             children: new_nodes,
         } => {
             let element: &Element = node.unchecked_ref();
-            let mut active_closures = HashMap::new();
             for new_node in new_nodes.iter() {
                 let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
                     program,
@@ -388,7 +377,7 @@ where
                 element.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }
-            Ok(active_closures)
         }
     }
+    Ok(())
 }

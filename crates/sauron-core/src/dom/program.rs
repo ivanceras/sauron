@@ -30,6 +30,7 @@ impl<APP,MSG> AppWrapper<APP,MSG>
         }
     }
 
+    ///TODO: spawn the updates here
     async fn dispatch_updates(&mut self, deadline: f64) -> Cmd<APP, MSG>{
         let t1 = crate::now();
         let mut all_cmd = vec![];

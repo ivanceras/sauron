@@ -47,46 +47,21 @@ pub use mt_dom;
 pub mod prelude {
     pub use crate::{
         html::{
-            attributes::{
-                attr,
-                *,
-            },
-            tags::{
-                commons::*,
-                *,
-            },
-            units::{
-                self,
-                ch,
-                em,
-                percent,
-                pt,
-                px,
-                rem,
-            },
+            attributes::{attr, *},
+            tags::{commons::*, *},
+            units::{self, ch, em, percent, pt, px, rem},
             *,
         },
-        svg::{
-            attributes::*,
-            tags::commons::*,
-            *,
-        },
+        svg::{attributes::*, tags::commons::*, *},
         vdom::*,
         *,
     };
+    pub use async_trait::async_trait;
     pub use render::Render;
     pub use vdom::{
         diff,
-        map_msg::{
-            AttributeMapMsg,
-            ElementMapMsg,
-            NodeMapMsg,
-        },
-        Attribute,
-        Element,
-        Listener,
-        Node,
-        Patch,
+        map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg},
+        Attribute, Element, Listener, Node, Patch,
     };
     #[cfg(feature = "with-dom")]
     pub use wasm_bindgen::prelude::*;

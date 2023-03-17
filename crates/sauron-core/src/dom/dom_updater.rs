@@ -189,7 +189,7 @@ where
         // since it can be replaced with a new root Node(the top-level node of the view) when patching
         let root_node = self.root_node.as_mut().expect("must have a root_node");
 
-        let active_closures = patch(
+        patch(
             program,
             root_node,
             &mut self.active_closures,
@@ -198,7 +198,6 @@ where
         )
         .expect("Error in patching the dom");
 
-        self.active_closures.extend(active_closures);
 
         self.current_vdom = new_vdom;
         self.set_focus_element();
@@ -214,7 +213,7 @@ where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
         let root_node = self.root_node.as_mut().expect("must have a root_node");
-        let active_closures = patch(
+        patch(
             program,
             root_node,
             &mut self.active_closures,
@@ -222,7 +221,6 @@ where
             patches,
         )
         .expect("Error in patching the dom");
-        self.active_closures.extend(active_closures);
     }
 
     /// Return the root node of your application, the highest ancestor of all other nodes in
