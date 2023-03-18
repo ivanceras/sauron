@@ -168,6 +168,17 @@
     - [X] It was cause by jss `style!` macro where the lookup for style name is recreated everytime,
           due to the use of `const` instead of `static` in a `once_cell::Lazy` declaration. This is fixed in `jss 0.3.3`
 - [ ] Create the dom nodes in depth-first-traversal
+- [ ] Make a pending patches in the DomUpdater which stops applying remaining patches when the time remaining for the deadline is up.
+    - There is a problem with storing the patch in a struct which will need to have explicit lifetime
+    - This can not also be stored in a global variable since there is a generic MSG
+    - Solution:
+        - Make an owned Patch which has no reference to the node
+          ```rust
+            struct OwnedPatch{
+                tag: Option<TAG>,
+                node: Node<'a,...>,
+            }
+          ```
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
