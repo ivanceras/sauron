@@ -45,11 +45,11 @@ where
     // can be done with Promise.all (https://docs.rs/js-sys/0.3.61/js_sys/struct.Promise.html#method.all)
     for patch in patches.iter() {
         let patch_path = patch.path();
-        if let Some(element) = nodes_to_patch.get(patch_path) {
+        if let Some(target_node) = nodes_to_patch.get(patch_path) {
             apply_patch_to_node(
                 program,
                 root_node,
-                element,
+                target_node,
                 active_closures,
                 focused_node,
                 patch,
@@ -198,7 +198,7 @@ fn remove_event_listener_with_name(
 fn apply_patch_to_node<DSP, MSG>(
     program: &DSP,
     root_node: &mut Node,
-    node: &Node,
+    target_node: &Node,
     active_closures: &mut ActiveClosure,
     focused_node: &mut Option<Node>,
     patch: &Patch<MSG>,
@@ -214,8 +214,8 @@ where
             nodes: for_inserts,
         } => {
             // we inser the node before this target element
-            let target_element: &Element = node.unchecked_ref();
-            if let Some(parent_node) = target_element.parent_node() {
+            let target_element: &Element = target_node.unchecked_ref();
+            if let Some(parent_target) = target_element.parent_node() {
                 if let Some(tag) = tag {
                     let target_tag = target_element.tag_name().to_lowercase();
                     if target_tag != **tag {
@@ -232,7 +232,7 @@ where
                         for_insert,
                         focused_node,
                     );
-                    parent_node
+                    parent_target
                         .insert_before(&created_node.node, Some(target_element))
                         .expect("must remove target node");
 
@@ -248,8 +248,8 @@ where
             patch_path: _,
             nodes: for_inserts,
         } => {
-            // we inser the node before this target element
-            let target_element: &Element = node.unchecked_ref();
+            // we insert the node before this target element
+            let target_element: &Element = target_node.unchecked_ref();
             if let Some(tag) = tag {
                 let target_tag = target_element.tag_name().to_lowercase();
                 if target_tag != **tag {
@@ -278,29 +278,30 @@ where
         }
 
         Patch::AddAttributes { attrs, .. } => {
-            let element: &Element = node.unchecked_ref();
+            let target_element: &Element = target_node.unchecked_ref();
             CreatedNode::set_element_attributes(
                 program,
                 active_closures,
-                element,
+                target_element,
                 attrs,
             );
         }
         Patch::RemoveAttributes { attrs, .. } => {
-            let element: &Element = node.unchecked_ref();
+            let target_element: &Element = target_node.unchecked_ref();
             for attr in attrs.iter() {
                 for att_value in attr.value() {
                     match att_value {
                         AttributeValue::Simple(_) => {
                             CreatedNode::remove_element_attribute(
-                                element, attr,
+                                target_element,
+                                attr,
                             )?;
                         }
                         // it is an event listener
                         AttributeValue::EventListener(_) => {
                             remove_event_listener_with_name(
                                 attr.name(),
-                                element,
+                                target_element,
                                 active_closures,
                             )?;
                         }
@@ -321,7 +322,7 @@ where
             patch_path,
             replacement,
         } => {
-            let element: &Element = node.unchecked_ref();
+            let target_element: &Element = target_node.unchecked_ref();
             // FIXME: performance bottleneck here
             // Each element and it's descendant is created. Each call to dom to create the element
             // has a cost of ~1ms due to bindings in wasm-bindgen, multiple call of 1000 elements can accumulate to 1s time.
@@ -333,10 +334,10 @@ where
                 replacement,
                 focused_node,
             );
-            if element.node_type() == Node::ELEMENT_NODE {
-                remove_event_listeners(element, active_closures)?;
+            if target_element.node_type() == Node::ELEMENT_NODE {
+                remove_event_listeners(target_element, active_closures)?;
             }
-            element
+            target_element
                 .replace_with_with_node_1(&created_node.node)
                 .expect("must replace node");
 
@@ -351,15 +352,15 @@ where
             active_closures.extend(created_node.closures);
         }
         Patch::RemoveNode { .. } => {
-            let element: &Element = node.unchecked_ref();
-            let parent_node =
-                element.parent_node().expect("must have a parent node");
-            parent_node
-                .remove_child(element)
+            let target_element: &Element = target_node.unchecked_ref();
+            let parent_target = target_element
+                .parent_node()
+                .expect("must have a parent node");
+            parent_target
+                .remove_child(target_element)
                 .expect("must remove target node");
-            if element.node_type() == Node::ELEMENT_NODE {
-                let element: &Element = node.unchecked_ref();
-                remove_event_listeners(element, active_closures)?;
+            if target_element.node_type() == Node::ELEMENT_NODE {
+                remove_event_listeners(target_element, active_closures)?;
             }
         }
         Patch::AppendChildren {
@@ -367,14 +368,14 @@ where
             patch_path: _,
             children: new_nodes,
         } => {
-            let element: &Element = node.unchecked_ref();
+            let target_element: &Element = target_node.unchecked_ref();
             for new_node in new_nodes.iter() {
                 let created_node = CreatedNode::create_dom_node::<DSP, MSG>(
                     program,
                     new_node,
                     focused_node,
                 );
-                element.append_child(&created_node.node)?;
+                target_element.append_child(&created_node.node)?;
                 active_closures.extend(created_node.closures);
             }
         }
