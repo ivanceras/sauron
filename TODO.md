@@ -179,6 +179,9 @@
                 node: Node<'a,...>,
             }
           ```
+        - Store the patches as Closures, so as to get away with the generics
+            - but then there will be error can be shared between threads because closure is not Send
+        - Make a DomPatch which a DOM version of the patch with the target node and created node
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
