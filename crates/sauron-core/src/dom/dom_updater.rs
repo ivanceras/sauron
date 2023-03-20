@@ -3,6 +3,7 @@ use crate::{
         apply_patches::patch,
         created_node::{ActiveClosure, CreatedNode},
         Dispatch,
+        DomPatch,
     },
     vdom,
     vdom::diff,
@@ -35,7 +36,13 @@ pub struct DomUpdater<MSG> {
 
     /// whether or not to use shadow root of the mount_node
     pub use_shadow: bool,
+
+    /// for optimization purposes to avoid sluggishness of the app, when a patch
+    /// can not be run in 1 execution due to limited remaining time deadline
+    /// it will be put into the pending patches to be executed on the next run.
+    pub pending_patches: Vec<DomPatch<MSG>>,
 }
+
 
 impl<MSG> DomUpdater<MSG> {
     /// Creates and instance of this DOM updater, but doesn't mount the current_vdom to the DOM just yet.
@@ -53,6 +60,7 @@ impl<MSG> DomUpdater<MSG> {
             focused_node: None,
             replace,
             use_shadow,
+            pending_patches: Vec::new(),
         }
     }
 
