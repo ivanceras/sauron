@@ -6,7 +6,7 @@ use crate::{
 };
 use js_sys::Function;
 use mt_dom::TreePath;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{Element, Node};
 
@@ -19,12 +19,15 @@ pub fn patch<DSP, MSG>(
     root_node: &mut Node,
     active_closures: &mut ActiveClosure,
     focused_node: &mut Option<Node>,
+    pending_patches: &mut VecDeque<DomPatch<MSG>>,
     patches: Vec<Patch<MSG>>,
 ) -> Result<(), JsValue>
 where
     MSG: 'static,
     DSP: Clone + Dispatch<MSG> + 'static,
 {
+    #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+    let t1 = crate::now();
     let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
         .iter()
         .map(|patch| (patch.path(), patch.tag()))
@@ -36,15 +39,21 @@ where
     }
 
     let nodes_to_patch = find_all_nodes(root_node, &nodes_to_find);
+    #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+    let t2 = crate::now();
+
+    #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+    log::info!("Took {}ms to find all the nodes", t2 - t1);
 
     //TODO: spawn all the apply patch here to to it asynchronously
     // can be done with Promise.all (https://docs.rs/js-sys/0.3.61/js_sys/struct.Promise.html#method.all)
     for patch in patches.iter() {
         let patch_path = patch.path();
+        let patch_tag = patch.tag();
         if let Some(target_node) = nodes_to_patch.get(patch_path) {
             // check the tag here if it matches
             let target_element: &Element = target_node.unchecked_ref();
-            if let Some(tag) = patch.tag() {
+            if let Some(tag) = patch_tag {
                 let target_tag = target_element.tag_name().to_lowercase();
                 if target_tag != **tag {
                     panic!(
@@ -54,16 +63,69 @@ where
                 }
             }
 
+            #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+            let t3 = crate::now();
+
+            //TODO: push this into a vecqueue for executing the patches
+            //taking into account deadline remaining time
             let dom_patch =
                 DomPatch::from_patch(program, target_node, focused_node, patch);
-            dom_patch
-                .apply(program, active_closures)
-                .expect("must apply the dom patch");
+
+            #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+            let t4 = crate::now();
+
+            #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+            log::info!("Creating dom_patch took {}ms", t4 - t3);
+
+            pending_patches.push_back(dom_patch);
         } else {
-            unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}", patch_path);
+            unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
         }
     }
 
+    let deadline = 100.0;
+
+    apply_pending_patches(pending_patches, program, active_closures, deadline)
+        .expect("must not error");
+
+    Ok(())
+}
+
+/// apply the pending patches into the DOM
+fn apply_pending_patches<DSP, MSG>(
+    pending_patches: &mut VecDeque<DomPatch<MSG>>,
+    program: &DSP,
+    active_closures: &mut ActiveClosure,
+    deadline: f64,
+) -> Result<(), JsValue>
+where
+    MSG: 'static,
+    DSP: Clone + Dispatch<MSG> + 'static,
+{
+    let t1 = crate::now();
+    #[cfg(feature = "with-debug")]
+    let mut cnt = 0;
+    while let Some(dom_patch) = pending_patches.pop_front() {
+        #[cfg(feature = "with-debug")]
+        log::debug!("Executing pending patch item {}", cnt);
+        let t2 = crate::now();
+        dom_patch
+            .apply(program, active_closures)
+            .expect("must apply the dom patch");
+        let elapsed = t2 - t1;
+        if elapsed > deadline {
+            log::info!("breaking here...");
+            break;
+        }
+        #[cfg(feature = "with-debug")]
+        {
+            cnt += 1;
+        }
+    }
+    #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+    let t3 = crate::now();
+    #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+    log::info!("Pending patches took {}ms", t3 - t1);
     Ok(())
 }
 

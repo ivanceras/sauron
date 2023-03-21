@@ -10,6 +10,8 @@ use web_sys::{Element, Node};
 /// This is necessary since the CreatedNode doesn't contain references
 /// as opposed to Patch which contains reference to the vdom, which makes it hard
 /// to be included in a struct
+///
+/// TODO: use target_element instead of target_node
 pub enum DomPatch<MSG> {
     /// Insert nodes before the target node
     InsertBeforeNode {

@@ -11,6 +11,7 @@ use crate::{
 use wasm_bindgen::JsCast;
 use web_sys::{self, Element, Node};
 use crate::vdom::Patch;
+use std::collections::VecDeque;
 
 /// Used for keeping a real DOM node up to date based on the current Node
 /// and a new incoming Node that represents our latest DOM state.
@@ -40,7 +41,7 @@ pub struct DomUpdater<MSG> {
     /// for optimization purposes to avoid sluggishness of the app, when a patch
     /// can not be run in 1 execution due to limited remaining time deadline
     /// it will be put into the pending patches to be executed on the next run.
-    pub pending_patches: Vec<DomPatch<MSG>>,
+    pub pending_patches: VecDeque<DomPatch<MSG>>,
 }
 
 
@@ -60,7 +61,7 @@ impl<MSG> DomUpdater<MSG> {
             focused_node: None,
             replace,
             use_shadow,
-            pending_patches: Vec::new(),
+            pending_patches: VecDeque::new(),
         }
     }
 
@@ -202,6 +203,7 @@ where
             root_node,
             &mut self.active_closures,
             &mut self.focused_node,
+            &mut self.pending_patches,
             patches,
         )
         .expect("Error in patching the dom");
@@ -226,6 +228,7 @@ where
             root_node,
             &mut self.active_closures,
             &mut self.focused_node,
+            &mut self.pending_patches,
             patches,
         )
         .expect("Error in patching the dom");

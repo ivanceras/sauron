@@ -9,7 +9,6 @@ use wasm_bindgen::{closure::Closure, JsCast};
 use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen::JsValue;
 use once_cell::sync::OnceCell;
-use async_delay::Throttle;
 use std::collections::VecDeque;
 
 
@@ -86,7 +85,6 @@ where
     pub app_wrap: Rc<RefCell<AppWrapper<APP, MSG>>>,
     /// The dom_updater responsible to updating the actual document in the browser
     pub dom_updater: Rc<RefCell<DomUpdater<MSG>>>,
-    throttle: Rc<Throttle>,
 }
 
 impl<APP, MSG> Clone for Program<APP, MSG>
@@ -97,7 +95,6 @@ where
         Program {
             app_wrap: Rc::clone(&self.app_wrap),
             dom_updater: Rc::clone(&self.dom_updater),
-            throttle: Rc::clone(&self.throttle),
         }
     }
 }
@@ -120,7 +117,6 @@ where
         Program {
             app_wrap: Rc::new(RefCell::new(AppWrapper::new(app))),
             dom_updater: Rc::new(RefCell::new(dom_updater)),
-            throttle: Rc::new(Throttle::from_interval(5)),
         }
     }
 
@@ -252,11 +248,17 @@ where
 
         // a new view is created due to the app update
         let view = self.app_wrap.borrow().view();
+        let t25 = crate::now();
+        #[cfg(all(feature = "with-measure", feature="with-debug"))]
+        log::info!("view took: {}ms", t25 - t2);
 
         #[cfg(feature = "with-measure")]
         let node_count = view.node_count();
         #[cfg(feature = "with-measure")]
         let t3 = crate::now();
+
+        #[cfg(all(feature = "with-measure", feature="with-debug"))]
+        log::info!("view and node count took: {}ms", t3 - t2);
 
         // update the last DOM node tree with this new view
         let _total_patches =
@@ -267,6 +269,8 @@ where
         #[cfg(feature = "with-measure")]
         {
             let dispatch_duration = t4 - _t1;
+            #[cfg(all(feature = "with-measure", feature="with-debug"))]
+             log::info!("dispatch took: {}ms", dispatch_duration);
             // 60fps is 16.667 ms per frame.
             if dispatch_duration > 16.0 {
                 log::warn!("dispatch took: {}ms", dispatch_duration);
@@ -307,20 +311,14 @@ where
         let t1 = crate::now();
 
         let msg_count = 0;
-        let cmd = self.throttle.call(move||{
-            self.dispatch_updates(deadline)
-        }).await;
+        let cmd = self.dispatch_updates(deadline).await;
 
-        if let Some(cmd) = cmd{
-            if cmd.modifier.should_update_view {
-                let log_measurements = cmd.modifier.log_measurements;
-                let measurement_name = &cmd.modifier.measurement_name;
-                self.dispatch_dom_changes(log_measurements, measurement_name, msg_count, t1).await;
-            }
-            cmd.emit(self);
-        }else{
-            log::info!("no cmd here...");
+        if cmd.modifier.should_update_view {
+            let log_measurements = cmd.modifier.log_measurements;
+            let measurement_name = &cmd.modifier.measurement_name;
+            self.dispatch_dom_changes(log_measurements, measurement_name, msg_count, t1).await;
         }
+        cmd.emit(self);
     }
 
     /// Inject a style to the global document
