@@ -449,7 +449,7 @@ impl CreatedNode {
     /// explicitly call set_open for details
     /// since setting the attribute `open` to false will not close it.
     ///
-    /// TODO: HtmlDialogElement ( but it is not supported on firefox and in safarit, only works on chrome)
+    /// TODO: HtmlDialogElement ( but it is not supported on firefox and in safari, only works on chrome)
     ///
     /// Applies to:
     ///  - dialog
@@ -566,8 +566,6 @@ impl CreatedNode {
     ) -> Result<(), JsValue> {
         log::trace!("removing attribute: {}", attr.name());
 
-        element.remove_attribute(attr.name())?;
-
         match *attr.name() {
             "value" => {
                 Self::set_value_str(element, "");
@@ -583,6 +581,9 @@ impl CreatedNode {
             }
             _ => (),
         }
+        //actually remove the element
+        element.remove_attribute(attr.name())?;
+
         Ok(())
     }
 }

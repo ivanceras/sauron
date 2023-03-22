@@ -3,25 +3,16 @@
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
 use crate::{
     html::attributes::AttributeValue,
-    vdom::{
-        Attribute,
-        Listener,
-    },
+    vdom::{Attribute, Listener},
 };
 use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
 pub use web_sys::{
-    AnimationEvent,
-    HashChangeEvent,
-    KeyboardEvent,
-    MouseEvent,
-    TransitionEvent,
+    AnimationEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TransitionEvent,
 };
 use web_sys::{
-    EventTarget,
-    HtmlInputElement,
-    HtmlSelectElement,
+    EventTarget, HtmlDetailsElement, HtmlInputElement, HtmlSelectElement,
     HtmlTextAreaElement,
 };
 
@@ -129,13 +120,11 @@ where
     F: Fn(MountEvent) -> MSG + 'static,
     MSG: 'static,
 {
-    on("mount", move |event: Event| {
-        match event {
-            Event::MountEvent(me) => f(me),
-            _ => {
-                log::warn!("was expecting a mount event");
-                panic!("not a mount event!")
-            }
+    on("mount", move |event: Event| match event {
+        Event::MountEvent(me) => f(me),
+        _ => {
+            log::warn!("was expecting a mount event");
+            panic!("not a mount event!")
         }
     })
 }
@@ -256,12 +245,21 @@ fn to_input_event(event: Event) -> InputEvent {
 
 fn to_checked(event: Event) -> bool {
     let web_event = event.as_web().expect("must be a web event");
-    //web_event.prevent_default();
-    //web_event.stop_propagation();
     let target: EventTarget =
         web_event.target().expect("Unable to get event target");
     if let Some(input) = target.dyn_ref::<HtmlInputElement>() {
         input.checked()
+    } else {
+        panic!("must be a html input element");
+    }
+}
+
+fn to_open(event: Event) -> bool {
+    let web_event = event.as_web().expect("must be a web event");
+    let target: EventTarget =
+        web_event.target().expect("Unable to get event target");
+    if let Some(details) = target.dyn_ref::<HtmlDetailsElement>() {
+        details.open()
     } else {
         panic!("must be a html input element");
     }
@@ -302,7 +300,7 @@ declare_html_events! {
     on_keydown => keydown => to_keyboard_event => KeyboardEvent;
     on_keypress => keypress => to_keyboard_event => KeyboardEvent;
     on_keyup => keyup => to_keyboard_event => KeyboardEvent;
-    on_toggle => toggle => to_webevent => web_sys::Event;
+    on_toggle => toggle => to_open => bool;
     on_focus => focus => to_webevent => web_sys::Event;
     on_blur => blur => to_webevent => web_sys::Event;
     on_reset => reset => to_webevent => web_sys::Event;

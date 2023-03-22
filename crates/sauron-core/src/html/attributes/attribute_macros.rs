@@ -1,7 +1,4 @@
-use crate::prelude::{
-    AttributeValue,
-    Value,
-};
+use crate::prelude::{AttributeValue, Value};
 use mt_dom::attr;
 
 /// declare a function with the name corresponds to attribute name for easy usage in html elements
@@ -66,7 +63,7 @@ macro_rules! declare_html_attributes{
 
         #[cfg(feature = "with-lookup")]
         /// These are most commonly used html attributes such as class, id, etc
-        pub const HTML_ATTRS:[&'static str; 115] = [$(stringify!($name),)*];
+        pub const HTML_ATTRS:[&'static str; 114] = [$(stringify!($name),)*];
     }
 }
 
@@ -167,7 +164,6 @@ declare_html_attributes! {
     muted;
     name;
     novalidate;
-    open;
     optimum;
     pattern;
     ping;

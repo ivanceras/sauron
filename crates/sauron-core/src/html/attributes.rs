@@ -289,6 +289,16 @@ pub fn disabled<MSG>(is_disabled: bool) -> Attribute<MSG> {
     }
 }
 
+/// set whether an element, ie: details, that is the contents of the
+/// details are currently visible
+pub fn open<MSG>(is_open: bool) -> Attribute<MSG> {
+    if is_open {
+        attr("open", true)
+    } else {
+        empty_attr()
+    }
+}
+
 /// set the inner html of this element without comparing in the diff
 /// this always sets the value
 /// This is for optimization purposes

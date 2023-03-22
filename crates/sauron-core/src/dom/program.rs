@@ -35,6 +35,7 @@ impl<APP,MSG> AppWrapper<APP,MSG>
         let mut all_cmd = vec![];
         let mut i = 0;
         while let Some(pending_msg) = self.pending_updates.pop_front(){
+            #[cfg(all(feature = "with-measure", feature = "with-debug"))]
             log::debug!("Executing pending msg item {}", i);
             let c = self.app.update(pending_msg).await;
             all_cmd.push(c);
