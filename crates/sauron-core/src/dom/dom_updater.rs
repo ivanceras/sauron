@@ -9,7 +9,7 @@ use crate::{
 };
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
-use crate::vdom::Patch;
+//use crate::vdom::Patch;
 use mt_dom::TreePath;
 use std::collections::VecDeque;
 
@@ -184,64 +184,22 @@ where
         &mut self,
         program: &DSP,
         new_vdom: vdom::Node<MSG>,
-    ) -> usize
+    ) -> Result<usize, JsValue>
     where
         DSP: Dispatch<MSG> + Clone + 'static,
     {
-        // move the diff into patch function.
-        let patches = diff(&self.current_vdom, &new_vdom);
-        let total_patches = patches.len();
 
-        #[cfg(feature = "with-debug")]
-        log::debug!("patches: {:#?}", patches);
-
-        //Note: it is important that root_node points to the original mutable reference here
-        // since it can be replaced with a new root Node(the top-level node of the view) when patching
-        let root_node = self.root_node.as_mut().expect("must have a root_node");
-
-        Self::patch(
+        let total_patches = self.patch(
             program,
-            root_node,
-            &mut self.active_closures,
-            &mut self.focused_node,
-            &mut self.pending_patches,
-            patches,
-        )
-        .expect("Error in patching the dom");
+            new_vdom
+        )?;
 
 
-        self.current_vdom = new_vdom;
         self.set_focus_element();
-        //return the total number of patches
-        total_patches
+        Ok(total_patches)
     }
 
-    /// Apply patches blindly to the `root_node` in this DomUpdater.
-    ///
-    /// Warning: only used this for debugging purposes
-    pub async fn patch_dom<'a, DSP>(&mut self, program: &DSP, patches: Vec<Patch<'a, MSG>>)
-    where
-        DSP: Dispatch<MSG> + Clone + 'static,
-    {
-        let root_node = self.root_node.as_mut().expect("must have a root_node");
-        Self::patch(
-            program,
-            root_node,
-            &mut self.active_closures,
-            &mut self.focused_node,
-            &mut self.pending_patches,
-            patches,
-        )
-        .expect("Error in patching the dom");
-    }
 
-    /// Return the root node of your application, the highest ancestor of all other nodes in
-    /// your real DOM tree.
-    pub fn mount_node(&self) -> Node {
-        // Note that we're cloning the `web_sys::Node`, not the DOM element.
-        // So we're effectively cloning a pointer here, which is fast.
-        self.mount_node.clone()
-    }
 
 
     /// Apply all of the patches to our old root node in order to create the new root node
@@ -249,17 +207,21 @@ where
     /// This is usually used after diffing two virtual nodes.
     ///
     pub fn patch<DSP>(
+        &mut self,
         program: &DSP,
-        root_node: &mut Node,
-        active_closures: &mut ActiveClosure,
-        focused_node: &mut Option<Node>,
-        pending_patches: &mut VecDeque<DomPatch<MSG>>,
-        patches: Vec<Patch<MSG>>,
-    ) -> Result<(), JsValue>
+        new_vdom: vdom::Node<MSG>,
+    ) -> Result<usize, JsValue>
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
+        let patches = diff(&self.current_vdom, &new_vdom);
+        // move the diff into patch function.
+        let total_patches = patches.len();
+
+        #[cfg(feature = "with-debug")]
+        log::debug!("patches: {:#?}", patches);
+
         #[cfg(all(feature = "with-measure", feature = "with-debug"))]
         let t1 = crate::now();
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
@@ -271,6 +233,10 @@ where
         for patch in patches.iter() {
             paths.push(patch.path());
         }
+
+        //Note: it is important that root_node points to the original mutable reference here
+        // since it can be replaced with a new root Node(the top-level node of the view) when patching
+        let root_node = self.root_node.as_mut().expect("must have a root_node");
 
         let nodes_to_patch = created_node::find_all_nodes(root_node, &nodes_to_find);
         #[cfg(all(feature = "with-measure", feature = "with-debug"))]
@@ -303,7 +269,7 @@ where
                 //TODO: push this into a vecqueue for executing the patches
                 //taking into account deadline remaining time
                 let dom_patch =
-                    DomPatch::from_patch(program, target_node, focused_node, patch);
+                    DomPatch::from_patch(program, target_node, &mut self.focused_node, patch);
 
                 #[cfg(all(feature = "with-measure", feature = "with-debug"))]
                 let t4 = crate::now();
@@ -311,7 +277,7 @@ where
                 #[cfg(all(feature = "with-measure", feature = "with-debug"))]
                 log::info!("Creating dom_patch took {}ms", t4 - t3);
 
-                pending_patches.push_back(dom_patch);
+                self.pending_patches.push_back(dom_patch);
             } else {
                 unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
             }
@@ -319,17 +285,17 @@ where
 
         let deadline = 100.0;
 
-        Self::apply_pending_patches(pending_patches, program, active_closures, deadline)
+        self.apply_pending_patches(program, deadline)
             .expect("must not error");
 
-        Ok(())
+        self.current_vdom = new_vdom;
+        Ok(total_patches)
     }
 
     /// apply the pending patches into the DOM
     fn apply_pending_patches<DSP>(
-        pending_patches: &mut VecDeque<DomPatch<MSG>>,
+        &mut self,
         program: &DSP,
-        active_closures: &mut ActiveClosure,
         deadline: f64,
     ) -> Result<(), JsValue>
     where
@@ -339,12 +305,12 @@ where
         let t1 = crate::now();
         #[cfg(feature = "with-debug")]
         let mut cnt = 0;
-        while let Some(dom_patch) = pending_patches.pop_front() {
+        while let Some(dom_patch) = self.pending_patches.pop_front() {
             #[cfg(feature = "with-debug")]
             log::debug!("Executing pending patch item {}", cnt);
             let t2 = crate::now();
             dom_patch
-                .apply(program, active_closures)
+                .apply(program, &mut self.active_closures)
                 .expect("must apply the dom patch");
             let elapsed = t2 - t1;
             if elapsed > deadline {
@@ -361,6 +327,14 @@ where
         #[cfg(all(feature = "with-measure", feature = "with-debug"))]
         log::info!("Pending patches took {}ms", t3 - t1);
         Ok(())
+    }
+
+    /// Return the root node of your application, the highest ancestor of all other nodes in
+    /// your real DOM tree.
+    pub fn mount_node(&self) -> Node {
+        // Note that we're cloning the `web_sys::Node`, not the DOM element.
+        // So we're effectively cloning a pointer here, which is fast.
+        self.mount_node.clone()
     }
 }
 

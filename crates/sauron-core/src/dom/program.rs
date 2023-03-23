@@ -263,7 +263,7 @@ where
 
         // update the last DOM node tree with this new view
         let _total_patches =
-            self.dom_updater.borrow_mut().update_dom(self, view).await;
+            self.dom_updater.borrow_mut().update_dom(self, view).await.expect("must not error");
         #[cfg(feature = "with-measure")]
         let t4 = crate::now();
 
