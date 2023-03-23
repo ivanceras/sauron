@@ -74,7 +74,7 @@ async fn insert_multiple_before_nodes() {
     let expected = "<main class=\"before_nodes_test1\"><ul class=\"todo\"><li key=\"1\">item1</li><li key=\"2\">item2</li><li key=\"3\">item3</li></ul></main>";
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1).await;
+    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
 
     let container = document
         .query_selector(".before_nodes_test1")
@@ -154,7 +154,7 @@ async fn insert_multiple_after_nodes() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1).await;
+    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
 
     let container = document
         .query_selector(".after_nodes_test1")

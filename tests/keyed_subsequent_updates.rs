@@ -215,7 +215,7 @@ async fn subsequent_updates() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1.clone()).await;
+    dom_updater.update_dom(&simple_program, update1.clone()).await.expect("must not error");
 
     let container = document
         .query_selector(".editor")
@@ -351,7 +351,7 @@ async fn subsequent_updates() {
         ]
     );
 
-    dom_updater.update_dom(&simple_program, update2.clone()).await;
+    dom_updater.update_dom(&simple_program, update2.clone()).await.expect("must not error");
 
     let container = document
         .query_selector(".editor")
@@ -501,7 +501,7 @@ async fn subsequent_updates() {
         ]
     );
 
-    dom_updater.update_dom(&simple_program, update3.clone()).await;
+    dom_updater.update_dom(&simple_program, update3.clone()).await.expect("must not error");
 
     let container = document
         .query_selector(".editor")

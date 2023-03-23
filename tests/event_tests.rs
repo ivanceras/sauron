@@ -91,7 +91,7 @@ async fn added_event() {
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);
     // update to new dom with no event attached
-    dom_updater.update_dom(&simple_program, new).await;
+    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
 
     let input_element =
         sauron_core::document().get_element_by_id(&elem_id).unwrap();
@@ -145,7 +145,7 @@ async fn remove_event() {
     let mut dom_updater =
         DomUpdater::new_append_to_mount(&simple_program, old, &body);
     // update to new dom with no event attached
-    dom_updater.update_dom(&simple_program, new).await;
+    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
 
     let input_element =
         sauron_core::document().get_element_by_id(&elem_id).unwrap();
@@ -199,7 +199,7 @@ async fn remove_event_from_truncated_children() {
         5,
         "There should be 5 events attached to the DomUpdater"
     );
-    dom_updater.update_dom(&simple_program, new).await;
+    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
 
     assert_eq!(
         dom_updater.active_closure_len(),
@@ -246,7 +246,7 @@ async fn remove_event_from_truncated_children_some_with_no_events() {
         3,
         "There should be 3 events attached to the DomUpdater"
     );
-    dom_updater.update_dom(&simple_program, new).await;
+    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
 
     assert_eq!(
         dom_updater.active_closure_len(),
@@ -283,7 +283,7 @@ async fn remove_event_from_replaced_node() {
         1,
         "There should be 1 event attached to the DomUpdater"
     );
-    dom_updater.update_dom(&simple_program, new).await;
+    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
 
     assert_eq!(
         dom_updater.active_closure_len(),

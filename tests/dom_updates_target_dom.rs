@@ -166,14 +166,15 @@ async fn multiple_match_on_keyed_elements() {
         &sauron_core::body(),
     );
 
-    dom_updater.patch_dom(&simple_program, patches).await;
+    let target_dom_html = target_dom.render_to_string();
+    dom_updater.update_dom(&simple_program, target_dom).await.expect("must not error");
 
     let app_node = crate::document()
         .query_selector(".app")
         .expect("must not error")
         .expect("must exist");
 
-    assert_eq!(target_dom.render_to_string(), app_node.outer_html());
+    assert_eq!(target_dom_html, app_node.outer_html());
 }
 
 #[test]

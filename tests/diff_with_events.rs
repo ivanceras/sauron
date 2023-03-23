@@ -68,7 +68,7 @@ async fn remove_event_from_replaced_node() {
         1,
         "There should be 1 event attached to the DomUpdater"
     );
-    dom_updater.update_dom(&simple_program, new).await;
+    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
 
     assert_eq!(
         dom_updater.active_closure_len(),

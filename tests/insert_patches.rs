@@ -72,7 +72,7 @@ async fn test_patch_insert_node() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1).await;
+    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
 
     let container = document
         .query_selector(".test1")
@@ -147,7 +147,7 @@ async fn test_patch_insert_node_in_the_middle() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1).await;
+    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
 
     let container = document
         .query_selector(".test_middle")
@@ -230,7 +230,7 @@ async fn multiple_insert_should_work() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1).await;
+    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
 
     let container = document
         .query_selector(".test5")

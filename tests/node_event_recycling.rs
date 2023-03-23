@@ -67,7 +67,7 @@ async fn elements_with_different_event_should_not_be_recycle() {
         DomUpdater::new_append_to_mount(&simple_program, old.clone(), &body);
 
     // update to new dom with no event attached
-    dom_updater.patch_dom(&simple_program, patches).await;
+    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
 
     let input_element =
         sauron_core::document().get_element_by_id(elem_id).unwrap();

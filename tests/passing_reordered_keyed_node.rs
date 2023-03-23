@@ -49,7 +49,7 @@ async fn reordered_keys2() {
     );
 
     let update1_html = update1.render_to_string();
-    dom_updater.update_dom(&simple_program, update1).await;
+    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
 
     let container = document
         .query_selector(".reordered2")
@@ -107,7 +107,7 @@ async fn reordered_keys3() {
     );
 
     let update1_html = update1.render_to_string();
-    dom_updater.update_dom(&simple_program, update1).await;
+    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
 
     let container = document
         .query_selector(".reordered3")

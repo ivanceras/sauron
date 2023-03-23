@@ -54,7 +54,7 @@ async fn failing_reordered_keys() {
         &sauron_core::body(),
     );
 
-    dom_updater.update_dom(&simple_program, update1).await;
+    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
 
     let container = document
         .query_selector(".reordered")

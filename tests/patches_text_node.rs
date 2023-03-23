@@ -66,7 +66,7 @@ async fn patches_text() {
         </section>\
         </main>";
 
-    dom_updater.update_dom(&simple_program, update1).await;
+    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
     let result = container.outer_html();
     log::info!("result: {}", result);
     println!("result: {}", result);

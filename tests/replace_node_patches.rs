@@ -79,7 +79,7 @@ async fn test_multiple_replace() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1).await;
+    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
 
     let container = document
         .query_selector(".multi_replace")
@@ -163,7 +163,7 @@ async fn test_multiple_replace_and_parent_is_replaced_too() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1).await;
+    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
 
     let container = document
         .query_selector(".parent_replaced")
