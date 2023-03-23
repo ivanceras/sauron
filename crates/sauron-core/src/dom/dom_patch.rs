@@ -1,4 +1,3 @@
-use crate::dom::apply_patches::*;
 use crate::dom::created_node::ActiveClosure;
 use crate::dom::Dispatch;
 use crate::vdom::{Attribute, AttributeValue, Patch};
@@ -226,7 +225,7 @@ impl<MSG> DomPatch<MSG> {
                             }
                             // it is an event listener
                             AttributeValue::EventListener(_) => {
-                                remove_event_listener_with_name(
+                                CreatedNode::remove_event_listener_with_name(
                                     attr.name(),
                                     target_element,
                                     active_closures,
@@ -256,7 +255,10 @@ impl<MSG> DomPatch<MSG> {
                 // Possible fix: stringify and process the patch in plain javascript code.
                 // That way, all the code is done at once.
                 if target_element.node_type() == Node::ELEMENT_NODE {
-                    remove_event_listeners(target_element, active_closures)?;
+                    CreatedNode::remove_event_listeners(
+                        target_element,
+                        active_closures,
+                    )?;
                 }
                 target_element
                     .replace_with_with_node_1(&replacement.node)
@@ -286,7 +288,10 @@ impl<MSG> DomPatch<MSG> {
                     .remove_child(target_element)
                     .expect("must remove target node");
                 if target_element.node_type() == Node::ELEMENT_NODE {
-                    remove_event_listeners(target_element, active_closures)?;
+                    CreatedNode::remove_event_listeners(
+                        target_element,
+                        active_closures,
+                    )?;
                 }
             }
         }

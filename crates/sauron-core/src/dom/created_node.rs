@@ -6,7 +6,12 @@ use crate::{
     vdom,
     vdom::{Attribute, Leaf, Listener, NodeTrait},
 };
-use std::{cell::Cell, collections::HashMap};
+use js_sys::Function;
+use mt_dom::TreePath;
+use std::{
+    cell::Cell,
+    collections::{BTreeMap, HashMap},
+};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
     self, Element, EventTarget, HtmlButtonElement, HtmlDataElement,
@@ -16,6 +21,9 @@ use web_sys::{
     HtmlParamElement, HtmlProgressElement, HtmlSelectElement, HtmlStyleElement,
     HtmlTextAreaElement, Node, Text,
 };
+
+/// data attribute name used in assigning the node id of an element with events
+pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
 
@@ -31,8 +39,6 @@ fn create_unique_identifier() -> usize {
         tmp
     })
 }
-
-pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
 /// VirtualNode is dropped.
@@ -586,6 +592,67 @@ impl CreatedNode {
 
         Ok(())
     }
+
+    /// remove all the event listeners for this node
+    pub(crate) fn remove_event_listeners(
+        node: &Element,
+        active_closures: &mut ActiveClosure,
+    ) -> Result<(), JsValue> {
+        let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
+        for vdom_id in all_descendant_vdom_id {
+            if let Some(old_closure) = active_closures.get(&vdom_id) {
+                for (event, oc) in old_closure.iter() {
+                    let func: &Function = oc.as_ref().unchecked_ref();
+                    node.remove_event_listener_with_callback(event, func)?;
+                }
+
+                // remove closure active_closure in dom_updater to free up memory
+                active_closures
+                    .remove(&vdom_id)
+                    .expect("Unable to remove old closure");
+            } else {
+                log::warn!(
+                    "There is no closure marked with that vdom_id: {}",
+                    vdom_id
+                );
+            }
+        }
+        Ok(())
+    }
+
+    /// remove the event listener which matches the given event name
+    pub(crate) fn remove_event_listener_with_name(
+        event_name: &'static str,
+        node: &Element,
+        active_closures: &mut ActiveClosure,
+    ) -> Result<(), JsValue> {
+        let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
+        for vdom_id in all_descendant_vdom_id {
+            if let Some(old_closure) = active_closures.get_mut(&vdom_id) {
+                for (event, oc) in old_closure.iter() {
+                    if *event == event_name {
+                        let func: &Function = oc.as_ref().unchecked_ref();
+                        node.remove_event_listener_with_callback(event, func)?;
+                    }
+                }
+
+                old_closure.retain(|(event, _oc)| *event != event_name);
+
+                // remove closure active_closure in dom_updater to free up memory
+                if old_closure.is_empty() {
+                    active_closures
+                        .remove(&vdom_id)
+                        .expect("Unable to remove old closure");
+                }
+            } else {
+                log::warn!(
+                    "There is no closure marked with that vdom_id: {}",
+                    vdom_id
+                );
+            }
+        }
+        Ok(())
+    }
 }
 
 /// This wrap into a closure the function that is dispatched when the event is triggered.
@@ -604,4 +671,68 @@ where
         let msg = listener_clone.emit(Event::from(event));
         program_clone.dispatch(msg);
     }))
+}
+
+fn find_node(node: &Node, path: &mut TreePath) -> Option<Node> {
+    if path.is_empty() {
+        Some(node.clone())
+    } else {
+        let idx = path.remove_first();
+        let children = node.child_nodes();
+        if let Some(child) = children.item(idx as u32) {
+            find_node(&child, path)
+        } else {
+            None
+        }
+    }
+}
+
+pub(crate) fn find_all_nodes(
+    node: &Node,
+    nodes_to_find: &[(&TreePath, Option<&&'static str>)],
+) -> BTreeMap<TreePath, Node> {
+    let mut nodes_to_patch: BTreeMap<TreePath, Node> = BTreeMap::new();
+
+    for (path, tag) in nodes_to_find {
+        let mut traverse_path: TreePath = (*path).clone();
+        if let Some(found) = find_node(node, &mut traverse_path) {
+            nodes_to_patch.insert((*path).clone(), found);
+        } else {
+            log::warn!(
+                "can not find: {:?} {:?} root_node: {:?}",
+                path,
+                tag,
+                node
+            );
+        }
+    }
+    nodes_to_patch
+}
+
+/// Get the "data-sauron-vdom-id" of all the desendent of this node including itself
+/// This is needed to free-up the closure that was attached ActiveClosure manually
+fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<usize> {
+    let mut data_vdom_id = vec![];
+
+    // TODO: there should be a better way to get the node-id back
+    // without having to read from the actual dom node element
+    if let Some(vdom_id_str) = root_element.get_attribute(DATA_VDOM_ID) {
+        let vdom_id = vdom_id_str
+            .parse::<usize>()
+            .expect("unable to parse sauron_vdom-id");
+        data_vdom_id.push(vdom_id);
+    }
+
+    let children = root_element.child_nodes();
+    let child_node_count = children.length();
+    for i in 0..child_node_count {
+        let child_node = children.item(i).expect("Expecting a child node");
+        if child_node.node_type() == Node::ELEMENT_NODE {
+            let child_element = child_node.unchecked_ref::<Element>();
+            let child_data_vdom_id =
+                get_node_descendant_data_vdom_id(child_element);
+            data_vdom_id.extend(child_data_vdom_id);
+        }
+    }
+    data_vdom_id
 }

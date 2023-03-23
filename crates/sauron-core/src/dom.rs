@@ -2,7 +2,6 @@
 //! manipulating the actual Document Object Model in the browser
 //!
 mod application;
-pub mod apply_patches;
 mod callback;
 pub mod cmd;
 mod component;

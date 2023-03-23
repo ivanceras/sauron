@@ -192,6 +192,9 @@
 - [X] Fix the data-viewer example to use Components on the views rather than Application
 - [X] Revisit and use style_name identifier in usage of jss in examples
 - [X] Move `html::units` to `jss` crate
+- [ ] Rename `DomUpdater` to `DomPatcher`.
+    - [ ] move apply_patches into `DomPatcher`.
+- [ ] Rename `CreatedNode` to `DomNode`.
 
 ## Bug
 - [X] When 2 nodes with multiple similar keys, multiple replace node patch is generated. But it couldn't seem to find the correct target element.
