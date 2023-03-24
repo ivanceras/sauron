@@ -22,6 +22,7 @@ cfg-if = "0.1"
 default = ["with-dom", "with-node-macro"]
 with-dom = ["sauron-core/with-dom"]
 with-lookup = ["sauron-core/with-lookup"]
+with-ric = ["sauron-core/with-ric"]
 
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]

@@ -586,7 +586,7 @@ where
         self.add_pending(msgs);
         let program = self.clone();
         #[cfg(feature = "with-ric")]
-        let handle = util::request_idle_callback(move|v: JsValue|{
+        let _handle = crate::dom::util::request_idle_callback(move|v: JsValue|{
             let deadline = if let Ok(deadline) = v.dyn_into::<web_sys::IdleDeadline>() {
                 deadline.time_remaining()
             } else {
