@@ -20,14 +20,10 @@ async fn patches_dom() {
 
     let vdom: Node<()> = div(vec![], vec![]);
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        vdom,
-        &sauron_core::body(),
-    );
+    simple_program.set_current_dom(vdom);
 
     let new_vdom = div(vec![id("patched")], vec![]); //html! { <div id="patched"></div> };
-    dom_updater.update_dom(&simple_program, new_vdom).await.expect("must not error");
+    simple_program.update_dom(new_vdom).await.expect("must not error");
 
     assert_eq!(document.query_selector("#patched").unwrap().is_some(), true);
 }
@@ -39,12 +35,10 @@ async fn patches_dom() {
 async fn updates_active_closure_on_replace() {
     console_error_panic_hook::set_once();
 
-    let body = sauron_core::body();
-
     let simple_program = simple_program();
     let old = div(vec![], vec![]);
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &body);
+
+    simple_program.set_current_dom(old);
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -65,7 +59,7 @@ async fn updates_active_closure_on_replace() {
     // New node replaces old node.
     // We are testing that we've stored this new node's closures even though `new` will be dropped
     // at the end of this block.
-    dom_updater.update_dom(&simple_program, replace_node).await.expect("must not error");
+    simple_program.update_dom(replace_node).await.expect("must not error");
 
     let input_event = InputEvent::new("input").unwrap();
 
@@ -87,12 +81,9 @@ async fn updates_active_closure_on_replace() {
 async fn updates_active_closures_on_append() {
     console_error_panic_hook::set_once();
 
-    let body = sauron_core::body();
-
     let old = div(vec![], vec![]);
     let simple_program = simple_program();
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &body);
+    simple_program.set_current_dom(old);
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -119,7 +110,7 @@ async fn updates_active_closures_on_append() {
         // New node gets appended into the DOM.
         // We are testing that we've stored this new node's closures even though `new` will be dropped
         // at the end of this block.
-        dom_updater.update_dom(&simple_program, append_node).await.expect("must not error");
+        simple_program.update_dom(append_node).await.expect("must not error");
     }
 
     let input_event = InputEvent::new("input").unwrap();

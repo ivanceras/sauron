@@ -48,13 +48,9 @@ async fn failing_reordered_keys() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        old,
-        &sauron_core::body(),
-    );
+    simple_program.set_current_dom(old);
 
-    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
+    simple_program.update_dom(update1).await.expect("must not error");
 
     let container = document
         .query_selector(".reordered")

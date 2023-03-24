@@ -30,11 +30,7 @@ async fn node_mounted_properly() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let _dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        old,
-        &sauron_core::body(),
-    );
+    simple_program.set_current_dom(old);
 
     let container = document
         .query_selector(".container1")
@@ -92,11 +88,7 @@ async fn node_patched_properly() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        old,
-        &sauron_core::body(),
-    );
+    simple_program.set_current_dom(old);
 
     let container = document
         .query_selector(".container2")
@@ -112,7 +104,7 @@ async fn node_patched_properly() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
+    simple_program.update_dom(update1).await.expect("must not error");
 
     let container = document
         .query_selector(".container2")
@@ -174,11 +166,7 @@ async fn node_patched_properly_remove_from_start() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        old,
-        &sauron_core::body(),
-    );
+    simple_program.set_current_dom(old);
 
     let container = document
         .query_selector(".test3")
@@ -195,7 +183,7 @@ async fn node_patched_properly_remove_from_start() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
+    simple_program.update_dom(update1).await.expect("must not error");
 
     let container = document
         .query_selector(".test3")
@@ -261,11 +249,7 @@ async fn node_patched_properly_text_changed() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        old,
-        &sauron_core::body(),
-    );
+    simple_program.set_current_dom(old);
 
     let container = document
         .query_selector(".test4")
@@ -282,7 +266,7 @@ async fn node_patched_properly_text_changed() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
+    simple_program.update_dom(update1).await.expect("must not error");
 
     let container = document
         .query_selector(".test4")
@@ -359,11 +343,8 @@ async fn mixed_keyed_and_non_keyed_elements() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        old,
-        &sauron_core::body(),
-    );
+
+    simple_program.set_current_dom(old);
 
     let container = document
         .query_selector(".test5")
@@ -381,7 +362,7 @@ async fn mixed_keyed_and_non_keyed_elements() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1).await.expect("must not error");
+    simple_program.update_dom(update1).await.expect("must not error");
 
     let container = document
         .query_selector(".test5")

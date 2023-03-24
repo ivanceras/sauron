@@ -37,10 +37,8 @@ fn on_input_test() {
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
-    let body = sauron_core::body();
     let simple_program = simple_program();
-    let _dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, input, &body);
+    simple_program.set_current_dom(input);
 
     let input_element =
         sauron_core::document().get_element_by_id(&elem_id).unwrap();
@@ -86,12 +84,11 @@ async fn added_event() {
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
-    let body = sauron_core::body();
     let simple_program = simple_program();
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &body);
+
+    simple_program.set_current_dom(old);
     // update to new dom with no event attached
-    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
+    simple_program.update_dom(new).await.expect("must not error");
 
     let input_element =
         sauron_core::document().get_element_by_id(&elem_id).unwrap();
@@ -140,12 +137,10 @@ async fn remove_event() {
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
-    let body = sauron_core::body();
     let simple_program = simple_program();
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &body);
+    simple_program.set_current_dom(old);
     // update to new dom with no event attached
-    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
+    simple_program.update_dom(new).await.expect("must not error");
 
     let input_element =
         sauron_core::document().get_element_by_id(&elem_id).unwrap();
@@ -179,7 +174,6 @@ async fn remove_event_from_truncated_children() {
 
     let new: Node<()> = div(vec![], vec![button(vec![cb.clone()], vec![])]);
 
-    let body = sauron_core::body();
     let simple_program = simple_program();
     let diff = diff(&old, &new);
     log::debug!("{:#?}", diff);
@@ -192,17 +186,17 @@ async fn remove_event_from_truncated_children() {
             Patch::remove_node(Some(&"button"), TreePath::new(vec![4]),),
         ],
     );
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &body);
+
+    simple_program.set_current_dom(old);
     assert_eq!(
-        dom_updater.active_closure_len(),
+        simple_program.active_closures.borrow().len(),
         5,
         "There should be 5 events attached to the DomUpdater"
     );
-    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
+    simple_program.update_dom(new).await.expect("must not error");
 
     assert_eq!(
-        dom_updater.active_closure_len(),
+        simple_program.active_closures.borrow().len(),
         1,
         "There should only be 1 left after the truncate"
     );
@@ -225,7 +219,6 @@ async fn remove_event_from_truncated_children_some_with_no_events() {
 
     let new: Node<()> = div(vec![], vec![button(vec![cb.clone()], vec![])]);
 
-    let body = sauron_core::body();
     let simple_program = simple_program();
     let diff = diff(&old, &new);
     log::debug!("{:#?}", diff);
@@ -239,17 +232,18 @@ async fn remove_event_from_truncated_children_some_with_no_events() {
         ],
         "Should be a Truncate patch"
     );
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &body);
+
+    simple_program.set_current_dom(old);
+
     assert_eq!(
-        dom_updater.active_closure_len(),
+        simple_program.active_closures.borrow().len(),
         3,
         "There should be 3 events attached to the DomUpdater"
     );
-    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
+    simple_program.update_dom( new).await.expect("must not error");
 
     assert_eq!(
-        dom_updater.active_closure_len(),
+        simple_program.active_closures.borrow().len(),
         1,
         "There should only be 1 left after the truncate"
     );
@@ -264,7 +258,6 @@ async fn remove_event_from_replaced_node() {
 
     let new: Node<()> = p(vec![], vec![]);
 
-    let body = sauron_core::body();
     let simple_program = simple_program();
     let diff = diff(&old, &new);
     log::info!("{:#?}", diff);
@@ -276,17 +269,16 @@ async fn remove_event_from_replaced_node() {
             &p(vec![], vec![])
         )],
     );
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old, &body);
+    simple_program.set_current_dom(old);
     assert_eq!(
-        dom_updater.active_closure_len(),
+        simple_program.active_closures.borrow().len(),
         1,
         "There should be 1 event attached to the DomUpdater"
     );
-    dom_updater.update_dom(&simple_program, new).await.expect("must not error");
+    simple_program.update_dom(new).await.expect("must not error");
 
     assert_eq!(
-        dom_updater.active_closure_len(),
+        simple_program.active_closures.borrow().len(),
         0,
         "There should only be 0 left after replacing it with a different tag"
     );
