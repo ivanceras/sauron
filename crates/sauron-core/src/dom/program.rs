@@ -1,77 +1,21 @@
-#![allow(unused)]
 #[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
-use crate::dom::util;
-use crate::vdom::Node;
-use crate::{dom::dom_updater::DomUpdater, Application, Cmd, Dispatch};
+use crate::vdom;
+use crate::{Application, Cmd, Dispatch};
 use std::{any::TypeId, cell::RefCell, collections::BTreeMap, rc::Rc};
 use wasm_bindgen::{closure::Closure, JsCast};
 use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen::JsValue;
-use once_cell::sync::OnceCell;
 use std::collections::VecDeque;
+use crate::dom::created_node::ActiveClosure;
+use crate::DomPatch;
+use web_sys::{self,Element,Node};
+use crate::vdom::diff;
+use mt_dom::TreePath;
+use crate::CreatedNode;
+use crate::dom::created_node;
 
 
-pub struct AppWrapper<APP,MSG>{
-    pub app: APP,
-    pending_updates: VecDeque<MSG>,
-}
-
-impl<APP,MSG> AppWrapper<APP,MSG>
-    where MSG: 'static,
-        APP: Application<MSG> + 'static,
-    {
-
-    fn new(app: APP) -> Self{
-        Self{
-            app,
-            pending_updates: VecDeque::new(),
-        }
-    }
-
-    ///TODO: spawn the updates here
-    async fn dispatch_updates(&mut self, deadline: f64) -> Cmd<APP, MSG>{
-        let t1 = crate::now();
-        let mut all_cmd = vec![];
-        let mut i = 0;
-        while let Some(pending_msg) = self.pending_updates.pop_front(){
-            #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-            log::debug!("Executing pending msg item {}", i);
-            let c = self.app.update(pending_msg).await;
-            all_cmd.push(c);
-            let t2 = crate::now();
-            let elapsed = t2 - t1;
-            if elapsed > deadline{
-                log::warn!("elapsed time: {}ms", elapsed);
-                log::warn!("we should be breaking at {}..", i);
-                break;
-            }
-            i += 1;
-        }
-        Cmd::batch(all_cmd)
-    }
-
-    fn init(&mut self) -> Cmd<APP,MSG>{
-        self.app.init()
-    }
-
-    fn style(&self) -> String {
-        self.app.style()
-    }
-
-    fn view(&self) -> Node<MSG>{
-        self.app.view()
-    }
-
-    fn add_pending(&mut self, msgs: impl IntoIterator<Item = MSG>) {
-        self.pending_updates.extend(msgs)
-    }
-
-    #[cfg(feature = "with-measure")]
-    fn measurements(&self, measurements: Measurements) -> Cmd<APP,MSG>{
-        self.app.measurements(measurements)
-    }
-}
 
 /// Holds the user App and the dom updater
 /// This is passed into the event listener and the dispatch program
@@ -81,11 +25,36 @@ where
     MSG: 'static,
 {
     /// holds the user application
-    // Note: This needs to be in Rc<RefCell<_>> to allow interior mutability
-    // from a non-mutable reference
-    pub app_wrap: Rc<RefCell<AppWrapper<APP, MSG>>>,
-    /// The dom_updater responsible to updating the actual document in the browser
-    pub dom_updater: Rc<RefCell<DomUpdater<MSG>>>,
+    pub app: Rc<RefCell<APP>>,
+    /// The MSG that hasn't been applied to the APP yet
+    pub pending_updates: Rc<RefCell<VecDeque<MSG>>>,
+
+    /// the current vdom representation
+    pub current_vdom: Rc<RefCell<vdom::Node<MSG>>>,
+    /// the first element of the app view, where the patch is generated is relative to
+    pub root_node: Rc<RefCell<Option<Node>>>,
+
+    /// the actual DOM element where the APP is mounted to.
+    pub mount_node: Node,
+
+    /// The closures that are currently attached to elements in the page.
+    ///
+    /// We keep these around so that they don't get dropped (and thus stop working);
+    ///
+    pub active_closures: Rc<RefCell<ActiveClosure>>,
+    /// after mounting or update dispatch call, the element will be focused
+    pub focused_node: Rc<RefCell<Option<Node>>>,
+
+    /// if the mount node is replaced by the root_node
+    pub replace: bool,
+
+    /// whether or not to use shadow root of the mount_node
+    pub use_shadow: bool,
+
+    /// for optimization purposes to avoid sluggishness of the app, when a patch
+    /// can not be run in 1 execution due to limited remaining time deadline
+    /// it will be put into the pending patches to be executed on the next run.
+    pub pending_patches: Rc<RefCell<VecDeque<DomPatch<MSG>>>>,
 }
 
 impl<APP, MSG> Clone for Program<APP, MSG>
@@ -94,8 +63,16 @@ where
 {
     fn clone(&self) -> Self {
         Program {
-            app_wrap: Rc::clone(&self.app_wrap),
-            dom_updater: Rc::clone(&self.dom_updater),
+            app: Rc::clone(&self.app),
+            pending_updates: Rc::clone(&self.pending_updates),
+            current_vdom: Rc::clone(&self.current_vdom),
+            root_node: Rc::clone(&self.root_node),
+            mount_node: self.mount_node.clone(),
+            active_closures: Rc::clone(&self.active_closures),
+            focused_node: Rc::clone(&self.focused_node),
+            replace: self.replace,
+            use_shadow: self.use_shadow,
+            pending_patches: Rc::clone(&self.pending_patches),
         }
     }
 }
@@ -113,25 +90,32 @@ where
         replace: bool,
         use_shadow: bool,
     ) -> Self {
-        let dom_updater: DomUpdater<MSG> =
-            DomUpdater::new(app.view(), mount_node, replace, use_shadow);
+        let view = app.view();
         Program {
-            app_wrap: Rc::new(RefCell::new(AppWrapper::new(app))),
-            dom_updater: Rc::new(RefCell::new(dom_updater)),
+            app: Rc::new(RefCell::new(app)),
+            pending_updates: Rc::new(RefCell::new(VecDeque::new())),
+            current_vdom: Rc::new(RefCell::new(view)),
+            root_node: Rc::new(RefCell::new(None)),
+            mount_node: mount_node.clone(),
+            active_closures: Rc::new(RefCell::new(ActiveClosure::new())),
+            focused_node: Rc::new(RefCell::new(None)),
+            replace,
+            use_shadow,
+            pending_patches: Rc::new(RefCell::new(VecDeque::new())),
         }
     }
 
     /// executed after the program has been mounted
     fn after_mounted(&self) {
         // call the init of the component
-        let cmds = self.app_wrap.borrow_mut().init();
+        let cmds = self.app.borrow_mut().init();
         // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
         // listening to events (resize, hashchange)
         cmds.emit(self);
 
         // inject the style style after call the init of the app as
         // it may be modifying the app state including the style
-        let style = self.app_wrap.borrow().style();
+        let style = self.app.borrow().style();
         if !style.trim().is_empty() {
             let type_id = TypeId::of::<APP>();
             Self::inject_style(type_id, &style);
@@ -140,7 +124,7 @@ where
 
     /// return the node where the app is mounted into
     pub fn mount_node(&self) -> web_sys::Node {
-        self.dom_updater.borrow().mount_node()
+        self.mount_node.clone()
     }
 
     /// Creates an Rc wrapped instance of Program and replace the root_node with the app view
@@ -209,21 +193,50 @@ where
         Self::append_to_mount(app, &crate::body())
     }
 
-    /// Do the actual mounting of the view to the specified mount node
-    pub fn mount(&self) {
-        self.dom_updater.borrow_mut().mount(self);
+    /// each element and it's descendant in the vdom is created into
+    /// an actual DOM node.
+    pub fn mount(&self)
+    {
+        let created_node = CreatedNode::create_dom_node(
+            self,
+            &self.current_vdom.borrow(),
+            &mut self.focused_node.borrow_mut(),
+        );
+
+        //TODO: maybe remove replace the mount
+        if self.replace {
+            let mount_element: &Element = self.mount_node.unchecked_ref();
+            mount_element
+                .replace_with_with_node_1(&created_node.node)
+                .expect("Could not append child to mount");
+        } else if self.use_shadow {
+            let mount_element: &web_sys::Element =
+                self.mount_node.unchecked_ref();
+            mount_element
+                .attach_shadow(&web_sys::ShadowRootInit::new(
+                    web_sys::ShadowRootMode::Open,
+                ))
+                .expect("unable to attached shadow");
+            let mount_shadow =
+                mount_element.shadow_root().expect("must have a shadow");
+
+            let mount_shadow_node: &web_sys::Node =
+                mount_shadow.unchecked_ref();
+
+            mount_shadow_node
+                .append_child(&created_node.node)
+                .expect("could not append child to mount shadow");
+        } else {
+            self.mount_node
+                .append_child(&created_node.node)
+                .expect("Could not append child to mount");
+        }
+        *self.root_node.borrow_mut() = Some(created_node.node);
+        *self.active_closures.borrow_mut() = created_node.closures;
+        self.set_focus_element();
         self.after_mounted();
     }
 
-    /// explicity update the dom
-    pub fn update_dom(&self) {
-        let view = self.app_wrap.borrow().view();
-        // update the last DOM node tree with this new view
-        let mut dom_updater = self.dom_updater.borrow_mut();
-        let _total_patches =
-            dom_updater
-            .update_dom(self, view);
-    }
 
     /// update the attributes at the mounted element
     pub fn update_mount_attributes(
@@ -240,15 +253,183 @@ where
     }
 
     async fn dispatch_updates(&self, deadline: f64) -> Cmd<APP, MSG>{
-        self.app_wrap.borrow_mut().dispatch_updates(deadline).await
+        let t1 = crate::now();
+        let mut all_cmd = vec![];
+        let mut i = 0;
+        while let Some(pending_msg) = self.pending_updates.borrow_mut().pop_front(){
+            #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+            log::debug!("Executing pending msg item {}", i);
+            let c = self.app.borrow_mut().update(pending_msg).await;
+            all_cmd.push(c);
+            let t2 = crate::now();
+            let elapsed = t2 - t1;
+            if elapsed > deadline{
+                log::warn!("elapsed time: {}ms", elapsed);
+                log::warn!("we should be breaking at {}..", i);
+                break;
+            }
+            i += 1;
+        }
+        Cmd::batch(all_cmd)
     }
+
+    /// Diff the current virtual dom with the new virtual dom that is being passed in.
+    ///
+    /// Then use that diff to patch the real DOM in the user's browser so that they are
+    /// seeing the latest state of the application.
+    ///
+    /// Return the total number of patches applied
+    pub async fn update_dom(
+        &self,
+        new_vdom: vdom::Node<MSG>,
+    ) -> Result<usize, JsValue>
+    {
+
+        let total_patches = self.patch(
+            &new_vdom
+        )?;
+
+        *self.current_vdom.borrow_mut() = new_vdom;
+
+        self.set_focus_element();
+        Ok(total_patches)
+    }
+
+    /// Apply all of the patches to our old root node in order to create the new root node
+    /// that we desire.
+    /// This is usually used after diffing two virtual nodes.
+    ///
+    pub fn patch(
+        &self,
+        new_vdom: &vdom::Node<MSG>,
+    ) -> Result<usize, JsValue>
+    {
+        let current_vdom = self.current_vdom.borrow();
+        let patches = diff(&current_vdom, new_vdom);
+        // move the diff into patch function.
+        let total_patches = patches.len();
+
+        #[cfg(feature = "with-debug")]
+        log::debug!("patches: {:#?}", patches);
+
+        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+        let t1 = crate::now();
+        let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
+            .iter()
+            .map(|patch| (patch.path(), patch.tag()))
+            .collect();
+
+        let mut paths = vec![];
+        for patch in patches.iter() {
+            paths.push(patch.path());
+        }
+
+        //Note: it is important that root_node points to the original mutable reference here
+        // since it can be replaced with a new root Node(the top-level node of the view) when patching
+        let root_node = self.root_node.borrow();
+        let root_node = root_node.as_ref().expect("must have a root_node");
+
+        let nodes_to_patch = created_node::find_all_nodes(root_node, &nodes_to_find);
+        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+        let t2 = crate::now();
+
+        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+        log::info!("Took {}ms to find all the nodes", t2 - t1);
+
+        //TODO: spawn all the apply patch here to to it asynchronously
+        // can be done with Promise.all (https://docs.rs/js-sys/0.3.61/js_sys/struct.Promise.html#method.all)
+        for patch in patches.iter() {
+            let patch_path = patch.path();
+            let patch_tag = patch.tag();
+            if let Some(target_node) = nodes_to_patch.get(patch_path) {
+                // check the tag here if it matches
+                let target_element: &Element = target_node.unchecked_ref();
+                if let Some(tag) = patch_tag {
+                    let target_tag = target_element.tag_name().to_lowercase();
+                    if target_tag != **tag {
+                        panic!(
+                            "expecting a tag: {:?}, but found: {:?}",
+                            tag, target_tag
+                        );
+                    }
+                }
+
+                #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+                let t3 = crate::now();
+
+                //TODO: push this into a vecqueue for executing the patches
+                //taking into account deadline remaining time
+                let dom_patch =
+                    DomPatch::from_patch(self, target_node, &mut self.focused_node.borrow_mut(), patch);
+
+                #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+                let t4 = crate::now();
+
+                #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+                log::info!("Creating dom_patch took {}ms", t4 - t3);
+
+                self.pending_patches.borrow_mut().push_back(dom_patch);
+            } else {
+                unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
+            }
+        }
+
+        let deadline = 100.0;
+
+        self.apply_pending_patches(deadline)
+            .expect("must not error");
+
+        Ok(total_patches)
+    }
+
+    /// apply the pending patches into the DOM
+    fn apply_pending_patches(
+        &self,
+        deadline: f64,
+    ) -> Result<(), JsValue>
+    {
+        let t1 = crate::now();
+        #[cfg(feature = "with-debug")]
+        let mut cnt = 0;
+        while let Some(dom_patch) = self.pending_patches.borrow_mut().pop_front() {
+            #[cfg(feature = "with-debug")]
+            log::debug!("Executing pending patch item {}", cnt);
+            let t2 = crate::now();
+            dom_patch
+                .apply(self, &mut self.active_closures.borrow_mut())
+                .expect("must apply the dom patch");
+            let elapsed = t2 - t1;
+            if elapsed > deadline {
+                log::info!("breaking here...");
+                break;
+            }
+            #[cfg(feature = "with-debug")]
+            {
+                cnt += 1;
+            }
+        }
+        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+        let t3 = crate::now();
+        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+        log::info!("Pending patches took {}ms", t3 - t1);
+        Ok(())
+    }
+
+    fn set_focus_element(&self) {
+        if let Some(focused_node) = &*self.focused_node.borrow() {
+            let focused_element: &Element = focused_node.unchecked_ref();
+            CreatedNode::set_element_focus(focused_element);
+        }
+    }
+
 
     async fn dispatch_dom_changes(&self, _log_measurements: bool, _measurement_name: &str, _msg_count: usize, _t1: f64) {
         #[cfg(feature = "with-measure")]
         let t2 = crate::now();
 
         // a new view is created due to the app update
-        let view = self.app_wrap.borrow().view();
+        let view = self.app.borrow().view();
+        #[cfg(all(feature = "with-measure", feature="with-debug"))]
         let t25 = crate::now();
         #[cfg(all(feature = "with-measure", feature="with-debug"))]
         log::info!("view took: {}ms", t25 - t2);
@@ -263,7 +444,7 @@ where
 
         // update the last DOM node tree with this new view
         let _total_patches =
-            self.dom_updater.borrow_mut().update_dom(self, view).await.expect("must not error");
+            self.update_dom(view).await.expect("must not error");
         #[cfg(feature = "with-measure")]
         let t4 = crate::now();
 
@@ -292,7 +473,7 @@ where
             };
             // tell the app on app performance measurements
             let cmd_measurement =
-                self.app_wrap.borrow().measurements(measurements).no_render();
+                self.app.borrow().measurements(measurements).no_render();
             cmd_measurement.emit(self);
         }
     }
@@ -341,9 +522,32 @@ where
         head.append_child(&html_style).expect("must append style");
     }
 
-    /// Inject a style to the mount node
-    pub fn inject_style_to_mount(&self, style: &str) {
-        self.dom_updater.borrow().inject_style_to_mount(self, style);
+    /// inject style element to the mount node
+    pub fn inject_style_to_mount<DSP>(&self, style: &str)
+    {
+        let style_node =
+            crate::html::tags::style([], [crate::html::text(style)]);
+        let created_node =
+            CreatedNode::create_dom_node(self, &style_node, &mut None);
+        if self.use_shadow {
+            let mount_element: &web_sys::Element =
+                self.mount_node.unchecked_ref();
+            let mount_shadow =
+                mount_element.shadow_root().expect("must have a shadow");
+
+            let mount_shadow_node: &web_sys::Node =
+                mount_shadow.unchecked_ref();
+
+            mount_shadow_node
+                .append_child(&created_node.node)
+                .expect("could not append child to mount shadow");
+        } else {
+            panic!("injecting style to non shadow mount is not supported");
+        }
+    }
+
+    fn add_pending(&self, msgs: impl IntoIterator<Item = MSG>) {
+        self.pending_updates.borrow_mut().extend(msgs)
     }
 
 }
@@ -360,7 +564,7 @@ where
     /// with an alloted time of say 10ms to execute.
     /// if there is no more time, then dom patching should be commence and resume.
     fn dispatch_multiple(&self, msgs: Vec<MSG>) {
-        self.app_wrap.borrow_mut().add_pending(msgs);
+        self.add_pending(msgs);
         let program = self.clone();
         #[cfg(feature = "with-ric")]
         let handle = util::request_idle_callback(move|v: JsValue|{
