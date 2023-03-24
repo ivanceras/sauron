@@ -168,7 +168,7 @@
     - [X] It was cause by jss `style!` macro where the lookup for style name is recreated everytime,
           due to the use of `const` instead of `static` in a `once_cell::Lazy` declaration. This is fixed in `jss 0.3.3`
 - [ ] Create the dom nodes in depth-first-traversal
-- [ ] Make a pending patches in the DomUpdater which stops applying remaining patches when the time remaining for the deadline is up.
+- [X] Make a pending patches in the DomUpdater which stops applying remaining patches when the time remaining for the deadline is up.
     - There is a problem with storing the patch in a struct which will need to have explicit lifetime
     - This can not also be stored in a global variable since there is a generic MSG
     - Solution:
@@ -181,7 +181,7 @@
           ```
         - Store the patches as Closures, so as to get away with the generics
             - but then there will be error can be shared between threads because closure is not Send
-        - Make a DomPatch which a DOM version of the patch with the target node and created node
+        - [X] Make a DomPatch which a DOM version of the patch with the target node and created node
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
@@ -192,9 +192,14 @@
 - [X] Fix the data-viewer example to use Components on the views rather than Application
 - [X] Revisit and use style_name identifier in usage of jss in examples
 - [X] Move `html::units` to `jss` crate
-- [ ] Rename `DomUpdater` to `DomPatcher`.
-    - [ ] move apply_patches into `DomPatcher`.
+- [X] Rename `DomUpdater` to `DomPatcher`.
+    - [X] move apply_patches into `DomPatcher`.
 - [ ] Rename `CreatedNode` to `DomNode`.
+- [X] Move fields from `DomUpdater` into `Program` such as
+     - [X] current_vdom
+     - [X] root_node,
+     - [X] active_closures,
+     - [X] pending_patches
 
 ## Bug
 - [X] When 2 nodes with multiple similar keys, multiple replace node patch is generated. But it couldn't seem to find the correct target element.
