@@ -27,7 +27,7 @@ where
     /// holds the user application
     pub app: Rc<RefCell<APP>>,
     /// The MSG that hasn't been applied to the APP yet
-    pub pending_updates: Rc<RefCell<VecDeque<MSG>>>,
+    pub pending_msgs: Rc<RefCell<VecDeque<MSG>>>,
 
     /// the current vdom representation
     pub current_vdom: Rc<RefCell<vdom::Node<MSG>>>,
@@ -64,7 +64,7 @@ where
     fn clone(&self) -> Self {
         Program {
             app: Rc::clone(&self.app),
-            pending_updates: Rc::clone(&self.pending_updates),
+            pending_msgs: Rc::clone(&self.pending_msgs),
             current_vdom: Rc::clone(&self.current_vdom),
             root_node: Rc::clone(&self.root_node),
             mount_node: self.mount_node.clone(),
@@ -93,7 +93,7 @@ where
         let view = app.view();
         Program {
             app: Rc::new(RefCell::new(app)),
-            pending_updates: Rc::new(RefCell::new(VecDeque::new())),
+            pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
             current_vdom: Rc::new(RefCell::new(view)),
             root_node: Rc::new(RefCell::new(None)),
             mount_node: mount_node.clone(),
@@ -252,11 +252,11 @@ where
         }
     }
 
-    async fn dispatch_updates(&self, deadline: f64) -> Cmd<APP, MSG>{
+    async fn dispatch_pending_msgs(&self, deadline: f64) -> Cmd<APP, MSG>{
         let t1 = crate::now();
         let mut all_cmd = vec![];
         let mut i = 0;
-        while let Some(pending_msg) = self.pending_updates.borrow_mut().pop_front(){
+        while let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front(){
             #[cfg(all(feature = "with-measure", feature = "with-debug"))]
             log::debug!("Executing pending msg item {}", i);
             let c = self.app.borrow_mut().update(pending_msg).await;
@@ -657,7 +657,7 @@ where
         let t1 = crate::now();
 
         let msg_count = 0;
-        let cmd = self.dispatch_updates(deadline).await;
+        let cmd = self.dispatch_pending_msgs(deadline).await;
 
         if cmd.modifier.should_update_view {
             let log_measurements = cmd.modifier.log_measurements;
@@ -710,9 +710,6 @@ where
         }
     }
 
-    fn add_pending(&self, msgs: impl IntoIterator<Item = MSG>) {
-        self.pending_updates.borrow_mut().extend(msgs)
-    }
 
 }
 
@@ -728,15 +725,11 @@ where
     /// with an alloted time of say 10ms to execute.
     /// if there is no more time, then dom patching should be commence and resume.
     fn dispatch_multiple(&self, msgs: Vec<MSG>) {
-        self.add_pending(msgs);
+        self.pending_msgs.borrow_mut().extend(msgs);
         let program = self.clone();
         #[cfg(feature = "with-ric")]
         let _handle = crate::dom::util::request_idle_callback(move|v: JsValue|{
-            let deadline = if let Ok(deadline) = v.dyn_into::<web_sys::IdleDeadline>() {
-                deadline.time_remaining()
-            } else {
-                panic!("must have a deadline");
-            };
+            let deadline =  v.dyn_into::<web_sys::IdleDeadline>().expect("must have idle deadline").time_remaining();
             log::info!("deadline: {:.2}", deadline);
             let program = program.clone();
             spawn_local(async move{
