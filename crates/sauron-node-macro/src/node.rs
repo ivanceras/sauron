@@ -93,11 +93,6 @@ fn attribute_to_tokens(attribute: &Node) -> TokenStream {
                             sauron::html::attributes::attr(#name, #value)
                         }
                     }
-                    /*
-                    quote::quote! {
-                        sauron::html::attributes::attr(#name, #value)
-                    }
-                    */
                 }
                 _ => {
                     quote! {
