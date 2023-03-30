@@ -102,7 +102,7 @@ features = [
 [features]
 default = ["with-dom"]
 with-lookup = [] #enumerates html tags and attributes
-with-measure = ["mt-dom/with-measure"] # log traces for measurements in various parts of the system where performance matters.
+with-measure = [] # log traces for measurements in various parts of the system where performance matters.
 with-debug = [] # log debug patches
 with-ric = []
 with-dom = ["wasm-bindgen", "js-sys", "web-sys", "wasm-bindgen-futures"] # for client-side usage
