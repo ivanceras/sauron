@@ -1,24 +1,18 @@
 use once_cell::sync::Lazy;
 use sauron_core::{
     html::tags::{
-        HTML_SC_TAGS,
-        HTML_TAGS,
-        HTML_TAGS_NON_COMMON,
+        HTML_SC_TAGS, HTML_TAGS, HTML_TAGS_NON_COMMON,
         HTML_TAGS_WITH_MACRO_NON_COMMON,
     },
     svg::{
-        tags::{
-            SVG_TAGS,
-            SVG_TAGS_NON_COMMON,
-            SVG_TAGS_SPECIAL,
-        },
+        tags::{SVG_TAGS, SVG_TAGS_NON_COMMON, SVG_TAGS_SPECIAL},
         SVG_NAMESPACE,
     },
 };
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 /// All of the svg tags
-static ALL_SVG_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
+static ALL_SVG_TAGS: Lazy<BTreeSet<&&'static str>> = Lazy::new(|| {
     SVG_TAGS
         .iter()
         .chain(SVG_TAGS_NON_COMMON.iter())
@@ -27,7 +21,7 @@ static ALL_SVG_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
 });
 
 /// All of the html tags, excluding the SVG tags.
-static ALL_HTML_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
+static ALL_HTML_TAGS: Lazy<BTreeSet<&&'static str>> = Lazy::new(|| {
     HTML_TAGS
         .iter()
         .chain(HTML_SC_TAGS.iter())
@@ -36,7 +30,7 @@ static ALL_HTML_TAGS: Lazy<HashSet<&&'static str>> = Lazy::new(|| {
         .collect()
 });
 
-static SELF_CLOSING_TAGS: Lazy<HashSet<&&'static str>> =
+static SELF_CLOSING_TAGS: Lazy<BTreeSet<&&'static str>> =
     Lazy::new(|| HTML_SC_TAGS.iter().collect());
 
 /// Find the namespace of this tag

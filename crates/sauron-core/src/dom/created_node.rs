@@ -8,10 +8,7 @@ use crate::{
 };
 use js_sys::Function;
 use mt_dom::TreePath;
-use std::{
-    cell::Cell,
-    collections::{BTreeMap, HashMap},
-};
+use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
     self, Element, EventTarget, HtmlButtonElement, HtmlDataElement,
@@ -47,7 +44,7 @@ fn create_unique_identifier() -> usize {
 /// attached to.
 ///
 pub type ActiveClosure =
-    HashMap<usize, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
+    BTreeMap<usize, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
 
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
@@ -63,7 +60,7 @@ impl CreatedNode {
     pub fn without_closures(node: Node) -> Self {
         CreatedNode {
             node,
-            closures: HashMap::with_capacity(0),
+            closures: BTreeMap::new(),
         }
     }
 
