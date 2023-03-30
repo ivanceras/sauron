@@ -252,6 +252,10 @@ where
         }
     }
 
+    /// executes pending msgs by calling the app update method with the msgs
+    /// as parameters
+    ///
+    /// TODO: maybe call the apply_pending_patches here to apply the some patches
     async fn dispatch_pending_msgs(&self, deadline: f64) -> Cmd<APP, MSG>{
         let t1 = crate::now();
         let mut all_cmd = vec![];
@@ -386,9 +390,8 @@ where
             }
         }
 
-        let deadline = 100.0;
 
-        self.apply_pending_patches(deadline)
+        self.apply_pending_patches()
             .expect("must not error");
 
         Ok(total_patches)
@@ -397,9 +400,9 @@ where
     /// apply the pending patches into the DOM
     fn apply_pending_patches(
         &self,
-        deadline: f64,
     ) -> Result<(), JsValue>
     {
+        let deadline = 100.0;
         let t1 = crate::now();
         #[cfg(feature = "with-debug")]
         let mut cnt = 0;
@@ -425,7 +428,6 @@ where
         Ok(())
     }
 
-    #[allow(unused)]
     fn apply_dom_patch(&self, dom_patch: DomPatch<MSG>) -> Result<(), JsValue>{
         match dom_patch {
             DomPatch::InsertBeforeNode {
@@ -587,6 +589,7 @@ where
     }
 
 
+    /// execute DOM changes in order to reflect the APP's view into the browser representation
     async fn dispatch_dom_changes(&self, _log_measurements: bool, _measurement_name: &str, _msg_count: usize, _t1: f64) {
         #[cfg(feature = "with-measure")]
         let t2 = crate::now();
