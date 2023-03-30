@@ -140,7 +140,7 @@ pub fn classes<MSG>(
 ) -> Attribute<MSG> {
     let class_values = class_list
         .into_iter()
-        .map(|v| AttributeValue::from_value(Value::from(v.to_string())));
+        .map(|v| AttributeValue::from(Value::from(v.to_string())));
 
     Attribute::with_multiple_values(None, "class", class_values)
 }
@@ -339,7 +339,7 @@ pub fn focus<MSG>(is_focus: bool) -> Attribute<MSG> {
 /// let data_id: Attribute<()> = attr("data-id", 42);
 /// ```
 pub fn attr<MSG, V: Into<Value>>(att: &'static str, v: V) -> Attribute<MSG> {
-    mt_dom::attr(att, AttributeValue::from_value(v.into()))
+    mt_dom::attr(att, AttributeValue::from(v.into()))
 }
 
 /// a utility function to return create an empty attr, useful for cases where branch expression

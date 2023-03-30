@@ -1,14 +1,8 @@
 use crate::{
-    prelude::{
-        Style,
-        Value,
-    },
+    prelude::{Style, Value},
     vdom::Listener,
 };
-use std::fmt::{
-    self,
-    Debug,
-};
+use std::fmt::{self, Debug};
 
 /// Values of an attribute can be in these variants
 pub enum AttributeValue<MSG> {
@@ -83,15 +77,28 @@ impl<MSG> PartialEq for AttributeValue<MSG> {
     }
 }
 
+impl<MSG> From<Value> for AttributeValue<MSG> {
+    fn from(value: Value) -> Self {
+        Self::Simple(value)
+    }
+}
+
+impl<MSG> From<String> for AttributeValue<MSG> {
+    fn from(value: String) -> Self {
+        Self::Simple(value.into())
+    }
+}
+
+impl<MSG> From<Listener<MSG>> for AttributeValue<MSG> {
+    fn from(listener: Listener<MSG>) -> Self {
+        Self::EventListener(listener)
+    }
+}
+
 impl<MSG> AttributeValue<MSG> {
     /// create an attribute from Vec<Style>
     pub fn from_styles(styles: impl IntoIterator<Item = Style>) -> Self {
         AttributeValue::Style(styles.into_iter().collect())
-    }
-
-    /// create an attribute value from simple value
-    pub fn from_value(value: Value) -> Self {
-        AttributeValue::Simple(value)
     }
 
     /// create an attribute from a function `name` with arguments `value`

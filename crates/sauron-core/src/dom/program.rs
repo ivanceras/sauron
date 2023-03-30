@@ -360,7 +360,6 @@ where
             if let Some(target_node) = nodes_to_patch.get(patch_path) {
                 //TODO: tests are panicking here!, so has to comment out the checking of tag names
                 // check the tag here if it matches
-                /*
                 let target_element: &Element = target_node.unchecked_ref();
                 if let Some(tag) = patch_tag {
                     let target_tag = target_element.tag_name().to_lowercase();
@@ -371,7 +370,6 @@ where
                         );
                     }
                 }
-                */
 
                 #[cfg(all(feature = "with-measure", feature = "with-debug"))]
                 let t3 = crate::now();

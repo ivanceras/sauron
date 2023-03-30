@@ -24,7 +24,7 @@ macro_rules! declare_attributes {
                 pub fn $name<V, MSG>(v: V) -> $crate::vdom::Attribute<MSG>
                     where V: Into<Value>,
                     {
-                        attr(stringify!($name), AttributeValue::from_value(v.into()))
+                        attr(stringify!($name), AttributeValue::from(v.into()))
                 }
             }
          )*
@@ -44,7 +44,7 @@ macro_rules! declare_attributes {
                 pub fn $name<V, MSG>(v: V) -> $crate::vdom::Attribute<MSG>
                     where V: Into<Value>,
                     {
-                        attr($attribute, AttributeValue::from_value(v.into()))
+                        attr($attribute, AttributeValue::from(v.into()))
                 }
              }
          )*

@@ -54,10 +54,8 @@ fn change_class_attribute() {
                 None,
                 "class",
                 vec![
-                    AttributeValue::from_value("class1".to_string().into()),
-                    AttributeValue::from_value(
-                        "difference_class".to_string().into()
-                    )
+                    AttributeValue::from("class1".to_string()),
+                    AttributeValue::from("difference_class".to_string())
                 ]
             )]
         )],

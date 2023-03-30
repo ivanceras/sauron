@@ -1,20 +1,7 @@
-use proc_macro2::{
-    Span,
-    TokenStream,
-};
+use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use syn::{
-    Expr,
-    ExprBlock,
-    ExprForLoop,
-    Ident,
-    Stmt,
-};
-use syn_rsx::{
-    Node,
-    NodeType,
-    ParserConfig,
-};
+use syn::{Expr, ExprBlock, ExprForLoop, Ident, Stmt};
+use syn_rsx::{Node, NodeType, ParserConfig};
 
 pub(crate) mod lookup;
 
@@ -106,6 +93,11 @@ fn attribute_to_tokens(attribute: &Node) -> TokenStream {
                             sauron::html::attributes::attr(#name, #value)
                         }
                     }
+                    /*
+                    quote::quote! {
+                        sauron::html::attributes::attr(#name, #value)
+                    }
+                    */
                 }
                 _ => {
                     quote! {
@@ -173,33 +165,31 @@ fn children_to_tokens(children: Vec<Node>) -> TokenStream {
                         #receiver.push(sauron::html::doctype(#value));
                     });
                 }
-                NodeType::Block => {
-                    match child.value {
-                        Some(syn::Expr::Block(expr)) => {
-                            match braced_for_loop(&expr) {
-                                Some(ExprForLoop {
-                                    pat, expr, body, ..
-                                }) => {
-                                    tokens.extend(quote! {
+                NodeType::Block => match child.value {
+                    Some(syn::Expr::Block(expr)) => {
+                        match braced_for_loop(&expr) {
+                            Some(ExprForLoop {
+                                pat, expr, body, ..
+                            }) => {
+                                tokens.extend(quote! {
                                         for #pat in #expr {
                                             #receiver.push(sauron::Node::from(#body));
                                         }
                                     });
-                                }
-                                _ => {
-                                    tokens.extend(quote! {
+                            }
+                            _ => {
+                                tokens.extend(quote! {
                                     #receiver.push(sauron::Node::from(#expr));
                                 });
-                                }
-                            }
-                        }
-                        _ => {
-                            return quote! {
-                                compile_error!("Unexpected missing block for NodeType::Block")
                             }
                         }
                     }
-                }
+                    _ => {
+                        return quote! {
+                            compile_error!("Unexpected missing block for NodeType::Block")
+                        }
+                    }
+                },
                 _ => {
                     return quote! {
                         compile_error!(format!("Unexpected NodeType for child: {}", child.node_type))
