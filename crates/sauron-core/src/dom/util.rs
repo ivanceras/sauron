@@ -51,6 +51,15 @@ pub(crate) fn request_idle_callback_for_closure(f: Closure<dyn Fn(JsValue)>) -> 
     Ok(handle)
 }
 
+pub(crate) fn request_idle_callback_with_deadline<F>(f: F) -> Result<u32, JsValue>
+where F: Fn(f64) + 'static
+{
+    request_idle_callback(move|v:JsValue|{
+        let deadline = v.dyn_into::<web_sys::IdleDeadline>().expect("must have an idle deadline").time_remaining();
+        f(deadline);
+    })
+}
+
 /// execute the function at a certain specified timeout in ms
 pub fn delay_exec(
     closure_delay: Closure<dyn FnMut()>,

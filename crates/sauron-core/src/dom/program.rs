@@ -257,9 +257,13 @@ where
     ///
     /// TODO: maybe call the apply_pending_patches here to apply the some patches
     async fn dispatch_pending_msgs(&self, deadline: f64) -> Cmd<APP, MSG>{
-        let t1 = crate::now();
+        if self.pending_msgs.borrow().is_empty(){
+            log::info!("no pending msgs... returning early..");
+            return Cmd::none()
+        }
         let mut all_cmd = vec![];
         let mut i = 0;
+        let t1 = crate::now();
         while let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front(){
             #[cfg(all(feature = "with-measure", feature = "with-debug"))]
             log::debug!("Executing pending msg item {}", i);
@@ -289,7 +293,7 @@ where
     ) -> Result<usize, JsValue>
     {
 
-        let total_patches = self.patch(
+        let total_patches = self.patch_dom(
             &new_vdom
         )?;
 
@@ -321,7 +325,7 @@ where
     /// that we desire.
     /// This is usually used after diffing two virtual nodes.
     ///
-    pub fn patch(
+    pub fn patch_dom(
         &self,
         new_vdom: &vdom::Node<MSG>,
     ) -> Result<usize, JsValue>
@@ -402,6 +406,10 @@ where
         &self,
     ) -> Result<(), JsValue>
     {
+        if self.pending_patches.borrow().is_empty(){
+            log::info!("No pending patches... returning..");
+            return Ok(())
+        }
         let deadline = 100.0;
         let t1 = crate::now();
         #[cfg(feature = "with-debug")]
@@ -731,14 +739,13 @@ where
         self.pending_msgs.borrow_mut().extend(msgs);
         let program = self.clone();
         #[cfg(feature = "with-ric")]
-        let _handle = crate::dom::util::request_idle_callback(move|v: JsValue|{
-            let deadline =  v.dyn_into::<web_sys::IdleDeadline>().expect("must have idle deadline").time_remaining();
+        let _handle = crate::dom::util::request_idle_callback_with_deadline(move|deadline: f64|{
             log::info!("deadline: {:.2}", deadline);
             let program = program.clone();
             spawn_local(async move{
                 program.dispatch_inner(deadline).await;
             });
-        });
+        }).expect("must execute");
 
         #[cfg(not(feature = "with-ric"))]
         spawn_local(async move{
