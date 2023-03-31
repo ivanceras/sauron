@@ -48,6 +48,10 @@ where
     /// We keep these around so that they don't get dropped (and thus stop working);
     ///
     pub active_closures: Rc<RefCell<ActiveClosure>>,
+
+    /// The program should be able to set and keep track of the focused element.
+    /// There is only 1 focused element at any given time.
+    ///
     /// after mounting or update dispatch call, the element will be focused
     pub focused_node: Rc<RefCell<Option<Node>>>,
 
@@ -736,6 +740,11 @@ where
         let t1 = crate::now();
 
         self.dispatch_pending_msgs(deadline).await.expect("must dispatch msgs");
+        // ensure that all pending msgs are all dispatched already
+        if !self.pending_msgs.borrow().is_empty(){
+            log::error!("There are still remaining pending msgs: {}", self.pending_msgs.borrow().len());
+            panic!("Can not proceed until previous pending msgs are dispatched..");
+        }
 
         let mut all_cmd = vec![];
         let mut pending_cmds = self.pending_cmds.borrow_mut();
@@ -744,10 +753,26 @@ where
         }
         // we can execute all the cmd here at once
         let cmd = Cmd::batch(all_cmd);
+
+        if !self.pending_patches.borrow().is_empty(){
+            log::error!("BEFORE DOM updates there are still Remaining pending patches: {}", self.pending_patches.borrow().len());
+        }
+
         if cmd.modifier.should_update_view {
             let log_measurements = cmd.modifier.log_measurements;
             let measurement_name = &cmd.modifier.measurement_name;
             self.dispatch_dom_changes(log_measurements, measurement_name, t1);
+        }
+
+        // Ensure all pending patches are applied before emiting the Cmd from update
+        while !self.pending_patches.borrow().is_empty(){
+            self.apply_pending_patches(10.0).expect("applying pending patches..");
+        }
+
+        if !self.pending_patches.borrow().is_empty(){
+            log::error!("Remaining pending patches: {}", self.pending_patches.borrow().len());
+            panic!("There are still pending patches.. can not emit cmd, if all pending patches
+            has not been applied yet!");
         }
         cmd.emit(self);
     }
