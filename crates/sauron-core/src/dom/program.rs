@@ -29,6 +29,9 @@ where
     /// The MSG that hasn't been applied to the APP yet
     pub pending_msgs: Rc<RefCell<VecDeque<MSG>>>,
 
+    /// pending cmds that hasn't been emited yet
+    pub pending_cmds: Rc<RefCell<VecDeque<Cmd<APP,MSG>>>>,
+
     /// the current vdom representation
     pub current_vdom: Rc<RefCell<vdom::Node<MSG>>>,
     /// the first element of the app view, where the patch is generated is relative to
@@ -51,6 +54,7 @@ where
     /// whether or not to use shadow root of the mount_node
     pub use_shadow: bool,
 
+    /// Pending patches that hasn't been applied to the DOM yet
     /// for optimization purposes to avoid sluggishness of the app, when a patch
     /// can not be run in 1 execution due to limited remaining time deadline
     /// it will be put into the pending patches to be executed on the next run.
@@ -65,6 +69,7 @@ where
         Program {
             app: Rc::clone(&self.app),
             pending_msgs: Rc::clone(&self.pending_msgs),
+            pending_cmds: Rc::clone(&self.pending_cmds),
             current_vdom: Rc::clone(&self.current_vdom),
             root_node: Rc::clone(&self.root_node),
             mount_node: self.mount_node.clone(),
@@ -94,6 +99,7 @@ where
         Program {
             app: Rc::new(RefCell::new(app)),
             pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
+            pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
             current_vdom: Rc::new(RefCell::new(view)),
             root_node: Rc::new(RefCell::new(None)),
             mount_node: mount_node.clone(),
@@ -256,19 +262,18 @@ where
     /// as parameters
     ///
     /// TODO: maybe call the apply_pending_patches here to apply the some patches
-    async fn dispatch_pending_msgs(&self, deadline: f64) -> Cmd<APP, MSG>{
+    async fn dispatch_pending_msgs(&self, deadline: f64) ->Result<(), JsValue>{
         if self.pending_msgs.borrow().is_empty(){
             log::info!("no pending msgs... returning early..");
-            return Cmd::none()
+            return Ok(())
         }
-        let mut all_cmd = vec![];
         let mut i = 0;
         let t1 = crate::now();
         while let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front(){
             #[cfg(all(feature = "with-measure", feature = "with-debug"))]
             log::debug!("Executing pending msg item {}", i);
-            let c = self.app.borrow_mut().update(pending_msg).await;
-            all_cmd.push(c);
+            let cmd = self.app.borrow_mut().update(pending_msg).await;
+            self.pending_cmds.borrow_mut().push_back(cmd);
             let t2 = crate::now();
             let elapsed = t2 - t1;
             if elapsed > deadline{
@@ -278,7 +283,7 @@ where
             }
             i += 1;
         }
-        Cmd::batch(all_cmd)
+        Ok(())
     }
 
     /// Diff the current virtual dom with the new virtual dom that is being passed in.
@@ -668,14 +673,16 @@ where
         let t1 = crate::now();
 
         let msg_count = 0;
-        let cmd = self.dispatch_pending_msgs(deadline).await;
+        self.dispatch_pending_msgs(deadline).await.expect("must dispatch msgs");
 
-        if cmd.modifier.should_update_view {
-            let log_measurements = cmd.modifier.log_measurements;
-            let measurement_name = &cmd.modifier.measurement_name;
-            self.dispatch_dom_changes(log_measurements, measurement_name, msg_count, t1).await;
+        while let Some(cmd) = self.pending_cmds.borrow_mut().pop_front(){
+            if cmd.modifier.should_update_view {
+                let log_measurements = cmd.modifier.log_measurements;
+                let measurement_name = &cmd.modifier.measurement_name;
+                self.dispatch_dom_changes(log_measurements, measurement_name, msg_count, t1).await;
+            }
+            cmd.emit(self);
         }
-        cmd.emit(self);
     }
 
     /// Inject a style to the global document
