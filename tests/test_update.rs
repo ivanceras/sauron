@@ -15,7 +15,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 ///  The solution is therefore to not put key to elements that
 ///  are meant to be discarded  and can easily be construcated
 #[wasm_bindgen_test]
-async fn test1() {
+fn test1() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -171,7 +171,9 @@ async fn test1() {
 
     let target_dom_html = target_dom.render_to_string();
 
-    simple_program.update_dom(target_dom).await.expect("must not error");
+    simple_program
+        .update_dom(target_dom)
+        .expect("must not error");
 
     let app_node = crate::document()
         .query_selector(".app")

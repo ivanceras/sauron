@@ -42,7 +42,7 @@ fn nodes_with_event_should_not_recycle() {
 }
 
 #[wasm_bindgen_test]
-async fn remove_event_from_replaced_node() {
+fn remove_event_from_replaced_node() {
     console_log::init_with_level(log::Level::Trace).ok();
 
     let old: Node<()> = div(vec![on_click(|_| trace!("I'm a div"))], vec![]);
@@ -68,7 +68,7 @@ async fn remove_event_from_replaced_node() {
         "There should be 1 event attached to the DomUpdater"
     );
 
-    simple_program.update_dom(new).await.expect("must not error");
+    simple_program.update_dom(new).expect("must not error");
 
     assert_eq!(
         simple_program.active_closures.borrow().len(),

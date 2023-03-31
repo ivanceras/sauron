@@ -8,7 +8,7 @@ mod test_fixtures;
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-async fn insert_multiple_before_nodes() {
+fn insert_multiple_before_nodes() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -71,7 +71,7 @@ async fn insert_multiple_before_nodes() {
     let expected = "<main class=\"before_nodes_test1\"><ul class=\"todo\"><li key=\"1\">item1</li><li key=\"2\">item2</li><li key=\"3\">item3</li></ul></main>";
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
 
     let container = document
         .query_selector(".before_nodes_test1")
@@ -84,7 +84,7 @@ async fn insert_multiple_before_nodes() {
 }
 
 #[wasm_bindgen_test]
-async fn insert_multiple_after_nodes() {
+fn insert_multiple_after_nodes() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -147,7 +147,7 @@ async fn insert_multiple_after_nodes() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
 
     let container = document
         .query_selector(".after_nodes_test1")

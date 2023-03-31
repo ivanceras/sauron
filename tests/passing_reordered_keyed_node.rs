@@ -5,7 +5,7 @@ use wasm_bindgen_test::*;
 
 mod test_fixtures;
 #[wasm_bindgen_test]
-async fn reordered_keys2() {
+fn reordered_keys2() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -45,7 +45,7 @@ async fn reordered_keys2() {
     simple_program.set_current_dom(old);
 
     let update1_html = update1.render_to_string();
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
 
     let container = document
         .query_selector(".reordered2")
@@ -59,7 +59,7 @@ async fn reordered_keys2() {
 }
 
 #[wasm_bindgen_test]
-async fn reordered_keys3() {
+fn reordered_keys3() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -99,7 +99,7 @@ async fn reordered_keys3() {
     simple_program.set_current_dom(old);
 
     let update1_html = update1.render_to_string();
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
 
     let container = document
         .query_selector(".reordered3")

@@ -1,8 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    mt_dom::TreePath,
-    prelude::*,
-};
+use sauron::{mt_dom::TreePath, prelude::*};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 
@@ -10,7 +7,7 @@ mod test_fixtures;
 
 wasm_bindgen_test_configure!(run_in_browser);
 #[wasm_bindgen_test]
-async fn test_patch_insert_node() {
+fn test_patch_insert_node() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -68,7 +65,7 @@ async fn test_patch_insert_node() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test1")
@@ -81,7 +78,7 @@ async fn test_patch_insert_node() {
 }
 
 #[wasm_bindgen_test]
-async fn test_patch_insert_node_in_the_middle() {
+fn test_patch_insert_node_in_the_middle() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -140,7 +137,7 @@ async fn test_patch_insert_node_in_the_middle() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test_middle")
@@ -153,7 +150,7 @@ async fn test_patch_insert_node_in_the_middle() {
 }
 
 #[wasm_bindgen_test]
-async fn multiple_insert_should_work() {
+fn multiple_insert_should_work() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -219,7 +216,7 @@ async fn multiple_insert_should_work() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test5")

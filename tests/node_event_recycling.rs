@@ -1,12 +1,6 @@
 #![deny(warnings)]
-use sauron::{
-    mt_dom::TreePath,
-    prelude::*,
-};
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use sauron::{mt_dom::TreePath, prelude::*};
+use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 
@@ -15,7 +9,7 @@ mod test_fixtures;
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-async fn elements_with_different_event_should_not_be_recycle() {
+fn elements_with_different_event_should_not_be_recycle() {
     console_log::init_with_level(log::Level::Trace).ok();
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -65,7 +59,7 @@ async fn elements_with_different_event_should_not_be_recycle() {
     simple_program.set_current_dom(old.clone());
 
     // update to new dom with no event attached
-    simple_program.update_dom(new).await.expect("must not error");
+    simple_program.update_dom(new).expect("must not error");
 
     let input_element =
         sauron_core::document().get_element_by_id(elem_id).unwrap();

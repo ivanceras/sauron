@@ -13,7 +13,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 // We test a simple case here, since diff_patch.rs is responsible for testing more complex
 // diffing and patching.
 #[wasm_bindgen_test]
-async fn patches_dom() {
+fn patches_dom() {
     console_error_panic_hook::set_once();
 
     let document = web_sys::window().unwrap().document().unwrap();
@@ -23,7 +23,7 @@ async fn patches_dom() {
     simple_program.set_current_dom(vdom);
 
     let new_vdom = div(vec![id("patched")], vec![]); //html! { <div id="patched"></div> };
-    simple_program.update_dom(new_vdom).await.expect("must not error");
+    simple_program.update_dom(new_vdom).expect("must not error");
 
     assert_eq!(document.query_selector("#patched").unwrap().is_some(), true);
 }
@@ -32,7 +32,7 @@ async fn patches_dom() {
 // from the new DOM node are stored by the DomUpdater otherwise they'll get dropped and
 // won't work.
 #[wasm_bindgen_test]
-async fn updates_active_closure_on_replace() {
+fn updates_active_closure_on_replace() {
     console_error_panic_hook::set_once();
 
     let simple_program = simple_program();
@@ -59,7 +59,7 @@ async fn updates_active_closure_on_replace() {
     // New node replaces old node.
     // We are testing that we've stored this new node's closures even though `new` will be dropped
     // at the end of this block.
-    simple_program.update_dom(replace_node).await.expect("must not error");
+    simple_program.update_dom(replace_node).expect("must not error");
 
     let input_event = InputEvent::new("input").unwrap();
 
@@ -110,7 +110,7 @@ async fn updates_active_closures_on_append() {
         // New node gets appended into the DOM.
         // We are testing that we've stored this new node's closures even though `new` will be dropped
         // at the end of this block.
-        simple_program.update_dom(append_node).await.expect("must not error");
+        simple_program.update_dom(append_node).expect("must not error");
     }
 
     let input_event = InputEvent::new("input").unwrap();

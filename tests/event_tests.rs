@@ -1,12 +1,6 @@
 #![deny(warnings)]
-use sauron::{
-    mt_dom::TreePath,
-    prelude::*,
-};
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use sauron::{mt_dom::TreePath, prelude::*};
+use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 
@@ -54,7 +48,7 @@ fn on_input_test() {
 }
 
 #[wasm_bindgen_test]
-async fn added_event() {
+fn added_event() {
     console_log::init_with_level(log::Level::Trace).ok();
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -88,7 +82,7 @@ async fn added_event() {
 
     simple_program.set_current_dom(old);
     // update to new dom with no event attached
-    simple_program.update_dom(new).await.expect("must not error");
+    simple_program.update_dom(new).expect("must not error");
 
     let input_element =
         sauron_core::document().get_element_by_id(&elem_id).unwrap();
@@ -105,7 +99,7 @@ async fn added_event() {
 }
 
 #[wasm_bindgen_test]
-async fn remove_event() {
+fn remove_event() {
     console_log::init_with_level(log::Level::Trace).ok();
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -140,7 +134,7 @@ async fn remove_event() {
     let simple_program = simple_program();
     simple_program.set_current_dom(old);
     // update to new dom with no event attached
-    simple_program.update_dom(new).await.expect("must not error");
+    simple_program.update_dom(new).expect("must not error");
 
     let input_element =
         sauron_core::document().get_element_by_id(&elem_id).unwrap();
@@ -158,7 +152,7 @@ async fn remove_event() {
 }
 
 #[wasm_bindgen_test]
-async fn remove_event_from_truncated_children() {
+fn remove_event_from_truncated_children() {
     console_log::init_with_level(log::Level::Trace).ok();
     let cb = on_click(|_| log::trace!("Clicked here"));
     let old: Node<()> = div(
@@ -193,7 +187,7 @@ async fn remove_event_from_truncated_children() {
         5,
         "There should be 5 events attached to the DomUpdater"
     );
-    simple_program.update_dom(new).await.expect("must not error");
+    simple_program.update_dom(new).expect("must not error");
 
     assert_eq!(
         simple_program.active_closures.borrow().len(),
@@ -203,7 +197,7 @@ async fn remove_event_from_truncated_children() {
 }
 
 #[wasm_bindgen_test]
-async fn remove_event_from_truncated_children_some_with_no_events() {
+fn remove_event_from_truncated_children_some_with_no_events() {
     console_log::init_with_level(log::Level::Trace).ok();
     let cb = on_click(|_| log::trace!("Clicked here"));
     let old: Node<()> = div(
@@ -240,7 +234,7 @@ async fn remove_event_from_truncated_children_some_with_no_events() {
         3,
         "There should be 3 events attached to the DomUpdater"
     );
-    simple_program.update_dom( new).await.expect("must not error");
+    simple_program.update_dom(new).expect("must not error");
 
     assert_eq!(
         simple_program.active_closures.borrow().len(),
@@ -250,7 +244,7 @@ async fn remove_event_from_truncated_children_some_with_no_events() {
 }
 
 #[wasm_bindgen_test]
-async fn remove_event_from_replaced_node() {
+fn remove_event_from_replaced_node() {
     console_log::init_with_level(log::Level::Trace).ok();
 
     let old: Node<()> =
@@ -275,7 +269,7 @@ async fn remove_event_from_replaced_node() {
         1,
         "There should be 1 event attached to the DomUpdater"
     );
-    simple_program.update_dom(new).await.expect("must not error");
+    simple_program.update_dom(new).expect("must not error");
 
     assert_eq!(
         simple_program.active_closures.borrow().len(),

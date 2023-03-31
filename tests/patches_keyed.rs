@@ -9,7 +9,7 @@ mod test_fixtures;
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-async fn node_mounted_properly() {
+fn node_mounted_properly() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -48,7 +48,7 @@ async fn node_mounted_properly() {
 }
 
 #[wasm_bindgen_test]
-async fn node_patched_properly() {
+fn node_patched_properly() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -104,7 +104,7 @@ async fn node_patched_properly() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
 
     let container = document
         .query_selector(".container2")
@@ -121,7 +121,7 @@ async fn node_patched_properly() {
 }
 
 #[wasm_bindgen_test]
-async fn node_patched_properly_remove_from_start() {
+fn node_patched_properly_remove_from_start() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -183,7 +183,7 @@ async fn node_patched_properly_remove_from_start() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test3")
@@ -201,7 +201,7 @@ async fn node_patched_properly_remove_from_start() {
 }
 
 #[wasm_bindgen_test]
-async fn node_patched_properly_text_changed() {
+fn node_patched_properly_text_changed() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -266,7 +266,7 @@ async fn node_patched_properly_text_changed() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test4")
@@ -284,7 +284,7 @@ async fn node_patched_properly_text_changed() {
 }
 
 #[wasm_bindgen_test]
-async fn mixed_keyed_and_non_keyed_elements() {
+fn mixed_keyed_and_non_keyed_elements() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -362,7 +362,7 @@ async fn mixed_keyed_and_non_keyed_elements() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test5")

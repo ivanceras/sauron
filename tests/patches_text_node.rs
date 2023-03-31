@@ -1,8 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    mt_dom::TreePath,
-    prelude::*,
-};
+use sauron::{mt_dom::TreePath, prelude::*};
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -12,7 +9,7 @@ mod test_fixtures;
 wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-async fn patches_text() {
+fn patches_text() {
     console_log::init_with_level(log::Level::Trace).ok();
     console_error_panic_hook::set_once();
 
@@ -63,7 +60,7 @@ async fn patches_text() {
         </section>\
         </main>";
 
-    simple_program.update_dom(update1).await.expect("must not error");
+    simple_program.update_dom(update1).expect("must not error");
     let result = container.outer_html();
     log::info!("result: {}", result);
     println!("result: {}", result);
