@@ -27,6 +27,9 @@ where
     /// holds the user application
     pub app: Rc<RefCell<APP>>,
     /// The MSG that hasn't been applied to the APP yet
+    ///
+    /// Note: MSG has to be executed in the same succession one by one
+    /// since the APP's state may be affected by the previous MSG
     pub pending_msgs: Rc<RefCell<VecDeque<MSG>>>,
 
     /// pending cmds that hasn't been emited yet
@@ -258,30 +261,56 @@ where
         }
     }
 
+
+    #[cfg(feature = "with-ric")]
+    fn dispatch_pending_msgs_with_ric(&self) -> Result<(), JsValue>{
+        let program = self.clone();
+        crate::dom::util::request_idle_callback_with_deadline(move|deadline|{
+            let program = program.clone();
+            spawn_local(async move{
+                program.dispatch_pending_msgs(deadline).await.expect("must execute")
+            });
+        }).expect("must execute");
+        Ok(())
+    }
+
     /// executes pending msgs by calling the app update method with the msgs
     /// as parameters
     ///
     /// TODO: maybe call the apply_pending_patches here to apply the some patches
     async fn dispatch_pending_msgs(&self, deadline: f64) ->Result<(), JsValue>{
+        log::info!("dispatching pending msgs deadline: {}", deadline);
         if self.pending_msgs.borrow().is_empty(){
-            log::info!("no pending msgs... returning early..");
             return Ok(())
         }
         let mut i = 0;
         let t1 = crate::now();
+        let mut did_complete = true;
         while let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front(){
             #[cfg(all(feature = "with-measure", feature = "with-debug"))]
             log::debug!("Executing pending msg item {}", i);
+
+            // Note: each MSG needs to be executed one by one in the same order
+            // as APP's state can be affected by the previous MSG
             let cmd = self.app.borrow_mut().update(pending_msg).await;
+
+            // we put the cmd in the pending_cmd queue
             self.pending_cmds.borrow_mut().push_back(cmd);
+
             let t2 = crate::now();
             let elapsed = t2 - t1;
             if elapsed > deadline{
                 log::warn!("elapsed time: {}ms", elapsed);
                 log::warn!("we should be breaking at {}..", i);
+                did_complete = false;
                 break;
             }
             i += 1;
+        }
+        if !did_complete{
+            log::info!("PENDING MSGS rescheduling");
+            #[cfg(feature = "with-ric")]
+            self.dispatch_pending_msgs_with_ric().expect("must complete");
         }
         Ok(())
     }
@@ -292,7 +321,7 @@ where
     /// seeing the latest state of the application.
     ///
     /// Return the total number of patches applied
-    pub async fn update_dom(
+    pub fn update_dom(
         &self,
         new_vdom: vdom::Node<MSG>,
     ) -> Result<usize, JsValue>
@@ -382,8 +411,6 @@ where
                 #[cfg(all(feature = "with-measure", feature = "with-debug"))]
                 let t3 = crate::now();
 
-                //TODO: push this into a vecqueue for executing the patches
-                //taking into account deadline remaining time
                 let dom_patch =
                     DomPatch::from_patch(self, target_node, &mut self.focused_node.borrow_mut(), patch);
 
@@ -400,25 +427,53 @@ where
         }
 
 
-        self.apply_pending_patches()
-            .expect("must not error");
+        #[cfg(feature = "with-ric")]
+        self.apply_pending_patches_with_ric().expect("must complete");
+
+        #[cfg(not(feature = "with-ric"))]
+        self.apply_pending_patches(10.0).expect("must complete");
 
         Ok(total_patches)
+    }
+
+
+    #[cfg(feature = "with-ric")]
+    fn apply_pending_patches_with_ric(&self) -> Result<(), JsValue>{
+        log::info!("here in apply_pending patches with ric..");
+        let program = self.clone();
+        crate::dom::util::request_idle_callback_with_deadline(move|deadline|{
+            log::info!("ric deadline: {}", deadline);
+            program.apply_pending_patches(deadline)
+                .expect("must not error");
+        }).expect("must complete the remaining pending patches..");
+        Ok(())
+    }
+
+    #[cfg(not(feature = "with-ric"))]
+    fn apply_pending_patches_with_raf(&self) -> Result<(), JsValue>{
+        let program = self.clone();
+        crate::dom::util::request_animation_frame(move||{
+            let deadline = 10.0;
+            program.apply_pending_patches(deadline)
+                .expect("must not error");
+        });
+        Ok(())
     }
 
     /// apply the pending patches into the DOM
     fn apply_pending_patches(
         &self,
+        deadline: f64
     ) -> Result<(), JsValue>
     {
+        log::info!("deadline: {}", deadline);
         if self.pending_patches.borrow().is_empty(){
-            log::info!("No pending patches... returning..");
             return Ok(())
         }
-        let deadline = 100.0;
         let t1 = crate::now();
         #[cfg(feature = "with-debug")]
         let mut cnt = 0;
+        let mut did_complete = true;
         while let Some(dom_patch) = self.pending_patches.borrow_mut().pop_front() {
             #[cfg(feature = "with-debug")]
             log::debug!("Executing pending patch item {}", cnt);
@@ -427,12 +482,20 @@ where
             let elapsed = t2 - t1;
             if elapsed > deadline {
                 log::info!("breaking here...");
+                did_complete = false;
                 break;
             }
             #[cfg(feature = "with-debug")]
             {
                 cnt += 1;
             }
+        }
+        if !did_complete{
+            log::error!("Rescheduling here... ric");
+            #[cfg(feature = "with-ric")]
+            self.apply_pending_patches_with_ric().expect("must complete");
+            #[cfg(not(feature = "with-ric"))]
+            self.apply_pending_patches_with_raf().expect("must complete");
         }
         #[cfg(all(feature = "with-measure", feature = "with-debug"))]
         let t3 = crate::now();
@@ -603,7 +666,7 @@ where
 
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    async fn dispatch_dom_changes(&self, _log_measurements: bool, _measurement_name: &str, _t1: f64) {
+    fn dispatch_dom_changes(&self, _log_measurements: bool, _measurement_name: &str, _t1: f64) {
         #[cfg(feature = "with-measure")]
         let t2 = crate::now();
 
@@ -624,7 +687,7 @@ where
 
         // update the last DOM node tree with this new view
         let _total_patches =
-            self.update_dom(view).await.expect("must not error");
+            self.update_dom(view).expect("must not error");
         #[cfg(feature = "with-measure")]
         let t4 = crate::now();
 
@@ -679,11 +742,12 @@ where
         while let Some(cmd) = pending_cmds.pop_front(){
             all_cmd.push(cmd);
         }
+        // we can execute all the cmd here at once
         let cmd = Cmd::batch(all_cmd);
         if cmd.modifier.should_update_view {
             let log_measurements = cmd.modifier.log_measurements;
             let measurement_name = &cmd.modifier.measurement_name;
-            self.dispatch_dom_changes(log_measurements, measurement_name, t1).await;
+            self.dispatch_dom_changes(log_measurements, measurement_name, t1);
         }
         cmd.emit(self);
     }
