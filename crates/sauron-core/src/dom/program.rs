@@ -603,7 +603,7 @@ where
 
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    async fn dispatch_dom_changes(&self, _log_measurements: bool, _measurement_name: &str, _msg_count: usize, _t1: f64) {
+    async fn dispatch_dom_changes(&self, _log_measurements: bool, _measurement_name: &str, _t1: f64) {
         #[cfg(feature = "with-measure")]
         let t2 = crate::now();
 
@@ -643,7 +643,7 @@ where
         if _log_measurements && _total_patches > 0 {
             let measurements = Measurements {
                 name: _measurement_name.to_string(),
-                msg_count: _msg_count,
+                msg_count: 0,
                 view_node_count: node_count,
                 update_dispatch_took: t2 - _t1,
                 build_view_took: t3 - t2,
@@ -672,17 +672,20 @@ where
     async fn dispatch_inner(&self, deadline: f64) {
         let t1 = crate::now();
 
-        let msg_count = 0;
         self.dispatch_pending_msgs(deadline).await.expect("must dispatch msgs");
 
-        while let Some(cmd) = self.pending_cmds.borrow_mut().pop_front(){
-            if cmd.modifier.should_update_view {
-                let log_measurements = cmd.modifier.log_measurements;
-                let measurement_name = &cmd.modifier.measurement_name;
-                self.dispatch_dom_changes(log_measurements, measurement_name, msg_count, t1).await;
-            }
-            cmd.emit(self);
+        let mut all_cmd = vec![];
+        let mut pending_cmds = self.pending_cmds.borrow_mut();
+        while let Some(cmd) = pending_cmds.pop_front(){
+            all_cmd.push(cmd);
         }
+        let cmd = Cmd::batch(all_cmd);
+        if cmd.modifier.should_update_view {
+            let log_measurements = cmd.modifier.log_measurements;
+            let measurement_name = &cmd.modifier.measurement_name;
+            self.dispatch_dom_changes(log_measurements, measurement_name, t1).await;
+        }
+        cmd.emit(self);
     }
 
     /// Inject a style to the global document
