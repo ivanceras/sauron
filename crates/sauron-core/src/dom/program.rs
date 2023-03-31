@@ -669,23 +669,27 @@ where
     /// TODO: split this function into 2.
     /// - update the app with msgs (use a request_idle_callback)
     /// - compute the view and update the dom (use request_animation_frame )
-    async fn dispatch_inner(&self, deadline: f64) {
-        let t1 = crate::now();
+    fn dispatch_inner(&self) {
+        let program  = self.clone();
+        spawn_local(async move{
+            let deadline = 10.0;
+            let t1 = crate::now();
+            program.dispatch_pending_msgs(deadline).await.expect("must dispatch msgs");
+            let mut all_cmd = vec![];
+            let mut pending_cmds = program.pending_cmds.borrow_mut();
+            while let Some(cmd) = pending_cmds.pop_front(){
+                all_cmd.push(cmd);
+            }
+            let cmd = Cmd::batch(all_cmd);
 
-        self.dispatch_pending_msgs(deadline).await.expect("must dispatch msgs");
+            if cmd.modifier.should_update_view {
+                let log_measurements = cmd.modifier.log_measurements;
+                let measurement_name = cmd.modifier.measurement_name.clone();
+                program.dispatch_dom_changes(log_measurements, &measurement_name, t1).await;
+            }
+            cmd.emit(&program);
+        });
 
-        let mut all_cmd = vec![];
-        let mut pending_cmds = self.pending_cmds.borrow_mut();
-        while let Some(cmd) = pending_cmds.pop_front(){
-            all_cmd.push(cmd);
-        }
-        let cmd = Cmd::batch(all_cmd);
-        if cmd.modifier.should_update_view {
-            let log_measurements = cmd.modifier.log_measurements;
-            let measurement_name = &cmd.modifier.measurement_name;
-            self.dispatch_dom_changes(log_measurements, measurement_name, t1).await;
-        }
-        cmd.emit(self);
     }
 
     /// Inject a style to the global document
@@ -747,20 +751,7 @@ where
     /// if there is no more time, then dom patching should be commence and resume.
     fn dispatch_multiple(&self, msgs: Vec<MSG>) {
         self.pending_msgs.borrow_mut().extend(msgs);
-        let program = self.clone();
-        #[cfg(feature = "with-ric")]
-        let _handle = crate::dom::util::request_idle_callback_with_deadline(move|deadline: f64|{
-            log::info!("deadline: {:.2}", deadline);
-            let program = program.clone();
-            spawn_local(async move{
-                program.dispatch_inner(deadline).await;
-            });
-        }).expect("must execute");
-
-        #[cfg(not(feature = "with-ric"))]
-        spawn_local(async move{
-            program.dispatch_inner(10.0).await;
-        });
+        self.dispatch_inner();
     }
 
 
