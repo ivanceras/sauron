@@ -18,6 +18,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use dom::*;
     pub use web_sys;
     pub use wasm_bindgen;
+    pub use wasm_bindgen_futures;
     pub use js_sys;
 }}
 
