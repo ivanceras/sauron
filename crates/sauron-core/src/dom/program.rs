@@ -272,18 +272,19 @@ where
         crate::dom::util::request_idle_callback_with_deadline(move|deadline|{
             let program = program.clone();
             spawn_local(async move{
-                program.dispatch_pending_msgs(deadline).await.expect("must execute")
+                program.dispatch_pending_msgs(Some(deadline)).await.expect("must execute")
             });
         }).expect("must execute");
         Ok(())
     }
 
     /// executes pending msgs by calling the app update method with the msgs
-    /// as parameters
+    /// as parameters.
+    /// If there is no deadline specified all the pending messages are executed
     ///
     /// TODO: maybe call the apply_pending_patches here to apply the some patches
-    async fn dispatch_pending_msgs(&self, deadline: f64) ->Result<(), JsValue>{
-        log::info!("dispatching pending msgs deadline: {}", deadline);
+    async fn dispatch_pending_msgs(&self, deadline: Option<f64>) ->Result<(), JsValue>{
+        log::info!("dispatching pending msgs deadline: {:?}", deadline);
         if self.pending_msgs.borrow().is_empty(){
             return Ok(())
         }
@@ -303,11 +304,14 @@ where
 
             let t2 = crate::now();
             let elapsed = t2 - t1;
-            if elapsed > deadline{
-                log::warn!("elapsed time: {}ms", elapsed);
-                log::warn!("we should be breaking at {}..", i);
-                did_complete = false;
-                break;
+            // break only if a deadline is supplied
+            if let Some(deadline) = deadline{
+                if elapsed > deadline{
+                    log::warn!("elapsed time: {}ms", elapsed);
+                    log::warn!("we should be breaking at {}..", i);
+                    did_complete = false;
+                    break;
+                }
             }
             i += 1;
         }
@@ -435,7 +439,7 @@ where
         self.apply_pending_patches_with_ric().expect("must complete");
 
         #[cfg(not(feature = "with-ric"))]
-        self.apply_pending_patches(10.0).expect("must complete");
+        self.apply_pending_patches(Some(10.0)).expect("must complete");
 
         Ok(total_patches)
     }
@@ -447,7 +451,7 @@ where
         let program = self.clone();
         crate::dom::util::request_idle_callback_with_deadline(move|deadline|{
             log::info!("ric deadline: {}", deadline);
-            program.apply_pending_patches(deadline)
+            program.apply_pending_patches(Some(deadline))
                 .expect("must not error");
         }).expect("must complete the remaining pending patches..");
         Ok(())
@@ -458,7 +462,7 @@ where
         let program = self.clone();
         crate::dom::util::request_animation_frame(move||{
             let deadline = 10.0;
-            program.apply_pending_patches(deadline)
+            program.apply_pending_patches(Some(deadline))
                 .expect("must not error");
         });
         Ok(())
@@ -467,10 +471,10 @@ where
     /// apply the pending patches into the DOM
     fn apply_pending_patches(
         &self,
-        deadline: f64
+        deadline: Option<f64>
     ) -> Result<(), JsValue>
     {
-        log::info!("deadline: {}", deadline);
+        log::info!("deadline: {:?}", deadline);
         if self.pending_patches.borrow().is_empty(){
             return Ok(())
         }
@@ -484,10 +488,13 @@ where
             let t2 = crate::now();
             self.apply_dom_patch(dom_patch).expect("must apply dom patch");
             let elapsed = t2 - t1;
-            if elapsed > deadline {
-                log::info!("breaking here...");
-                did_complete = false;
-                break;
+            // only break if deadline is specified
+            if let Some(deadline) = deadline{
+                if elapsed > deadline {
+                    log::info!("breaking here...");
+                    did_complete = false;
+                    break;
+                }
             }
             #[cfg(feature = "with-debug")]
             {
@@ -739,8 +746,11 @@ where
     async fn dispatch_inner(&self, deadline: f64) {
         let t1 = crate::now();
 
-        self.dispatch_pending_msgs(deadline).await.expect("must dispatch msgs");
+        self.dispatch_pending_msgs(Some(deadline)).await.expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
+        if !self.pending_msgs.borrow().is_empty(){
+            self.dispatch_pending_msgs(None).await.expect("must dispatch all pending msgs");
+        }
         if !self.pending_msgs.borrow().is_empty(){
             log::error!("There are still remaining pending msgs: {}", self.pending_msgs.borrow().len());
             panic!("Can not proceed until previous pending msgs are dispatched..");
@@ -765,8 +775,8 @@ where
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update
-        while !self.pending_patches.borrow().is_empty(){
-            self.apply_pending_patches(10.0).expect("applying pending patches..");
+        if !self.pending_patches.borrow().is_empty(){
+            self.apply_pending_patches(None).expect("applying pending patches..");
         }
 
         if !self.pending_patches.borrow().is_empty(){
