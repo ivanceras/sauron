@@ -373,6 +373,8 @@ where
     ) -> Result<usize, JsValue>
     {
         let current_vdom = self.current_vdom.borrow();
+        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+        let t0 = crate::now();
         let patches = diff(&current_vdom, new_vdom);
         // move the diff into patch function.
         let total_patches = patches.len();
@@ -382,6 +384,9 @@ where
 
         #[cfg(all(feature = "with-measure", feature = "with-debug"))]
         let t1 = crate::now();
+        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+        log::info!("diffing took {}ms", t1 - t0);
+
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
             .iter()
             .map(|patch| (patch.path(), patch.tag()))
@@ -756,6 +761,9 @@ where
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
+        let t2 = crate::now();
+        log::info!("Dispatching pending MSG's took {}ms", t2-t1);
+
         let mut all_cmd = vec![];
         let mut pending_cmds = self.pending_cmds.borrow_mut();
         while let Some(cmd) = pending_cmds.pop_front(){
@@ -774,6 +782,9 @@ where
             self.dispatch_dom_changes(log_measurements, measurement_name, t1);
         }
 
+        let t3 = crate::now();
+        log::info!("Dispatching dom changes took: {}ms", t3-t2);
+
         // Ensure all pending patches are applied before emiting the Cmd from update
         if !self.pending_patches.borrow().is_empty(){
             self.apply_pending_patches(None).expect("applying pending patches..");
@@ -784,7 +795,11 @@ where
             panic!("There are still pending patches.. can not emit cmd, if all pending patches
             has not been applied yet!");
         }
+        let t4 = crate::now();
+        log::info!("Applying the pending patches took: {}ms", t4-t3);
         cmd.emit(self);
+        let t5 = crate::now();
+        log::info!("Emitting the suceeding cmd took: {}ms", t5-t4);
     }
 
     /// Inject a style to the global document

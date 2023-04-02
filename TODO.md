@@ -182,6 +182,8 @@
         - Store the patches as Closures, so as to get away with the generics
             - but then there will be error can be shared between threads because closure is not Send
         - [X] Make a DomPatch which a DOM version of the patch with the target node and created node
+- [ ] Find a way to break up building the view into multiple frames, since view can take a long time to build
+- [ ] Find a way to break up diffing the current vdom and the new vdom as they can also take a bit of long time as well.
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
