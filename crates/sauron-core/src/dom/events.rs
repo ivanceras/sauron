@@ -9,7 +9,8 @@ use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
 pub use web_sys::{
-    AnimationEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TransitionEvent,
+    AnimationEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TouchEvent,
+    TransitionEvent,
 };
 use web_sys::{
     EventTarget, HtmlDetailsElement, HtmlInputElement, HtmlSelectElement,
@@ -168,7 +169,7 @@ macro_rules! declare_html_events{
         }
 
         /// html events
-        pub const HTML_EVENTS: [&'static str; 34] = [$(stringify!($event),)*];
+        pub const HTML_EVENTS: &[&'static str] = &[$(stringify!($event),)*];
     }
 }
 
@@ -197,6 +198,11 @@ fn to_transition_event(event: Event) -> TransitionEvent {
     web_event
         .dyn_into()
         .expect("unable to cast to transition event")
+}
+
+fn to_touch_event(event: Event) -> TouchEvent {
+    let web_event = event.as_web().expect("must be web sys event");
+    web_event.dyn_into().expect("unable to cast to touch event")
 }
 
 fn to_webevent(event: Event) -> web_sys::Event {
@@ -301,6 +307,9 @@ declare_html_events! {
     on_keypress => keypress => to_keyboard_event => KeyboardEvent;
     on_keyup => keyup => to_keyboard_event => KeyboardEvent;
     on_toggle => toggle => to_open => bool;
+    on_touchstart => touchstart => to_touch_event => TouchEvent;
+    on_touchend => touchend => to_touch_event => TouchEvent;
+    on_touchmove => touchmove => to_touch_event => TouchEvent;
     on_focus => focus => to_webevent => web_sys::Event;
     on_blur => blur => to_webevent => web_sys::Event;
     on_reset => reset => to_webevent => web_sys::Event;
