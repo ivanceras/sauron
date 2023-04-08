@@ -284,7 +284,6 @@ where
     ///
     /// TODO: maybe call the apply_pending_patches here to apply the some patches
     async fn dispatch_pending_msgs(&self, deadline: Option<f64>) ->Result<(), JsValue>{
-        log::info!("dispatching pending msgs deadline: {:?}", deadline);
         if self.pending_msgs.borrow().is_empty(){
             return Ok(())
         }
@@ -316,7 +315,6 @@ where
             i += 1;
         }
         if !did_complete{
-            log::info!("PENDING MSGS rescheduling");
             #[cfg(feature = "with-ric")]
             self.dispatch_pending_msgs_with_ric().expect("must complete");
         }
@@ -452,10 +450,8 @@ where
 
     #[cfg(feature = "with-ric")]
     fn apply_pending_patches_with_ric(&self) -> Result<(), JsValue>{
-        log::info!("here in apply_pending patches with ric..");
         let program = self.clone();
         crate::dom::util::request_idle_callback_with_deadline(move|deadline|{
-            log::info!("ric deadline: {}", deadline);
             program.apply_pending_patches(Some(deadline))
                 .expect("must not error");
         }).expect("must complete the remaining pending patches..");
@@ -479,7 +475,6 @@ where
         deadline: Option<f64>
     ) -> Result<(), JsValue>
     {
-        log::info!("deadline: {:?}", deadline);
         if self.pending_patches.borrow().is_empty(){
             return Ok(())
         }
@@ -496,7 +491,6 @@ where
             // only break if deadline is specified
             if let Some(deadline) = deadline{
                 if elapsed > deadline {
-                    log::info!("breaking here...");
                     did_complete = false;
                     break;
                 }
@@ -761,7 +755,9 @@ where
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
+        #[cfg(all(feature = "with-measure", feature="with-debug"))]
         let t2 = crate::now();
+        #[cfg(all(feature = "with-measure", feature="with-debug"))]
         log::info!("Dispatching pending MSG's took {}ms", t2-t1);
 
         let mut all_cmd = vec![];
@@ -782,7 +778,9 @@ where
             self.dispatch_dom_changes(log_measurements, measurement_name, t1);
         }
 
+        #[cfg(all(feature = "with-measure", feature="with-debug"))]
         let t3 = crate::now();
+        #[cfg(all(feature = "with-measure", feature="with-debug"))]
         log::info!("Dispatching dom changes took: {}ms", t3-t2);
 
         // Ensure all pending patches are applied before emiting the Cmd from update
@@ -795,10 +793,14 @@ where
             panic!("There are still pending patches.. can not emit cmd, if all pending patches
             has not been applied yet!");
         }
+        #[cfg(all(feature = "with-measure", feature="with-debug"))]
         let t4 = crate::now();
+        #[cfg(all(feature = "with-measure", feature="with-debug"))]
         log::info!("Applying the pending patches took: {}ms", t4-t3);
         cmd.emit(self);
+        #[cfg(all(feature = "with-measure", feature="with-debug"))]
         let t5 = crate::now();
+        #[cfg(all(feature = "with-measure", feature="with-debug"))]
         log::info!("Emitting the suceeding cmd took: {}ms", t5-t4);
     }
 
@@ -864,7 +866,6 @@ where
         let program = self.clone();
         #[cfg(feature = "with-ric")]
         let _handle = crate::dom::util::request_idle_callback_with_deadline(move|deadline: f64|{
-            log::info!("deadline: {:.2}", deadline);
             let program = program.clone();
             spawn_local(async move{
                 program.dispatch_inner(deadline).await;
