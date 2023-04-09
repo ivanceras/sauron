@@ -3,7 +3,7 @@ use crate::dom::Measurements;
 use crate::vdom;
 use crate::{Application, Cmd, Dispatch};
 use std::{any::TypeId, cell::RefCell, collections::BTreeMap, rc::Rc};
-use wasm_bindgen::{closure::Closure, JsCast};
+use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen::JsValue;
 use std::collections::VecDeque;
@@ -458,14 +458,15 @@ where
         Ok(())
     }
 
-    #[cfg(not(feature = "with-ric"))]
+    #[cfg(feature = "with-raf")]
+    #[allow(unused)]
     fn apply_pending_patches_with_raf(&self) -> Result<(), JsValue>{
         let program = self.clone();
         crate::dom::util::request_animation_frame(move||{
             let deadline = 10.0;
             program.apply_pending_patches(Some(deadline))
                 .expect("must not error");
-        });
+        }).expect("must execute");
         Ok(())
     }
 
@@ -505,7 +506,12 @@ where
             #[cfg(feature = "with-ric")]
             self.apply_pending_patches_with_ric().expect("must complete");
             #[cfg(not(feature = "with-ric"))]
-            self.apply_pending_patches_with_raf().expect("must complete");
+            {
+                #[cfg(feature = "with-raf")]
+                self.apply_pending_patches_with_raf().expect("must complete");
+                #[cfg(not(feature = "with-raf"))]
+                self.apply_pending_patches(None).expect("must complete");
+            }
         }
         #[cfg(all(feature = "with-measure", feature = "with-debug"))]
         let t3 = crate::now();
@@ -884,13 +890,4 @@ where
         self.dispatch_multiple(vec![msg])
     }
 
-    fn dispatch_with_delay(&self, msg: MSG, timeout: i32) ->i32 {
-        let program_clone = self.clone();
-        crate::dom::util::delay_exec(
-            Closure::once(move || {
-                program_clone.dispatch(msg);
-            }),
-            timeout,
-        )
-    }
 }

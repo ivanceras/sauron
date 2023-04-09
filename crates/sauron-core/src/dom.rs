@@ -28,8 +28,8 @@ pub use events::*;
 pub use http::Http;
 pub use program::Program;
 pub use util::{
-    async_delay, body, delay_exec, document, history, now, performance,
-    request_animation_frame, spawn_local, window,
+    async_delay, body, clear_timeout_with_handle, delay_exec, document,
+    history, now, performance, request_animation_frame, spawn_local, window,
 };
 pub use window::Window;
 
