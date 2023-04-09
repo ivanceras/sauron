@@ -25,6 +25,7 @@ use wasm_bindgen_futures::spawn_local;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use std::rc::Rc;
+use std::cell::RefCell;
 
 pub enum Msg {
     Click,
@@ -34,25 +35,26 @@ pub enum Msg {
 
 #[derive(Default)]
 pub struct App {
-    current_handle: Option<i32>,
+    current_handle: Rc<RefCell<Option<i32>>>,
     executed: Rc<AtomicBool>,
 }
 
 impl App{
-    fn execute_delayed(&mut self){
+    fn execute_delayed(program: impl Dispatch<Msg> + 'static, current_handle: Rc<RefCell<Option<i32>>>, executed: Rc<AtomicBool>){
         log::info!("in execute delayed...");
-        if let Some(current_handle) = self.current_handle{
-            sauron::dom::clear_timeout_with_handle(current_handle);
+        if let Some(current_handle) = current_handle.borrow().as_ref(){
+            sauron::dom::clear_timeout_with_handle(*current_handle);
             log::info!("We cancelled {}", current_handle);
         }
 
-        log::info!("We are scheduling a new one..");
-        let executed = self.executed.clone();
         let handle = sauron::dom::delay_exec(move||{
             log::info!("I'm executing after 5 seconds");
             executed.store(true, Ordering::Relaxed);
+            // have to dispatch something in order to update the view
+            program.dispatch(Msg::NoOp);
         }, 5000).expect("must have a handle");
-        self.current_handle = Some(handle);
+
+        *current_handle.borrow_mut() = Some(handle);
     }
 }
 
@@ -96,11 +98,17 @@ impl Application<Msg> for App {
 
     async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
-            Msg::Click => spawn_local(some_async_function()),
-            Msg::CancelPrevious => self.execute_delayed(),
-            Msg::NoOp => (),
+            Msg::Click => {
+                spawn_local(some_async_function());
+                Cmd::none()
+            }
+            Msg::CancelPrevious => {
+                let current_handle = Rc::clone(&self.current_handle);
+                let executed = Rc::clone(&self.executed);
+                Cmd::new(|program|Self::execute_delayed(program, current_handle, executed))
+            },
+            Msg::NoOp => Cmd::none(),
         }
-        Cmd::none()
     }
 
     fn style(&self) -> String {
