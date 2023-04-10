@@ -437,14 +437,41 @@ where
             }
         }
 
-
-        #[cfg(feature = "with-ric")]
-        self.apply_pending_patches_with_ric().expect("must complete");
-
-        #[cfg(not(feature = "with-ric"))]
-        self.apply_pending_patches(Some(10.0)).expect("must complete");
+        self.apply_pending_patches_with_priority_raf();
 
         Ok(total_patches)
+    }
+
+
+    /// apply pending patches using raf
+    /// if raf is not available, use ric
+    /// if ric is not available call bare function
+    fn apply_pending_patches_with_priority_raf(&self){
+        #[cfg(feature = "with-raf")]
+        self.apply_pending_patches_with_raf().expect("must complete");
+        #[cfg(not(feature = "with-raf"))]
+        {
+            #[cfg(feature = "with-ric")]
+            self.apply_pending_patches_with_ric().expect("must complete");
+            #[cfg(not(feature = "with-ric"))]
+            self.apply_pending_patches(None).expect("must complete");
+        }
+    }
+
+
+    /// apply pending patches using ric
+    /// if ric is not available, use raf
+    /// if raf is not available call bare function
+    fn apply_pending_patches_with_priority_ric(&self){
+        #[cfg(feature = "with-ric")]
+        self.apply_pending_patches_with_ric().expect("must complete");
+        #[cfg(not(feature = "with-ric"))]
+        {
+            #[cfg(feature = "with-raf")]
+            self.apply_pending_patches_with_raf().expect("must complete");
+            #[cfg(not(feature = "with-raf"))]
+            self.apply_pending_patches(None).expect("must complete");
+        }
     }
 
 
@@ -503,15 +530,7 @@ where
         }
         if !did_complete{
             log::error!("Rescheduling here... ric");
-            #[cfg(feature = "with-ric")]
-            self.apply_pending_patches_with_ric().expect("must complete");
-            #[cfg(not(feature = "with-ric"))]
-            {
-                #[cfg(feature = "with-raf")]
-                self.apply_pending_patches_with_raf().expect("must complete");
-                #[cfg(not(feature = "with-raf"))]
-                self.apply_pending_patches(None).expect("must complete");
-            }
+            self.apply_pending_patches_with_priority_ric();
         }
         #[cfg(all(feature = "with-measure", feature = "with-debug"))]
         let t3 = crate::now();
