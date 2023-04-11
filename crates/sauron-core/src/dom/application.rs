@@ -51,13 +51,9 @@ where
 pub struct Measurements {
     /// The application can name this measurement to determine where this measurement is coming
     /// from.
-    pub name: String,
-    /// The number of msg processed in the update loop
-    pub msg_count: usize,
+    pub name: Option<String>,
     /// The number of DOM nodes in this Component
-    pub view_node_count: usize,
-    /// Time it took for dispatching the Component's update function
-    pub update_dispatch_took: f64,
+    pub node_count: usize,
     /// Time it took for the Component to build it's view
     pub build_view_took: f64,
     /// Total number of patches applied on this update loop

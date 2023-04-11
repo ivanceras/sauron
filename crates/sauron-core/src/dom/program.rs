@@ -1,7 +1,6 @@
-#[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
 use crate::vdom;
-use crate::{Application, Cmd, Dispatch};
+use crate::{Application, Cmd, Dispatch, prelude::Patch};
 use std::{any::TypeId, cell::RefCell, collections::BTreeMap, rc::Rc};
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
@@ -291,9 +290,6 @@ where
         let t1 = crate::now();
         let mut did_complete = true;
         while let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front(){
-            #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-            log::debug!("Executing pending msg item {}", i);
-
             // Note: each MSG needs to be executed one by one in the same order
             // as APP's state can be affected by the previous MSG
             let cmd = self.app.borrow_mut().update(pending_msg).await;
@@ -321,24 +317,47 @@ where
         Ok(())
     }
 
-    /// Diff the current virtual dom with the new virtual dom that is being passed in.
-    ///
-    /// Then use that diff to patch the real DOM in the user's browser so that they are
-    /// seeing the latest state of the application.
-    ///
-    /// Return the total number of patches applied
-    pub fn update_dom(
+    fn update_dom(&self) -> Result<Measurements, JsValue>{
+        let t1 = crate::now();
+        // a new view is created due to the app update
+        let view = self.app.borrow().view();
+        let t2 = crate::now();
+
+        let node_count = view.node_count();
+
+        // update the last DOM node tree with this new view
+        let total_patches =
+            self.update_dom_with_vdom(view).expect("must not error");
+        let t3 = crate::now();
+
+        let measurements = Measurements{
+            name: None,
+            node_count,
+            build_view_took: t2 - t1,
+            total_patches,
+            dom_update_took: t3 - t2,
+            total_time: t3 - t1,
+        };
+        Ok(measurements)
+    }
+
+    /// patch the DOM to reflect the App's view
+    pub fn update_dom_with_vdom(
         &self,
         new_vdom: vdom::Node<MSG>,
     ) -> Result<usize, JsValue>
     {
 
-        let total_patches = self.patch_dom(
-            &new_vdom
-        )?;
+        let total_patches = {
+            let current_vdom = self.current_vdom.borrow();
+            let patches = diff(&current_vdom, &new_vdom);
+            let dom_patches = self.convert_patches(&patches).expect("must convert patches");
+            self.pending_patches.borrow_mut().extend(dom_patches);
+            self.apply_pending_patches_with_priority_raf();
+            patches.len()
+        };
 
         *self.current_vdom.borrow_mut() = new_vdom;
-
         self.set_focus_element();
         Ok(total_patches)
     }
@@ -357,57 +376,22 @@ where
 
         *self.root_node.borrow_mut() = Some(created_node.node);
         *self.active_closures.borrow_mut() = created_node.closures;
-
         *self.current_vdom.borrow_mut() = new_vdom;
     }
 
-    /// Apply all of the patches to our old root node in order to create the new root node
-    /// that we desire.
-    /// This is usually used after diffing two virtual nodes.
-    ///
-    pub fn patch_dom(
-        &self,
-        new_vdom: &vdom::Node<MSG>,
-    ) -> Result<usize, JsValue>
-    {
-        let current_vdom = self.current_vdom.borrow();
-        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-        let t0 = crate::now();
-        let patches = diff(&current_vdom, new_vdom);
-        // move the diff into patch function.
-        let total_patches = patches.len();
-
-        #[cfg(feature = "with-debug")]
-        log::debug!("patches: {:#?}", patches);
-
-        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-        let t1 = crate::now();
-        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-        log::info!("diffing took {}ms", t1 - t0);
-
+    /// get the real DOM target node and make a DomPatch object for each of the Patch
+    fn convert_patches(&self, patches: &[Patch<MSG>]) -> Result<Vec<DomPatch<MSG>>, JsValue>{
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
             .iter()
             .map(|patch| (patch.path(), patch.tag()))
             .collect();
 
-        let mut paths = vec![];
-        for patch in patches.iter() {
-            paths.push(patch.path());
-        }
-
         let nodes_to_patch = created_node::find_all_nodes(self.root_node.borrow().as_ref().expect("must have a root node"), &nodes_to_find);
-        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-        let t2 = crate::now();
 
-        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-        log::info!("Took {}ms to find all the nodes", t2 - t1);
-
-        for patch in patches.iter() {
+        let dom_patches:Vec<DomPatch<MSG>> = patches.iter().map(|patch|{
             let patch_path = patch.path();
             let patch_tag = patch.tag();
             if let Some(target_node) = nodes_to_patch.get(patch_path) {
-                //TODO: tests are panicking here!, so has to comment out the checking of tag names
-                // check the tag here if it matches
                 let target_element: &Element = target_node.unchecked_ref();
                 if let Some(tag) = patch_tag {
                     let target_tag = target_element.tag_name().to_lowercase();
@@ -418,28 +402,14 @@ where
                         );
                     }
                 }
-
-                #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-                let t3 = crate::now();
-
-                let dom_patch =
-                    DomPatch::from_patch(self, target_node, &mut self.focused_node.borrow_mut(), patch);
-
-                #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-                let t4 = crate::now();
-
-                #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-                log::info!("Creating dom_patch took {}ms", t4 - t3);
-
-                self.pending_patches.borrow_mut().push_back(dom_patch);
+                DomPatch::from_patch(self, target_node, &mut self.focused_node.borrow_mut(), patch)
             } else {
                 unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
             }
-        }
+        }).collect();
 
-        self.apply_pending_patches_with_priority_raf();
+        Ok(dom_patches)
 
-        Ok(total_patches)
     }
 
 
@@ -507,12 +477,8 @@ where
             return Ok(())
         }
         let t1 = crate::now();
-        #[cfg(feature = "with-debug")]
-        let mut cnt = 0;
         let mut did_complete = true;
         while let Some(dom_patch) = self.pending_patches.borrow_mut().pop_front() {
-            #[cfg(feature = "with-debug")]
-            log::debug!("Executing pending patch item {}", cnt);
             let t2 = crate::now();
             self.apply_dom_patch(dom_patch).expect("must apply dom patch");
             let elapsed = t2 - t1;
@@ -523,19 +489,10 @@ where
                     break;
                 }
             }
-            #[cfg(feature = "with-debug")]
-            {
-                cnt += 1;
-            }
         }
         if !did_complete{
-            log::error!("Rescheduling here... ric");
             self.apply_pending_patches_with_priority_ric();
         }
-        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-        let t3 = crate::now();
-        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-        log::info!("Pending patches took {}ms", t3 - t1);
         Ok(())
     }
 
@@ -701,54 +658,12 @@ where
 
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    fn dispatch_dom_changes(&self, _log_measurements: bool, _measurement_name: &str, _t1: f64) {
-        #[cfg(feature = "with-measure")]
-        let t2 = crate::now();
+    fn dispatch_dom_changes(&self, log_measurements: bool) {
 
-        // a new view is created due to the app update
-        let view = self.app.borrow().view();
-        #[cfg(all(feature = "with-measure", feature="with-debug"))]
-        let t25 = crate::now();
-        #[cfg(all(feature = "with-measure", feature="with-debug"))]
-        log::info!("view took: {}ms", t25 - t2);
+        let measurements = self.update_dom().expect("must update dom");
 
-        #[cfg(feature = "with-measure")]
-        let node_count = view.node_count();
-        #[cfg(feature = "with-measure")]
-        let t3 = crate::now();
 
-        #[cfg(all(feature = "with-measure", feature="with-debug"))]
-        log::info!("view and node count took: {}ms", t3 - t2);
-
-        // update the last DOM node tree with this new view
-        let _total_patches =
-            self.update_dom(view).expect("must not error");
-        #[cfg(feature = "with-measure")]
-        let t4 = crate::now();
-
-        #[cfg(feature = "with-measure")]
-        {
-            let dispatch_duration = t4 - _t1;
-            #[cfg(all(feature = "with-measure", feature="with-debug"))]
-             log::info!("dispatch took: {}ms", dispatch_duration);
-            // 60fps is 16.667 ms per frame.
-            if dispatch_duration > 16.0 {
-                log::warn!("dispatch took: {}ms", dispatch_duration);
-            }
-        }
-
-        #[cfg(feature = "with-measure")]
-        if _log_measurements && _total_patches > 0 {
-            let measurements = Measurements {
-                name: _measurement_name.to_string(),
-                msg_count: 0,
-                view_node_count: node_count,
-                update_dispatch_took: t2 - _t1,
-                build_view_took: t3 - t2,
-                total_patches: _total_patches,
-                dom_update_took: t4 - t3,
-                total_time: t4 - _t1,
-            };
+        if log_measurements && measurements.total_patches > 0 {
             // tell the app on app performance measurements
             let cmd_measurement =
                 self.app.borrow().measurements(measurements).no_render();
@@ -768,7 +683,6 @@ where
     /// - update the app with msgs (use a request_idle_callback)
     /// - compute the view and update the dom (use request_animation_frame )
     async fn dispatch_inner(&self, deadline: f64) {
-        let t1 = crate::now();
 
         self.dispatch_pending_msgs(Some(deadline)).await.expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
@@ -776,14 +690,9 @@ where
             self.dispatch_pending_msgs(None).await.expect("must dispatch all pending msgs");
         }
         if !self.pending_msgs.borrow().is_empty(){
-            log::error!("There are still remaining pending msgs: {}", self.pending_msgs.borrow().len());
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
-        #[cfg(all(feature = "with-measure", feature="with-debug"))]
-        let t2 = crate::now();
-        #[cfg(all(feature = "with-measure", feature="with-debug"))]
-        log::info!("Dispatching pending MSG's took {}ms", t2-t1);
 
         let mut all_cmd = vec![];
         let mut pending_cmds = self.pending_cmds.borrow_mut();
@@ -799,14 +708,8 @@ where
 
         if cmd.modifier.should_update_view {
             let log_measurements = cmd.modifier.log_measurements;
-            let measurement_name = &cmd.modifier.measurement_name;
-            self.dispatch_dom_changes(log_measurements, measurement_name, t1);
+            self.dispatch_dom_changes(log_measurements);
         }
-
-        #[cfg(all(feature = "with-measure", feature="with-debug"))]
-        let t3 = crate::now();
-        #[cfg(all(feature = "with-measure", feature="with-debug"))]
-        log::info!("Dispatching dom changes took: {}ms", t3-t2);
 
         // Ensure all pending patches are applied before emiting the Cmd from update
         if !self.pending_patches.borrow().is_empty(){
@@ -818,15 +721,7 @@ where
             panic!("There are still pending patches.. can not emit cmd, if all pending patches
             has not been applied yet!");
         }
-        #[cfg(all(feature = "with-measure", feature="with-debug"))]
-        let t4 = crate::now();
-        #[cfg(all(feature = "with-measure", feature="with-debug"))]
-        log::info!("Applying the pending patches took: {}ms", t4-t3);
         cmd.emit(self);
-        #[cfg(all(feature = "with-measure", feature="with-debug"))]
-        let t5 = crate::now();
-        #[cfg(all(feature = "with-measure", feature="with-debug"))]
-        log::info!("Emitting the suceeding cmd took: {}ms", t5-t4);
     }
 
     /// Inject a style to the global document
