@@ -658,13 +658,15 @@ where
 
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
+    #[allow(unused)]
     fn dispatch_dom_changes(&self, log_measurements: bool) {
 
         let measurements = self.update_dom().expect("must update dom");
 
 
+        #[cfg(feature = "with-measure")]
+        // tell the app about the performance measurement and only if there was patches applied
         if log_measurements && measurements.total_patches > 0 {
-            // tell the app on app performance measurements
             let cmd_measurement =
                 self.app.borrow().measurements(measurements).no_render();
             cmd_measurement.emit(self);
