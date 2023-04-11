@@ -59,11 +59,12 @@ where
     }
 }
 
+#[async_trait(?Send)]
 impl<XMSG> sauron::Component<Msg, XMSG> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
+    async fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
@@ -193,7 +194,6 @@ impl DateTimeWidgetCustomElement {
             program: Program::new(
                 DateTimeWidget::<()>::default(),
                 mount_node,
-                false,
                 true,
             ),
         }
@@ -237,7 +237,7 @@ impl DateTimeWidgetCustomElement {
             &self.program.app.borrow(),
         );
         self.program.inject_style_to_mount(&component_style);
-        self.program.update_dom();
+        self.program.update_dom().expect("must update dom");
     }
 
     #[wasm_bindgen(method, js_name = disconnectedCallback)]

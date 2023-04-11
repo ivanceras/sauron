@@ -6,8 +6,9 @@ enum AppMsg {}
 #[derive(Default)]
 pub struct App {}
 
+#[async_trait(?Send)]
 impl Application<AppMsg> for App {
-    fn update(&mut self, _msg: AppMsg) -> Cmd<Self, AppMsg> {
+    async fn update(&mut self, _msg: AppMsg) -> Cmd<Self, AppMsg> {
         Cmd::none()
     }
 

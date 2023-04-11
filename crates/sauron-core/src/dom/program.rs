@@ -16,9 +16,7 @@ use crate::dom::created_node;
 
 
 
-/// Holds the user App and the dom updater
-/// This is passed into the event listener and the dispatch program
-/// will be called after the event is triggered.
+/// Program handle the lifecycle of the APP
 pub struct Program<APP, MSG>
 where
     MSG: 'static,
@@ -54,9 +52,6 @@ where
     /// after mounting or update dispatch call, the element will be focused
     pub focused_node: Rc<RefCell<Option<Node>>>,
 
-    /// if the mount node is replaced by the root_node
-    pub replace: bool,
-
     /// whether or not to use shadow root of the mount_node
     pub use_shadow: bool,
 
@@ -81,7 +76,6 @@ where
             mount_node: self.mount_node.clone(),
             active_closures: Rc::clone(&self.active_closures),
             focused_node: Rc::clone(&self.focused_node),
-            replace: self.replace,
             use_shadow: self.use_shadow,
             pending_patches: Rc::clone(&self.pending_patches),
         }
@@ -98,7 +92,6 @@ where
     pub fn new(
         app: APP,
         mount_node: &web_sys::Node,
-        replace: bool,
         use_shadow: bool,
     ) -> Self {
         let view = app.view();
@@ -111,7 +104,6 @@ where
             mount_node: mount_node.clone(),
             active_closures: Rc::new(RefCell::new(ActiveClosure::new())),
             focused_node: Rc::new(RefCell::new(None)),
-            replace,
             use_shadow,
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
         }
@@ -139,29 +131,6 @@ where
         self.mount_node.clone()
     }
 
-    /// Creates an Rc wrapped instance of Program and replace the root_node with the app view
-    /// # Example
-    /// ```rust,ignore
-    /// # use sauron::prelude::*;
-    /// # use sauron::document;
-    /// struct App{}
-    /// # impl Application<()> for App{
-    /// #     fn view(&self) -> Node<()>{
-    /// #         text("hello")
-    /// #     }
-    /// #     fn update(&mut self, _: ()) -> Cmd<Self, ()> {
-    /// #         Cmd::none()
-    /// #     }
-    /// # }
-    /// let mount = document().query_selector(".container").ok().flatten().unwrap();
-    /// Program::replace_mount(App{}, &mount);
-    /// ```
-    pub fn replace_mount(app: APP, mount_node: &web_sys::Node) -> Self {
-        let program = Self::new(app, mount_node, true, false);
-        program.mount();
-        program
-    }
-
     ///  Instantiage an app and append the view to the root_node
     /// # Example
     /// ```rust,ignore
@@ -180,7 +149,7 @@ where
     /// Program::append_to_mount(App{}, &mount);
     /// ```
     pub fn append_to_mount(app: APP, mount_node: &web_sys::Node) -> Self {
-        let program = Self::new(app, mount_node, false, false);
+        let program = Self::new(app, mount_node, false);
         program.mount();
         program
     }
@@ -215,13 +184,7 @@ where
             &mut self.focused_node.borrow_mut(),
         );
 
-        //TODO: maybe remove replace the mount
-        if self.replace {
-            let mount_element: &Element = self.mount_node.unchecked_ref();
-            mount_element
-                .replace_with_with_node_1(&created_node.node)
-                .expect("Could not append child to mount");
-        } else if self.use_shadow {
+       if self.use_shadow {
             let mount_element: &web_sys::Element =
                 self.mount_node.unchecked_ref();
             mount_element
@@ -280,8 +243,6 @@ where
     /// executes pending msgs by calling the app update method with the msgs
     /// as parameters.
     /// If there is no deadline specified all the pending messages are executed
-    ///
-    /// TODO: maybe call the apply_pending_patches here to apply the some patches
     async fn dispatch_pending_msgs(&self, deadline: Option<f64>) ->Result<(), JsValue>{
         if self.pending_msgs.borrow().is_empty(){
             return Ok(())
@@ -317,7 +278,8 @@ where
         Ok(())
     }
 
-    fn update_dom(&self) -> Result<Measurements, JsValue>{
+    /// update the browser DOM to reflect the APP's  view
+    pub fn update_dom(&self) -> Result<Measurements, JsValue>{
         let t1 = crate::now();
         // a new view is created due to the app update
         let view = self.app.borrow().view();
@@ -679,11 +641,6 @@ where
     /// - The returned Cmd from the component update is then emitted.
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
-    ///
-    ///
-    /// TODO: split this function into 2.
-    /// - update the app with msgs (use a request_idle_callback)
-    /// - compute the view and update the dom (use request_animation_frame )
     async fn dispatch_inner(&self, deadline: f64) {
 
         self.dispatch_pending_msgs(Some(deadline)).await.expect("must dispatch msgs");
@@ -746,7 +703,7 @@ where
     }
 
     /// inject style element to the mount node
-    pub fn inject_style_to_mount<DSP>(&self, style: &str)
+    pub fn inject_style_to_mount(&self, style: &str)
     {
         let style_node =
             crate::html::tags::style([], [crate::html::text(style)]);
@@ -779,10 +736,7 @@ where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
-    ///TODO: store the msgs in a queue
-    /// and an executor to execute those msgs
-    /// with an alloted time of say 10ms to execute.
-    /// if there is no more time, then dom patching should be commence and resume.
+    /// dispatch multiple MSG
     fn dispatch_multiple(&self, msgs: Vec<MSG>) {
         self.pending_msgs.borrow_mut().extend(msgs);
         let program = self.clone();
