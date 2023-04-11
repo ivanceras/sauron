@@ -118,6 +118,19 @@
     - This issue manifested in `performance-test-sauron` repo
     - Suspecting it has to do with `mount_node` and `root_node` as replace and append could have a different behavior in the 2.
     - Solved by: using mutable reference to the `root_node` rather than a mutable reference to a clond one.
+- [ ] Rethink about the replace_mount in Program
+    - It is useful for replacing the preload spinner when the application is finished loading
+    - [ ] Have an enum for mount action
+        ```rust
+            enum MountAction{
+                /// append as child to the target mount
+                Append,
+                /// clear any child to the target mount then append
+                ClearAppend,
+                /// clear the target mount
+                Replace
+            }
+        ```
 
 
 

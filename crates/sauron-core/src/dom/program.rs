@@ -702,6 +702,7 @@ where
         head.append_child(&html_style).expect("must append style");
     }
 
+    /// TODO: unify the code here with inject style
     /// inject style element to the mount node
     pub fn inject_style_to_mount(&self, style: &str)
     {
