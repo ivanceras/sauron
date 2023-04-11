@@ -164,7 +164,7 @@ fn multiple_match_on_keyed_elements() {
 
     let target_dom_html = target_dom.render_to_string();
     simple_program
-        .update_dom(target_dom)
+        .update_dom_with_vdom(target_dom)
         .expect("must not error");
 
     let app_node = crate::document()

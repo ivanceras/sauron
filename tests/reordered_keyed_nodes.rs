@@ -50,7 +50,7 @@ fn failing_reordered_keys() {
     let simple_program = simple_program();
     simple_program.set_current_dom(old);
 
-    simple_program.update_dom(update1).expect("must not error");
+    simple_program.update_dom_with_vdom(update1).expect("must not error");
 
     let container = document
         .query_selector(".reordered")

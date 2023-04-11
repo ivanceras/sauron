@@ -212,7 +212,7 @@ fn subsequent_updates() {
     assert_eq!(expected, container.outer_html());
 
     simple_program
-        .update_dom(update1.clone())
+        .update_dom_with_vdom(update1.clone())
         .expect("must not error");
 
     let container = document
@@ -350,7 +350,7 @@ fn subsequent_updates() {
     );
 
     simple_program
-        .update_dom(update2.clone())
+        .update_dom_with_vdom(update2.clone())
         .expect("must not error");
 
     let container = document
@@ -502,7 +502,7 @@ fn subsequent_updates() {
     );
 
     simple_program
-        .update_dom(update3.clone())
+        .update_dom_with_vdom(update3.clone())
         .expect("must not error");
 
     let container = document

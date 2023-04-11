@@ -104,7 +104,7 @@ fn node_patched_properly() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).expect("must not error");
+    simple_program.update_dom_with_vdom(update1).expect("must not error");
 
     let container = document
         .query_selector(".container2")
@@ -183,7 +183,7 @@ fn node_patched_properly_remove_from_start() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).expect("must not error");
+    simple_program.update_dom_with_vdom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test3")
@@ -266,7 +266,7 @@ fn node_patched_properly_text_changed() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).expect("must not error");
+    simple_program.update_dom_with_vdom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test4")
@@ -362,7 +362,7 @@ fn mixed_keyed_and_non_keyed_elements() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).expect("must not error");
+    simple_program.update_dom_with_vdom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test5")

@@ -65,7 +65,7 @@ fn test_patch_insert_node() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).expect("must not error");
+    simple_program.update_dom_with_vdom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test1")
@@ -137,7 +137,7 @@ fn test_patch_insert_node_in_the_middle() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).expect("must not error");
+    simple_program.update_dom_with_vdom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test_middle")
@@ -216,7 +216,7 @@ fn multiple_insert_should_work() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom(update1).expect("must not error");
+    simple_program.update_dom_with_vdom(update1).expect("must not error");
 
     let container = document
         .query_selector(".test5")

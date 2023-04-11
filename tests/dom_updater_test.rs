@@ -23,7 +23,7 @@ fn patches_dom() {
     simple_program.set_current_dom(vdom);
 
     let new_vdom = div(vec![id("patched")], vec![]); //html! { <div id="patched"></div> };
-    simple_program.update_dom(new_vdom).expect("must not error");
+    simple_program.update_dom_with_vdom(new_vdom).expect("must not error");
 
     assert_eq!(document.query_selector("#patched").unwrap().is_some(), true);
 }
@@ -59,7 +59,7 @@ fn updates_active_closure_on_replace() {
     // New node replaces old node.
     // We are testing that we've stored this new node's closures even though `new` will be dropped
     // at the end of this block.
-    simple_program.update_dom(replace_node).expect("must not error");
+    simple_program.update_dom_with_vdom(replace_node).expect("must not error");
 
     let input_event = InputEvent::new("input").unwrap();
 
@@ -110,7 +110,7 @@ async fn updates_active_closures_on_append() {
         // New node gets appended into the DOM.
         // We are testing that we've stored this new node's closures even though `new` will be dropped
         // at the end of this block.
-        simple_program.update_dom(append_node).expect("must not error");
+        simple_program.update_dom_with_vdom(append_node).expect("must not error");
     }
 
     let input_event = InputEvent::new("input").unwrap();
