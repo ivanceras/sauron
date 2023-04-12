@@ -75,13 +75,7 @@ where
 {
     async fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
         let effects = <Self as crate::Component<MSG, ()>>::update(self, msg).await;
-        let mount_attributes = self.attributes_for_mount();
-        Cmd::batch([
-            Cmd::from(effects),
-            Cmd::new(|program| {
-                program.update_mount_attributes(mount_attributes);
-            }),
-        ])
+        Cmd::from(effects)
     }
 
     fn view(&self) -> Node<MSG> {

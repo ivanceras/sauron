@@ -40,8 +40,7 @@ pub trait CustomElement<MSG> {
     ///
     /// if the listed attributes in the observed attributes are modified
     fn attribute_changed<DSP>(
-        &self,
-        program: DSP,
+        program: &DSP,
         attr_name: &str,
         old_value: JsValue,
         new_value: JsValue,

@@ -1,7 +1,7 @@
 use crate::dom::Measurements;
 use crate::vdom;
 use crate::{Application, Cmd, Dispatch, prelude::Patch};
-use std::{any::TypeId, cell::RefCell, collections::BTreeMap, rc::Rc};
+use std::{any::TypeId, cell::RefCell, rc::Rc};
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen::JsValue;
@@ -212,20 +212,6 @@ where
         self.after_mounted();
     }
 
-
-    /// update the attributes at the mounted element
-    pub fn update_mount_attributes(
-        &self,
-        attributes_value: BTreeMap<String, String>,
-    ) {
-        let mount_node = self.mount_node();
-        let mount_element: &web_sys::Element = mount_node.unchecked_ref();
-        for (attr, value) in attributes_value.iter() {
-            mount_element
-                .set_attribute(attr, value)
-                .expect("unable to set attribute in the mount element");
-        }
-    }
 
 
     #[cfg(feature = "with-ric")]
