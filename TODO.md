@@ -127,11 +127,14 @@
                 Append,
                 /// clear any child to the target mount then append
                 ClearAppend,
-                /// clear the target mount
+                /// replace the target mount with the root node
                 Replace
             }
         ```
-
+    - [ ] Mount event should have a reference to the host_node and the root_node
+            - host_node is the node where the view is mounted, usually the parent
+            - in case of replace host_node is the same as the root_node.
+- [ ] Maybe we don't need the `async` in update.
 
 
 ## Features
