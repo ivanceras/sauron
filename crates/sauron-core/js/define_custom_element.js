@@ -28,8 +28,8 @@ export function register_custom_element(custom_tag, adapter, superClass){
             adoptedCallback(){
                 this.instance.adoptedCallback();
             }
-            attributeChangedCallback(){
-                this.instance.attributeChangedCallback();
+            attributeChangedCallback(name, oldValue, newValue){
+                this.instance.attributeChangedCallback(name, oldValue, newValue);
             }
 
             appendChild(child){

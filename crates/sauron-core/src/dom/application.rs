@@ -70,7 +70,7 @@ pub struct Measurements {
 impl<COMP, MSG> Application<MSG> for COMP
 where
     COMP: crate::Component<MSG, ()> + 'static,
-    COMP: crate::CustomElement,
+    COMP: crate::CustomElement<MSG>,
     MSG: 'static,
 {
     async fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
@@ -99,7 +99,7 @@ where
 impl<CONT, MSG> crate::Component<MSG, ()> for CONT
 where
     CONT: crate::Container<MSG, ()>,
-    CONT: crate::CustomElement,
+    CONT: crate::CustomElement<MSG>,
     MSG: 'static,
 {
     async fn update(&mut self, msg: MSG) -> crate::Effects<MSG, ()> {

@@ -1,6 +1,7 @@
-use crate::{dom::effects::Effects, vdom::Node};
+use crate::{dom::effects::Effects, vdom::Node, Dispatch};
 use std::collections::BTreeMap;
 use async_trait::async_trait;
+use wasm_bindgen::JsValue;
 
 /// A component has a view and can update itself.
 ///
@@ -29,7 +30,7 @@ pub trait Component<MSG, XMSG> {
 }
 
 /// a trait for implementing CustomElement in the DOM with custom tag
-pub trait CustomElement {
+pub trait CustomElement<MSG> {
     /// returns the attributes that is observed by this component
     /// These are the names of the attributes the component is interested in
     fn observed_attributes() -> Vec<&'static str>;
@@ -38,10 +39,13 @@ pub trait CustomElement {
     /// and the attributes of the custom-element has been modified
     ///
     /// if the listed attributes in the observed attributes are modified
-    fn attributes_changed(
-        &mut self,
-        attributes_values: BTreeMap<String, String>,
-    );
+    fn attribute_changed<DSP>(
+        &self,
+        program: DSP,
+        attr_name: &str,
+        old_value: JsValue,
+        new_value: JsValue,
+    ) where DSP: Dispatch<MSG> + Clone + 'static;
 
     /// This will be invoked when a component needs to set the attributes for the
     /// mounted element of this component

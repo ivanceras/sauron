@@ -19,13 +19,14 @@
 
         function dateTimeClicked(e){
             console.log("date time is clicked",e);
+            document.getElementById("date1").setAttribute("time", "11:11");
         }
 
         window.dateTimeChange = dateTimeChange;
         window.dateTimeClicked = dateTimeClicked;
     </script>
 
-    <date-time date="2022-02-22" time="22:22" onchange="dateTimeChange()" onclick="dateTimeClicked()"></date-time>
-    <button>Some button</button>
+    <date-time id="date1" date="2022-02-22" time="22:22" onchange="dateTimeChange()" ></date-time>
+    <button onclick="dateTimeClicked()">Some button</button>
   </body>
 </html>
