@@ -713,15 +713,56 @@ where
         }
     }
 
+    #[cfg(feature = "with-ric")]
+    fn dispatch_inner_with_ric(&self) {
+        let program = self.clone();
+        let _handle = crate::dom::util::request_idle_callback_with_deadline(move|deadline: f64|{
+            let program = program.clone();
+            spawn_local(async move{
+                program.dispatch_inner(Some(deadline)).await;
+            });
+        }).expect("must execute");
+    }
+
+    #[cfg(feature = "with-raf")]
+    #[allow(unused)]
+    fn dispatch_inner_with_raf(&self) {
+        let program = self.clone();
+        crate::dom::util::request_animation_frame(move||{
+            let program = program.clone();
+            spawn_local(async move{
+                program.dispatch_inner(None).await;
+            });
+        }).expect("must execute");
+    }
+
+    fn dispatch_inner_with_priority_ric(&self){
+        #[cfg(feature = "with-ric")]
+        self.dispatch_inner_with_ric();
+        #[cfg(not(feature = "with-ric"))]
+        {
+            #[cfg(feature = "with-raf")]
+            self.dispatch_inner_with_raf();
+
+            #[cfg(not(feature = "with-raf"))]
+            {
+                let program = self.clone();
+                spawn_local(async move{
+                    program.dispatch_inner(None).await;
+                })
+            }
+        }
+    }
+
     /// This is called when an event is triggered in the html DOM.
     /// The sequence of things happening here:
     /// - The app component update is executed.
     /// - The returned Cmd from the component update is then emitted.
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
-    async fn dispatch_inner(&self, deadline: f64) {
+    async fn dispatch_inner(&self, deadline: Option<f64>) {
 
-        self.dispatch_pending_msgs(Some(deadline)).await.expect("must dispatch msgs");
+        self.dispatch_pending_msgs(deadline).await.expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
         if !self.pending_msgs.borrow().is_empty(){
             self.dispatch_pending_msgs(None).await.expect("must dispatch all pending msgs");
@@ -807,19 +848,7 @@ where
     /// dispatch multiple MSG
     fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>) {
         self.pending_msgs.borrow_mut().extend(msgs);
-        let program = self.clone();
-        #[cfg(feature = "with-ric")]
-        let _handle = crate::dom::util::request_idle_callback_with_deadline(move|deadline: f64|{
-            let program = program.clone();
-            spawn_local(async move{
-                program.dispatch_inner(deadline).await;
-            });
-        }).expect("must execute");
-
-        #[cfg(not(feature = "with-ric"))]
-        spawn_local(async move{
-            program.dispatch_inner(10.0).await;
-        });
+        self.dispatch_inner_with_priority_ric();
     }
 
 
