@@ -1,6 +1,5 @@
 use crate::{dom::effects::Effects, vdom::Node, Dispatch};
 use std::collections::BTreeMap;
-use async_trait::async_trait;
 use wasm_bindgen::JsValue;
 
 /// A component has a view and can update itself.
@@ -9,11 +8,10 @@ use wasm_bindgen::JsValue;
 /// follow ups and effects. Follow ups are executed on the next
 /// update loop of this component, while the effects are executed
 /// on the parent component that mounts it.
-#[async_trait(?Send)]
 pub trait Component<MSG, XMSG> {
     /// Update the model of this component and return
     /// follow up and/or effects that will be executed on the next update loop
-    async fn update(&mut self, msg: MSG) -> Effects<MSG, XMSG>;
+    fn update(&mut self, msg: MSG) -> Effects<MSG, XMSG>;
 
     /// the view of the component
     fn view(&self) -> Node<MSG>;
@@ -44,7 +42,8 @@ pub trait CustomElement<MSG> {
         attr_name: &str,
         old_value: JsValue,
         new_value: JsValue,
-    ) where DSP: Dispatch<MSG> + Clone + 'static;
+    ) where
+        DSP: Dispatch<MSG> + Clone + 'static;
 
     /// This will be invoked when a component needs to set the attributes for the
     /// mounted element of this component
@@ -60,11 +59,10 @@ pub trait CustomElement<MSG> {
 ///
 /// The view in the container is set by the parent component. The container itself
 /// can not listen to events on its view
-#[async_trait(?Send)]
 pub trait Container<MSG, XMSG> {
     /// update the model of this component and return follow ups and/or effects
     /// that will be executed on the next update loop.
-    async fn update(&mut self, msg: MSG) -> Effects<MSG, XMSG>;
+    fn update(&mut self, msg: MSG) -> Effects<MSG, XMSG>;
 
     /// The container presents the children passed to it from the parent.
     /// The container can decide how to display the children components here, but

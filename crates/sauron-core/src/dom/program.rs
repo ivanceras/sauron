@@ -331,7 +331,7 @@ where
         while let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front(){
             // Note: each MSG needs to be executed one by one in the same order
             // as APP's state can be affected by the previous MSG
-            let cmd = self.app.borrow_mut().update(pending_msg).await;
+            let cmd = self.app.borrow_mut().update(pending_msg);
 
             // we put the cmd in the pending_cmd queue
             self.pending_cmds.borrow_mut().push_back(cmd);
