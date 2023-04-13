@@ -26,7 +26,7 @@ pub use dom_patch::DomPatch;
 pub use effects::Effects;
 pub use events::*;
 pub use http::Http;
-pub use program::Program;
+pub use program::{MountAction, MountTarget, Program};
 pub use util::{
     async_delay, body, clear_timeout_with_handle, delay_exec, document,
     history, now, performance, request_animation_frame, spawn_local, window,

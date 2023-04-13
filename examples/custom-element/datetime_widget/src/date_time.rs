@@ -1,6 +1,7 @@
 use sauron::dom::Callback;
 use sauron::jss;
 use sauron::prelude::*;
+use sauron::dom::{MountAction,MountTarget};
 use std::collections::BTreeMap;
 use std::fmt::Debug;
 use std::iter::FromIterator;
@@ -195,7 +196,8 @@ impl DateTimeWidgetCustomElement {
             program: Program::new(
                 DateTimeWidget::<()>::default(),
                 mount_node,
-                true,
+                MountAction::Append,
+                MountTarget::ShadowRoot,
             ),
         }
     }
@@ -210,13 +212,6 @@ impl DateTimeWidgetCustomElement {
     pub fn attribute_changed_callback(&self, attr_name: &str, old_value: JsValue, new_value: JsValue) {
         log::info!("attribute: {} is changed from: {:?} to: {:?}", attr_name, old_value, new_value);
         DateTimeWidget::<Msg>::attribute_changed(&self.program, attr_name, old_value, new_value);
-        self.update_mount_attributes();
-    }
-
-    fn update_mount_attributes(&self){
-        use wasm_bindgen::JsCast;
-        let mount_element: web_sys::Element = self.program.mount_node().unchecked_into();
-        mount_element.set_attribute("date_time", &self.program.app.borrow().date_time()).expect("set date_time");
     }
 
     #[wasm_bindgen(method, js_name = connectedCallback)]
@@ -226,7 +221,6 @@ impl DateTimeWidgetCustomElement {
             &self.program.app.borrow(),
         );
         self.program.inject_style_to_mount(&component_style);
-        self.update_mount_attributes();
         self.program.update_dom().expect("must update dom");
     }
 

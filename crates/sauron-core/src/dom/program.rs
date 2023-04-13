@@ -260,9 +260,11 @@ where
                 let mount_shadow =
                     mount_element.shadow_root().expect("must have a shadow");
 
-                mount_shadow.unchecked_into()
+                *self.mount_node.borrow_mut() = mount_shadow.unchecked_into();
+                self.mount_node.borrow().clone()
             }
         };
+
 
         match self.mount_procedure.action{
             MountAction::Append => {
@@ -295,6 +297,7 @@ where
                 *self.mount_node.borrow_mut() = created_node.node.clone()
             }
         }
+        log::debug!("Root node is now set..");
         *self.root_node.borrow_mut() = Some(created_node.node);
         *self.active_closures.borrow_mut() = created_node.closures;
         self.set_focus_element();
