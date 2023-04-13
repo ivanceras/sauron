@@ -165,7 +165,7 @@ impl<DSP> Cmd<DSP> {
         MSG: 'static,
         DSP: Dispatch<MSG> + Clone + 'static,
     {
-        let msg_list = msg_list.into_iter().collect();
+        let msg_list: Vec<MSG> = msg_list.into_iter().collect();
         Cmd::new(move |program: DSP| {
             program.dispatch_multiple(msg_list);
         })

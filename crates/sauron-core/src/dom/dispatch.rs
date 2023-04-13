@@ -14,5 +14,5 @@ pub trait Dispatch<MSG> {
     fn dispatch(&self, msg: MSG);
 
     /// dispatch multiple msg
-    fn dispatch_multiple(&self, msgs: Vec<MSG>);
+    fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>);
 }

@@ -805,7 +805,7 @@ where
     APP: Application<MSG> + 'static,
 {
     /// dispatch multiple MSG
-    fn dispatch_multiple(&self, msgs: Vec<MSG>) {
+    fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>) {
         self.pending_msgs.borrow_mut().extend(msgs);
         let program = self.clone();
         #[cfg(feature = "with-ric")]
@@ -825,7 +825,7 @@ where
 
 
     fn dispatch(&self, msg: MSG) {
-        self.dispatch_multiple(vec![msg])
+        self.dispatch_multiple([msg])
     }
 
 }
