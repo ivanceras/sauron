@@ -378,6 +378,9 @@ where
             dom_update_took: t3 - t2,
             total_time: t3 - t1,
         };
+        if measurements.total_time > 16.0 {
+            log::warn!("dispatch took {}ms", measurements.total_time.round());
+        }
         Ok(measurements)
     }
 

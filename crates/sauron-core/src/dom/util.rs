@@ -29,8 +29,8 @@ pub(crate) fn request_animation_frame_for_closure(
     f: Closure<dyn FnMut()>,
 ) -> Result<i32, JsValue> {
     let handle = window()
-        .request_animation_frame(f.as_ref().unchecked_ref())
-        .expect("should register `requestAnimationFrame` OK");
+        .request_animation_frame(f.as_ref().unchecked_ref())?;
+
     f.forget();
     Ok(handle)
 }
@@ -48,8 +48,8 @@ pub(crate) fn request_idle_callback_for_closure(
     f: Closure<dyn Fn(JsValue)>,
 ) -> Result<u32, JsValue> {
     let handle = window()
-        .request_idle_callback(f.as_ref().unchecked_ref())
-        .expect("should register `requestAnimationFrame` OK");
+        .request_idle_callback(f.as_ref().unchecked_ref())?;
+
     f.forget();
     Ok(handle)
 }
@@ -89,7 +89,7 @@ pub fn delay_exec_with_closure(
 pub fn delay_exec<F>(
     mut f: F,
     timeout: i32,
-) -> Result<i32, JsValue> 
+) -> Result<i32, JsValue>
 where F: FnMut() + 'static
 {
     delay_exec_with_closure(Closure::once(move||{
