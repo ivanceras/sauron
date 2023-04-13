@@ -38,7 +38,7 @@ where
     pub root_node: Rc<RefCell<Option<Node>>>,
 
     /// the actual DOM element where the APP is mounted to.
-    pub mount_node: Node,
+    pub mount_node: Rc<RefCell<Node>>,
 
     /// The closures that are currently attached to elements in the page.
     ///
@@ -52,14 +52,42 @@ where
     /// after mounting or update dispatch call, the element will be focused
     pub focused_node: Rc<RefCell<Option<Node>>>,
 
-    /// whether or not to use shadow root of the mount_node
-    pub use_shadow: bool,
+    /// specify how the root node is mounted into the mount node
+    mount_procedure: MountProcedure,
 
     /// Pending patches that hasn't been applied to the DOM yet
     /// for optimization purposes to avoid sluggishness of the app, when a patch
     /// can not be run in 1 execution due to limited remaining time deadline
     /// it will be put into the pending patches to be executed on the next run.
     pub pending_patches: Rc<RefCell<VecDeque<DomPatch<MSG>>>>,
+}
+
+
+/// specify how the App is mounted to the DOM
+#[derive(Clone, Copy)]
+pub enum MountAction{
+    /// append the APP's root node to the target mount node
+    Append,
+    /// clear any children of the target mount node then append the APP's root node
+    ClearAppend,
+    /// replace the target mount node with the APP's root node
+    Replace
+}
+
+/// specify whether to attach the Node in shadow_root
+#[derive(Clone, Copy)]
+pub enum MountTarget{
+    /// attached in the mount node
+    MountNode,
+    /// attached to the shadow root
+    ShadowRoot,
+}
+
+/// specify how the root node will be mounted to the mount node
+#[derive(Clone, Copy)]
+struct MountProcedure{
+    action: MountAction,
+    target: MountTarget,
 }
 
 impl<APP, MSG> Clone for Program<APP, MSG>
@@ -73,10 +101,10 @@ where
             pending_cmds: Rc::clone(&self.pending_cmds),
             current_vdom: Rc::clone(&self.current_vdom),
             root_node: Rc::clone(&self.root_node),
-            mount_node: self.mount_node.clone(),
+            mount_node: Rc::clone(&self.mount_node),
             active_closures: Rc::clone(&self.active_closures),
             focused_node: Rc::clone(&self.focused_node),
-            use_shadow: self.use_shadow,
+            mount_procedure: self.mount_procedure.clone(),
             pending_patches: Rc::clone(&self.pending_patches),
         }
     }
@@ -92,7 +120,8 @@ where
     pub fn new(
         app: APP,
         mount_node: &web_sys::Node,
-        use_shadow: bool,
+        action: MountAction,
+        target: MountTarget,
     ) -> Self {
         let view = app.view();
         Program {
@@ -101,10 +130,13 @@ where
             pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
             current_vdom: Rc::new(RefCell::new(view)),
             root_node: Rc::new(RefCell::new(None)),
-            mount_node: mount_node.clone(),
+            mount_node: Rc::new(RefCell::new(mount_node.clone())),
             active_closures: Rc::new(RefCell::new(ActiveClosure::new())),
             focused_node: Rc::new(RefCell::new(None)),
-            use_shadow,
+            mount_procedure: MountProcedure{
+                action,
+                target
+            },
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
         }
     }
@@ -128,7 +160,7 @@ where
 
     /// return the node where the app is mounted into
     pub fn mount_node(&self) -> web_sys::Node {
-        self.mount_node.clone()
+        self.mount_node.borrow().clone()
     }
 
     ///  Instantiage an app and append the view to the root_node
@@ -149,7 +181,37 @@ where
     /// Program::append_to_mount(App{}, &mount);
     /// ```
     pub fn append_to_mount(app: APP, mount_node: &web_sys::Node) -> Self {
-        let program = Self::new(app, mount_node, false);
+        let program = Self::new(app, mount_node, MountAction::Append, MountTarget::MountNode);
+        program.mount();
+        program
+    }
+
+    /// Creates an Rc wrapped instance of Program and replace the root_node with the app view
+    /// # Example
+    /// ```rust,ignore
+    /// # use sauron::prelude::*;
+    /// # use sauron::document;
+    /// struct App{}
+    /// # impl Application<()> for App{
+    /// #     fn view(&self) -> Node<()>{
+    /// #         text("hello")
+    /// #     }
+    /// #     fn update(&mut self, _: ()) -> Cmd<Self, ()> {
+    /// #         Cmd::none()
+    /// #     }
+    /// # }
+    /// let mount = document().query_selector(".container").ok().flatten().unwrap();
+    /// Program::replace_mount(App{}, &mount);
+    /// ```
+    pub fn replace_mount(app: APP, mount_node: &web_sys::Node) -> Self {
+        let program = Self::new(app, mount_node, MountAction::Replace, MountTarget::MountNode);
+        program.mount();
+        program
+    }
+
+    /// clear the existing children of the mount first before appending
+    pub fn clear_append_to_mount(app: APP, mount_node: &web_sys::Node) -> Self {
+        let program = Self::new(app, mount_node, MountAction::ClearAppend, MountTarget::MountNode);
         program.mount();
         program
     }
@@ -184,27 +246,54 @@ where
             &mut self.focused_node.borrow_mut(),
         );
 
-       if self.use_shadow {
-            let mount_element: &web_sys::Element =
-                self.mount_node.unchecked_ref();
-            mount_element
-                .attach_shadow(&web_sys::ShadowRootInit::new(
-                    web_sys::ShadowRootMode::Open,
-                ))
-                .expect("unable to attached shadow");
-            let mount_shadow =
-                mount_element.shadow_root().expect("must have a shadow");
+        let mount_node: web_sys::Node = match self.mount_procedure.target{
+            MountTarget::MountNode => {
+                self.mount_node.borrow().clone()
+            }
+            MountTarget::ShadowRoot => {
+                let mount_element: web_sys::Element = self.mount_node.borrow().clone().unchecked_into();
+                mount_element
+                    .attach_shadow(&web_sys::ShadowRootInit::new(
+                        web_sys::ShadowRootMode::Open,
+                    ))
+                    .expect("unable to attached shadow");
+                let mount_shadow =
+                    mount_element.shadow_root().expect("must have a shadow");
 
-            let mount_shadow_node: &web_sys::Node =
-                mount_shadow.unchecked_ref();
+                mount_shadow.unchecked_into()
+            }
+        };
 
-            mount_shadow_node
-                .append_child(&created_node.node)
-                .expect("could not append child to mount shadow");
-        } else {
-            self.mount_node
-                .append_child(&created_node.node)
-                .expect("Could not append child to mount");
+        match self.mount_procedure.action{
+            MountAction::Append => {
+                mount_node
+                    .append_child(&created_node.node)
+                    .expect("Could not append child to mount");
+            }
+            MountAction::ClearAppend => {
+                let mount_element: &Element = mount_node.unchecked_ref();
+                log::debug!("mount_node: {:?}", mount_element.outer_html());
+                let children = mount_node.child_nodes();
+                log::debug!("There are {}", children.length());
+                let child_nodes:Vec<Node> = (0..children.length()).map(|i|{
+                    children.item(i).expect("must have a child")
+                }).collect();
+
+                child_nodes.into_iter().for_each(|child|{
+                    mount_node.remove_child(&child).expect("must remove child");
+                });
+
+                mount_node
+                    .append_child(&created_node.node)
+                    .expect("Could not append child to mount");
+            }
+            MountAction::Replace => {
+                let mount_element: &Element = mount_node.unchecked_ref();
+                mount_element
+                    .replace_with_with_node_1(&created_node.node)
+                    .expect("Could not append child to mount");
+                *self.mount_node.borrow_mut() = created_node.node.clone()
+            }
         }
         *self.root_node.borrow_mut() = Some(created_node.node);
         *self.active_closures.borrow_mut() = created_node.closures;
@@ -318,7 +407,7 @@ where
             &new_vdom,
             &mut self.focused_node.borrow_mut(),
         );
-        self.mount_node
+        self.mount_node.borrow_mut()
             .append_child(&created_node.node)
             .expect("Could not append child to mount");
 
@@ -696,21 +785,10 @@ where
             crate::html::tags::style([], [crate::html::text(style)]);
         let created_node =
             CreatedNode::create_dom_node(self, &style_node, &mut None);
-        if self.use_shadow {
-            let mount_element: &web_sys::Element =
-                self.mount_node.unchecked_ref();
-            let mount_shadow =
-                mount_element.shadow_root().expect("must have a shadow");
 
-            let mount_shadow_node: &web_sys::Node =
-                mount_shadow.unchecked_ref();
-
-            mount_shadow_node
-                .append_child(&created_node.node)
-                .expect("could not append child to mount shadow");
-        } else {
-            panic!("injecting style to non shadow mount is not supported");
-        }
+        self.mount_node.borrow_mut()
+            .append_child(&created_node.node)
+            .expect("could not append child to mount shadow");
     }
 
 
