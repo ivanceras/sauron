@@ -73,7 +73,7 @@
         - [X] map `DomUpdater<MSG>` to `DomUpdater<MSG2>`
         - Issue mapping fields of Program that are in `Rc<RefCell>` seems not that simple
             as the Rc value of dom_updater is to be borrowed and will have a borrow checker issue
-- ~~[ ] Merge `Program` and `DomUpdater`~~
+- [X] Merge `Program` and `DomUpdater`
     - Issue: DomUpdater has multiple fields, which would then be wrap with `Rc<RefCell>` individually
 - [ ] Change the `'static` of trait implementation by specifying the lifetime
         - ref: https://stackoverflow.com/questions/52187644/lifetime-must-be-valid-for-the-static-lifetime-so-that-the-types-are-compatible
@@ -118,9 +118,9 @@
     - This issue manifested in `performance-test-sauron` repo
     - Suspecting it has to do with `mount_node` and `root_node` as replace and append could have a different behavior in the 2.
     - Solved by: using mutable reference to the `root_node` rather than a mutable reference to a clond one.
-- [ ] Rethink about the replace_mount in Program
+- [X] Rethink about the replace_mount in Program
     - It is useful for replacing the preload spinner when the application is finished loading
-    - [ ] Have an enum for mount action
+    - [X] Have an enum for mount action
         ```rust
             enum MountAction{
                 /// append as child to the target mount
@@ -135,6 +135,7 @@
             - host_node is the node where the view is mounted, usually the parent
             - in case of replace host_node is the same as the root_node.
 - [ ] Maybe we don't need the `async` in update.
+- [ ] Refactor Program that will have to use less of `Rc<RefCell<>>`, by having an inner structure which is wrapped into `Rc<RefCell<>>`
 
 
 ## Features
