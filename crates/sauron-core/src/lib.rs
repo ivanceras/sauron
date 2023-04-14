@@ -57,7 +57,6 @@ pub mod prelude {
         vdom::*,
         *,
     };
-    pub use async_trait::async_trait;
     pub use render::Render;
     pub use vdom::{
         diff,
