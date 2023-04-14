@@ -312,7 +312,7 @@ where
         crate::dom::util::request_idle_callback_with_deadline(move|deadline|{
             let program = program.clone();
             spawn_local(async move{
-                program.dispatch_pending_msgs(Some(deadline)).await.expect("must execute")
+                program.dispatch_pending_msgs(Some(deadline)).expect("must execute")
             });
         }).expect("must execute");
         Ok(())
@@ -321,7 +321,7 @@ where
     /// executes pending msgs by calling the app update method with the msgs
     /// as parameters.
     /// If there is no deadline specified all the pending messages are executed
-    async fn dispatch_pending_msgs(&self, deadline: Option<f64>) ->Result<(), JsValue>{
+    fn dispatch_pending_msgs(&self, deadline: Option<f64>) ->Result<(), JsValue>{
         if self.pending_msgs.borrow().is_empty(){
             return Ok(())
         }
@@ -722,7 +722,7 @@ where
         let _handle = crate::dom::util::request_idle_callback_with_deadline(move|deadline: f64|{
             let program = program.clone();
             spawn_local(async move{
-                program.dispatch_inner(Some(deadline)).await;
+                program.dispatch_inner(Some(deadline));
             });
         }).expect("must execute");
     }
@@ -734,7 +734,7 @@ where
         crate::dom::util::request_animation_frame(move||{
             let program = program.clone();
             spawn_local(async move{
-                program.dispatch_inner(None).await;
+                program.dispatch_inner(None);
             });
         }).expect("must execute");
     }
@@ -751,7 +751,7 @@ where
             {
                 let program = self.clone();
                 spawn_local(async move{
-                    program.dispatch_inner(None).await;
+                    program.dispatch_inner(None);
                 })
             }
         }
@@ -763,12 +763,12 @@ where
     /// - The returned Cmd from the component update is then emitted.
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
-    async fn dispatch_inner(&self, deadline: Option<f64>) {
+    fn dispatch_inner(&self, deadline: Option<f64>) {
 
-        self.dispatch_pending_msgs(deadline).await.expect("must dispatch msgs");
+        self.dispatch_pending_msgs(deadline).expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
         if !self.pending_msgs.borrow().is_empty(){
-            self.dispatch_pending_msgs(None).await.expect("must dispatch all pending msgs");
+            self.dispatch_pending_msgs(None).expect("must dispatch all pending msgs");
         }
         if !self.pending_msgs.borrow().is_empty(){
             panic!("Can not proceed until previous pending msgs are dispatched..");
