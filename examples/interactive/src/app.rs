@@ -1,10 +1,6 @@
 #![deny(warnings)]
 use js_sys::Date;
-use sauron::{
-    jss,
-    prelude::*,
-    web_sys::MouseEvent,
-};
+use sauron::{jss, prelude::*, web_sys::MouseEvent};
 
 pub enum Msg {
     Click,
@@ -37,10 +33,8 @@ impl App {
     }
 }
 
-
-#[async_trait(?Send)]
 impl Application<Msg> for App {
-    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Click => {
                 self.click_count += 1;

@@ -1,46 +1,22 @@
 use crate::{
-    views::{
-        column_view,
-        page_view,
-        ColumnView,
-        FieldView,
-        PageView,
-        RowView,
-    },
+    views::{column_view, page_view, ColumnView, FieldView, PageView, RowView},
     widgets::selector_box,
-    ColumnDef,
-    DataValue,
-    Error,
+    ColumnDef, DataValue, Error,
 };
-use restq::{
-    bytes_to_chars,
-    table_def,
-    CsvRows,
-    TableName,
-};
+use restq::{bytes_to_chars, table_def, CsvRows, TableName};
 use sauron::{
     html::{
-        attributes::{
-            class,
-            key,
-            styles,
-        },
+        attributes::{class, key, styles},
         events::*,
         units::*,
         *,
     },
     prelude::*,
-    Component,
-    Node,
-    Window,
+    Component, Node, Window,
 };
 use std::{
     cell::RefCell,
-    io::{
-        BufRead,
-        BufReader,
-        Cursor,
-    },
+    io::{BufRead, BufReader, Cursor},
     rc::Rc,
 };
 
@@ -83,19 +59,18 @@ pub struct DataView {
     start_x: i32,
 }
 
-#[async_trait(?Send)]
 impl Component<Msg, ()> for DataView {
-    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::PageMsg(page_index, page_msg) => {
-                let effects = self.page_views[page_index].update(page_msg).await;
+                let effects = self.page_views[page_index].update(page_msg);
                 effects.map_msg(move |follow_up| {
                     Msg::PageMsg(page_index, follow_up)
                 })
             }
             Msg::ColumnMsg(column_index, column_msg) => {
                 let effects =
-                    self.column_views[column_index].update(column_msg).await;
+                    self.column_views[column_index].update(column_msg);
                 effects.map_msg(move |follow_up| {
                     Msg::ColumnMsg(column_index, follow_up)
                 })

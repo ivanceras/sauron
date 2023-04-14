@@ -1,27 +1,11 @@
-use crate::views::{
-    field_view,
-    FieldView,
-};
-use restq::{
-    ColumnDef,
-    DataValue,
-};
+use crate::views::{field_view, FieldView};
+use restq::{ColumnDef, DataValue};
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        units::*,
-        *,
-    },
+    html::{attributes::*, events::*, units::*, *},
     prelude::*,
-    Component,
-    Effects,
-    Node,
+    Component, Effects, Node,
 };
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use std::{cell::RefCell, rc::Rc};
 
 #[derive(Debug, PartialEq)]
 pub enum Msg {
@@ -58,12 +42,11 @@ impl RowView {
     }
 }
 
-#[async_trait(?Send)]
 impl Component<Msg, ()> for RowView {
-    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::FieldMsg(field_index, field_msg) => {
-                self.fields[field_index].borrow_mut().update(field_msg).await;
+                self.fields[field_index].borrow_mut().update(field_msg);
                 Effects::none()
             }
             Msg::DoubleClick => Effects::none(),

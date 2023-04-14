@@ -58,7 +58,6 @@ impl App{
     }
 }
 
-#[async_trait(?Send)]
 impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         sauron::html::main(
@@ -82,12 +81,12 @@ impl Application<Msg> for App {
                     ),
                     button([
                         on_click(|_|{Msg::CancelPrevious})
-                        ], 
+                        ],
                         [text("Cancel previous")]
                     ),
                     button([
                         on_click(|_|{Msg::NoOp})
-                        ], 
+                        ],
                         [text("Noping..")]
                     ),
                     ],
@@ -96,7 +95,7 @@ impl Application<Msg> for App {
         )
     }
 
-    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Click => {
                 spawn_local(some_async_function());

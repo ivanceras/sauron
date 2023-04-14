@@ -16,7 +16,6 @@ impl App {
     }
 }
 
-#[async_trait(?Send)]
 impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         node! {
@@ -38,7 +37,7 @@ impl Application<Msg> for App {
         }
     }
 
-    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,

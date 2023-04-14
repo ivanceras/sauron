@@ -74,7 +74,6 @@ impl App {
     }
 }
 
-#[async_trait(?Send)]
 impl Application<Msg> for App {
     fn init(&mut self) -> Cmd<Self, Msg> {
         console_log::init_with_level(log::Level::Trace).unwrap();
@@ -140,7 +139,7 @@ impl Application<Msg> for App {
         )
     }
 
-    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         trace!("App is updating from msg: {:?}", msg);
         match msg {
             Msg::NextPage => {

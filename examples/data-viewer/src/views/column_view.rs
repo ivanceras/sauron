@@ -1,19 +1,7 @@
-use crate::{
-    assets,
-    widgets::search_widget,
-    ColumnDef,
-};
+use crate::{assets, widgets::search_widget, ColumnDef};
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        units::*,
-        *,
-    },
-    Component,
-    Effects,
-    Node,
-    prelude::*,
+    html::{attributes::*, events::*, units::*, *},
+    Component, Effects, Node,
 };
 
 #[derive(Debug, PartialEq)]
@@ -39,9 +27,8 @@ impl ColumnView {
     }
 }
 
-#[async_trait(?Send)]
 impl Component<Msg, ()> for ColumnView {
-    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::ChangeSearch(search) => {
                 trace!("Search term change: {}", search);

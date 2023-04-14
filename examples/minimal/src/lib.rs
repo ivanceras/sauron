@@ -23,7 +23,6 @@ pub struct App {
     click_count: u32,
 }
 
-#[async_trait(?Send)]
 impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         sauron::html::main(
@@ -63,7 +62,7 @@ impl Application<Msg> for App {
         )
     }
 
-    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Click => self.click_count += 1,
             Msg::NoOp => (),

@@ -1,16 +1,9 @@
 #![deny(warnings)]
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
+    html::{attributes::*, events::*, *},
     jss,
     prelude::*,
-    Application,
-    Cmd,
-    Node,
-    Program,
+    Application, Cmd, Node, Program,
 };
 use tab::Tab;
 
@@ -68,9 +61,8 @@ impl Window {
     }
 }
 
-#[async_trait(?Send)]
 impl Application<Msg> for Window {
-    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         self.window_activities += 1;
         match msg {
             Msg::WindowClick => Cmd::none(),
@@ -79,7 +71,7 @@ impl Application<Msg> for Window {
                 Cmd::none()
             }
             Msg::TabMsg(index, tab_msg) => {
-                let effects = self.tabs[index].update(tab_msg).await;
+                let effects = self.tabs[index].update(tab_msg);
                 let effects = effects
                     .map_msg(move |follow_up| Msg::TabMsg(index, follow_up));
                 Cmd::from(effects)

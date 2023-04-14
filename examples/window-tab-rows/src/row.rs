@@ -1,13 +1,6 @@
-use crate::field::{
-    self,
-    Field,
-    Interaction,
-};
+use crate::field::{self, Field, Interaction};
 use sauron::{
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     prelude::*,
     Node,
 };
@@ -45,12 +38,11 @@ impl Row {
     }
 }
 
-#[async_trait(?Send)]
 impl Component<Msg, ()> for Row {
-    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::FieldMsg(index, field_msg) => {
-                let effects = self.fields[index].update(field_msg).await;
+                let effects = self.fields[index].update(field_msg);
                 effects
                     .localize(move |follow_up| Msg::FieldMsg(index, follow_up))
             }

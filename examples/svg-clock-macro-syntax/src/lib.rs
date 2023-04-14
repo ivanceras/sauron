@@ -26,7 +26,6 @@ impl Default for Clock {
     }
 }
 
-#[async_trait(?Send)]
 impl Application<Msg> for Clock {
     // we wire the window set_interval api to trigger an Msg::Tick
     // by dispatching it from the program, through the Cmd interface
@@ -47,7 +46,7 @@ impl Application<Msg> for Clock {
         })
     }
 
-    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Tick => {
                 info!("Tick Tock");

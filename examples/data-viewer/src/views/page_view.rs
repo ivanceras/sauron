@@ -1,27 +1,16 @@
 use crate::{
-    views::{
-        row_view,
-        RowView,
-    },
+    views::{row_view, RowView},
     widgets::selector_box,
 };
-use restq::{
-    ColumnDef,
-    DataValue,
-};
+use restq::{ColumnDef, DataValue};
 use sauron::{
     html::{
-        attributes::{
-            class,
-            key,
-            styles,
-        },
+        attributes::{class, key, styles},
         units::*,
         *,
     },
     prelude::*,
-    Component,
-    Node,
+    Component, Node,
 };
 
 #[derive(Debug, PartialEq)]
@@ -65,12 +54,11 @@ impl PageView {
     }
 }
 
-#[async_trait(?Send)]
 impl Component<Msg, ()> for PageView {
-    async fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::RowMsg(row_index, row_msg) => {
-                let effects = self.row_views[row_index].update(row_msg).await;
+                let effects = self.row_views[row_index].update(row_msg);
                 effects
                     .map_msg(move |follow_up| Msg::RowMsg(row_index, follow_up))
             }

@@ -1,13 +1,6 @@
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
-    Component,
-    Effects,
-    Node,
-    prelude::*,
+    html::{attributes::*, events::*, *},
+    Component, Effects, Node,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -46,9 +39,8 @@ impl<XMSG> Field<XMSG> {
     }
 }
 
-#[async_trait(?Send)]
 impl<XMSG> Component<Msg, XMSG> for Field<XMSG> {
-    async fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::FieldClick => {
                 self.field_clicks += 1;
@@ -59,13 +51,11 @@ impl<XMSG> Component<Msg, XMSG> for Field<XMSG> {
                     input,
                 ))])
             }
-            Msg::Interacted(interaction) => {
-                Effects::with_external(
-                    self.on_interact
-                        .iter()
-                        .map(|listener| listener(interaction.clone())),
-                )
-            }
+            Msg::Interacted(interaction) => Effects::with_external(
+                self.on_interact
+                    .iter()
+                    .map(|listener| listener(interaction.clone())),
+            ),
         }
     }
 

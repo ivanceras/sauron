@@ -1,19 +1,9 @@
-use crate::views::{
-    data_view,
-    DataView,
-};
+use crate::views::{data_view, DataView};
 use sauron::{
-    html::{
-        attributes::class,
-        events::*,
-        *,
-    },
+    html::{attributes::class, events::*, *},
     jss,
     prelude::*,
-    Application,
-    Cmd,
-    Node,
-    Window,
+    Application, Cmd, Node, Window,
 };
 
 #[derive(Debug, PartialEq)]
@@ -54,7 +44,6 @@ impl ResizeWrapper {
     }
 }
 
-#[async_trait(?Send)]
 impl Application<Msg> for ResizeWrapper {
     /// Setup the resize wrapper to listen to the mouseup
     /// and mousemove event of the Window
@@ -76,10 +65,10 @@ impl Application<Msg> for ResizeWrapper {
         Cmd::batch(cmds)
     }
 
-    async fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::DataViewMsg(data_view_msg) => {
-                let effects = self.data_view.update(data_view_msg).await;
+                let effects = self.data_view.update(data_view_msg);
                 //TODO: follow ups should be wired automatically
                 Cmd::from(effects.map_msg(Msg::DataViewMsg))
             }
