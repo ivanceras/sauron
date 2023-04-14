@@ -1,7 +1,7 @@
 use sauron::dom::Callback;
+use sauron::dom::{MountAction, MountTarget};
 use sauron::jss;
 use sauron::prelude::*;
-use sauron::dom::{MountAction,MountTarget};
 use std::collections::BTreeMap;
 use std::fmt::Debug;
 use std::iter::FromIterator;
@@ -60,12 +60,11 @@ where
     }
 }
 
-#[async_trait(?Send)]
 impl<XMSG> sauron::Component<Msg, XMSG> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
-    async fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
@@ -163,10 +162,17 @@ where
     }
 
     /// this is called when the attributes in the mount is changed
-    fn attribute_changed<DSP>(program: &DSP, attr_name: &str, old_value: JsValue, new_value: JsValue) where DSP: Dispatch<Msg> + Clone + 'static{
+    fn attribute_changed<DSP>(
+        program: &DSP,
+        attr_name: &str,
+        old_value: JsValue,
+        new_value: JsValue,
+    ) where
+        DSP: Dispatch<Msg> + Clone + 'static,
+    {
         log::info!("old_value: {:?}", old_value);
-        if let Some(new_value) = new_value.as_string(){
-            match &*attr_name{
+        if let Some(new_value) = new_value.as_string() {
+            match &*attr_name {
                 "time" => program.dispatch(Msg::TimeChange(new_value)),
                 "date" => program.dispatch(Msg::DateChange(new_value)),
                 _ => log::warn!("unknown attr_name: {attr_name:?}"),
@@ -209,9 +215,24 @@ impl DateTimeWidgetCustomElement {
     }
 
     #[wasm_bindgen(method, js_name = attributeChangedCallback)]
-    pub fn attribute_changed_callback(&self, attr_name: &str, old_value: JsValue, new_value: JsValue) {
-        log::info!("attribute: {} is changed from: {:?} to: {:?}", attr_name, old_value, new_value);
-        DateTimeWidget::<Msg>::attribute_changed(&self.program, attr_name, old_value, new_value);
+    pub fn attribute_changed_callback(
+        &self,
+        attr_name: &str,
+        old_value: JsValue,
+        new_value: JsValue,
+    ) {
+        log::info!(
+            "attribute: {} is changed from: {:?} to: {:?}",
+            attr_name,
+            old_value,
+            new_value
+        );
+        DateTimeWidget::<Msg>::attribute_changed(
+            &self.program,
+            attr_name,
+            old_value,
+            new_value,
+        );
     }
 
     #[wasm_bindgen(method, js_name = connectedCallback)]
