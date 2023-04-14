@@ -140,6 +140,10 @@
 - [ ] BUG: if the `dispatch_inner` is not called in a callback which is `request_animation_frame` or `request_idle_callback`
     - This will cause the `dispatch_mount` event to dispatch before the `root_node` is set in the program when the program is to be mounted
     - Note the `dispatch_mount` is triggered when the view has `on_mount` event.
+    - [ ] mitigation: make the dispatch_inner spawn in a thead either via callback, or `spawn_local` from `wasm_bindgen_futures`.
+- [ ] Tighten visibility of objects that are not meant to be `pub`
+    - [ ] some fields in `Program`
+    - [ ] struct types that are not meant to be public
 
 
 ## Features
