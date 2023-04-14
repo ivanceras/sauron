@@ -278,10 +278,7 @@ where
                     .expect("Could not append child to mount");
             }
             MountAction::ClearAppend => {
-                let mount_element: &Element = mount_node.unchecked_ref();
-                log::debug!("mount_node: {:?}", mount_element.outer_html());
                 let children = mount_node.child_nodes();
-                log::debug!("There are {}", children.length());
                 let child_nodes: Vec<Node> = (0..children.length())
                     .map(|i| children.item(i).expect("must have a child"))
                     .collect();
@@ -302,6 +299,7 @@ where
                 *self.mount_node.borrow_mut() = created_node.node.clone()
             }
         }
+        #[cfg(feature = "with-debug")]
         log::debug!("Root node is now set..");
         *self.root_node.borrow_mut() = Some(created_node.node);
         *self.active_closures.borrow_mut() = created_node.closures;
@@ -389,6 +387,7 @@ where
             total_time: t3 - t1,
         };
         if measurements.total_time > 16.0 {
+            #[cfg(feature = "with-debug")]
             log::warn!("dispatch took {}ms", measurements.total_time.round());
         }
         Ok(measurements)
@@ -402,11 +401,28 @@ where
         let total_patches = {
             let current_vdom = self.current_vdom.borrow();
             let patches = diff(&current_vdom, &new_vdom);
-            let dom_patches = self
-                .convert_patches(&patches)
-                .expect("must convert patches");
-            self.pending_patches.borrow_mut().extend(dom_patches);
-            self.apply_pending_patches_with_priority_raf();
+            // BUG: if the program has not called on mount
+            // the root_node is not yet set causing the convert_patches function
+            // to panic, since it needs the root_node
+            if let Some(root_node) = self.root_node.borrow().as_ref(){
+                let dom_patches = self
+                    .convert_patches(root_node, &patches)
+                    .expect("must convert patches");
+                self.pending_patches.borrow_mut().extend(dom_patches);
+            }
+            else if !patches.is_empty(){
+                panic!("can not convert patches to real dom patches if the root_node is not yet set");
+            }else{
+                #[cfg(feature = "with-debug")]
+                log::info!("There was no root_node, but the patches is empty, so it's all good!");
+            }
+
+            if !patches.is_empty(){
+                self.apply_pending_patches_with_priority_raf();
+            }else{
+                #[cfg(feature = "with-debug")]
+                log::info!("There were no patches added, so we dont call apply_pending_patches here!");
+            }
             patches.len()
         };
 
@@ -435,6 +451,7 @@ where
     /// get the real DOM target node and make a DomPatch object for each of the Patch
     fn convert_patches(
         &self,
+        root_node: &Node,
         patches: &[Patch<MSG>],
     ) -> Result<Vec<DomPatch<MSG>>, JsValue> {
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
@@ -443,10 +460,7 @@ where
             .collect();
 
         let nodes_to_patch = created_node::find_all_nodes(
-            self.root_node
-                .borrow()
-                .as_ref()
-                .expect("must have a root node"),
+            root_node,
             &nodes_to_find,
         );
 
@@ -489,10 +503,18 @@ where
             self.apply_pending_patches(None).expect("must complete");
             #[cfg(not(feature = "with-ric"))]
             {
-                let program = self.clone();
-                wasm_bindgen_futures::spawn_local(async move{
-                    program.apply_pending_patches(None).expect("must complete");
-                })
+                #[cfg(feature = "with-spawn-local")]
+                {
+                    let program = self.clone();
+                    wasm_bindgen_futures::spawn_local(async move{
+                        program.apply_pending_patches(None).expect("must complete");
+                    })
+                }
+                #[cfg(not(feature = "with-spawn-local"))]
+                {
+                    log::debug!("apply_pending_patches_with_priority_raf: not using spawn local");
+                    self.apply_pending_patches(None).expect("must complete");
+                }
             }
         }
     }
@@ -512,10 +534,19 @@ where
 
             #[cfg(not(feature = "with-raf"))]
             {
-                let program = self.clone();
-                wasm_bindgen_futures::spawn_local(async move{
-                    program.apply_pending_patches(None).expect("must complete");
-                })
+                #[cfg(feature = "with-spawn-local")]
+                {
+                    let program = self.clone();
+                    wasm_bindgen_futures::spawn_local(async move{
+                        program.apply_pending_patches(None).expect("must complete");
+                    })
+                }
+                #[cfg(not(feature = "with-spawn-local"))]
+                {
+                    #[cfg(feature = "with-debug")]
+                    log::debug!("apply_pending_patches_with_priority_ric: not using spawn local");
+                    self.apply_pending_patches(None).expect("must complete");
+                }
             }
         }
     }
@@ -786,10 +817,20 @@ where
 
             #[cfg(not(feature = "with-raf"))]
             {
-                let program = self.clone();
-                wasm_bindgen_futures::spawn_local(async move{
-                    program.dispatch_inner(None);
-                })
+
+                #[cfg(feature = "with-spawn-local")]
+                {
+                    let program = self.clone();
+                    wasm_bindgen_futures::spawn_local(async move{
+                        program.dispatch_inner(None);
+                    })
+                }
+
+                #[cfg(not(feature = "with-spawn-local"))]
+                {
+                    log::debug!("dispatch_inner_with_priorty_ric: not using spawn local");
+                    self.dispatch_inner(None);
+                }
             }
         }
     }

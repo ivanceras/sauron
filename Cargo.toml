@@ -24,6 +24,7 @@ with-dom = ["sauron-core/with-dom"]
 with-lookup = ["sauron-core/with-lookup"]
 with-ric = ["sauron-core/with-ric"]
 with-raf = ["sauron-core/with-raf"]
+with-spawn-local = ["sauron-core/with-spawn-local"]
 
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]
