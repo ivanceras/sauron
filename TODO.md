@@ -134,8 +134,12 @@
     - [ ] Mount event should have a reference to the host_node and the root_node
             - host_node is the node where the view is mounted, usually the parent
             - in case of replace host_node is the same as the root_node.
-- [ ] Maybe we don't need the `async` in update.
-- [ ] Refactor Program that will have to use less of `Rc<RefCell<>>`, by having an inner structure which is wrapped into `Rc<RefCell<>>`
+- [X] Maybe we don't need the `async` in update.
+- ~[ ] Refactor Program that will have to use less of `Rc<RefCell<>>`, by having an inner structure which is wrapped into `Rc<RefCell<>>`~
+    - this is not possible because we need to update each field separately, and borrowing the inner program state will disallow borrowing other fields.
+- [ ] BUG: if the `dispatch_inner` is not called in a callback which is `request_animation_frame` or `request_idle_callback`
+    - This will cause the `dispatch_mount` event to dispatch before the `root_node` is set in the program when the program is to be mounted
+    - Note the `dispatch_mount` is triggered when the view has `on_mount` event.
 
 
 ## Features

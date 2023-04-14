@@ -487,6 +487,13 @@ where
                 .expect("must complete");
             #[cfg(not(feature = "with-ric"))]
             self.apply_pending_patches(None).expect("must complete");
+            #[cfg(not(feature = "with-ric"))]
+            {
+                let program = self.clone();
+                wasm_bindgen_futures::spawn_local(async move{
+                    program.apply_pending_patches(None).expect("must complete");
+                })
+            }
         }
     }
 
@@ -502,8 +509,14 @@ where
             #[cfg(feature = "with-raf")]
             self.apply_pending_patches_with_raf()
                 .expect("must complete");
+
             #[cfg(not(feature = "with-raf"))]
-            self.apply_pending_patches(None).expect("must complete");
+            {
+                let program = self.clone();
+                wasm_bindgen_futures::spawn_local(async move{
+                    program.apply_pending_patches(None).expect("must complete");
+                })
+            }
         }
     }
 

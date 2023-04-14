@@ -139,6 +139,10 @@ impl CreatedNode {
     /// dispatch the mount event,
     /// call the listener since browser don't allow asynchronous execution of
     /// dispatching custom events (non-native browser events)
+    ///
+    /// TODO: this is triggered in the creation of node including the root node
+    /// which has not yet beend assigned to the program
+    /// causing it to panic
     fn dispatch_mount_event<DSP, MSG>(
         program: &DSP,
         velem: &vdom::Element<MSG>,
