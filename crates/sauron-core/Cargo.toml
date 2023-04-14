@@ -109,7 +109,6 @@ with-measure = [] # log traces for measurements in various parts of the system w
 with-debug = [] # log debug patches
 with-ric = []
 with-raf = []
-with-spawn-local = []
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
