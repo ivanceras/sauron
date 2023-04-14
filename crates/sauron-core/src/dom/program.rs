@@ -1,20 +1,17 @@
+use crate::dom::created_node;
+use crate::dom::created_node::ActiveClosure;
 use crate::dom::Measurements;
 use crate::vdom;
-use crate::{Application, Cmd, Dispatch, prelude::Patch};
+use crate::vdom::{diff, Attribute, AttributeValue};
+use crate::CreatedNode;
+use crate::DomPatch;
+use crate::{prelude::Patch, Application, Cmd, Dispatch};
+use mt_dom::TreePath;
+use std::collections::VecDeque;
 use std::{any::TypeId, cell::RefCell, rc::Rc};
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen::JsValue;
-use std::collections::VecDeque;
-use crate::dom::created_node::ActiveClosure;
-use crate::DomPatch;
-use web_sys::{self,Element,Node};
-use crate::vdom::{diff,AttributeValue, Attribute};
-use mt_dom::TreePath;
-use crate::CreatedNode;
-use crate::dom::created_node;
-
-
+use web_sys::{self, Element, Node};
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP, MSG>
@@ -30,7 +27,7 @@ where
     pub pending_msgs: Rc<RefCell<VecDeque<MSG>>>,
 
     /// pending cmds that hasn't been emited yet
-    pub pending_cmds: Rc<RefCell<VecDeque<Cmd<APP,MSG>>>>,
+    pub pending_cmds: Rc<RefCell<VecDeque<Cmd<APP, MSG>>>>,
 
     /// the current vdom representation
     pub current_vdom: Rc<RefCell<vdom::Node<MSG>>>,
@@ -62,21 +59,20 @@ where
     pub pending_patches: Rc<RefCell<VecDeque<DomPatch<MSG>>>>,
 }
 
-
 /// specify how the App is mounted to the DOM
 #[derive(Clone, Copy)]
-pub enum MountAction{
+pub enum MountAction {
     /// append the APP's root node to the target mount node
     Append,
     /// clear any children of the target mount node then append the APP's root node
     ClearAppend,
     /// replace the target mount node with the APP's root node
-    Replace
+    Replace,
 }
 
 /// specify whether to attach the Node in shadow_root
 #[derive(Clone, Copy)]
-pub enum MountTarget{
+pub enum MountTarget {
     /// attached in the mount node
     MountNode,
     /// attached to the shadow root
@@ -85,7 +81,7 @@ pub enum MountTarget{
 
 /// specify how the root node will be mounted to the mount node
 #[derive(Clone, Copy)]
-struct MountProcedure{
+struct MountProcedure {
     action: MountAction,
     target: MountTarget,
 }
@@ -133,10 +129,7 @@ where
             mount_node: Rc::new(RefCell::new(mount_node.clone())),
             active_closures: Rc::new(RefCell::new(ActiveClosure::new())),
             focused_node: Rc::new(RefCell::new(None)),
-            mount_procedure: MountProcedure{
-                action,
-                target
-            },
+            mount_procedure: MountProcedure { action, target },
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
         }
     }
@@ -181,7 +174,12 @@ where
     /// Program::append_to_mount(App{}, &mount);
     /// ```
     pub fn append_to_mount(app: APP, mount_node: &web_sys::Node) -> Self {
-        let program = Self::new(app, mount_node, MountAction::Append, MountTarget::MountNode);
+        let program = Self::new(
+            app,
+            mount_node,
+            MountAction::Append,
+            MountTarget::MountNode,
+        );
         program.mount();
         program
     }
@@ -204,14 +202,24 @@ where
     /// Program::replace_mount(App{}, &mount);
     /// ```
     pub fn replace_mount(app: APP, mount_node: &web_sys::Node) -> Self {
-        let program = Self::new(app, mount_node, MountAction::Replace, MountTarget::MountNode);
+        let program = Self::new(
+            app,
+            mount_node,
+            MountAction::Replace,
+            MountTarget::MountNode,
+        );
         program.mount();
         program
     }
 
     /// clear the existing children of the mount first before appending
     pub fn clear_append_to_mount(app: APP, mount_node: &web_sys::Node) -> Self {
-        let program = Self::new(app, mount_node, MountAction::ClearAppend, MountTarget::MountNode);
+        let program = Self::new(
+            app,
+            mount_node,
+            MountAction::ClearAppend,
+            MountTarget::MountNode,
+        );
         program.mount();
         program
     }
@@ -238,20 +246,18 @@ where
 
     /// each element and it's descendant in the vdom is created into
     /// an actual DOM node.
-    pub fn mount(&self)
-    {
+    pub fn mount(&self) {
         let created_node = CreatedNode::create_dom_node(
             self,
             &self.current_vdom.borrow(),
             &mut self.focused_node.borrow_mut(),
         );
 
-        let mount_node: web_sys::Node = match self.mount_procedure.target{
-            MountTarget::MountNode => {
-                self.mount_node.borrow().clone()
-            }
+        let mount_node: web_sys::Node = match self.mount_procedure.target {
+            MountTarget::MountNode => self.mount_node.borrow().clone(),
             MountTarget::ShadowRoot => {
-                let mount_element: web_sys::Element = self.mount_node.borrow().clone().unchecked_into();
+                let mount_element: web_sys::Element =
+                    self.mount_node.borrow().clone().unchecked_into();
                 mount_element
                     .attach_shadow(&web_sys::ShadowRootInit::new(
                         web_sys::ShadowRootMode::Open,
@@ -265,8 +271,7 @@ where
             }
         };
 
-
-        match self.mount_procedure.action{
+        match self.mount_procedure.action {
             MountAction::Append => {
                 mount_node
                     .append_child(&created_node.node)
@@ -277,11 +282,11 @@ where
                 log::debug!("mount_node: {:?}", mount_element.outer_html());
                 let children = mount_node.child_nodes();
                 log::debug!("There are {}", children.length());
-                let child_nodes:Vec<Node> = (0..children.length()).map(|i|{
-                    children.item(i).expect("must have a child")
-                }).collect();
+                let child_nodes: Vec<Node> = (0..children.length())
+                    .map(|i| children.item(i).expect("must have a child"))
+                    .collect();
 
-                child_nodes.into_iter().for_each(|child|{
+                child_nodes.into_iter().for_each(|child| {
                     mount_node.remove_child(&child).expect("must remove child");
                 });
 
@@ -304,31 +309,35 @@ where
         self.after_mounted();
     }
 
-
-
     #[cfg(feature = "with-ric")]
-    fn dispatch_pending_msgs_with_ric(&self) -> Result<(), JsValue>{
+    fn dispatch_pending_msgs_with_ric(&self) -> Result<(), JsValue> {
         let program = self.clone();
-        crate::dom::util::request_idle_callback_with_deadline(move|deadline|{
-            let program = program.clone();
-            spawn_local(async move{
-                program.dispatch_pending_msgs(Some(deadline)).expect("must execute")
-            });
-        }).expect("must execute");
+        crate::dom::util::request_idle_callback_with_deadline(
+            move |deadline| {
+                program
+                    .dispatch_pending_msgs(Some(deadline))
+                    .expect("must execute")
+            },
+        )
+        .expect("must execute");
         Ok(())
     }
 
     /// executes pending msgs by calling the app update method with the msgs
     /// as parameters.
     /// If there is no deadline specified all the pending messages are executed
-    fn dispatch_pending_msgs(&self, deadline: Option<f64>) ->Result<(), JsValue>{
-        if self.pending_msgs.borrow().is_empty(){
-            return Ok(())
+    fn dispatch_pending_msgs(
+        &self,
+        deadline: Option<f64>,
+    ) -> Result<(), JsValue> {
+        if self.pending_msgs.borrow().is_empty() {
+            return Ok(());
         }
         let mut i = 0;
         let t1 = crate::now();
         let mut did_complete = true;
-        while let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front(){
+        while let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front()
+        {
             // Note: each MSG needs to be executed one by one in the same order
             // as APP's state can be affected by the previous MSG
             let cmd = self.app.borrow_mut().update(pending_msg);
@@ -339,8 +348,8 @@ where
             let t2 = crate::now();
             let elapsed = t2 - t1;
             // break only if a deadline is supplied
-            if let Some(deadline) = deadline{
-                if elapsed > deadline{
+            if let Some(deadline) = deadline {
+                if elapsed > deadline {
                     log::warn!("elapsed time: {}ms", elapsed);
                     log::warn!("we should be breaking at {}..", i);
                     did_complete = false;
@@ -349,15 +358,16 @@ where
             }
             i += 1;
         }
-        if !did_complete{
+        if !did_complete {
             #[cfg(feature = "with-ric")]
-            self.dispatch_pending_msgs_with_ric().expect("must complete");
+            self.dispatch_pending_msgs_with_ric()
+                .expect("must complete");
         }
         Ok(())
     }
 
     /// update the browser DOM to reflect the APP's  view
-    pub fn update_dom(&self) -> Result<Measurements, JsValue>{
+    pub fn update_dom(&self) -> Result<Measurements, JsValue> {
         let t1 = crate::now();
         // a new view is created due to the app update
         let view = self.app.borrow().view();
@@ -370,7 +380,7 @@ where
             self.update_dom_with_vdom(view).expect("must not error");
         let t3 = crate::now();
 
-        let measurements = Measurements{
+        let measurements = Measurements {
             name: None,
             node_count,
             build_view_took: t2 - t1,
@@ -388,13 +398,13 @@ where
     pub fn update_dom_with_vdom(
         &self,
         new_vdom: vdom::Node<MSG>,
-    ) -> Result<usize, JsValue>
-    {
-
+    ) -> Result<usize, JsValue> {
         let total_patches = {
             let current_vdom = self.current_vdom.borrow();
             let patches = diff(&current_vdom, &new_vdom);
-            let dom_patches = self.convert_patches(&patches).expect("must convert patches");
+            let dom_patches = self
+                .convert_patches(&patches)
+                .expect("must convert patches");
             self.pending_patches.borrow_mut().extend(dom_patches);
             self.apply_pending_patches_with_priority_raf();
             patches.len()
@@ -407,13 +417,13 @@ where
 
     /// replace the current vdom with the `new_vdom`.
     pub fn set_current_dom(&self, new_vdom: vdom::Node<MSG>) {
-
         let created_node = CreatedNode::create_dom_node(
             self,
             &new_vdom,
             &mut self.focused_node.borrow_mut(),
         );
-        self.mount_node.borrow_mut()
+        self.mount_node
+            .borrow_mut()
             .append_child(&created_node.node)
             .expect("Could not append child to mount");
 
@@ -423,13 +433,22 @@ where
     }
 
     /// get the real DOM target node and make a DomPatch object for each of the Patch
-    fn convert_patches(&self, patches: &[Patch<MSG>]) -> Result<Vec<DomPatch<MSG>>, JsValue>{
+    fn convert_patches(
+        &self,
+        patches: &[Patch<MSG>],
+    ) -> Result<Vec<DomPatch<MSG>>, JsValue> {
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
             .iter()
             .map(|patch| (patch.path(), patch.tag()))
             .collect();
 
-        let nodes_to_patch = created_node::find_all_nodes(self.root_node.borrow().as_ref().expect("must have a root node"), &nodes_to_find);
+        let nodes_to_patch = created_node::find_all_nodes(
+            self.root_node
+                .borrow()
+                .as_ref()
+                .expect("must have a root node"),
+            &nodes_to_find,
+        );
 
         let dom_patches:Vec<DomPatch<MSG>> = patches.iter().map(|patch|{
             let patch_path = patch.path();
@@ -452,94 +471,102 @@ where
         }).collect();
 
         Ok(dom_patches)
-
     }
-
 
     /// apply pending patches using raf
     /// if raf is not available, use ric
     /// if ric is not available call bare function
-    fn apply_pending_patches_with_priority_raf(&self){
+    fn apply_pending_patches_with_priority_raf(&self) {
         #[cfg(feature = "with-raf")]
-        self.apply_pending_patches_with_raf().expect("must complete");
+        self.apply_pending_patches_with_raf()
+            .expect("must complete");
         #[cfg(not(feature = "with-raf"))]
         {
             #[cfg(feature = "with-ric")]
-            self.apply_pending_patches_with_ric().expect("must complete");
+            self.apply_pending_patches_with_ric()
+                .expect("must complete");
             #[cfg(not(feature = "with-ric"))]
             self.apply_pending_patches(None).expect("must complete");
         }
     }
 
-
     /// apply pending patches using ric
     /// if ric is not available, use raf
     /// if raf is not available call bare function
-    fn apply_pending_patches_with_priority_ric(&self){
+    fn apply_pending_patches_with_priority_ric(&self) {
         #[cfg(feature = "with-ric")]
-        self.apply_pending_patches_with_ric().expect("must complete");
+        self.apply_pending_patches_with_ric()
+            .expect("must complete");
         #[cfg(not(feature = "with-ric"))]
         {
             #[cfg(feature = "with-raf")]
-            self.apply_pending_patches_with_raf().expect("must complete");
+            self.apply_pending_patches_with_raf()
+                .expect("must complete");
             #[cfg(not(feature = "with-raf"))]
             self.apply_pending_patches(None).expect("must complete");
         }
     }
 
-
     #[cfg(feature = "with-ric")]
-    fn apply_pending_patches_with_ric(&self) -> Result<(), JsValue>{
+    fn apply_pending_patches_with_ric(&self) -> Result<(), JsValue> {
         let program = self.clone();
-        crate::dom::util::request_idle_callback_with_deadline(move|deadline|{
-            program.apply_pending_patches(Some(deadline))
-                .expect("must not error");
-        }).expect("must complete the remaining pending patches..");
+        crate::dom::util::request_idle_callback_with_deadline(
+            move |deadline| {
+                program
+                    .apply_pending_patches(Some(deadline))
+                    .expect("must not error");
+            },
+        )
+        .expect("must complete the remaining pending patches..");
         Ok(())
     }
 
     #[cfg(feature = "with-raf")]
     #[allow(unused)]
-    fn apply_pending_patches_with_raf(&self) -> Result<(), JsValue>{
+    fn apply_pending_patches_with_raf(&self) -> Result<(), JsValue> {
         let program = self.clone();
-        crate::dom::util::request_animation_frame(move||{
+        crate::dom::util::request_animation_frame(move || {
             let deadline = 10.0;
-            program.apply_pending_patches(Some(deadline))
+            program
+                .apply_pending_patches(Some(deadline))
                 .expect("must not error");
-        }).expect("must execute");
+        })
+        .expect("must execute");
         Ok(())
     }
 
     /// apply the pending patches into the DOM
     fn apply_pending_patches(
         &self,
-        deadline: Option<f64>
-    ) -> Result<(), JsValue>
-    {
-        if self.pending_patches.borrow().is_empty(){
-            return Ok(())
+        deadline: Option<f64>,
+    ) -> Result<(), JsValue> {
+        if self.pending_patches.borrow().is_empty() {
+            return Ok(());
         }
         let t1 = crate::now();
         let mut did_complete = true;
-        while let Some(dom_patch) = self.pending_patches.borrow_mut().pop_front() {
+        while let Some(dom_patch) =
+            self.pending_patches.borrow_mut().pop_front()
+        {
             let t2 = crate::now();
-            self.apply_dom_patch(dom_patch).expect("must apply dom patch");
+            self.apply_dom_patch(dom_patch)
+                .expect("must apply dom patch");
             let elapsed = t2 - t1;
             // only break if deadline is specified
-            if let Some(deadline) = deadline{
+            if let Some(deadline) = deadline {
                 if elapsed > deadline {
                     did_complete = false;
                     break;
                 }
             }
         }
-        if !did_complete{
+        if !did_complete {
             self.apply_pending_patches_with_priority_ric();
         }
         Ok(())
     }
 
-    fn apply_dom_patch(&self, dom_patch: DomPatch<MSG>) -> Result<(), JsValue>{
+    fn apply_dom_patch(&self, dom_patch: DomPatch<MSG>) -> Result<(), JsValue> {
         match dom_patch {
             DomPatch::InsertBeforeNode {
                 target_node, nodes, ..
@@ -555,7 +582,9 @@ where
                             )
                             .expect("must remove target node");
 
-                        self.active_closures.borrow_mut().extend(for_insert.closures);
+                        self.active_closures
+                            .borrow_mut()
+                            .extend(for_insert.closures);
                     }
                 } else {
                     panic!("unable to get parent node of the target element: {:?} for patching: {:#?}", target_element, nodes);
@@ -575,7 +604,9 @@ where
                     target_element
                         .insert_adjacent_element("afterend", created_element)
                         .expect("must remove target node");
-                    self.active_closures.borrow_mut().extend(for_insert.closures);
+                    self.active_closures
+                        .borrow_mut()
+                        .extend(for_insert.closures);
                 }
             }
             DomPatch::AppendChildren {
@@ -597,7 +628,7 @@ where
                 let attrs: Vec<&Attribute<MSG>> =
                     attrs.iter().map(|a| a).collect();
                 CreatedNode::set_element_attributes(
-                   self,
+                    self,
                     &mut self.active_closures.borrow_mut(),
                     target_element,
                     &attrs,
@@ -671,7 +702,9 @@ where
                         &self.root_node
                     );
                 }
-                self.active_closures.borrow_mut().extend(replacement.closures);
+                self.active_closures
+                    .borrow_mut()
+                    .extend(replacement.closures);
             }
             DomPatch::RemoveNode { target_node, .. } => {
                 let target_element: &Element = target_node.unchecked_ref();
@@ -699,13 +732,10 @@ where
         }
     }
 
-
     /// execute DOM changes in order to reflect the APP's view into the browser representation
     #[allow(unused)]
     fn dispatch_dom_changes(&self, log_measurements: bool) {
-
         let measurements = self.update_dom().expect("must update dom");
-
 
         #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied
@@ -719,27 +749,25 @@ where
     #[cfg(feature = "with-ric")]
     fn dispatch_inner_with_ric(&self) {
         let program = self.clone();
-        let _handle = crate::dom::util::request_idle_callback_with_deadline(move|deadline: f64|{
-            let program = program.clone();
-            spawn_local(async move{
+        let _handle = crate::dom::util::request_idle_callback_with_deadline(
+            move |deadline: f64| {
                 program.dispatch_inner(Some(deadline));
-            });
-        }).expect("must execute");
+            },
+        )
+        .expect("must execute");
     }
 
     #[cfg(feature = "with-raf")]
     #[allow(unused)]
     fn dispatch_inner_with_raf(&self) {
         let program = self.clone();
-        crate::dom::util::request_animation_frame(move||{
-            let program = program.clone();
-            spawn_local(async move{
-                program.dispatch_inner(None);
-            });
-        }).expect("must execute");
+        crate::dom::util::request_animation_frame(move || {
+            program.dispatch_inner(None);
+        })
+        .expect("must execute");
     }
 
-    fn dispatch_inner_with_priority_ric(&self){
+    fn dispatch_inner_with_priority_ric(&self) {
         #[cfg(feature = "with-ric")]
         self.dispatch_inner_with_ric();
         #[cfg(not(feature = "with-ric"))]
@@ -750,7 +778,7 @@ where
             #[cfg(not(feature = "with-raf"))]
             {
                 let program = self.clone();
-                spawn_local(async move{
+                wasm_bindgen_futures::spawn_local(async move{
                     program.dispatch_inner(None);
                 })
             }
@@ -764,26 +792,28 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&self, deadline: Option<f64>) {
-
-        self.dispatch_pending_msgs(deadline).expect("must dispatch msgs");
+        self.dispatch_pending_msgs(deadline)
+            .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
-        if !self.pending_msgs.borrow().is_empty(){
-            self.dispatch_pending_msgs(None).expect("must dispatch all pending msgs");
+        if !self.pending_msgs.borrow().is_empty() {
+            self.dispatch_pending_msgs(None)
+                .expect("must dispatch all pending msgs");
         }
-        if !self.pending_msgs.borrow().is_empty(){
-            panic!("Can not proceed until previous pending msgs are dispatched..");
+        if !self.pending_msgs.borrow().is_empty() {
+            panic!(
+                "Can not proceed until previous pending msgs are dispatched.."
+            );
         }
-
 
         let mut all_cmd = vec![];
         let mut pending_cmds = self.pending_cmds.borrow_mut();
-        while let Some(cmd) = pending_cmds.pop_front(){
+        while let Some(cmd) = pending_cmds.pop_front() {
             all_cmd.push(cmd);
         }
         // we can execute all the cmd here at once
         let cmd = Cmd::batch(all_cmd);
 
-        if !self.pending_patches.borrow().is_empty(){
+        if !self.pending_patches.borrow().is_empty() {
             log::error!("BEFORE DOM updates there are still Remaining pending patches: {}", self.pending_patches.borrow().len());
         }
 
@@ -793,12 +823,16 @@ where
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update
-        if !self.pending_patches.borrow().is_empty(){
-            self.apply_pending_patches(None).expect("applying pending patches..");
+        if !self.pending_patches.borrow().is_empty() {
+            self.apply_pending_patches(None)
+                .expect("applying pending patches..");
         }
 
-        if !self.pending_patches.borrow().is_empty(){
-            log::error!("Remaining pending patches: {}", self.pending_patches.borrow().len());
+        if !self.pending_patches.borrow().is_empty() {
+            log::error!(
+                "Remaining pending patches: {}",
+                self.pending_patches.borrow().len()
+            );
             panic!("There are still pending patches.. can not emit cmd, if all pending patches
             has not been applied yet!");
         }
@@ -826,19 +860,17 @@ where
 
     /// TODO: unify the code here with inject style
     /// inject style element to the mount node
-    pub fn inject_style_to_mount(&self, style: &str)
-    {
+    pub fn inject_style_to_mount(&self, style: &str) {
         let style_node =
             crate::html::tags::style([], [crate::html::text(style)]);
         let created_node =
             CreatedNode::create_dom_node(self, &style_node, &mut None);
 
-        self.mount_node.borrow_mut()
+        self.mount_node
+            .borrow_mut()
             .append_child(&created_node.node)
             .expect("could not append child to mount shadow");
     }
-
-
 }
 
 /// This will be called when the actual event is triggered.
@@ -854,10 +886,7 @@ where
         self.dispatch_inner_with_priority_ric();
     }
 
-
-
     fn dispatch(&self, msg: MSG) {
         self.dispatch_multiple([msg])
     }
-
 }
