@@ -2,19 +2,18 @@ use crate::dom::Dispatch;
 use crate::vdom::{Attribute, Patch, PatchType};
 use crate::CreatedNode;
 use mt_dom::TreePath;
-use web_sys::Node;
+use web_sys::{Element, Node};
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the CreatedNode doesn't contain references
 /// as opposed to Patch which contains reference to the vdom, which makes it hard
 /// to be included in a struct
 ///
-/// TODO: use target_element instead of target_node
 pub struct DomPatch<MSG> {
-    /// The path to traverse to get to the target_node
+    /// The path to traverse to get to the target_element
     pub patch_path: TreePath,
     /// the target node
-    pub target_node: Node,
+    pub target_element: Element,
     /// the patch variant
     pub patch_variant: PatchVariant<MSG>,
 }
@@ -59,7 +58,7 @@ impl<MSG> DomPatch<MSG> {
     /// convert a virtual DOM Patch into a created DOM node Patch
     pub fn from_patch<'a, DSP>(
         program: &DSP,
-        target_node: &Node,
+        target_element: &Element,
         focused_node: &mut Option<Node>,
         patch: &Patch<'a, MSG>,
     ) -> Self
@@ -67,7 +66,7 @@ impl<MSG> DomPatch<MSG> {
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
-        let target_node = target_node.clone();
+        let target_element = target_element.clone();
         let Patch {
             patch_path,
             patch_type,
@@ -90,7 +89,7 @@ impl<MSG> DomPatch<MSG> {
                     .collect();
                 Self {
                     patch_path,
-                    target_node,
+                    target_element,
                     patch_variant: PatchVariant::InsertBeforeNode { nodes },
                 }
             }
@@ -107,21 +106,21 @@ impl<MSG> DomPatch<MSG> {
                     .collect();
                 Self {
                     patch_path,
-                    target_node,
+                    target_element,
                     patch_variant: PatchVariant::InsertAfterNode { nodes },
                 }
             }
 
             PatchType::AddAttributes { attrs } => Self {
                 patch_path,
-                target_node,
+                target_element,
                 patch_variant: PatchVariant::AddAttributes {
                     attrs: attrs.iter().map(|a| (*a).clone()).collect(),
                 },
             },
             PatchType::RemoveAttributes { attrs } => Self {
                 patch_path,
-                target_node,
+                target_element,
                 patch_variant: PatchVariant::RemoveAttributes {
                     attrs: attrs.iter().map(|a| (*a).clone()).collect(),
                 },
@@ -135,13 +134,13 @@ impl<MSG> DomPatch<MSG> {
                 );
                 Self {
                     patch_path,
-                    target_node,
+                    target_element,
                     patch_variant: PatchVariant::ReplaceNode { replacement },
                 }
             }
             PatchType::RemoveNode => Self {
                 patch_path,
-                target_node,
+                target_element,
                 patch_variant: PatchVariant::RemoveNode,
             },
             PatchType::AppendChildren { children } => {
@@ -158,7 +157,7 @@ impl<MSG> DomPatch<MSG> {
 
                 Self {
                     patch_path,
-                    target_node,
+                    target_element,
                     patch_variant: PatchVariant::AppendChildren { children },
                 }
             }

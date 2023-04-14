@@ -464,7 +464,7 @@ where
                         );
                     }
                 }
-                DomPatch::from_patch(self, target_node, &mut self.focused_node.borrow_mut(), patch)
+                DomPatch::from_patch(self, target_element, &mut self.focused_node.borrow_mut(), patch)
             } else {
                 unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
             }
@@ -583,7 +583,7 @@ where
 
         let DomPatch {
             patch_path,
-            target_node,
+            target_element,
             patch_variant,
         } = dom_patch;
 
@@ -592,13 +592,12 @@ where
                 nodes
             } => {
                 // we insert the node before this target element
-                let target_element: &Element = target_node.unchecked_ref();
                 if let Some(parent_target) = target_element.parent_node() {
                     for for_insert in nodes {
                         parent_target
                             .insert_before(
                                 &for_insert.node,
-                                Some(target_element),
+                                Some(&target_element),
                             )
                             .expect("must remove target node");
 
@@ -615,7 +614,6 @@ where
                  nodes
             } => {
                 // we insert the node before this target element
-                let target_element: &Element = target_node.unchecked_ref();
                 for for_insert in nodes.into_iter().rev() {
                     let created_element: &Element = for_insert
                         .node
@@ -632,7 +630,6 @@ where
             PatchVariant::AppendChildren {
                 children
             } => {
-                let target_element: &Element = target_node.unchecked_ref();
                 for child in children.into_iter() {
                     target_element.append_child(&child.node)?;
                     self.active_closures.borrow_mut().extend(child.closures);
@@ -642,26 +639,24 @@ where
             PatchVariant::AddAttributes {
                 attrs
             } => {
-                let target_element: &Element = target_node.unchecked_ref();
                 let attrs: Vec<&Attribute<MSG>> =
                     attrs.iter().map(|a| a).collect();
                 CreatedNode::set_element_attributes(
                     self,
                     &mut self.active_closures.borrow_mut(),
-                    target_element,
+                    &target_element,
                     &attrs,
                 );
             }
             PatchVariant::RemoveAttributes {
                  attrs
             } => {
-                let target_element: &Element = target_node.unchecked_ref();
                 for attr in attrs.iter() {
                     for att_value in attr.value() {
                         match att_value {
                             AttributeValue::Simple(_) => {
                                 CreatedNode::remove_element_attribute(
-                                    target_element,
+                                    &target_element,
                                     attr,
                                 )?;
                             }
@@ -669,7 +664,7 @@ where
                             AttributeValue::EventListener(_) => {
                                 CreatedNode::remove_event_listener_with_name(
                                     attr.name(),
-                                    target_element,
+                                    &target_element,
                                     &mut self.active_closures.borrow_mut(),
                                 )?;
                             }
@@ -688,7 +683,6 @@ where
             PatchVariant::ReplaceNode {
                 replacement
             } => {
-                let target_element: &Element = target_node.unchecked_ref();
                 // FIXME: performance bottleneck here
                 // Each element and it's descendant is created. Each call to dom to create the element
                 // has a cost of ~1ms due to bindings in wasm-bindgen, multiple call of 1000 elements can accumulate to 1s time.
@@ -697,7 +691,7 @@ where
                 // That way, all the code is done at once.
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     CreatedNode::remove_event_listeners(
-                        target_element,
+                        &target_element,
                         &mut self.active_closures.borrow_mut(),
                     )?;
                 }
@@ -723,16 +717,15 @@ where
                     .extend(replacement.closures);
             }
             PatchVariant::RemoveNode => {
-                let target_element: &Element = target_node.unchecked_ref();
                 let parent_target = target_element
                     .parent_node()
                     .expect("must have a parent node");
                 parent_target
-                    .remove_child(target_element)
+                    .remove_child(&target_element)
                     .expect("must remove target node");
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     CreatedNode::remove_event_listeners(
-                        target_element,
+                        &target_element,
                         &mut self.active_closures.borrow_mut(),
                     )?;
                 }
