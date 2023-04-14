@@ -2,8 +2,8 @@
 
 set -v
 
-. ./bootstrap.sh
+. ./bootstrap.sh  &&\
 
-. ./build_optimized.sh
+. ./build_optimized.sh &&\
 
 basic-http-server ./ -a 0.0.0.0:4001

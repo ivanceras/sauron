@@ -24,18 +24,18 @@ where
     ///
     /// Note: MSG has to be executed in the same succession one by one
     /// since the APP's state may be affected by the previous MSG
-    pub pending_msgs: Rc<RefCell<VecDeque<MSG>>>,
+    pending_msgs: Rc<RefCell<VecDeque<MSG>>>,
 
     /// pending cmds that hasn't been emited yet
-    pub pending_cmds: Rc<RefCell<VecDeque<Cmd<APP, MSG>>>>,
+    pending_cmds: Rc<RefCell<VecDeque<Cmd<APP, MSG>>>>,
 
     /// the current vdom representation
-    pub current_vdom: Rc<RefCell<vdom::Node<MSG>>>,
+    current_vdom: Rc<RefCell<vdom::Node<MSG>>>,
     /// the first element of the app view, where the patch is generated is relative to
-    pub root_node: Rc<RefCell<Option<Node>>>,
+    root_node: Rc<RefCell<Option<Node>>>,
 
     /// the actual DOM element where the APP is mounted to.
-    pub mount_node: Rc<RefCell<Node>>,
+    mount_node: Rc<RefCell<Node>>,
 
     /// The closures that are currently attached to elements in the page.
     ///
@@ -47,7 +47,7 @@ where
     /// There is only 1 focused element at any given time.
     ///
     /// after mounting or update dispatch call, the element will be focused
-    pub focused_node: Rc<RefCell<Option<Node>>>,
+    focused_node: Rc<RefCell<Option<Node>>>,
 
     /// specify how the root node is mounted into the mount node
     mount_procedure: MountProcedure,
@@ -56,7 +56,7 @@ where
     /// for optimization purposes to avoid sluggishness of the app, when a patch
     /// can not be run in 1 execution due to limited remaining time deadline
     /// it will be put into the pending patches to be executed on the next run.
-    pub pending_patches: Rc<RefCell<VecDeque<DomPatch<MSG>>>>,
+    pending_patches: Rc<RefCell<VecDeque<DomPatch<MSG>>>>,
 }
 
 /// specify how the App is mounted to the DOM
@@ -147,7 +147,7 @@ where
         let style = self.app.borrow().style();
         if !style.trim().is_empty() {
             let type_id = TypeId::of::<APP>();
-            Self::inject_style(type_id, &style);
+            self.inject_style(type_id, &style);
         }
     }
 
@@ -849,22 +849,14 @@ where
     }
 
     /// Inject a style to the global document
-    fn inject_style(type_id: TypeId, style: &str) {
-        use wasm_bindgen::JsCast;
-        dbg!(&type_id);
-        let type_id = format!("{:?}", type_id);
+    fn inject_style(&self, type_id: TypeId, style: &str) {
+        let style_node =
+            crate::html::tags::style([crate::prelude::class(format!("{type_id:?}"))], [crate::html::text(style)]);
+        let created_node =
+            CreatedNode::create_dom_node(self, &style_node, &mut None);
 
-        let document = crate::document();
-        let html_style = document
-            .create_element("style")
-            .expect("must be able to create style element");
-        html_style
-            .set_attribute("class", &type_id)
-            .expect("must set attribute");
-        let html_style: web_sys::Node = html_style.unchecked_into();
-        html_style.set_text_content(Some(style));
-        let head = document.head().expect("must have a head");
-        head.append_child(&html_style).expect("must append style");
+        let head = crate::document().head().expect("must have a head");
+        head.append_child(&created_node.node).expect("must append style");
     }
 
     /// TODO: unify the code here with inject style
