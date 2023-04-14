@@ -22,7 +22,7 @@ pub use component::{Component, Container, CustomElement};
 pub use created_node::CreatedNode;
 pub use custom_element::register_custom_element;
 pub use dispatch::Dispatch;
-pub use dom_patch::DomPatch;
+pub use dom_patch::{DomPatch, PatchVariant};
 pub use effects::Effects;
 pub use events::*;
 pub use http::Http;

@@ -4,7 +4,7 @@ use crate::dom::Measurements;
 use crate::vdom;
 use crate::vdom::{diff, Attribute, AttributeValue};
 use crate::CreatedNode;
-use crate::DomPatch;
+use crate::{DomPatch, PatchVariant};
 use crate::{prelude::Patch, Application, Cmd, Dispatch};
 use mt_dom::TreePath;
 use std::collections::VecDeque;
@@ -580,11 +580,18 @@ where
     }
 
     fn apply_dom_patch(&self, dom_patch: DomPatch<MSG>) -> Result<(), JsValue> {
-        match dom_patch {
-            DomPatch::InsertBeforeNode {
-                target_node, nodes, ..
+
+        let DomPatch {
+            patch_path,
+            target_node,
+            patch_variant,
+        } = dom_patch;
+
+        match patch_variant {
+            PatchVariant::InsertBeforeNode {
+                nodes
             } => {
-                // we inser the node before this target element
+                // we insert the node before this target element
                 let target_element: &Element = target_node.unchecked_ref();
                 if let Some(parent_target) = target_element.parent_node() {
                     for for_insert in nodes {
@@ -604,8 +611,8 @@ where
                 }
             }
 
-            DomPatch::InsertAfterNode {
-                target_node, nodes, ..
+            PatchVariant::InsertAfterNode {
+                 nodes
             } => {
                 // we insert the node before this target element
                 let target_element: &Element = target_node.unchecked_ref();
@@ -622,10 +629,8 @@ where
                         .extend(for_insert.closures);
                 }
             }
-            DomPatch::AppendChildren {
-                target_node,
-                children,
-                ..
+            PatchVariant::AppendChildren {
+                children
             } => {
                 let target_element: &Element = target_node.unchecked_ref();
                 for child in children.into_iter() {
@@ -634,8 +639,8 @@ where
                 }
             }
 
-            DomPatch::AddAttributes {
-                target_node, attrs, ..
+            PatchVariant::AddAttributes {
+                attrs
             } => {
                 let target_element: &Element = target_node.unchecked_ref();
                 let attrs: Vec<&Attribute<MSG>> =
@@ -647,8 +652,8 @@ where
                     &attrs,
                 );
             }
-            DomPatch::RemoveAttributes {
-                target_node, attrs, ..
+            PatchVariant::RemoveAttributes {
+                 attrs
             } => {
                 let target_element: &Element = target_node.unchecked_ref();
                 for attr in attrs.iter() {
@@ -680,10 +685,8 @@ where
             // including the associated closures of the descendant of replaced node
             // before it is actully replaced in the DOM
             //
-            DomPatch::ReplaceNode {
-                patch_path,
-                target_node,
-                replacement,
+            PatchVariant::ReplaceNode {
+                replacement
             } => {
                 let target_element: &Element = target_node.unchecked_ref();
                 // FIXME: performance bottleneck here
@@ -719,7 +722,7 @@ where
                     .borrow_mut()
                     .extend(replacement.closures);
             }
-            DomPatch::RemoveNode { target_node, .. } => {
+            PatchVariant::RemoveNode => {
                 let target_element: &Element = target_node.unchecked_ref();
                 let parent_target = target_element
                     .parent_node()

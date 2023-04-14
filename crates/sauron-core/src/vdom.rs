@@ -47,6 +47,15 @@ pub type Patch<'a, MSG> = mt_dom::Patch<
     AttributeValue<MSG>,
 >;
 
+/// patch type variant
+pub type PatchType<'a, MSG> = mt_dom::PatchType<
+    'a,
+    Namespace,
+    Tag,
+    Leaf<MSG>,
+    AttributeName,
+    AttributeValue<MSG>,
+>;
 /// Attribute type used in sauron where the type of the Attribute name is &'static str
 pub type Attribute<MSG> =
     mt_dom::Attribute<Namespace, AttributeName, AttributeValue<MSG>>;

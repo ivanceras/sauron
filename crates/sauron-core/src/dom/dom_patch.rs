@@ -1,5 +1,5 @@
 use crate::dom::Dispatch;
-use crate::vdom::{Attribute, Patch};
+use crate::vdom::{Attribute, Patch, PatchType};
 use crate::CreatedNode;
 use mt_dom::TreePath;
 use web_sys::Node;
@@ -10,68 +10,49 @@ use web_sys::Node;
 /// to be included in a struct
 ///
 /// TODO: use target_element instead of target_node
-pub enum DomPatch<MSG> {
+pub struct DomPatch<MSG> {
+    /// The path to traverse to get to the target_node
+    pub patch_path: TreePath,
+    /// the target node
+    pub target_node: Node,
+    /// the patch variant
+    pub patch_variant: PatchVariant<MSG>,
+}
+
+/// patch variant
+pub enum PatchVariant<MSG> {
     /// Insert nodes before the target node
     InsertBeforeNode {
-        /// The path to traverse to get to the target_node
-        patch_path: TreePath,
-        /// the target node
-        target_node: Node,
         /// nodes to be inserted before the target node
         nodes: Vec<CreatedNode>,
     },
     /// Insert nodes after the target node
     InsertAfterNode {
-        /// The path to traverse to get to the target_node
-        patch_path: TreePath,
-        /// the target node
-        target_node: Node,
         /// the nodes to be inserted after the target node
         nodes: Vec<CreatedNode>,
     },
     /// Append nodes into the target node
     AppendChildren {
-        /// The path to traverse to get to the target_node
-        patch_path: TreePath,
-        /// the target node
-        target_node: Node,
         /// the children nodes to be appended into the target node
         children: Vec<CreatedNode>,
     },
     /// Add attributes to the target node
     AddAttributes {
-        /// The path to traverse to get to the target_node
-        patch_path: TreePath,
-        /// the target node
-        target_node: Node,
         /// the attributes to be added to the target node
         attrs: Vec<Attribute<MSG>>,
     },
     /// Remove attributes from the target node
     RemoveAttributes {
-        /// The path to traverse to get to the target_node
-        patch_path: TreePath,
-        /// the target node
-        target_node: Node,
         /// the attributes names to be removed
         attrs: Vec<Attribute<MSG>>,
     },
     /// Replace the target node with the replacement node
     ReplaceNode {
-        /// The path to traverse to get to the target_node
-        patch_path: TreePath,
-        /// the target node
-        target_node: Node,
         /// the replacement node
         replacement: CreatedNode,
     },
     /// Remove the target node
-    RemoveNode {
-        /// The path to traverse to get to the target_node
-        patch_path: TreePath,
-        /// the target node
-        target_node: Node,
-    },
+    RemoveNode,
 }
 
 impl<MSG> DomPatch<MSG> {
@@ -87,10 +68,16 @@ impl<MSG> DomPatch<MSG> {
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         let target_node = target_node.clone();
-        match patch {
-            Patch::InsertBeforeNode {
-                patch_path, nodes, ..
-            } => {
+        let Patch {
+            patch_path,
+            patch_type,
+            ..
+        } = patch;
+
+        let patch_path = patch_path.clone();
+
+        match patch_type {
+            PatchType::InsertBeforeNode { nodes } => {
                 let nodes: Vec<CreatedNode> = nodes
                     .iter()
                     .map(|for_insert| {
@@ -101,15 +88,13 @@ impl<MSG> DomPatch<MSG> {
                         )
                     })
                     .collect();
-                Self::InsertBeforeNode {
-                    patch_path: patch_path.clone(),
+                Self {
+                    patch_path,
                     target_node,
-                    nodes,
+                    patch_variant: PatchVariant::InsertBeforeNode { nodes },
                 }
             }
-            Patch::InsertAfterNode {
-                patch_path, nodes, ..
-            } => {
+            PatchType::InsertAfterNode { nodes } => {
                 let nodes: Vec<CreatedNode> = nodes
                     .iter()
                     .map(|for_insert| {
@@ -120,53 +105,46 @@ impl<MSG> DomPatch<MSG> {
                         )
                     })
                     .collect();
-                Self::InsertAfterNode {
-                    patch_path: patch_path.clone(),
+                Self {
+                    patch_path,
                     target_node,
-                    nodes,
+                    patch_variant: PatchVariant::InsertAfterNode { nodes },
                 }
             }
 
-            Patch::AddAttributes {
-                patch_path, attrs, ..
-            } => Self::AddAttributes {
-                patch_path: patch_path.clone(),
-                target_node,
-                attrs: attrs.iter().map(|a| (*a).clone()).collect(),
-            },
-            Patch::RemoveAttributes {
-                patch_path, attrs, ..
-            } => Self::RemoveAttributes {
-                patch_path: patch_path.clone(),
-                target_node,
-                attrs: attrs.iter().map(|a| (*a).clone()).collect(),
-            },
-
-            Patch::ReplaceNode {
+            PatchType::AddAttributes { attrs } => Self {
                 patch_path,
-                replacement,
-                ..
-            } => {
+                target_node,
+                patch_variant: PatchVariant::AddAttributes {
+                    attrs: attrs.iter().map(|a| (*a).clone()).collect(),
+                },
+            },
+            PatchType::RemoveAttributes { attrs } => Self {
+                patch_path,
+                target_node,
+                patch_variant: PatchVariant::RemoveAttributes {
+                    attrs: attrs.iter().map(|a| (*a).clone()).collect(),
+                },
+            },
+
+            PatchType::ReplaceNode { replacement } => {
                 let replacement = CreatedNode::create_dom_node::<DSP, MSG>(
                     program,
                     replacement,
                     focused_node,
                 );
-                Self::ReplaceNode {
-                    patch_path: patch_path.clone(),
+                Self {
+                    patch_path,
                     target_node,
-                    replacement,
+                    patch_variant: PatchVariant::ReplaceNode { replacement },
                 }
             }
-            Patch::RemoveNode { patch_path, .. } => Self::RemoveNode {
-                patch_path: patch_path.clone(),
-                target_node,
-            },
-            Patch::AppendChildren {
+            PatchType::RemoveNode => Self {
                 patch_path,
-                children,
-                ..
-            } => {
+                target_node,
+                patch_variant: PatchVariant::RemoveNode,
+            },
+            PatchType::AppendChildren { children } => {
                 let children: Vec<CreatedNode> = children
                     .iter()
                     .map(|for_insert| {
@@ -177,10 +155,11 @@ impl<MSG> DomPatch<MSG> {
                         )
                     })
                     .collect();
-                Self::AppendChildren {
-                    patch_path: patch_path.clone(),
+
+                Self {
+                    patch_path,
                     target_node,
-                    children,
+                    patch_variant: PatchVariant::AppendChildren { children },
                 }
             }
         }
