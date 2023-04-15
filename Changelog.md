@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.52.0
 - refactor: make visibility private on fields of program that is not needed to be accessible outside of the module
 - refactor: use `target_element` instead of `target_node` in `DomPatch`
 - refactor: make `DomPatch` use less repeated fields in all variants by making it use struct with `PatchVariant` as the enum
