@@ -679,16 +679,9 @@ where
             // This also removes the associated closures and event listeners to the node being replaced
             // including the associated closures of the descendant of replaced node
             // before it is actully replaced in the DOM
-            //
             PatchVariant::ReplaceNode {
                 replacement
             } => {
-                // FIXME: performance bottleneck here
-                // Each element and it's descendant is created. Each call to dom to create the element
-                // has a cost of ~1ms due to bindings in wasm-bindgen, multiple call of 1000 elements can accumulate to 1s time.
-                //
-                // Possible fix: stringify and process the patch in plain javascript code.
-                // That way, all the code is done at once.
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     CreatedNode::remove_event_listeners(
                         &target_element,
@@ -859,7 +852,6 @@ where
         head.append_child(&created_node.node).expect("must append style");
     }
 
-    /// TODO: unify the code here with inject style
     /// inject style element to the mount node
     pub fn inject_style_to_mount(&self, style: &str) {
         let style_node =
