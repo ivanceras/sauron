@@ -1,6 +1,36 @@
 # Changelog
 
 ## Unreleased
+- refactor: make visibility private on fields of program that is not needed to be accessible outside of the module
+- refactor: use `target_element` instead of `target_node` in `DomPatch`
+- refactor: make `DomPatch` use less repeated fields in all variants by making it use struct with `PatchVariant` as the enum
+- feat: Program api such as `replace_mount` and `append_to_mount` is now clearly defined with explcity use of enum for `MountAction` and `MounTarget`, rather than just boolean for `is_shadow` or `is_replace`.
+- fix: improve the lifecycle logic of custom elements
+- refactor: organize code in updating of dom
+- feat: expose `with-raf` as feature in sauron, which the dispatch function cal use `requestAnimationFrame` callback
+- feat: add support for `touch_event` in events module
+- feat: export `wasm_bindgen_futures` from sauron
+- fix: add optional deadline to applying of msgs and patches functions
+- fix: add code for ensuring the state of the Program is correct
+- refactor: make `dispatch_dom_changes` a sync function since it does not need to be async, add feature gates to function calls
+- refactor: make `pending_cmd` as state in the program, which can be handled later on
+- refactor: create a `request_idle_callback_with_deadline` in dom util, rename some functions, add early return when there is no pending patches, pending msgs
+- refactor: use `BTreeMap` and `BTreeSet` as alternative to `HashMap` and `HashSet` which seems to work faster than the later
+- fix: remove the Already borrowed error when setting the root_node, refactor the DomPatch apply method into the Program
+- refactor: make conversion of attribute value from various types idiomatic
+- feat: expose the `with-ric` (requestIdleCallback) feature in sauron
+- refactor: merge DomUpdater into Program to simplify and unify all the central logic of the APP lifecycle in one place
+- refactor: remove apply_patches and distribute the functions into CreatedNode and DomUpdater
+- fix: polish the open attribute and the toggle event used in `<details>` element
+- feat: improvement to the processing of `pending_patches`, remove the throttling feature
+- feat: add DomPatch as an intermediate Patch with no lifetime reference for processing the patches in a controlled way to minimize sluggishness of the app
+- refactor: mutate the active_closures in place rather than re-assigning it.
+- fix: remove commented out examples
+- feat: split the `dispatch_inner` method into 2 stages methods: the app updates and the dom updates
+- feat: add `skip_criteria`, an improvement on the skip attribute
+- refactor: make `batch_msg` method accepts IntoIterator rathern than vec
+
+## 0.51.0
  - breaking: remove the use of sauron-component-macro
  - fix: use mt-dom 0.21.0
  - feat: add a function to check whether a tag is a custom-element, add append_child to Container trait

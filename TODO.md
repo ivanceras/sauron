@@ -59,24 +59,24 @@
         - Issue how will be map the Msg of the sub component to convert it into the Msg of the main `Application`?
     - [ ] Merge the Container and Component which the view is now requires to have children components
     - [X] Add a CustomElement trait which facilitates the component to be a custom element
-    - [ ] Rethink of the sauron-component-macro
-        - [ ] Redo it, maybe we don't need it and then manually implement all the Components
-        - [ ] Make Application trait for internal usage only
+    - [X] Rethink of the sauron-component-macro
+        - [X] Redo it, maybe we don't need it and then manually implement all the Components
+        - ~~[ ] Make Application trait for internal usage only~~
 
 ## Internal
-- [ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`
-        ie: `Cmd<ChildApp, ChildMsg>` to `Cmd<App, Msg>`
+- ~~[ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`~~
+        ~~ie: `Cmd<ChildApp, ChildMsg>` to `Cmd<App, Msg>`
         This is needed since `Cmd` from `update` function of sub components
         are not dispatched in the program. Only the top level
-        component `Cmd` can be dispatched
-    - [ ] Find a way to map `Program<APP,MSG>` to `Program<APP2,MSG2>`
-        - [X] map `DomUpdater<MSG>` to `DomUpdater<MSG2>`
-        - Issue mapping fields of Program that are in `Rc<RefCell>` seems not that simple
-            as the Rc value of dom_updater is to be borrowed and will have a borrow checker issue
+        component `Cmd` can be dispatched~~
+    - ~~[ ] Find a way to map `Program<APP,MSG>` to `Program<APP2,MSG2>`~~
+        - ~~[X] map `DomUpdater<MSG>` to `DomUpdater<MSG2>`~~
+        -  ~~Issue mapping fields of Program that are in `Rc<RefCell>` seems not that simple~~
+           ~~ as the Rc value of dom_updater is to be borrowed and will have a borrow checker issue~~
 - [X] Merge `Program` and `DomUpdater`
     - Issue: DomUpdater has multiple fields, which would then be wrap with `Rc<RefCell>` individually
-- [ ] Change the `'static` of trait implementation by specifying the lifetime
-        - ref: https://stackoverflow.com/questions/52187644/lifetime-must-be-valid-for-the-static-lifetime-so-that-the-types-are-compatible
+- ~~[ ] Change the `'static` of trait implementation by specifying the lifetime
+        - ref: https://stackoverflow.com/questions/52187644/lifetime-must-be-valid-for-the-static-lifetime-so-that-the-types-are-compatible~~
 - [X] Get rid of test_fixtures and move it to test directory
 - [ ] Make each component have a reference to the root dom where it is mounted.
     - This will make local state changes to the component easier to do, as opposed to diffing the whole DOM tree.
@@ -142,8 +142,9 @@
     - Note the `dispatch_mount` is triggered when the view has `on_mount` event.
     - [ ] mitigation: make the dispatch_inner spawn in a thead either via callback, or `spawn_local` from `wasm_bindgen_futures`.
 - [ ] Tighten visibility of objects that are not meant to be `pub`
-    - [ ] some fields in `Program`
+    - [X] some fields in `Program`
     - [ ] struct types that are not meant to be public
+- [ ] Use the deadline object in `request_idle_callback_with_deadline`, instead of just `f64`, which calculates the remaining time manually
 
 
 ## Features
