@@ -15,7 +15,7 @@ jobs:
         firefox-version: ${{ matrix.firefox }}
     - run: firefox --version
 
-    - name: Install nightly
+    - name: Install stable
       run: rustup toolchain install stable && rustup component add clippy && cargo install wasm-pack
 
     - name: Build allow all warnings
