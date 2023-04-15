@@ -1,57 +1,26 @@
 use crate::{
-    dom::{
-        Dispatch,
-        Event,
-    },
+    dom::{Dispatch, Event},
     events::MountEvent,
     html,
-    html::attributes::{
-        AttributeValue,
-        SegregatedAttributes,
-        Special,
-    },
+    html::attributes::{AttributeValue, SegregatedAttributes, Special},
     vdom,
-    vdom::{
-        Attribute,
-        Leaf,
-        Listener,
-        NodeTrait,
-    },
+    vdom::{Attribute, Leaf, Listener, NodeTrait},
 };
-use std::{
-    cell::Cell,
-    collections::HashMap,
-};
-use wasm_bindgen::{
-    closure::Closure,
-    JsCast,
-    JsValue,
-};
+use js_sys::Function;
+use mt_dom::TreePath;
+use std::{cell::Cell, collections::BTreeMap};
+use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
-    self,
-    Element,
-    EventTarget,
-    HtmlButtonElement,
-    HtmlDataElement,
-    HtmlDetailsElement,
-    HtmlElement,
-    HtmlFieldSetElement,
-    HtmlInputElement,
-    HtmlLiElement,
-    HtmlLinkElement,
-    HtmlMenuItemElement,
-    HtmlMeterElement,
-    HtmlOptGroupElement,
-    HtmlOptionElement,
-    HtmlOutputElement,
-    HtmlParamElement,
-    HtmlProgressElement,
-    HtmlSelectElement,
-    HtmlStyleElement,
-    HtmlTextAreaElement,
-    Node,
-    Text,
+    self, Element, EventTarget, HtmlButtonElement, HtmlDataElement,
+    HtmlDetailsElement, HtmlElement, HtmlFieldSetElement, HtmlInputElement,
+    HtmlLiElement, HtmlLinkElement, HtmlMenuItemElement, HtmlMeterElement,
+    HtmlOptGroupElement, HtmlOptionElement, HtmlOutputElement,
+    HtmlParamElement, HtmlProgressElement, HtmlSelectElement, HtmlStyleElement,
+    HtmlTextAreaElement, Node, Text,
 };
+
+/// data attribute name used in assigning the node id of an element with events
+pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
 
@@ -68,8 +37,6 @@ fn create_unique_identifier() -> usize {
     })
 }
 
-pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
-
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
 /// VirtualNode is dropped.
 ///
@@ -77,7 +44,7 @@ pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
 /// attached to.
 ///
 pub type ActiveClosure =
-    HashMap<usize, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
+    BTreeMap<usize, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
 
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
@@ -93,7 +60,7 @@ impl CreatedNode {
     pub fn without_closures(node: Node) -> Self {
         CreatedNode {
             node,
-            closures: HashMap::with_capacity(0),
+            closures: BTreeMap::new(),
         }
     }
 
@@ -172,6 +139,10 @@ impl CreatedNode {
     /// dispatch the mount event,
     /// call the listener since browser don't allow asynchronous execution of
     /// dispatching custom events (non-native browser events)
+    ///
+    /// TODO: this is triggered in the creation of node including the root node
+    /// which has not yet beend assigned to the program
+    /// causing it to panic
     fn dispatch_mount_event<DSP, MSG>(
         program: &DSP,
         velem: &vdom::Element<MSG>,
@@ -324,10 +295,7 @@ impl CreatedNode {
                         &merged_plain_values,
                     )
                     .unwrap_or_else(|_| {
-                        panic!(
-                            "Error setting an attribute_ns for {:?}",
-                            element
-                        )
+                        panic!("Error setting an attribute_ns for {element:?}")
                     });
             } else {
                 match *attr.name() {
@@ -367,8 +335,7 @@ impl CreatedNode {
                             .set_attribute(attr.name(), &merged_plain_values)
                             .unwrap_or_else(|_| {
                                 panic!(
-                                    "Error setting an attribute for {:?}",
-                                    element
+                                    "Error setting an attribute for {element:?}"
                                 )
                             });
                     }
@@ -381,7 +348,7 @@ impl CreatedNode {
             element
                 .set_attribute(attr.name(), &merged_styles)
                 .unwrap_or_else(|_| {
-                    panic!("Error setting an attribute_ns for {:?}", element)
+                    panic!("Error setting an attribute_ns for {element:?}")
                 });
         } else {
             //if the merged attribute is blank of empty when string is trimmed
@@ -485,7 +452,7 @@ impl CreatedNode {
     /// explicitly call set_open for details
     /// since setting the attribute `open` to false will not close it.
     ///
-    /// TODO: HtmlDialogElement ( but it is not supported on firefox and in safarit, only works on chrome)
+    /// TODO: HtmlDialogElement ( but it is not supported on firefox and in safari, only works on chrome)
     ///
     /// Applies to:
     ///  - dialog
@@ -510,6 +477,8 @@ impl CreatedNode {
     /// - optgroup
     /// - fieldset
     /// - menuitem
+    ///
+    /// TODO: use macro to simplify this code
     fn set_disabled(element: &Element, is_disabled: bool) {
         if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
             elm.set_disabled(is_disabled);
@@ -536,6 +505,7 @@ impl CreatedNode {
 
     /// we explicitly call the `set_value` function in the html element
     ///
+    /// TODO: use macro to simplify this code
     fn set_value_str(element: &Element, value: &str) {
         if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
             elm.set_value(value);
@@ -599,8 +569,6 @@ impl CreatedNode {
     ) -> Result<(), JsValue> {
         log::trace!("removing attribute: {}", attr.name());
 
-        element.remove_attribute(attr.name())?;
-
         match *attr.name() {
             "value" => {
                 Self::set_value_str(element, "");
@@ -615,6 +583,70 @@ impl CreatedNode {
                 Self::set_disabled(element, false);
             }
             _ => (),
+        }
+        //actually remove the element
+        element.remove_attribute(attr.name())?;
+
+        Ok(())
+    }
+
+    /// remove all the event listeners for this node
+    pub(crate) fn remove_event_listeners(
+        node: &Element,
+        active_closures: &mut ActiveClosure,
+    ) -> Result<(), JsValue> {
+        let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
+        for vdom_id in all_descendant_vdom_id {
+            if let Some(old_closure) = active_closures.get(&vdom_id) {
+                for (event, oc) in old_closure.iter() {
+                    let func: &Function = oc.as_ref().unchecked_ref();
+                    node.remove_event_listener_with_callback(event, func)?;
+                }
+
+                // remove closure active_closure in dom_updater to free up memory
+                active_closures
+                    .remove(&vdom_id)
+                    .expect("Unable to remove old closure");
+            } else {
+                log::warn!(
+                    "There is no closure marked with that vdom_id: {}",
+                    vdom_id
+                );
+            }
+        }
+        Ok(())
+    }
+
+    /// remove the event listener which matches the given event name
+    pub(crate) fn remove_event_listener_with_name(
+        event_name: &'static str,
+        node: &Element,
+        active_closures: &mut ActiveClosure,
+    ) -> Result<(), JsValue> {
+        let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
+        for vdom_id in all_descendant_vdom_id {
+            if let Some(old_closure) = active_closures.get_mut(&vdom_id) {
+                for (event, oc) in old_closure.iter() {
+                    if *event == event_name {
+                        let func: &Function = oc.as_ref().unchecked_ref();
+                        node.remove_event_listener_with_callback(event, func)?;
+                    }
+                }
+
+                old_closure.retain(|(event, _oc)| *event != event_name);
+
+                // remove closure active_closure in dom_updater to free up memory
+                if old_closure.is_empty() {
+                    active_closures
+                        .remove(&vdom_id)
+                        .expect("Unable to remove old closure");
+                }
+            } else {
+                log::warn!(
+                    "There is no closure marked with that vdom_id: {}",
+                    vdom_id
+                );
+            }
         }
         Ok(())
     }
@@ -636,4 +668,66 @@ where
         let msg = listener_clone.emit(Event::from(event));
         program_clone.dispatch(msg);
     }))
+}
+
+fn find_node(node: &Node, path: &mut TreePath) -> Option<Node> {
+    if path.is_empty() {
+        Some(node.clone())
+    } else {
+        let idx = path.remove_first();
+        let children = node.child_nodes();
+        if let Some(child) = children.item(idx as u32) {
+            find_node(&child, path)
+        } else {
+            None
+        }
+    }
+}
+
+pub(crate) fn find_all_nodes(
+    node: &Node,
+    nodes_to_find: &[(&TreePath, Option<&&'static str>)],
+) -> BTreeMap<TreePath, Node> {
+    let mut nodes_to_patch: BTreeMap<TreePath, Node> = BTreeMap::new();
+
+    for (path, tag) in nodes_to_find {
+        let mut traverse_path: TreePath = (*path).clone();
+        if let Some(found) = find_node(node, &mut traverse_path) {
+            nodes_to_patch.insert((*path).clone(), found);
+        } else {
+            log::warn!(
+                "can not find: {:?} {:?} root_node: {:?}",
+                path,
+                tag,
+                node
+            );
+        }
+    }
+    nodes_to_patch
+}
+
+/// Get the "data-vdom-id" of all the desendent of this node including itself
+/// This is needed to free-up the closure that was attached ActiveClosure manually
+fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<usize> {
+    let mut data_vdom_id = vec![];
+
+    if let Some(vdom_id_str) = root_element.get_attribute(DATA_VDOM_ID) {
+        let vdom_id = vdom_id_str
+            .parse::<usize>()
+            .expect("unable to parse sauron_vdom-id");
+        data_vdom_id.push(vdom_id);
+    }
+
+    let children = root_element.child_nodes();
+    let child_node_count = children.length();
+    for i in 0..child_node_count {
+        let child_node = children.item(i).expect("Expecting a child node");
+        if child_node.node_type() == Node::ELEMENT_NODE {
+            let child_element = child_node.unchecked_ref::<Element>();
+            let child_data_vdom_id =
+                get_node_descendant_data_vdom_id(child_element);
+            data_vdom_id.extend(child_data_vdom_id);
+        }
+    }
+    data_vdom_id
 }

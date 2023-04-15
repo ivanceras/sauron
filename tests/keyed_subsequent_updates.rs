@@ -178,11 +178,7 @@ fn subsequent_updates() {
     assert_eq!(old_html, expected_old);
 
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        old.clone(),
-        &sauron_core::body(),
-    );
+    simple_program.set_current_dom(old.clone());
 
     let container = document
         .query_selector(".editor")
@@ -215,7 +211,9 @@ fn subsequent_updates() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1.clone());
+    simple_program
+        .update_dom_with_vdom(update1.clone())
+        .expect("must not error");
 
     let container = document
         .query_selector(".editor")
@@ -351,7 +349,9 @@ fn subsequent_updates() {
         ]
     );
 
-    dom_updater.update_dom(&simple_program, update2.clone());
+    simple_program
+        .update_dom_with_vdom(update2.clone())
+        .expect("must not error");
 
     let container = document
         .query_selector(".editor")
@@ -501,7 +501,9 @@ fn subsequent_updates() {
         ]
     );
 
-    dom_updater.update_dom(&simple_program, update3.clone());
+    simple_program
+        .update_dom_with_vdom(update3.clone())
+        .expect("must not error");
 
     let container = document
         .query_selector(".editor")

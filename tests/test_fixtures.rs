@@ -4,13 +4,7 @@
 //! use for doing component tests
 //!
 use log::*;
-use sauron::{
-    html::div,
-    Application,
-    Cmd,
-    Node,
-    Program,
-};
+use sauron::{html::div, Application, Cmd, Node, Program};
 
 /// This is a simple component for the puprpose of testing
 #[derive(Copy, Clone, Debug)]

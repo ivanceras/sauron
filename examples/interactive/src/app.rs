@@ -1,10 +1,6 @@
 #![deny(warnings)]
 use js_sys::Date;
-use sauron::{
-    jss,
-    prelude::*,
-    web_sys::MouseEvent,
-};
+use sauron::{jss, prelude::*, web_sys::MouseEvent};
 
 pub enum Msg {
     Click,

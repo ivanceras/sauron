@@ -23,6 +23,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use sauron_core::dom::*;
     pub use sauron_core::web_sys;
     pub use sauron_core::wasm_bindgen;
+    pub use sauron_core::wasm_bindgen_futures;
     pub use sauron_core::{Component, Cmd, Program};
     pub use sauron_core::js_sys;
 }}
@@ -35,23 +36,9 @@ pub mod prelude {
 }
 pub use sauron_core::{
     html,
-    jss::{
-        jss,
-        jss_ns,
-        jss_ns_pretty,
-        jss_pretty,
-        units,
-    },
-    mt_dom,
-    svg,
-    vdom::{
-        diff,
-        Attribute,
-        Element,
-        Listener,
-        Node,
-        Patch,
-    },
+    jss::{jss, jss_ns, jss_ns_pretty, jss_pretty, units},
+    mt_dom, svg,
+    vdom::{diff, Attribute, Element, Listener, Node, Patch},
     Render,
 };
 #[cfg(feature = "with-node-macro")]

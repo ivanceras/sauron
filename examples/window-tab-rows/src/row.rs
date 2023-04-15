@@ -1,13 +1,6 @@
-use crate::field::{
-    self,
-    Field,
-    Interaction,
-};
+use crate::field::{self, Field, Interaction};
 use sauron::{
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     prelude::*,
     Node,
 };

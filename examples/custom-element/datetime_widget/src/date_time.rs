@@ -1,4 +1,5 @@
 use sauron::dom::Callback;
+use sauron::dom::{MountAction, MountTarget};
 use sauron::jss;
 use sauron::prelude::*;
 use std::collections::BTreeMap;
@@ -152,7 +153,7 @@ where
     }
 }
 
-impl<XMSG> sauron::CustomElement for DateTimeWidget<XMSG>
+impl<XMSG> sauron::CustomElement<Msg> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
@@ -161,12 +162,20 @@ where
     }
 
     /// this is called when the attributes in the mount is changed
-    fn attributes_changed(&mut self, attributes: BTreeMap<String, String>) {
-        for (key, value) in attributes {
-            match &*key {
-                "date" => self.date = value,
-                "time" => self.time = value,
-                _ => log::info!("unused attribute: {}", key),
+    fn attribute_changed<DSP>(
+        program: &DSP,
+        attr_name: &str,
+        old_value: JsValue,
+        new_value: JsValue,
+    ) where
+        DSP: Dispatch<Msg> + Clone + 'static,
+    {
+        log::info!("old_value: {:?}", old_value);
+        if let Some(new_value) = new_value.as_string() {
+            match &*attr_name {
+                "time" => program.dispatch(Msg::TimeChange(new_value)),
+                "date" => program.dispatch(Msg::DateChange(new_value)),
+                _ => log::warn!("unknown attr_name: {attr_name:?}"),
             }
         }
     }
@@ -193,8 +202,8 @@ impl DateTimeWidgetCustomElement {
             program: Program::new(
                 DateTimeWidget::<()>::default(),
                 mount_node,
-                false,
-                true,
+                MountAction::Append,
+                MountTarget::ShadowRoot,
             ),
         }
     }
@@ -206,28 +215,24 @@ impl DateTimeWidgetCustomElement {
     }
 
     #[wasm_bindgen(method, js_name = attributeChangedCallback)]
-    pub fn attribute_changed_callback(&self) {
-        use sauron::wasm_bindgen::JsCast;
-        use std::ops::DerefMut;
-        let mount_node = self.program.mount_node();
-        let mount_element: &web_sys::Element = mount_node.unchecked_ref();
-        let attribute_names = mount_element.get_attribute_names();
-        let len = attribute_names.length();
-        let mut attribute_values: std::collections::BTreeMap<String, String> =
-            std::collections::BTreeMap::new();
-        for i in 0..len {
-            let name = attribute_names.get(i);
-            let attr_name =
-                name.as_string().expect("must be a string attribute");
-            if let Some(attr_value) = mount_element.get_attribute(&attr_name) {
-                attribute_values.insert(attr_name, attr_value);
-            }
-        }
-        self.program
-            .app
-            .borrow_mut()
-            .deref_mut()
-            .attributes_changed(attribute_values);
+    pub fn attribute_changed_callback(
+        &self,
+        attr_name: &str,
+        old_value: JsValue,
+        new_value: JsValue,
+    ) {
+        log::info!(
+            "attribute: {} is changed from: {:?} to: {:?}",
+            attr_name,
+            old_value,
+            new_value
+        );
+        DateTimeWidget::<Msg>::attribute_changed(
+            &self.program,
+            attr_name,
+            old_value,
+            new_value,
+        );
     }
 
     #[wasm_bindgen(method, js_name = connectedCallback)]
@@ -237,7 +242,7 @@ impl DateTimeWidgetCustomElement {
             &self.program.app.borrow(),
         );
         self.program.inject_style_to_mount(&component_style);
-        self.program.update_dom();
+        self.program.update_dom().expect("must update dom");
     }
 
     #[wasm_bindgen(method, js_name = disconnectedCallback)]

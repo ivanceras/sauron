@@ -1,12 +1,6 @@
 #![deny(warnings)]
-use sauron::{
-    mt_dom::TreePath,
-    prelude::*,
-};
-use std::{
-    cell::RefCell,
-    rc::Rc,
-};
+use sauron::{mt_dom::TreePath, prelude::*};
+use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 
@@ -61,13 +55,11 @@ fn elements_with_different_event_should_not_be_recycle() {
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
-    let body = sauron_core::body();
     let simple_program = simple_program();
-    let mut dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program, old.clone(), &body);
+    simple_program.set_current_dom(old.clone());
 
     // update to new dom with no event attached
-    dom_updater.patch_dom(&simple_program, patches);
+    simple_program.update_dom_with_vdom(new).expect("must not error");
 
     let input_element =
         sauron_core::document().get_element_by_id(elem_id).unwrap();

@@ -140,7 +140,7 @@ pub fn classes<MSG>(
 ) -> Attribute<MSG> {
     let class_values = class_list
         .into_iter()
-        .map(|v| AttributeValue::from_value(Value::from(v.to_string())));
+        .map(|v| AttributeValue::from(Value::from(v.to_string())));
 
     Attribute::with_multiple_values(None, "class", class_values)
 }
@@ -289,6 +289,16 @@ pub fn disabled<MSG>(is_disabled: bool) -> Attribute<MSG> {
     }
 }
 
+/// set whether an element, ie: details, that is the contents of the
+/// details are currently visible
+pub fn open<MSG>(is_open: bool) -> Attribute<MSG> {
+    if is_open {
+        attr("open", true)
+    } else {
+        empty_attr()
+    }
+}
+
 /// set the inner html of this element without comparing in the diff
 /// this always sets the value
 /// This is for optimization purposes
@@ -329,7 +339,7 @@ pub fn focus<MSG>(is_focus: bool) -> Attribute<MSG> {
 /// let data_id: Attribute<()> = attr("data-id", 42);
 /// ```
 pub fn attr<MSG, V: Into<Value>>(att: &'static str, v: V) -> Attribute<MSG> {
-    mt_dom::attr(att, AttributeValue::from_value(v.into()))
+    mt_dom::attr(att, AttributeValue::from(v.into()))
 }
 
 /// a utility function to return create an empty attr, useful for cases where branch expression
@@ -385,7 +395,7 @@ pub(crate) fn merge_styles_attributes_values<MSG>(
             AttributeValue::Style(styles) => {
                 let mut style_str = String::new();
                 styles.iter().for_each(|s| {
-                    write!(style_str, "{};", s).expect("must write")
+                    write!(style_str, "{s};").expect("must write")
                 });
                 Some(style_str)
             }

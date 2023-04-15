@@ -1,3 +1,4 @@
+#![deny(warnings)]
 use sauron::Listener;
 use sauron_core::prelude::*;
 

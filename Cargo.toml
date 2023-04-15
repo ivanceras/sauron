@@ -22,6 +22,8 @@ cfg-if = "0.1"
 default = ["with-dom", "with-node-macro"]
 with-dom = ["sauron-core/with-dom"]
 with-lookup = ["sauron-core/with-lookup"]
+with-ric = ["sauron-core/with-ric"]
+with-raf = ["sauron-core/with-raf"]
 
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]
@@ -39,6 +41,7 @@ log = "0.4"
 wasm-bindgen-test = "0.3"
 wasm-bindgen-futures = "0.4.31"
 regex = "1"
+async-trait = "0.1.58"
 
 [dev-dependencies.web-sys]
 version = "0.3"
@@ -62,7 +65,7 @@ members = [
 # progressive-rendering example has its own workspace
 exclude = [
     "examples/custom-element", 
-    "examples/progressive-rendering"
+    "examples/progressive-rendering",
 ]
 
 

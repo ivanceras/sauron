@@ -49,13 +49,9 @@ where
 pub struct Measurements {
     /// The application can name this measurement to determine where this measurement is coming
     /// from.
-    pub name: String,
-    /// The number of msg processed in the update loop
-    pub msg_count: usize,
+    pub name: Option<String>,
     /// The number of DOM nodes in this Component
-    pub view_node_count: usize,
-    /// Time it took for dispatching the Component's update function
-    pub update_dispatch_took: f64,
+    pub node_count: usize,
     /// Time it took for the Component to build it's view
     pub build_view_took: f64,
     /// Total number of patches applied on this update loop
@@ -71,18 +67,12 @@ pub struct Measurements {
 impl<COMP, MSG> Application<MSG> for COMP
 where
     COMP: crate::Component<MSG, ()> + 'static,
-    COMP: crate::CustomElement,
+    COMP: crate::CustomElement<MSG>,
     MSG: 'static,
 {
     fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
         let effects = <Self as crate::Component<MSG, ()>>::update(self, msg);
-        let mount_attributes = self.attributes_for_mount();
-        Cmd::batch([
-            Cmd::from(effects),
-            Cmd::new(|program| {
-                program.update_mount_attributes(mount_attributes);
-            }),
-        ])
+        Cmd::from(effects)
     }
 
     fn view(&self) -> Node<MSG> {
@@ -99,7 +89,8 @@ where
 impl<CONT, MSG> crate::Component<MSG, ()> for CONT
 where
     CONT: crate::Container<MSG, ()>,
-    CONT: crate::CustomElement,
+    CONT: crate::CustomElement<MSG>,
+    MSG: 'static,
 {
     fn update(&mut self, msg: MSG) -> crate::Effects<MSG, ()> {
         <Self as crate::Container<MSG, ()>>::update(self, msg)

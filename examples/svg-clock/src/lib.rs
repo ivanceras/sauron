@@ -5,12 +5,7 @@
 #![deny(clippy::all)]
 
 use js_sys::Date;
-use sauron::{
-    html::attributes::style,
-    jss,
-    prelude::*,
-    wasm_bindgen::JsCast,
-};
+use sauron::{html::attributes::style, jss, prelude::*, wasm_bindgen::JsCast};
 
 #[macro_use]
 extern crate log;

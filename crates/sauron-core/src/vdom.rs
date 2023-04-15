@@ -5,10 +5,8 @@
 //! All the code in this module are run in purely rust environment, that is there is NO code here
 //! involves accessing the real DOM.
 //!
-use crate::{
-    html::attributes::{self, AttributeValue},
-    Event,
-};
+pub use crate::html::attributes::AttributeValue;
+use crate::{html::attributes, Event};
 pub use leaf::Leaf;
 pub use node_trait::NodeTrait;
 
@@ -49,6 +47,15 @@ pub type Patch<'a, MSG> = mt_dom::Patch<
     AttributeValue<MSG>,
 >;
 
+/// patch type variant
+pub type PatchType<'a, MSG> = mt_dom::PatchType<
+    'a,
+    Namespace,
+    Tag,
+    Leaf<MSG>,
+    AttributeName,
+    AttributeValue<MSG>,
+>;
 /// Attribute type used in sauron where the type of the Attribute name is &'static str
 pub type Attribute<MSG> =
     mt_dom::Attribute<Namespace, AttributeName, AttributeValue<MSG>>;

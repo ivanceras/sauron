@@ -1,3 +1,4 @@
+#![deny(warnings)]
 use crate::mt_dom::TreePath;
 use sauron::prelude::*;
 

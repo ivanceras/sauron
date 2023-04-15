@@ -18,6 +18,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use dom::*;
     pub use web_sys;
     pub use wasm_bindgen;
+    pub use wasm_bindgen_futures;
     pub use js_sys;
 }}
 
@@ -47,46 +48,20 @@ pub use mt_dom;
 pub mod prelude {
     pub use crate::{
         html::{
-            attributes::{
-                attr,
-                *,
-            },
-            tags::{
-                commons::*,
-                *,
-            },
-            units::{
-                self,
-                ch,
-                em,
-                percent,
-                pt,
-                px,
-                rem,
-            },
+            attributes::{attr, *},
+            tags::{commons::*, *},
+            units::{self, ch, em, percent, pt, px, rem},
             *,
         },
-        svg::{
-            attributes::*,
-            tags::commons::*,
-            *,
-        },
+        svg::{attributes::*, tags::commons::*, *},
         vdom::*,
         *,
     };
     pub use render::Render;
     pub use vdom::{
         diff,
-        map_msg::{
-            AttributeMapMsg,
-            ElementMapMsg,
-            NodeMapMsg,
-        },
-        Attribute,
-        Element,
-        Listener,
-        Node,
-        Patch,
+        map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg},
+        Attribute, Element, Listener, Node, Patch,
     };
     #[cfg(feature = "with-dom")]
     pub use wasm_bindgen::prelude::*;

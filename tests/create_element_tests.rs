@@ -1,17 +1,10 @@
 #![deny(warnings)]
 use sauron::prelude::*;
-use std::{
-    cell::Cell,
-    rc::Rc,
-};
+use std::{cell::Cell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
-use web_sys::{
-    console,
-    Element,
-    EventTarget,
-};
+use web_sys::{console, Element, EventTarget};
 
 mod test_fixtures;
 
@@ -69,7 +62,6 @@ fn click_event() {
     console_error_panic_hook::set_once();
 
     let document = web_sys::window().unwrap().document().unwrap();
-    let body = document.body().unwrap();
 
     let clicked = Rc::new(Cell::new(false));
     let clicked_clone = Rc::clone(&clicked);
@@ -86,8 +78,9 @@ fn click_event() {
         vec![],
     );
 
-    let _dom_updater =
-        DomUpdater::new_append_to_mount(&simple_program(), vdiv, &body);
+    let simple_program = simple_program();
+
+    simple_program.set_current_dom(vdiv);
 
     let click_event = web_sys::MouseEvent::new("click").unwrap();
 

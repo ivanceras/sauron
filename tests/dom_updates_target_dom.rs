@@ -160,20 +160,19 @@ fn multiple_match_on_keyed_elements() {
     log::trace!("target_dom: {}", target_dom.render_to_string());
 
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        current_dom.clone(),
-        &sauron_core::body(),
-    );
+    simple_program.set_current_dom(current_dom.clone());
 
-    dom_updater.patch_dom(&simple_program, patches);
+    let target_dom_html = target_dom.render_to_string();
+    simple_program
+        .update_dom_with_vdom(target_dom)
+        .expect("must not error");
 
     let app_node = crate::document()
         .query_selector(".app")
         .expect("must not error")
         .expect("must exist");
 
-    assert_eq!(target_dom.render_to_string(), app_node.outer_html());
+    assert_eq!(target_dom_html, app_node.outer_html());
 }
 
 #[test]

@@ -20,7 +20,7 @@ log = "0.4"
 cfg-if = "0.1"
 thiserror = "1.0"
 doc-comment = "0.3"
-mt-dom = { version = "0.21.0" }
+mt-dom = { version = "0.22.0" }
 #mt-dom = { path = "../../../mt-dom" }
 once_cell = "1.8"
 jss = { version = "0.5.1"}
@@ -75,6 +75,7 @@ features = [
     "HtmlSelectElement",
     "HtmlStyleElement",
     "HtmlTextAreaElement",
+    "IdleDeadline",
     "Storage",
     "ShadowRoot",
     "ShadowRootInit",
@@ -84,6 +85,9 @@ features = [
     "NodeList",
     "Text",
     "TransitionEvent",
+    "Touch",
+    "TouchEvent",
+    "TouchList",
     "CharacterData",
     "Performance",
     "Window",
@@ -99,10 +103,12 @@ features = [
 
 [features]
 default = ["with-dom"]
-with-lookup = [] #enumerates html tags and attributes
-with-measure = ["mt-dom/with-measure"] # log traces for measurements in various parts of the system where performance matters.
-with-debug = [] # log debug patches
 with-dom = ["wasm-bindgen", "js-sys", "web-sys", "wasm-bindgen-futures"] # for client-side usage
+with-lookup = [] #enumerates html tags and attributes
+with-measure = [] # log traces for measurements in various parts of the system where performance matters.
+with-debug = [] # log debug patches
+with-ric = []
+with-raf = []
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

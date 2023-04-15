@@ -1,9 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    html::attributes::style,
-    jss,
-    prelude::*,
-};
+use sauron::{html::attributes::style, jss, prelude::*};
 
 extern crate log;
 

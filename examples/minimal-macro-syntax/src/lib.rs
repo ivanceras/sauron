@@ -1,8 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    jss,
-    prelude::*,
-};
+use sauron::{jss, prelude::*};
 
 #[derive(Debug)]
 enum Msg {

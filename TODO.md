@@ -73,7 +73,7 @@
         - [X] map `DomUpdater<MSG>` to `DomUpdater<MSG2>`
         - Issue mapping fields of Program that are in `Rc<RefCell>` seems not that simple
             as the Rc value of dom_updater is to be borrowed and will have a borrow checker issue
-- ~~[ ] Merge `Program` and `DomUpdater`~~
+- [X] Merge `Program` and `DomUpdater`
     - Issue: DomUpdater has multiple fields, which would then be wrap with `Rc<RefCell>` individually
 - [ ] Change the `'static` of trait implementation by specifying the lifetime
         - ref: https://stackoverflow.com/questions/52187644/lifetime-must-be-valid-for-the-static-lifetime-so-that-the-types-are-compatible
@@ -118,7 +118,32 @@
     - This issue manifested in `performance-test-sauron` repo
     - Suspecting it has to do with `mount_node` and `root_node` as replace and append could have a different behavior in the 2.
     - Solved by: using mutable reference to the `root_node` rather than a mutable reference to a clond one.
-
+- [X] Rethink about the replace_mount in Program
+    - It is useful for replacing the preload spinner when the application is finished loading
+    - [X] Have an enum for mount action
+        ```rust
+            enum MountAction{
+                /// append as child to the target mount
+                Append,
+                /// clear any child to the target mount then append
+                ClearAppend,
+                /// replace the target mount with the root node
+                Replace
+            }
+        ```
+    - [ ] Mount event should have a reference to the host_node and the root_node
+            - host_node is the node where the view is mounted, usually the parent
+            - in case of replace host_node is the same as the root_node.
+- [X] Maybe we don't need the `async` in update.
+- ~[ ] Refactor Program that will have to use less of `Rc<RefCell<>>`, by having an inner structure which is wrapped into `Rc<RefCell<>>`~
+    - this is not possible because we need to update each field separately, and borrowing the inner program state will disallow borrowing other fields.
+- [ ] BUG: if the `dispatch_inner` is not called in a callback which is `request_animation_frame` or `request_idle_callback`
+    - This will cause the `dispatch_mount` event to dispatch before the `root_node` is set in the program when the program is to be mounted
+    - Note the `dispatch_mount` is triggered when the view has `on_mount` event.
+    - [ ] mitigation: make the dispatch_inner spawn in a thead either via callback, or `spawn_local` from `wasm_bindgen_futures`.
+- [ ] Tighten visibility of objects that are not meant to be `pub`
+    - [ ] some fields in `Program`
+    - [ ] struct types that are not meant to be public
 
 
 ## Features
@@ -168,6 +193,22 @@
     - [X] It was cause by jss `style!` macro where the lookup for style name is recreated everytime,
           due to the use of `const` instead of `static` in a `once_cell::Lazy` declaration. This is fixed in `jss 0.3.3`
 - [ ] Create the dom nodes in depth-first-traversal
+- [X] Make a pending patches in the DomUpdater which stops applying remaining patches when the time remaining for the deadline is up.
+    - There is a problem with storing the patch in a struct which will need to have explicit lifetime
+    - This can not also be stored in a global variable since there is a generic MSG
+    - Solution:
+        - Make an owned Patch which has no reference to the node
+          ```rust
+            struct OwnedPatch{
+                tag: Option<TAG>,
+                node: Node<'a,...>,
+            }
+          ```
+        - Store the patches as Closures, so as to get away with the generics
+            - but then there will be error can be shared between threads because closure is not Send
+        - [X] Make a DomPatch which a DOM version of the patch with the target node and created node
+- [ ] Find a way to break up building the view into multiple frames, since view can take a long time to build
+- [ ] Find a way to break up diffing the current vdom and the new vdom as they can also take a bit of long time as well.
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
@@ -178,6 +219,14 @@
 - [X] Fix the data-viewer example to use Components on the views rather than Application
 - [X] Revisit and use style_name identifier in usage of jss in examples
 - [X] Move `html::units` to `jss` crate
+- [X] Rename `DomUpdater` to `DomPatcher`.
+    - [X] move apply_patches into `DomPatcher`.
+- [ ] Rename `CreatedNode` to `DomNode`.
+- [X] Move fields from `DomUpdater` into `Program` such as
+     - [X] current_vdom
+     - [X] root_node,
+     - [X] active_closures,
+     - [X] pending_patches
 
 ## Bug
 - [X] When 2 nodes with multiple similar keys, multiple replace node patch is generated. But it couldn't seem to find the correct target element.

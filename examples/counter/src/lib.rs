@@ -1,7 +1,4 @@
-use sauron::{
-    jss,
-    prelude::*,
-};
+use sauron::{jss, prelude::*};
 
 enum Msg {
     Increment,

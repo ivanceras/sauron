@@ -50,14 +50,14 @@ impl<MSG> Leaf<MSG> {
 impl<MSG> fmt::Debug for Leaf<MSG> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::Text(v) => write!(f, "Text({})", v),
-            Self::SafeHtml(v) => write!(f, "SafeHtml({})", v),
-            Self::Comment(v) => write!(f, "Comment({})", v),
+            Self::Text(v) => write!(f, "Text({v})"),
+            Self::SafeHtml(v) => write!(f, "SafeHtml({v})"),
+            Self::Comment(v) => write!(f, "Comment({v})"),
             Self::Fragment(v) => {
                 write!(f, "Fragment:")?;
                 f.debug_list().entries(v).finish()
             }
-            Self::DocType(v) => write!(f, "DocType({})", v),
+            Self::DocType(v) => write!(f, "DocType({v})"),
         }
     }
 }

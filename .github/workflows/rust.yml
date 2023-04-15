@@ -16,7 +16,10 @@ jobs:
     - run: firefox --version
 
     - name: Install nightly
-      run: rustup toolchain install nightly && rustup override set nightly && rustup component add clippy && cargo install wasm-pack
+      run: rustup toolchain install stable && rustup component add clippy && cargo install wasm-pack
+
+    - name: Build allow all warnings
+      run: RUSTFLAGS=-Awarnings cargo build --all --no-default-features
 
     - name: Build no features
       run: cargo build --all --no-default-features

@@ -1,14 +1,8 @@
 use crate::{
-    prelude::{
-        Style,
-        Value,
-    },
+    prelude::{Style, Value},
     vdom::Listener,
 };
-use std::fmt::{
-    self,
-    Debug,
-};
+use std::fmt::{self, Debug};
 
 /// Values of an attribute can be in these variants
 pub enum AttributeValue<MSG> {
@@ -83,26 +77,36 @@ impl<MSG> PartialEq for AttributeValue<MSG> {
     }
 }
 
+impl<MSG> From<Listener<MSG>> for AttributeValue<MSG> {
+    fn from(listener: Listener<MSG>) -> Self {
+        Self::EventListener(listener)
+    }
+}
+
+impl<MSG, V> From<V> for AttributeValue<MSG>
+where
+    V: Into<Value>,
+{
+    fn from(v: V) -> Self {
+        Self::Simple(Into::<Value>::into(v))
+    }
+}
+
 impl<MSG> AttributeValue<MSG> {
     /// create an attribute from Vec<Style>
     pub fn from_styles(styles: impl IntoIterator<Item = Style>) -> Self {
-        AttributeValue::Style(styles.into_iter().collect())
-    }
-
-    /// create an attribute value from simple value
-    pub fn from_value(value: Value) -> Self {
-        AttributeValue::Simple(value)
+        Self::Style(styles.into_iter().collect())
     }
 
     /// create an attribute from a function `name` with arguments `value`
     pub fn function_call(value: Value) -> Self {
-        AttributeValue::FunctionCall(value)
+        Self::FunctionCall(value)
     }
 
     /// return the value if it is a Simple variant
     pub fn get_simple(&self) -> Option<&Value> {
         match self {
-            AttributeValue::Simple(v) => Some(v),
+            Self::Simple(v) => Some(v),
             _ => None,
         }
     }
@@ -110,20 +114,20 @@ impl<MSG> AttributeValue<MSG> {
     /// return the function call argument value if it is a FunctionCall variant
     pub fn get_function_call_value(&self) -> Option<&Value> {
         match self {
-            AttributeValue::FunctionCall(v) => Some(v),
+            Self::FunctionCall(v) => Some(v),
             _ => None,
         }
     }
 
     /// returns true if this attribute value is a style
     pub fn is_style(&self) -> bool {
-        matches!(self, AttributeValue::Style(_))
+        matches!(self, Self::Style(_))
     }
 
     /// return the styles if the attribute value is a style
     pub fn as_event_listener(&self) -> Option<&Listener<MSG>> {
         match self {
-            AttributeValue::EventListener(cb) => Some(cb),
+            Self::EventListener(cb) => Some(cb),
             _ => None,
         }
     }
@@ -131,18 +135,18 @@ impl<MSG> AttributeValue<MSG> {
     /// return the styles if the attribute value is a style
     pub fn as_style(&self) -> Option<&Vec<Style>> {
         match self {
-            AttributeValue::Style(styles) => Some(styles),
+            Self::Style(styles) => Some(styles),
             _ => None,
         }
     }
 
     /// return true if this is a function call
     pub fn is_function_call(&self) -> bool {
-        matches!(self, AttributeValue::FunctionCall(_))
+        matches!(self, Self::FunctionCall(_))
     }
 
     /// returns true if this attribute value is empty
     pub fn is_empty(&self) -> bool {
-        matches!(self, AttributeValue::Empty)
+        matches!(self, Self::Empty)
     }
 }

@@ -1,12 +1,7 @@
 //! provides functionalities for commands to be executed by the system, such as
 //! when the application starts or after the application updates.
 //!
-use crate::{
-    Dispatch,
-    Effects,
-};
-use std::future::Future;
-use wasm_bindgen_futures::spawn_local;
+use crate::{Dispatch, Effects};
 
 /// Cmd is a command to be executed by the system.
 /// This is returned at the init function of a component and is executed right
@@ -170,22 +165,9 @@ impl<DSP> Cmd<DSP> {
         MSG: 'static,
         DSP: Dispatch<MSG> + Clone + 'static,
     {
-        let msg_list = msg_list.into_iter().collect();
+        let msg_list: Vec<MSG> = msg_list.into_iter().collect();
         Cmd::new(move |program: DSP| {
             program.dispatch_multiple(msg_list);
-        })
-    }
-
-    /// creates a Cmd from a Future which has an MSG Output
-    pub fn from_async<MSG>(msg_fut: impl Future<Output = MSG> + 'static) -> Self
-    where
-        DSP: Dispatch<MSG> + Clone + 'static,
-    {
-        Cmd::new(|program: DSP| {
-            spawn_local(async move {
-                let msg = msg_fut.await;
-                program.dispatch(msg)
-            });
         })
     }
 }

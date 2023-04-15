@@ -1,19 +1,11 @@
 use sauron::{
     dom::events::KeyboardEvent,
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     jss,
     prelude::*,
-    Application,
-    Cmd,
-    Node,
+    Application, Cmd, Node,
 };
-use serde_derive::{
-    Deserialize,
-    Serialize,
-};
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Model {
@@ -180,12 +172,10 @@ impl Model {
                 ul([class("todo-list")], {
                     self.entries
                         .iter()
-                        .filter(|entry| {
-                            match self.visibility {
-                                Visibility::All => true,
-                                Visibility::Active => !entry.completed,
-                                Visibility::Completed => entry.completed,
-                            }
+                        .filter(|entry| match self.visibility {
+                            Visibility::All => true,
+                            Visibility::Active => !entry.completed,
+                            Visibility::Completed => entry.completed,
                         })
                         .map(|entry| self.view_entry(entry))
                         .collect::<Vec<Node<Msg>>>()

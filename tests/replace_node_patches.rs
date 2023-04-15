@@ -64,11 +64,7 @@ fn test_multiple_replace() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        old,
-        &sauron_core::body(),
-    );
+    simple_program.set_current_dom(old);
 
     let container = document
         .query_selector(".multi_replace")
@@ -79,7 +75,7 @@ fn test_multiple_replace() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    simple_program.update_dom_with_vdom(update1).expect("must not error");
 
     let container = document
         .query_selector(".multi_replace")
@@ -148,11 +144,7 @@ fn test_multiple_replace_and_parent_is_replaced_too() {
     old.render(&mut old_html).expect("must render");
 
     let simple_program = simple_program();
-    let mut dom_updater = DomUpdater::new_append_to_mount(
-        &simple_program,
-        old,
-        &sauron_core::body(),
-    );
+    simple_program.set_current_dom(old);
 
     let container = document
         .query_selector(".parent_replaced")
@@ -163,7 +155,7 @@ fn test_multiple_replace_and_parent_is_replaced_too() {
 
     assert_eq!(expected, container.outer_html());
 
-    dom_updater.update_dom(&simple_program, update1);
+    simple_program.update_dom_with_vdom(update1).expect("must not error");
 
     let container = document
         .query_selector(".parent_replaced")

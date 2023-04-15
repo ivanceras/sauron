@@ -1,8 +1,5 @@
 #![deny(warnings)]
-use sauron_core::{
-    html::attributes::style,
-    prelude::*,
-};
+use sauron_core::{html::attributes::style, prelude::*};
 
 #[test]
 fn test_style_macro() {
@@ -141,8 +138,8 @@ fn classes_test() {
             None,
             "class",
             vec![
-                AttributeValue::from_value("class1".to_string().into()),
-                AttributeValue::from_value("class2".to_string().into())
+                AttributeValue::from("class1".to_string()),
+                AttributeValue::from("class2".to_string())
             ]
         )
     );
@@ -171,8 +168,8 @@ fn should_merge_classes_flag() {
             None,
             "class",
             vec![
-                AttributeValue::from_value("class1".to_string().into()),
-                AttributeValue::from_value("class2".to_string().into())
+                AttributeValue::from("class1".to_string()),
+                AttributeValue::from("class2".to_string())
             ]
         )
     );

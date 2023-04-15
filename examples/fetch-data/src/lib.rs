@@ -57,16 +57,19 @@ impl App {
     fn fetch_page(&self) -> Cmd<Self, Msg> {
         let url =
             format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
-        Cmd::from_async(async move {
-            match Http::fetch_with_text_response_decoder(&url).await {
-                Ok(v) => {
-                    match serde_json::from_str(&v) {
-                        Ok(data) => Msg::ReceivedData(data),
-                        Err(err) => Msg::JsonError(err),
+        Cmd::new(|program|{
+            spawn_local(async move {
+                let msg = match Http::fetch_with_text_response_decoder(&url).await {
+                    Ok(v) => {
+                        match serde_json::from_str(&v) {
+                            Ok(data) => Msg::ReceivedData(data),
+                            Err(err) => Msg::JsonError(err),
+                        }
                     }
-                }
-                Err(e) => Msg::RequestError(e),
-            }
+                    Err(e) => Msg::RequestError(e),
+                };
+                program.dispatch(msg);
+            })
         })
     }
 }

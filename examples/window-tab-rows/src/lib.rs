@@ -1,16 +1,9 @@
 #![deny(warnings)]
 use sauron::{
-    html::{
-        attributes::*,
-        events::*,
-        *,
-    },
+    html::{attributes::*, events::*, *},
     jss,
     prelude::*,
-    Application,
-    Cmd,
-    Node,
-    Program,
+    Application, Cmd, Node, Program,
 };
 use tab::Tab;
 
