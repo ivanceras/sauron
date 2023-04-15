@@ -11,7 +11,7 @@ use std::collections::VecDeque;
 use std::{any::TypeId, cell::RefCell, rc::Rc};
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
-use web_sys::{self, Element, Node};
+use web_sys::{self, Element, Node, IdleDeadline};
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP, MSG>
@@ -328,7 +328,7 @@ where
     /// If there is no deadline specified all the pending messages are executed
     fn dispatch_pending_msgs(
         &self,
-        deadline: Option<f64>,
+        deadline: Option<IdleDeadline>,
     ) -> Result<(), JsValue> {
         if self.pending_msgs.borrow().is_empty() {
             return Ok(());
@@ -348,8 +348,8 @@ where
             let t2 = crate::now();
             let elapsed = t2 - t1;
             // break only if a deadline is supplied
-            if let Some(deadline) = deadline {
-                if elapsed > deadline {
+            if let Some(deadline) = &deadline {
+                if deadline.did_timeout(){
                     log::warn!("elapsed time: {}ms", elapsed);
                     log::warn!("we should be breaking at {}..", i);
                     did_complete = false;
@@ -538,9 +538,8 @@ where
     fn apply_pending_patches_with_raf(&self) -> Result<(), JsValue> {
         let program = self.clone();
         crate::dom::util::request_animation_frame(move || {
-            let deadline = 10.0;
             program
-                .apply_pending_patches(Some(deadline))
+                .apply_pending_patches(None)
                 .expect("must not error");
         })
         .expect("must execute");
@@ -550,23 +549,20 @@ where
     /// apply the pending patches into the DOM
     fn apply_pending_patches(
         &self,
-        deadline: Option<f64>,
+        deadline: Option<IdleDeadline>,
     ) -> Result<(), JsValue> {
         if self.pending_patches.borrow().is_empty() {
             return Ok(());
         }
-        let t1 = crate::now();
         let mut did_complete = true;
         while let Some(dom_patch) =
             self.pending_patches.borrow_mut().pop_front()
         {
-            let t2 = crate::now();
             self.apply_dom_patch(dom_patch)
                 .expect("must apply dom patch");
-            let elapsed = t2 - t1;
             // only break if deadline is specified
-            if let Some(deadline) = deadline {
-                if elapsed > deadline {
+            if let Some(deadline) = &deadline {
+                if deadline.did_timeout() {
                     did_complete = false;
                     break;
                 }
@@ -751,7 +747,7 @@ where
     fn dispatch_inner_with_ric(&self) {
         let program = self.clone();
         let _handle = crate::dom::util::request_idle_callback_with_deadline(
-            move |deadline: f64| {
+            move |deadline| {
                 program.dispatch_inner(Some(deadline));
             },
         )
@@ -792,7 +788,7 @@ where
     /// - The returned Cmd from the component update is then emitted.
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
-    fn dispatch_inner(&self, deadline: Option<f64>) {
+    fn dispatch_inner(&self, deadline: Option<IdleDeadline>) {
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already

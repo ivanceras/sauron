@@ -58,13 +58,12 @@ pub(crate) fn request_idle_callback_with_deadline<F>(
     f: F,
 ) -> Result<u32, JsValue>
 where
-    F: Fn(f64) + 'static,
+    F: Fn(web_sys::IdleDeadline) + 'static,
 {
     request_idle_callback(move |v: JsValue| {
         let deadline = v
             .dyn_into::<web_sys::IdleDeadline>()
-            .expect("must have an idle deadline")
-            .time_remaining();
+            .expect("must have an idle deadline");
         f(deadline);
     })
 }
