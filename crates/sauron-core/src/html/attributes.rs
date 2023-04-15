@@ -395,7 +395,7 @@ pub(crate) fn merge_styles_attributes_values<MSG>(
             AttributeValue::Style(styles) => {
                 let mut style_str = String::new();
                 styles.iter().for_each(|s| {
-                    write!(style_str, "{};", s).expect("must write")
+                    write!(style_str, "{s};").expect("must write")
                 });
                 Some(style_str)
             }

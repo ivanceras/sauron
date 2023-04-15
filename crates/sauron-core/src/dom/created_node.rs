@@ -295,10 +295,7 @@ impl CreatedNode {
                         &merged_plain_values,
                     )
                     .unwrap_or_else(|_| {
-                        panic!(
-                            "Error setting an attribute_ns for {:?}",
-                            element
-                        )
+                        panic!("Error setting an attribute_ns for {element:?}")
                     });
             } else {
                 match *attr.name() {
@@ -338,8 +335,7 @@ impl CreatedNode {
                             .set_attribute(attr.name(), &merged_plain_values)
                             .unwrap_or_else(|_| {
                                 panic!(
-                                    "Error setting an attribute for {:?}",
-                                    element
+                                    "Error setting an attribute for {element:?}"
                                 )
                             });
                     }
@@ -352,7 +348,7 @@ impl CreatedNode {
             element
                 .set_attribute(attr.name(), &merged_styles)
                 .unwrap_or_else(|_| {
-                    panic!("Error setting an attribute_ns for {:?}", element)
+                    panic!("Error setting an attribute_ns for {element:?}")
                 });
         } else {
             //if the merged attribute is blank of empty when string is trimmed

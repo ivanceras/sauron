@@ -2,17 +2,8 @@
 //! virtual dom into a writable buffer
 //!
 use crate::{
-    html::{
-        attributes,
-        attributes::SegregatedAttributes,
-    },
-    vdom::{
-        Attribute,
-        Element,
-        Leaf,
-        Node,
-        NodeTrait,
-    },
+    html::{attributes, attributes::SegregatedAttributes},
+    vdom::{Attribute, Element, Leaf, Node, NodeTrait},
 };
 use std::fmt;
 
@@ -119,14 +110,14 @@ impl<MSG> Render for Leaf<MSG> {
     ) -> fmt::Result {
         match self {
             Leaf::Text(text) => {
-                write!(buffer, "{}", text)
+                write!(buffer, "{text}")
             }
             Leaf::SafeHtml(html) => {
                 //TODO: html escape this one
-                write!(buffer, "{}", html)
+                write!(buffer, "{html}")
             }
             Leaf::Comment(comment) => {
-                write!(buffer, "<!--{}-->", comment)
+                write!(buffer, "<!--{comment}-->")
             }
             Leaf::Fragment(fragment) => {
                 for (i, frag) in fragment.iter().enumerate() {
@@ -138,7 +129,7 @@ impl<MSG> Render for Leaf<MSG> {
                 Ok(())
             }
             Leaf::DocType(doctype) => {
-                write!(buffer, "<!doctype {}>", doctype)
+                write!(buffer, "<!doctype {doctype}>")
             }
         }
     }
@@ -220,7 +211,7 @@ impl<MSG> Render for Element<MSG> {
 
         let inner_html = extract_inner_html(&merged_attributes);
         if !inner_html.is_empty() {
-            write!(buffer, "{}", inner_html)?;
+            write!(buffer, "{inner_html}")?;
         }
 
         if !self.self_closing {

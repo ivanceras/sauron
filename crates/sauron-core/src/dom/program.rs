@@ -100,7 +100,7 @@ where
             mount_node: Rc::clone(&self.mount_node),
             active_closures: Rc::clone(&self.active_closures),
             focused_node: Rc::clone(&self.focused_node),
-            mount_procedure: self.mount_procedure.clone(),
+            mount_procedure: self.mount_procedure,
             pending_patches: Rc::clone(&self.pending_patches),
         }
     }
@@ -459,8 +459,7 @@ where
                     let target_tag = target_element.tag_name().to_lowercase();
                     if target_tag != **tag {
                         panic!(
-                            "expecting a tag: {:?}, but found: {:?}",
-                            tag, target_tag
+                            "expecting a tag: {tag:?}, but found: {target_tag:?}"
                         );
                     }
                 }
@@ -606,7 +605,7 @@ where
                             .extend(for_insert.closures);
                     }
                 } else {
-                    panic!("unable to get parent node of the target element: {:?} for patching: {:#?}", target_element, nodes);
+                    panic!("unable to get parent node of the target element: {target_element:?} for patching: {nodes:#?}");
                 }
             }
 
@@ -640,7 +639,7 @@ where
                 attrs
             } => {
                 let attrs: Vec<&Attribute<MSG>> =
-                    attrs.iter().map(|a| a).collect();
+                    attrs.iter().collect();
                 CreatedNode::set_element_attributes(
                     self,
                     &mut self.active_closures.borrow_mut(),

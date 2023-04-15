@@ -56,11 +56,11 @@ pub enum PatchVariant<MSG> {
 
 impl<MSG> DomPatch<MSG> {
     /// convert a virtual DOM Patch into a created DOM node Patch
-    pub fn from_patch<'a, DSP>(
+    pub fn from_patch<DSP>(
         program: &DSP,
         target_element: &Element,
         focused_node: &mut Option<Node>,
-        patch: &Patch<'a, MSG>,
+        patch: &Patch<MSG>,
     ) -> Self
     where
         MSG: 'static,
