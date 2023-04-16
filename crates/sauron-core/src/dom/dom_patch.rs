@@ -80,11 +80,7 @@ impl<MSG> DomPatch<MSG> {
                 let nodes: Vec<CreatedNode> = nodes
                     .iter()
                     .map(|for_insert| {
-                        CreatedNode::create_dom_node::<DSP, MSG>(
-                            program,
-                            for_insert,
-                            focused_node,
-                        )
+                        CreatedNode::create_dom_node::<DSP, MSG>(program, for_insert, focused_node)
                     })
                     .collect();
                 Self {
@@ -97,11 +93,7 @@ impl<MSG> DomPatch<MSG> {
                 let nodes: Vec<CreatedNode> = nodes
                     .iter()
                     .map(|for_insert| {
-                        CreatedNode::create_dom_node::<DSP, MSG>(
-                            program,
-                            for_insert,
-                            focused_node,
-                        )
+                        CreatedNode::create_dom_node::<DSP, MSG>(program, for_insert, focused_node)
                     })
                     .collect();
                 Self {
@@ -127,11 +119,8 @@ impl<MSG> DomPatch<MSG> {
             },
 
             PatchType::ReplaceNode { replacement } => {
-                let replacement = CreatedNode::create_dom_node::<DSP, MSG>(
-                    program,
-                    replacement,
-                    focused_node,
-                );
+                let replacement =
+                    CreatedNode::create_dom_node::<DSP, MSG>(program, replacement, focused_node);
                 Self {
                     patch_path,
                     target_element,
@@ -147,11 +136,7 @@ impl<MSG> DomPatch<MSG> {
                 let children: Vec<CreatedNode> = children
                     .iter()
                     .map(|for_insert| {
-                        CreatedNode::create_dom_node::<DSP, MSG>(
-                            program,
-                            for_insert,
-                            focused_node,
-                        )
+                        CreatedNode::create_dom_node::<DSP, MSG>(program, for_insert, focused_node)
                     })
                     .collect();
 

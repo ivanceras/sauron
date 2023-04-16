@@ -24,41 +24,22 @@ pub type AttributeName = &'static str;
 /// A simplified version of saurdon_vdom node, where we supplied the type for the tag
 /// which is a &'static str. The missing type is now only MSG which will be supplied by the users
 /// App code.
-pub type Node<MSG> =
-    mt_dom::Node<Namespace, Tag, Leaf<MSG>, AttributeName, AttributeValue<MSG>>;
+pub type Node<MSG> = mt_dom::Node<Namespace, Tag, Leaf<MSG>, AttributeName, AttributeValue<MSG>>;
 
 /// Element type with tag and attribute name type set to &'static str
-pub type Element<MSG> = mt_dom::Element<
-    Namespace,
-    Tag,
-    Leaf<MSG>,
-    AttributeName,
-    AttributeValue<MSG>,
->;
+pub type Element<MSG> =
+    mt_dom::Element<Namespace, Tag, Leaf<MSG>, AttributeName, AttributeValue<MSG>>;
 
 /// Patch as result of diffing the current_vdom and the new vdom.
 /// The tag and attribute name types is set to &'static str
-pub type Patch<'a, MSG> = mt_dom::Patch<
-    'a,
-    Namespace,
-    Tag,
-    Leaf<MSG>,
-    AttributeName,
-    AttributeValue<MSG>,
->;
+pub type Patch<'a, MSG> =
+    mt_dom::Patch<'a, Namespace, Tag, Leaf<MSG>, AttributeName, AttributeValue<MSG>>;
 
 /// patch type variant
-pub type PatchType<'a, MSG> = mt_dom::PatchType<
-    'a,
-    Namespace,
-    Tag,
-    Leaf<MSG>,
-    AttributeName,
-    AttributeValue<MSG>,
->;
+pub type PatchType<'a, MSG> =
+    mt_dom::PatchType<'a, Namespace, Tag, Leaf<MSG>, AttributeName, AttributeValue<MSG>>;
 /// Attribute type used in sauron where the type of the Attribute name is &'static str
-pub type Attribute<MSG> =
-    mt_dom::Attribute<Namespace, AttributeName, AttributeValue<MSG>>;
+pub type Attribute<MSG> = mt_dom::Attribute<Namespace, AttributeName, AttributeValue<MSG>>;
 
 /// Callback where Event type is supplied
 /// for Components
@@ -66,10 +47,7 @@ pub type Listener<MSG> = attributes::Listener<Event, MSG>;
 
 /// This is a sauron html specific functionality
 /// diff 2 nodes with attribute using `&'static str` instead of generic ATT
-pub fn diff<'a, MSG>(
-    old: &'a Node<MSG>,
-    new: &'a Node<MSG>,
-) -> Vec<Patch<'a, MSG>>
+pub fn diff<'a, MSG>(old: &'a Node<MSG>, new: &'a Node<MSG>) -> Vec<Patch<'a, MSG>>
 where
     MSG: 'static,
 {

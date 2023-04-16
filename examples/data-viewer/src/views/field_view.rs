@@ -1,7 +1,5 @@
 use crate::widgets::*;
-use restq::{
-    ast::Value, data_value::cast_data_value, ColumnDef, DataType, DataValue,
-};
+use restq::{ast::Value, data_value::cast_data_value, ColumnDef, DataType, DataValue};
 use sauron::{
     html::{
         attributes::{class, classes_flag, r#type, styles},
@@ -41,10 +39,8 @@ impl Component<Msg, ()> for FieldView {
             Msg::TextChange(value) => {
                 debug!("text changed..{}", value);
                 //TODO: cast to the original data type
-                self.new_value = cast_data_value(
-                    &Value::String(value),
-                    &self.column.data_type_def.data_type,
-                );
+                self.new_value =
+                    cast_data_value(&Value::String(value), &self.column.data_type_def.data_type);
             }
             Msg::PrimaryClicked => {
                 trace!("Primary clicked");
@@ -334,10 +330,7 @@ impl FieldView {
                 class("field_view--detail flex-row"),
                 classes_flag([
                     ("field_view--detail--frozen_row", self.is_frozen_row),
-                    (
-                        "field_view--detail--frozen_column",
-                        self.is_frozen_column,
-                    ),
+                    ("field_view--detail--frozen_column", self.is_frozen_column),
                 ]),
             ],
             [

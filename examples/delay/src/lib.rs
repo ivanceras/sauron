@@ -3,29 +3,20 @@
 use log::trace;
 use sauron::{
     html::{
-        attributes::{
-            class,
-            r#type,
-            value,
-        },
+        attributes::{class, r#type, value},
         div,
         events::on_click,
-        h2,h4,
-        input,
-        text,
+        h2, h4, input, text,
     },
     jss,
     prelude::*,
-    Application,
-    Cmd,
-    Node,
-    Program,
+    Application, Cmd, Node, Program,
 };
-use wasm_bindgen_futures::spawn_local;
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
-use std::rc::Rc;
-use std::cell::RefCell;
+use wasm_bindgen_futures::spawn_local;
 
 pub enum Msg {
     Click,
@@ -39,20 +30,28 @@ pub struct App {
     executed: Rc<AtomicBool>,
 }
 
-impl App{
-    fn execute_delayed(program: impl Dispatch<Msg> + 'static, current_handle: Rc<RefCell<Option<i32>>>, executed: Rc<AtomicBool>){
+impl App {
+    fn execute_delayed(
+        program: impl Dispatch<Msg> + 'static,
+        current_handle: Rc<RefCell<Option<i32>>>,
+        executed: Rc<AtomicBool>,
+    ) {
         log::info!("in execute delayed...");
-        if let Some(current_handle) = current_handle.borrow().as_ref(){
+        if let Some(current_handle) = current_handle.borrow().as_ref() {
             sauron::dom::clear_timeout_with_handle(*current_handle);
             log::info!("We cancelled {}", current_handle);
         }
 
-        let handle = sauron::dom::delay_exec(move||{
-            log::info!("I'm executing after 5 seconds");
-            executed.store(true, Ordering::Relaxed);
-            // have to dispatch something in order to update the view
-            program.dispatch(Msg::NoOp);
-        }, 5000).expect("must have a handle");
+        let handle = sauron::dom::delay_exec(
+            move || {
+                log::info!("I'm executing after 5 seconds");
+                executed.store(true, Ordering::Relaxed);
+                // have to dispatch something in order to update the view
+                program.dispatch(Msg::NoOp);
+            },
+            5000,
+        )
+        .expect("must have a handle");
 
         *current_handle.borrow_mut() = Some(handle);
     }
@@ -64,31 +63,33 @@ impl Application<Msg> for App {
             [],
             [
                 h2([], [text("Delay example")]),
-                h4([], [text!("Is executed: {}", self.executed.load(Ordering::Relaxed))]),
+                h4(
+                    [],
+                    [text!(
+                        "Is executed: {}",
+                        self.executed.load(Ordering::Relaxed)
+                    )],
+                ),
                 div(
                     [],
-                    [input(
-                        [
-                            class("client"),
-                            r#type("button"),
-                            value("Click me!"),
-                            on_click(|_| {
-                                trace!("Button is clicked");
-                                Msg::Click
-                            }),
-                        ],
-                        [],
-                    ),
-                    button([
-                        on_click(|_|{Msg::CancelPrevious})
-                        ],
-                        [text("Cancel previous")]
-                    ),
-                    button([
-                        on_click(|_|{Msg::NoOp})
-                        ],
-                        [text("Noping..")]
-                    ),
+                    [
+                        input(
+                            [
+                                class("client"),
+                                r#type("button"),
+                                value("Click me!"),
+                                on_click(|_| {
+                                    trace!("Button is clicked");
+                                    Msg::Click
+                                }),
+                            ],
+                            [],
+                        ),
+                        button(
+                            [on_click(|_| Msg::CancelPrevious)],
+                            [text("Cancel previous")],
+                        ),
+                        button([on_click(|_| Msg::NoOp)], [text("Noping..")]),
                     ],
                 ),
             ],
@@ -104,8 +105,8 @@ impl Application<Msg> for App {
             Msg::CancelPrevious => {
                 let current_handle = Rc::clone(&self.current_handle);
                 let executed = Rc::clone(&self.executed);
-                Cmd::new(|program|Self::execute_delayed(program, current_handle, executed))
-            },
+                Cmd::new(|program| Self::execute_delayed(program, current_handle, executed))
+            }
             Msg::NoOp => Cmd::none(),
         }
     }
@@ -118,7 +119,6 @@ impl Application<Msg> for App {
         }
     }
 }
-
 
 async fn some_async_function() {
     let t1 = sauron::now();

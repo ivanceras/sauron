@@ -112,10 +112,7 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
     }
 
     /// Append this msgs to the local effects
-    pub fn append_local(
-        mut self,
-        local: impl IntoIterator<Item = MSG>,
-    ) -> Self {
+    pub fn append_local(mut self, local: impl IntoIterator<Item = MSG>) -> Self {
         self.local.extend(local);
         self
     }

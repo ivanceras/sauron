@@ -1,11 +1,6 @@
 use sauron::{
-    html::{
-        attributes::*,
-        units::px,
-        *,
-    },
-    Attribute,
-    Node,
+    html::{attributes::*, units::px, *},
+    Attribute, Node,
 };
 use search_widget::SearchWidget;
 
@@ -15,8 +10,7 @@ pub(crate) fn textbox<MSG, V: ToString>(
     v: V,
     attributes: impl IntoIterator<Item = Attribute<MSG>>,
 ) -> Node<MSG> {
-    input([r#type("text"), class("textbox"), value(v.to_string())], [])
-        .add_attributes(attributes)
+    input([r#type("text"), class("textbox"), value(v.to_string())], []).add_attributes(attributes)
 }
 
 pub(crate) fn numberbox<MSG, V: ToString>(
@@ -46,8 +40,7 @@ pub(crate) fn datebox<MSG>(
     v: String,
     attributes: impl IntoIterator<Item = Attribute<MSG>>,
 ) -> Node<MSG> {
-    input([r#type("date"), class("datebox"), value(v)], [])
-        .add_attributes(attributes)
+    input([r#type("date"), class("datebox"), value(v)], []).add_attributes(attributes)
 }
 
 /// accepts the checked, container attributes and the actual checkbox attributes

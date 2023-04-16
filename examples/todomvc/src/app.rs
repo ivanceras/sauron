@@ -111,11 +111,7 @@ impl Application<Msg> for Model {
             [
                 section(
                     [class("todoapp")],
-                    [
-                        self.view_input(),
-                        self.view_entries(),
-                        self.view_controls(),
-                    ],
+                    [self.view_input(), self.view_entries(), self.view_controls()],
                 ),
                 self.info_footer(),
             ],
@@ -196,9 +192,7 @@ impl Model {
                         "not-selected"
                     }),
                     href(visibility.to_uri()),
-                    on_click(move |_| {
-                        Msg::ChangeVisibility(visibility.clone())
-                    }),
+                    on_click(move |_| Msg::ChangeVisibility(visibility.clone())),
                 ],
                 [text(visibility_str)],
             )],
@@ -257,16 +251,11 @@ impl Model {
                             [],
                         ),
                         label(
-                            [on_doubleclick(move |_| {
-                                Msg::ToggleEdit(entry_id)
-                            })],
+                            [on_doubleclick(move |_| Msg::ToggleEdit(entry_id))],
                             [text(entry.description.to_string())],
                         ),
                         button(
-                            [
-                                class("destroy"),
-                                on_click(move |_| Msg::Delete(entry_id)),
-                            ],
+                            [class("destroy"), on_click(move |_| Msg::Delete(entry_id))],
                             [],
                         ),
                     ],
@@ -277,9 +266,7 @@ impl Model {
                         r#type("text"),
                         hidden(!entry.editing),
                         value(&entry.description),
-                        on_input(move |input: InputEvent| {
-                            Msg::UpdateEntry(entry_id, input.value)
-                        }),
+                        on_input(move |input: InputEvent| Msg::UpdateEntry(entry_id, input.value)),
                         on_blur(move |_| Msg::EditingEntry(entry_id, false)),
                         on_keypress(move |event: KeyboardEvent| {
                             if event.key_code() == 13 {
@@ -296,8 +283,7 @@ impl Model {
     }
 
     fn view_controls(&self) -> Node<Msg> {
-        let entries_completed =
-            self.entries.iter().filter(|entry| entry.completed).count();
+        let entries_completed = self.entries.iter().filter(|entry| entry.completed).count();
 
         let entries_left = self.entries.len() - entries_completed;
         let item = if entries_left == 1 { " item" } else { " items" };
@@ -342,10 +328,7 @@ impl Model {
                     [
                         text("Written by "),
                         a(
-                            [
-                                href("https://github.com/ivanceras/"),
-                                target("_blank"),
-                            ],
+                            [href("https://github.com/ivanceras/"), target("_blank")],
                             [text("Jovansonlee Cesar")],
                         ),
                     ],
@@ -369,11 +352,8 @@ impl Model {
         let window = web_sys::window().expect("no global `window` exists");
         let local_storage = window.local_storage();
         if let Ok(Some(local_storage)) = local_storage {
-            let json_data =
-                serde_json::to_string(&self).expect("must serialize data");
-            if let Err(err) =
-                local_storage.set_item("todomvc::data", &json_data)
-            {
+            let json_data = serde_json::to_string(&self).expect("must serialize data");
+            if let Err(err) = local_storage.set_item("todomvc::data", &json_data) {
                 log::error!("Could not write to local storage, {:?}", err);
             }
         }

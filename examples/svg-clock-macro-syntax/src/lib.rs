@@ -61,38 +61,33 @@ impl Application<Msg> for Clock {
             <circle cx="100" cy="100" r="98" fill="none" stroke="#1a202c"/>
         };
 
-        let hand = |rotate: f64,
-                    stroke_color: &'static str,
-                    stroke_width_value: u32,
-                    height: u32| {
-            node! {
-                <line
-                        x1="100"
-                        y1="100"
-                        x2={100 - height}
-                        y2="100"
-                        stroke={stroke_color}
-                        stroke-width={stroke_width_value}
-                        stroke-linecap="round"
-                        transform={format!(
-                            "rotate({} 100 100)",
-                            (rotate * 10.0).round() / 10.0
-                        )}
-                />
-            }
-        };
+        let hand =
+            |rotate: f64, stroke_color: &'static str, stroke_width_value: u32, height: u32| {
+                node! {
+                    <line
+                            x1="100"
+                            y1="100"
+                            x2={100 - height}
+                            y2="100"
+                            stroke={stroke_color}
+                            stroke-width={stroke_width_value}
+                            stroke-linecap="round"
+                            transform={format!(
+                                "rotate({} 100 100)",
+                                (rotate * 10.0).round() / 10.0
+                            )}
+                    />
+                }
+            };
 
         let d = &self.date;
-        let ms = ((((d.get_hours() * 60 + d.get_minutes()) * 60)
-            + d.get_seconds())
-            * 1000
+        let ms = ((((d.get_hours() * 60 + d.get_minutes()) * 60) + d.get_seconds()) * 1000
             + d.get_milliseconds()) as f64;
 
         let subsecond_rotate = 90.0 + ((ms / 1000.0) % 1.0) * 360.0;
         let second_rotate = 90.0 + ((ms / 1000.0) % 60.0) * 360.0 / 60.0;
         let minute_rotate = 90.0 + ((ms / 1000.0 / 60.0) % 60.0) * 360.0 / 60.0;
-        let hour_rotate =
-            90.0 + ((ms / 1000.0 / 60.0 / 60.0) % 12.0) * 360.0 / 12.0;
+        let hour_rotate = 90.0 + ((ms / 1000.0 / 60.0 / 60.0) % 12.0) * 360.0 / 12.0;
 
         node! {
             <article>

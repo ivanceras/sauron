@@ -85,12 +85,8 @@ impl<MSG> Render for Node<MSG> {
         compressed: bool,
     ) -> fmt::Result {
         match self {
-            Node::Element(element) => {
-                element.render_with_indent(buffer, indent, compressed)
-            }
-            Node::Leaf(leaf) => {
-                leaf.render_with_indent(buffer, indent, compressed)
-            }
+            Node::Element(element) => element.render_with_indent(buffer, indent, compressed),
+            Node::Leaf(leaf) => leaf.render_with_indent(buffer, indent, compressed),
             Node::NodeList(node_list) => {
                 for node in node_list {
                     node.render_with_indent(buffer, indent, compressed)?;
@@ -139,10 +135,12 @@ fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
     merged_attributes
         .iter()
         .flat_map(|attr| {
-            let SegregatedAttributes{listeners:_, plain_values:_, styles:_, function_calls} =
-                attributes::partition_callbacks_from_plain_styles_and_func_calls(
-                    attr,
-                );
+            let SegregatedAttributes {
+                listeners: _,
+                plain_values: _,
+                styles: _,
+                function_calls,
+            } = attributes::partition_callbacks_from_plain_styles_and_func_calls(attr);
 
             if *attr.name() == "inner_html" {
                 attributes::merge_plain_attributes_values(&function_calls)
@@ -163,8 +161,7 @@ impl<MSG> Render for Element<MSG> {
     ) -> fmt::Result {
         write!(buffer, "<{}", self.tag())?;
 
-        let ref_attrs: Vec<&Attribute<MSG>> =
-            self.get_attributes().iter().collect();
+        let ref_attrs: Vec<&Attribute<MSG>> = self.get_attributes().iter().collect();
         let merged_attributes: Vec<Attribute<MSG>> =
             mt_dom::merge_attributes_of_same_name(&ref_attrs);
 
@@ -185,11 +182,9 @@ impl<MSG> Render for Element<MSG> {
 
         let children = self.get_children();
         let first_child = children.get(0);
-        let is_first_child_text_node =
-            first_child.map(|node| node.is_text()).unwrap_or(false);
+        let is_first_child_text_node = first_child.map(|node| node.is_text()).unwrap_or(false);
 
-        let is_lone_child_text_node =
-            children.len() == 1 && is_first_child_text_node;
+        let is_lone_child_text_node = children.len() == 1 && is_first_child_text_node;
 
         // do not indent if it is only text child node
         if is_lone_child_text_node {
@@ -233,9 +228,7 @@ impl<MSG> Render for Attribute<MSG> {
             plain_values,
             styles,
             function_calls: _,
-        } = attributes::partition_callbacks_from_plain_styles_and_func_calls(
-            self,
-        );
+        } = attributes::partition_callbacks_from_plain_styles_and_func_calls(self);
 
         // These are attribute values which specifies the state of the element
         // regardless of it's value.
@@ -252,8 +245,7 @@ impl<MSG> Render for Attribute<MSG> {
             .unwrap_or(false);
 
         // skip this attribute if the boolean attributes evaluates to false
-        let should_skip_attribute =
-            boolean_attributes.contains(self.name()) && !bool_value;
+        let should_skip_attribute = boolean_attributes.contains(self.name()) && !bool_value;
 
         if !should_skip_attribute {
             if let Some(merged_plain_values) =
@@ -261,9 +253,7 @@ impl<MSG> Render for Attribute<MSG> {
             {
                 write!(buffer, "{}=\"{}\"", self.name(), merged_plain_values)?;
             }
-            if let Some(merged_styles) =
-                attributes::merge_styles_attributes_values(&styles)
-            {
+            if let Some(merged_styles) = attributes::merge_styles_attributes_values(&styles) {
                 write!(buffer, "{}=\"{}\"", self.name(), merged_styles)?;
             }
         }
@@ -278,8 +268,7 @@ mod test {
 
     #[test]
     fn test_render_comments() {
-        let view: Node<()> =
-            div(vec![], vec![comment("comment1"), comment("comment2")]);
+        let view: Node<()> = div(vec![], vec![comment("comment1"), comment("comment2")]);
 
         assert_eq!(
             view.render_to_string(),
@@ -299,8 +288,7 @@ mod test {
 
     #[test]
     fn test_render_classes() {
-        let view: Node<()> =
-            div(vec![class("frame"), class("component")], vec![]);
+        let view: Node<()> = div(vec![class("frame"), class("component")], vec![]);
         let expected = r#"<div class="frame component"></div>"#;
         let mut buffer = String::new();
         view.render(&mut buffer).expect("must render");

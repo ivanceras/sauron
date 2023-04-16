@@ -79,11 +79,7 @@ fn test_unmatched_old_key() {
     assert_eq!(
         patches,
         vec![
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1, 0, 0,]),
-                &text("2")
-            ),
+            Patch::replace_node(None, TreePath::new(vec![1, 0, 0,]), &text("2")),
             Patch::remove_node(Some(&"div"), TreePath::new(vec![0]),),
             Patch::insert_before_node(
                 Some(&"div"),
@@ -96,16 +92,8 @@ fn test_unmatched_old_key() {
                     </div>
                 </div>)]
             ),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![2, 0, 0,]),
-                &text("3")
-            ),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![3, 0, 0,]),
-                &text("4")
-            ),
+            Patch::replace_node(None, TreePath::new(vec![2, 0, 0,]), &text("3")),
+            Patch::replace_node(None, TreePath::new(vec![3, 0, 0,]), &text("4")),
         ]
     );
 }

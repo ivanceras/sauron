@@ -1,15 +1,7 @@
 //! Provides functions and macros to build html elements
-use crate::vdom::{
-    leaf,
-    Attribute,
-    Node,
-    NodeTrait,
-};
+use crate::vdom::{leaf, Attribute, Node, NodeTrait};
 pub use jss::units;
-pub use mt_dom::{
-    element,
-    element_ns,
-};
+pub use mt_dom::{element, element_ns};
 
 #[macro_use]
 pub mod attributes;
@@ -18,10 +10,7 @@ pub mod tags;
 #[cfg(feature = "with-dom")]
 pub use crate::dom::events;
 
-pub use tags::{
-    commons::*,
-    self_closing::*,
-};
+pub use tags::{commons::*, self_closing::*};
 
 /// A help function which render the view when the condition is met, otherwise
 /// just display a `span(vec![], vec![])`

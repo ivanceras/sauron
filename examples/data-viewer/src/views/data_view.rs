@@ -64,16 +64,11 @@ impl Component<Msg, ()> for DataView {
         match msg {
             Msg::PageMsg(page_index, page_msg) => {
                 let effects = self.page_views[page_index].update(page_msg);
-                effects.map_msg(move |follow_up| {
-                    Msg::PageMsg(page_index, follow_up)
-                })
+                effects.map_msg(move |follow_up| Msg::PageMsg(page_index, follow_up))
             }
             Msg::ColumnMsg(column_index, column_msg) => {
-                let effects =
-                    self.column_views[column_index].update(column_msg);
-                effects.map_msg(move |follow_up| {
-                    Msg::ColumnMsg(column_index, follow_up)
-                })
+                let effects = self.column_views[column_index].update(column_msg);
+                effects.map_msg(move |follow_up| Msg::ColumnMsg(column_index, follow_up))
             }
             Msg::Scrolled((scroll_top, scroll_left)) => {
                 self.scroll_top = scroll_top;
@@ -91,15 +86,12 @@ impl Component<Msg, ()> for DataView {
             }
             Msg::MouseMove(client_x, _client_y) => {
                 debug!("debug in column view from the window..");
-                if let Some((column_index, active_resize)) =
-                    self.active_resize.clone()
-                {
+                if let Some((column_index, active_resize)) = self.active_resize.clone() {
                     match active_resize {
                         Grip::Left => {}
                         Grip::Right => {
                             let delta_x = client_x - self.start_x;
-                            let column_view =
-                                &mut self.column_views[column_index];
+                            let column_view = &mut self.column_views[column_index];
                             column_view.width += delta_x;
                             let column_width = column_view.calc_width();
                             self.start_x = client_x;
@@ -113,10 +105,7 @@ impl Component<Msg, ()> for DataView {
                 self.active_resize = Some((column_index, grip));
                 let column_view = &mut self.column_views[column_index];
                 self.start_x = client_x;
-                debug!(
-                    "width of column {} is {}",
-                    column_index, column_view.width
-                );
+                debug!("width of column {} is {}", column_index, column_view.width);
                 Effects::none()
             }
         }
@@ -143,23 +132,13 @@ impl Component<Msg, ()> for DataView {
                     )],
                     [
                         div(
-                            [class(
-                                "data_view__spacer__frozen_column_names flex-row",
-                            )],
+                            [class("data_view__spacer__frozen_column_names flex-row")],
                             [
                                 div(
-                                    [class(
-                                        "data_view__spacer flex-column-reverse",
-                                    )],
+                                    [class("data_view__spacer flex-column-reverse")],
                                     [div(
-                                        [class(
-                                            "data_view__spacer__multi_selector",
-                                        )],
-                                        [selector_box(
-                                            false,
-                                            [],
-                                            [],
-                                        )],
+                                        [class("data_view__spacer__multi_selector")],
+                                        [selector_box(false, [], [])],
                                     )],
                                 ),
                                 self.view_frozen_column_names(),
@@ -181,10 +160,7 @@ impl Component<Msg, ()> for DataView {
                     [section(
                         [
                             class("normal_column_names__frozen_rows"),
-                            styles([(
-                                "margin-left",
-                                px(-self.scroll_left),
-                            )]),
+                            styles([("margin-left", px(-self.scroll_left))]),
                         ],
                         [
                             // can move left and right
@@ -229,8 +205,7 @@ impl DataView {
         let column_defs = table_def.columns.clone();
         trace!("bufread len: {}", bufread.buffer().len());
         let rows_iter = CsvRows::new(bufread);
-        let data: Vec<Vec<restq::DataValue>> =
-            rows_iter.into_data_values(&column_defs);
+        let data: Vec<Vec<restq::DataValue>> = rows_iter.into_data_values(&column_defs);
         trace!("rows: {}", data.len());
         let page_view = PageView::new(&column_defs, &data);
         let data_view = DataView {
@@ -264,16 +239,10 @@ impl DataView {
         debug!("Init in  data view for column resize");
         Window::add_event_listeners(vec![
             on_mouseup(|event| {
-                crate::AppMsg::DataViewMsg(Msg::ColumnEndResize(
-                    event.client_x(),
-                    event.client_y(),
-                ))
+                crate::AppMsg::DataViewMsg(Msg::ColumnEndResize(event.client_x(), event.client_y()))
             }),
             on_mousemove(|event| {
-                crate::AppMsg::DataViewMsg(Msg::MouseMove(
-                    event.client_x(),
-                    event.client_y(),
-                ))
+                crate::AppMsg::DataViewMsg(Msg::MouseMove(event.client_x(), event.client_y()))
             }),
         ])
     }
@@ -293,11 +262,7 @@ impl DataView {
         self.update_visible_pages();
     }
 
-    pub fn get_fields(
-        &self,
-        page_index: usize,
-        row_index: usize,
-    ) -> &Vec<Rc<RefCell<FieldView>>> {
+    pub fn get_fields(&self, page_index: usize, row_index: usize) -> &Vec<Rc<RefCell<FieldView>>> {
         &self.get_row(page_index, row_index).fields
     }
 
@@ -370,8 +335,7 @@ impl DataView {
             });
 
         // calculate field_widths by adding the the grip width of each column_view
-        let field_widths: Vec<i32> =
-            self.column_views.iter().map(|cw| cw.calc_width()).collect();
+        let field_widths: Vec<i32> = self.column_views.iter().map(|cw| cw.calc_width()).collect();
 
         self.page_views
             .iter_mut()
@@ -380,9 +344,9 @@ impl DataView {
 
     /// set the field widths due to a change in column width
     fn set_field_width(&mut self, column_index: usize, column_width: i32) {
-        self.page_views.iter_mut().for_each(|page_view| {
-            page_view.set_field_width(column_index, column_width)
-        });
+        self.page_views
+            .iter_mut()
+            .for_each(|page_view| page_view.set_field_width(column_index, column_width));
     }
 
     /// This is the allocated height set by the parent tab
@@ -491,9 +455,7 @@ impl DataView {
                 .iter()
                 .enumerate()
                 .filter(|(_index, column)| column.is_frozen)
-                .map(|(index, column)| {
-                    self.column_view_with_resize(index, column)
-                })
+                .map(|(index, column)| self.column_view_with_resize(index, column))
                 .collect::<Vec<Node<Msg>>>(),
         )
     }
@@ -507,24 +469,18 @@ impl DataView {
                 .iter()
                 .enumerate()
                 .filter(|(_index, column)| !column.is_frozen)
-                .map(|(index, column)| {
-                    self.column_view_with_resize(index, column)
-                })
+                .map(|(index, column)| self.column_view_with_resize(index, column))
                 .collect::<Vec<Node<Msg>>>(),
         )
     }
 
-    fn column_view_with_resize(
-        &self,
-        index: usize,
-        column: &ColumnView,
-    ) -> Node<Msg> {
+    fn column_view_with_resize(&self, index: usize, column: &ColumnView) -> Node<Msg> {
         div(
             [class("column_view flex-row")],
             [
-                column.view().map_msg(move |column_msg| {
-                    Msg::ColumnMsg(index, column_msg)
-                }),
+                column
+                    .view()
+                    .map_msg(move |column_msg| Msg::ColumnMsg(index, column_msg)),
                 div(
                     [
                         class("column_view__grip column_view__grip--right"),
@@ -609,16 +565,16 @@ impl DataView {
 
     fn update_visible_pages(&mut self) {
         let visible_page = self.visible_page();
-        let visible_pages =
-            vec![visible_page - 1, visible_page, visible_page + 1];
-        self.page_views.iter_mut().enumerate().for_each(
-            |(page_index, page_view)| {
+        let visible_pages = vec![visible_page - 1, visible_page, visible_page + 1];
+        self.page_views
+            .iter_mut()
+            .enumerate()
+            .for_each(|(page_index, page_view)| {
                 if visible_pages.contains(&page_index) {
                     page_view.set_visible(true)
                 } else {
                     page_view.set_visible(false);
                 }
-            },
-        );
+            });
     }
 }

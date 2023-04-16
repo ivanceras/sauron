@@ -68,7 +68,9 @@ fn remove_event_from_replaced_node() {
         "There should be 1 event attached to the DomUpdater"
     );
 
-    simple_program.update_dom_with_vdom(new).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(new)
+        .expect("must not error");
 
     assert_eq!(
         simple_program.active_closures.borrow().len(),

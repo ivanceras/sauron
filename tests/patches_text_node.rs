@@ -60,7 +60,9 @@ fn patches_text() {
         </section>\
         </main>";
 
-    simple_program.update_dom_with_vdom(update1).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(update1)
+        .expect("must not error");
     let result = container.outer_html();
     log::info!("result: {}", result);
     println!("result: {}", result);

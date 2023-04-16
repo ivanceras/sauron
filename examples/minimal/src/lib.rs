@@ -51,10 +51,7 @@ impl Application<Msg> for App {
                             ],
                             [],
                         ),
-                        div(
-                            [],
-                            [text(format!("Clicked: {}", self.click_count))],
-                        ),
+                        div([], [text(format!("Clicked: {}", self.click_count))]),
                         input([r#type("text"), value(self.click_count)], []),
                     ],
                 ),

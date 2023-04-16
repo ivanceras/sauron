@@ -1,26 +1,17 @@
 #[macro_use]
 extern crate criterion;
 
-use criterion::{
-    Criterion,
-    Fun,
-};
+use criterion::{Criterion, Fun};
 
 use sauron_core::{
     diff,
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     Node,
 };
 
 use std::{
     collections::hash_map::DefaultHasher,
-    hash::{
-        Hash,
-        Hasher,
-    },
+    hash::{Hash, Hasher},
 };
 
 const LOREM: &str = "
@@ -505,10 +496,7 @@ fn build_editor() {
                     line.chars()
                         .enumerate()
                         .map(|(n_char, ch)| {
-                            div(
-                                vec![class("ch"), attr("pos", n_char)],
-                                vec![text(ch)],
-                            )
+                            div(vec![class("ch"), attr("pos", n_char)], vec![text(ch)])
                         })
                         .collect::<Vec<_>>(),
                 )
@@ -522,12 +510,7 @@ fn build_100_child_nodes() {
         vec![class("some-class")],
         (0..100)
             .into_iter()
-            .map(|n| {
-                div(
-                    vec![class("child-div")],
-                    vec![text(format!("node: {}", n))],
-                )
-            })
+            .map(|n| div(vec![class("child-div")], vec![text(format!("node: {}", n))]))
             .collect::<Vec<Node<()>>>(),
     );
 }

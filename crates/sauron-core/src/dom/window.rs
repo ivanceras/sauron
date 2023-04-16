@@ -1,22 +1,11 @@
 use crate::{
-    dom::{
-        created_node::create_closure_wrap,
-        Cmd,
-        Dispatch,
-    },
+    dom::{created_node::create_closure_wrap, Cmd, Dispatch},
     vdom::Attribute,
     Application,
 };
 use std::fmt::Debug;
-use wasm_bindgen::{
-    self,
-    prelude::*,
-    JsCast,
-};
-use web_sys::{
-    EventTarget,
-    ScrollToOptions,
-};
+use wasm_bindgen::{self, prelude::*, JsCast};
+use web_sys::{EventTarget, ScrollToOptions};
 
 /// Provides access to the Browser window
 #[derive(Copy, Clone, Debug)]
@@ -24,9 +13,7 @@ pub struct Window;
 
 impl Window {
     /// attach an event listender to the window
-    pub fn add_event_listeners<APP, MSG>(
-        event_listeners: Vec<Attribute<MSG>>,
-    ) -> Cmd<APP, MSG>
+    pub fn add_event_listeners<APP, MSG>(event_listeners: Vec<Attribute<MSG>>) -> Cmd<APP, MSG>
     where
         APP: Application<MSG> + 'static,
         MSG: 'static,
@@ -40,9 +27,7 @@ impl Window {
             for event_attr in event_listeners.iter() {
                 let event_str = event_attr.name();
                 for event_cb in event_attr.value() {
-                    let callback = event_cb
-                        .as_event_listener()
-                        .expect("expecting a callback");
+                    let callback = event_cb.as_event_listener().expect("expecting a callback");
 
                     let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
                         create_closure_wrap(&program, callback);
@@ -79,8 +64,7 @@ impl Window {
                     let msg = cb(window_width, window_height);
                     program.dispatch(msg);
                 }));
-            crate::window()
-                .set_onresize(Some(resize_callback.as_ref().unchecked_ref()));
+            crate::window().set_onresize(Some(resize_callback.as_ref().unchecked_ref()));
             resize_callback.forget();
         });
         cmd
@@ -101,9 +85,7 @@ impl Window {
                     let msg = cb(hash);
                     program.dispatch(msg);
                 }));
-            crate::window().set_onhashchange(Some(
-                hashchange_callback.as_ref().unchecked_ref(),
-            ));
+            crate::window().set_onhashchange(Some(hashchange_callback.as_ref().unchecked_ref()));
             hashchange_callback.forget();
         });
         cmd

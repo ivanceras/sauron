@@ -1,8 +1,5 @@
 //! Provides functions and macros to build svg elements
-pub use mt_dom::{
-    element,
-    element_ns,
-};
+pub use mt_dom::{element, element_ns};
 pub mod attributes;
 pub mod tags;
 use crate::vdom;

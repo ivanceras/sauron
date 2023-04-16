@@ -7,9 +7,5 @@ extern "C" {
     // ```rust,ignore
     //  sauron::register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
     // ```
-    pub fn register_custom_element(
-        custom_tag: &str,
-        adapter: &str,
-        superClass: &str,
-    );
+    pub fn register_custom_element(custom_tag: &str, adapter: &str, superClass: &str);
 }

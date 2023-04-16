@@ -54,12 +54,8 @@ impl Application<Msg> for ResizeWrapper {
     /// not being triggered
     fn init(&mut self) -> Cmd<Self, Msg> {
         let mut cmds = vec![Window::add_event_listeners(vec![
-            on_mouseup(|event| {
-                Msg::EndResize(event.client_x(), event.client_y())
-            }),
-            on_mousemove(|event| {
-                Msg::MouseMove(event.client_x(), event.client_y())
-            }),
+            on_mouseup(|event| Msg::EndResize(event.client_x(), event.client_y())),
+            on_mousemove(|event| Msg::MouseMove(event.client_x(), event.client_y())),
         ])];
         cmds.push(DataView::init());
         Cmd::batch(cmds)
@@ -118,30 +114,18 @@ impl Application<Msg> for ResizeWrapper {
                 self.data_view.view().map_msg(Msg::DataViewMsg),
                 div(
                     [
-                        class(
-                            "resize_wrapper__resize_grip resize_wrapper__resize_grip--right",
-                        ),
+                        class("resize_wrapper__resize_grip resize_wrapper__resize_grip--right"),
                         on_mousedown(|event| {
-                            Msg::StartResize(
-                                Grip::Right,
-                                event.client_x(),
-                                event.client_y(),
-                            )
+                            Msg::StartResize(Grip::Right, event.client_x(), event.client_y())
                         }),
                     ],
                     [],
                 ),
                 div(
                     [
-                        class(
-                            "resize_wrapper__resize_grip resize_wrapper__resize_grip--bottom",
-                        ),
+                        class("resize_wrapper__resize_grip resize_wrapper__resize_grip--bottom"),
                         on_mousedown(|event| {
-                            Msg::StartResize(
-                                Grip::Bottom,
-                                event.client_x(),
-                                event.client_y(),
-                            )
+                            Msg::StartResize(Grip::Bottom, event.client_x(), event.client_y())
                         }),
                     ],
                     [],
@@ -152,20 +136,16 @@ impl Application<Msg> for ResizeWrapper {
                             "resize_wrapper__resize_grip resize_wrapper__resize_grip--bottom_right",
                         ),
                         on_mousedown(|event| {
-                            Msg::StartResize(
-                                Grip::BottomRight,
-                                event.client_x(),
-                                event.client_y(),
-                            )
+                            Msg::StartResize(Grip::BottomRight, event.client_x(), event.client_y())
                         }),
                     ],
                     [],
                 ),
                 a(
                     [html::attributes::href(
-                        "https://github.com/ivanceras/sauron/tree/master/examples/data-viewer/"
+                        "https://github.com/ivanceras/sauron/tree/master/examples/data-viewer/",
                     )],
-                    [text("code")]
+                    [text("code")],
                 ),
             ],
         )

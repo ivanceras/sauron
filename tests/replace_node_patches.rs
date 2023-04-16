@@ -75,7 +75,9 @@ fn test_multiple_replace() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom_with_vdom(update1).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(update1)
+        .expect("must not error");
 
     let container = document
         .query_selector(".multi_replace")
@@ -155,7 +157,9 @@ fn test_multiple_replace_and_parent_is_replaced_too() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom_with_vdom(update1).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(update1)
+        .expect("must not error");
 
     let container = document
         .query_selector(".parent_replaced")

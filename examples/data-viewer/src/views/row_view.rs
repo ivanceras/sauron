@@ -22,19 +22,13 @@ pub struct RowView {
 }
 
 impl RowView {
-    pub fn new(
-        index: usize,
-        data_rows: &[DataValue],
-        data_columns: &[ColumnDef],
-    ) -> Self {
+    pub fn new(index: usize, data_rows: &[DataValue], data_columns: &[ColumnDef]) -> Self {
         RowView {
             index,
             fields: data_rows
                 .into_iter()
                 .zip(data_columns.iter())
-                .map(|(value, column)| {
-                    Rc::new(RefCell::new(FieldView::new(value, column)))
-                })
+                .map(|(value, column)| Rc::new(RefCell::new(FieldView::new(value, column))))
                 .collect(),
             frozen_fields: vec![],
             is_frozen: false,
@@ -55,9 +49,7 @@ impl Component<Msg, ()> for RowView {
     }
 
     fn view(&self) -> Node<Msg> {
-        self.view_with_filter(|(_index, field)| {
-            field.borrow().is_normal_field()
-        })
+        self.view_with_filter(|(_index, field)| field.borrow().is_normal_field())
     }
 }
 
@@ -114,9 +106,10 @@ impl RowView {
                 .enumerate()
                 .filter(filter)
                 .map(|(index, field)| {
-                    field.borrow().view().map_msg(move |field_msg| {
-                        Msg::FieldMsg(index, field_msg)
-                    })
+                    field
+                        .borrow()
+                        .view()
+                        .map_msg(move |field_msg| Msg::FieldMsg(index, field_msg))
                 })
                 .collect::<Vec<Node<Msg>>>(),
         )
@@ -145,9 +138,9 @@ impl RowView {
     }
 
     pub fn update_frozen_row_fields(&mut self) {
-        self.fields.iter().for_each(|field| {
-            field.borrow_mut().set_is_frozen_row(self.is_frozen)
-        })
+        self.fields
+            .iter()
+            .for_each(|field| field.borrow_mut().set_is_frozen_row(self.is_frozen))
     }
 
     pub fn update_frozen_column_fields(&mut self) {

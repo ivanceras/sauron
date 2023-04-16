@@ -1,18 +1,9 @@
 #![deny(warnings)]
 pub use error::Error;
 use log::Level;
-pub use restq::{
-    ast::ddl::DataTypeDef,
-    ColumnDef,
-    DataType,
-    DataValue,
-};
+pub use restq::{ast::ddl::DataTypeDef, ColumnDef, DataType, DataValue};
 use sauron::prelude::*;
-use views::{
-    resize_wrapper,
-    DataView,
-    ResizeWrapper,
-};
+use views::{resize_wrapper, DataView, ResizeWrapper};
 
 #[macro_use]
 extern crate log;
@@ -46,7 +37,8 @@ fn create_resize_wrapper() -> ResizeWrapper {
 }
 
 fn create_data_view() -> DataView {
-    let csv = "actor{*actor_id:s32,@first_name:text,last_name:text,last_update:utc,is_active:bool}\n\
+    let csv =
+        "actor{*actor_id:s32,@first_name:text,last_name:text,last_update:utc,is_active:bool}\n\
         1,PENELOPE,GUINESS,2006-02-15 09:34:33,true\n\
         2,NICK,WAHLBERG,2006-02-15 09:34:33,false\n\
         3,ED,CHASE,2006-02-15 09:34:33,true\n\
@@ -69,8 +61,7 @@ fn create_data_view() -> DataView {
         20,LUCILLE,TRACY,2006-02-15 09:34:33,true";
 
     trace!("csv data: {}", csv);
-    let mut data_view = DataView::from_csv_data(csv.as_bytes().to_vec())
-        .expect("must be parsed");
+    let mut data_view = DataView::from_csv_data(csv.as_bytes().to_vec()).expect("must be parsed");
     let column_widths = [200, 200, 200, 500, 200];
 
     let total_width = column_widths.iter().fold(0, |acc, cw| acc + cw + 10);

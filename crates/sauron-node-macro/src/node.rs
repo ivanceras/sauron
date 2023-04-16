@@ -9,8 +9,7 @@ pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match syn_rsx::parse_with_config(input, ParserConfig::new()) {
         Ok(mut nodes) => {
             if nodes.len() == 1 {
-                let node =
-                    nodes.pop().expect("unable to convert node to tokens");
+                let node = nodes.pop().expect("unable to convert node to tokens");
                 node_to_tokens(node)
             } else {
                 node_list_to_tokens(nodes)
@@ -54,15 +53,13 @@ fn node_to_tokens(node: Node) -> TokenStream {
                 }}
             );
     } else {
-        tokens.extend(
-                quote! {{
-                    #[allow(unused_braces)]
-                    {
-                        #children_tokens
-                        sauron::html::element_ns(None, #name, [#(#attributes),*], children, #self_closing)
-                    }
-                }}
-            );
+        tokens.extend(quote! {{
+            #[allow(unused_braces)]
+            {
+                #children_tokens
+                sauron::html::element_ns(None, #name, [#(#attributes),*], children, #self_closing)
+            }
+        }});
     }
     tokens
 }
@@ -161,24 +158,22 @@ fn children_to_tokens(children: Vec<Node>) -> TokenStream {
                     });
                 }
                 NodeType::Block => match child.value {
-                    Some(syn::Expr::Block(expr)) => {
-                        match braced_for_loop(&expr) {
-                            Some(ExprForLoop {
-                                pat, expr, body, ..
-                            }) => {
-                                tokens.extend(quote! {
-                                        for #pat in #expr {
-                                            #receiver.push(sauron::Node::from(#body));
-                                        }
-                                    });
-                            }
-                            _ => {
-                                tokens.extend(quote! {
-                                    #receiver.push(sauron::Node::from(#expr));
-                                });
-                            }
+                    Some(syn::Expr::Block(expr)) => match braced_for_loop(&expr) {
+                        Some(ExprForLoop {
+                            pat, expr, body, ..
+                        }) => {
+                            tokens.extend(quote! {
+                                for #pat in #expr {
+                                    #receiver.push(sauron::Node::from(#body));
+                                }
+                            });
                         }
-                    }
+                        _ => {
+                            tokens.extend(quote! {
+                                #receiver.push(sauron::Node::from(#expr));
+                            });
+                        }
+                    },
                     _ => {
                         return quote! {
                             compile_error!("Unexpected missing block for NodeType::Block")

@@ -1,15 +1,6 @@
 use crate::{
-    html::attributes::{
-        AttributeValue,
-        Listener,
-    },
-    vdom::{
-        Attribute,
-        Element,
-        Event,
-        Leaf,
-        Node,
-    },
+    html::attributes::{AttributeValue, Listener},
+    vdom::{Attribute, Element, Event, Leaf, Node},
 };
 
 /// Add mapping function for Node, Element, Attribute,
@@ -85,14 +76,12 @@ where
         match self {
             Node::Element(element) => Node::Element(element.map_callback(cb)),
             Node::Leaf(leaf) => Node::Leaf(leaf.map_callback(cb)),
-            Node::NodeList(node_list) => {
-                Node::NodeList(
-                    node_list
-                        .into_iter()
-                        .map(|node| node.map_callback(cb.clone()))
-                        .collect(),
-                )
-            }
+            Node::NodeList(node_list) => Node::NodeList(
+                node_list
+                    .into_iter()
+                    .map(|node| node.map_callback(cb.clone()))
+                    .collect(),
+            ),
         }
     }
 
@@ -180,17 +169,12 @@ where
     MSG: 'static,
 {
     /// map the callback of this attribute using another callback
-    pub fn map_callback<MSG2>(
-        self,
-        cb: Listener<MSG, MSG2>,
-    ) -> AttributeValue<MSG2>
+    pub fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> AttributeValue<MSG2>
     where
         MSG2: 'static,
     {
         match self {
-            AttributeValue::FunctionCall(this) => {
-                AttributeValue::FunctionCall(this)
-            }
+            AttributeValue::FunctionCall(this) => AttributeValue::FunctionCall(this),
             AttributeValue::Simple(this) => AttributeValue::Simple(this),
             AttributeValue::Style(this) => AttributeValue::Style(this),
             AttributeValue::EventListener(this) => {
@@ -214,9 +198,7 @@ where
             Self::SafeHtml(v) => Leaf::SafeHtml(v),
             Self::Comment(v) => Leaf::Comment(v),
             Self::Fragment(v) => {
-                Leaf::Fragment(
-                    v.into_iter().map(|n| n.map_callback(cb.clone())).collect(),
-                )
+                Leaf::Fragment(v.into_iter().map(|n| n.map_callback(cb.clone())).collect())
             }
             Self::DocType(v) => Leaf::DocType(v),
         }

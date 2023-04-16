@@ -1,14 +1,9 @@
 #![deny(warnings)]
 use sauron::{
     diff,
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     mt_dom::patch::*,
-    Node,
-    Patch,
-    Render,
+    Node, Patch, Render,
 };
 use sauron_node_macro::node;
 
@@ -53,8 +48,7 @@ fn test_self_closing_tag() {
 
 #[test]
 fn test_inner_html_patch() {
-    let view1: Node<()> =
-        main(vec![class("container")], vec![article(vec![], vec![])]);
+    let view1: Node<()> = main(vec![class("container")], vec![article(vec![], vec![])]);
 
     let view2: Node<()> = main(
         vec![class("container")],
@@ -79,8 +73,7 @@ fn test_inner_html_removed() {
         vec![article(vec![inner_html("<h1>Lorep Ipsum</h1>")], vec![])],
     );
 
-    let view2: Node<()> =
-        main(vec![class("container")], vec![article(vec![], vec![])]);
+    let view2: Node<()> = main(vec![class("container")], vec![article(vec![], vec![])]);
 
     let patch = diff(&view1, &view2);
     assert_eq!(

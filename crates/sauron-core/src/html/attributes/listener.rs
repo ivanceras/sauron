@@ -1,10 +1,6 @@
 //! Callbacks contains function that can be called at a later time.
 //! This is used in containing an event listener attached to an DOM element.
-use std::{
-    any::TypeId,
-    fmt,
-    rc::Rc,
-};
+use std::{any::TypeId, fmt, rc::Rc};
 
 /// A generic sized representation of a function that can be
 /// attached to a Node. The callback will essentially be owned by the element
@@ -81,10 +77,7 @@ where
 
     /// map this callback using another callback such that
     /// OUT becomes MSG2
-    pub fn map_callback<MSG2>(
-        self,
-        cb: Listener<OUT, MSG2>,
-    ) -> Listener<IN, MSG2>
+    pub fn map_callback<MSG2>(self, cb: Listener<OUT, MSG2>) -> Listener<IN, MSG2>
     where
         MSG2: 'static,
     {

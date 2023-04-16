@@ -128,21 +128,9 @@ fn truncate_children_different_attributes() {
     assert_eq!(
         patch,
         vec![
-            Patch::add_attributes(
-                &"div",
-                TreePath::new(vec![0]),
-                vec![&class("class5")]
-            ),
-            Patch::add_attributes(
-                &"div",
-                TreePath::new(vec![1]),
-                vec![&class("class6")]
-            ),
-            Patch::add_attributes(
-                &"div",
-                TreePath::new(vec![2]),
-                vec![&class("class7")]
-            ),
+            Patch::add_attributes(&"div", TreePath::new(vec![0]), vec![&class("class5")]),
+            Patch::add_attributes(&"div", TreePath::new(vec![1]), vec![&class("class6")]),
+            Patch::add_attributes(&"div", TreePath::new(vec![2]), vec![&class("class7")]),
             Patch::remove_node(Some(&"div"), TreePath::new(vec![3]),),
             Patch::remove_node(Some(&"div"), TreePath::new(vec![4]),),
             Patch::remove_node(Some(&"div"), TreePath::new(vec![5]),),
@@ -154,8 +142,7 @@ fn truncate_children_different_attributes() {
 
 #[test]
 fn replace_node2() {
-    let old: Node<()> =
-        div(vec![], vec![b(vec![], vec![text("1")]), b(vec![], vec![])]);
+    let old: Node<()> = div(vec![], vec![b(vec![], vec![text("1")]), b(vec![], vec![])]);
     let new = div(vec![], vec![i(vec![], vec![text("1")]), i(vec![], vec![])]);
 
     let patch = diff(&old, &new);
@@ -168,11 +155,7 @@ fn replace_node2() {
                 TreePath::new(vec![0]),
                 &i(vec![], vec![text("1")])
             ),
-            Patch::replace_node(
-                Some(&"b"),
-                TreePath::new(vec![1]),
-                &i(vec![], vec![])
-            ),
+            Patch::replace_node(Some(&"b"), TreePath::new(vec![1]), &i(vec![], vec![])),
         ],
         "ReplaceNode node with a child",
     )
@@ -180,8 +163,7 @@ fn replace_node2() {
 
 #[test]
 fn remove_nodes1() {
-    let old: Node<()> =
-        div(vec![], vec![b(vec![], vec![]), span(vec![], vec![])]); //{ <div> <b></b> <span></span> </div> },
+    let old: Node<()> = div(vec![], vec![b(vec![], vec![]), span(vec![], vec![])]); //{ <div> <b></b> <span></span> </div> },
     let new = div(vec![], vec![]); //{ <div> </div> },
 
     assert_eq!(
@@ -212,8 +194,7 @@ fn remove_nodes2() {
         ],
     );
 
-    let new: Node<()> =
-        div(vec![], vec![span(vec![], vec![b(vec![], vec![])])]);
+    let new: Node<()> = div(vec![], vec![span(vec![], vec![b(vec![], vec![])])]);
 
     assert_eq!(
         dbg!(diff(&old, &new)),
@@ -242,11 +223,7 @@ fn remove_nodes3() {
         dbg!(diff(&old, &new)),
         vec![
             Patch::remove_node(Some(&"i"), TreePath::new(vec![0, 1]),),
-            Patch::replace_node(
-                Some(&"b"),
-                TreePath::new(vec![1]),
-                &i(vec![], vec![])
-            ),
+            Patch::replace_node(Some(&"b"), TreePath::new(vec![1]), &i(vec![], vec![])),
         ],
         "Removing child and change next node after parent",
     )

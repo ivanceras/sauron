@@ -1,7 +1,4 @@
-use std::{
-    fmt,
-    rc::Rc,
-};
+use std::{fmt, rc::Rc};
 
 /// A generic wrapper for a closure in rust where we can transform and pass around.
 pub struct Callback<IN, OUT> {

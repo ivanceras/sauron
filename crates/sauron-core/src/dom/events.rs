@@ -9,12 +9,10 @@ use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
 pub use web_sys::{
-    AnimationEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TouchEvent,
-    TransitionEvent,
+    AnimationEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TouchEvent, TransitionEvent,
 };
 use web_sys::{
-    EventTarget, HtmlDetailsElement, HtmlInputElement, HtmlSelectElement,
-    HtmlTextAreaElement,
+    EventTarget, HtmlDetailsElement, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
 };
 
 /// Map the Event to DomEvent, which are browser events
@@ -98,10 +96,8 @@ where
             f((scroll_top, scroll_left))
         } else {
             let window = crate::window();
-            let scroll_top =
-                window.page_y_offset().expect("must get page offset") as i32;
-            let scroll_left =
-                window.page_x_offset().expect("must get page offset") as i32;
+            let scroll_top = window.page_y_offset().expect("must get page offset") as i32;
+            let scroll_left = window.page_x_offset().expect("must get page offset") as i32;
             f((scroll_top, scroll_left))
         }
     })
@@ -236,8 +232,7 @@ impl InputEvent {
 
 fn to_input_event(event: Event) -> InputEvent {
     let web_event = event.as_web().expect("must be a web event");
-    let target: EventTarget =
-        web_event.target().expect("Unable to get event target");
+    let target: EventTarget = web_event.target().expect("Unable to get event target");
     if let Some(input) = target.dyn_ref::<HtmlInputElement>() {
         InputEvent::new(input.value(), web_event)
     } else if let Some(textarea) = target.dyn_ref::<HtmlTextAreaElement>() {
@@ -251,8 +246,7 @@ fn to_input_event(event: Event) -> InputEvent {
 
 fn to_checked(event: Event) -> bool {
     let web_event = event.as_web().expect("must be a web event");
-    let target: EventTarget =
-        web_event.target().expect("Unable to get event target");
+    let target: EventTarget = web_event.target().expect("Unable to get event target");
     if let Some(input) = target.dyn_ref::<HtmlInputElement>() {
         input.checked()
     } else {
@@ -262,8 +256,7 @@ fn to_checked(event: Event) -> bool {
 
 fn to_open(event: Event) -> bool {
     let web_event = event.as_web().expect("must be a web event");
-    let target: EventTarget =
-        web_event.target().expect("Unable to get event target");
+    let target: EventTarget = web_event.target().expect("Unable to get event target");
     if let Some(details) = target.dyn_ref::<HtmlDetailsElement>() {
         details.open()
     } else {

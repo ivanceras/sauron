@@ -11,11 +11,10 @@ use mt_dom::TreePath;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
-    self, Element, EventTarget, HtmlButtonElement, HtmlDataElement,
-    HtmlDetailsElement, HtmlElement, HtmlFieldSetElement, HtmlInputElement,
-    HtmlLiElement, HtmlLinkElement, HtmlMenuItemElement, HtmlMeterElement,
-    HtmlOptGroupElement, HtmlOptionElement, HtmlOutputElement,
-    HtmlParamElement, HtmlProgressElement, HtmlSelectElement, HtmlStyleElement,
+    self, Element, EventTarget, HtmlButtonElement, HtmlDataElement, HtmlDetailsElement,
+    HtmlElement, HtmlFieldSetElement, HtmlInputElement, HtmlLiElement, HtmlLinkElement,
+    HtmlMenuItemElement, HtmlMeterElement, HtmlOptGroupElement, HtmlOptionElement,
+    HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement, HtmlStyleElement,
     HtmlTextAreaElement, Node, Text,
 };
 
@@ -43,8 +42,7 @@ fn create_unique_identifier() -> usize {
 /// The u32 is a unique identifier that is associated with the DOM element that this closure is
 /// attached to.
 ///
-pub type ActiveClosure =
-    BTreeMap<usize, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
+pub type ActiveClosure = BTreeMap<usize, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
 
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
@@ -91,16 +89,17 @@ impl CreatedNode {
                 panic!("safe html must have already been dealt in create_element node");
             }
             Leaf::DocType(_doctype) => {
-                panic!("It looks like you are using doctype in the middle of an app,
-                    doctype is only used in rendering");
+                panic!(
+                    "It looks like you are using doctype in the middle of an app,
+                    doctype is only used in rendering"
+                );
             }
             Leaf::Fragment(nodes) => {
                 let document = crate::document();
                 let doc_fragment = document.create_document_fragment();
                 let mut closures = ActiveClosure::new();
                 for vnode in nodes {
-                    let created_node =
-                        Self::create_dom_node(program, vnode, focused_node);
+                    let created_node = Self::create_dom_node(program, vnode, focused_node);
                     closures.extend(created_node.closures);
                     doc_fragment
                         .append_child(&created_node.node)
@@ -124,9 +123,7 @@ impl CreatedNode {
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         match vnode {
-            vdom::Node::Leaf(leaf_node) => {
-                Self::create_leaf_node(program, leaf_node, focused_node)
-            }
+            vdom::Node::Leaf(leaf_node) => Self::create_leaf_node(program, leaf_node, focused_node),
             vdom::Node::Element(element_node) => {
                 Self::create_element_node(program, element_node, focused_node)
             }
@@ -143,11 +140,8 @@ impl CreatedNode {
     /// TODO: this is triggered in the creation of node including the root node
     /// which has not yet beend assigned to the program
     /// causing it to panic
-    fn dispatch_mount_event<DSP, MSG>(
-        program: &DSP,
-        velem: &vdom::Element<MSG>,
-        element: &Element,
-    ) where
+    fn dispatch_mount_event<DSP, MSG>(program: &DSP, velem: &vdom::Element<MSG>, element: &Element)
+    where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
@@ -224,8 +218,7 @@ impl CreatedNode {
                     .insert_adjacent_html("beforeend", child_text)
                     .expect("must not error");
             } else {
-                let created_child =
-                    Self::create_dom_node(program, child, focused_node);
+                let created_child = Self::create_dom_node(program, child, focused_node);
 
                 closures.extend(created_child.closures);
                 element
@@ -274,10 +267,7 @@ impl CreatedNode {
             plain_values,
             styles,
             function_calls,
-        } =
-            html::attributes::partition_callbacks_from_plain_styles_and_func_calls(
-                attr,
-            );
+        } = html::attributes::partition_callbacks_from_plain_styles_and_func_calls(attr);
 
         // set simple values
         if let Some(merged_plain_values) =
@@ -289,14 +279,8 @@ impl CreatedNode {
                 // using this with None will error in the browser with:
                 // NamespaceError: An attempt was made to create or change an object in a way which is incorrect with regard to namespaces
                 element
-                    .set_attribute_ns(
-                        Some(namespace),
-                        attr.name(),
-                        &merged_plain_values,
-                    )
-                    .unwrap_or_else(|_| {
-                        panic!("Error setting an attribute_ns for {element:?}")
-                    });
+                    .set_attribute_ns(Some(namespace), attr.name(), &merged_plain_values)
+                    .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
             } else {
                 match *attr.name() {
                     "value" => {
@@ -306,27 +290,21 @@ impl CreatedNode {
                     "open" => {
                         let is_open: bool = plain_values
                             .first()
-                            .and_then(|v| {
-                                v.get_simple().and_then(|v| v.as_bool())
-                            })
+                            .and_then(|v| v.get_simple().and_then(|v| v.as_bool()))
                             .unwrap_or(false);
                         Self::set_open(element, is_open);
                     }
                     "checked" => {
                         let is_checked: bool = plain_values
                             .first()
-                            .and_then(|av| {
-                                av.get_simple().and_then(|v| v.as_bool())
-                            })
+                            .and_then(|av| av.get_simple().and_then(|v| v.as_bool()))
                             .unwrap_or(false);
                         Self::set_checked(element, is_checked)
                     }
                     "disabled" => {
                         let is_disabled: bool = plain_values
                             .first()
-                            .and_then(|av| {
-                                av.get_simple().and_then(|v| v.as_bool())
-                            })
+                            .and_then(|av| av.get_simple().and_then(|v| v.as_bool()))
                             .unwrap_or(false);
                         Self::set_disabled(element, is_disabled);
                     }
@@ -334,9 +312,7 @@ impl CreatedNode {
                         element
                             .set_attribute(attr.name(), &merged_plain_values)
                             .unwrap_or_else(|_| {
-                                panic!(
-                                    "Error setting an attribute for {element:?}"
-                                )
+                                panic!("Error setting an attribute for {element:?}")
                             });
                     }
                 }
@@ -347,9 +323,7 @@ impl CreatedNode {
             // set the styles
             element
                 .set_attribute(attr.name(), &merged_styles)
-                .unwrap_or_else(|_| {
-                    panic!("Error setting an attribute_ns for {element:?}")
-                });
+                .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
         } else {
             //if the merged attribute is blank of empty when string is trimmed
             //remove the attribute
@@ -390,9 +364,8 @@ impl CreatedNode {
                 let listener_clone = listener.clone();
                 let key_press_func: Closure<dyn FnMut(web_sys::Event)> =
                     Closure::wrap(Box::new(move |event: web_sys::Event| {
-                        let ke: &web_sys::KeyboardEvent = event
-                            .dyn_ref()
-                            .expect("should be a keyboard event");
+                        let ke: &web_sys::KeyboardEvent =
+                            event.dyn_ref().expect("should be a keyboard event");
                         if ke.key() == "Enter" {
                             let msg = listener_clone.emit(Event::from(event));
                             program_clone.dispatch(msg);
@@ -443,8 +416,7 @@ impl CreatedNode {
     fn set_checked(element: &Element, is_checked: bool) {
         if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
             input.set_checked(is_checked);
-        } else if let Some(menu_item) = element.dyn_ref::<HtmlMenuItemElement>()
-        {
+        } else if let Some(menu_item) = element.dyn_ref::<HtmlMenuItemElement>() {
             menu_item.set_checked(is_checked);
         }
     }
@@ -541,10 +513,7 @@ impl CreatedNode {
     }
 
     /// set the element attribute value with the first numerical value found in values
-    fn set_with_values<MSG>(
-        element: &Element,
-        values: &[&AttributeValue<MSG>],
-    ) {
+    fn set_with_values<MSG>(element: &Element, values: &[&AttributeValue<MSG>]) {
         let value_i32 = values
             .first()
             .and_then(|v| v.get_simple().and_then(|v| v.as_i32()));
@@ -608,10 +577,7 @@ impl CreatedNode {
                     .remove(&vdom_id)
                     .expect("Unable to remove old closure");
             } else {
-                log::warn!(
-                    "There is no closure marked with that vdom_id: {}",
-                    vdom_id
-                );
+                log::warn!("There is no closure marked with that vdom_id: {}", vdom_id);
             }
         }
         Ok(())
@@ -642,10 +608,7 @@ impl CreatedNode {
                         .expect("Unable to remove old closure");
                 }
             } else {
-                log::warn!(
-                    "There is no closure marked with that vdom_id: {}",
-                    vdom_id
-                );
+                log::warn!("There is no closure marked with that vdom_id: {}", vdom_id);
             }
         }
         Ok(())
@@ -695,12 +658,7 @@ pub(crate) fn find_all_nodes(
         if let Some(found) = find_node(node, &mut traverse_path) {
             nodes_to_patch.insert((*path).clone(), found);
         } else {
-            log::warn!(
-                "can not find: {:?} {:?} root_node: {:?}",
-                path,
-                tag,
-                node
-            );
+            log::warn!("can not find: {:?} {:?} root_node: {:?}", path, tag, node);
         }
     }
     nodes_to_patch
@@ -724,8 +682,7 @@ fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<usize> {
         let child_node = children.item(i).expect("Expecting a child node");
         if child_node.node_type() == Node::ELEMENT_NODE {
             let child_element = child_node.unchecked_ref::<Element>();
-            let child_data_vdom_id =
-                get_node_descendant_data_vdom_id(child_element);
+            let child_data_vdom_id = get_node_descendant_data_vdom_id(child_element);
             data_vdom_id.extend(child_data_vdom_id);
         }
     }

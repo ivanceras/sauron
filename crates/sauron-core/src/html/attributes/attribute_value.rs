@@ -23,16 +23,10 @@ pub enum AttributeValue<MSG> {
 impl<MSG> Clone for AttributeValue<MSG> {
     fn clone(&self) -> Self {
         match self {
-            AttributeValue::FunctionCall(this) => {
-                AttributeValue::FunctionCall(this.clone())
-            }
-            AttributeValue::Simple(this) => {
-                AttributeValue::Simple(this.clone())
-            }
+            AttributeValue::FunctionCall(this) => AttributeValue::FunctionCall(this.clone()),
+            AttributeValue::Simple(this) => AttributeValue::Simple(this.clone()),
             AttributeValue::Style(this) => AttributeValue::Style(this.clone()),
-            AttributeValue::EventListener(this) => {
-                AttributeValue::EventListener(this.clone())
-            }
+            AttributeValue::EventListener(this) => AttributeValue::EventListener(this.clone()),
             AttributeValue::Empty => AttributeValue::Empty,
         }
     }
@@ -57,20 +51,14 @@ impl<MSG> Debug for AttributeValue<MSG> {
 impl<MSG> PartialEq for AttributeValue<MSG> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (
-                AttributeValue::FunctionCall(this),
-                AttributeValue::FunctionCall(other),
-            ) => this == other,
-            (AttributeValue::Simple(this), AttributeValue::Simple(other)) => {
+            (AttributeValue::FunctionCall(this), AttributeValue::FunctionCall(other)) => {
                 this == other
             }
-            (AttributeValue::Style(this), AttributeValue::Style(other)) => {
+            (AttributeValue::Simple(this), AttributeValue::Simple(other)) => this == other,
+            (AttributeValue::Style(this), AttributeValue::Style(other)) => this == other,
+            (AttributeValue::EventListener(this), AttributeValue::EventListener(other)) => {
                 this == other
             }
-            (
-                AttributeValue::EventListener(this),
-                AttributeValue::EventListener(other),
-            ) => this == other,
             (AttributeValue::Empty, AttributeValue::Empty) => true,
             (_, _) => false,
         }

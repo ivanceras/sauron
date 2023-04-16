@@ -45,8 +45,7 @@ fn test_classes() {
     );
     let mut actual_html = String::new();
     actual.render(&mut actual_html).unwrap();
-    let expected: Node<&'static str> =
-        div(vec![class("class1 class2 big_blue circular")], vec![]);
+    let expected: Node<&'static str> = div(vec![class("class1 class2 big_blue circular")], vec![]);
 
     let mut expected_html = String::new();
     expected.render(&mut expected_html).unwrap();
@@ -67,8 +66,7 @@ fn test_classes_flag() {
     );
     let mut actual_html = String::new();
     actual.render(&mut actual_html).unwrap();
-    let expected: Node<&'static str> =
-        div(vec![class("class1 big_blue circular")], vec![]);
+    let expected: Node<&'static str> = div(vec![class("class1 big_blue circular")], vec![]);
     let mut expected_html = String::new();
     expected.render(&mut expected_html).unwrap();
 
@@ -86,8 +84,7 @@ fn test_styles_flag() {
     );
     let mut actual_html = String::new();
     actual.render(&mut actual_html).unwrap();
-    let expected: Node<&'static str> =
-        div(vec![style("font-family", "monospace")], vec![]);
+    let expected: Node<&'static str> = div(vec![style("font-family", "monospace")], vec![]);
     let mut expected_html = String::new();
     expected.render(&mut expected_html).unwrap();
 

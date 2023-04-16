@@ -15,11 +15,7 @@ fn comments_next_to_each_other() {
     assert_eq!(
         patch,
         vec![
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1]),
-                &comment("world".to_string())
-            ),
+            Patch::replace_node(None, TreePath::new(vec![1]), &comment("world".to_string())),
             Patch::remove_node(None, TreePath::new(vec![2]),)
         ]
     );

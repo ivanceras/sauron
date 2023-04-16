@@ -34,8 +34,7 @@ fn on_input_test() {
     let simple_program = simple_program();
     simple_program.set_current_dom(input);
 
-    let input_element =
-        sauron_core::document().get_element_by_id(&elem_id).unwrap();
+    let input_element = sauron_core::document().get_element_by_id(&elem_id).unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 
@@ -82,10 +81,11 @@ fn added_event() {
 
     simple_program.set_current_dom(old);
     // update to new dom with no event attached
-    simple_program.update_dom_with_vdom(new).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(new)
+        .expect("must not error");
 
-    let input_element =
-        sauron_core::document().get_element_by_id(&elem_id).unwrap();
+    let input_element = sauron_core::document().get_element_by_id(&elem_id).unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 
@@ -134,10 +134,11 @@ fn remove_event() {
     let simple_program = simple_program();
     simple_program.set_current_dom(old);
     // update to new dom with no event attached
-    simple_program.update_dom_with_vdom(new).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(new)
+        .expect("must not error");
 
-    let input_element =
-        sauron_core::document().get_element_by_id(&elem_id).unwrap();
+    let input_element = sauron_core::document().get_element_by_id(&elem_id).unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 
@@ -187,7 +188,9 @@ fn remove_event_from_truncated_children() {
         5,
         "There should be 5 events attached to the DomUpdater"
     );
-    simple_program.update_dom_with_vdom(new).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(new)
+        .expect("must not error");
 
     assert_eq!(
         simple_program.active_closures.borrow().len(),
@@ -234,7 +237,9 @@ fn remove_event_from_truncated_children_some_with_no_events() {
         3,
         "There should be 3 events attached to the DomUpdater"
     );
-    simple_program.update_dom_with_vdom(new).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(new)
+        .expect("must not error");
 
     assert_eq!(
         simple_program.active_closures.borrow().len(),
@@ -247,8 +252,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
 fn remove_event_from_replaced_node() {
     console_log::init_with_level(log::Level::Trace).ok();
 
-    let old: Node<()> =
-        div(vec![on_click(|_| log::trace!("I'm a div"))], vec![]);
+    let old: Node<()> = div(vec![on_click(|_| log::trace!("I'm a div"))], vec![]);
 
     let new: Node<()> = p(vec![], vec![]);
 
@@ -269,7 +273,9 @@ fn remove_event_from_replaced_node() {
         1,
         "There should be 1 event attached to the DomUpdater"
     );
-    simple_program.update_dom_with_vdom(new).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(new)
+        .expect("must not error");
 
     assert_eq!(
         simple_program.active_closures.borrow().len(),

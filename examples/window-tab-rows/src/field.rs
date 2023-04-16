@@ -31,10 +31,7 @@ impl<XMSG> Field<XMSG> {
         }
     }
 
-    pub fn add_interaction_listener(
-        &mut self,
-        listener: Box<dyn Fn(Interaction) -> XMSG>,
-    ) {
+    pub fn add_interaction_listener(&mut self, listener: Box<dyn Fn(Interaction) -> XMSG>) {
         self.on_interact.push(listener);
     }
 }
@@ -47,9 +44,7 @@ impl<XMSG> Component<Msg, XMSG> for Field<XMSG> {
                 Effects::with_local(vec![Msg::Interacted(Interaction::Click)])
             }
             Msg::InputChange(input) => {
-                Effects::with_local(vec![Msg::Interacted(Interaction::Modify(
-                    input,
-                ))])
+                Effects::with_local(vec![Msg::Interacted(Interaction::Modify(input))])
             }
             Msg::Interacted(interaction) => Effects::with_external(
                 self.on_interact

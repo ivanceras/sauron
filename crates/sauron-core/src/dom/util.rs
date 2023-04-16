@@ -25,11 +25,8 @@ where
 }
 
 /// utility function which executes the agument closure in a request animation frame
-pub(crate) fn request_animation_frame_for_closure(
-    f: Closure<dyn FnMut()>,
-) -> Result<i32, JsValue> {
-    let handle = window()
-        .request_animation_frame(f.as_ref().unchecked_ref())?;
+pub(crate) fn request_animation_frame_for_closure(f: Closure<dyn FnMut()>) -> Result<i32, JsValue> {
+    let handle = window().request_animation_frame(f.as_ref().unchecked_ref())?;
 
     f.forget();
     Ok(handle)
@@ -39,24 +36,20 @@ pub fn request_idle_callback<F>(f: F) -> Result<u32, JsValue>
 where
     F: Fn(JsValue) + 'static,
 {
-    let closure_raf: Closure<dyn Fn(JsValue) + 'static> =
-        Closure::wrap(Box::new(f));
+    let closure_raf: Closure<dyn Fn(JsValue) + 'static> = Closure::wrap(Box::new(f));
     request_idle_callback_for_closure(closure_raf)
 }
 
 pub(crate) fn request_idle_callback_for_closure(
     f: Closure<dyn Fn(JsValue)>,
 ) -> Result<u32, JsValue> {
-    let handle = window()
-        .request_idle_callback(f.as_ref().unchecked_ref())?;
+    let handle = window().request_idle_callback(f.as_ref().unchecked_ref())?;
 
     f.forget();
     Ok(handle)
 }
 
-pub(crate) fn request_idle_callback_with_deadline<F>(
-    f: F,
-) -> Result<u32, JsValue>
+pub(crate) fn request_idle_callback_with_deadline<F>(f: F) -> Result<u32, JsValue>
 where
     F: Fn(web_sys::IdleDeadline) + 'static,
 {
@@ -73,11 +66,10 @@ pub fn delay_exec_with_closure(
     closure_delay: Closure<dyn FnMut()>,
     timeout: i32,
 ) -> Result<i32, JsValue> {
-    let timeout_id = window()
-        .set_timeout_with_callback_and_timeout_and_arguments_0(
-            closure_delay.as_ref().unchecked_ref(),
-            timeout,
-        );
+    let timeout_id = window().set_timeout_with_callback_and_timeout_and_arguments_0(
+        closure_delay.as_ref().unchecked_ref(),
+        timeout,
+    );
 
     closure_delay.forget();
 
@@ -85,15 +77,11 @@ pub fn delay_exec_with_closure(
 }
 
 /// execute with a timeout delay
-pub fn delay_exec<F>(
-    mut f: F,
-    timeout: i32,
-) -> Result<i32, JsValue>
-where F: FnMut() + 'static
+pub fn delay_exec<F>(mut f: F, timeout: i32) -> Result<i32, JsValue>
+where
+    F: FnMut() + 'static,
 {
-    delay_exec_with_closure(Closure::once(move||{
-        f()
-    }), timeout)
+    delay_exec_with_closure(Closure::once(move || f()), timeout)
 }
 
 /// cancel the execution of a delayed closure
@@ -111,7 +99,7 @@ fn future_delay(timeout: i32) -> (JsFuture, Option<i32>) {
                     .expect("must be able to call resolve");
             }),
             timeout,
-        ){
+        ) {
             handle = Some(ret);
         }
     });

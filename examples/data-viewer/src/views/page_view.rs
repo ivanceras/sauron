@@ -59,8 +59,7 @@ impl Component<Msg, ()> for PageView {
         match msg {
             Msg::RowMsg(row_index, row_msg) => {
                 let effects = self.row_views[row_index].update(row_msg);
-                effects
-                    .map_msg(move |follow_up| Msg::RowMsg(row_index, follow_up))
+                effects.map_msg(move |follow_up| Msg::RowMsg(row_index, follow_up))
             }
         }
     }
@@ -110,12 +109,7 @@ impl PageView {
         self.row_views.len()
     }
 
-    pub fn set_page(
-        &mut self,
-        data: &[Vec<DataValue>],
-        current_page: usize,
-        total_rows: usize,
-    ) {
+    pub fn set_page(&mut self, data: &[Vec<DataValue>], current_page: usize, total_rows: usize) {
         trace!("setting pages in page_view: {:#?}", data);
         self.set_data_rows(data, current_page, total_rows);
     }
@@ -185,9 +179,9 @@ impl PageView {
     /// call these when new rows are set or added
     pub fn update_freeze_columns(&mut self) {
         let frozen_columns = self.frozen_columns.clone();
-        self.row_views.iter_mut().for_each(|row_view| {
-            row_view.freeze_columns(frozen_columns.clone())
-        })
+        self.row_views
+            .iter_mut()
+            .for_each(|row_view| row_view.freeze_columns(frozen_columns.clone()))
     }
 
     pub fn freeze_columns(&mut self, columns: &Vec<usize>) {
@@ -222,16 +216,14 @@ impl PageView {
                     // The checkbox selection and the rows of the frozen
                     // columns
                     div(
-                        [class("page_view__frozen_columns__selector__frozen_column_rows flex-row")],
+                        [class(
+                            "page_view__frozen_columns__selector__frozen_column_rows flex-row",
+                        )],
                         [
-                            selector_box(
-                                false,
-                                [],
-                                [styles([("width", px(30))])],
-                            ),
-                            row_view.view_frozen_columns().map_msg(
-                                move |row_msg| Msg::RowMsg(index, row_msg),
-                            ),
+                            selector_box(false, [], [styles([("width", px(30))])]),
+                            row_view
+                                .view_frozen_columns()
+                                .map_msg(move |row_msg| Msg::RowMsg(index, row_msg)),
                         ],
                     )
                 })
@@ -249,18 +241,16 @@ impl PageView {
                 .filter(|(_index, row_view)| row_view.is_frozen)
                 .map(|(index, row_view)| {
                     div(
-                        [class(
-                            "page_view__selector_box__immovable_rows flex-row",
-                        )],
+                        [class("page_view__selector_box__immovable_rows flex-row")],
                         [
                             selector_box(
                                 false,
                                 [class("immovable_rows__selector_box")],
                                 [styles([("width", px(30))])],
                             ),
-                            row_view.view_immovable_fields().map_msg(
-                                move |row_msg| Msg::RowMsg(index, row_msg),
-                            ),
+                            row_view
+                                .view_immovable_fields()
+                                .map_msg(move |row_msg| Msg::RowMsg(index, row_msg)),
                         ],
                     )
                 })

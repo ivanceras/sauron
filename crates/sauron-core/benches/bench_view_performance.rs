@@ -1,15 +1,7 @@
-use criterion::{
-    black_box,
-    criterion_group,
-    criterion_main,
-    Criterion,
-};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 use sauron_core::{
-    html::{
-        attributes::*,
-        *,
-    },
+    html::{attributes::*, *},
     Node,
 };
 
@@ -20,12 +12,7 @@ fn bench_view_builing_100_child_nodes(c: &mut Criterion) {
                 vec![class("some-class")],
                 (0..100)
                     .into_iter()
-                    .map(|n| {
-                        div(
-                            vec![class("child-div")],
-                            vec![text(format!("node: {}", n))],
-                        )
-                    })
+                    .map(|n| div(vec![class("child-div")], vec![text(format!("node: {}", n))]))
                     .collect::<Vec<Node<()>>>(),
             ));
         })

@@ -71,7 +71,9 @@ fn insert_multiple_before_nodes() {
     let expected = "<main class=\"before_nodes_test1\"><ul class=\"todo\"><li key=\"1\">item1</li><li key=\"2\">item2</li><li key=\"3\">item3</li></ul></main>";
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom_with_vdom(update1).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(update1)
+        .expect("must not error");
 
     let container = document
         .query_selector(".before_nodes_test1")
@@ -147,7 +149,9 @@ fn insert_multiple_after_nodes() {
 
     assert_eq!(expected, container.outer_html());
 
-    simple_program.update_dom_with_vdom(update1).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(update1)
+        .expect("must not error");
 
     let container = document
         .query_selector(".after_nodes_test1")

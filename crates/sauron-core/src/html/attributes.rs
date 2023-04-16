@@ -24,10 +24,7 @@ mod style;
 ///
 /// let flex:Attribute<()> = style("display", "flex");
 /// ```
-pub fn style<MSG>(
-    style_name: impl ToString,
-    value: impl Into<Value>,
-) -> Attribute<MSG> {
+pub fn style<MSG>(style_name: impl ToString, value: impl Into<Value>) -> Attribute<MSG> {
     mt_dom::attr(
         "style",
         AttributeValue::from_styles([Style::new(style_name, value.into())]),
@@ -50,9 +47,9 @@ pub fn style<MSG>(
 pub fn styles<MSG>(
     pairs: impl IntoIterator<Item = (impl ToString, impl Into<Value>)>,
 ) -> Attribute<MSG> {
-    let styles = pairs.into_iter().map(|(key, value)| {
-        Style::new(key.to_string(), Into::<Value>::into(value))
-    });
+    let styles = pairs
+        .into_iter()
+        .map(|(key, value)| Style::new(key.to_string(), Into::<Value>::into(value)));
     mt_dom::attr("style", AttributeValue::from_styles(styles))
 }
 
@@ -112,16 +109,16 @@ pub fn styles_flag<MSG>(
 ///        ("error", has_error),
 ///    ]);
 /// ```
-pub fn classes_flag<MSG>(
-    pair: impl IntoIterator<Item = (impl ToString, bool)>,
-) -> Attribute<MSG> {
-    let class_list = pair.into_iter().filter_map(|(class, flag)| {
-        if flag {
-            Some(class.to_string())
-        } else {
-            None
-        }
-    });
+pub fn classes_flag<MSG>(pair: impl IntoIterator<Item = (impl ToString, bool)>) -> Attribute<MSG> {
+    let class_list = pair.into_iter().filter_map(
+        |(class, flag)| {
+            if flag {
+                Some(class.to_string())
+            } else {
+                None
+            }
+        },
+    );
 
     classes(class_list)
 }
@@ -135,9 +132,7 @@ pub fn classes_flag<MSG>(
 /// let html: Node<()> =
 ///    div(vec![classes(["dashed", "error"])], vec![]);
 /// ```
-pub fn classes<MSG>(
-    class_list: impl IntoIterator<Item = impl ToString>,
-) -> Attribute<MSG> {
+pub fn classes<MSG>(class_list: impl IntoIterator<Item = impl ToString>) -> Attribute<MSG> {
     let class_values = class_list
         .into_iter()
         .map(|v| AttributeValue::from(Value::from(v.to_string())));
@@ -394,9 +389,9 @@ pub(crate) fn merge_styles_attributes_values<MSG>(
         .flat_map(|att_value| match att_value {
             AttributeValue::Style(styles) => {
                 let mut style_str = String::new();
-                styles.iter().for_each(|s| {
-                    write!(style_str, "{s};").expect("must write")
-                });
+                styles
+                    .iter()
+                    .for_each(|s| write!(style_str, "{s};").expect("must write"));
                 Some(style_str)
             }
             _ => None,

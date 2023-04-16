@@ -67,8 +67,7 @@ fn test_macros_with_lines() {
 fn simple_builder() {
     let mut div: Element<()> = Element::new(None, "div", vec![], vec![], false);
     div.add_attributes(vec![attr("class", "some-class")]);
-    let expected: Element<()> =
-        Element::new(None, "div", vec![class("some-class")], vec![], false);
+    let expected: Element<()> = Element::new(None, "div", vec![class("some-class")], vec![], false);
 
     assert_eq!(div, expected);
 }
@@ -80,8 +79,7 @@ fn builder_with_event() {
     };
     let mut div: Element<()> = Element::new(None, "div", vec![], vec![], false);
     div.add_attributes(vec![on("click", cb.clone())]);
-    let expected: Element<()> =
-        Element::new(None, "div", vec![on("click", cb)], vec![], false);
+    let expected: Element<()> = Element::new(None, "div", vec![on("click", cb)], vec![], false);
 
     assert_eq!(
         div, expected,
@@ -130,10 +128,8 @@ fn replace_node() {
         )],
     );
 
-    let old: Node<()> =
-        div(vec![], vec![b(vec![], vec![text("1")]), b(vec![], vec![])]);
-    let new: Node<()> =
-        div(vec![], vec![i(vec![], vec![text("1")]), i(vec![], vec![])]);
+    let old: Node<()> = div(vec![], vec![b(vec![], vec![text("1")]), b(vec![], vec![])]);
+    let new: Node<()> = div(vec![], vec![i(vec![], vec![text("1")]), i(vec![], vec![])]);
     let patch = diff(&old, &new);
 
     dbg!(&patch);
@@ -146,11 +142,7 @@ fn replace_node() {
                 TreePath::new(vec![0]),
                 &i(vec![], vec![text("1")])
             ),
-            Patch::replace_node(
-                Some(&"b"),
-                TreePath::new(vec![1]),
-                &i(vec![], vec![])
-            ),
+            Patch::replace_node(Some(&"b"), TreePath::new(vec![1]), &i(vec![], vec![])),
         ],
     )
 }

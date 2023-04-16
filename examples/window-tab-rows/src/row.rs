@@ -27,9 +27,7 @@ impl Row {
                 .into_iter()
                 .map(|index| {
                     let mut field = Field::new(format!("Field {}", index));
-                    field.add_interaction_listener(Box::new(|action| {
-                        Msg::FieldInteracted(action)
-                    }));
+                    field.add_interaction_listener(Box::new(|action| Msg::FieldInteracted(action)));
                     field
                 })
                 .collect(),
@@ -43,8 +41,7 @@ impl Component<Msg, ()> for Row {
         match msg {
             Msg::FieldMsg(index, field_msg) => {
                 let effects = self.fields[index].update(field_msg);
-                effects
-                    .localize(move |follow_up| Msg::FieldMsg(index, follow_up))
+                effects.localize(move |follow_up| Msg::FieldMsg(index, follow_up))
             }
             Msg::FieldInteracted(interaction) => {
                 log::trace!("interacted: {:?}", interaction);
@@ -66,9 +63,9 @@ impl Component<Msg, ()> for Row {
                 div(
                     [],
                     self.fields.iter().enumerate().map(|(index, field)| {
-                        field.view().map_msg(move |field_msg| {
-                            Msg::FieldMsg(index, field_msg)
-                        })
+                        field
+                            .view()
+                            .map_msg(move |field_msg| Msg::FieldMsg(index, field_msg))
                     }),
                 ),
                 span(

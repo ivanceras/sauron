@@ -72,8 +72,7 @@ impl Application<Msg> for Window {
             }
             Msg::TabMsg(index, tab_msg) => {
                 let effects = self.tabs[index].update(tab_msg);
-                let effects = effects
-                    .map_msg(move |follow_up| Msg::TabMsg(index, follow_up));
+                let effects = effects.map_msg(move |follow_up| Msg::TabMsg(index, follow_up));
                 Cmd::from(effects)
             }
         }
@@ -106,8 +105,7 @@ impl Application<Msg> for Window {
                 div(
                     [class("tab-list")],
                     self.tabs.iter().enumerate().map(|(index, tab)| {
-                        Tab::view(tab)
-                            .map_msg(move |tab_msg| Msg::TabMsg(index, tab_msg))
+                        Tab::view(tab).map_msg(move |tab_msg| Msg::TabMsg(index, tab_msg))
                     }),
                 ),
             ],

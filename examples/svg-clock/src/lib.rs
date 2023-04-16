@@ -61,57 +61,53 @@ impl Application<Msg> for Clock {
             [],
         );
 
-        let hand = |rotate: f64,
-                    stroke_color: &'static str,
-                    stroke_width_value: u32,
-                    height: u32| {
-            line(
-                [
-                    x1(100),
-                    y1(100),
-                    x2(100 - height),
-                    y2(100),
-                    stroke(stroke_color),
-                    stroke_width(stroke_width_value),
-                    stroke_linecap("round"),
-                    transform(format!(
-                        "rotate({} 100 100)",
-                        (rotate * 10.0).round() / 10.0
-                    )),
-                ],
-                [],
-            )
-        };
+        let hand =
+            |rotate: f64, stroke_color: &'static str, stroke_width_value: u32, height: u32| {
+                line(
+                    [
+                        x1(100),
+                        y1(100),
+                        x2(100 - height),
+                        y2(100),
+                        stroke(stroke_color),
+                        stroke_width(stroke_width_value),
+                        stroke_linecap("round"),
+                        transform(format!(
+                            "rotate({} 100 100)",
+                            (rotate * 10.0).round() / 10.0
+                        )),
+                    ],
+                    [],
+                )
+            };
 
         let d = &self.date;
-        let ms = ((((d.get_hours() * 60 + d.get_minutes()) * 60)
-            + d.get_seconds())
-            * 1000
+        let ms = ((((d.get_hours() * 60 + d.get_minutes()) * 60) + d.get_seconds()) * 1000
             + d.get_milliseconds()) as f64;
 
         let subsecond_rotate = 90.0 + ((ms / 1000.0) % 1.0) * 360.0;
         let second_rotate = 90.0 + ((ms / 1000.0) % 60.0) * 360.0 / 60.0;
         let minute_rotate = 90.0 + ((ms / 1000.0 / 60.0) % 60.0) * 360.0 / 60.0;
-        let hour_rotate =
-            90.0 + ((ms / 1000.0 / 60.0 / 60.0) % 12.0) * 360.0 / 12.0;
+        let hour_rotate = 90.0 + ((ms / 1000.0 / 60.0 / 60.0) % 12.0) * 360.0 / 12.0;
 
         article(
             [],
             [
                 h2(
                     [],
-                    [text("Sauron clock demonstrating svg dom manipulation")]
+                    [text("Sauron clock demonstrating svg dom manipulation")],
                 ),
                 a(
                     [href(
-                        "https://github.com/ivanceras/sauron/tree/master/examples/svg-clock"
+                        "https://github.com/ivanceras/sauron/tree/master/examples/svg-clock",
                     )],
-                    [text("code")]
+                    [text("code")],
                 ),
                 div(
-                    [style("display","flex"),
-                     style("align-items", "center"),
-                     style("flex-direction", "column"),
+                    [
+                        style("display", "flex"),
+                        style("align-items", "center"),
+                        style("flex-direction", "column"),
                     ],
                     [svg(
                         [width(400), height(400), viewBox([0, 0, 200, 200])],
@@ -121,10 +117,10 @@ impl Application<Msg> for Clock {
                             hand(hour_rotate, "#2d3748", 4, 50),
                             hand(minute_rotate, "#2d3748", 3, 70),
                             hand(second_rotate, "#e53e3e", 2, 90),
-                        ]
-                    )]
-                )
-            ]
+                        ],
+                    )],
+                ),
+            ],
         )
     }
 

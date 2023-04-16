@@ -83,14 +83,8 @@ impl ColumnView {
         div(
             [
                 class("column_view__controls flex-column"),
-                classes_flag([(
-                    "column_view__controls--frozen",
-                    self.is_frozen,
-                )]),
-                styles([
-                    ("height", px(self.height)),
-                    ("width", px(controls_width)),
-                ]),
+                classes_flag([("column_view__controls--frozen", self.is_frozen)]),
+                styles([("height", px(self.height)), ("width", px(controls_width))]),
             ],
             [
                 div(
@@ -117,9 +111,7 @@ impl ColumnView {
                     [class("column_view__search")],
                     [search_widget(
                         self.width,
-                        [on_input(|input| {
-                            Msg::ChangeSearch(input.value.to_string())
-                        })],
+                        [on_input(|input| Msg::ChangeSearch(input.value.to_string()))],
                     )],
                 ),
             ],

@@ -3,10 +3,7 @@ use js_sys::TypeError;
 use std::fmt::Debug;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{
-    RequestInit,
-    Response,
-};
+use web_sys::{RequestInit, Response};
 
 /// Provides functions for doing http network request
 #[derive(Copy, Clone, Debug)]
@@ -14,11 +11,8 @@ pub struct Http;
 
 impl Http {
     /// fetch text document from the url and decode the result with the supplied
-    pub async fn fetch_with_text_response_decoder(
-        url: &str,
-    ) -> Result<String, TypeError> {
-        let response =
-            Self::fetch_with_request_and_response_decoder(url, None).await?;
+    pub async fn fetch_with_text_response_decoder(url: &str) -> Result<String, TypeError> {
+        let response = Self::fetch_with_request_and_response_decoder(url, None).await?;
 
         let response_promise = response.text().expect("must be a promise text");
 

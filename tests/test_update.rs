@@ -109,26 +109,15 @@ fn test1() {
     assert_eq!(
         patch,
         vec![
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1, 0, 0, 1, 0, 0,]),
-                &text("0")
-            ),
+            Patch::replace_node(None, TreePath::new(vec![1, 0, 0, 1, 0, 0,]), &text("0")),
             Patch::remove_node(Some(&"div"), TreePath::new(vec![1, 0, 0, 0,]),),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1, 0, 0, 2, 0, 0,]),
-                &text("3")
-            ),
+            Patch::replace_node(None, TreePath::new(vec![1, 0, 0, 2, 0, 0,]), &text("3")),
             Patch::insert_before_node(
                 Some(&"div"),
                 TreePath::new(vec![1, 0, 0, 2,]),
                 vec![
                     &div(
-                        vec![
-                            class("grid__number__line"),
-                            key("623356695095054844")
-                        ],
+                        vec![class("grid__number__line"), key("623356695095054844")],
                         vec![
                             div(vec![class("grid__number")], vec![text(1)]),
                             div(
@@ -143,10 +132,7 @@ fn test1() {
                         ]
                     ),
                     &div(
-                        vec![
-                            class("grid__number__line"),
-                            key("4638962052468762037")
-                        ],
+                        vec![class("grid__number__line"), key("4638962052468762037")],
                         vec![
                             div(vec![class("grid__number")], vec![text(2)]),
                             div(

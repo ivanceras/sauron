@@ -1,9 +1,5 @@
 #![deny(warnings)]
-use sauron::{
-    js_sys::TypeError,
-    jss,
-    prelude::*,
-};
+use sauron::{js_sys::TypeError, jss, prelude::*};
 use serde::Deserialize;
 
 #[macro_use]
@@ -55,17 +51,14 @@ impl App {
     }
 
     fn fetch_page(&self) -> Cmd<Self, Msg> {
-        let url =
-            format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
-        Cmd::new(|program|{
+        let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
+        Cmd::new(|program| {
             spawn_local(async move {
                 let msg = match Http::fetch_with_text_response_decoder(&url).await {
-                    Ok(v) => {
-                        match serde_json::from_str(&v) {
-                            Ok(data) => Msg::ReceivedData(data),
-                            Err(err) => Msg::JsonError(err),
-                        }
-                    }
+                    Ok(v) => match serde_json::from_str(&v) {
+                        Ok(data) => Msg::ReceivedData(data),
+                        Err(err) => Msg::JsonError(err),
+                    },
                     Err(e) => Msg::RequestError(e),
                 };
                 program.dispatch(msg);
@@ -162,10 +155,7 @@ impl Application<Msg> for App {
             }
             Msg::JsonError(err) => {
                 trace!("Error fetching users! {:#?}", err);
-                self.error = Some(format!(
-                    "There was an error fetching the page: {:?}",
-                    err
-                ));
+                self.error = Some(format!("There was an error fetching the page: {:?}", err));
                 Cmd::none()
             }
             Msg::RequestError(type_error) => {

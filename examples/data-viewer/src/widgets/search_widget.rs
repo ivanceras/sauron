@@ -1,13 +1,8 @@
 use crate::assets;
 
 use sauron::{
-    html::{
-        attributes::*,
-        units::px,
-        *,
-    },
-    Attribute,
-    Node,
+    html::{attributes::*, units::px, *},
+    Attribute, Node,
 };
 
 pub struct SearchWidget {}
@@ -15,10 +10,7 @@ pub struct SearchWidget {}
 pub struct SearchIcon {}
 
 impl SearchWidget {
-    pub fn new<MSG>(
-        width: i32,
-        attributes: impl IntoIterator<Item = Attribute<MSG>>,
-    ) -> Node<MSG> {
+    pub fn new<MSG>(width: i32, attributes: impl IntoIterator<Item = Attribute<MSG>>) -> Node<MSG> {
         let mut input_width = width - SearchIcon::css_width();
         if input_width < 0 {
             input_width = 0;

@@ -78,31 +78,21 @@ impl Application<Msg> for App {
                         input(
                             [
                                 r#type("text"),
-                                on_input(|event: InputEvent| {
-                                    Msg::ChangeName(event.value)
-                                }),
+                                on_input(|event: InputEvent| Msg::ChangeName(event.value)),
                                 placeholder("John Smith"),
                             ],
                             [],
                         ),
                         button(
                             [on_click(|event: MouseEvent| {
-                                trace!(
-                                    "Clicked at ({},{})",
-                                    event.x(),
-                                    event.y()
-                                );
+                                trace!("Clicked at ({},{})", event.x(), event.y());
                                 Msg::Click
                             })],
                             [text!("Click me!")],
                         ),
                         button(
                             [on_dblclick(|event: MouseEvent| {
-                                trace!(
-                                    "Double clicked at ({},{})",
-                                    event.x(),
-                                    event.y()
-                                );
+                                trace!("Double clicked at ({},{})", event.x(), event.y());
                                 Msg::DoubleClick
                             })],
                             [text!("DoubleClicks {}", self.double_clicks)],
@@ -134,9 +124,7 @@ impl Application<Msg> for App {
                                 [
                                     rows(10),
                                     cols(80),
-                                    on_input(|event: InputEvent| {
-                                        Msg::ChangeBiography(event.value)
-                                    }),
+                                    on_input(|event: InputEvent| Msg::ChangeBiography(event.value)),
                                     placeholder("I'm a..."),
                                 ],
                                 [],
@@ -152,9 +140,7 @@ impl Application<Msg> for App {
                         input(
                             [
                                 r#type("text"),
-                                on_change(|event: InputEvent| {
-                                    Msg::ChangeThought(event.value)
-                                }),
+                                on_change(|event: InputEvent| Msg::ChangeThought(event.value)),
                                 placeholder("Elephants..."),
                             ],
                             [],
