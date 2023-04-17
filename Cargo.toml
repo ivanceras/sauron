@@ -19,11 +19,12 @@ sauron-node-macro = { version = "0.52", path = "crates/sauron-node-macro", optio
 cfg-if = "0.1"
 
 [features]
-default = ["with-dom", "with-node-macro"]
+default = ["with-dom", "with-node-macro", "with-interning"]
 with-dom = ["sauron-core/with-dom"]
 with-lookup = ["sauron-core/with-lookup"]
 with-ric = ["sauron-core/with-ric"]
 with-raf = ["sauron-core/with-raf"]
+with-interning = ["sauron-core/with-interning"]
 
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]

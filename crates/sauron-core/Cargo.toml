@@ -31,6 +31,7 @@ version = "0.2"
 optional = true
 features = [
     "serde-serialize",
+    "enable-interning",
 ]
 
 [dependencies.web-sys]
@@ -107,8 +108,9 @@ with-dom = ["wasm-bindgen", "js-sys", "web-sys", "wasm-bindgen-futures"] # for c
 with-lookup = [] #enumerates html tags and attributes
 with-measure = [] # log traces for measurements in various parts of the system where performance matters.
 with-debug = [] # log debug patches
-with-ric = []
-with-raf = []
+with-ric = [] # use of request_idle_callback in javascript
+with-raf = [] # use of request_animation_frame in javascript
+with-interning = [] # use caching of strings when crossing rust to js, for faster transfer
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

@@ -1,5 +1,5 @@
 use crate::dom::created_node;
-use crate::dom::created_node::ActiveClosure;
+use crate::dom::created_node::{intern, ActiveClosure};
 use crate::dom::Measurements;
 use crate::vdom;
 use crate::vdom::{diff, Attribute, AttributeValue};
@@ -574,7 +574,7 @@ where
                         .dyn_ref()
                         .expect("only elements is supported for now");
                     target_element
-                        .insert_adjacent_element("afterend", created_element)
+                        .insert_adjacent_element(intern("afterend"), created_element)
                         .expect("must remove target node");
                     self.active_closures
                         .borrow_mut()

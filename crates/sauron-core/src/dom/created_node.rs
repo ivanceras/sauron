@@ -23,6 +23,18 @@ pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
 
+#[cfg(feature = "with-interning")]
+#[inline(always)]
+pub fn intern(s: &str) -> &str {
+    wasm_bindgen::intern(s)
+}
+
+#[cfg(not(feature = "with-interning"))]
+#[inline(always)]
+pub fn intern(s: &str) -> &str {
+    s
+}
+
 /// This is the value of the data-sauron-vdom-id.
 /// Used to uniquely identify elements that contain closures so that the DomUpdater can
 /// look them up by their unique id.
@@ -161,7 +173,7 @@ impl CreatedNode {
 
     fn is_custom_element(tag: &str) -> bool {
         let custom_element = crate::window().custom_elements();
-        let existing = custom_element.get(tag);
+        let existing = custom_element.get(intern(tag));
         // define the custom element only when it is not yet defined
         !existing.is_undefined()
     }
@@ -185,11 +197,11 @@ impl CreatedNode {
 
         let element = if let Some(namespace) = velem.namespace() {
             document
-                .create_element_ns(Some(namespace), velem.tag())
+                .create_element_ns(Some(intern(namespace)), intern(velem.tag()))
                 .expect("Unable to create element")
         } else {
             document
-                .create_element(velem.tag())
+                .create_element(intern(velem.tag()))
                 .expect("Unable to create element")
         };
 
@@ -215,7 +227,7 @@ impl CreatedNode {
                 let child_text = child.unwrap_safe_html();
                 // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
                 element
-                    .insert_adjacent_html("beforeend", child_text)
+                    .insert_adjacent_html(intern("beforeend"), child_text)
                     .expect("must not error");
             } else {
                 let created_child = Self::create_dom_node(program, child, focused_node);
@@ -279,7 +291,11 @@ impl CreatedNode {
                 // using this with None will error in the browser with:
                 // NamespaceError: An attempt was made to create or change an object in a way which is incorrect with regard to namespaces
                 element
-                    .set_attribute_ns(Some(namespace), attr.name(), &merged_plain_values)
+                    .set_attribute_ns(
+                        Some(intern(namespace)),
+                        intern(attr.name()),
+                        &merged_plain_values,
+                    )
                     .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
             } else {
                 match *attr.name() {
@@ -310,7 +326,7 @@ impl CreatedNode {
                     }
                     _ => {
                         element
-                            .set_attribute(attr.name(), &merged_plain_values)
+                            .set_attribute(intern(attr.name()), &merged_plain_values)
                             .unwrap_or_else(|_| {
                                 panic!("Error setting an attribute for {element:?}")
                             });
@@ -322,13 +338,13 @@ impl CreatedNode {
         {
             // set the styles
             element
-                .set_attribute(attr.name(), &merged_styles)
+                .set_attribute(intern(attr.name()), &merged_styles)
                 .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
         } else {
             //if the merged attribute is blank of empty when string is trimmed
             //remove the attribute
             element
-                .remove_attribute(attr.name())
+                .remove_attribute(intern(attr.name()))
                 .expect("must remove attribute");
         }
 
@@ -348,7 +364,7 @@ impl CreatedNode {
             // set the data-sauron_vdom-id this will be read later on
             // when it's time to remove this element and its closures and event listeners
             element
-                .set_attribute(DATA_VDOM_ID, &unique_id.to_string())
+                .set_attribute(intern(DATA_VDOM_ID), &unique_id.to_string())
                 .expect("Could not set attribute on element");
 
             closures.insert(unique_id, vec![]);
@@ -374,7 +390,7 @@ impl CreatedNode {
 
                 current_elm
                     .add_event_listener_with_callback(
-                        "keypress",
+                        intern("keypress"),
                         key_press_func.as_ref().unchecked_ref(),
                     )
                     .expect("unable to attach enter event listener");
@@ -389,7 +405,7 @@ impl CreatedNode {
                     create_closure_wrap(program, listener);
                 current_elm
                     .add_event_listener_with_callback(
-                        event_str,
+                        intern(event_str),
                         callback_wrapped.as_ref().unchecked_ref(),
                     )
                     .expect("Unable to attached event listener");
@@ -554,7 +570,7 @@ impl CreatedNode {
             _ => (),
         }
         //actually remove the element
-        element.remove_attribute(attr.name())?;
+        element.remove_attribute(intern(attr.name()))?;
 
         Ok(())
     }
@@ -569,7 +585,7 @@ impl CreatedNode {
             if let Some(old_closure) = active_closures.get(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
                     let func: &Function = oc.as_ref().unchecked_ref();
-                    node.remove_event_listener_with_callback(event, func)?;
+                    node.remove_event_listener_with_callback(intern(event), func)?;
                 }
 
                 // remove closure active_closure in dom_updater to free up memory
@@ -595,7 +611,7 @@ impl CreatedNode {
                 for (event, oc) in old_closure.iter() {
                     if *event == event_name {
                         let func: &Function = oc.as_ref().unchecked_ref();
-                        node.remove_event_listener_with_callback(event, func)?;
+                        node.remove_event_listener_with_callback(intern(event), func)?;
                     }
                 }
 
@@ -669,7 +685,7 @@ pub(crate) fn find_all_nodes(
 fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<usize> {
     let mut data_vdom_id = vec![];
 
-    if let Some(vdom_id_str) = root_element.get_attribute(DATA_VDOM_ID) {
+    if let Some(vdom_id_str) = root_element.get_attribute(intern(DATA_VDOM_ID)) {
         let vdom_id = vdom_id_str
             .parse::<usize>()
             .expect("unable to parse sauron_vdom-id");
