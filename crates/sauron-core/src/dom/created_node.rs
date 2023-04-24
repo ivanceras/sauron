@@ -8,6 +8,8 @@ use crate::{
 };
 use js_sys::Function;
 use mt_dom::TreePath;
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
@@ -23,6 +25,13 @@ pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
 
+// a cache of commonly used elements, so we can clone them.
+// cloning is much faster then creating the element
+thread_local! {
+    static CREATED_ELEMENTS: RefCell<HashMap<&'static str, web_sys::Element>> =
+        RefCell::new(HashMap::from_iter(["div", "span", "ol", "ul", "li"].map(create_element_with_tag)));
+}
+
 #[cfg(feature = "with-interning")]
 #[inline(always)]
 pub fn intern(s: &str) -> &str {
@@ -33,6 +42,26 @@ pub fn intern(s: &str) -> &str {
 #[inline(always)]
 pub fn intern(s: &str) -> &str {
     s
+}
+
+fn create_element_with_tag(tag: &'static str) -> (&'static str, web_sys::Element) {
+    let elm = crate::document().create_element(intern(tag)).unwrap();
+    (tag, elm)
+}
+
+/// find the element from the most created element and clone it, else create it
+fn create_element(tag: &'static str) -> web_sys::Element {
+    CREATED_ELEMENTS.with(|map| {
+        let map = map.borrow();
+        if let Some(elm) = map.get(tag) {
+            elm.clone_node_with_deep(false)
+                .expect("must clone node")
+                .unchecked_into()
+        } else {
+            let elm = crate::document().create_element(intern(tag)).unwrap();
+            elm
+        }
+    })
 }
 
 /// This is the value of the data-sauron-vdom-id.
@@ -200,9 +229,7 @@ impl CreatedNode {
                 .create_element_ns(Some(intern(namespace)), intern(velem.tag()))
                 .expect("Unable to create element")
         } else {
-            document
-                .create_element(intern(velem.tag()))
-                .expect("Unable to create element")
+            create_element(velem.tag())
         };
 
         Self::dispatch_mount_event(program, velem, &element);
