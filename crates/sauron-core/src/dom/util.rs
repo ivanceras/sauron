@@ -5,9 +5,16 @@ pub use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_futures::JsFuture;
 
 thread_local!(static WINDOW: web_sys::Window = web_sys::window().expect("no global `window` exists"));
+thread_local!(static DOCUMENT: web_sys::Document = window().document().expect("should have a document on window"));
+
 /// utility function which returns the Window element
 pub fn window() -> web_sys::Window {
     WINDOW.with(|window| window.clone())
+}
+
+/// provides access to the document element
+pub fn document() -> web_sys::Document {
+    DOCUMENT.with(|document| document.clone())
 }
 
 /// utility function which returns the history api of the browser
@@ -112,12 +119,7 @@ pub async fn async_delay(timeout: i32) {
     fut.await.expect("must not error");
 }
 
-thread_local!(static DOCUMENT: web_sys::Document = window().document().expect("should have a document on window"));
 
-/// provides access to the document element
-pub fn document() -> web_sys::Document {
-    DOCUMENT.with(|document| document.clone())
-}
 
 /// provides access to the document body
 pub fn body() -> web_sys::HtmlElement {
