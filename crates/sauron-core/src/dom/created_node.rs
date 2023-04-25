@@ -8,7 +8,6 @@ use crate::{
 };
 use js_sys::Function;
 use mt_dom::TreePath;
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
@@ -28,8 +27,8 @@ thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
 // a cache of commonly used elements, so we can clone them.
 // cloning is much faster then creating the element
 thread_local! {
-    static CREATED_ELEMENTS: RefCell<HashMap<&'static str, web_sys::Element>> =
-        RefCell::new(HashMap::from_iter(["div", "span", "ol", "ul", "li"].map(create_element_with_tag)));
+    static CACHE_ELEMENTS: HashMap<&'static str, web_sys::Element> =
+        HashMap::from_iter(["div", "span", "ol", "ul", "li"].map(create_element_with_tag));
 }
 
 #[cfg(feature = "with-interning")]
@@ -51,8 +50,7 @@ fn create_element_with_tag(tag: &'static str) -> (&'static str, web_sys::Element
 
 /// find the element from the most created element and clone it, else create it
 fn create_element(tag: &'static str) -> web_sys::Element {
-    CREATED_ELEMENTS.with(|map| {
-        let map = map.borrow();
+    CACHE_ELEMENTS.with(|map| {
         if let Some(elm) = map.get(tag) {
             elm.clone_node_with_deep(false)
                 .expect("must clone node")
