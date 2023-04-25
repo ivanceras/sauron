@@ -81,7 +81,7 @@ pub fn delay_exec<F>(mut f: F, timeout: i32) -> Result<i32, JsValue>
 where
     F: FnMut() + 'static,
 {
-    delay_exec_with_closure(Closure::once(move || f()), timeout)
+    delay_exec_with_closure(Closure::once(f), timeout)
 }
 
 /// cancel the execution of a delayed closure
