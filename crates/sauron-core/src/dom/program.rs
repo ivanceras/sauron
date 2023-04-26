@@ -304,7 +304,7 @@ where
     #[cfg(feature = "with-ric")]
     fn dispatch_pending_msgs_with_ric(&self) -> Result<(), JsValue> {
         let program = self.clone();
-        crate::dom::util::request_idle_callback_with_deadline(move |deadline| {
+        crate::dom::util::request_idle_callback(move |deadline| {
             program
                 .dispatch_pending_msgs(Some(deadline))
                 .expect("must execute")
@@ -498,7 +498,7 @@ where
     #[cfg(feature = "with-ric")]
     fn apply_pending_patches_with_ric(&self) -> Result<(), JsValue> {
         let program = self.clone();
-        crate::dom::util::request_idle_callback_with_deadline(move |deadline| {
+        crate::dom::util::request_idle_callback(move |deadline| {
             program
                 .apply_pending_patches(Some(deadline))
                 .expect("must not error");
@@ -689,7 +689,7 @@ where
     #[cfg(feature = "with-ric")]
     fn dispatch_inner_with_ric(&self) {
         let program = self.clone();
-        let _handle = crate::dom::util::request_idle_callback_with_deadline(move |deadline| {
+        let _handle = crate::dom::util::request_idle_callback(move |deadline| {
             program.dispatch_inner(Some(deadline));
         })
         .expect("must execute");

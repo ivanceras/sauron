@@ -38,7 +38,7 @@ impl App {
     ) {
         log::info!("in execute delayed...");
         if let Some(current_handle) = current_handle.borrow().as_ref() {
-            sauron::dom::clear_timeout_with_handle(*current_handle);
+            sauron::window().clear_timeout_with_handle(*current_handle);
             log::info!("We cancelled {}", current_handle);
         }
 
