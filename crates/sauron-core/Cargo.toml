@@ -49,6 +49,7 @@ features = [
     "Event",
     "HtmlElement",
     "EventTarget",
+    "FocusEvent",
     "KeyboardEvent",
     "HashChangeEvent",
     "InputEvent",

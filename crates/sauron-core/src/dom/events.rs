@@ -9,7 +9,8 @@ use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
 pub use web_sys::{
-    AnimationEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TouchEvent, TransitionEvent,
+    AnimationEvent, FocusEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TouchEvent,
+    TransitionEvent,
 };
 use web_sys::{
     EventTarget, HtmlDetailsElement, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
@@ -175,6 +176,11 @@ fn to_mouse_event(event: Event) -> MouseEvent {
     web_event.dyn_into().expect("Unable to cast to mouse event")
 }
 
+fn to_focus_event(event: Event) -> FocusEvent {
+    let web_event = event.as_web().expect("must be a web_sys event");
+    web_event.dyn_into().expect("Unable to cast to focus event")
+}
+
 fn to_keyboard_event(event: Event) -> KeyboardEvent {
     let web_event = event.as_web().expect("must be a web_sys event");
     web_event
@@ -303,8 +309,8 @@ declare_html_events! {
     on_touchstart => touchstart => to_touch_event => TouchEvent;
     on_touchend => touchend => to_touch_event => TouchEvent;
     on_touchmove => touchmove => to_touch_event => TouchEvent;
-    on_focus => focus => to_webevent => web_sys::Event;
-    on_blur => blur => to_webevent => web_sys::Event;
+    on_focus => focus => to_focus_event => FocusEvent;
+    on_blur => blur => to_focus_event => FocusEvent;
     on_reset => reset => to_webevent => web_sys::Event;
     on_submit => submit => to_webevent => web_sys::Event;
     on_input => input => to_input_event => InputEvent;
