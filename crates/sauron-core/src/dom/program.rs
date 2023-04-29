@@ -374,6 +374,7 @@ where
             total_time: t3 - t1,
         };
         if measurements.total_time > 16.0 {
+            #[cfg(all(feature = "with-measure", feature = "with-debug"))]
             log::warn!("dispatch took {}ms", measurements.total_time.round());
         }
         Ok(measurements)
