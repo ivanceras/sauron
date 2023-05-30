@@ -69,16 +69,12 @@ where
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
                 self.date = date;
-                Effects::with_local(vec![Msg::TimeOrDateModified(
-                    self.date_time(),
-                )])
+                Effects::with_local(vec![Msg::TimeOrDateModified(self.date_time())])
             }
             Msg::TimeChange(time) => {
                 log::trace!("time is changed to: {}", time);
                 self.time = time;
-                Effects::with_local(vec![Msg::TimeOrDateModified(
-                    self.date_time(),
-                )])
+                Effects::with_local(vec![Msg::TimeOrDateModified(self.date_time())])
             }
             Msg::TimeOrDateModified(date_time) => {
                 log::trace!("time or date is changed: {}", date_time);
@@ -103,6 +99,9 @@ where
 
     fn style(&self) -> String {
         jss! {
+            ".datetimebox":{
+                border: "1px solid green",
+            },
             "button": {
               background: "#1E88E5",
               color: "white",
@@ -144,10 +143,7 @@ where
                     [],
                 ),
                 input([r#type("text"), value(self.cnt)], []),
-                button(
-                    [on_click(move |_| Msg::BtnClick)],
-                    [text("Do something")],
-                ),
+                button([on_click(move |_| Msg::BtnClick)], [text("Do something")]),
             ],
         )
     }
@@ -227,20 +223,14 @@ impl DateTimeWidgetCustomElement {
             old_value,
             new_value
         );
-        DateTimeWidget::<Msg>::attribute_changed(
-            &self.program,
-            attr_name,
-            old_value,
-            new_value,
-        );
+        DateTimeWidget::<Msg>::attribute_changed(&self.program, attr_name, old_value, new_value);
     }
 
     #[wasm_bindgen(method, js_name = connectedCallback)]
     pub fn connected_callback(&mut self) {
         self.program.mount();
-        let component_style = <DateTimeWidget<()> as Application<Msg>>::style(
-            &self.program.app.borrow(),
-        );
+        let component_style =
+            <DateTimeWidget<()> as Application<Msg>>::style(&self.program.app.borrow());
         self.program.inject_style_to_mount(&component_style);
         self.program.update_dom().expect("must update dom");
     }
@@ -253,9 +243,5 @@ impl DateTimeWidgetCustomElement {
 }
 
 pub fn register() {
-    sauron::register_custom_element(
-        "date-time",
-        "DateTimeWidgetCustomElement",
-        "HTMLElement",
-    );
+    sauron::register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
 }
