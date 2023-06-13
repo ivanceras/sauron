@@ -1,5 +1,8 @@
-use crate::dom::{Cmd, Component, Container, CustomElement};
+use crate::dom::{Component, Container, CustomElement};
 use crate::vdom::Node;
+
+#[cfg(feature = "with-dom")]
+use crate::dom::Cmd;
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
@@ -10,6 +13,7 @@ where
 {
     ///  The application can implement this method where it can modify its initial state.
     ///  This method is called right after the program is mounted into the DOM.
+    #[cfg(feature = "with-dom")]
     fn init(&mut self) -> Cmd<Self, MSG>
     where
         Self: Sized + 'static,
@@ -21,6 +25,7 @@ where
     /// The update function returns a Cmd, which can be executed by the runtime.
     ///
     /// Called each time an action is triggered from the view
+    #[cfg(feature = "with-dom")]
     fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>
     where
         Self: Sized + 'static;
@@ -35,6 +40,7 @@ where
     /// This is for diagnostic and performance measurement purposes.
     ///
     /// Warning: DO NOT use for anything else other than the intended purpose
+    #[cfg(feature = "with-dom")]
     fn measurements(&self, measurements: Measurements) -> Cmd<Self, MSG>
     where
         Self: Sized + 'static,
@@ -71,6 +77,7 @@ where
     COMP: CustomElement<MSG>,
     MSG: 'static,
 {
+    #[cfg(feature = "with-dom")]
     fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
         let effects = <Self as crate::Component<MSG, ()>>::update(self, msg);
         Cmd::from(effects)

@@ -1,6 +1,7 @@
 //! Create [events][0] Object
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
+use crate::dom::Event;
 use crate::{
     html::attributes::AttributeValue,
     vdom::{Attribute, Listener},
@@ -15,15 +16,6 @@ pub use web_sys::{
 use web_sys::{
     EventTarget, HtmlDetailsElement, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
 };
-
-/// Map the Event to DomEvent, which are browser events
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Event {
-    /// native dome events web_sys::Events
-    WebEvent(web_sys::Event),
-    /// custom event here follows
-    MountEvent(MountEvent),
-}
 
 impl Event {
     /// convert to web event

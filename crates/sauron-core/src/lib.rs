@@ -40,10 +40,7 @@ pub use crate::{
 };
 
 pub mod dom;
-pub use crate::dom::{
-    body, document, events, now, window, Application, Cmd, Component, Container, CustomElement,
-    Dispatch, Effects, Program,
-};
+pub use crate::dom::{Application, Component, Container, CustomElement, Dispatch, Effects};
 
 use cfg_if::cfg_if;
 
@@ -53,10 +50,5 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use js_sys;
     pub use wasm_bindgen;
     pub use wasm_bindgen::prelude::*;
-}}
-
-cfg_if! {if #[cfg(not(feature = "with-dom"))] {
-    /// When event is not needed, such as just rendering the dom
-    /// tree in server side application
-    pub type Event = ();
+    pub use crate::dom::{events, Program, document, now, window, Cmd};
 }}

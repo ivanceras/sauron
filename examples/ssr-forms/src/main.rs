@@ -1,6 +1,6 @@
 #![deny(warnings)]
 use chrono::Local;
-use sauron::*;
+use sauron::{*, html::*, attributes::*};
 use serde_derive::{Deserialize, Serialize};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use warp::{http::Response, Filter};
@@ -118,7 +118,7 @@ async fn main() {
         Response::builder().body(buffer)
     });
 
-    let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
+    let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 4040);
     println!("serve at http://{}:{}", socket.ip(), socket.port());
     warp::serve(submission.or(index)).run(socket).await;
 }

@@ -1,8 +1,11 @@
-use crate::{dom::Dispatch, dom::Effects, vdom::Node};
+use crate::{dom::Effects, vdom::Node};
 use std::collections::BTreeMap;
 
 #[cfg(feature = "with-dom")]
 use wasm_bindgen::JsValue;
+
+#[cfg(feature = "with-dom")]
+use crate::dom::Dispatch;
 
 /// A component has a view and can update itself.
 ///
