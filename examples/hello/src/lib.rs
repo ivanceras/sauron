@@ -1,4 +1,4 @@
-use sauron::prelude::*;
+use sauron::*;
 
 struct App;
 

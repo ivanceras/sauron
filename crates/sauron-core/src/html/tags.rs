@@ -51,7 +51,7 @@ macro_rules! declare_sc_tags {
 
         #[cfg(feature = "with-lookup")]
         /// These are the self closing tags such as `<input/>`, `<br/>`,
-        pub const HTML_SC_TAGS: [&'static str; 16] = [$(stringify!($name),)*];
+        pub const HTML_SC_TAGS: &[&'static str] = &[$(stringify!($name),)*];
     }
 }
 
@@ -65,7 +65,7 @@ macro_rules! declare_common_tags_and_macro {
 
         #[cfg(feature = "with-lookup")]
         /// These are the comonly used html tags such as div, input, buttons,.. etc
-        pub const HTML_TAGS: [&'static str; 98] = [$(stringify!($name),)*];
+        pub const HTML_TAGS: &[&'static str] = &[$(stringify!($name),)*];
     };
 }
 
@@ -90,7 +90,7 @@ macro_rules! declare_tags_non_common{
         /// These are html tags which are non commonly used.
         /// Put together in this collection to avoid import conflicts with the commonly used
         /// ones.
-        pub const HTML_TAGS_NON_COMMON:[&'static str;1] = [$(stringify!($name),)*];
+        pub const HTML_TAGS_NON_COMMON: &[&'static str] = &[$(stringify!($name),)*];
     }
 }
 
@@ -107,7 +107,7 @@ macro_rules! declare_tags_and_macro_non_common{
         /// These are html tags with macro which are non commonly used.
         /// Put together in this collection to avoid import conflicts with the commonly used
         /// ones.
-        pub const HTML_TAGS_WITH_MACRO_NON_COMMON:[&'static str;2] = [$(stringify!($name),)*];
+        pub const HTML_TAGS_WITH_MACRO_NON_COMMON: &[&'static str] = &[$(stringify!($name),)*];
     }
 }
 
@@ -153,7 +153,6 @@ declare_common_tags_and_macro! {
     bdo;
     cite;
     code;
-    data;
     dfn;
     em;
     i;
@@ -227,6 +226,7 @@ declare_tags_non_common! {
 declare_tags_and_macro_non_common! {
     title; // conflicts with html::attributes::title  , attributes::title   > tags::title
     slot;  // conflicts with html::attributes::slot   , attrributes::slot   > tags::slot
+    data;  // data for local variable is commonly used everywhere
 }
 
 // self closing tags such as `<input/>, `<br/>`

@@ -1,9 +1,7 @@
 use sauron::{
     dom::events::KeyboardEvent,
-    html::{attributes::*, *},
-    jss,
-    prelude::*,
-    Application, Cmd, Node,
+    html::{attributes::*, events::*, *},
+    jss, Application, Cmd, Node, *,
 };
 use serde_derive::{Deserialize, Serialize};
 

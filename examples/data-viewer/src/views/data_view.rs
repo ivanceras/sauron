@@ -5,14 +5,14 @@ use crate::{
 };
 use restq::{bytes_to_chars, table_def, CsvRows, TableName};
 use sauron::{
+    dom::Window,
     html::{
         attributes::{class, key, styles},
         events::*,
         units::*,
         *,
     },
-    prelude::*,
-    Component, Node, Window,
+    Cmd, Component, Effects, Node, NodeMapMsg,
 };
 use std::{
     cell::RefCell,

@@ -6,7 +6,7 @@
 //! involves accessing the real DOM.
 //!
 pub use crate::html::attributes::AttributeValue;
-use crate::{html::attributes, Event};
+use crate::{dom::Event, html::attributes};
 pub use leaf::Leaf;
 pub use node_trait::NodeTrait;
 

@@ -1,5 +1,4 @@
-use sauron::prelude::*;
-
+use sauron::{svg::attributes::*, svg::*, units::*, Node};
 #[allow(unused)]
 pub fn svg_table_icon<MSG>() -> Node<MSG>
 where

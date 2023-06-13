@@ -1,7 +1,7 @@
 //! provides functionalities for commands to be executed by the system, such as
 //! when the application starts or after the application updates.
 //!
-use crate::{Dispatch, Effects};
+use crate::dom::{Dispatch, Effects};
 
 /// Cmd is a command to be executed by the system.
 /// This is returned at the init function of a component and is executed right

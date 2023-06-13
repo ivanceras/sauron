@@ -1,7 +1,10 @@
 use sauron::js_sys::TypeError;
-use sauron::prelude::*;
+use sauron::*;
 use sauron::jss;
 use serde::{Deserialize, Serialize};
+use sauron::dom::spawn_local;
+use sauron::dom::Http;
+use sauron::html::*;
 
 #[macro_use]
 extern crate log;

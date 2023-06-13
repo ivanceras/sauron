@@ -1,4 +1,5 @@
-use crate::{dom::Cmd, vdom::Node};
+use crate::dom::{Cmd, Component, Container, CustomElement};
+use crate::vdom::Node;
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
@@ -66,8 +67,8 @@ pub struct Measurements {
 /// has no external MSG
 impl<COMP, MSG> Application<MSG> for COMP
 where
-    COMP: crate::Component<MSG, ()> + 'static,
-    COMP: crate::CustomElement<MSG>,
+    COMP: Component<MSG, ()> + 'static,
+    COMP: CustomElement<MSG>,
     MSG: 'static,
 {
     fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
@@ -86,10 +87,10 @@ where
 
 /// Auto implementation of Component trait for Container,
 /// which in turn creates an Auto implementation trait for of Application for Container
-impl<CONT, MSG> crate::Component<MSG, ()> for CONT
+impl<CONT, MSG> Component<MSG, ()> for CONT
 where
-    CONT: crate::Container<MSG, ()>,
-    CONT: crate::CustomElement<MSG>,
+    CONT: Container<MSG, ()>,
+    CONT: CustomElement<MSG>,
     MSG: 'static,
 {
     fn update(&mut self, msg: MSG) -> crate::Effects<MSG, ()> {

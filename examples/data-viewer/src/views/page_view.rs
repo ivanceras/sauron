@@ -9,8 +9,7 @@ use sauron::{
         units::*,
         *,
     },
-    prelude::*,
-    Component, Node,
+    Component, Effects, Node, NodeMapMsg,
 };
 
 #[derive(Debug, PartialEq)]

@@ -5,7 +5,7 @@
 #![deny(clippy::all)]
 
 use js_sys::Date;
-use sauron::{jss, prelude::*, wasm_bindgen::JsCast};
+use sauron::{jss, wasm_bindgen::JsCast, *};
 
 #[macro_use]
 extern crate log;
@@ -114,8 +114,8 @@ impl Application<Msg> for Clock {
                 font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
                 margin: 0,
                 padding: 0,
-                width: px(100),
-                height: px(100),
+                width: percent(100),
+                height: percent(100),
             },
 
             "article": {

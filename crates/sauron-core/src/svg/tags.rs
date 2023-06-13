@@ -1,5 +1,4 @@
 //! Provides macro for creating functions for tags
-//!
 
 macro_rules! declare_svg_tags{
 
@@ -57,7 +56,7 @@ macro_rules! declare_common_svg_tags_and_macro {
 
         #[cfg(feature = "with-lookup")]
         /// These are the commonly used svg tags such as rect, circle, path, arc, ..etc.
-        pub const SVG_TAGS: [&'static str; 66] = [ $(stringify!($name),)* ];
+        pub const SVG_TAGS: &[&'static str] = &[ $(stringify!($name),)* ];
 
     };
 }
@@ -76,7 +75,7 @@ macro_rules! declare_svg_tags_special{
         #[cfg(feature = "with-lookup")]
         /// These are svg tags which the tags are non proper rust identifier, so they are handled
         /// differently
-        pub const SVG_TAGS_SPECIAL:[(&'static str,&'static str); 2] = [$((stringify!($name),$attribute),)*];
+        pub const SVG_TAGS_SPECIAL:&[(&'static str,&'static str)] = &[$((stringify!($name),$attribute),)*];
     }
 }
 
@@ -92,7 +91,7 @@ macro_rules! declare_svg_tags_non_common{
         #[cfg(feature = "with-lookup")]
         /// These are collection of svg tags that are non commonly used put together in this
         /// collection so as not to create import conflicts with the common tags
-        pub const SVG_TAGS_NON_COMMON:[&'static str;5] = [$(stringify!($name),)*];
+        pub const SVG_TAGS_NON_COMMON:&[&'static str] = &[$(stringify!($name),)*];
     }
 }
 

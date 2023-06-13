@@ -1,7 +1,7 @@
 //! Create html [attributes][0]
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
-use crate::{vdom, vdom::Attribute, Event};
+use crate::{dom::Event, vdom, vdom::Attribute};
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
 pub use jss::Value;

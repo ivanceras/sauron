@@ -1,8 +1,7 @@
 use crate::row::{self, Row};
 use sauron::{
     html::{attributes::*, events::*, *},
-    prelude::*,
-    Node,
+    Node, *,
 };
 
 #[derive(Debug, PartialEq)]

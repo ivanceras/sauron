@@ -1,5 +1,7 @@
-use crate::{dom::effects::Effects, vdom::Node, Dispatch};
+use crate::{dom::Dispatch, dom::Effects, vdom::Node};
 use std::collections::BTreeMap;
+
+#[cfg(feature = "with-dom")]
 use wasm_bindgen::JsValue;
 
 /// A component has a view and can update itself.
@@ -37,6 +39,7 @@ pub trait CustomElement<MSG> {
     /// and the attributes of the custom-element has been modified
     ///
     /// if the listed attributes in the observed attributes are modified
+    #[cfg(feature = "with-dom")]
     fn attribute_changed<DSP>(
         program: &DSP,
         attr_name: &str,

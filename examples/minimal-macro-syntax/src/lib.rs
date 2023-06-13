@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::{jss, prelude::*};
+use sauron::{html::attributes::*, html::*, jss, *};
 
 #[derive(Debug)]
 enum Msg {

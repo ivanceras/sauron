@@ -2,15 +2,8 @@
 #![deny(clippy::all)]
 use log::trace;
 use sauron::{
-    html::{
-        attributes::{attr, class, id, r#type, value},
-        div,
-        events::on_click,
-        h1, input, text,
-    },
-    jss,
-    prelude::*,
-    Application, Cmd, Node, Program,
+    html::{attributes::*, events::*, *},
+    *,
 };
 
 pub enum Msg {

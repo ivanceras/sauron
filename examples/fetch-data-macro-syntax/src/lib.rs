@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::{js_sys::TypeError, jss, prelude::*};
+use sauron::{*, js_sys::TypeError, jss, dom::spawn_local, dom::Http, html::*, html::attributes::*};
 use serde::Deserialize;
 
 #[macro_use]
@@ -57,7 +57,7 @@ impl App {
             spawn_local(async move {
                 let msg = match Http::fetch_with_text_response_decoder(&url).await {
                     Ok(v) => match serde_json::from_str(&v) {
-                        Ok(data) => Msg::ReceivedData(data),
+                        Ok(data1) => Msg::ReceivedData(data1),
                         Err(err) => Msg::JsonError(err),
                     },
                     Err(e) => Msg::RequestError(e),
@@ -138,8 +138,8 @@ impl Application<Msg> for App {
                 }
                 self.fetch_page()
             }
-            Msg::ReceivedData(data) => {
-                self.data = data;
+            Msg::ReceivedData(data1) => {
+                self.data = data1;
                 Cmd::none()
             }
             Msg::JsonError(err) => {

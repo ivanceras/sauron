@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::wasm_bindgen;
 
 #[wasm_bindgen(module = "/js/define_custom_element.js")]
 extern "C" {

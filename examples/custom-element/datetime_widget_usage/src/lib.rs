@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::prelude::*;
+use sauron::*;
 
 enum AppMsg {}
 

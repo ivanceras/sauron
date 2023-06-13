@@ -1,6 +1,5 @@
 use client::{App, Msg};
-use sauron::jss;
-use sauron::prelude::*;
+use sauron::{html::*, *};
 
 /// We are creating an index page.
 /// From the `App` supplied, we can derive the view by calling `App.view` function.

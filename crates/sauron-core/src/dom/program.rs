@@ -3,9 +3,9 @@ use crate::dom::created_node::{intern, ActiveClosure};
 use crate::dom::Measurements;
 use crate::vdom;
 use crate::vdom::{diff, Attribute, AttributeValue};
-use crate::CreatedNode;
-use crate::{prelude::Patch, Application, Cmd, Dispatch};
-use crate::{DomPatch, PatchVariant};
+use crate::dom::CreatedNode;
+use crate::{Patch, Application, Cmd, Dispatch};
+use crate::dom::{DomPatch, PatchVariant};
 use mt_dom::TreePath;
 use std::collections::VecDeque;
 use std::{any::TypeId, cell::RefCell, rc::Rc};
@@ -236,7 +236,7 @@ where
     /// Program::mount_to_body(App{});
     /// ```
     pub fn mount_to_body(app: APP) -> Self {
-        Self::append_to_mount(app, &crate::body())
+        Self::append_to_mount(app, &crate::dom::body())
     }
 
     /// each element and it's descendant in the vdom is created into
@@ -784,7 +784,7 @@ where
     /// Inject a style to the global document
     fn inject_style(&self, type_id: TypeId, style: &str) {
         let style_node = crate::html::tags::style(
-            [crate::prelude::class(format!("{type_id:?}"))],
+            [crate::html::attributes::class(format!("{type_id:?}"))],
             [crate::html::text(style)],
         );
         let created_node = CreatedNode::create_dom_node(self, &style_node, &mut None);

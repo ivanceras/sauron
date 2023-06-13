@@ -1,6 +1,6 @@
 #![deny(warnings)]
 use chrono::Local;
-use sauron::{html::attributes, prelude::*};
+use sauron::*;
 use serde_derive::{Deserialize, Serialize};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use warp::{http::Response, Filter};

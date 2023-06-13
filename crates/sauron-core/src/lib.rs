@@ -7,26 +7,7 @@
     unstable_features,
     unused_import_braces
 )]
-//!  Core component of sauron
-
-#[macro_use]
-extern crate doc_comment;
-
-use cfg_if::cfg_if;
-cfg_if! {if #[cfg(feature = "with-dom")] {
-    pub mod dom;
-    pub use dom::*;
-    pub use web_sys;
-    pub use wasm_bindgen;
-    pub use wasm_bindgen_futures;
-    pub use js_sys;
-}}
-
-cfg_if! {if #[cfg(not(feature = "with-dom"))] {
-    /// When event is not needed, such as just rendering the dom
-    /// tree in server side application
-    pub type Event = ();
-}}
+//! The core components of sauron
 
 #[macro_use]
 pub mod html;
@@ -35,36 +16,47 @@ pub mod svg;
 mod render;
 pub mod vdom;
 
-pub use render::Render;
-
-#[doc(hidden)]
-pub use jss;
 #[doc(hidden)]
 pub use mt_dom;
 
-/// Prelude simplifies the imports from sauron
-/// This imports the necessary functions to build
-/// a basic sauron app.
-pub mod prelude {
-    pub use crate::{
-        html::{
-            attributes::{attr, *},
-            tags::{commons::*, *},
-            units::{self, ch, em, percent, pt, px, rem},
-            *,
-        },
-        svg::{attributes::*, tags::commons::*, *},
-        vdom::*,
-        *,
-    };
-    pub use render::Render;
-    pub use vdom::{
-        diff,
-        map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg},
-        Attribute, Element, Listener, Node, Patch,
-    };
-    #[cfg(feature = "with-dom")]
-    pub use wasm_bindgen::prelude::*;
-    #[cfg(feature = "with-dom")]
+#[macro_use]
+extern crate doc_comment;
+
+pub use jss::{jss, jss_ns, jss_ns_pretty, jss_pretty};
+
+pub use crate::render::Render;
+pub use crate::vdom::{
+    diff,
+    map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg},
+    Attribute, Element, Listener, Node, Patch,
+};
+pub use crate::{
+    html::{
+        attributes,
+        tags::commons::*,
+        units::{self, ch, em, percent, pt, px, rem},
+    },
+    svg::tags::commons::*,
+};
+
+pub mod dom;
+pub use crate::dom::{
+    body, document, events, now, window, Application, Cmd, Component, Container, CustomElement,
+    Dispatch, Effects, Program,
+};
+
+use cfg_if::cfg_if;
+
+cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use web_sys;
-}
+    pub use wasm_bindgen_futures;
+    pub use js_sys;
+    pub use wasm_bindgen;
+    pub use wasm_bindgen::prelude::*;
+}}
+
+cfg_if! {if #[cfg(not(feature = "with-dom"))] {
+    /// When event is not needed, such as just rendering the dom
+    /// tree in server side application
+    pub type Event = ();
+}}

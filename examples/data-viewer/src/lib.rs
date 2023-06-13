@@ -2,7 +2,7 @@
 pub use error::Error;
 use log::Level;
 pub use restq::{ast::ddl::DataTypeDef, ColumnDef, DataType, DataValue};
-use sauron::prelude::*;
+use sauron::*;
 use views::{resize_wrapper, DataView, ResizeWrapper};
 
 #[macro_use]

@@ -1,7 +1,12 @@
-use sauron::dom::Callback;
-use sauron::dom::{MountAction, MountTarget};
-use sauron::jss;
-use sauron::prelude::*;
+use sauron::{
+    dom::register_custom_element,
+    dom::{Callback, MountAction, MountTarget},
+    html::attributes::*,
+    html::events::*,
+    html::*,
+    jss, wasm_bindgen, web_sys, Application, CustomElement, Dispatch, Effects, JsValue, Node,
+    Program,
+};
 use std::collections::BTreeMap;
 use std::fmt::Debug;
 use std::iter::FromIterator;
@@ -243,5 +248,5 @@ impl DateTimeWidgetCustomElement {
 }
 
 pub fn register() {
-    sauron::register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
+    register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
 }

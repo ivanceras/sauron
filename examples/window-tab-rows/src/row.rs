@@ -1,8 +1,7 @@
 use crate::field::{self, Field, Interaction};
 use sauron::{
     html::{attributes::*, *},
-    prelude::*,
-    Node,
+    Node, *,
 };
 
 #[derive(Debug, PartialEq)]

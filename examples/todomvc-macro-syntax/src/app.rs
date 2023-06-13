@@ -1,4 +1,4 @@
-use sauron::{dom::events::KeyboardEvent, html::*, jss, node, prelude::*, Application, Cmd, Node};
+use sauron::{dom::events::*, html::*, jss, node, Application, Cmd, Node, *};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]

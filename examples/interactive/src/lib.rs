@@ -1,7 +1,6 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
 use sauron::*;
-use wasm_bindgen::{self, prelude::*, JsCast};
 
 use app::{App, Msg};
 

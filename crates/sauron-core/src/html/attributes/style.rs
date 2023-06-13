@@ -1,4 +1,4 @@
-use crate::prelude::Value;
+use crate::html::attributes::Value;
 use std::fmt;
 
 /// Creat a style attribute

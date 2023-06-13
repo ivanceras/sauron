@@ -1,6 +1,6 @@
+use crate::dom::CreatedNode;
 use crate::dom::Dispatch;
 use crate::vdom::{Attribute, Patch, PatchType};
-use crate::CreatedNode;
 use mt_dom::TreePath;
 use web_sys::{Element, Node};
 

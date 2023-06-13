@@ -1,5 +1,5 @@
 use crate::{
-    prelude::{Style, Value},
+    html::attributes::{Style, Value},
     vdom::Listener,
 };
 use std::fmt::{self, Debug};

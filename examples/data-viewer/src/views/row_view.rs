@@ -2,8 +2,7 @@ use crate::views::{field_view, FieldView};
 use restq::{ColumnDef, DataValue};
 use sauron::{
     html::{attributes::*, events::*, units::*, *},
-    prelude::*,
-    Component, Effects, Node,
+    Component, Effects, Node, NodeMapMsg,
 };
 use std::{cell::RefCell, rc::Rc};
 

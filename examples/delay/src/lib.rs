@@ -1,16 +1,9 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
 use log::trace;
-use sauron::{
-    html::{
-        attributes::{class, r#type, value},
-        div,
-        events::on_click,
-        h2, h4, input, text,
-    },
-    jss,
-    prelude::*,
-    Application, Cmd, Node, Program,
+use sauron::{text, jss, html::*, html::events::*, html::attributes::*,
+    Dispatch, Application, Node, Program, Cmd, wasm_bindgen,
+    dom::async_delay,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
