@@ -5,7 +5,7 @@ use std::fmt;
 #[macro_export]
 macro_rules! style {
     ( $($arg: tt)* ) => {
-        attr("style", $crate::jss::style!{$($arg)*})
+        $crate::attributes::attr("style", $crate::jss::style!{$($arg)*})
     };
 }
 

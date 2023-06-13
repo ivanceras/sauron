@@ -17,6 +17,8 @@
     unused_import_braces
 )]
 
+pub use sauron_core::jss as jss_crate;
+pub use sauron_core::jss::{jss, jss_ns, jss_ns_pretty, jss_pretty};
 pub use sauron_core::*;
 
 #[cfg(feature = "with-node-macro")]

@@ -7,6 +7,8 @@
     unstable_features,
     unused_import_braces
 )]
+#![allow(deprecated)]
+
 //! The core components of sauron
 
 #[macro_use]
@@ -22,8 +24,6 @@ pub use mt_dom;
 #[macro_use]
 extern crate doc_comment;
 
-pub use jss::{jss, jss_ns, jss_ns_pretty, jss_pretty};
-
 pub use crate::render::Render;
 pub use crate::vdom::{
     diff,
@@ -38,6 +38,8 @@ pub use crate::{
     },
     svg::tags::commons::*,
 };
+
+pub use jss;
 
 pub mod dom;
 pub use crate::dom::{Application, Component, Container, CustomElement, Dispatch, Effects};
