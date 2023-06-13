@@ -1,5 +1,6 @@
 #![deny(warnings)]
-use sauron::{mt_dom::TreePath, prelude::*};
+use sauron::{html::attributes::*, html::events::*, html::*};
+use sauron::{mt_dom::TreePath, *};
 use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;

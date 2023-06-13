@@ -1,5 +1,6 @@
 #![deny(warnings)]
-use sauron::prelude::*;
+use sauron::svg::attributes::*;
+use sauron::*;
 
 #[test]
 fn children() {

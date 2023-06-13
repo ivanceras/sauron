@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron_core::{html::attributes::style, prelude::*};
+use sauron::{html::attributes::*, *};
 
 #[test]
 fn test_style_macro() {

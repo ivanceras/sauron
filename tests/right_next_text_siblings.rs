@@ -1,6 +1,7 @@
 #![deny(warnings)]
 use crate::mt_dom::TreePath;
-use sauron::prelude::*;
+use sauron::html::*;
+use sauron::*;
 
 #[test]
 fn comments_next_to_each_other() {

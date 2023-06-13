@@ -264,7 +264,7 @@ impl<MSG> Render for Attribute<MSG> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::prelude::*;
+    use crate::html::{attributes::*, *};
 
     #[test]
     fn test_render_comments() {

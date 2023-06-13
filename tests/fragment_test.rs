@@ -1,5 +1,6 @@
 #![deny(warnings)]
-use sauron::prelude::*;
+use sauron::html::*;
+use sauron::*;
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
 

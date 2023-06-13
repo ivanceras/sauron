@@ -17,7 +17,7 @@ pub use tags::{commons::*, self_closing::*};
 ///
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::*};
 ///
 /// let content = "hello world";
 /// let html: Node<()> = view_if(!content.is_empty(), p(vec![], vec![text(content)]));
@@ -37,7 +37,7 @@ pub fn view_if<MSG>(flag: bool, node: Node<MSG>) -> Node<MSG> {
 /// browser will not render it correctly.
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::*, svg::attributes::*};
 ///
 /// let html:Node<()> =
 ///     html_element(Some("http://www.w3.org/2000/svg"),"svg", vec![width(200), height(200), xmlns("http://www.w3.org/2000/svg")], vec![], false);
@@ -69,7 +69,7 @@ pub fn html_element<MSG>(
 /// creates a text node using a formatter
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::*};
 ///
 /// let number = 42;
 /// let title:Node<()> = h1(vec![], vec![text!("This is the content number: {}", number)]);
@@ -86,7 +86,7 @@ macro_rules! text {
 /// Create a text node element
 /// # Example
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::*};
 /// let node: Node<()> = text("hi");
 /// ```
 pub fn text<S, MSG>(s: S) -> Node<MSG>
@@ -102,7 +102,7 @@ where
 /// as a programmer to sanitize the input here.
 /// # Example
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*,html::*};
 ///
 /// let node: Node<()> = safe_html("<div>In a safe html</div>");
 /// ```
@@ -116,7 +116,7 @@ where
 /// create a comment node
 /// # Example
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::*};
 /// let node: Node<()> = comment("This is a comment");
 /// ```
 pub fn comment<S, MSG>(s: S) -> Node<MSG>
@@ -129,7 +129,7 @@ where
 /// fragment is a list of nodes
 /// # Example
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::*};
 ///
 /// let node: Node<()> = fragment([div([],[]), span([],[])]);
 /// ```

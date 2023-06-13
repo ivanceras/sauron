@@ -1,6 +1,6 @@
 #![deny(warnings)]
 use sauron::Listener;
-use sauron_core::prelude::*;
+use sauron_core::*;
 
 #[test]
 fn test_type_ids() {

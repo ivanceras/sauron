@@ -19,7 +19,7 @@ mod style;
 /// create a style attribute
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::*;
 /// use sauron::html::attributes::style;
 ///
 /// let flex:Attribute<()> = style("display", "flex");
@@ -34,13 +34,14 @@ pub fn style<MSG>(style_name: impl ToString, value: impl Into<Value>) -> Attribu
 /// A helper function which creates a style attribute by assembling the tuples into a string for the style value.
 /// # Example
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::*;
+/// use sauron::html::attributes::*;
 ///
 /// let html:Node<()> = div(vec![styles([("display", "flex"), ("flex-direction", "row")])], vec![]);
 /// ```
 /// is the same way of writing
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::*};
 ///
 /// let html: Node<()> = div(vec![style!{"display":"flex","flex-direction":"row"}],vec![]);
 /// ```
@@ -67,7 +68,7 @@ pub fn styles_values<MSG>(
 /// boolean flag.
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*,attributes::*};
 ///
 /// let is_active = true;
 /// let display:Attribute<()> = styles_flag([
@@ -77,7 +78,7 @@ pub fn styles_values<MSG>(
 /// ```
 /// This could also be written as
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*,attributes::*};
 ///
 /// let is_active = true;
 /// let display:Attribute<()> =
@@ -100,7 +101,7 @@ pub fn styles_flag<MSG>(
 /// assembled using only the values that has a flag which evaluates to true.
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*,attributes::*};
 /// let is_hidden = true;
 /// let has_error = true;
 ///
@@ -127,7 +128,7 @@ pub fn classes_flag<MSG>(pair: impl IntoIterator<Item = (impl ToString, bool)>) 
 /// # Examples
 ///
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*,html::*, html::attributes::*};
 ///
 /// let html: Node<()> =
 ///    div(vec![classes(["dashed", "error"])], vec![]);
@@ -166,8 +167,8 @@ pub fn class_namespaced<MSG>(
 /// return a class namespaced with flag
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
-/// use sauron::html::attributes::classes_flag_namespaced;
+/// use sauron::*;
+/// use sauron::html::attributes::*;
 ///
 /// let component = "fui";
 /// let is_border = true;
@@ -197,7 +198,7 @@ pub fn classes_flag_namespaced<MSG>(
 /// returns an array of attributes which doesn't play well with the others
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*,html::*, html::attributes::*};
 ///
 /// let is_checked = true;
 /// let html: Node<()> =
@@ -222,7 +223,7 @@ pub fn attrs_flag<MSG>(
 /// Set the attribute of this element if value is Some, empty attribute otherwise
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::attributes::*};
 ///
 /// let width = Some(10);
 /// let html: Node<()> = button(vec![maybe_attr("width", width)], vec![]);
@@ -248,7 +249,7 @@ pub fn maybe_attr<MSG>(
 /// set the checked value, used checkbox and radio buttons
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::*, html::attributes::*};
 ///
 /// let html: Node<()> =
 ///     input(vec![r#type("checkbox"), checked(true)], vec![]);
@@ -271,7 +272,7 @@ pub fn checked<MSG>(is_checked: bool) -> Attribute<MSG> {
 /// set whether an element is disabled or not
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::*, html::attributes::*};
 ///
 /// let html: Node<()> =
 ///     input(vec![r#type("checkbox"), disabled(true)], vec![]);
@@ -300,7 +301,7 @@ pub fn open<MSG>(is_open: bool) -> Attribute<MSG> {
 /// and will lead to some hacks in the implementation
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::{*, attributes::*}};
 ///
 /// let html:Node<()> =
 ///     div(vec![inner_html("<p>This is a paragraph <b>injected</b> into a <strong>div</strong> via <i>inner_html</i></p>")], vec![]);
@@ -318,7 +319,7 @@ where
 /// focus the html element
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::*, html::attributes::*};
 ///
 /// let editor:Node<()> = textarea(vec![focus(true)], vec![]);
 /// ```
@@ -329,7 +330,7 @@ pub fn focus<MSG>(is_focus: bool) -> Attribute<MSG> {
 /// a utility function to convert simple value into attribute
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*,attributes::*};
 ///
 /// let data_id: Attribute<()> = attr("data-id", 42);
 /// ```
@@ -341,8 +342,8 @@ pub fn attr<MSG, V: Into<Value>>(att: &'static str, v: V) -> Attribute<MSG> {
 /// need to return an attribute which otherwise it can not produce
 /// example:
 /// ```rust
-/// use sauron::prelude::*;
-/// use sauron::html::attributes::title;
+/// use sauron::*;
+/// use sauron::html::attributes::*;
 ///
 /// let img_title = Some("this is the image");
 /// let result: Attribute<()> = if let Some(img_title) = img_title{

@@ -1,6 +1,7 @@
 #![deny(warnings)]
 use crate::mt_dom::TreePath;
-use sauron::prelude::*;
+use sauron::html::*;
+use sauron::*;
 
 #[test]
 fn test_unmatched_old_key() {

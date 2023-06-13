@@ -1,7 +1,9 @@
 #![deny(warnings)]
 use crate::mt_dom::TreePath;
-use sauron::prelude::*;
-use sauron_core::html::attributes::*;
+use sauron::html::attributes::*;
+use sauron::html::events::*;
+use sauron::html::*;
+use sauron::*;
 
 #[test]
 fn nodes_with_event_must_be_replaced() {

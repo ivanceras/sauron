@@ -1,4 +1,7 @@
-use sauron::{node, prelude::*, Node, Render};
+use sauron::{
+    html::{attributes::*, *},
+    *,
+};
 
 #[test]
 fn style_should_be_valid() {

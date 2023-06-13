@@ -41,7 +41,7 @@ impl<MSG> Special for Element<MSG> {
 /// creates a key attribute using a formatter
 /// # Examples
 /// ```rust
-/// use sauron::prelude::*;
+/// use sauron::{*, html::{*, attributes::*}};
 ///
 /// let number = 42;
 /// let button:Node<()> = button([key!("content-{}", 42)], [text("Click")]);

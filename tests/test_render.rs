@@ -1,9 +1,8 @@
 #![deny(warnings)]
+use crate::mt_dom::TreePath;
 use sauron::{
-    diff,
     html::{attributes::*, *},
-    mt_dom::patch::*,
-    Node, Patch, Render,
+    *,
 };
 use sauron_node_macro::node;
 
@@ -88,7 +87,6 @@ fn test_inner_html_removed() {
 
 #[test]
 fn text_node_in_script_work_as_is() {
-    use sauron::prelude::*;
     let serialized_state = "hello world";
     let view: Node<()> = node! {
         <html lang="en">

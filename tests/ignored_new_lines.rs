@@ -1,6 +1,7 @@
 #![deny(warnings)]
 use crate::mt_dom::TreePath;
-use sauron::prelude::*;
+use sauron::*;
+use sauron::{html::attributes::*, html::*};
 
 #[test]
 fn new_lines_ignored() {

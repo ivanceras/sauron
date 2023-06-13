@@ -1,5 +1,9 @@
 #![deny(warnings)]
-use sauron::{mt_dom::TreePath, prelude::*};
+use sauron::mt_dom::TreePath;
+use sauron::{
+    html::{attributes::*, *},
+    *,
+};
 
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;

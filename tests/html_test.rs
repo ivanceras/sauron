@@ -1,6 +1,11 @@
 #![deny(warnings)]
 use crate::mt_dom::TreePath;
-use sauron_core::prelude::*;
+use sauron::{
+    dom::Event,
+    events::on,
+    html::{attributes::*, *},
+    *,
+};
 
 #[test]
 fn test_macros() {
