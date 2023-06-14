@@ -13,7 +13,7 @@ Then add `sauron` to our dependency.
 [package]
 name = "counter"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]

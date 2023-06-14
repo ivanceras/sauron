@@ -107,13 +107,13 @@ In `Cargo.toml`, specify the crate-type to be `cdylib`
 [package]
 name = "counter"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = "0.50.0"
+sauron = "0.53.0"
 ```
 
 #### Prerequisite:

@@ -2,7 +2,7 @@
 name = "ssr-forms"
 version = "0.1.0"
 authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
