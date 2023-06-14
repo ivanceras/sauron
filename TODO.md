@@ -55,6 +55,24 @@
             </div>
         }
         ```
+
+        leaf.rs
+        ```rust
+        pub enum Leaf<MSG>{
+            Text(String),
+            <...>
+            Component(Box<dyn Component>),
+            <...>
+        }
+        ```
+
+        attribute_value.rs
+        ```rust
+        pub enum AttributeValue<MSG>{
+            Simple(Value),
+            CompProperties(<ComponentProperties>),
+        }
+        ```
     - The `Application` don't have to store the state of `FuiButton` component, it will be stored into the `Program` object.
         - Issue how will be map the Msg of the sub component to convert it into the Msg of the main `Application`?
     - [ ] Merge the Container and Component which the view is now requires to have children components
