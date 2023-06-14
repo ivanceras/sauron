@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.53.0
+- **breaking**: fix glob imports conflict, remove prelude.
+    - the html tags and attributes should be explicity imported as well
+    - this is necessary since rust version 1.70 don't allow importing names that conflicts other names in the same glob, in the case of html and svg attributes, there are conflicting names such as: title, slot, data, style
+        old
+        ```rust
+        use sauron::prelude::*,
+        ```
+        new
+        ```rust
+        use sauron::{*, html::*, html::attributes::*, html::events::*}
+        ```
+        this is neccessary, since a lot of tags and attributes could be comming from html or svg, if you are working with svg elements
+        ```rust
+        use sauron::{*, svg::*, svg::attributes::*, html::events::*}
+        ```
+        if you are using both html and svg in the same module, you can glob imports the html, and explcitly specify the svg attribtues.
+        ```rust
+        use sauron::{*, html::*, html::attributes::*, html::events::*, svg::attributes::{xmlns, cx, cy, r, points, d}}
+        ```
+- fix: put the logging of dispatch time in measure and debug feature flag
+- feat: enable scroll related objects from web_sys
+- feat: convert on_focus and on_blur to use FocusEvent
+- refactor: make the request_animation_callback, request_idle_callback and async_delay more readable by unifying the code that was scattered into small little functions
+- feat: make the cache_elements readonly, not using refcell as there is no need to add the other elements
+- feat: add caching of created element for faster creation using clone_node
+- feat: add with-interning feature to make transfering faster from rust to js
+- cargo fmt using stable features with default values
+
 ## 0.52.0
 - refactor: make visibility private on fields of program that is not needed to be accessible outside of the module
 - refactor: use `target_element` instead of `target_node` in `DomPatch`
