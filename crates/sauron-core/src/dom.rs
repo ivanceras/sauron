@@ -20,7 +20,7 @@ mod http;
 #[cfg(feature = "with-dom")]
 mod program;
 #[cfg(feature = "with-dom")]
-mod util;
+pub mod util;
 #[cfg(feature = "with-dom")]
 mod window;
 

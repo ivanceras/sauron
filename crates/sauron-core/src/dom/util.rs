@@ -1,3 +1,5 @@
+//! utility functions
+//!
 #![allow(unused)]
 use js_sys::Promise;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
@@ -33,6 +35,11 @@ where
     Ok(handle)
 }
 
+/// cancel the animation frame with handle
+pub fn cancel_animation_frame(handle: i32) -> Result<(), JsValue>{
+    window().cancel_animation_frame(handle)
+}
+
 
 /// request and idle callback
 pub fn request_idle_callback<F>(f: F) -> Result<u32, JsValue>
@@ -49,6 +56,29 @@ where
     let handle = window().request_idle_callback(closure.as_ref().unchecked_ref())?;
     closure.forget();
     Ok(handle)
+}
+
+/// cancel the idle callback with handle
+pub fn cancel_idle_callback(handle: u32) -> Result<(), JsValue>{
+    window().cancel_idle_callback(handle);
+    Ok(())
+}
+
+/// request and idle callback
+pub fn request_timeout_callback<F>(f: F, timeout: i32) -> Result<i32, JsValue>
+where
+    F: FnMut() + 'static,
+{
+    let closure = Closure::once(f);
+    let handle = window().set_timeout_with_callback_and_timeout_and_arguments_0(closure.as_ref().unchecked_ref(), timeout)?;
+    closure.forget();
+    Ok(handle)
+}
+
+/// cancel the timeout callback with handle
+pub fn cancel_timeout_callback(handle: i32) -> Result<(), JsValue>{
+    window().clear_timeout_with_handle(handle);
+    Ok(())
 }
 
 /// execute the function at a certain specified timeout in ms
