@@ -4,8 +4,8 @@ use sauron::{
     html::attributes::*,
     html::events::*,
     html::*,
-    jss, wasm_bindgen, web_sys, Application, CustomElement, Dispatch, Effects, JsValue, Node,
-    Program,
+    jss, wasm_bindgen, web_sys, Application, Attribute, CustomElement, Dispatch, Effects, JsValue,
+    Node, Program,
 };
 use std::collections::BTreeMap;
 use std::fmt::Debug;
@@ -249,4 +249,20 @@ impl DateTimeWidgetCustomElement {
 
 pub fn register() {
     register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
+}
+
+pub fn date<MSG, V: Into<Value>>(v: V) -> Attribute<MSG> {
+    attr("date", v)
+}
+
+pub fn time<MSG, V: Into<Value>>(v: V) -> Attribute<MSG> {
+    attr("time", v)
+}
+
+pub fn date_time<MSG>(
+    attrs: impl IntoIterator<Item = Attribute<MSG>>,
+    children: impl IntoIterator<Item = Node<MSG>>,
+) -> Node<MSG> {
+    register();
+    html_element(None, "date-time", attrs, children, true)
 }

@@ -43,7 +43,6 @@ pub fn view_if<MSG>(flag: bool, node: Node<MSG>) -> Node<MSG> {
 ///     html_element(Some("http://www.w3.org/2000/svg"),"svg", vec![width(200), height(200), xmlns("http://www.w3.org/2000/svg")], vec![], false);
 /// assert_eq!(node!{<svg width=200 height=200 xmlns="http://www.w3.org/2000/svg"></svg>}, html);
 /// ```
-#[inline]
 pub fn html_element<MSG>(
     namespace: Option<&'static str>,
     tag: &'static str,

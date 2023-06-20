@@ -7,36 +7,40 @@
 //      example: HTMLElement
 export function register_custom_element(custom_tag, adapter, superClass){
     // https://developer.mozilla.org/en-US/docs/Web/API/Window/customElements
-    window.customElements.define(custom_tag,
-        class extends window[superClass]{
-            constructor(){
-                super();
-                console.log("outer html: {}", this.outerHTML);
-                this.instance = new window[adapter](this);
-            }
+    if (window.customElements.get(custom_tag) === undefined ){
+        window.customElements.define(custom_tag,
+            class extends window[superClass]{
+                constructor(){
+                    super();
+                    console.log("outer html: {}", this.outerHTML);
+                    this.instance = new window[adapter](this);
+                }
 
-            static get observedAttributes(){
-                return window[adapter].observedAttributes;
-            }
+                static get observedAttributes(){
+                    return window[adapter].observedAttributes;
+                }
 
-            connectedCallback(){
-                this.instance.connectedCallback();
-            }
-            disconnectedCallback(){
-                this.instance.disconnectedCallback();
-            }
-            adoptedCallback(){
-                this.instance.adoptedCallback();
-            }
-            attributeChangedCallback(name, oldValue, newValue){
-                this.instance.attributeChangedCallback(name, oldValue, newValue);
-            }
+                connectedCallback(){
+                    this.instance.connectedCallback();
+                }
+                disconnectedCallback(){
+                    this.instance.disconnectedCallback();
+                }
+                adoptedCallback(){
+                    this.instance.adoptedCallback();
+                }
+                attributeChangedCallback(name, oldValue, newValue){
+                    this.instance.attributeChangedCallback(name, oldValue, newValue);
+                }
 
-            appendChild(child){
-                console.log("appending a child:", child);
-                this.instance.appendChild(child);
-            }
+                appendChild(child){
+                    console.log("appending a child:", child);
+                    this.instance.appendChild(child);
+                }
 
-        }
-    );
+            }
+        );
+    }else{
+        console.log("tag [" + custom_tag + "] is already defined");
+    }
 }

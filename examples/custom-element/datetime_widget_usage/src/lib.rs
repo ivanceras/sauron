@@ -1,4 +1,5 @@
 #![deny(warnings)]
+use datetime_widget::date_time::{date, date_time, time};
 use sauron::*;
 
 enum AppMsg {}
@@ -14,8 +15,10 @@ impl Application<AppMsg> for App {
     fn view(&self) -> Node<AppMsg> {
         node! {
             <div>
-                <h5>"Usage of custom element"</h5>
+                <h2>"Called using `date-time` tag "</h2>
                 <date-time date="2022-05-16" time="15:46"></date-time>
+                <h3>"Using in an expression date_time([],[])"</h3>
+                {date_time([date("2022-07-07"), time("07:07")],[])}
             </div>
         }
     }
