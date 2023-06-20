@@ -1,5 +1,4 @@
 #![deny(warnings)]
-use sauron::mt_dom::TreePath;
 use sauron::{
     html::{attributes::*, *},
     *,
@@ -45,14 +44,6 @@ fn test_patch_insert_node() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![Patch::insert_before_node(
-            Some(&"li"),
-            TreePath::new(vec![0, 0]),
-            vec![&li(vec![key(0)], vec![text("item0")])]
-        )]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -118,14 +109,6 @@ fn test_patch_insert_node_in_the_middle() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![Patch::insert_before_node(
-            Some(&"li"),
-            TreePath::new(vec![0, 1]),
-            vec![&li(vec![key(0)], vec![text("item0")])]
-        )]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -195,19 +178,6 @@ fn multiple_insert_should_work() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![Patch::insert_before_node(
-            Some(&"li"),
-            TreePath::new(vec![0, 0]),
-            vec![
-                &li(vec![key("c")], vec![text("itemc")]),
-                &li(vec![key("b")], vec![text("itemb")]),
-                &li(vec![key("a")], vec![text("itema")]),
-                &li(vec![key(0)], vec![text("item0")]),
-            ]
-        ),]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");

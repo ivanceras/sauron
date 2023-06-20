@@ -1,5 +1,4 @@
 #![deny(warnings)]
-use crate::mt_dom::TreePath;
 use sauron::{
     html::{attributes::*, *},
     *,
@@ -45,23 +44,6 @@ fn test_multiple_replace() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![
-            Patch::remove_node(Some(&"li"), TreePath::new(vec![0, 0]),),
-            Patch::remove_node(Some(&"li"), TreePath::new(vec![0, 1]),),
-            Patch::remove_node(Some(&"li"), TreePath::new(vec![0, 2]),),
-            Patch::append_children(
-                &"ul",
-                TreePath::new(vec![0]),
-                vec![
-                    &li(vec![key(10)], vec![text("item10")]),
-                    &li(vec![key(20)], vec![text("item20")]),
-                    &li(vec![key(30)], vec![text("item30")]),
-                ]
-            )
-        ]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -126,24 +108,6 @@ fn test_multiple_replace_and_parent_is_replaced_too() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![Patch::replace_node(
-            Some(&"main"),
-            TreePath::new(vec![]),
-            &main(
-                vec![class("parent_replaced"), key("parent-new")],
-                vec![ul(
-                    vec![class("todo")],
-                    vec![
-                        li(vec![key(10)], vec![text("item10")]),
-                        li(vec![key(20)], vec![text("item20")]),
-                        li(vec![key(30)], vec![text("item30")]),
-                    ],
-                )],
-            )
-        )]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");

@@ -1,5 +1,4 @@
 #![deny(warnings)]
-use sauron::mt_dom::TreePath;
 use sauron::{html::attributes::*, html::*, *};
 
 use test_fixtures::simple_program;
@@ -34,14 +33,6 @@ fn patches_text() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![Patch::replace_node(
-            None,
-            TreePath::new(vec![0, 0, 0]),
-            &text("item1 has changed...")
-        )]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");

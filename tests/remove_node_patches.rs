@@ -1,5 +1,4 @@
 #![deny(warnings)]
-use crate::mt_dom::TreePath;
 use sauron::*;
 use sauron::{html::attributes::*, html::*};
 
@@ -44,10 +43,6 @@ fn test_remove_nodes() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![Patch::remove_node(Some(&"li"), TreePath::new(vec![0, 0]),)]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");

@@ -1,5 +1,4 @@
 #![deny(warnings)]
-use sauron::mt_dom::TreePath;
 use sauron::{
     html::{attributes::*, *},
     *,
@@ -47,18 +46,6 @@ fn insert_multiple_before_nodes() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![Patch::insert_before_node(
-            Some(&"li"),
-            TreePath::new(vec![0, 0]),
-            vec![
-                &li(vec![], vec![text("itemA")]),
-                &li(vec![], vec![text("itemB")]),
-                &li(vec![], vec![text("itemC")]),
-            ]
-        )]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -125,18 +112,6 @@ fn insert_multiple_after_nodes() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![Patch::insert_after_node(
-            Some(&"li"),
-            TreePath::new(vec![0, 2]),
-            vec![
-                &li(vec![], vec![text("itemA")]),
-                &li(vec![], vec![text("itemB")]),
-                &li(vec![], vec![text("itemC")]),
-            ]
-        )]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");

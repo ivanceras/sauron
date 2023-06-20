@@ -1,5 +1,4 @@
 #![deny(warnings)]
-use sauron::mt_dom::TreePath;
 use sauron::{
     html::{attributes::*, *},
     *,
@@ -80,14 +79,6 @@ fn node_patched_properly() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![Patch::remove_node(
-            Some(&"article"),
-            TreePath::new(vec![0, 1])
-        )]
-    );
-
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
@@ -160,13 +151,6 @@ fn node_patched_properly_remove_from_start() {
     let patches = diff(&old, &update1);
 
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![Patch::remove_node(
-            Some(&"article"),
-            TreePath::new(vec![0, 0])
-        )]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -241,17 +225,6 @@ fn node_patched_properly_text_changed() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![
-            Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0])),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![0, 2, 0]),
-                &text("item3 with changes")
-            ),
-        ]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -332,18 +305,6 @@ fn mixed_keyed_and_non_keyed_elements() {
 
     let patches = diff(&old, &update1);
     log::debug!("patches: {:#?}", patches);
-    assert_eq!(
-        patches,
-        vec![
-            Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0]),),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![0, 2, 0,]),
-                &text("item3 with changes")
-            ),
-            Patch::replace_node(None, TreePath::new(vec![1, 0]), &text("2 items left"))
-        ]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");

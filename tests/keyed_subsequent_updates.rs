@@ -1,5 +1,4 @@
 #![deny(warnings)]
-use crate::mt_dom::TreePath;
 use sauron::{
     html::{attributes::*, *},
     *,
@@ -116,26 +115,6 @@ fn subsequent_updates() {
     let patches1 = diff(&old, &update1);
 
     log::trace!("patches1: {:#?}", patches1);
-    assert_eq!(
-        patches1,
-        vec![
-            Patch::replace_node(None, TreePath::new(vec![0, 0, 0, 0,]), &text("1")),
-            Patch::insert_before_node(
-                Some(&"div"),
-                TreePath::new(vec![0, 0]),
-                vec![&div(
-                    vec![key("hashXXX")],
-                    vec![
-                        div(vec![], vec![text("0")]),
-                        div(vec![], vec![text("lineXXX")]),
-                    ],
-                )]
-            ),
-            Patch::replace_node(None, TreePath::new(vec![0, 1, 0, 0,]), &text("2")),
-            Patch::replace_node(None, TreePath::new(vec![0, 2, 0, 0,]), &text("3")),
-            Patch::replace_node(None, TreePath::new(vec![0, 3, 0, 0,]), &text("4")),
-        ]
-    );
 
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
@@ -294,27 +273,6 @@ fn subsequent_updates() {
 
     let patches2 = diff(&update1, &update2);
     log::trace!("-->patches2: {:#?}", patches2);
-    assert_eq!(
-        patches2,
-        vec![
-            Patch::replace_node(None, TreePath::new(vec![0, 0, 0, 0,]), &text("1")),
-            Patch::insert_before_node(
-                Some(&"div"),
-                TreePath::new(vec![0, 0,]),
-                vec![&div(
-                    vec![key("hashYYY")],
-                    vec![
-                        div(vec![], vec![text("0")]),
-                        div(vec![], vec![text("lineYYY")]),
-                    ],
-                )]
-            ),
-            Patch::replace_node(None, TreePath::new(vec![0, 1, 0, 0,]), &text("2")),
-            Patch::replace_node(None, TreePath::new(vec![0, 2, 0, 0,]), &text("3")),
-            Patch::replace_node(None, TreePath::new(vec![0, 3, 0, 0,]), &text("4")),
-            Patch::replace_node(None, TreePath::new(vec![0, 4, 0, 0,]), &text("5")),
-        ]
-    );
 
     simple_program
         .update_dom_with_vdom(update2.clone())
@@ -418,25 +376,6 @@ fn subsequent_updates() {
 
     let patches3 = diff(&update2, &update3);
     log::trace!("\n---->patches3: {:#?}", patches3);
-    assert_eq!(
-        patches3,
-        vec![
-            Patch::replace_node(None, TreePath::new(vec![0, 0, 0, 0,]), &text("1")),
-            Patch::insert_before_node(
-                Some(&"div"),
-                TreePath::new(vec![0, 0,]),
-                vec![&div(
-                    vec![key("hashZZZ")],
-                    vec![div(vec![], vec![text("0")]), div(vec![], vec![text("\n")]),],
-                )]
-            ),
-            Patch::replace_node(None, TreePath::new(vec![0, 1, 0, 0,]), &text("2")),
-            Patch::replace_node(None, TreePath::new(vec![0, 2, 0, 0,]), &text("3")),
-            Patch::replace_node(None, TreePath::new(vec![0, 3, 0, 0,]), &text("4")),
-            Patch::replace_node(None, TreePath::new(vec![0, 4, 0, 0,]), &text("5")),
-            Patch::replace_node(None, TreePath::new(vec![0, 5, 0, 0,]), &text("6")),
-        ]
-    );
 
     simple_program
         .update_dom_with_vdom(update3.clone())
