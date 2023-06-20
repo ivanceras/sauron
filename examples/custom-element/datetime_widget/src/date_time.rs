@@ -245,10 +245,10 @@ impl DateTimeWidgetCustomElement {
 
     #[wasm_bindgen(method, js_name = adoptedCallback)]
     pub fn adopted_callback(&mut self) {}
-}
 
-pub fn register() {
-    register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
+    pub fn register() {
+        register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
+    }
 }
 
 pub fn date<MSG, V: Into<Value>>(v: V) -> Attribute<MSG> {
@@ -263,6 +263,6 @@ pub fn date_time<MSG>(
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG> {
-    register();
+    DateTimeWidgetCustomElement::register();
     html_element(None, "date-time", attrs, children, true)
 }
