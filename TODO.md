@@ -194,6 +194,8 @@
     - [X] custom element would be appended to the `shadowRoot`
         - [X] Usage of custom element inside another sauron component should skip the custom-element internal DOM elements
     - [ ] custom element should also need access to the `textContent` of the tag for further processing
+- [ ] Properly trigger the MountEvent at the appending of the component to the DOM
+    - Right now, it is triggered when the virtual Node is created into a real Node.
 
 
 ## Performance

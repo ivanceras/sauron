@@ -158,6 +158,10 @@ impl<XMSG> sauron::CustomElement<Msg> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
+    fn custom_tag() -> &'static str {
+        "date-time"
+    }
+
     fn observed_attributes() -> Vec<&'static str> {
         vec!["date", "time"]
     }
@@ -211,7 +215,7 @@ impl DateTimeWidgetCustomElement {
 
     #[wasm_bindgen(getter, static_method_of = Self, js_name = observedAttributes)]
     pub fn observed_attributes() -> JsValue {
-        let attributes = DateTimeWidget::<Msg>::observed_attributes();
+        let attributes = DateTimeWidget::<()>::observed_attributes();
         JsValue::from_serde(&attributes).expect("must be serde")
     }
 
@@ -228,7 +232,7 @@ impl DateTimeWidgetCustomElement {
             old_value,
             new_value
         );
-        DateTimeWidget::<Msg>::attribute_changed(&self.program, attr_name, old_value, new_value);
+        DateTimeWidget::<()>::attribute_changed(&self.program, attr_name, old_value, new_value);
     }
 
     #[wasm_bindgen(method, js_name = connectedCallback)]
@@ -246,8 +250,12 @@ impl DateTimeWidgetCustomElement {
     #[wasm_bindgen(method, js_name = adoptedCallback)]
     pub fn adopted_callback(&mut self) {}
 
+    fn struct_name() -> &'static str {
+        "DateTimeWidgetCustomElement"
+    }
+
     pub fn register() {
-        register_custom_element("date-time", "DateTimeWidgetCustomElement", "HTMLElement");
+        register_custom_element(DateTimeWidget::<()>::custom_tag(), Self::struct_name());
     }
 }
 
@@ -264,5 +272,11 @@ pub fn date_time<MSG>(
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG> {
     DateTimeWidgetCustomElement::register();
-    html_element(None, "date-time", attrs, children, true)
+    html_element(
+        None,
+        DateTimeWidget::<()>::custom_tag(),
+        attrs,
+        children,
+        true,
+    )
 }

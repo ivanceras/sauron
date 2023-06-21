@@ -230,6 +230,8 @@ impl CreatedNode {
             create_element(velem.tag())
         };
 
+        // TODO: dispatching mount should be
+        // when the child is appended, not here
         Self::dispatch_mount_event(program, velem, &element);
 
         if velem.is_focused() {
