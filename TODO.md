@@ -75,12 +75,17 @@
         ```
     - The `Application` don't have to store the state of `FuiButton` component, it will be stored into the `Program` object.
         - Issue how will be map the Msg of the sub component to convert it into the Msg of the main `Application`?
-    - [ ] Merge the Container and Component which the view is now requires to have children components
+    - [X] Merge the Container and Component which the view is now requires to have children components
     - [X] Add a CustomElement trait which facilitates the component to be a custom element
     - [X] Rethink of the sauron-component-macro
         - [X] Redo it, maybe we don't need it and then manually implement all the Components
         - ~~[ ] Make Application trait for internal usage only~~
-- [ ] Make Http api passe a decoder function
+- [ ] Make Http api pass a decoder function
+- [ ] Additional to the dispatching of mount event.
+    - [X] on_mount
+         - on_will_mount
+    - [X] on_dismount
+         - on_will_dismount
 
 ## Internal
 - ~~[ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`~~

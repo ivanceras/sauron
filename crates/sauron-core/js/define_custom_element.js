@@ -10,7 +10,6 @@ export function register_custom_element(custom_tag, adapter){
             class extends HTMLElement{
                 constructor(){
                     super();
-                    console.log("outer html: {}", this.outerHTML);
                     this.instance = new window[adapter](this);
                 }
 
@@ -38,7 +37,5 @@ export function register_custom_element(custom_tag, adapter){
 
             }
         );
-    }else{
-        console.log("tag [" + custom_tag + "] is already defined");
     }
 }

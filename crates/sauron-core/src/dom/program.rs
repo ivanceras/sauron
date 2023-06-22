@@ -265,9 +265,7 @@ where
 
         match self.mount_procedure.action {
             MountAction::Append => {
-                mount_node
-                    .append_child(&created_node.node)
-                    .expect("Could not append child to mount");
+                CreatedNode::append_child_and_dispatch_mount_event(self, &mount_node, &self.current_vdom.borrow(), &created_node.node);
             }
             MountAction::ClearAppend => {
                 let mount_element: &Element = mount_node.unchecked_ref();
@@ -282,9 +280,7 @@ where
                     mount_node.remove_child(&child).expect("must remove child");
                 });
 
-                mount_node
-                    .append_child(&created_node.node)
-                    .expect("Could not append child to mount");
+                CreatedNode::append_child_and_dispatch_mount_event(self, &mount_node, &self.current_vdom.borrow(), &created_node.node);
             }
             MountAction::Replace => {
                 let mount_element: &Element = mount_node.unchecked_ref();
@@ -385,6 +381,8 @@ where
         let total_patches = {
             let current_vdom = self.current_vdom.borrow();
             let patches = diff(&current_vdom, &new_vdom);
+            log::debug!("There are {} patches", patches.len());
+            log::debug!("patches: {patches:#?}");
             let dom_patches = self
                 .convert_patches(&patches)
                 .expect("must convert patches");
@@ -574,6 +572,7 @@ where
                         .node
                         .dyn_ref()
                         .expect("only elements is supported for now");
+                    // trigger a
                     target_element
                         .insert_adjacent_element(intern("afterend"), created_element)
                         .expect("must remove target node");
@@ -584,6 +583,8 @@ where
             }
             PatchVariant::AppendChildren { children } => {
                 for child in children.into_iter() {
+                    //TODO: call dispatch_mount event here,
+                    //TODO: but it has no access to the vnode
                     target_element.append_child(&child.node)?;
                     self.active_closures.borrow_mut().extend(child.closures);
                 }
@@ -631,6 +632,7 @@ where
                         &mut self.active_closures.borrow_mut(),
                     )?;
                 }
+                //TODO: make a dispatch_on_dismount event and in the method in created node
                 target_element
                     .replace_with_with_node_1(&replacement.node)
                     .expect("must replace node");
@@ -653,6 +655,7 @@ where
                 let parent_target = target_element
                     .parent_node()
                     .expect("must have a parent node");
+                //TODO: trigger a on_dispatch event here
                 parent_target
                     .remove_child(&target_element)
                     .expect("must remove target node");

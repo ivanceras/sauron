@@ -140,9 +140,12 @@ impl CreatedNode {
                 for vnode in nodes {
                     let created_node = Self::create_dom_node(program, vnode, focused_node);
                     closures.extend(created_node.closures);
-                    doc_fragment
-                        .append_child(&created_node.node)
-                        .expect("Unable to append node to document fragment");
+                    Self::append_child_and_dispatch_mount_event(
+                        program,
+                        &doc_fragment,
+                        vnode,
+                        &created_node.node,
+                    )
                 }
                 let node: Node = doc_fragment.unchecked_into();
                 CreatedNode { node, closures }
@@ -164,36 +167,32 @@ impl CreatedNode {
         match vnode {
             vdom::Node::Leaf(leaf_node) => Self::create_leaf_node(program, leaf_node, focused_node),
             vdom::Node::Element(element_node) => {
-                Self::create_element_node(program, element_node, focused_node)
+                let mut created_node =
+                    Self::create_element_node(program, element_node, focused_node);
+                for child in element_node.get_children().iter() {
+                    if child.is_safe_html() {
+                        let child_text = child.unwrap_safe_html();
+                        // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
+                        let created_element: &Element = created_node.node.unchecked_ref();
+                        created_element
+                            .insert_adjacent_html(intern("beforeend"), child_text)
+                            .expect("must not error");
+                    } else {
+                        let created_child = Self::create_dom_node(program, child, focused_node);
+                        created_node.closures.extend(created_child.closures);
+
+                        Self::append_child_and_dispatch_mount_event(
+                            program,
+                            &created_node.node,
+                            &child,
+                            &created_child.node,
+                        );
+                    }
+                }
+                created_node
             }
             vdom::Node::NodeList(_node_list) => {
                 panic!("Node list must have already been unrolled");
-            }
-        }
-    }
-
-    /// dispatch the mount event,
-    /// call the listener since browser don't allow asynchronous execution of
-    /// dispatching custom events (non-native browser events)
-    ///
-    /// TODO: this is triggered in the creation of node including the root node
-    /// which has not yet beend assigned to the program
-    /// causing it to panic
-    fn dispatch_mount_event<DSP, MSG>(program: &DSP, velem: &vdom::Element<MSG>, element: &Element)
-    where
-        MSG: 'static,
-        DSP: Clone + Dispatch<MSG> + 'static,
-    {
-        for att in velem.attrs.iter() {
-            if *att.name() == "mount" {
-                for val in att.value().iter() {
-                    if let AttributeValue::EventListener(cb) = val {
-                        let msg = cb.emit(Event::from(MountEvent {
-                            target_node: element.clone().unchecked_into(),
-                        }));
-                        program.dispatch(msg);
-                    }
-                }
             }
         }
     }
@@ -230,10 +229,6 @@ impl CreatedNode {
             create_element(velem.tag())
         };
 
-        // TODO: dispatching mount should be
-        // when the child is appended, not here
-        Self::dispatch_mount_event(program, velem, &element);
-
         if velem.is_focused() {
             *focused_node = Some(element.clone().unchecked_into());
             log::trace!("element is focused..{:?}", focused_node);
@@ -249,25 +244,49 @@ impl CreatedNode {
             &velem.get_attributes().iter().collect::<Vec<_>>(),
         );
 
-        for child in velem.get_children().iter() {
-            if child.is_safe_html() {
-                let child_text = child.unwrap_safe_html();
-                // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
-                element
-                    .insert_adjacent_html(intern("beforeend"), child_text)
-                    .expect("must not error");
-            } else {
-                let created_child = Self::create_dom_node(program, child, focused_node);
-
-                closures.extend(created_child.closures);
-                element
-                    .append_child(&created_child.node)
-                    .expect("Unable to append element node");
-            }
-        }
-
         let node: Node = element.unchecked_into();
         CreatedNode { node, closures }
+    }
+
+    /// dispatch the mount event,
+    /// call the listener since browser don't allow asynchronous execution of
+    /// dispatching custom events (non-native browser events)
+    ///
+    pub fn dispatch_mount_event<DSP, MSG>(program: &DSP, vnode: &vdom::Node<MSG>, node: &Node)
+    where
+        MSG: 'static,
+        DSP: Clone + Dispatch<MSG> + 'static,
+    {
+        if let Some(velm) = vnode.as_element_ref() {
+            for att in velm.attrs.iter() {
+                if *att.name() == "mount" {
+                    for val in att.value().iter() {
+                        if let AttributeValue::EventListener(cb) = val {
+                            let msg = cb.emit(Event::from(MountEvent {
+                                target_node: node.clone(),
+                            }));
+                            program.dispatch(msg);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// a helper method to append a node to its parent and trigger a mount event if there is any
+    pub fn append_child_and_dispatch_mount_event<DSP, MSG>(
+        program: &DSP,
+        parent: &Node,
+        child_vnode: &vdom::Node<MSG>,
+        child_node: &Node,
+    ) where
+        MSG: 'static,
+        DSP: Clone + Dispatch<MSG> + 'static,
+    {
+        parent
+            .append_child(&child_node)
+            .expect("must append child node");
+        Self::dispatch_mount_event(program, child_vnode, &child_node);
     }
 
     /// set the element attribute

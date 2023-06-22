@@ -91,7 +91,7 @@ where
                 Effects::with_external(parent_msg)
             }
             Msg::Mount(target_node) => {
-                log::debug!("widget is mounted to {:?}", target_node);
+                log::info!("----->>>widget is mounted to {:?}", target_node);
                 Effects::none()
             }
             Msg::BtnClick => {
