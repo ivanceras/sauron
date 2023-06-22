@@ -265,7 +265,7 @@ where
 
         match self.mount_procedure.action {
             MountAction::Append => {
-                CreatedNode::append_child_and_dispatch_mount_event(self, &mount_node, &self.current_vdom.borrow(), &created_node.node);
+                CreatedNode::append_child_and_dispatch_mount_event(&mount_node,  &created_node.node);
             }
             MountAction::ClearAppend => {
                 let mount_element: &Element = mount_node.unchecked_ref();
@@ -280,7 +280,7 @@ where
                     mount_node.remove_child(&child).expect("must remove child");
                 });
 
-                CreatedNode::append_child_and_dispatch_mount_event(self, &mount_node, &self.current_vdom.borrow(), &created_node.node);
+                CreatedNode::append_child_and_dispatch_mount_event(&mount_node, &created_node.node);
             }
             MountAction::Replace => {
                 let mount_element: &Element = mount_node.unchecked_ref();
@@ -583,9 +583,7 @@ where
             }
             PatchVariant::AppendChildren { children } => {
                 for child in children.into_iter() {
-                    //TODO: call dispatch_mount event here,
-                    //TODO: but it has no access to the vnode
-                    target_element.append_child(&child.node)?;
+                    CreatedNode::append_child_and_dispatch_mount_event(target_element.unchecked_ref(), &child.node);
                     self.active_closures.borrow_mut().extend(child.closures);
                 }
             }

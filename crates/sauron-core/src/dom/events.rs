@@ -104,18 +104,26 @@ pub struct MountEvent {
     pub target_node: web_sys::Node,
 }
 
+impl MountEvent {
+    /// create a native web event
+    pub fn create_web_event() -> web_sys::Event {
+        web_sys::Event::new("mount").expect("as event")
+    }
+}
+
 /// custom mount event
 pub fn on_mount<F, MSG>(f: F) -> Attribute<MSG>
 where
     F: Fn(MountEvent) -> MSG + 'static,
     MSG: 'static,
 {
-    on("mount", move |event: Event| match event {
-        Event::MountEvent(me) => f(me),
-        _ => {
-            log::warn!("was expecting a mount event");
-            panic!("not a mount event!")
-        }
+    on("mount", move |event: Event| {
+        let web_event = event.as_web().expect("must be a web event");
+        let event_target = web_event.target().expect("must have a target");
+        let me = MountEvent {
+            target_node: event_target.unchecked_into(),
+        };
+        f(me)
     })
 }
 

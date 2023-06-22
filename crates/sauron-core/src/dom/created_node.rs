@@ -140,12 +140,7 @@ impl CreatedNode {
                 for vnode in nodes {
                     let created_node = Self::create_dom_node(program, vnode, focused_node);
                     closures.extend(created_node.closures);
-                    Self::append_child_and_dispatch_mount_event(
-                        program,
-                        &doc_fragment,
-                        vnode,
-                        &created_node.node,
-                    )
+                    Self::append_child_and_dispatch_mount_event(&doc_fragment, &created_node.node)
                 }
                 let node: Node = doc_fragment.unchecked_into();
                 CreatedNode { node, closures }
@@ -182,9 +177,7 @@ impl CreatedNode {
                         created_node.closures.extend(created_child.closures);
 
                         Self::append_child_and_dispatch_mount_event(
-                            program,
                             &created_node.node,
-                            &child,
                             &created_child.node,
                         );
                     }
@@ -252,41 +245,20 @@ impl CreatedNode {
     /// call the listener since browser don't allow asynchronous execution of
     /// dispatching custom events (non-native browser events)
     ///
-    pub fn dispatch_mount_event<DSP, MSG>(program: &DSP, vnode: &vdom::Node<MSG>, node: &Node)
-    where
-        MSG: 'static,
-        DSP: Clone + Dispatch<MSG> + 'static,
-    {
-        if let Some(velm) = vnode.as_element_ref() {
-            for att in velm.attrs.iter() {
-                if *att.name() == "mount" {
-                    for val in att.value().iter() {
-                        if let AttributeValue::EventListener(cb) = val {
-                            let msg = cb.emit(Event::from(MountEvent {
-                                target_node: node.clone(),
-                            }));
-                            program.dispatch(msg);
-                        }
-                    }
-                }
-            }
-        }
+    pub fn dispatch_mount_event(node: &Node) {
+        let event_target: &web_sys::EventTarget = node.unchecked_ref();
+        assert_eq!(
+            Ok(true),
+            event_target.dispatch_event(&MountEvent::create_web_event())
+        );
     }
 
     /// a helper method to append a node to its parent and trigger a mount event if there is any
-    pub fn append_child_and_dispatch_mount_event<DSP, MSG>(
-        program: &DSP,
-        parent: &Node,
-        child_vnode: &vdom::Node<MSG>,
-        child_node: &Node,
-    ) where
-        MSG: 'static,
-        DSP: Clone + Dispatch<MSG> + 'static,
-    {
+    pub fn append_child_and_dispatch_mount_event(parent: &Node, child_node: &Node) {
         parent
             .append_child(&child_node)
             .expect("must append child node");
-        Self::dispatch_mount_event(program, child_vnode, &child_node);
+        Self::dispatch_mount_event(&child_node);
     }
 
     /// set the element attribute
