@@ -80,6 +80,7 @@
     - [X] Rethink of the sauron-component-macro
         - [X] Redo it, maybe we don't need it and then manually implement all the Components
         - ~~[ ] Make Application trait for internal usage only~~
+- [ ] Make Http api passe a decoder function
 
 ## Internal
 - ~~[ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`~~
@@ -162,7 +163,7 @@
 - [ ] Tighten visibility of objects that are not meant to be `pub`
     - [X] some fields in `Program`
     - [ ] struct types that are not meant to be public
-- [ ] Use the deadline object in `request_idle_callback_with_deadline`, instead of just `f64`, which calculates the remaining time manually
+- [X] Use the deadline object in `request_idle_callback_with_deadline`, instead of just `f64`, which calculates the remaining time manually
 - [ ] Migrate to rshtml, since syn-rsx is unmaintained.
 
 ## Features
@@ -183,7 +184,7 @@
 - [X] Add example using markdown
 - [X] Make use of `serde_json` to parse `style` into components
 - [ ] Add an example where a program is a custom html element, that way sauron could be used as a way to migrate parts of an existing html/js code base.
-    - [ ] Custom element which is defiend as a web component where it can be used by some other Application.
+    - [X] Custom element which is defiend as a web component where it can be used by some other Application.
     - [ ] The App should be serializable and each of the fields will become an html attribute which
     - [ ] There is an issue with the patch not being able to find the element to be patch when using custom element
         due to the reason that the root_node stored in the dom updater is not the first element of the view, but rather
