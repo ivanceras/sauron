@@ -86,6 +86,12 @@
          - on_will_mount
     - [X] on_dismount
          - on_will_dismount
+- [ ] Make the mount event be wrap as a real event, this way we can dispatch it in the real dom instead of from the virtual node
+    ```javascript
+        let mount_event = new Event("mount");
+        elm.dispatchEvent(mount_event);
+    ```
+- [ ] Call set_attribute in addition to setting the special attributes such as `value`, `checked`, this should trigger the `attribute_changed` callback in web components
 
 ## Internal
 - ~~[ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`~~
