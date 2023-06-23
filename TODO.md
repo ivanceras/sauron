@@ -86,7 +86,7 @@
          - on_will_mount
     - [X] on_dismount
          - on_will_dismount
-- [ ] Make the mount event be wrap as a real event, this way we can dispatch it in the real dom instead of from the virtual node
+- [X] Make the mount event be wrap as a real event, this way we can dispatch it in the real dom instead of from the virtual node
     ```javascript
         let mount_event = new Event("mount");
         elm.dispatchEvent(mount_event);
