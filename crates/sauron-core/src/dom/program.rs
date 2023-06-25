@@ -381,7 +381,9 @@ where
         let total_patches = {
             let current_vdom = self.current_vdom.borrow();
             let patches = diff(&current_vdom, &new_vdom);
+            #[cfg(feature = "with-debug")]
             log::debug!("There are {} patches", patches.len());
+            #[cfg(feature = "with-debug")]
             log::debug!("patches: {patches:#?}");
             let dom_patches = self
                 .convert_patches(&patches)
