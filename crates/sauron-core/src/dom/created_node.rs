@@ -316,16 +316,29 @@ impl CreatedNode {
                     )
                     .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
             } else {
-                match *attr.name() {
+                let attr_name = attr.name();
+                match *attr_name {
                     "value" => {
+                        log::info!("setting value for {}", element.outer_html());
+                        element
+                            .set_attribute(intern(attr_name), &merged_plain_values)
+                            .unwrap_or_else(|_| {
+                                panic!("Error setting an attribute for {element:?}")
+                            });
                         Self::set_value_str(element, &merged_plain_values);
-                        Self::set_with_values(element, &plain_values);
+                        Self::set_numeric_values(element, &plain_values);
                     }
                     "open" => {
                         let is_open: bool = plain_values
                             .first()
                             .and_then(|v| v.get_simple().and_then(|v| v.as_bool()))
                             .unwrap_or(false);
+
+                        element
+                            .set_attribute(intern(attr.name()), &is_open.to_string())
+                            .unwrap_or_else(|_| {
+                                panic!("Error setting an attribute for {element:?}")
+                            });
                         Self::set_open(element, is_open);
                     }
                     "checked" => {
@@ -333,6 +346,12 @@ impl CreatedNode {
                             .first()
                             .and_then(|av| av.get_simple().and_then(|v| v.as_bool()))
                             .unwrap_or(false);
+
+                        element
+                            .set_attribute(intern(attr_name), &is_checked.to_string())
+                            .unwrap_or_else(|_| {
+                                panic!("Error setting an attribute for {element:?}")
+                            });
                         Self::set_checked(element, is_checked)
                     }
                     "disabled" => {
@@ -340,11 +359,17 @@ impl CreatedNode {
                             .first()
                             .and_then(|av| av.get_simple().and_then(|v| v.as_bool()))
                             .unwrap_or(false);
+
+                        element
+                            .set_attribute(intern(attr_name), &is_disabled.to_string())
+                            .unwrap_or_else(|_| {
+                                panic!("Error setting an attribute for {element:?}")
+                            });
                         Self::set_disabled(element, is_disabled);
                     }
                     _ => {
                         element
-                            .set_attribute(intern(attr.name()), &merged_plain_values)
+                            .set_attribute(intern(attr_name), &merged_plain_values)
                             .unwrap_or_else(|_| {
                                 panic!("Error setting an attribute for {element:?}")
                             });
@@ -547,7 +572,7 @@ impl CreatedNode {
     }
 
     /// set the element attribute value with the first numerical value found in values
-    fn set_with_values<MSG>(element: &Element, values: &[&AttributeValue<MSG>]) {
+    fn set_numeric_values<MSG>(element: &Element, values: &[&AttributeValue<MSG>]) {
         let value_i32 = values
             .first()
             .and_then(|v| v.get_simple().and_then(|v| v.as_i32()));

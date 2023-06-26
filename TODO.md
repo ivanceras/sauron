@@ -91,7 +91,7 @@
         let mount_event = new Event("mount");
         elm.dispatchEvent(mount_event);
     ```
-- [ ] Call set_attribute in addition to setting the special attributes such as `value`, `checked`, this should trigger the `attribute_changed` callback in web components
+- [X] Call set_attribute in addition to setting the special attributes such as `value`, `checked`, this should trigger the `attribute_changed` callback in web components
 
 ## Internal
 - ~~[ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`~~
@@ -161,7 +161,7 @@
                 Replace
             }
         ```
-    - [ ] Mount event should have a reference to the host_node and the root_node
+    - [X] Mount event should have a reference to the host_node and the root_node
             - host_node is the node where the view is mounted, usually the parent
             - in case of replace host_node is the same as the root_node.
 - [X] Maybe we don't need the `async` in update.
