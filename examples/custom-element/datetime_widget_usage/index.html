@@ -14,7 +14,7 @@
         await init().catch(console.error);
 
         function dateTimeChange(e){
-            console.log("date time is changed", e);
+            console.log("dateTimeChange in custom tag usage", e);
         }
 
         function dateTimeClicked(e){
@@ -24,10 +24,12 @@
 
         window.dateTimeChange = dateTimeChange;
         window.dateTimeClicked = dateTimeClicked;
+        let date1 = document.getElementById("date1");
+        date1.addEventListener("input", dateTimeChange);
     </script>
 
     <h1>Using it in plain html</h1>
-    <date-time id="date1" date="2022-02-22" time="22:22" onchange="dateTimeChange()" ></date-time>
+    <date-time id="date1" date="2022-02-22" time="22:22"></date-time>
     <button onclick="dateTimeClicked()">Some button</button>
   </body>
 </html>

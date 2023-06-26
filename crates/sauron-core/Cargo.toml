@@ -47,6 +47,7 @@ features = [
     "DocumentFragment",
     "Element",
     "Event",
+    "EventInit",
     "HtmlElement",
     "EventTarget",
     "FocusEvent",

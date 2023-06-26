@@ -1,3 +1,4 @@
+use sauron::wasm_bindgen::JsCast;
 use sauron::{
     dom::register_custom_element,
     dom::{Callback, MountAction, MountTarget},
@@ -16,12 +17,14 @@ pub enum Msg {
     DateChange(String),
     TimeChange(String),
     TimeOrDateModified(String),
-    Mount(web_sys::Node),
+    Mounted(MountEvent),
     BtnClick,
 }
 
 #[derive(Debug, Clone)]
 pub struct DateTimeWidget<XMSG> {
+    /// the host element the web editor is mounted to, when mounted as a custom web component
+    host_element: Option<web_sys::Element>,
     date: String,
     time: String,
     cnt: i32,
@@ -31,6 +34,7 @@ pub struct DateTimeWidget<XMSG> {
 impl<XMSG> Default for DateTimeWidget<XMSG> {
     fn default() -> Self {
         Self {
+            host_element: None,
             date: String::new(),
             time: String::new(),
             cnt: 0,
@@ -45,6 +49,7 @@ where
 {
     pub fn new(date: &str, time: &str) -> Self {
         DateTimeWidget {
+            host_element: None,
             date: date.to_string(),
             time: time.to_string(),
             cnt: 0,
@@ -88,10 +93,28 @@ where
                     let pmsg = listener.emit(self.date_time());
                     parent_msg.push(pmsg);
                 }
+                if let Some(host_element) = self.host_element.as_ref() {
+                    host_element
+                        .set_attribute("date_time", &date_time)
+                        .expect("change attribute");
+                    host_element
+                        .dispatch_event(&InputEvent::create_web_event_composed())
+                        .expect("must dispatch event");
+                } else {
+                    log::debug!("There is no host_element");
+                }
                 Effects::with_external(parent_msg)
             }
-            Msg::Mount(target_node) => {
-                log::info!("----->>>widget is mounted to {:?}", target_node);
+            Msg::Mounted(mount_event) => {
+                let mount_element: web_sys::Element = mount_event.target_node.unchecked_into();
+                let root_node = mount_element.get_root_node();
+                if let Some(shadow_root) = root_node.dyn_ref::<web_sys::ShadowRoot>() {
+                    log::info!("There is a shadow root");
+                    let host_element = shadow_root.host();
+                    self.host_element = Some(host_element);
+                } else {
+                    log::warn!("There is no shadow root");
+                }
                 Effects::none()
             }
             Msg::BtnClick => {
@@ -121,10 +144,7 @@ where
 
     fn view(&self) -> Node<Msg> {
         div(
-            [
-                class("datetimebox"),
-                on_mount(|me| Msg::Mount(me.target_node)),
-            ],
+            [class("datetimebox"), on_mount(Msg::Mounted)],
             [
                 input(
                     [

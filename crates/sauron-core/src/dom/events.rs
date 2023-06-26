@@ -234,6 +234,18 @@ impl InputEvent {
     fn new(value: String, event: web_sys::Event) -> Self {
         InputEvent { value, event }
     }
+
+    /// create a native web event
+    pub fn create_web_event() -> web_sys::Event {
+        web_sys::Event::new("input").expect("as event")
+    }
+
+    /// create a native web event, with composed set to true
+    pub fn create_web_event_composed() -> web_sys::Event {
+        let mut event_init = web_sys::EventInit::new();
+        event_init.composed(true);
+        web_sys::Event::new_with_event_init_dict("input", &event_init).expect("event init")
+    }
 }
 
 fn to_input_event(event: Event) -> InputEvent {
