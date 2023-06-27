@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.54.1
+- bump up version such that `sauron-node-macro` is using `sauron-core` v0.54.1 as well.
+
 ## 0.54.0
 - fix: make clippy happy, use bump up version of mt-dom
 - fix to suit changes in mt-dom where replacement uses multiple nodes, fix tests
