@@ -264,7 +264,7 @@ fn remove_event_from_replaced_node() {
         vec![Patch::replace_node(
             Some(&"div"),
             TreePath::new(vec![]),
-            &p(vec![], vec![])
+            vec![&p(vec![], vec![])]
         )],
     );
     simple_program.set_current_dom(old);

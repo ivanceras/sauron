@@ -36,7 +36,7 @@ fn nodes_with_event_should_not_recycle() {
         vec![Patch::replace_node(
             Some(&"div"),
             TreePath::new(vec![0]),
-            &div(vec![class("child")], vec![])
+            vec![&div(vec![class("child")], vec![])]
         )]
     );
 }
@@ -57,7 +57,7 @@ fn remove_event_from_replaced_node() {
         vec![Patch::replace_node(
             Some(&"div"),
             TreePath::new(vec![]),
-            &p(vec![], vec![])
+            vec![&p(vec![], vec![])]
         )],
     );
     simple_program.set_current_dom(old);

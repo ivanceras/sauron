@@ -48,7 +48,7 @@ pub enum PatchVariant<MSG> {
     /// Replace the target node with the replacement node
     ReplaceNode {
         /// the replacement node
-        replacement: CreatedNode,
+        replacement: Vec<CreatedNode>,
     },
     /// Remove the target node
     RemoveNode,
@@ -119,8 +119,12 @@ impl<MSG> DomPatch<MSG> {
             },
 
             PatchType::ReplaceNode { replacement } => {
-                let replacement =
-                    CreatedNode::create_dom_node::<DSP, MSG>(program, replacement, focused_node);
+                let replacement: Vec<CreatedNode> = replacement
+                    .iter()
+                    .map(|node| {
+                        CreatedNode::create_dom_node::<DSP, MSG>(program, node, focused_node)
+                    })
+                    .collect();
                 Self {
                     patch_path,
                     target_element,

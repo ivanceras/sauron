@@ -625,17 +625,30 @@ where
             // This also removes the associated closures and event listeners to the node being replaced
             // including the associated closures of the descendant of replaced node
             // before it is actully replaced in the DOM
-            PatchVariant::ReplaceNode { replacement } => {
+            PatchVariant::ReplaceNode { mut replacement } => {
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     CreatedNode::remove_event_listeners(
                         &target_element,
                         &mut self.active_closures.borrow_mut(),
                     )?;
                 }
+                let first_node = replacement.pop().expect("must have a first node");
                 //TODO: make a dispatch_on_dismount event and in the method in created node
                 target_element
-                    .replace_with_with_node_1(&replacement.node)
+                    .replace_with_with_node_1(&first_node.node)
                     .expect("must replace node");
+
+                self.active_closures.borrow_mut().extend(first_node.closures);
+
+                let first_node_elm: &web_sys::Element = first_node.node.unchecked_ref();
+
+                for node in replacement.into_iter(){
+                    let node_elm: &web_sys::Element = node.node.unchecked_ref();
+                    first_node_elm.insert_adjacent_element(intern("beforebegin"),&node_elm).expect("append child");
+                    self.active_closures
+                        .borrow_mut()
+                        .extend(node.closures);
+                }
 
                 //Note: it is important that root_node points to the original mutable reference here
                 // since it can be replaced with a new root Node(the top-level node of the view) when patching
@@ -643,13 +656,11 @@ where
                 // we replace the root node here, so that's reference is updated
                 // to the newly created node
                 if patch_path.path.is_empty() {
-                    *self.root_node.borrow_mut() = Some(replacement.node);
+                    *self.root_node.borrow_mut() = Some(first_node.node);
                     #[cfg(feature = "with-debug")]
                     log::info!("the root_node is replaced with {:?}", &self.root_node);
                 }
-                self.active_closures
-                    .borrow_mut()
-                    .extend(replacement.closures);
+
             }
             PatchVariant::RemoveNode => {
                 let parent_target = target_element

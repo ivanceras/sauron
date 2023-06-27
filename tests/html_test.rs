@@ -117,7 +117,7 @@ fn replace_node() {
         vec![Patch::replace_node(
             Some(&"div"),
             TreePath::new(vec![]),
-            &span(vec![], vec![])
+            vec![&span(vec![], vec![])]
         )],
         "ReplaceNode the root if the tag changed"
     );
@@ -129,7 +129,7 @@ fn replace_node() {
         vec![Patch::replace_node(
             Some(&"b"),
             TreePath::new(vec![0]),
-            &strong(vec![], vec![])
+            vec![&strong(vec![], vec![])]
         )],
     );
 
@@ -145,9 +145,9 @@ fn replace_node() {
             Patch::replace_node(
                 Some(&"b"),
                 TreePath::new(vec![0]),
-                &i(vec![], vec![text("1")])
+                vec![&i(vec![], vec![text("1")])]
             ),
-            Patch::replace_node(Some(&"b"), TreePath::new(vec![1]), &i(vec![], vec![])),
+            Patch::replace_node(Some(&"b"), TreePath::new(vec![1]), vec![&i(vec![], vec![])]),
         ],
     )
 }
@@ -242,7 +242,7 @@ fn replace_text_node() {
         vec![Patch::replace_node(
             None,
             TreePath::new(vec![]),
-            &text("New")
+            vec![&text("New")]
         )],
         "ReplaceNode text node",
     );

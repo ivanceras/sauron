@@ -37,7 +37,7 @@ fn nodes_with_event_must_be_replaced() {
         vec![Patch::replace_node(
             Some(&"input"),
             TreePath::new(vec![]),
-            &input(vec![id(elem_id), value("End Text"),], vec![]),
+            vec![&input(vec![id(elem_id), value("End Text"),], vec![])],
         )]
     );
 }
@@ -155,9 +155,9 @@ fn replace_node2() {
             Patch::replace_node(
                 Some(&"b"),
                 TreePath::new(vec![0]),
-                &i(vec![], vec![text("1")])
+                vec![&i(vec![], vec![text("1")])]
             ),
-            Patch::replace_node(Some(&"b"), TreePath::new(vec![1]), &i(vec![], vec![])),
+            Patch::replace_node(Some(&"b"), TreePath::new(vec![1]), vec![&i(vec![], vec![])]),
         ],
         "ReplaceNode node with a child",
     )
@@ -225,7 +225,7 @@ fn remove_nodes3() {
         dbg!(diff(&old, &new)),
         vec![
             Patch::remove_node(Some(&"i"), TreePath::new(vec![0, 1]),),
-            Patch::replace_node(Some(&"b"), TreePath::new(vec![1]), &i(vec![], vec![])),
+            Patch::replace_node(Some(&"b"), TreePath::new(vec![1]), vec![&i(vec![], vec![])]),
         ],
         "Removing child and change next node after parent",
     )
@@ -338,7 +338,7 @@ fn remove_events_will_become_replace_node() {
         vec![Patch::replace_node(
             Some(&"div"),
             TreePath::new(vec![]),
-            &div(vec![], vec![])
+            vec![&div(vec![], vec![])]
         )],
         "Remove events",
     );
@@ -378,7 +378,7 @@ fn text_changed_in_keyed_elements() {
             Patch::replace_node(
                 None,
                 TreePath::new(vec![0, 2, 0]),
-                &text("item3 with changes")
+                vec![&text("item3 with changes")]
             ),
             Patch::remove_node(Some(&"article"), TreePath::new(vec![0, 0]),),
         ]
