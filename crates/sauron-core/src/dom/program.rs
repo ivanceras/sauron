@@ -644,7 +644,7 @@ where
 
                 for node in replacement.into_iter(){
                     let node_elm: &web_sys::Element = node.node.unchecked_ref();
-                    first_node_elm.insert_adjacent_element(intern("beforebegin"),&node_elm).expect("append child");
+                    first_node_elm.insert_adjacent_element(intern("beforebegin"), node_elm).expect("append child");
                     self.active_closures
                         .borrow_mut()
                         .extend(node.closures);

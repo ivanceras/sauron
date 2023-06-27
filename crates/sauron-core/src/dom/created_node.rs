@@ -256,9 +256,9 @@ impl CreatedNode {
     /// a helper method to append a node to its parent and trigger a mount event if there is any
     pub fn append_child_and_dispatch_mount_event(parent: &Node, child_node: &Node) {
         parent
-            .append_child(&child_node)
+            .append_child(child_node)
             .expect("must append child node");
-        Self::dispatch_mount_event(&child_node);
+        Self::dispatch_mount_event(child_node);
     }
 
     /// set the element attribute
