@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.54.0
+- fix: make clippy happy, use bump up version of mt-dom
+- fix to suit changes in mt-dom where replacement uses multiple nodes, fix tests
+- add composed to InputEvent, modify the custom_element example to demonstrate input event
+- call on `set_attribute`, in order to trigger attribute_change value for special attributes such as `value`, `checked`, `open`, `disabled`  etc
+- fix: put debug logging behind feature patches
+- add improvement to MountEvent dispatching it as a native web event
+- refine the appending of child nodes and combine them into a function that calls the dispatch_mount event together upon appending
+- simplify the `register_custom_element` function, to just accept the 2 args instead of 3.
+    - add custom_tag function to CustomElement trait
+    - This includes the custom-tag and the CustomElement wrapper, and removes the never changing HTML as base class
+    - add improvements on custom_elements, auto-registering when used in function call to form a widget, attributes should also be a function inside the module
+    - move the register function as a static member of the WidgetCustomElement
+- add more util functions for asynchronous execution
+- use edition 2021 for the example projects
+
 ## 0.53.0
 - **breaking**: fix glob imports conflict, remove prelude.
     - the html tags and attributes should be explicity imported as well
