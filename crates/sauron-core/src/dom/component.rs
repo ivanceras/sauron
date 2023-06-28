@@ -1,5 +1,4 @@
 use crate::{dom::Effects, vdom::Node};
-use std::collections::BTreeMap;
 
 #[cfg(feature = "with-dom")]
 use wasm_bindgen::JsValue;
@@ -53,12 +52,6 @@ pub trait CustomElement<MSG> {
         new_value: JsValue,
     ) where
         DSP: Dispatch<MSG> + Clone + 'static;
-
-    /// This will be invoked when a component needs to set the attributes for the
-    /// mounted element of this component
-    fn attributes_for_mount(&self) -> BTreeMap<String, String> {
-        BTreeMap::new()
-    }
 }
 
 /// A Container have children that is set from the parent component
