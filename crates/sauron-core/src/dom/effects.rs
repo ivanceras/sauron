@@ -10,7 +10,7 @@ use crate::dom::cmd::Modifier;
 pub struct Effects<MSG, XMSG> {
     /// Messages that will be executed locally in the Component
     pub local: Vec<MSG>,
-    /// effects that will be executed on the parent Component that instantiate
+    /// effects that will be executed on the parent Component which instantiate
     /// this component
     pub external: Vec<XMSG>,
     pub(crate) modifier: Modifier,
@@ -83,6 +83,24 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
         Effects {
             local: local.into_iter().map(f).collect(),
             external,
+            modifier,
+        }
+    }
+
+    /// Map the external messages of this Effects such that XMSG will be transposed into XMSG2
+    /// with the use of the mapping function `f`
+    pub fn map_external<F, XMSG2>(self, f: F) -> Effects<MSG, XMSG2>
+    where
+        F: Fn(XMSG) -> XMSG2 + 'static,
+    {
+        let Effects {
+            local,
+            external,
+            modifier,
+        } = self;
+        Effects {
+            local,
+            external: external.into_iter().map(f).collect(),
             modifier,
         }
     }
