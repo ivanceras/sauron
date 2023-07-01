@@ -2,7 +2,7 @@ use crate::{
     dom::{Dispatch, Event},
     events::MountEvent,
     html,
-    html::attributes::{AttributeValue, SegregatedAttributes, Special},
+    html::attributes::{AttributeValue, SegregatedAttributes},
     vdom,
     vdom::{Attribute, Leaf, Listener, NodeTrait},
 };
@@ -13,10 +13,9 @@ use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
     self, Element, EventTarget, HtmlButtonElement, HtmlDataElement, HtmlDetailsElement,
-    HtmlElement, HtmlFieldSetElement, HtmlInputElement, HtmlLiElement, HtmlLinkElement,
-    HtmlMenuItemElement, HtmlMeterElement, HtmlOptGroupElement, HtmlOptionElement,
-    HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement, HtmlStyleElement,
-    HtmlTextAreaElement, Node, Text,
+    HtmlFieldSetElement, HtmlInputElement, HtmlLiElement, HtmlLinkElement, HtmlMenuItemElement,
+    HtmlMeterElement, HtmlOptGroupElement, HtmlOptionElement, HtmlOutputElement, HtmlParamElement,
+    HtmlProgressElement, HtmlSelectElement, HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
 
 /// data attribute name used in assigning the node id of an element with events
@@ -106,11 +105,7 @@ impl CreatedNode {
         crate::document().create_text_node(txt)
     }
 
-    fn create_leaf_node<DSP, MSG>(
-        program: &DSP,
-        leaf: &Leaf<MSG>,
-        focused_node: &mut Option<Node>,
-    ) -> CreatedNode
+    fn create_leaf_node<DSP, MSG>(program: &DSP, leaf: &Leaf<MSG>) -> CreatedNode
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
@@ -138,7 +133,7 @@ impl CreatedNode {
                 let doc_fragment = document.create_document_fragment();
                 let mut closures = ActiveClosure::new();
                 for vnode in nodes {
-                    let created_node = Self::create_dom_node(program, vnode, focused_node);
+                    let created_node = Self::create_dom_node(program, vnode);
                     closures.extend(created_node.closures);
                     Self::append_child_and_dispatch_mount_event(&doc_fragment, &created_node.node)
                 }
@@ -150,20 +145,15 @@ impl CreatedNode {
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
-    pub fn create_dom_node<DSP, MSG>(
-        program: &DSP,
-        vnode: &vdom::Node<MSG>,
-        focused_node: &mut Option<Node>,
-    ) -> CreatedNode
+    pub fn create_dom_node<DSP, MSG>(program: &DSP, vnode: &vdom::Node<MSG>) -> CreatedNode
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
     {
         match vnode {
-            vdom::Node::Leaf(leaf_node) => Self::create_leaf_node(program, leaf_node, focused_node),
+            vdom::Node::Leaf(leaf_node) => Self::create_leaf_node(program, leaf_node),
             vdom::Node::Element(element_node) => {
-                let mut created_node =
-                    Self::create_element_node(program, element_node, focused_node);
+                let mut created_node = Self::create_element_node(program, element_node);
                 for child in element_node.get_children().iter() {
                     if child.is_safe_html() {
                         let child_text = child.unwrap_safe_html();
@@ -173,7 +163,7 @@ impl CreatedNode {
                             .insert_adjacent_html(intern("beforeend"), child_text)
                             .expect("must not error");
                     } else {
-                        let created_child = Self::create_dom_node(program, child, focused_node);
+                        let created_child = Self::create_dom_node(program, child);
                         created_node.closures.extend(created_child.closures);
 
                         Self::append_child_and_dispatch_mount_event(
@@ -199,11 +189,7 @@ impl CreatedNode {
 
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
-    fn create_element_node<DSP, MSG>(
-        program: &DSP,
-        velem: &vdom::Element<MSG>,
-        focused_node: &mut Option<Node>,
-    ) -> CreatedNode
+    fn create_element_node<DSP, MSG>(program: &DSP, velem: &vdom::Element<MSG>) -> CreatedNode
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
@@ -221,12 +207,6 @@ impl CreatedNode {
         } else {
             create_element(velem.tag())
         };
-
-        if velem.is_focused() {
-            *focused_node = Some(element.clone().unchecked_into());
-            log::trace!("element is focused..{:?}", focused_node);
-            Self::set_element_focus(&element);
-        }
 
         let mut closures = ActiveClosure::new();
 
@@ -433,12 +413,6 @@ impl CreatedNode {
                 .expect("Unable to get closure")
                 .push((event_str, callback_wrapped));
         }
-    }
-
-    /// set focus to this element
-    pub(crate) fn set_element_focus(element: &Element) {
-        let html_element: &HtmlElement = element.unchecked_ref();
-        html_element.focus().expect("must focus")
     }
 
     /// explicitly call `set_checked` function on the html element

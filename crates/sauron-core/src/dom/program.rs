@@ -43,12 +43,6 @@ where
     ///
     pub active_closures: Rc<RefCell<ActiveClosure>>,
 
-    /// The program should be able to set and keep track of the focused element.
-    /// There is only 1 focused element at any given time.
-    ///
-    /// after mounting or update dispatch call, the element will be focused
-    focused_node: Rc<RefCell<Option<Node>>>,
-
     /// specify how the root node is mounted into the mount node
     mount_procedure: MountProcedure,
 
@@ -99,7 +93,6 @@ where
             root_node: Rc::clone(&self.root_node),
             mount_node: Rc::clone(&self.mount_node),
             active_closures: Rc::clone(&self.active_closures),
-            focused_node: Rc::clone(&self.focused_node),
             mount_procedure: self.mount_procedure,
             pending_patches: Rc::clone(&self.pending_patches),
         }
@@ -128,7 +121,6 @@ where
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(mount_node.clone())),
             active_closures: Rc::new(RefCell::new(ActiveClosure::new())),
-            focused_node: Rc::new(RefCell::new(None)),
             mount_procedure: MountProcedure { action, target },
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
         }
@@ -245,7 +237,6 @@ where
         let created_node = CreatedNode::create_dom_node(
             self,
             &self.current_vdom.borrow(),
-            &mut self.focused_node.borrow_mut(),
         );
 
         let mount_node: web_sys::Node = match self.mount_procedure.target {
@@ -293,7 +284,6 @@ where
         log::debug!("Root node is now set..");
         *self.root_node.borrow_mut() = Some(created_node.node);
         *self.active_closures.borrow_mut() = created_node.closures;
-        self.set_focus_element();
         self.after_mounted();
     }
 
@@ -394,14 +384,13 @@ where
         };
 
         *self.current_vdom.borrow_mut() = new_vdom;
-        self.set_focus_element();
         Ok(total_patches)
     }
 
     /// replace the current vdom with the `new_vdom`.
     pub fn set_current_dom(&self, new_vdom: vdom::Node<MSG>) {
         let created_node =
-            CreatedNode::create_dom_node(self, &new_vdom, &mut self.focused_node.borrow_mut());
+            CreatedNode::create_dom_node(self, &new_vdom);
         self.mount_node
             .borrow_mut()
             .append_child(&created_node.node)
@@ -440,7 +429,7 @@ where
                         );
                     }
                 }
-                DomPatch::from_patch(self, target_element, &mut self.focused_node.borrow_mut(), patch)
+                DomPatch::from_patch(self, target_element, patch)
             } else {
                 unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
             }
@@ -681,13 +670,6 @@ where
         Ok(())
     }
 
-    fn set_focus_element(&self) {
-        if let Some(focused_node) = &*self.focused_node.borrow() {
-            let focused_element: &Element = focused_node.unchecked_ref();
-            CreatedNode::set_element_focus(focused_element);
-        }
-    }
-
     /// execute DOM changes in order to reflect the APP's view into the browser representation
     #[allow(unused)]
     fn dispatch_dom_changes(&self, log_measurements: bool) {
@@ -801,7 +783,7 @@ where
             [crate::html::attributes::class(format!("{type_id:?}"))],
             [crate::html::text(style)],
         );
-        let created_node = CreatedNode::create_dom_node(self, &style_node, &mut None);
+        let created_node = CreatedNode::create_dom_node(self, &style_node);
 
         let head = crate::document().head().expect("must have a head");
         head.append_child(&created_node.node)
@@ -811,7 +793,7 @@ where
     /// inject style element to the mount node
     pub fn inject_style_to_mount(&self, style: &str) {
         let style_node = crate::html::tags::style([], [crate::html::text(style)]);
-        let created_node = CreatedNode::create_dom_node(self, &style_node, &mut None);
+        let created_node = CreatedNode::create_dom_node(self, &style_node);
 
         self.mount_node
             .borrow_mut()

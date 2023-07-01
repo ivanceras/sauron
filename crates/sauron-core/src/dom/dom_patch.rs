@@ -2,7 +2,7 @@ use crate::dom::CreatedNode;
 use crate::dom::Dispatch;
 use crate::vdom::{Attribute, Patch, PatchType};
 use mt_dom::TreePath;
-use web_sys::{Element, Node};
+use web_sys::Element;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the CreatedNode doesn't contain references
@@ -56,12 +56,7 @@ pub enum PatchVariant<MSG> {
 
 impl<MSG> DomPatch<MSG> {
     /// convert a virtual DOM Patch into a created DOM node Patch
-    pub fn from_patch<DSP>(
-        program: &DSP,
-        target_element: &Element,
-        focused_node: &mut Option<Node>,
-        patch: &Patch<MSG>,
-    ) -> Self
+    pub fn from_patch<DSP>(program: &DSP, target_element: &Element, patch: &Patch<MSG>) -> Self
     where
         MSG: 'static,
         DSP: Clone + Dispatch<MSG> + 'static,
@@ -79,9 +74,7 @@ impl<MSG> DomPatch<MSG> {
             PatchType::InsertBeforeNode { nodes } => {
                 let nodes: Vec<CreatedNode> = nodes
                     .iter()
-                    .map(|for_insert| {
-                        CreatedNode::create_dom_node::<DSP, MSG>(program, for_insert, focused_node)
-                    })
+                    .map(|for_insert| CreatedNode::create_dom_node::<DSP, MSG>(program, for_insert))
                     .collect();
                 Self {
                     patch_path,
@@ -92,9 +85,7 @@ impl<MSG> DomPatch<MSG> {
             PatchType::InsertAfterNode { nodes } => {
                 let nodes: Vec<CreatedNode> = nodes
                     .iter()
-                    .map(|for_insert| {
-                        CreatedNode::create_dom_node::<DSP, MSG>(program, for_insert, focused_node)
-                    })
+                    .map(|for_insert| CreatedNode::create_dom_node::<DSP, MSG>(program, for_insert))
                     .collect();
                 Self {
                     patch_path,
@@ -121,9 +112,7 @@ impl<MSG> DomPatch<MSG> {
             PatchType::ReplaceNode { replacement } => {
                 let replacement: Vec<CreatedNode> = replacement
                     .iter()
-                    .map(|node| {
-                        CreatedNode::create_dom_node::<DSP, MSG>(program, node, focused_node)
-                    })
+                    .map(|node| CreatedNode::create_dom_node::<DSP, MSG>(program, node))
                     .collect();
                 Self {
                     patch_path,
@@ -139,9 +128,7 @@ impl<MSG> DomPatch<MSG> {
             PatchType::AppendChildren { children } => {
                 let children: Vec<CreatedNode> = children
                     .iter()
-                    .map(|for_insert| {
-                        CreatedNode::create_dom_node::<DSP, MSG>(program, for_insert, focused_node)
-                    })
+                    .map(|for_insert| CreatedNode::create_dom_node::<DSP, MSG>(program, for_insert))
                     .collect();
 
                 Self {
