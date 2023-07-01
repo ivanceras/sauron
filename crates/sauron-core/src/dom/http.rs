@@ -11,8 +11,8 @@ pub struct Http;
 
 impl Http {
     /// fetch text document from the url and decode the result with the supplied
-    pub async fn fetch_with_text_response_decoder(url: &str) -> Result<String, TypeError> {
-        let response = Self::fetch_with_request_and_response_decoder(url, None).await?;
+    pub async fn fetch_text(url: &str) -> Result<String, TypeError> {
+        let response = Self::fetch_with_request_init(url, None).await?;
 
         let response_promise = response.text().expect("must be a promise text");
 
@@ -26,7 +26,7 @@ impl Http {
     }
 
     /// API for fetching http rest request
-    pub async fn fetch_with_request_and_response_decoder(
+    pub async fn fetch_with_request_init(
         url: &str,
         request_init: Option<RequestInit>,
     ) -> Result<Response, TypeError> {

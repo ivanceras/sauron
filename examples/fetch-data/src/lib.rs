@@ -60,7 +60,7 @@ impl App {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
         Cmd::new(|program| {
             spawn_local(async move {
-                let msg = match Http::fetch_with_text_response_decoder(&url).await {
+                let msg = match Http::fetch_text(&url).await {
                     Ok(v) => match serde_json::from_str(&v) {
                         Ok(data1) => Msg::ReceivedData(data1),
                         Err(err) => Msg::JsonError(err),
