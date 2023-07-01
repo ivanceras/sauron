@@ -46,6 +46,10 @@ pub trait CustomElement<MSG> {
 }
 
 /// A self contain web component
+/// This is needed to move some of the code from the #web_component macro
+/// This is also necessary, since #[wasm_bindgen] macro can not process impl types which uses
+/// generics, we use generics here to simplify the code and do the type checks for us, rather than
+/// in the code derived from the #[web_component] macro
 pub struct WebComponent<APP, MSG>
 where
     MSG: 'static,
@@ -73,7 +77,7 @@ where
         }
     }
 
-    /// the web component changed attribute
+    /// When the attribute of the component is changed, this method will be called
     pub fn attribute_changed(&self, attr_name: &str, old_value: JsValue, new_value: JsValue) {
         APP::attribute_changed(&self.program, attr_name, old_value, new_value)
     }
