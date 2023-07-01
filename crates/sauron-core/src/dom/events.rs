@@ -67,14 +67,6 @@ where
     on("click", move |event: Event| f(to_mouse_event(event)))
 }
 
-/// custom on_enter event, which is triggered from key_press when the Enter key is pressed
-pub fn on_enter<F, MSG>(f: F) -> Attribute<MSG>
-where
-    F: Fn(KeyboardEvent) -> MSG + 'static,
-    MSG: 'static,
-{
-    on("enter", move |event: Event| f(to_keyboard_event(event)))
-}
 /// attach callback to the scroll event
 pub fn on_scroll<F, MSG>(f: F) -> Attribute<MSG>
 where

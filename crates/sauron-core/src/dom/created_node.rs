@@ -416,47 +416,22 @@ impl CreatedNode {
             let current_elm: &EventTarget =
                 element.dyn_ref().expect("unable to cast to event targe");
 
-            // a custom enter event which triggers the listener
-            // when the enter key is pressed
-            if *event_str == "enter" {
-                let program_clone = program.clone();
-                let listener_clone = listener.clone();
-                let key_press_func: Closure<dyn FnMut(web_sys::Event)> =
-                    Closure::wrap(Box::new(move |event: web_sys::Event| {
-                        let ke: &web_sys::KeyboardEvent =
-                            event.dyn_ref().expect("should be a keyboard event");
-                        if ke.key() == "Enter" {
-                            let msg = listener_clone.emit(Event::from(event));
-                            program_clone.dispatch(msg);
-                        }
-                    }));
-
-                current_elm
-                    .add_event_listener_with_callback(
-                        intern("keypress"),
-                        key_press_func.as_ref().unchecked_ref(),
-                    )
-                    .expect("unable to attach enter event listener");
-
-                key_press_func.forget();
-            } else {
-                // This is where all of the UI events is wired in this part of the code.
-                // All event listener is added to this element.
-                // The callback to this listener emits an Msg which is then \
-                // dispatched to the `program` which then triggers update view cycle.
-                let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
-                    create_closure_wrap(program, listener);
-                current_elm
-                    .add_event_listener_with_callback(
-                        intern(event_str),
-                        callback_wrapped.as_ref().unchecked_ref(),
-                    )
-                    .expect("Unable to attached event listener");
-                closures
-                    .get_mut(&unique_id)
-                    .expect("Unable to get closure")
-                    .push((event_str, callback_wrapped));
-            }
+            // This is where all of the UI events is wired in this part of the code.
+            // All event listener is added to this element.
+            // The callback to this listener emits an Msg which is then \
+            // dispatched to the `program` which then triggers update view cycle.
+            let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
+                create_closure_wrap(program, listener);
+            current_elm
+                .add_event_listener_with_callback(
+                    intern(event_str),
+                    callback_wrapped.as_ref().unchecked_ref(),
+                )
+                .expect("Unable to attached event listener");
+            closures
+                .get_mut(&unique_id)
+                .expect("Unable to get closure")
+                .push((event_str, callback_wrapped));
         }
     }
 
