@@ -3,7 +3,7 @@ use sauron::js_sys::TypeError;
 use serde::Deserialize;
 use sauron::dom::spawn_local;
 use sauron::dom::Http;
-use sauron::{text, jss, Cmd, Program, Application, Node, wasm_bindgen, Dispatch};
+use sauron::{text, jss, Cmd, Program, Application, Node, wasm_bindgen};
 use sauron::html::*;
 use sauron::html::attributes::*;
 use sauron::html::events::*;

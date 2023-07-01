@@ -1,7 +1,7 @@
 use sauron::wasm_bindgen::JsCast;
 use sauron::{
     dom::register_custom_element, dom::Callback, html::attributes::*, html::events::*, html::*,
-    jss, wasm_bindgen, web_sys, Attribute, CustomElement, Dispatch, Effects, JsValue, Node, *,
+    jss, wasm_bindgen, web_sys, Attribute, CustomElement, Effects, JsValue, Node, *,
 };
 use std::fmt::Debug;
 
@@ -181,13 +181,13 @@ where
     }
 
     /// this is called when the attributes in the mount is changed
-    fn attribute_changed<DSP>(
-        program: &DSP,
+    fn attribute_changed<APP>(
+        program: &Program<APP, Msg>,
         attr_name: &str,
         old_value: JsValue,
         new_value: JsValue,
     ) where
-        DSP: Dispatch<Msg> + Clone + 'static,
+        APP: Application<Msg> + 'static,
     {
         log::info!("old_value: {:?}", old_value);
         if let Some(new_value) = new_value.as_string() {

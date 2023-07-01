@@ -71,6 +71,7 @@ pub struct Measurements {
 
 /// Auto implementation of Application trait for Component that
 /// has no external MSG
+/// but only if that Component is intended to be a CustomElement
 impl<COMP, MSG> Application<MSG> for COMP
 where
     COMP: Component<MSG, ()> + 'static,
@@ -94,6 +95,7 @@ where
 
 /// Auto implementation of Component trait for Container,
 /// which in turn creates an Auto implementation trait for of Application for Container
+/// but only if that Container is intended to be a CustomElement
 impl<CONT, MSG> Component<MSG, ()> for CONT
 where
     CONT: Container<MSG, ()>,

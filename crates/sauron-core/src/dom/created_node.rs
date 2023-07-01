@@ -1,5 +1,5 @@
 use crate::{
-    dom::{Dispatch, Event},
+    dom::{Application, Event, Program},
     events::MountEvent,
     html,
     html::attributes::{AttributeValue, SegregatedAttributes},
@@ -105,10 +105,10 @@ impl CreatedNode {
         crate::document().create_text_node(txt)
     }
 
-    fn create_leaf_node<DSP, MSG>(program: &DSP, leaf: &Leaf<MSG>) -> CreatedNode
+    fn create_leaf_node<APP, MSG>(program: &Program<APP, MSG>, leaf: &Leaf<MSG>) -> CreatedNode
     where
         MSG: 'static,
-        DSP: Clone + Dispatch<MSG> + 'static,
+        APP: Application<MSG> + 'static,
     {
         match leaf {
             Leaf::Text(txt) => {
@@ -145,10 +145,13 @@ impl CreatedNode {
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
-    pub fn create_dom_node<DSP, MSG>(program: &DSP, vnode: &vdom::Node<MSG>) -> CreatedNode
+    pub fn create_dom_node<APP, MSG>(
+        program: &Program<APP, MSG>,
+        vnode: &vdom::Node<MSG>,
+    ) -> CreatedNode
     where
         MSG: 'static,
-        DSP: Clone + Dispatch<MSG> + 'static,
+        APP: Application<MSG> + 'static,
     {
         match vnode {
             vdom::Node::Leaf(leaf_node) => Self::create_leaf_node(program, leaf_node),
@@ -189,10 +192,13 @@ impl CreatedNode {
 
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
-    fn create_element_node<DSP, MSG>(program: &DSP, velem: &vdom::Element<MSG>) -> CreatedNode
+    fn create_element_node<APP, MSG>(
+        program: &Program<APP, MSG>,
+        velem: &vdom::Element<MSG>,
+    ) -> CreatedNode
     where
         MSG: 'static,
-        DSP: Clone + Dispatch<MSG> + 'static,
+        APP: Application<MSG> + 'static,
     {
         let document = crate::document();
 
@@ -242,14 +248,14 @@ impl CreatedNode {
     }
 
     /// set the element attribute
-    pub fn set_element_attributes<DSP, MSG>(
-        program: &DSP,
+    pub fn set_element_attributes<APP, MSG>(
+        program: &Program<APP, MSG>,
         closures: &mut ActiveClosure,
         element: &Element,
         attrs: &[&Attribute<MSG>],
     ) where
         MSG: 'static,
-        DSP: Clone + Dispatch<MSG> + 'static,
+        APP: Application<MSG> + 'static,
     {
         let attrs = mt_dom::merge_attributes_of_same_name(attrs);
         for att in attrs {
@@ -262,15 +268,14 @@ impl CreatedNode {
     /// Note: this is called in a loop, so setting the attributes, and style will not be on
     /// the same call, but on a subsequent call to each other. Using the if-else-if here for
     /// attributes, style, function_call.
-    #[track_caller]
-    pub fn set_element_attribute<DSP, MSG>(
-        program: &DSP,
+    pub fn set_element_attribute<APP, MSG>(
+        program: &Program<APP, MSG>,
         closures: &mut ActiveClosure,
         element: &Element,
         attr: &Attribute<MSG>,
     ) where
         MSG: 'static,
-        DSP: Clone + Dispatch<MSG> + 'static,
+        APP: Application<MSG> + 'static,
     {
         let SegregatedAttributes {
             listeners,
@@ -624,13 +629,13 @@ impl CreatedNode {
 }
 
 /// This wrap into a closure the function that is dispatched when the event is triggered.
-pub(crate) fn create_closure_wrap<DSP, MSG>(
-    program: &DSP,
+pub(crate) fn create_closure_wrap<APP, MSG>(
+    program: &Program<APP, MSG>,
     listener: &Listener<MSG>,
 ) -> Closure<dyn FnMut(web_sys::Event)>
 where
     MSG: 'static,
-    DSP: Clone + Dispatch<MSG> + 'static,
+    APP: Application<MSG> + 'static,
 {
     let listener_clone = listener.clone();
     let program_clone = program.clone();

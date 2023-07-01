@@ -42,7 +42,7 @@ pub use crate::{
 pub use jss;
 
 pub mod dom;
-pub use crate::dom::{Application, Component, Container, CustomElement, Dispatch, Effects};
+pub use crate::dom::{Application, Component, Container, CustomElement, Effects};
 
 use cfg_if::cfg_if;
 

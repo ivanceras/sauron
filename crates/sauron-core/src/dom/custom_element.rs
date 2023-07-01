@@ -1,4 +1,4 @@
-use crate::dom::{Dispatch, MountAction, MountTarget};
+use crate::dom::{MountAction, MountTarget};
 use crate::wasm_bindgen;
 use crate::{Application, Program};
 use wasm_bindgen::JsValue;
@@ -26,13 +26,14 @@ pub trait CustomElement<MSG> {
     /// and the attributes of the custom-element has been modified
     ///
     /// if the listed attributes in the observed attributes are modified
-    fn attribute_changed<DSP>(
-        program: &DSP,
+    fn attribute_changed<APP>(
+        program: &Program<APP, MSG>,
         attr_name: &str,
         old_value: JsValue,
         new_value: JsValue,
     ) where
-        DSP: Dispatch<MSG> + Clone + 'static;
+        APP: Application<MSG> + 'static,
+        MSG: 'static;
 
     /// the component is attached to the dom
     fn connected_callback(&mut self);

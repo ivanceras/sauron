@@ -2,7 +2,7 @@
 #![deny(clippy::all)]
 use log::trace;
 use sauron::{text, jss, html::*, html::events::*, html::attributes::*,
-    Dispatch, Application, Node, Program, Cmd, wasm_bindgen,
+    Application, Node, Program, Cmd, wasm_bindgen,
     dom::async_delay,
 };
 use std::cell::RefCell;
@@ -25,7 +25,7 @@ pub struct App {
 
 impl App {
     fn execute_delayed(
-        program: impl Dispatch<Msg> + 'static,
+        program: Program<Self, Msg>,
         current_handle: Rc<RefCell<Option<i32>>>,
         executed: Rc<AtomicBool>,
     ) {

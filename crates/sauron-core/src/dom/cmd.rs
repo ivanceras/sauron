@@ -1,7 +1,7 @@
 //! provides functionalities for commands to be executed by the system, such as
 //! when the application starts or after the application updates.
 //!
-use crate::dom::{Dispatch, Effects};
+use crate::dom::{Application, Effects, Program};
 
 /// Cmd is a command to be executed by the system.
 /// This is returned at the init function of a component and is executed right
@@ -9,9 +9,12 @@ use crate::dom::{Dispatch, Effects};
 /// Cmd required a DSP object which is the Program as an argument
 /// The emit function is called with the program argument.
 /// The callback is supplied with the program an is then executed/emitted.
-pub struct Cmd<DSP> {
+pub struct Cmd<APP, MSG>
+where
+    MSG: 'static,
+{
     /// the functions that would be executed when this Cmd is emited
-    pub commands: Vec<Box<dyn FnOnce(DSP)>>,
+    pub commands: Vec<Box<dyn FnOnce(Program<APP, MSG>)>>,
     pub(crate) modifier: Modifier,
 }
 
@@ -49,14 +52,15 @@ impl Default for Modifier {
     }
 }
 
-impl<DSP> Cmd<DSP>
+impl<APP, MSG> Cmd<APP, MSG>
 where
-    DSP: 'static,
+    MSG: 'static,
+    APP: Application<MSG> + 'static,
 {
     /// creates a new Cmd from a function
     pub fn new<F>(f: F) -> Self
     where
-        F: FnOnce(DSP) + 'static,
+        F: FnOnce(Program<APP, MSG>) + 'static,
     {
         Self {
             commands: vec![Box::new(f)],
@@ -141,41 +145,30 @@ where
         self.modifier.measurement_name = name.to_string();
         self
     }
-}
 
-impl<DSP> Cmd<DSP>
-where
-    DSP: Clone + 'static,
-{
     /// Executes the Cmd
-    pub fn emit(self, program: &DSP) {
+    pub fn emit(self, program: &Program<APP, MSG>) {
         for cb in self.commands {
             let program_clone = program.clone();
             cb(program_clone);
         }
     }
-}
 
-impl<DSP> Cmd<DSP> {
     /// Tell the runtime to execute subsequent update of the App with the message list.
     /// A single call to update the view is then executed thereafter.
     ///
-    pub fn batch_msg<MSG>(msg_list: impl IntoIterator<Item = MSG>) -> Self
-    where
-        MSG: 'static,
-        DSP: Dispatch<MSG> + Clone + 'static,
-    {
+    pub fn batch_msg(msg_list: impl IntoIterator<Item = MSG>) -> Self {
         let msg_list: Vec<MSG> = msg_list.into_iter().collect();
-        Cmd::new(move |program: DSP| {
+        Cmd::new(move |program| {
             program.dispatch_multiple(msg_list);
         })
     }
 }
 
-impl<DSP, MSG> From<Effects<MSG, ()>> for Cmd<DSP>
+impl<APP, MSG> From<Effects<MSG, ()>> for Cmd<APP, MSG>
 where
     MSG: 'static,
-    DSP: Dispatch<MSG> + Clone + 'static,
+    APP: Application<MSG> + 'static,
 {
     /// Convert Effects that has only follow ups
     fn from(effects: Effects<MSG, ()>) -> Self {
@@ -192,10 +185,10 @@ where
     }
 }
 
-impl<DSP, MSG> From<Vec<Effects<MSG, ()>>> for Cmd<DSP>
+impl<APP, MSG> From<Vec<Effects<MSG, ()>>> for Cmd<APP, MSG>
 where
     MSG: 'static,
-    DSP: Dispatch<MSG> + Clone + 'static,
+    APP: Application<MSG> + 'static,
 {
     fn from(effects: Vec<Effects<MSG, ()>>) -> Self {
         Cmd::from(Effects::merge_all(effects))

@@ -9,7 +9,6 @@ mod component;
 mod created_node;
 #[cfg(feature = "with-dom")]
 mod custom_element;
-mod dispatch;
 #[cfg(feature = "with-dom")]
 mod dom_patch;
 mod effects;
@@ -31,7 +30,6 @@ pub use component::{Component, Container, Widget};
 pub use created_node::CreatedNode;
 #[cfg(feature = "with-dom")]
 pub use custom_element::{register_custom_element, CustomElement, WebComponent};
-pub use dispatch::Dispatch;
 #[cfg(feature = "with-dom")]
 pub use dom_patch::{DomPatch, PatchVariant};
 pub use effects::Effects;
@@ -49,7 +47,7 @@ pub use window::Window;
 
 /// alias Cmd to use Program as the APP
 #[cfg(feature = "with-dom")]
-pub type Cmd<APP, MSG> = cmd::Cmd<Program<APP, MSG>>;
+pub use cmd::Cmd;
 
 /// Map the Event to DomEvent, which are browser events
 #[derive(Debug, Clone, PartialEq, Eq)]

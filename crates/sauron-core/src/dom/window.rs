@@ -1,5 +1,5 @@
 use crate::{
-    dom::{created_node::create_closure_wrap, Cmd, Dispatch},
+    dom::{created_node::create_closure_wrap, Cmd},
     vdom::Attribute,
     Application,
 };
@@ -117,7 +117,7 @@ impl Window {
     /// scroll the browser to the top of the document
     pub fn scroll_to_top<APP, MSG>() -> Cmd<APP, MSG>
     where
-        APP: 'static,
+        APP: Application<MSG> + 'static,
         MSG: 'static,
     {
         Cmd::new(|_program| {

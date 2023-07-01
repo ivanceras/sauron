@@ -4,7 +4,7 @@ use crate::dom::Measurements;
 use crate::vdom;
 use crate::vdom::{diff, Attribute, AttributeValue};
 use crate::dom::CreatedNode;
-use crate::{Patch, Application, Cmd, Dispatch};
+use crate::{Patch, Application, Cmd};
 use crate::dom::{DomPatch, PatchVariant};
 use mt_dom::TreePath;
 use std::collections::VecDeque;
@@ -803,18 +803,19 @@ where
 
 /// This will be called when the actual event is triggered.
 /// Defined in the DomUpdater::create_closure_wrap function
-impl<APP, MSG> Dispatch<MSG> for Program<APP, MSG>
+impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
     /// dispatch multiple MSG
-    fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>) {
+    pub fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>) {
         self.pending_msgs.borrow_mut().extend(msgs);
         self.dispatch_inner_with_priority_ric();
     }
 
-    fn dispatch(&self, msg: MSG) {
+    /// dispatch a single msg
+    pub fn dispatch(&self, msg: MSG) {
         self.dispatch_multiple([msg])
     }
 }
