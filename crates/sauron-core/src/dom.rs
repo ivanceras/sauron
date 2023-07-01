@@ -26,11 +26,11 @@ mod window;
 
 pub use application::{Application, Measurements};
 pub use callback::Callback;
-pub use component::{Component, Container, CustomElement};
+pub use component::{Component, Container};
 #[cfg(feature = "with-dom")]
 pub use created_node::CreatedNode;
 #[cfg(feature = "with-dom")]
-pub use custom_element::register_custom_element;
+pub use custom_element::{register_custom_element, CustomElement};
 pub use dispatch::Dispatch;
 #[cfg(feature = "with-dom")]
 pub use dom_patch::{DomPatch, PatchVariant};
