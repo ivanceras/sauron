@@ -498,7 +498,6 @@ where
     }
 
     #[cfg(feature = "with-raf")]
-    #[allow(unused)]
     fn apply_pending_patches_with_raf(&self) -> Result<(), JsValue> {
         let program = self.clone();
         crate::dom::util::request_animation_frame(move || {
@@ -671,7 +670,6 @@ where
     }
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    #[allow(unused)]
     fn dispatch_dom_changes(&self, log_measurements: bool) {
         let measurements = self.update_dom().expect("must update dom");
 
@@ -693,7 +691,6 @@ where
     }
 
     #[cfg(feature = "with-raf")]
-    #[allow(unused)]
     fn dispatch_inner_with_raf(&self) {
         let program = self.clone();
         crate::dom::util::request_animation_frame(move || {

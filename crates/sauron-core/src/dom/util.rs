@@ -1,6 +1,5 @@
 //! utility functions
 //!
-#![allow(unused)]
 use js_sys::Promise;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 pub use wasm_bindgen_futures::spawn_local;

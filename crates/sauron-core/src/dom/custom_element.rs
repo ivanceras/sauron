@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 use crate::dom::{Dispatch, MountAction, MountTarget};
 use crate::wasm_bindgen;
 use crate::{Application, Program};
