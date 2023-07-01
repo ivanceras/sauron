@@ -1,9 +1,6 @@
-use crate::wasm_bindgen;
-#[cfg(feature = "with-dom")]
-use wasm_bindgen::JsValue;
-
-#[cfg(feature = "with-dom")]
 use crate::dom::Dispatch;
+use crate::wasm_bindgen;
+use wasm_bindgen::JsValue;
 
 #[wasm_bindgen(module = "/js/define_custom_element.js")]
 extern "C" {
@@ -28,7 +25,6 @@ pub trait CustomElement<MSG> {
     /// and the attributes of the custom-element has been modified
     ///
     /// if the listed attributes in the observed attributes are modified
-    #[cfg(feature = "with-dom")]
     fn attribute_changed<DSP>(
         program: &DSP,
         attr_name: &str,
