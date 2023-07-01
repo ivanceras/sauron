@@ -670,6 +670,7 @@ where
     }
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
+    #[allow(unused_variables)]
     fn dispatch_dom_changes(&self, log_measurements: bool) {
         let measurements = self.update_dom().expect("must update dom");
 
@@ -690,6 +691,7 @@ where
         .expect("must execute");
     }
 
+    #[allow(unused)]
     #[cfg(feature = "with-raf")]
     fn dispatch_inner_with_raf(&self) {
         let program = self.clone();

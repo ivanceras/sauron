@@ -81,7 +81,7 @@ pub fn cancel_timeout_callback(handle: i32) -> Result<(), JsValue>{
 }
 
 /// execute the function at a certain specified timeout in ms
-pub fn delay_exec<F>(mut f: F, timeout: i32) -> Result<i32, JsValue>
+pub fn delay_exec<F>(f: F, timeout: i32) -> Result<i32, JsValue>
 where
     F: FnMut() + 'static,
 {
