@@ -176,6 +176,7 @@
     - [ ] struct types that are not meant to be public
 - [X] Use the deadline object in `request_idle_callback_with_deadline`, instead of just `f64`, which calculates the remaining time manually
 - [ ] Migrate to rshtml, since syn-rsx is unmaintained.
+- [ ] Remove `Dispatch` and just pass `Program` around
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
