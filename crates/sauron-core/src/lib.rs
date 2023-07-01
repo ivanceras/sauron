@@ -53,4 +53,5 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use wasm_bindgen;
     pub use wasm_bindgen::prelude::*;
     pub use crate::dom::{events, Program, document, now, window, Cmd};
+    pub use serde_wasm_bindgen;
 }}

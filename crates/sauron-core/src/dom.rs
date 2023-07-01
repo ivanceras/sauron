@@ -30,7 +30,7 @@ pub use component::{Component, Container, Widget};
 #[cfg(feature = "with-dom")]
 pub use created_node::CreatedNode;
 #[cfg(feature = "with-dom")]
-pub use custom_element::{register_custom_element, CustomElement};
+pub use custom_element::{register_custom_element, CustomElement, WebComponent};
 pub use dispatch::Dispatch;
 #[cfg(feature = "with-dom")]
 pub use dom_patch::{DomPatch, PatchVariant};

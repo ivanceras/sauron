@@ -1,5 +1,8 @@
-use crate::dom::Dispatch;
+#![allow(unused)]
+
+use crate::dom::{Dispatch, MountAction, MountTarget};
 use crate::wasm_bindgen;
+use crate::{Application, Program};
 use wasm_bindgen::JsValue;
 
 #[wasm_bindgen(module = "/js/define_custom_element.js")]
@@ -32,4 +35,65 @@ pub trait CustomElement<MSG> {
         new_value: JsValue,
     ) where
         DSP: Dispatch<MSG> + Clone + 'static;
+
+    /// the component is attached to the dom
+    fn connected_callback(&mut self);
+    /// the component is removed from the DOM
+    fn disconnected_callback(&mut self);
+
+    /// the component is moved or attached to the dom
+    fn adopted_callback(&mut self);
+}
+
+/// A self contain web component
+pub struct WebComponent<APP, MSG>
+where
+    MSG: 'static,
+{
+    program: Program<APP, MSG>,
+}
+
+impl<APP, MSG> WebComponent<APP, MSG>
+where
+    APP: Application<MSG> + Default + 'static,
+    APP: CustomElement<MSG>,
+    MSG: 'static,
+{
+    /// create a new web component, with the node as the target element to be mounted into
+    pub fn new(node: JsValue) -> Self {
+        use crate::wasm_bindgen::JsCast;
+        let mount_node: &web_sys::Node = node.unchecked_ref();
+        Self {
+            program: Program::new(
+                APP::default(),
+                mount_node,
+                MountAction::Append,
+                MountTarget::ShadowRoot,
+            ),
+        }
+    }
+
+    /// the web component changed attribute
+    pub fn attribute_changed(&self, attr_name: &str, old_value: JsValue, new_value: JsValue) {
+        APP::attribute_changed(&self.program, attr_name, old_value, new_value)
+    }
+
+    /// called when the web component is mounted
+    pub fn connected_callback(&mut self) {
+        self.program.mount();
+        let component_style = <APP as Application<MSG>>::style(&self.program.app.borrow());
+        self.program.inject_style_to_mount(&component_style);
+        self.program.update_dom().expect("must update dom");
+        self.program.app.borrow_mut().connected_callback();
+    }
+
+    /// called when the web component is removed
+    pub fn disconnected_callback(&mut self) {
+        self.program.app.borrow_mut().disconnected_callback();
+    }
+
+    /// called when web componented is moved into other parts of the document
+    pub fn adopted_callback(&mut self) {
+        self.program.app.borrow_mut().adopted_callback();
+    }
 }

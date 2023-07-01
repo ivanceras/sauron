@@ -23,3 +23,4 @@ pub use sauron_core::*;
 
 #[cfg(feature = "with-node-macro")]
 pub use sauron_node_macro::node;
+pub use sauron_node_macro::web_component;

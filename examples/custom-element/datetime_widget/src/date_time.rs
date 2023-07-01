@@ -1,16 +1,9 @@
 use sauron::wasm_bindgen::JsCast;
 use sauron::{
-    dom::register_custom_element,
-    dom::{Callback, MountAction, MountTarget},
-    html::attributes::*,
-    html::events::*,
-    html::*,
-    jss, wasm_bindgen, web_sys, Application, Attribute, CustomElement, Dispatch, Effects, JsValue,
-    Node, Program,
+    dom::register_custom_element, dom::Callback, html::attributes::*, html::events::*, html::*,
+    jss, wasm_bindgen, web_sys, Attribute, CustomElement, Dispatch, Effects, JsValue, Node, *,
 };
-use std::collections::BTreeMap;
 use std::fmt::Debug;
-use std::iter::FromIterator;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -174,6 +167,7 @@ where
     }
 }
 
+#[sauron::web_component]
 impl<XMSG> sauron::CustomElement<Msg> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
@@ -205,78 +199,11 @@ where
         }
     }
 
-    /// This is called when the attributes for the mount is to be set
-    /// this is called every after update
-    fn attributes_for_mount(&self) -> BTreeMap<String, String> {
-        BTreeMap::from_iter([("value".to_string(), self.date_time())])
-    }
-}
+    fn connected_callback(&mut self) {}
 
-#[wasm_bindgen]
-pub struct DateTimeWidgetCustomElement {
-    program: Program<DateTimeWidget<()>, Msg>,
-}
+    fn disconnected_callback(&mut self) {}
 
-#[wasm_bindgen]
-impl DateTimeWidgetCustomElement {
-    #[wasm_bindgen(constructor)]
-    pub fn new(node: JsValue) -> Self {
-        use sauron::wasm_bindgen::JsCast;
-        let mount_node: &web_sys::Node = node.unchecked_ref();
-        Self {
-            program: Program::new(
-                DateTimeWidget::<()>::default(),
-                mount_node,
-                MountAction::Append,
-                MountTarget::ShadowRoot,
-            ),
-        }
-    }
-
-    #[wasm_bindgen(getter, static_method_of = Self, js_name = observedAttributes)]
-    pub fn observed_attributes() -> JsValue {
-        let attributes = DateTimeWidget::<()>::observed_attributes();
-        JsValue::from_serde(&attributes).expect("must be serde")
-    }
-
-    #[wasm_bindgen(method, js_name = attributeChangedCallback)]
-    pub fn attribute_changed_callback(
-        &self,
-        attr_name: &str,
-        old_value: JsValue,
-        new_value: JsValue,
-    ) {
-        log::info!(
-            "attribute: {} is changed from: {:?} to: {:?}",
-            attr_name,
-            old_value,
-            new_value
-        );
-        DateTimeWidget::<()>::attribute_changed(&self.program, attr_name, old_value, new_value);
-    }
-
-    #[wasm_bindgen(method, js_name = connectedCallback)]
-    pub fn connected_callback(&mut self) {
-        self.program.mount();
-        let component_style =
-            <DateTimeWidget<()> as Application<Msg>>::style(&self.program.app.borrow());
-        self.program.inject_style_to_mount(&component_style);
-        self.program.update_dom().expect("must update dom");
-    }
-
-    #[wasm_bindgen(method, js_name = disconnectedCallback)]
-    pub fn disconnected_callback(&mut self) {}
-
-    #[wasm_bindgen(method, js_name = adoptedCallback)]
-    pub fn adopted_callback(&mut self) {}
-
-    fn struct_name() -> &'static str {
-        "DateTimeWidgetCustomElement"
-    }
-
-    pub fn register() {
-        register_custom_element(DateTimeWidget::<()>::custom_tag(), Self::struct_name());
-    }
+    fn adopted_callback(&mut self) {}
 }
 
 pub fn date<MSG, V: Into<Value>>(v: V) -> Attribute<MSG> {
@@ -291,7 +218,7 @@ pub fn date_time<MSG>(
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG> {
-    DateTimeWidgetCustomElement::register();
+    register();
     html_element(
         None,
         DateTimeWidget::<()>::custom_tag(),

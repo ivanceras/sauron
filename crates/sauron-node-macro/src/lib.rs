@@ -14,6 +14,7 @@
 extern crate proc_macro;
 
 mod node;
+mod web_component;
 
 /// Quasi-quoting macro for building sauron [Node]s.
 ///
@@ -178,4 +179,16 @@ mod node;
 #[proc_macro]
 pub fn node(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     node::to_token_stream(input).into()
+}
+
+/// derive code for a certain CustomElement implementation to have the necessary types and glue
+/// code which register itself into the the DOM customElementRegistry.
+/// This also adds the register function into the module it is called in, so make sure you only
+/// use this in each module, multiple web_components should be in different modules
+#[proc_macro_attribute]
+pub fn web_component(
+    _attr: proc_macro::TokenStream,
+    input: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    web_component::to_token_stream(input)
 }
