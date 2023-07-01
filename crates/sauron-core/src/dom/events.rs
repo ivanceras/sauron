@@ -14,7 +14,8 @@ pub use web_sys::{
     TransitionEvent,
 };
 use web_sys::{
-    EventTarget, HtmlDetailsElement, HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement,
+    EventTarget, HtmlDetailsElement, HtmlElement, HtmlInputElement, HtmlSelectElement,
+    HtmlTextAreaElement,
 };
 
 impl Event {
@@ -225,6 +226,8 @@ fn to_hashchange_event(event: Event) -> HashChangeEvent {
 #[derive(Debug)]
 pub struct InputEvent {
     /// the input value
+    /// TODO: this should be optional since there will be custom component
+    /// aside from `input`, `textarea`, `select`
     pub value: String,
     /// the actual dom event
     pub event: web_sys::Event,
@@ -257,6 +260,10 @@ fn to_input_event(event: Event) -> InputEvent {
         InputEvent::new(textarea.value(), web_event)
     } else if let Some(select) = target.dyn_ref::<HtmlSelectElement>() {
         InputEvent::new(select.value(), web_event)
+    } else if let Some(html_elm) = target.dyn_ref::<HtmlElement>() {
+        //NOTE: this our custom component where we set the value into the content attribute
+        let content = html_elm.get_attribute("content").expect("get content");
+        InputEvent::new(content, web_event)
     } else {
         panic!("fail in mapping event into input event");
     }
