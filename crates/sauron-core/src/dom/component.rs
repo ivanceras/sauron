@@ -51,11 +51,14 @@ pub trait Container<MSG, XMSG> {
     fn append_child(&mut self, child: Node<XMSG>);
 }
 
-/// A view is a very simple component that can update itself view,
+/// A widget is a very simple component that can update itself view,
 /// but it can have no effect on the external component that use it.
-pub trait View<MSG> {
+pub trait Widget<MSG> {
+    /// update the model of the widget
     fn update(&mut self, msg: MSG) -> Effects<MSG, ()>;
+    /// how the widget display itself
     fn view(&self) -> Node<MSG>;
+    /// Widget can have a style
     fn style(&self) -> String {
         String::new()
     }

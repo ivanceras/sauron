@@ -26,7 +26,7 @@ mod window;
 
 pub use application::{Application, Measurements};
 pub use callback::Callback;
-pub use component::{Component, Container};
+pub use component::{Component, Container, Widget};
 #[cfg(feature = "with-dom")]
 pub use created_node::CreatedNode;
 #[cfg(feature = "with-dom")]
