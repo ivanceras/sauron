@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+- **breaking** rename crate `sauron-node-macro` into `sauron-macro`, since it contains some other macro other than `node!` ie: `#[web_component]`
+- organized the with-dom feature
+- remove `Dispatch` trait, and just pass the `Program` around, since `Program` is the only implementation of `Dispatch` trait.
+- use a more concise method names in `Http` module
+- refactor: put allow(unused) directive to some feature gated function
+- remove focused_node, to slim down and simplify the framework code
+- remove on_enter event since it can easily be done in the user application
+- feature: add a new attribute macro: #[web_component] to easily derive a WebComponent
+- add getting InputEvent from HtmlElement which is used in CustomElement
+- add `Widget` trait, which is a simpler version of `Component`.
+- move `CustomElement` to `custom_element` module
+- add `map_external` method to Effects
+- remove unused trait method `attributes_for_mount` in `CustomElement` trait
+
 ## 0.54.1
 - bump up version such that `sauron-node-macro` is using `sauron-core` v0.54.1 as well.
 
