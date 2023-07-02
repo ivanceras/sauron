@@ -22,6 +22,6 @@ pub use sauron_core::jss::{jss, jss_ns, jss_ns_pretty, jss_pretty};
 pub use sauron_core::*;
 
 #[cfg(feature = "with-node-macro")]
-pub use sauron_node_macro::node;
-#[cfg(feature = "with-node-macro")]
-pub use sauron_node_macro::web_component;
+pub use sauron_macro::node;
+#[cfg(feature = "with-webcomponent-macro")]
+pub use sauron_macro::web_component;

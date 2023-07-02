@@ -4,7 +4,7 @@ use sauron::{
     html::{attributes::*, *},
     *,
 };
-use sauron_node_macro::node;
+use sauron_macro::node;
 
 #[test]
 fn test_disabled() {

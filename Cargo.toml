@@ -15,11 +15,11 @@ maintenance = { status = "actively-developed" }
 
 [dependencies]
 sauron-core = { version = "0.54", path = "crates/sauron-core", default-features = false }
-sauron-node-macro = { version = "0.54", path = "crates/sauron-node-macro", optional = true }
+sauron-macro = { version = "0.54", path = "crates/sauron-macro", optional = true }
 cfg-if = "0.1"
 
 [features]
-default = ["with-dom", "with-node-macro", "with-interning"]
+default = ["with-dom", "with-node-macro", "with-webcomponent-macro", "with-interning"]
 with-dom = ["sauron-core/with-dom"]
 with-lookup = ["sauron-core/with-lookup"]
 with-ric = ["sauron-core/with-ric"]
@@ -32,7 +32,8 @@ with-measure = ["sauron-core/with-measure"]
 with-debug = ["sauron-core/with-debug"]
 
 # lets you use node! macro to write html like code in the view
-with-node-macro = ["sauron-node-macro"]
+with-node-macro = ["sauron-macro"]
+with-webcomponent-macro = ["sauron-macro"]
 
 
 [dev-dependencies]

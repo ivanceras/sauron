@@ -176,7 +176,7 @@
     - [ ] struct types that are not meant to be public
 - [X] Use the deadline object in `request_idle_callback_with_deadline`, instead of just `f64`, which calculates the remaining time manually
 - [ ] Migrate to rshtml, since syn-rsx is unmaintained.
-- [ ] Remove `Dispatch` and just pass `Program` around
+- [X] Remove `Dispatch` and just pass `Program` around
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
@@ -207,7 +207,7 @@
     - [X] custom element would be appended to the `shadowRoot`
         - [X] Usage of custom element inside another sauron component should skip the custom-element internal DOM elements
     - [ ] custom element should also need access to the `textContent` of the tag for further processing
-- [ ] Properly trigger the MountEvent at the appending of the component to the DOM
+- [X] Properly trigger the MountEvent at the appending of the component to the DOM
     - Right now, it is triggered when the virtual Node is created into a real Node.
 
 
