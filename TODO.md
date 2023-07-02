@@ -92,7 +92,7 @@
         elm.dispatchEvent(mount_event);
     ```
 - [X] Call set_attribute in addition to setting the special attributes such as `value`, `checked`, this should trigger the `attribute_changed` callback in web components
-
+- [ ] The attribute_changed method in CustomElement should return an `MSG` which will be dispatched in the WebComponent struct.
 ## Internal
 - ~~[ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`~~
         ~~ie: `Cmd<ChildApp, ChildMsg>` to `Cmd<App, Msg>`
