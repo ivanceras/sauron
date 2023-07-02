@@ -1,7 +1,8 @@
 //! provides functionalities for commands to be executed by the system, such as
 //! when the application starts or after the application updates.
 //!
-use crate::dom::{Application, Effects, Program};
+use crate::dom::Program;
+use crate::dom::{Application, Effects, Modifier};
 
 /// Cmd is a command to be executed by the system.
 /// This is returned at the init function of a component and is executed right
@@ -16,40 +17,6 @@ where
     /// the functions that would be executed when this Cmd is emited
     pub commands: Vec<Box<dyn FnOnce(Program<APP, MSG>)>>,
     pub(crate) modifier: Modifier,
-}
-
-/// These are collections of fields where we can modify the Cmd
-/// such as logging measurement or should update the view
-#[derive(Clone)]
-pub struct Modifier {
-    /// this instruct the program whether or not to update the view
-    pub should_update_view: bool,
-    /// tell the cmd to log the measurements of not.
-    /// set only to true for a certain MSG where you want to measure the performance
-    /// in the component update function. Otherwise, measurement calls
-    /// for other non-trivial functions are also called causing on measurements.
-    pub log_measurements: bool,
-    /// Set the measurement name for this Cmd.
-    /// This is used to distinguish measurements from other measurements in different parts of you
-    /// application
-    ///
-    /// This measurment name will be copied
-    /// into the [`Measurements`](crate::dom::Measurements) passed in
-    /// [`Application::measurements`](crate::Application::measurements)
-    pub measurement_name: String,
-}
-
-impl Default for Modifier {
-    fn default() -> Self {
-        Self {
-            // every cmd will update the view by default
-            should_update_view: true,
-            // every cmd will not log measurement by default
-            log_measurements: false,
-            // empty string by default
-            measurement_name: String::new(),
-        }
-    }
 }
 
 impl<APP, MSG> Cmd<APP, MSG>

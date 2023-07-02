@@ -42,7 +42,7 @@ pub use crate::{
 pub use jss;
 
 pub mod dom;
-pub use crate::dom::{Application, Component, Container, CustomElement, Effects};
+pub use crate::dom::{Component, Container, Effects};
 
 use cfg_if::cfg_if;
 
@@ -52,6 +52,6 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use js_sys;
     pub use wasm_bindgen;
     pub use wasm_bindgen::prelude::*;
-    pub use crate::dom::{events, Program, document, now, window, Cmd};
+    pub use crate::dom::{Application, events, Program, document, now, window, CustomElement, Cmd};
     pub use serde_wasm_bindgen;
 }}

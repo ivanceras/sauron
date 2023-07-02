@@ -1,4 +1,4 @@
-use crate::dom::cmd::Modifier;
+use crate::dom::Modifier;
 
 /// Effects is a convenient way to group Msg for component to execute subsequent updates based on certain conditions.
 /// This can be used for doing animation and incremental changes to the view to provide an effect
