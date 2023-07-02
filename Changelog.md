@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.55.0
 - **breaking** rename crate `sauron-node-macro` into `sauron-macro`, since it contains some other macro other than `node!` ie: `#[web_component]`
 - organized the with-dom feature
 - remove `Dispatch` trait, and just pass the `Program` around, since `Program` is the only implementation of `Dispatch` trait.
