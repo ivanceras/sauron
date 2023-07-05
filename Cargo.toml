@@ -1,6 +1,6 @@
 [package]
 name = "sauron"
-version = "0.55.0"
+version = "0.55.1"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "A versatile web framework and library for building client-side and/or server-side web applications"

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.55.1
+- fix: call `dispatch_mount_event` to other patching variants, other than just the `Append` variant
+
 ## 0.55.0
 - **breaking** rename crate `sauron-node-macro` into `sauron-macro`, since it contains some other macro other than `node!` ie: `#[web_component]`
 - organized the with-dom feature
