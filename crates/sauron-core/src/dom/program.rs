@@ -278,6 +278,7 @@ where
                 mount_element
                     .replace_with_with_node_1(&created_node.node)
                     .expect("Could not append child to mount");
+                CreatedNode::dispatch_mount_event(&created_node.node);
                 *self.mount_node.borrow_mut() = created_node.node.clone()
             }
         }
@@ -545,7 +546,7 @@ where
                         parent_target
                             .insert_before(&for_insert.node, Some(&target_element))
                             .expect("must remove target node");
-
+                        CreatedNode::dispatch_mount_event(&for_insert.node);
                         self.active_closures
                             .borrow_mut()
                             .extend(for_insert.closures);
@@ -566,6 +567,7 @@ where
                     target_element
                         .insert_adjacent_element(intern("afterend"), created_element)
                         .expect("must remove target node");
+                    CreatedNode::dispatch_mount_event(&for_insert.node);
                     self.active_closures
                         .borrow_mut()
                         .extend(for_insert.closures);
@@ -626,6 +628,7 @@ where
                     .replace_with_with_node_1(&first_node.node)
                     .expect("must replace node");
 
+                CreatedNode::dispatch_mount_event(&first_node.node);
                 self.active_closures.borrow_mut().extend(first_node.closures);
 
                 let first_node_elm: &web_sys::Element = first_node.node.unchecked_ref();
@@ -633,6 +636,7 @@ where
                 for node in replacement.into_iter(){
                     let node_elm: &web_sys::Element = node.node.unchecked_ref();
                     first_node_elm.insert_adjacent_element(intern("beforebegin"), node_elm).expect("append child");
+                    CreatedNode::dispatch_mount_event(node_elm);
                     self.active_closures
                         .borrow_mut()
                         .extend(node.closures);
