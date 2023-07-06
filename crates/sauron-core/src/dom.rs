@@ -24,7 +24,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use program::{MountAction, MountTarget, Program};
     pub use util::{
         async_delay, body, delay_exec, document, history, now, performance, request_animation_frame,
-        request_idle_callback, spawn_local, window,
+        request_idle_callback, spawn_local, window, inject_style,
     };
     pub use window::Window;
     pub use cmd::Cmd;

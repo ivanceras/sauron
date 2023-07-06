@@ -94,6 +94,15 @@ where
     timeout_id
 }
 
+/// inject style to document head
+pub fn inject_style(style: &str) {
+    let head = document().head().expect("must have a head");
+    let style_node = document().create_element("style").expect("create style element");
+    let style_css = document().create_text_node(style);
+    style_node.append_child(&style_css).expect("append to style");
+    head.append_child(&style_node).expect("must append to head");
+}
+
 
 /// simulate a delay using promise in js
 pub async fn async_delay(timeout: i32) {
@@ -109,6 +118,7 @@ pub async fn async_delay(timeout: i32) {
     });
     JsFuture::from(promise).await.expect("must not error");
 }
+
 
 
 
