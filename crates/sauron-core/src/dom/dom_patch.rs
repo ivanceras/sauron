@@ -172,7 +172,6 @@ where
                         .node
                         .dyn_ref()
                         .expect("only elements is supported for now");
-                    // trigger a
                     target_element
                         .insert_adjacent_element(intern("afterend"), created_element)
                         .expect("must remove target node");
@@ -223,7 +222,6 @@ where
                     CreatedNode::remove_event_listeners(self, &target_element)?;
                 }
                 let first_node = replacement.pop().expect("must have a first node");
-                //TODO: make a dispatch_on_dismount event and in the method in created node
                 target_element
                     .replace_with_with_node_1(&first_node.node)
                     .expect("must replace node");
@@ -255,7 +253,6 @@ where
                 let parent_target = target_element
                     .parent_node()
                     .expect("must have a parent node");
-                //TODO: trigger a on_dispatch event here
                 parent_target
                     .remove_child(&target_element)
                     .expect("must remove target node");

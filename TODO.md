@@ -121,8 +121,8 @@
         - Cmd{ commands:Vec<..>,should_update }
         - Cmd::noop() // no update operation
         - Fixed in `0.36.0`
-- ~~[ ] Remove the Dispatch trait and pass Program as it is in dom_updater and apply_patches module~~
-    - ~~There is only one implementation of `Dispatch` trait anyway, that is `Program`~~
+- [X] Remove the Dispatch trait and pass Program as it is in dom_updater and apply_patches module
+    - There is only one implementation of `Dispatch` trait anyway, that is `Program`
     - Dispatch serve its purpose to make the code less clutter, by passing arguments around with less generics.
 - [X] ISSUE: sauron `node!` macro doesn't work on svg tags since it is using only `html_element` function which `namespace` is not supplied.
     - Fixed in `0.35.0` by checking whether a tag has a namespace.
@@ -168,13 +168,13 @@
 - [X] Maybe we don't need the `async` in update.
 - ~[ ] Refactor Program that will have to use less of `Rc<RefCell<>>`, by having an inner structure which is wrapped into `Rc<RefCell<>>`~
     - this is not possible because we need to update each field separately, and borrowing the inner program state will disallow borrowing other fields.
-- [ ] BUG: if the `dispatch_inner` is not called in a callback which is `request_animation_frame` or `request_idle_callback`
+- [X] BUG: if the `dispatch_inner` is not called in a callback which is `request_animation_frame` or `request_idle_callback`
     - This will cause the `dispatch_mount` event to dispatch before the `root_node` is set in the program when the program is to be mounted
     - Note the `dispatch_mount` is triggered when the view has `on_mount` event.
-    - [ ] mitigation: make the dispatch_inner spawn in a thead either via callback, or `spawn_local` from `wasm_bindgen_futures`.
-- [ ] Tighten visibility of objects that are not meant to be `pub`
+    - [X] mitigation: make the dispatch_inner spawn in a thead either via callback, or `spawn_local` from `wasm_bindgen_futures`.
+- [X] Tighten visibility of objects that are not meant to be `pub`
     - [X] some fields in `Program`
-    - [ ] struct types that are not meant to be public
+    - [X] struct types that are not meant to be public
 - [X] Use the deadline object in `request_idle_callback_with_deadline`, instead of just `f64`, which calculates the remaining time manually
 - [ ] Migrate to rshtml, since syn-rsx is unmaintained.
 - [X] Remove `Dispatch` and just pass `Program` around
