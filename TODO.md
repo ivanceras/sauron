@@ -271,11 +271,13 @@
 - [X] Rename `DomUpdater` to `DomPatcher`.
     - [X] move apply_patches into `DomPatcher`.
 - [ ] Rename `CreatedNode` to `DomNode`.
+    - [ ] Maybe completely remove CreatedNode
 - [X] Move fields from `DomUpdater` into `Program` such as
      - [X] current_vdom
      - [X] root_node,
      - [X] active_closures,
      - [X] pending_patches
+- [ ] Remove the use of `wee_alloc` crate
 
 ## Bug
 - [X] When 2 nodes with multiple similar keys, multiple replace node patch is generated. But it couldn't seem to find the correct target element.
