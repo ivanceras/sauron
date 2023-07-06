@@ -3,7 +3,6 @@ use crate::dom::created_node::ActiveClosure;
 use crate::dom::Measurements;
 use crate::vdom;
 use crate::vdom::diff;
-use crate::dom::CreatedNode;
 use crate::{Patch, Application, Cmd};
 use crate::dom::DomPatch;
 use mt_dom::TreePath;
@@ -235,8 +234,7 @@ where
     /// each element and it's descendant in the vdom is created into
     /// an actual DOM node.
     pub fn mount(&self) {
-        let created_node = CreatedNode::create_dom_node(
-            self,
+        let created_node = self.create_dom_node(
             &self.current_vdom.borrow(),
         );
 
@@ -257,7 +255,7 @@ where
 
         match self.mount_procedure.action {
             MountAction::Append => {
-                CreatedNode::append_child_and_dispatch_mount_event(&mount_node,  &created_node.node);
+                Self::append_child_and_dispatch_mount_event(&mount_node,  &created_node);
             }
             MountAction::ClearAppend => {
                 let mount_element: &Element = mount_node.unchecked_ref();
@@ -272,19 +270,19 @@ where
                     mount_node.remove_child(&child).expect("must remove child");
                 });
 
-                CreatedNode::append_child_and_dispatch_mount_event(&mount_node, &created_node.node);
+                Self::append_child_and_dispatch_mount_event(&mount_node, &created_node);
             }
             MountAction::Replace => {
                 let mount_element: &Element = mount_node.unchecked_ref();
                 mount_element
-                    .replace_with_with_node_1(&created_node.node)
+                    .replace_with_with_node_1(&created_node)
                     .expect("Could not append child to mount");
-                CreatedNode::dispatch_mount_event(&created_node.node);
-                *self.mount_node.borrow_mut() = created_node.node.clone()
+                Self::dispatch_mount_event(&created_node);
+                *self.mount_node.borrow_mut() = created_node.clone()
             }
         }
         log::debug!("Root node is now set..");
-        *self.root_node.borrow_mut() = Some(created_node.node);
+        *self.root_node.borrow_mut() = Some(created_node);
         self.after_mounted();
     }
 
@@ -391,13 +389,13 @@ where
     /// replace the current vdom with the `new_vdom`.
     pub fn set_current_dom(&self, new_vdom: vdom::Node<MSG>) {
         let created_node =
-            CreatedNode::create_dom_node(self, &new_vdom);
+            self.create_dom_node(&new_vdom);
         self.mount_node
             .borrow_mut()
-            .append_child(&created_node.node)
+            .append_child(&created_node)
             .expect("Could not append child to mount");
 
-        *self.root_node.borrow_mut() = Some(created_node.node);
+        *self.root_node.borrow_mut() = Some(created_node);
         *self.current_vdom.borrow_mut() = new_vdom;
     }
 
@@ -643,21 +641,21 @@ where
             [crate::html::attributes::class(format!("{type_id:?}"))],
             [crate::html::text(style)],
         );
-        let created_node = CreatedNode::create_dom_node(self, &style_node);
+        let created_node = self.create_dom_node(&style_node);
 
         let head = crate::document().head().expect("must have a head");
-        head.append_child(&created_node.node)
+        head.append_child(&created_node)
             .expect("must append style");
     }
 
     /// inject style element to the mount node
     pub fn inject_style_to_mount(&self, style: &str) {
         let style_node = crate::html::tags::style([], [crate::html::text(style)]);
-        let created_node = CreatedNode::create_dom_node(self, &style_node);
+        let created_node = self.create_dom_node(&style_node);
 
         self.mount_node
             .borrow_mut()
-            .append_child(&created_node.node)
+            .append_child(&created_node)
             .expect("could not append child to mount shadow");
     }
 }

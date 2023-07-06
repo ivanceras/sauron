@@ -17,7 +17,6 @@ use cfg_if::cfg_if;
 
 cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use application::{Application, Measurements};
-    pub use created_node::CreatedNode;
     pub use custom_element::{register_custom_element, CustomElement, WebComponent};
     pub use dom_patch::{DomPatch, PatchVariant};
     pub use http::Http;

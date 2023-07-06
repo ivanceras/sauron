@@ -85,37 +85,20 @@ pub type ActiveClosure = BTreeMap<usize, Vec<(&'static str, Closure<dyn FnMut(we
 
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
-#[derive(Debug)]
-pub struct CreatedNode {
-    /// A `Node` or `Element` that was created from a `Node`
-    pub node: Node,
-}
-
-impl CreatedNode {
-    /// create a simple node with no closure attache
-    pub fn without_closures(node: Node) -> Self {
-        CreatedNode { node }
-    }
-
+impl<APP, MSG> Program<APP, MSG>
+where
+    MSG: 'static,
+    APP: Application<MSG> + 'static,
+{
     /// create a text node
     pub fn create_text_node(txt: &str) -> Text {
         crate::document().create_text_node(txt)
     }
 
-    fn create_leaf_node<APP, MSG>(program: &Program<APP, MSG>, leaf: &Leaf<MSG>) -> CreatedNode
-    where
-        MSG: 'static,
-        APP: Application<MSG> + 'static,
-    {
+    fn create_leaf_node(&self, leaf: &Leaf<MSG>) -> Node {
         match leaf {
-            Leaf::Text(txt) => {
-                let text_node = Self::create_text_node(txt);
-                CreatedNode::without_closures(text_node.unchecked_into())
-            }
-            Leaf::Comment(comment) => {
-                let comment_node = crate::document().create_comment(comment);
-                CreatedNode::without_closures(comment_node.unchecked_into())
-            }
+            Leaf::Text(txt) => Self::create_text_node(txt).into(),
+            Leaf::Comment(comment) => crate::document().create_comment(comment).into(),
             Leaf::SafeHtml(_safe_html) => {
                 panic!("safe html must have already been dealt in create_element node");
             }
@@ -129,44 +112,33 @@ impl CreatedNode {
                 let document = crate::document();
                 let doc_fragment = document.create_document_fragment();
                 for vnode in nodes {
-                    let created_node = Self::create_dom_node(program, vnode);
-                    Self::append_child_and_dispatch_mount_event(&doc_fragment, &created_node.node)
+                    let created_node = self.create_dom_node(vnode);
+                    Self::append_child_and_dispatch_mount_event(&doc_fragment, &created_node)
                 }
-                let node: Node = doc_fragment.unchecked_into();
-                CreatedNode { node }
+                doc_fragment.into()
             }
         }
     }
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
-    pub fn create_dom_node<APP, MSG>(
-        program: &Program<APP, MSG>,
-        vnode: &vdom::Node<MSG>,
-    ) -> CreatedNode
-    where
-        MSG: 'static,
-        APP: Application<MSG> + 'static,
-    {
+    pub fn create_dom_node(&self, vnode: &vdom::Node<MSG>) -> Node {
         match vnode {
-            vdom::Node::Leaf(leaf_node) => Self::create_leaf_node(program, leaf_node),
+            vdom::Node::Leaf(leaf_node) => self.create_leaf_node(leaf_node),
             vdom::Node::Element(element_node) => {
-                let created_node = Self::create_element_node(program, element_node);
+                let created_node = self.create_element_node(element_node);
                 for child in element_node.get_children().iter() {
                     if child.is_safe_html() {
                         let child_text = child.unwrap_safe_html();
                         // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
-                        let created_element: &Element = created_node.node.unchecked_ref();
+                        let created_element: &Element = created_node.unchecked_ref();
                         created_element
                             .insert_adjacent_html(intern("beforeend"), child_text)
                             .expect("must not error");
                     } else {
-                        let created_child = Self::create_dom_node(program, child);
+                        let created_child = self.create_dom_node(child);
 
-                        Self::append_child_and_dispatch_mount_event(
-                            &created_node.node,
-                            &created_child.node,
-                        );
+                        Self::append_child_and_dispatch_mount_event(&created_node, &created_child);
                     }
                 }
                 created_node
@@ -186,14 +158,7 @@ impl CreatedNode {
 
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
-    fn create_element_node<APP, MSG>(
-        program: &Program<APP, MSG>,
-        velem: &vdom::Element<MSG>,
-    ) -> CreatedNode
-    where
-        MSG: 'static,
-        APP: Application<MSG> + 'static,
-    {
+    fn create_element_node(&self, velem: &vdom::Element<MSG>) -> Node {
         let document = crate::document();
 
         if Self::is_custom_element(velem.tag()) {
@@ -209,13 +174,12 @@ impl CreatedNode {
         };
 
         Self::set_element_attributes(
-            program,
+            self,
             &element,
             &velem.get_attributes().iter().collect::<Vec<_>>(),
         );
 
-        let node: Node = element.unchecked_into();
-        CreatedNode { node }
+        element.into()
     }
 
     /// dispatch the mount event,
@@ -239,17 +203,10 @@ impl CreatedNode {
     }
 
     /// set the element attribute
-    pub fn set_element_attributes<APP, MSG>(
-        program: &Program<APP, MSG>,
-        element: &Element,
-        attrs: &[&Attribute<MSG>],
-    ) where
-        MSG: 'static,
-        APP: Application<MSG> + 'static,
-    {
+    pub fn set_element_attributes(&self, element: &Element, attrs: &[&Attribute<MSG>]) {
         let attrs = mt_dom::merge_attributes_of_same_name(attrs);
         for att in attrs {
-            Self::set_element_attribute(program, element, &att);
+            Self::set_element_attribute(self, element, &att);
         }
     }
 
@@ -258,14 +215,7 @@ impl CreatedNode {
     /// Note: this is called in a loop, so setting the attributes, and style will not be on
     /// the same call, but on a subsequent call to each other. Using the if-else-if here for
     /// attributes, style, function_call.
-    pub fn set_element_attribute<APP, MSG>(
-        program: &Program<APP, MSG>,
-        element: &Element,
-        attr: &Attribute<MSG>,
-    ) where
-        MSG: 'static,
-        APP: Application<MSG> + 'static,
-    {
+    pub fn set_element_attribute(&self, element: &Element, attr: &Attribute<MSG>) {
         let SegregatedAttributes {
             listeners,
             plain_values,
@@ -384,7 +334,7 @@ impl CreatedNode {
                 .set_attribute(intern(DATA_VDOM_ID), &unique_id.to_string())
                 .expect("Could not set attribute on element");
 
-            let mut active_closures = program.active_closures.borrow_mut();
+            let mut active_closures = self.active_closures.borrow_mut();
             active_closures.insert(unique_id, vec![]);
 
             let event_str = attr.name();
@@ -396,7 +346,7 @@ impl CreatedNode {
             // The callback to this listener emits an Msg which is then \
             // dispatched to the `program` which then triggers update view cycle.
             let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
-                create_closure_wrap(program, listener);
+                self.create_closure_wrap(listener);
             current_elm
                 .add_event_listener_with_callback(
                     intern(event_str),
@@ -517,7 +467,7 @@ impl CreatedNode {
     }
 
     /// set the element attribute value with the first numerical value found in values
-    fn set_numeric_values<MSG>(element: &Element, values: &[&AttributeValue<MSG>]) {
+    fn set_numeric_values(element: &Element, values: &[&AttributeValue<MSG>]) {
         let value_i32 = values
             .first()
             .and_then(|v| v.get_simple().and_then(|v| v.as_i32()));
@@ -536,7 +486,7 @@ impl CreatedNode {
 
     /// remove element attribute,
     /// takes care of special case such as checked
-    pub fn remove_element_attribute<MSG>(
+    pub fn remove_element_attribute(
         element: &Element,
         attr: &Attribute<MSG>,
     ) -> Result<(), JsValue> {
@@ -564,16 +514,9 @@ impl CreatedNode {
     }
 
     /// remove all the event listeners for this node
-    pub(crate) fn remove_event_listeners<APP, MSG>(
-        program: &Program<APP, MSG>,
-        node: &Element,
-    ) -> Result<(), JsValue>
-    where
-        MSG: 'static,
-        APP: Application<MSG> + 'static,
-    {
+    pub(crate) fn remove_event_listeners(&self, node: &Element) -> Result<(), JsValue> {
         let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
-        let mut active_closures = program.active_closures.borrow_mut();
+        let mut active_closures = self.active_closures.borrow_mut();
         for vdom_id in all_descendant_vdom_id {
             if let Some(old_closure) = active_closures.get(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
@@ -592,17 +535,13 @@ impl CreatedNode {
     }
 
     /// remove the event listener which matches the given event name
-    pub(crate) fn remove_event_listener_with_name<APP, MSG>(
-        program: &Program<APP, MSG>,
+    pub(crate) fn remove_event_listener_with_name(
+        &self,
         event_name: &'static str,
         node: &Element,
-    ) -> Result<(), JsValue>
-    where
-        MSG: 'static,
-        APP: Application<MSG> + 'static,
-    {
+    ) -> Result<(), JsValue> {
         let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
-        let mut active_closures = program.active_closures.borrow_mut();
+        let mut active_closures = self.active_closures.borrow_mut();
         for vdom_id in all_descendant_vdom_id {
             if let Some(old_closure) = active_closures.get_mut(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
@@ -626,24 +565,20 @@ impl CreatedNode {
         }
         Ok(())
     }
-}
 
-/// This wrap into a closure the function that is dispatched when the event is triggered.
-pub(crate) fn create_closure_wrap<APP, MSG>(
-    program: &Program<APP, MSG>,
-    listener: &Listener<MSG>,
-) -> Closure<dyn FnMut(web_sys::Event)>
-where
-    MSG: 'static,
-    APP: Application<MSG> + 'static,
-{
-    let listener_clone = listener.clone();
-    let program_clone = program.clone();
+    /// This wrap into a closure the function that is dispatched when the event is triggered.
+    pub(crate) fn create_closure_wrap(
+        &self,
+        listener: &Listener<MSG>,
+    ) -> Closure<dyn FnMut(web_sys::Event)> {
+        let listener_clone = listener.clone();
+        let program = self.clone();
 
-    Closure::wrap(Box::new(move |event: web_sys::Event| {
-        let msg = listener_clone.emit(Event::from(event));
-        program_clone.dispatch(msg);
-    }))
+        Closure::wrap(Box::new(move |event: web_sys::Event| {
+            let msg = listener_clone.emit(Event::from(event));
+            program.dispatch(msg);
+        }))
+    }
 }
 
 fn find_node(node: &Node, path: &mut TreePath) -> Option<Node> {

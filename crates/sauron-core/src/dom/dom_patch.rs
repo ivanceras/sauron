@@ -1,5 +1,5 @@
 use crate::dom::created_node::intern;
-use crate::dom::{Application, CreatedNode, Program};
+use crate::dom::{Application, Program};
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use mt_dom::TreePath;
 use wasm_bindgen::JsCast;
@@ -8,7 +8,7 @@ use web_sys::Element;
 use web_sys::Node;
 
 /// a Patch where the virtual nodes are all created in the document.
-/// This is necessary since the CreatedNode doesn't contain references
+/// This is necessary since the created Node  doesn't contain references
 /// as opposed to Patch which contains reference to the vdom, which makes it hard
 /// to be included in a struct
 ///
@@ -26,17 +26,17 @@ pub enum PatchVariant<MSG> {
     /// Insert nodes before the target node
     InsertBeforeNode {
         /// nodes to be inserted before the target node
-        nodes: Vec<CreatedNode>,
+        nodes: Vec<Node>,
     },
     /// Insert nodes after the target node
     InsertAfterNode {
         /// the nodes to be inserted after the target node
-        nodes: Vec<CreatedNode>,
+        nodes: Vec<Node>,
     },
     /// Append nodes into the target node
     AppendChildren {
         /// the children nodes to be appended into the target node
-        children: Vec<CreatedNode>,
+        children: Vec<Node>,
     },
     /// Add attributes to the target node
     AddAttributes {
@@ -51,7 +51,7 @@ pub enum PatchVariant<MSG> {
     /// Replace the target node with the replacement node
     ReplaceNode {
         /// the replacement node
-        replacement: Vec<CreatedNode>,
+        replacement: Vec<Node>,
     },
     /// Remove the target node
     RemoveNode,
@@ -75,9 +75,9 @@ where
 
         match patch_type {
             PatchType::InsertBeforeNode { nodes } => {
-                let nodes: Vec<CreatedNode> = nodes
+                let nodes: Vec<Node> = nodes
                     .iter()
-                    .map(|for_insert| CreatedNode::create_dom_node::<APP, MSG>(self, for_insert))
+                    .map(|for_insert| self.create_dom_node(for_insert))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -86,9 +86,9 @@ where
                 }
             }
             PatchType::InsertAfterNode { nodes } => {
-                let nodes: Vec<CreatedNode> = nodes
+                let nodes: Vec<Node> = nodes
                     .iter()
-                    .map(|for_insert| CreatedNode::create_dom_node::<APP, MSG>(self, for_insert))
+                    .map(|for_insert| self.create_dom_node(for_insert))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -113,9 +113,9 @@ where
             },
 
             PatchType::ReplaceNode { replacement } => {
-                let replacement: Vec<CreatedNode> = replacement
+                let replacement: Vec<Node> = replacement
                     .iter()
-                    .map(|node| CreatedNode::create_dom_node::<APP, MSG>(self, node))
+                    .map(|node| self.create_dom_node(node))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -129,9 +129,9 @@ where
                 patch_variant: PatchVariant::RemoveNode,
             },
             PatchType::AppendChildren { children } => {
-                let children: Vec<CreatedNode> = children
+                let children: Vec<Node> = children
                     .iter()
-                    .map(|for_insert| CreatedNode::create_dom_node::<APP, MSG>(self, for_insert))
+                    .map(|for_insert| self.create_dom_node(for_insert))
                     .collect();
 
                 DomPatch {
@@ -156,9 +156,9 @@ where
                 if let Some(parent_target) = target_element.parent_node() {
                     for for_insert in nodes {
                         parent_target
-                            .insert_before(&for_insert.node, Some(&target_element))
+                            .insert_before(&for_insert, Some(&target_element))
                             .expect("must remove target node");
-                        CreatedNode::dispatch_mount_event(&for_insert.node);
+                        Self::dispatch_mount_event(&for_insert);
                     }
                 } else {
                     panic!("unable to get parent node of the target element: {target_element:?} for patching: {nodes:#?}");
@@ -169,42 +169,37 @@ where
                 // we insert the node before this target element
                 for for_insert in nodes.into_iter().rev() {
                     let created_element: &Element = for_insert
-                        .node
                         .dyn_ref()
                         .expect("only elements is supported for now");
                     target_element
                         .insert_adjacent_element(intern("afterend"), created_element)
                         .expect("must remove target node");
-                    CreatedNode::dispatch_mount_event(&for_insert.node);
+                    Self::dispatch_mount_event(&for_insert);
                 }
             }
             PatchVariant::AppendChildren { children } => {
                 for child in children.into_iter() {
-                    CreatedNode::append_child_and_dispatch_mount_event(
+                    Self::append_child_and_dispatch_mount_event(
                         target_element.unchecked_ref(),
-                        &child.node,
+                        &child,
                     );
                 }
             }
 
             PatchVariant::AddAttributes { attrs } => {
                 let attrs: Vec<&Attribute<MSG>> = attrs.iter().collect();
-                CreatedNode::set_element_attributes(self, &target_element, &attrs);
+                self.set_element_attributes(&target_element, &attrs);
             }
             PatchVariant::RemoveAttributes { attrs } => {
                 for attr in attrs.iter() {
                     for att_value in attr.value() {
                         match att_value {
                             AttributeValue::Simple(_) => {
-                                CreatedNode::remove_element_attribute(&target_element, attr)?;
+                                Self::remove_element_attribute(&target_element, attr)?;
                             }
                             // it is an event listener
                             AttributeValue::EventListener(_) => {
-                                CreatedNode::remove_event_listener_with_name(
-                                    self,
-                                    attr.name(),
-                                    &target_element,
-                                )?;
+                                self.remove_event_listener_with_name(attr.name(), &target_element)?;
                             }
                             AttributeValue::FunctionCall(_)
                             | AttributeValue::Style(_)
@@ -219,23 +214,23 @@ where
             // before it is actully replaced in the DOM
             PatchVariant::ReplaceNode { mut replacement } => {
                 if target_element.node_type() == Node::ELEMENT_NODE {
-                    CreatedNode::remove_event_listeners(self, &target_element)?;
+                    self.remove_event_listeners(&target_element)?;
                 }
                 let first_node = replacement.pop().expect("must have a first node");
                 target_element
-                    .replace_with_with_node_1(&first_node.node)
+                    .replace_with_with_node_1(&first_node)
                     .expect("must replace node");
 
-                CreatedNode::dispatch_mount_event(&first_node.node);
+                Self::dispatch_mount_event(&first_node);
 
-                let first_node_elm: &web_sys::Element = first_node.node.unchecked_ref();
+                let first_node_elm: &web_sys::Element = first_node.unchecked_ref();
 
                 for node in replacement.into_iter() {
-                    let node_elm: &web_sys::Element = node.node.unchecked_ref();
+                    let node_elm: &web_sys::Element = node.unchecked_ref();
                     first_node_elm
                         .insert_adjacent_element(intern("beforebegin"), node_elm)
                         .expect("append child");
-                    CreatedNode::dispatch_mount_event(node_elm);
+                    Self::dispatch_mount_event(node_elm);
                 }
 
                 //Note: it is important that root_node points to the original mutable reference here
@@ -244,7 +239,7 @@ where
                 // we replace the root node here, so that's reference is updated
                 // to the newly created node
                 if patch_path.path.is_empty() {
-                    *self.root_node.borrow_mut() = Some(first_node.node);
+                    *self.root_node.borrow_mut() = Some(first_node);
                     #[cfg(feature = "with-debug")]
                     log::info!("the root_node is replaced with {:?}", &self.root_node);
                 }
@@ -257,7 +252,7 @@ where
                     .remove_child(&target_element)
                     .expect("must remove target node");
                 if target_element.node_type() == Node::ELEMENT_NODE {
-                    CreatedNode::remove_event_listeners(self, &target_element)?;
+                    self.remove_event_listeners(&target_element)?;
                 }
             }
         }

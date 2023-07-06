@@ -1,5 +1,5 @@
 use crate::{
-    dom::{created_node::create_closure_wrap, Cmd, Task},
+    dom::{ Cmd, Task},
     vdom::Attribute,
     Application,
 };
@@ -34,7 +34,8 @@ impl Window {
                     let callback = event_cb.as_event_listener().expect("expecting a callback");
 
                     let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
-                        create_closure_wrap(&program, callback);
+                        program.create_closure_wrap(callback);
+
                     window
                         .add_event_listener_with_callback(
                             event_str,
