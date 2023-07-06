@@ -178,10 +178,19 @@
 - [X] Use the deadline object in `request_idle_callback_with_deadline`, instead of just `f64`, which calculates the remaining time manually
 - [ ] Migrate to rshtml, since syn-rsx is unmaintained.
 - [X] Remove `Dispatch` and just pass `Program` around
-- [ ] Make an alternative to `Effects` and `Cmd` that can be used in `Component`.
+- [X] Make an alternative to `Effects` and `Cmd` that can be used in `Component`.
     - call it `Task` a wrapper to a future, will resolve into MSG which will then be dispatched into the program
     - does not have access to program for dispatching
 - [ ] Remove the use of `Closure::forget()`
+- [ ] Refactor `ActiveClosure` to use
+      - add a field `dom_closures` in `Program` which stores all closure for a certain Element
+      - all other closures is stored in `active_closure`
+      ```rust
+      closure_id_counter: usize,
+      type ActiveClosure: BTreeMap<usize, Closure>;
+      ```
+
+
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
