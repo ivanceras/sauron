@@ -3,22 +3,21 @@
 use sauron::{html::*, *};
 
 pub enum Msg {
-    Click,
-    NoOp,
+    WindowResized(i32, i32),
 }
 
 #[derive(Default)]
 pub struct App {
-    click_count: u32,
+    width: Option<i32>,
+    height: Option<i32>,
 }
 
 impl Application<Msg> for App {
     fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![sauron::dom::Window::on_resize_task(|w, h| {
+        vec![sauron::dom::Window::on_resize(|w, h| {
             log::info!("Window is resized to {w}x{h}");
-            Msg::NoOp
-        })
-        .into()]
+            Msg::WindowResized(w, h)
+        })]
     }
 
     fn view(&self) -> Node<Msg> {
@@ -26,17 +25,34 @@ impl Application<Msg> for App {
             [],
             [
                 h1([], [text("Usage of task")]),
-                div([], [text("resize the window")]),
+                ol(
+                    [],
+                    [
+                        li([], [text("resize the window")]),
+                        li([], [text("open the console")]),
+                        if let (Some(w), Some(h)) = (self.width, self.height) {
+                            li(
+                                [],
+                                [text!("See the log that the window is resized to {w} x {h}")],
+                            )
+                        } else {
+                            span([], [])
+                        },
+                    ],
+                ),
             ],
         )
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
-            Msg::Click => self.click_count += 1,
-            Msg::NoOp => (),
+            Msg::WindowResized(w, h) => {
+                log::info!("Setting the App's width: {w} and height: {h}");
+                self.width = Some(w);
+                self.height = Some(h);
+                Cmd::none()
+            }
         }
-        Cmd::none()
     }
 
     fn style(&self) -> Vec<String> {

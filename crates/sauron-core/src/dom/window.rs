@@ -75,6 +75,8 @@ impl Window {
         cmd
     }
 
+    /// TODO: only executed once, since the Task Future is droped once done
+    /// TODO: this should be a stream, instead of just one-time future
     /// a variant of resize task, but instead of returning Cmd, it is returning Task
     pub fn on_resize_task<F, MSG>(cb: F) -> Task<MSG>
     where
