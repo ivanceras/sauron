@@ -1,0 +1,54 @@
+use crate::dom::window;
+use wasm_bindgen::closure::Closure;
+use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen_futures::JsFuture;
+use js_sys::Promise;
+
+/// handle for request_idle_callback calls
+#[derive(Debug)]
+pub struct TimeoutCallbackHandle {
+    handle: i32,
+    _closure: Closure<dyn FnMut()>,
+}
+
+impl Drop for TimeoutCallbackHandle {
+    fn drop(&mut self) {
+        log::info!("timeout callback is being dropped..");
+        window().clear_timeout_with_handle(self.handle);
+    }
+}
+
+/// request and idle callback
+pub fn request_timeout_callback<F>(f: F, timeout: i32) -> Result<TimeoutCallbackHandle, JsValue>
+where
+    F: FnMut() + 'static,
+{
+    let closure = Closure::once(f);
+    let handle = window().set_timeout_with_callback_and_timeout_and_arguments_0(
+        closure.as_ref().unchecked_ref(),
+        timeout,
+    )?;
+    Ok(TimeoutCallbackHandle {
+        handle,
+        _closure: closure,
+    })
+}
+
+
+/// simulate a delay using promise in js
+pub async fn async_delay(timeout: i32) -> Result<TimeoutCallbackHandle, JsValue>{
+    let mut result = Err(JsValue::NULL);
+    let promise = Promise::new(&mut |resolve, _reject| {
+        let handle = request_timeout_callback(
+            move || {
+                resolve
+                    .call0(&JsValue::NULL)
+                    .expect("must be able to call resolve");
+            },
+            timeout,
+        );
+        result = handle;
+    });
+    JsFuture::from(promise).await.expect("must not error");
+    result
+}

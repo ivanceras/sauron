@@ -2,7 +2,7 @@ use crate::dom::Measurements;
 use crate::vdom;
 use crate::vdom::diff;
 use crate::{Patch, Application, Cmd};
-use crate::dom::DomPatch;
+use crate::dom::{DomPatch, IdleCallbackHandle, AnimationFrameHandle};
 use crate::dom::dom_node::find_all_nodes;
 use mt_dom::TreePath;
 use std::collections::VecDeque;
@@ -49,6 +49,11 @@ where
     /// can not be run in 1 execution due to limited remaining time deadline
     /// it will be put into the pending patches to be executed on the next run.
     pending_patches: Rc<RefCell<VecDeque<DomPatch<MSG>>>>,
+
+    /// store the Closure used in request_idle_callback calls
+    idle_callback_handles: Rc<RefCell<Vec<IdleCallbackHandle>>>,
+    /// store the Closure used in request_animation_frame calls
+    animation_frame_handles: Rc<RefCell<Vec<AnimationFrameHandle>>>,
 }
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
@@ -100,6 +105,8 @@ where
             node_closures: Rc::clone(&self.node_closures),
             mount_procedure: self.mount_procedure,
             pending_patches: Rc::clone(&self.pending_patches),
+            idle_callback_handles: Rc::clone(&self.idle_callback_handles),
+            animation_frame_handles: Rc::clone(&self.animation_frame_handles),
         }
     }
 }
@@ -128,6 +135,8 @@ where
             node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
             mount_procedure: MountProcedure { action, target },
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
+            idle_callback_handles: Rc::new(RefCell::new(vec![])),
+            animation_frame_handles: Rc::new(RefCell::new(vec![])),
         }
     }
 
@@ -295,12 +304,13 @@ where
     #[cfg(feature = "with-ric")]
     fn dispatch_pending_msgs_with_ric(&self) -> Result<(), JsValue> {
         let program = self.clone();
-        crate::dom::util::request_idle_callback(move |deadline| {
+        let handle = crate::dom::request_idle_callback(move |deadline| {
             program
                 .dispatch_pending_msgs(Some(deadline))
                 .expect("must execute")
         })
         .expect("must execute");
+        self.idle_callback_handles.borrow_mut().push(handle);
         Ok(())
     }
 
@@ -492,22 +502,24 @@ where
     #[cfg(feature = "with-ric")]
     fn apply_pending_patches_with_ric(&self) -> Result<(), JsValue> {
         let program = self.clone();
-        crate::dom::util::request_idle_callback(move |deadline| {
+        let handle = crate::dom::request_idle_callback(move |deadline| {
             program
                 .apply_pending_patches(Some(deadline))
                 .expect("must not error");
         })
         .expect("must complete the remaining pending patches..");
+        self.idle_callback_handles.borrow_mut().push(handle);
         Ok(())
     }
 
     #[cfg(feature = "with-raf")]
     fn apply_pending_patches_with_raf(&self) -> Result<(), JsValue> {
         let program = self.clone();
-        crate::dom::util::request_animation_frame(move || {
+        let handle = crate::dom::request_animation_frame(move || {
             program.apply_pending_patches(None).expect("must not error");
         })
         .expect("must execute");
+        self.animation_frame_handles.borrow_mut().push(handle);
         Ok(())
     }
 
@@ -550,20 +562,22 @@ where
     #[cfg(feature = "with-ric")]
     fn dispatch_inner_with_ric(&self) {
         let program = self.clone();
-        let _handle = crate::dom::util::request_idle_callback(move |deadline| {
+        let handle = crate::dom::request_idle_callback(move |deadline| {
             program.dispatch_inner(Some(deadline));
         })
         .expect("must execute");
+        self.idle_callback_handles.borrow_mut().push(handle);
     }
 
     #[allow(unused)]
     #[cfg(feature = "with-raf")]
     fn dispatch_inner_with_raf(&self) {
         let program = self.clone();
-        crate::dom::util::request_animation_frame(move || {
+        let handle = crate::dom::request_animation_frame(move || {
             program.dispatch_inner(None);
         })
         .expect("must execute");
+        self.animation_frame_handles.borrow_mut().push(handle);
     }
 
     fn dispatch_inner_with_priority_ric(&self) {

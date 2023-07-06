@@ -22,9 +22,12 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use http::Http;
     pub use program::{MountAction, MountTarget, Program};
     pub use util::{
-        async_delay, body, delay_exec, document, history, now, performance, request_animation_frame,
-        request_idle_callback, spawn_local, window, inject_style,
+        body, document, history, now, performance,
+        spawn_local, window, inject_style,
     };
+    pub use raf::{request_animation_frame, AnimationFrameHandle};
+    pub use ric::{request_idle_callback, IdleCallbackHandle};
+    pub use timeout::{async_delay, request_timeout_callback, TimeoutCallbackHandle};
     pub use window::Window;
     pub use cmd::Cmd;
 
@@ -37,7 +40,10 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     mod http;
     mod program;
     pub mod util;
+    mod raf;
+    mod ric;
     mod window;
+    mod timeout;
 
 
     /// Map the Event to DomEvent, which are browser events
