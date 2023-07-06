@@ -285,7 +285,6 @@ where
         }
         log::debug!("Root node is now set..");
         *self.root_node.borrow_mut() = Some(created_node.node);
-        *self.active_closures.borrow_mut() = created_node.closures;
         self.after_mounted();
     }
 
@@ -399,7 +398,6 @@ where
             .expect("Could not append child to mount");
 
         *self.root_node.borrow_mut() = Some(created_node.node);
-        *self.active_closures.borrow_mut() = created_node.closures;
         *self.current_vdom.borrow_mut() = new_vdom;
     }
 
@@ -548,9 +546,6 @@ where
                             .insert_before(&for_insert.node, Some(&target_element))
                             .expect("must remove target node");
                         CreatedNode::dispatch_mount_event(&for_insert.node);
-                        self.active_closures
-                            .borrow_mut()
-                            .extend(for_insert.closures);
                     }
                 } else {
                     panic!("unable to get parent node of the target element: {target_element:?} for patching: {nodes:#?}");
@@ -569,15 +564,11 @@ where
                         .insert_adjacent_element(intern("afterend"), created_element)
                         .expect("must remove target node");
                     CreatedNode::dispatch_mount_event(&for_insert.node);
-                    self.active_closures
-                        .borrow_mut()
-                        .extend(for_insert.closures);
                 }
             }
             PatchVariant::AppendChildren { children } => {
                 for child in children.into_iter() {
                     CreatedNode::append_child_and_dispatch_mount_event(target_element.unchecked_ref(), &child.node);
-                    self.active_closures.borrow_mut().extend(child.closures);
                 }
             }
 
@@ -585,7 +576,6 @@ where
                 let attrs: Vec<&Attribute<MSG>> = attrs.iter().collect();
                 CreatedNode::set_element_attributes(
                     self,
-                    &mut self.active_closures.borrow_mut(),
                     &target_element,
                     &attrs,
                 );
@@ -600,9 +590,9 @@ where
                             // it is an event listener
                             AttributeValue::EventListener(_) => {
                                 CreatedNode::remove_event_listener_with_name(
+                                    self,
                                     attr.name(),
                                     &target_element,
-                                    &mut self.active_closures.borrow_mut(),
                                 )?;
                             }
                             AttributeValue::FunctionCall(_)
@@ -619,8 +609,8 @@ where
             PatchVariant::ReplaceNode { mut replacement } => {
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     CreatedNode::remove_event_listeners(
+                        self,
                         &target_element,
-                        &mut self.active_closures.borrow_mut(),
                     )?;
                 }
                 let first_node = replacement.pop().expect("must have a first node");
@@ -630,7 +620,6 @@ where
                     .expect("must replace node");
 
                 CreatedNode::dispatch_mount_event(&first_node.node);
-                self.active_closures.borrow_mut().extend(first_node.closures);
 
                 let first_node_elm: &web_sys::Element = first_node.node.unchecked_ref();
 
@@ -638,9 +627,6 @@ where
                     let node_elm: &web_sys::Element = node.node.unchecked_ref();
                     first_node_elm.insert_adjacent_element(intern("beforebegin"), node_elm).expect("append child");
                     CreatedNode::dispatch_mount_event(node_elm);
-                    self.active_closures
-                        .borrow_mut()
-                        .extend(node.closures);
                 }
 
                 //Note: it is important that root_node points to the original mutable reference here
@@ -665,8 +651,8 @@ where
                     .expect("must remove target node");
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     CreatedNode::remove_event_listeners(
+                        self,
                         &target_element,
-                        &mut self.active_closures.borrow_mut(),
                     )?;
                 }
             }

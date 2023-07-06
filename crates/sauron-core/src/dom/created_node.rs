@@ -89,16 +89,12 @@ pub type ActiveClosure = BTreeMap<usize, Vec<(&'static str, Closure<dyn FnMut(we
 pub struct CreatedNode {
     /// A `Node` or `Element` that was created from a `Node`
     pub node: Node,
-    pub(crate) closures: ActiveClosure,
 }
 
 impl CreatedNode {
     /// create a simple node with no closure attache
     pub fn without_closures(node: Node) -> Self {
-        CreatedNode {
-            node,
-            closures: BTreeMap::new(),
-        }
+        CreatedNode { node }
     }
 
     /// create a text node
@@ -132,14 +128,12 @@ impl CreatedNode {
             Leaf::Fragment(nodes) => {
                 let document = crate::document();
                 let doc_fragment = document.create_document_fragment();
-                let mut closures = ActiveClosure::new();
                 for vnode in nodes {
                     let created_node = Self::create_dom_node(program, vnode);
-                    closures.extend(created_node.closures);
                     Self::append_child_and_dispatch_mount_event(&doc_fragment, &created_node.node)
                 }
                 let node: Node = doc_fragment.unchecked_into();
-                CreatedNode { node, closures }
+                CreatedNode { node }
             }
         }
     }
@@ -157,7 +151,7 @@ impl CreatedNode {
         match vnode {
             vdom::Node::Leaf(leaf_node) => Self::create_leaf_node(program, leaf_node),
             vdom::Node::Element(element_node) => {
-                let mut created_node = Self::create_element_node(program, element_node);
+                let created_node = Self::create_element_node(program, element_node);
                 for child in element_node.get_children().iter() {
                     if child.is_safe_html() {
                         let child_text = child.unwrap_safe_html();
@@ -168,7 +162,6 @@ impl CreatedNode {
                             .expect("must not error");
                     } else {
                         let created_child = Self::create_dom_node(program, child);
-                        created_node.closures.extend(created_child.closures);
 
                         Self::append_child_and_dispatch_mount_event(
                             &created_node.node,
@@ -215,17 +208,14 @@ impl CreatedNode {
             create_element(velem.tag())
         };
 
-        let mut closures = ActiveClosure::new();
-
         Self::set_element_attributes(
             program,
-            &mut closures,
             &element,
             &velem.get_attributes().iter().collect::<Vec<_>>(),
         );
 
         let node: Node = element.unchecked_into();
-        CreatedNode { node, closures }
+        CreatedNode { node }
     }
 
     /// dispatch the mount event,
@@ -251,7 +241,6 @@ impl CreatedNode {
     /// set the element attribute
     pub fn set_element_attributes<APP, MSG>(
         program: &Program<APP, MSG>,
-        closures: &mut ActiveClosure,
         element: &Element,
         attrs: &[&Attribute<MSG>],
     ) where
@@ -260,7 +249,7 @@ impl CreatedNode {
     {
         let attrs = mt_dom::merge_attributes_of_same_name(attrs);
         for att in attrs {
-            Self::set_element_attribute(program, closures, element, &att);
+            Self::set_element_attribute(program, element, &att);
         }
     }
 
@@ -271,7 +260,6 @@ impl CreatedNode {
     /// attributes, style, function_call.
     pub fn set_element_attribute<APP, MSG>(
         program: &Program<APP, MSG>,
-        closures: &mut ActiveClosure,
         element: &Element,
         attr: &Attribute<MSG>,
     ) where
@@ -396,7 +384,8 @@ impl CreatedNode {
                 .set_attribute(intern(DATA_VDOM_ID), &unique_id.to_string())
                 .expect("Could not set attribute on element");
 
-            closures.insert(unique_id, vec![]);
+            let mut active_closures = program.active_closures.borrow_mut();
+            active_closures.insert(unique_id, vec![]);
 
             let event_str = attr.name();
             let current_elm: &EventTarget =
@@ -414,7 +403,8 @@ impl CreatedNode {
                     callback_wrapped.as_ref().unchecked_ref(),
                 )
                 .expect("Unable to attached event listener");
-            closures
+
+            active_closures
                 .get_mut(&unique_id)
                 .expect("Unable to get closure")
                 .push((event_str, callback_wrapped));
@@ -574,18 +564,22 @@ impl CreatedNode {
     }
 
     /// remove all the event listeners for this node
-    pub(crate) fn remove_event_listeners(
+    pub(crate) fn remove_event_listeners<APP, MSG>(
+        program: &Program<APP, MSG>,
         node: &Element,
-        active_closures: &mut ActiveClosure,
-    ) -> Result<(), JsValue> {
+    ) -> Result<(), JsValue>
+    where
+        MSG: 'static,
+        APP: Application<MSG> + 'static,
+    {
         let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
+        let mut active_closures = program.active_closures.borrow_mut();
         for vdom_id in all_descendant_vdom_id {
             if let Some(old_closure) = active_closures.get(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
                     let func: &Function = oc.as_ref().unchecked_ref();
                     node.remove_event_listener_with_callback(intern(event), func)?;
                 }
-
                 // remove closure active_closure in dom_updater to free up memory
                 active_closures
                     .remove(&vdom_id)
@@ -598,12 +592,17 @@ impl CreatedNode {
     }
 
     /// remove the event listener which matches the given event name
-    pub(crate) fn remove_event_listener_with_name(
+    pub(crate) fn remove_event_listener_with_name<APP, MSG>(
+        program: &Program<APP, MSG>,
         event_name: &'static str,
         node: &Element,
-        active_closures: &mut ActiveClosure,
-    ) -> Result<(), JsValue> {
+    ) -> Result<(), JsValue>
+    where
+        MSG: 'static,
+        APP: Application<MSG> + 'static,
+    {
         let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
+        let mut active_closures = program.active_closures.borrow_mut();
         for vdom_id in all_descendant_vdom_id {
             if let Some(old_closure) = active_closures.get_mut(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
