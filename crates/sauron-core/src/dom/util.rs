@@ -5,6 +5,7 @@ use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 pub use wasm_bindgen_futures::spawn_local;
 use wasm_bindgen_futures::JsFuture;
 
+//TODO: feature gate this with `use-cached-windows`
 thread_local!(static WINDOW: web_sys::Window = web_sys::window().expect("no global `window` exists"));
 thread_local!(static DOCUMENT: web_sys::Document = window().document().expect("should have a document on window"));
 

@@ -1,8 +1,7 @@
-use crate::dom::CustomElement;
-use crate::dom::{Component, Container};
-use crate::vdom::Node;
-
 use crate::dom::Cmd;
+use crate::dom::CustomElement;
+use crate::dom::{Component, Container, Task};
+use crate::vdom::Node;
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
@@ -11,14 +10,13 @@ pub trait Application<MSG>
 where
     MSG: 'static,
 {
+    /// TODO: Maybe return Vec<> of Cmd here, since most likely we are batching it anyway
+    ///
     ///  The application can implement this method where it can modify its initial state.
     ///  This method is called right after the program is mounted into the DOM.
-    fn init(&mut self) -> Cmd<Self, MSG>
+    fn init(&mut self) -> Vec<Cmd<Self, MSG>>
     where
-        Self: Sized + 'static,
-    {
-        Cmd::none()
-    }
+        Self: Sized + 'static;
 
     /// Update the component with a message.
     /// The update function returns a Cmd, which can be executed by the runtime.
@@ -75,6 +73,13 @@ where
     COMP: CustomElement<MSG>,
     MSG: 'static,
 {
+    fn init(&mut self) -> Vec<Cmd<Self, MSG>> {
+        <Self as crate::Component<MSG, ()>>::init(self)
+            .into_iter()
+            .map(Cmd::from)
+            .collect()
+    }
+
     fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
         let effects = <Self as crate::Component<MSG, ()>>::update(self, msg);
         Cmd::from(effects)
@@ -98,6 +103,10 @@ where
     CONT: CustomElement<MSG>,
     MSG: 'static,
 {
+    fn init(&mut self) -> Vec<Task<MSG>> {
+        <Self as crate::Container<MSG, ()>>::init(self)
+    }
+
     fn update(&mut self, msg: MSG) -> crate::Effects<MSG, ()> {
         <Self as crate::Container<MSG, ()>>::update(self, msg)
     }

@@ -48,6 +48,7 @@ fn create_element_with_tag(tag: &'static str) -> (&'static str, web_sys::Element
 }
 
 /// find the element from the most created element and clone it, else create it
+/// TODO: feature gate this with `use-cached-elements`
 fn create_element(tag: &'static str) -> web_sys::Element {
     CACHE_ELEMENTS.with(|map| {
         if let Some(elm) = map.get(tag) {

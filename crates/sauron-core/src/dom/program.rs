@@ -132,7 +132,7 @@ where
         let cmds = self.app.borrow_mut().init();
         // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
         // listening to events (resize, hashchange)
-        cmds.emit(self);
+        cmds.into_iter().for_each(|cmd|cmd.emit(self));
 
         // inject the style style after call the init of the app as
         // it may be modifying the app state including the style

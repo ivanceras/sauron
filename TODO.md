@@ -93,6 +93,7 @@
     ```
 - [X] Call set_attribute in addition to setting the special attributes such as `value`, `checked`, this should trigger the `attribute_changed` callback in web components
 - [ ] The attribute_changed method in CustomElement should return an `MSG` which will be dispatched in the WebComponent struct.
+
 ## Internal
 - ~~[ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`~~
         ~~ie: `Cmd<ChildApp, ChildMsg>` to `Cmd<App, Msg>`
@@ -180,6 +181,7 @@
 - [ ] Make an alternative to `Effects` and `Cmd` that can be used in `Component`.
     - call it `Task` a wrapper to a future, will resolve into MSG which will then be dispatched into the program
     - does not have access to program for dispatching
+- [ ] Remove the use of `Closure::forget()`
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
@@ -246,6 +248,7 @@
         - [X] Make a DomPatch which a DOM version of the patch with the target node and created node
 - [ ] Find a way to break up building the view into multiple frames, since view can take a long time to build
 - [ ] Find a way to break up diffing the current vdom and the new vdom as they can also take a bit of long time as well.
+- [ ] Add benchmark function for using CACHE_ELEMENT and not
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
