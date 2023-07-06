@@ -84,7 +84,8 @@ where
     /// called when the web component is mounted
     pub fn connected_callback(&mut self) {
         self.program.mount();
-        let component_style = <APP as Application<MSG>>::style(&self.program.app.borrow());
+        let component_style =
+            <APP as Application<MSG>>::style(&self.program.app.borrow()).join("\n");
         self.program.inject_style_to_mount(&component_style);
         self.program.update_dom().expect("must update dom");
         self.program.app.borrow_mut().connected_callback();

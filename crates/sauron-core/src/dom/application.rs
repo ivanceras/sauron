@@ -29,8 +29,8 @@ where
     /// Returns a node on how the component is presented.
     fn view(&self) -> Node<MSG>;
 
-    /// optionally an Application can specify its own css style
-    fn style(&self) -> String;
+    /// The css style for the application, will be mounted automatically by the program
+    fn style(&self) -> Vec<String>;
 
     /// This is called after dispatching and updating the dom for the component
     /// This is for diagnostic and performance measurement purposes.
@@ -89,7 +89,7 @@ where
         <Self as crate::Component<MSG, ()>>::view(self)
     }
 
-    fn style(&self) -> String {
+    fn style(&self) -> Vec<String> {
         <Self as crate::Component<MSG, ()>>::style(self)
     }
 }
@@ -117,7 +117,7 @@ where
         <Self as crate::Container<MSG, ()>>::view(self, [])
     }
 
-    fn style(&self) -> String {
+    fn style(&self) -> Vec<String> {
         <Self as crate::Container<MSG, ()>>::style(self)
     }
 }

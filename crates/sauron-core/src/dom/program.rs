@@ -136,10 +136,11 @@ where
 
         // inject the style style after call the init of the app as
         // it may be modifying the app state including the style
-        let style = self.app.borrow().style();
-        if !style.trim().is_empty() {
+        let styles = self.app.borrow().style();
+        if !styles.is_empty() {
             let type_id = TypeId::of::<APP>();
-            self.inject_style(type_id, &style);
+            let css_style = styles.join("\n");
+            self.inject_style(type_id, &css_style);
         }
     }
 

@@ -21,14 +21,7 @@ pub trait Component<MSG, XMSG> {
     fn view(&self) -> Node<MSG>;
 
     /// optionally a Component can specify its own css style
-    fn style(&self) -> String {
-        String::new()
-    }
-
-    /// Component can have component id to identify themselves
-    fn get_component_id(&self) -> Option<&String> {
-        None
-    }
+    fn style(&self) -> Vec<String>;
 }
 
 /// A Container have children that is set from the parent component
@@ -51,9 +44,7 @@ pub trait Container<MSG, XMSG> {
     fn view(&self, content: impl IntoIterator<Item = Node<XMSG>>) -> Node<MSG>;
 
     /// optionally a Container can specify its own css style
-    fn style(&self) -> String {
-        String::new()
-    }
+    fn style(&self) -> Vec<String>;
 
     /// containers can append children
     fn append_child(&mut self, child: Node<XMSG>);
@@ -67,7 +58,5 @@ pub trait Widget<MSG> {
     /// how the widget display itself
     fn view(&self) -> Node<MSG>;
     /// Widget can have a style
-    fn style(&self) -> String {
-        String::new()
-    }
+    fn style(&self) -> Vec<String>;
 }
