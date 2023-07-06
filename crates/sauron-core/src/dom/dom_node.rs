@@ -198,7 +198,7 @@ where
     pub fn set_element_attributes(&self, element: &Element, attrs: &[&Attribute<MSG>]) {
         let attrs = mt_dom::merge_attributes_of_same_name(attrs);
         for att in attrs {
-            Self::set_element_attribute(self, element, &att);
+            self.set_element_attribute(element, &att);
         }
     }
 
@@ -326,8 +326,8 @@ where
                 .set_attribute(intern(DATA_VDOM_ID), &unique_id.to_string())
                 .expect("Could not set attribute on element");
 
-            let mut active_closures = self.active_closures.borrow_mut();
-            active_closures.insert(unique_id, vec![]);
+            let mut node_closures = self.node_closures.borrow_mut();
+            node_closures.insert(unique_id, vec![]);
 
             let event_str = attr.name();
             let current_elm: &EventTarget =
@@ -346,7 +346,7 @@ where
                 )
                 .expect("Unable to attached event listener");
 
-            active_closures
+            node_closures
                 .get_mut(&unique_id)
                 .expect("Unable to get closure")
                 .push((event_str, callback_wrapped));
@@ -508,15 +508,15 @@ where
     /// remove all the event listeners for this node
     pub(crate) fn remove_event_listeners(&self, node: &Element) -> Result<(), JsValue> {
         let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
-        let mut active_closures = self.active_closures.borrow_mut();
+        let mut node_closures = self.node_closures.borrow_mut();
         for vdom_id in all_descendant_vdom_id {
-            if let Some(old_closure) = active_closures.get(&vdom_id) {
+            if let Some(old_closure) = node_closures.get(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
                     let func: &Function = oc.as_ref().unchecked_ref();
                     node.remove_event_listener_with_callback(intern(event), func)?;
                 }
                 // remove closure active_closure in dom_updater to free up memory
-                active_closures
+                node_closures
                     .remove(&vdom_id)
                     .expect("Unable to remove old closure");
             } else {
@@ -533,9 +533,9 @@ where
         node: &Element,
     ) -> Result<(), JsValue> {
         let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
-        let mut active_closures = self.active_closures.borrow_mut();
+        let mut node_closures = self.node_closures.borrow_mut();
         for vdom_id in all_descendant_vdom_id {
-            if let Some(old_closure) = active_closures.get_mut(&vdom_id) {
+            if let Some(old_closure) = node_closures.get_mut(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
                     if *event == event_name {
                         let func: &Function = oc.as_ref().unchecked_ref();
@@ -547,7 +547,7 @@ where
 
                 // remove closure active_closure in dom_updater to free up memory
                 if old_closure.is_empty() {
-                    active_closures
+                    node_closures
                         .remove(&vdom_id)
                         .expect("Unable to remove old closure");
                 }

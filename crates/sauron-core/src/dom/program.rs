@@ -37,11 +37,9 @@ where
     /// the actual DOM element where the APP is mounted to.
     mount_node: Rc<RefCell<Node>>,
 
-    /// The closures that are currently attached to elements in the page.
-    ///
+    /// The closures that are currently attached to all the nodes used in the Application
     /// We keep these around so that they don't get dropped (and thus stop working);
-    ///
-    pub active_closures: Rc<RefCell<ActiveClosure>>,
+    pub node_closures: Rc<RefCell<ActiveClosure>>,
 
     /// specify how the root node is mounted into the mount node
     mount_procedure: MountProcedure,
@@ -56,9 +54,8 @@ where
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
 /// VirtualNode is dropped.
 ///
-/// The u32 is a unique identifier that is associated with the DOM element that this closure is
+/// The usize is a unique identifier that is associated with the DOM element that this closure is
 /// attached to.
-///
 pub type ActiveClosure = BTreeMap<usize, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
 
 /// specify how the App is mounted to the DOM
@@ -100,7 +97,7 @@ where
             current_vdom: Rc::clone(&self.current_vdom),
             root_node: Rc::clone(&self.root_node),
             mount_node: Rc::clone(&self.mount_node),
-            active_closures: Rc::clone(&self.active_closures),
+            node_closures: Rc::clone(&self.node_closures),
             mount_procedure: self.mount_procedure,
             pending_patches: Rc::clone(&self.pending_patches),
         }
@@ -128,7 +125,7 @@ where
             current_vdom: Rc::new(RefCell::new(view)),
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(mount_node.clone())),
-            active_closures: Rc::new(RefCell::new(ActiveClosure::new())),
+            node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
             mount_procedure: MountProcedure { action, target },
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
         }
