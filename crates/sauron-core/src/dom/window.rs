@@ -1,11 +1,15 @@
 use crate::{
-    dom::{created_node::create_closure_wrap, Cmd},
+    dom::{created_node::create_closure_wrap, Cmd, Task},
     vdom::Attribute,
     Application,
 };
 use std::fmt::Debug;
 use wasm_bindgen::{self, prelude::*, JsCast};
 use web_sys::{EventTarget, ScrollToOptions};
+use js_sys::Promise;
+use wasm_bindgen_futures::JsFuture;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 /// Provides access to the Browser window
 #[derive(Copy, Clone, Debug)]
@@ -68,6 +72,35 @@ impl Window {
             resize_callback.forget();
         });
         cmd
+    }
+
+    /// a variant of resize task, but instead of returning Cmd, it is returning Task
+    pub fn on_resize_task<F, MSG>(cb: F) -> Task<MSG>
+    where
+        F: Fn(i32, i32) -> MSG + Clone + 'static,
+        MSG: 'static,
+    {
+        Task::new(async move{
+            let stored: Rc<RefCell<Option<MSG>>> = Rc::new(RefCell::new(None));
+            let stored_weak = Rc::downgrade(&stored);
+            let promise = Promise::new(&mut move|resolve, _reject|{
+                let cb = cb.clone();
+                let stored = Rc::clone(&stored);
+                let resize_callback: Closure<dyn Fn(web_sys::Event)> =
+                    Closure::wrap(Box::new(move |_| {
+                        let (window_width, window_height) = Self::get_size();
+                        let msg = cb(window_width, window_height);
+                        *stored.borrow_mut() = Some(msg);
+                        resolve.call0(&JsValue::NULL).expect("must resolve");
+                    }));
+                crate::window().set_onresize(Some(resize_callback.as_ref().unchecked_ref()));
+                resize_callback.forget();
+            });
+            JsFuture::from(promise).await.expect("must await");
+            let refcell = stored_weak.upgrade().expect("upgrade stored_weak");
+            let opt = refcell.borrow_mut().take();
+            opt.expect("must contain the MSG here")
+        })
     }
 
     /// attached a callback and will be triggered when the hash portion of the window location
