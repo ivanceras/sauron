@@ -3,7 +3,7 @@
 use log::trace;
 use sauron::{text, jss, html::*, html::events::*, html::attributes::*,
     Application, Node, Program, Cmd, wasm_bindgen,
-    dom::async_delay,
+    dom::{async_delay, TimeoutCallbackHandle},
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -19,23 +19,23 @@ pub enum Msg {
 
 #[derive(Default)]
 pub struct App {
-    current_handle: Rc<RefCell<Option<i32>>>,
+    current_handle: Rc<RefCell<Option<TimeoutCallbackHandle>>>,
     executed: Rc<AtomicBool>,
 }
 
 impl App {
     fn execute_delayed(
         program: Program<Self, Msg>,
-        current_handle: Rc<RefCell<Option<i32>>>,
+        current_handle: Rc<RefCell<Option<TimeoutCallbackHandle>>>,
         executed: Rc<AtomicBool>,
     ) {
         log::info!("in execute delayed...");
         if let Some(current_handle) = current_handle.borrow().as_ref() {
-            sauron::window().clear_timeout_with_handle(*current_handle);
-            log::info!("We cancelled {}", current_handle);
+            log::info!("We cancelled {:?}", current_handle);
+            drop(current_handle);
         }
 
-        let handle = sauron::dom::delay_exec(
+        let handle = sauron::dom::request_timeout_callback(
             move || {
                 log::info!("I'm executing after 5 seconds");
                 executed.store(true, Ordering::Relaxed);
@@ -51,6 +51,9 @@ impl App {
 }
 
 impl Application<Msg> for App {
+    fn init(&mut self) -> Vec<Cmd<Self,Msg>>{
+        vec![]
+    }
     fn view(&self) -> Node<Msg> {
         sauron::html::main(
             [],
@@ -104,23 +107,25 @@ impl Application<Msg> for App {
         }
     }
 
-    fn style(&self) -> String {
-        jss! {
-            "body": {
-                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+    fn style(&self) -> Vec<String> {
+        vec![
+            jss! {
+                "body": {
+                    font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+                }
             }
-        }
+        ]
     }
 }
 
 async fn some_async_function() {
     let t1 = sauron::now();
     log::debug!("t1: {}", t1);
-    async_delay(1000).await;
+    async_delay(1000).await.unwrap();
     let t2 = sauron::now();
     log::debug!("t2: {}", t2);
     log::debug!("elapsed: {}", t2 - t1);
-    async_delay(5000).await;
+    async_delay(5000).await.unwrap();
     let t3 = sauron::now();
     log::debug!("t3: {}", t3);
     log::debug!("elapsed: {}", t3 - t2);
