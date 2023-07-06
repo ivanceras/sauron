@@ -139,7 +139,7 @@ where
         let styles = self.app.borrow().style();
         if !styles.is_empty() {
             let type_id = TypeId::of::<APP>();
-            let css_style = styles.join("\n");
+            let css_style = styles.join("");
             self.inject_style(type_id, &css_style);
         }
     }
