@@ -56,19 +56,19 @@ impl Window {
 
     /// Creates a Cmd in which the MSG will be emitted
     /// whenever the browser is resized
-    pub fn on_resize<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
+    pub fn on_resize<F, APP, MSG>(mut cb: F) -> Cmd<APP, MSG>
     where
-        F: Fn(i32, i32) -> MSG + Clone + 'static,
+        F: FnMut(i32, i32) -> MSG + Clone + 'static,
         MSG: 'static,
         APP: Application<MSG> + 'static,
     {
-        let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
-            let resize_callback: Closure<dyn Fn(web_sys::Event)> =
-                Closure::wrap(Box::new(move |_| {
+        let cmd: Cmd<APP, MSG> = Cmd::new(|program| {
+            let resize_callback: Closure<dyn FnMut(web_sys::Event)> =
+                Closure::new(move|_| {
                     let (window_width, window_height) = Self::get_size();
                     let msg = cb(window_width, window_height);
                     program.dispatch(msg);
-                }));
+                });
             crate::window().set_onresize(Some(resize_callback.as_ref().unchecked_ref()));
             resize_callback.forget();
         });
