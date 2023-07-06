@@ -566,10 +566,10 @@ where
         let listener_clone = listener.clone();
         let program = self.clone();
 
-        Closure::wrap(Box::new(move |event: web_sys::Event| {
+        Closure::new(move |event: web_sys::Event| {
             let msg = listener_clone.emit(Event::from(event));
             program.dispatch(msg);
-        }))
+        })
     }
 }
 
