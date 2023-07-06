@@ -2,7 +2,8 @@
 //! when the application starts or after the application updates.
 //!
 use crate::dom::Program;
-use crate::dom::{Application, Effects, Modifier};
+use crate::dom::{Application, Effects, Modifier, Task};
+use wasm_bindgen_futures::spawn_local;
 
 /// Cmd is a command to be executed by the system.
 /// This is returned at the init function of a component and is executed right
@@ -159,5 +160,22 @@ where
 {
     fn from(effects: Vec<Effects<MSG, ()>>) -> Self {
         Cmd::from(Effects::merge_all(effects))
+    }
+}
+
+impl<APP,MSG> From<Task<MSG>> for Cmd<APP,MSG>
+where
+    MSG: 'static,
+    APP: Application<MSG> + 'static,
+{
+
+    fn from(task: Task<MSG>) -> Self {
+        let task = task.task;
+        Cmd::new(move|program|{
+            spawn_local(async move{
+                let msg = task.await;
+                program.dispatch(msg)
+            });
+        })
     }
 }

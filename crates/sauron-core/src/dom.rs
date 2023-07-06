@@ -5,11 +5,13 @@ pub use callback::Callback;
 pub use component::{Component, Container, Widget};
 pub use effects::Effects;
 pub use modifier::Modifier;
+pub use task::Task;
 
 mod callback;
 mod component;
 mod effects;
 mod modifier;
+mod task;
 
 use cfg_if::cfg_if;
 
