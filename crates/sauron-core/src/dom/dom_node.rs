@@ -75,14 +75,6 @@ fn create_unique_identifier() -> usize {
     })
 }
 
-/// Closures that we are holding on to to make sure that they don't get invalidated after a
-/// VirtualNode is dropped.
-///
-/// The u32 is a unique identifier that is associated with the DOM element that this closure is
-/// attached to.
-///
-pub type ActiveClosure = BTreeMap<usize, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
-
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
 impl<APP, MSG> Program<APP, MSG>

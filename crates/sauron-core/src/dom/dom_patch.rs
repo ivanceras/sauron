@@ -1,4 +1,4 @@
-use crate::dom::created_node::intern;
+use crate::dom::dom_node::intern;
 use crate::dom::{Application, Program};
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use mt_dom::TreePath;

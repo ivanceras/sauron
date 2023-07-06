@@ -1,16 +1,17 @@
-use crate::dom::created_node;
-use crate::dom::created_node::ActiveClosure;
 use crate::dom::Measurements;
 use crate::vdom;
 use crate::vdom::diff;
 use crate::{Patch, Application, Cmd};
 use crate::dom::DomPatch;
+use crate::dom::dom_node::find_all_nodes;
 use mt_dom::TreePath;
 use std::collections::VecDeque;
 use std::{any::TypeId, cell::RefCell, rc::Rc};
-use wasm_bindgen::JsCast;
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, IdleDeadline, Node};
+use std::collections::BTreeMap;
+use wasm_bindgen::closure::Closure;
+
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP, MSG>
@@ -51,6 +52,14 @@ where
     /// it will be put into the pending patches to be executed on the next run.
     pending_patches: Rc<RefCell<VecDeque<DomPatch<MSG>>>>,
 }
+
+/// Closures that we are holding on to to make sure that they don't get invalidated after a
+/// VirtualNode is dropped.
+///
+/// The u32 is a unique identifier that is associated with the DOM element that this closure is
+/// attached to.
+///
+pub type ActiveClosure = BTreeMap<usize, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
 
 /// specify how the App is mounted to the DOM
 #[derive(Clone, Copy)]
@@ -406,7 +415,7 @@ where
             .map(|patch| (patch.path(), patch.tag()))
             .collect();
 
-        let nodes_to_patch = created_node::find_all_nodes(
+        let nodes_to_patch = find_all_nodes(
             self.root_node
                 .borrow()
                 .as_ref()

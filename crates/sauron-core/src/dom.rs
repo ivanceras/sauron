@@ -30,7 +30,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
 
     mod application;
     pub mod cmd;
-    mod created_node;
+    mod dom_node;
     mod custom_element;
     mod dom_patch;
     pub mod events;
