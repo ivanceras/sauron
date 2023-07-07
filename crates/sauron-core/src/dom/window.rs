@@ -1,19 +1,14 @@
 use crate::{
-    dom::{self, Cmd, Task, Program},
+    dom::{self, util, Task, Program},
     vdom::Attribute,
     Application,
 };
-use std::fmt::Debug;
 use wasm_bindgen::{self, prelude::*, JsCast};
-use web_sys::{EventTarget, ScrollToOptions};
+use web_sys::EventTarget;
 use js_sys::Promise;
 use wasm_bindgen_futures::JsFuture;
 use std::rc::Rc;
 use std::cell::RefCell;
-
-/// Provides access to the Browser window
-#[derive(Copy, Clone, Debug)]
-pub struct Window;
 
 impl<APP, MSG> Program<APP, MSG>
 where
@@ -50,10 +45,6 @@ where
         }
     }
 
-    /// set the title of the document
-    pub fn set_title(title: &str) {
-        crate::document().set_title(title);
-    }
 
     /// Creates a Cmd in which the MSG will be emitted
     /// whenever the browser is resized
@@ -64,7 +55,7 @@ where
         let program = self.clone();
         let closure: Closure<dyn FnMut(web_sys::Event)> =
             Closure::new(move|_| {
-                let (window_width, window_height) = Self::get_size();
+                let (window_width, window_height) = util::get_window_size();
                 let msg = cb(window_width, window_height);
                 program.dispatch(msg);
             });
@@ -87,7 +78,7 @@ where
                 let msg_store = Rc::clone(&msg_store);
                 let resize_callback: Closure<dyn FnMut(web_sys::Event)> =
                     Closure::new(move|_| {
-                        let (window_width, window_height) = Self::get_size();
+                        let (window_width, window_height) = util::get_window_size();
                         let msg = cb(window_width, window_height);
                         *msg_store.borrow_mut() = Some(msg);
                         resolve.call0(&JsValue::NULL).expect("must resolve");
@@ -113,7 +104,7 @@ where
         let program = self.clone();
         let closure: Closure<dyn FnMut(web_sys::Event)> =
             Closure::new(move |_| {
-                let hash = Self::get_hash();
+                let hash = util::get_location_hash();
                 let msg = cb(hash);
                 program.dispatch(msg);
             });
@@ -121,44 +112,6 @@ where
         self.event_closures.borrow_mut().push(closure);
     }
 
-    /// return the size of the browser at this moment
-    pub fn get_size() -> (i32, i32) {
-        let window = crate::window();
-        let window_width = window
-            .inner_width()
-            .expect("unable to get window width")
-            .as_f64()
-            .expect("cant convert to f64");
-        let window_height = window
-            .inner_height()
-            .expect("unable to get height")
-            .as_f64()
-            .expect("cant convert to f64");
-        (window_width as i32, window_height as i32)
-    }
 
-    /// return the hash part of the browser current url location
-    /// The hash part are the text right after the `#` sign
-    pub fn get_hash() -> String {
-        let window = crate::window();
-        window.location().hash().expect("must have a hash")
-    }
-
-    /// scroll the browser to the top of the document
-    pub fn scroll_to_top() -> Cmd<APP, MSG>
-    {
-        Cmd::new(|_program| {
-            let mut options = ScrollToOptions::new();
-            options.top(0.0);
-            options.left(0.0);
-            crate::window().scroll_to_with_scroll_to_options(&options);
-        })
-    }
-
-    /// set the browser location hash
-    pub fn set_location_hash(hash: &str) {
-        let window = crate::window();
-        let location = window.location();
-        location.set_hash(hash).expect("must set the location hash");
-    }
 }
+

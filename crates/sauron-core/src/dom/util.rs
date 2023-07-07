@@ -1,6 +1,7 @@
 //! utility functions
 //!
 pub use wasm_bindgen_futures::spawn_local;
+use web_sys::ScrollToOptions;
 
 //TODO: feature gate this with `use-cached-windows`
 thread_local!(static WINDOW: web_sys::Window = web_sys::window().expect("no global `window` exists"));
@@ -49,4 +50,47 @@ pub fn performance() -> web_sys::Performance {
 /// return the instantaneous time
 pub fn now() -> f64 {
     performance().now()
+}
+
+/// scroll the browser to the top of the document
+pub fn scroll_window_to_top() {
+    let mut options = ScrollToOptions::new();
+    options.top(0.0);
+    options.left(0.0);
+    crate::window().scroll_to_with_scroll_to_options(&options);
+}
+
+/// set the browser location hash
+pub fn set_location_hash(hash: &str) {
+    let window = crate::window();
+    let location = window.location();
+    location.set_hash(hash).expect("must set the location hash");
+}
+
+/// return the hash part of the browser current url location
+/// The hash part are the text right after the `#` sign
+pub fn get_location_hash() -> String {
+    let window = crate::window();
+    window.location().hash().expect("must have a hash")
+}
+
+/// return the size of the browser at this moment
+pub fn get_window_size() -> (i32, i32) {
+    let window = crate::window();
+    let window_width = window
+        .inner_width()
+        .expect("unable to get window width")
+        .as_f64()
+        .expect("cant convert to f64");
+    let window_height = window
+        .inner_height()
+        .expect("unable to get height")
+        .as_f64()
+        .expect("cant convert to f64");
+    (window_width as i32, window_height as i32)
+}
+
+/// set the title of the document
+pub fn set_window_title(title: &str) {
+    crate::document().set_title(title);
 }
