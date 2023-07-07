@@ -1,10 +1,10 @@
 use crate::{
-    dom::{Application, Event, Program},
+    dom::{self, Application, Program},
     events::MountEvent,
     html,
     html::attributes::{AttributeValue, SegregatedAttributes},
     vdom,
-    vdom::{Attribute, Leaf, Listener, NodeTrait},
+    vdom::{Attribute, Leaf, NodeTrait},
 };
 use js_sys::Function;
 use mt_dom::TreePath;
@@ -337,8 +337,14 @@ where
             // All event listener is added to this element.
             // The callback to this listener emits an Msg which is then \
             // dispatched to the `program` which then triggers update view cycle.
+            let listener_clone = listener.clone();
+            let program = self.clone();
             let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
-                self.create_closure_wrap(listener);
+                Closure::new(move |event: web_sys::Event| {
+                    let msg = listener_clone.emit(dom::Event::from(event));
+                    program.dispatch(msg);
+                });
+
             current_elm
                 .add_event_listener_with_callback(
                     intern(event_str),
@@ -556,20 +562,6 @@ where
             }
         }
         Ok(())
-    }
-
-    /// This wrap into a closure the function that is dispatched when the event is triggered.
-    pub(crate) fn create_closure_wrap(
-        &self,
-        listener: &Listener<MSG>,
-    ) -> Closure<dyn FnMut(web_sys::Event)> {
-        let listener_clone = listener.clone();
-        let program = self.clone();
-
-        Closure::new(move |event: web_sys::Event| {
-            let msg = listener_clone.emit(Event::from(event));
-            program.dispatch(msg);
-        })
     }
 }
 

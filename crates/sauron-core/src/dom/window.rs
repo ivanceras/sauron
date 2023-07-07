@@ -1,5 +1,5 @@
 use crate::{
-    dom::{ Cmd, Task},
+    dom::{self, Cmd, Task},
     vdom::Attribute,
     Application,
 };
@@ -28,22 +28,26 @@ impl Window {
                 .dyn_ref()
                 .expect("unable to cast window to event target");
 
-            for event_attr in event_listeners.iter() {
+            for event_attr in event_listeners.into_iter() {
                 let event_str = event_attr.name();
                 for event_cb in event_attr.value() {
-                    let callback = event_cb.as_event_listener().expect("expecting a callback");
-
-                    let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
-                        program.create_closure_wrap(callback);
+                    let listener = event_cb.as_event_listener().expect("expecting a callback");
+                    let listener = listener.clone();
+                    let program = program.clone();
+                    let closure: Closure<dyn FnMut(web_sys::Event)> =
+                    Closure::new(move|event: web_sys::Event| {
+                        let msg = listener.emit(dom::Event::from(event));
+                        program.dispatch(msg);
+                    });
 
                     window
                         .add_event_listener_with_callback(
                             event_str,
-                            callback_wrapped.as_ref().unchecked_ref(),
+                            closure.as_ref().unchecked_ref(),
                         )
                         .expect("Unable to attached event listener");
 
-                    callback_wrapped.forget();
+                    closure.forget();
                 }
             }
         })
