@@ -54,6 +54,9 @@ where
     idle_callback_handles: Rc<RefCell<Vec<IdleCallbackHandle>>>,
     /// store the Closure used in request_animation_frame calls
     animation_frame_handles: Rc<RefCell<Vec<AnimationFrameHandle>>>,
+
+    /// event listener closures
+    pub(crate) event_closures: Rc<RefCell<Vec<Closure<dyn FnMut(web_sys::Event)>>>>,
 }
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
@@ -107,6 +110,7 @@ where
             pending_patches: Rc::clone(&self.pending_patches),
             idle_callback_handles: Rc::clone(&self.idle_callback_handles),
             animation_frame_handles: Rc::clone(&self.animation_frame_handles),
+            event_closures: Rc::clone(&self.event_closures),
         }
     }
 }
@@ -137,6 +141,7 @@ where
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
             idle_callback_handles: Rc::new(RefCell::new(vec![])),
             animation_frame_handles: Rc::new(RefCell::new(vec![])),
+            event_closures: Rc::new(RefCell::new(vec![])),
         }
     }
 

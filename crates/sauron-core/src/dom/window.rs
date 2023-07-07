@@ -1,5 +1,5 @@
 use crate::{
-    dom::{self, Cmd, Task},
+    dom::{self, Cmd, Task, Program},
     vdom::Attribute,
     Application,
 };
@@ -15,42 +15,39 @@ use std::cell::RefCell;
 #[derive(Copy, Clone, Debug)]
 pub struct Window;
 
-impl Window {
+impl<APP, MSG> Program<APP, MSG>
+where
+    MSG: 'static,
+    APP: Application<MSG> + 'static,
+{
     /// attach an event listender to the window
-    pub fn add_event_listeners<APP, MSG>(event_listeners: Vec<Attribute<MSG>>) -> Cmd<APP, MSG>
-    where
-        APP: Application<MSG> + 'static,
-        MSG: 'static,
-    {
-        Cmd::new(move |program| {
-            let window = crate::window();
-            let window: &EventTarget = window
-                .dyn_ref()
-                .expect("unable to cast window to event target");
+    pub fn add_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
+        let window = crate::window();
+        let window: &EventTarget = window
+            .dyn_ref()
+            .expect("unable to cast window to event target");
 
-            for event_attr in event_listeners.into_iter() {
-                let event_str = event_attr.name();
-                for event_cb in event_attr.value() {
-                    let listener = event_cb.as_event_listener().expect("expecting a callback");
-                    let listener = listener.clone();
-                    let program = program.clone();
-                    let closure: Closure<dyn FnMut(web_sys::Event)> =
-                    Closure::new(move|event: web_sys::Event| {
-                        let msg = listener.emit(dom::Event::from(event));
-                        program.dispatch(msg);
-                    });
+        for event_attr in event_listeners.into_iter() {
+            let event_str = event_attr.name();
+            for event_cb in event_attr.value() {
+                let listener = event_cb.as_event_listener().expect("expecting a callback");
+                let listener = listener.clone();
+                let program = self.clone();
+                let closure: Closure<dyn FnMut(web_sys::Event)> =
+                Closure::new(move|event: web_sys::Event| {
+                    let msg = listener.emit(dom::Event::from(event));
+                    program.dispatch(msg);
+                });
 
-                    window
-                        .add_event_listener_with_callback(
-                            event_str,
-                            closure.as_ref().unchecked_ref(),
-                        )
-                        .expect("Unable to attached event listener");
-
-                    closure.forget();
-                }
+                window
+                    .add_event_listener_with_callback(
+                        event_str,
+                        closure.as_ref().unchecked_ref(),
+                    )
+                    .expect("Unable to attached event listener");
+                self.event_closures.borrow_mut().push(closure);
             }
-        })
+        }
     }
 
     /// set the title of the document
@@ -60,32 +57,27 @@ impl Window {
 
     /// Creates a Cmd in which the MSG will be emitted
     /// whenever the browser is resized
-    pub fn on_resize<F, APP, MSG>(mut cb: F) -> Cmd<APP, MSG>
+    pub fn on_resize<F>(&self, mut cb: F)
     where
         F: FnMut(i32, i32) -> MSG + Clone + 'static,
-        MSG: 'static,
-        APP: Application<MSG> + 'static,
     {
-        let cmd: Cmd<APP, MSG> = Cmd::new(|program| {
-            let resize_callback: Closure<dyn FnMut(web_sys::Event)> =
-                Closure::new(move|_| {
-                    let (window_width, window_height) = Self::get_size();
-                    let msg = cb(window_width, window_height);
-                    program.dispatch(msg);
-                });
-            crate::window().set_onresize(Some(resize_callback.as_ref().unchecked_ref()));
-            resize_callback.forget();
-        });
-        cmd
+        let program = self.clone();
+        let closure: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move|_| {
+                let (window_width, window_height) = Self::get_size();
+                let msg = cb(window_width, window_height);
+                program.dispatch(msg);
+            });
+        crate::window().set_onresize(Some(closure.as_ref().unchecked_ref()));
+        self.event_closures.borrow_mut().push(closure);
     }
 
     /// TODO: only executed once, since the Task Future is droped once done
     /// TODO: this should be a stream, instead of just one-time future
     /// a variant of resize task, but instead of returning Cmd, it is returning Task
-    pub fn on_resize_task<F, MSG>(cb: F) -> Task<MSG>
+    pub fn on_resize_task<F>(cb: F) -> Task<MSG>
     where
         F: FnMut(i32, i32) -> MSG + Clone + 'static,
-        MSG: 'static,
     {
         Task::new(async move{
             let msg_store: Rc<RefCell<Option<MSG>>> = Rc::new(RefCell::new(None));
@@ -114,23 +106,19 @@ impl Window {
 
     /// attached a callback and will be triggered when the hash portion of the window location
     /// url is changed
-    pub fn on_hashchange<F, APP, MSG>(cb: F) -> Cmd<APP, MSG>
+    pub fn on_hashchange<F>(&self, mut cb: F)
     where
-        F: Fn(String) -> MSG + Clone + 'static,
-        MSG: 'static,
-        APP: Application<MSG> + 'static,
+        F: FnMut(String) -> MSG + 'static,
     {
-        let cmd: Cmd<APP, MSG> = Cmd::new(move |program| {
-            let hashchange_callback: Closure<dyn Fn(web_sys::Event)> =
-                Closure::wrap(Box::new(move |_| {
-                    let hash = Self::get_hash();
-                    let msg = cb(hash);
-                    program.dispatch(msg);
-                }));
-            crate::window().set_onhashchange(Some(hashchange_callback.as_ref().unchecked_ref()));
-            hashchange_callback.forget();
-        });
-        cmd
+        let program = self.clone();
+        let closure: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |_| {
+                let hash = Self::get_hash();
+                let msg = cb(hash);
+                program.dispatch(msg);
+            });
+        crate::window().set_onhashchange(Some(closure.as_ref().unchecked_ref()));
+        self.event_closures.borrow_mut().push(closure);
     }
 
     /// return the size of the browser at this moment
@@ -157,10 +145,7 @@ impl Window {
     }
 
     /// scroll the browser to the top of the document
-    pub fn scroll_to_top<APP, MSG>() -> Cmd<APP, MSG>
-    where
-        APP: Application<MSG> + 'static,
-        MSG: 'static,
+    pub fn scroll_to_top() -> Cmd<APP, MSG>
     {
         Cmd::new(|_program| {
             let mut options = ScrollToOptions::new();
