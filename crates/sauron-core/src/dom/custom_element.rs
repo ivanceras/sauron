@@ -78,16 +78,16 @@ where
 
     /// When the attribute of the component is changed, this method will be called
     pub fn attribute_changed(&self, attr_name: &str, old_value: JsValue, new_value: JsValue) {
-        APP::attribute_changed(&self.program, attr_name, old_value, new_value)
+        APP::attribute_changed(&self.program, attr_name, old_value, new_value);
     }
 
     /// called when the web component is mounted
     pub fn connected_callback(&mut self) {
         self.program.mount();
+        self.program.app.borrow_mut().connected_callback();
         let component_style = <APP as Application<MSG>>::style(&self.program.app.borrow()).join("");
         self.program.inject_style_to_mount(&component_style);
         self.program.update_dom().expect("must update dom");
-        self.program.app.borrow_mut().connected_callback();
     }
 
     /// called when the web component is removed
