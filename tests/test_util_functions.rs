@@ -15,7 +15,7 @@ async fn test_delays() {
 
     let t1 = sauron::now();
     log::debug!("t1: {}", t1);
-    async_delay(5000).await;
+    async_delay(5000).await.unwrap();
     let t2 = sauron::now();
     log::debug!("t2: {}", t2);
 

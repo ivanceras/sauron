@@ -63,7 +63,7 @@ fn remove_event_from_replaced_node() {
     simple_program.set_current_dom(old);
 
     assert_eq!(
-        simple_program.active_closures.borrow().len(),
+        simple_program.node_closures.borrow().len(),
         1,
         "There should be 1 event attached to the DomUpdater"
     );
@@ -73,7 +73,7 @@ fn remove_event_from_replaced_node() {
         .expect("must not error");
 
     assert_eq!(
-        simple_program.active_closures.borrow().len(),
+        simple_program.node_closures.borrow().len(),
         0,
         "There should only be 0 left after replacing it with a different tag"
     );

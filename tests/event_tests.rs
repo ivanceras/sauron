@@ -184,7 +184,7 @@ fn remove_event_from_truncated_children() {
 
     simple_program.set_current_dom(old);
     assert_eq!(
-        simple_program.active_closures.borrow().len(),
+        simple_program.node_closures.borrow().len(),
         5,
         "There should be 5 events attached to the DomUpdater"
     );
@@ -193,7 +193,7 @@ fn remove_event_from_truncated_children() {
         .expect("must not error");
 
     assert_eq!(
-        simple_program.active_closures.borrow().len(),
+        simple_program.node_closures.borrow().len(),
         1,
         "There should only be 1 left after the truncate"
     );
@@ -233,7 +233,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     simple_program.set_current_dom(old);
 
     assert_eq!(
-        simple_program.active_closures.borrow().len(),
+        simple_program.node_closures.borrow().len(),
         3,
         "There should be 3 events attached to the DomUpdater"
     );
@@ -242,7 +242,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
         .expect("must not error");
 
     assert_eq!(
-        simple_program.active_closures.borrow().len(),
+        simple_program.node_closures.borrow().len(),
         1,
         "There should only be 1 left after the truncate"
     );
@@ -269,7 +269,7 @@ fn remove_event_from_replaced_node() {
     );
     simple_program.set_current_dom(old);
     assert_eq!(
-        simple_program.active_closures.borrow().len(),
+        simple_program.node_closures.borrow().len(),
         1,
         "There should be 1 event attached to the DomUpdater"
     );
@@ -278,7 +278,7 @@ fn remove_event_from_replaced_node() {
         .expect("must not error");
 
     assert_eq!(
-        simple_program.active_closures.borrow().len(),
+        simple_program.node_closures.borrow().len(),
         0,
         "There should only be 0 left after replacing it with a different tag"
     );

@@ -16,6 +16,7 @@ where
     APP: Application<MSG> + 'static,
 {
     /// attach an event listender to the window
+    /// TODO: maybe rename to add_window_event_listeners
     pub fn add_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
         let window = crate::window();
         let window: &EventTarget = window

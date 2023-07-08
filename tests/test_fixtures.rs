@@ -11,6 +11,10 @@ use sauron::{html::div, Application, Cmd, Node, Program};
 pub struct SimpleComponent;
 
 impl Application<()> for SimpleComponent {
+    fn init(&mut self) -> Vec<Cmd<Self, ()>> {
+        vec![]
+    }
+
     fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
         trace!("updating in SimpleComponent");
         Cmd::none()
@@ -20,8 +24,8 @@ impl Application<()> for SimpleComponent {
         div(vec![], vec![])
     }
 
-    fn style(&self) -> String {
-        String::new()
+    fn style(&self) -> Vec<String> {
+        vec![]
     }
 }
 

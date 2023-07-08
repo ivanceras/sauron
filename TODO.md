@@ -189,6 +189,12 @@
       closure_id_counter: usize,
       type ActiveClosure: BTreeMap<usize, Closure>;
       ```
+- [ ] unify the `Program::add_event_listener` which attach the event to window
+    and the `dom_node::add_event_listener_callback` usage used in `set_element_attributes`
+
+    ```rust
+        Program::add_event_listener(&self, target_element: EventTarget, event_listeners).
+    ```
 
 
 
