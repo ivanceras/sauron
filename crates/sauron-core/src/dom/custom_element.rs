@@ -26,14 +26,13 @@ pub trait CustomElement<MSG> {
     /// and the attributes of the custom-element has been modified
     ///
     /// if the listed attributes in the observed attributes are modified
-    fn attribute_changed<APP>(
-        program: &Program<APP, MSG>,
+    fn attribute_changed(
+        program: &Program<Self, MSG>,
         attr_name: &str,
         old_value: JsValue,
         new_value: JsValue,
     ) where
-        APP: Application<MSG> + 'static,
-        MSG: 'static;
+        Self: Sized + Application<MSG>;
 
     /// the component is attached to the dom
     fn connected_callback(&mut self);
@@ -53,7 +52,8 @@ pub struct WebComponent<APP, MSG>
 where
     MSG: 'static,
 {
-    program: Program<APP, MSG>,
+    /// the underlying program running this web component
+    pub program: Program<APP, MSG>,
 }
 
 impl<APP, MSG> WebComponent<APP, MSG>
