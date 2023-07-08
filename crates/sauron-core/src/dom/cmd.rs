@@ -16,6 +16,7 @@ where
     MSG: 'static,
 {
     /// the functions that would be executed when this Cmd is emited
+    #[allow(clippy::type_complexity)]
     pub commands: Vec<Box<dyn FnOnce(Program<APP, MSG>)>>,
     pub(crate) modifier: Modifier,
 }

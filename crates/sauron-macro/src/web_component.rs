@@ -114,11 +114,8 @@ fn extract_idents_from_type_path(type_: &syn::Type) -> Vec<&proc_macro2::Ident> 
 fn extract_custom_element_msg(path: &syn::Path) -> Vec<&proc_macro2::Ident> {
     if let Some(last_path) = path.segments.last() {
         if let syn::PathArguments::AngleBracketed(abga) = &last_path.arguments {
-            if let Some(first_arg) = abga.args.first() {
-                if let syn::GenericArgument::Type(type_) = first_arg {
-                    let generic_idents = extract_idents_from_type_path(type_);
-                    return generic_idents;
-                }
+            if let Some(syn::GenericArgument::Type(type_)) = abga.args.first() {
+                return extract_idents_from_type_path(type_);
             }
         }
     }

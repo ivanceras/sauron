@@ -56,6 +56,7 @@ where
     animation_frame_handles: Rc<RefCell<Vec<AnimationFrameHandle>>>,
 
     /// event listener closures
+    #[allow(clippy::type_complexity)]
     pub(crate) event_closures: Rc<RefCell<Vec<Closure<dyn FnMut(web_sys::Event)>>>>,
 }
 
