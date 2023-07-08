@@ -29,8 +29,8 @@ impl Default for Clock {
 impl Application<Msg> for Clock {
     // we wire the window set_interval api to trigger an Msg::Tick
     // by dispatching it from the program, through the Cmd interface
-    fn init(&mut self) -> Cmd<Self, Msg> {
-        Cmd::new(move |program| {
+    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
+        vec![Cmd::new(move |program| {
             let clock: Closure<dyn Fn()> = Closure::wrap(Box::new(move || {
                 program.dispatch(Msg::Tick);
             }));
@@ -39,11 +39,11 @@ impl Application<Msg> for Clock {
                 .expect("no global `window` exists")
                 .set_interval_with_callback_and_timeout_and_arguments_0(
                     clock.as_ref().unchecked_ref(),
-                    30,
+                    1_000 / 60, // try to Tick at 60fps
                 )
                 .expect("Unable to start interval");
             clock.forget();
-        })
+        })]
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
@@ -108,8 +108,8 @@ impl Application<Msg> for Clock {
         }
     }
 
-    fn style(&self) -> String {
-        jss! {
+    fn style(&self) -> Vec<String> {
+        vec![jss! {
             "body": {
                 font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
                 margin: 0,
@@ -124,7 +124,7 @@ impl Application<Msg> for Clock {
                 align_items: "center",
                 justify_content: "center",
             }
-        }
+        }]
     }
 }
 

@@ -1,6 +1,5 @@
 use crate::views::{data_view, DataView};
 use sauron::{
-    dom::Window,
     html::{attributes::*, events::*, *},
     jss, Application, Cmd, Component, Node, NodeMapMsg,
 };
@@ -51,25 +50,36 @@ impl Application<Msg> for ResizeWrapper {
     /// Unliked when listen by the this view container, which the mouse
     /// can be outside of this view, which causes the mousmove event
     /// not being triggered
-    fn init(&mut self) -> Cmd<Self, Msg> {
-        let mut cmds = vec![Window::add_event_listeners(vec![
-            on_mouseup(|event| Msg::EndResize(event.client_x(), event.client_y())),
-            on_mousemove(|event| Msg::MouseMove(event.client_x(), event.client_y())),
-        ])];
-        cmds.push(DataView::init());
-        Cmd::batch(cmds)
+    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
+        vec![
+            Cmd::new(|program| {
+                program.add_event_listeners(vec![
+                    on_mouseup(|event| Msg::EndResize(event.client_x(), event.client_y())),
+                    on_mousemove(|event| Msg::MouseMove(event.client_x(), event.client_y())),
+                ])
+            }),
+            Cmd::batch(
+                self.data_view
+                    .init()
+                    .into_iter()
+                    .map(|task| task.map_msg(Msg::DataViewMsg))
+                    .map(Cmd::from),
+            ),
+        ]
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::DataViewMsg(data_view_msg) => {
                 let effects = self.data_view.update(data_view_msg);
-                //TODO: follow ups should be wired automatically
                 Cmd::from(effects.map_msg(Msg::DataViewMsg))
             }
-            Msg::EndResize(_client_x, _client_y) => {
+            Msg::EndResize(client_x, client_y) => {
                 self.active_resize = None;
-                Cmd::none()
+                let effects = self
+                    .data_view
+                    .update(data_view::Msg::ColumnEndResize(client_x, client_y));
+                Cmd::from(effects.map_msg(Msg::DataViewMsg))
             }
             Msg::MouseMove(client_x, client_y) => {
                 if let Some(active_resize) = &self.active_resize {
@@ -95,7 +105,10 @@ impl Application<Msg> for ResizeWrapper {
                     }
                     self.data_view.set_allocated_size(self.width, self.height);
                 }
-                Cmd::none()
+                let effects = self
+                    .data_view
+                    .update(data_view::Msg::MouseMove(client_x, client_y));
+                Cmd::from(effects.map_msg(Msg::DataViewMsg))
             }
             Msg::StartResize(grip, client_x, client_y) => {
                 self.active_resize = Some(grip);
@@ -150,11 +163,11 @@ impl Application<Msg> for ResizeWrapper {
         )
     }
 
-    fn style(&self) -> String {
-        jss! {
+    fn style(&self) -> Vec<String> {
+        vec![jss! {
             "body": {
                 font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
             }
-        }
+        }]
     }
 }

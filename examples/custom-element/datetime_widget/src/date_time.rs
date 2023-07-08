@@ -67,6 +67,10 @@ impl<XMSG> sauron::Component<Msg, XMSG> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
+    fn init(&mut self) -> Vec<Task<Msg>> {
+        vec![]
+    }
+
     fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::DateChange(date) => {
@@ -118,8 +122,8 @@ where
         }
     }
 
-    fn style(&self) -> String {
-        jss! {
+    fn style(&self) -> Vec<String> {
+        vec![jss! {
             ".datetimebox":{
                 border: "1px solid green",
             },
@@ -132,7 +136,7 @@ where
               font_size: "1.5rem",
               border_radius: "5px",
             }
-        }
+        }]
     }
 
     fn view(&self) -> Node<Msg> {

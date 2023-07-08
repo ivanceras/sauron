@@ -69,9 +69,11 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self) -> Cmd<Self, Msg> {
+    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
         console_log::init_with_level(log::Level::Trace).unwrap();
+        vec![
         self.fetch_page()
+        ]
     }
 
     fn view(&self) -> Node<Msg> {
@@ -158,12 +160,14 @@ impl Application<Msg> for App {
         }
     }
 
-    fn style(&self) -> String {
-        jss! {
-            "body": {
-                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+    fn style(&self) -> Vec<String> {
+        vec![
+            jss! {
+                "body": {
+                    font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
+                }
             }
-        }
+        ]
     }
 }
 

@@ -17,6 +17,10 @@ impl App {
 }
 
 impl Application<Msg> for App {
+    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
+        vec![]
+    }
+
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
@@ -46,8 +50,8 @@ impl Application<Msg> for App {
         Cmd::none()
     }
 
-    fn style(&self) -> String {
-        jss! {
+    fn style(&self) -> Vec<String> {
+        vec![jss! {
             "body":{
                 font_family: "verdana, arial, monospace",
             },
@@ -64,7 +68,7 @@ impl Application<Msg> for App {
                 padding: px(30),
                 margin: px(30),
             }
-        }
+        }]
     }
 }
 

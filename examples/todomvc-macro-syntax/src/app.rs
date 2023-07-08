@@ -39,6 +39,9 @@ pub enum Msg {
 }
 
 impl Application<Msg> for Model {
+    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
+        vec![]
+    }
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Add => {
@@ -113,12 +116,12 @@ impl Application<Msg> for Model {
         }
     }
 
-    fn style(&self) -> String {
-        jss! {
+    fn style(&self) -> Vec<String> {
+        vec![jss! {
             "body": {
                 font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
             }
-        }
+        }]
     }
 }
 

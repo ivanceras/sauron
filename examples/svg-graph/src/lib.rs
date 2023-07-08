@@ -19,6 +19,10 @@ pub struct App {
 }
 
 impl Application<Msg> for App {
+    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
+        vec![]
+    }
+
     fn view(&self) -> Node<Msg> {
         svg(
             [
@@ -303,12 +307,12 @@ impl Application<Msg> for App {
         )
     }
 
-    fn style(&self) -> String {
-        jss! {
+    fn style(&self) -> Vec<String> {
+        vec![jss! {
             "body": {
                 font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
             }
-        }
+        }]
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {

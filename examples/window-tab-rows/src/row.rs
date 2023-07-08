@@ -36,6 +36,9 @@ impl Row {
 }
 
 impl Component<Msg, ()> for Row {
+    fn init(&mut self) -> Vec<Task<Msg>> {
+        vec![]
+    }
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::FieldMsg(index, field_msg) => {
@@ -76,5 +79,9 @@ impl Component<Msg, ()> for Row {
                 ),
             ],
         )
+    }
+
+    fn style(&self) -> Vec<String> {
+        vec![]
     }
 }

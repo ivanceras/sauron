@@ -5,14 +5,14 @@ use crate::{
 };
 use restq::{bytes_to_chars, table_def, CsvRows, TableName};
 use sauron::{
-    dom::Window,
+    dom::Task,
     html::{
         attributes::{class, key, styles},
         events::*,
         units::*,
         *,
     },
-    Cmd, Component, Effects, Node, NodeMapMsg,
+    Component, Effects, Node, NodeMapMsg,
 };
 use std::{
     cell::RefCell,
@@ -60,6 +60,24 @@ pub struct DataView {
 }
 
 impl Component<Msg, ()> for DataView {
+    fn init(&mut self) -> Vec<Task<Msg>> {
+        vec![]
+    }
+    /*
+    ///TODO: Make this ergonomic, something that is similar
+    ///to init in Application, but designed for Component
+    /// perhaps subscription?
+    fn init(&mut self) -> Vec<Task<Msg>> {
+        debug!("Init in  data view for column resize");
+        Cmd::new(|program| {
+            program.add_event_listeners(vec![
+                on_mouseup(|event| Msg::ColumnEndResize(event.client_x(), event.client_y())),
+                on_mousemove(|event| Msg::MouseMove(event.client_x(), event.client_y())),
+            ])
+        })
+    }
+    */
+
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::PageMsg(page_index, page_msg) => {
@@ -186,6 +204,10 @@ impl Component<Msg, ()> for DataView {
             ],
         )
     }
+
+    fn style(&self) -> Vec<String> {
+        vec![]
+    }
 }
 
 impl DataView {
@@ -230,21 +252,6 @@ impl DataView {
             start_x: 0,
         };
         Ok(data_view)
-    }
-
-    ///TODO: Make this ergonomic, something that is similar
-    ///to init in Application, but designed for Component
-    /// perhaps subscription?
-    pub fn init() -> Cmd<crate::App, crate::AppMsg> {
-        debug!("Init in  data view for column resize");
-        Window::add_event_listeners(vec![
-            on_mouseup(|event| {
-                crate::AppMsg::DataViewMsg(Msg::ColumnEndResize(event.client_x(), event.client_y()))
-            }),
-            on_mousemove(|event| {
-                crate::AppMsg::DataViewMsg(Msg::MouseMove(event.client_x(), event.client_y()))
-            }),
-        ])
     }
 
     pub fn set_pages(

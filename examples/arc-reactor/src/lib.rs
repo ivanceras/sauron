@@ -10,6 +10,9 @@ pub enum Msg {
 pub struct App;
 
 impl Application<Msg> for App {
+    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
+        vec![]
+    }
     fn update(&mut self, _msg: Msg) -> Cmd<Self, Msg> {
         Cmd::none()
     }
@@ -49,8 +52,8 @@ impl Application<Msg> for App {
         }
     }
 
-    fn style(&self) -> String {
-        jss! {
+    fn style(&self) -> Vec<String> {
+        vec![jss! {
             "body": {
                 position: "absolute",
                 top: 0,
@@ -185,7 +188,7 @@ impl Application<Msg> for App {
             ".reactor .circle-innner:hover": {
                background_color: "#ff0000",
             }
-        }
+        }]
     }
 }
 

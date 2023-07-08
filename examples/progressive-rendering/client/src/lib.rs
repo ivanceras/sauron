@@ -67,7 +67,7 @@ impl App {
         let url = format!("{}/{}", DATA_URL, self.name);
         Cmd::new(|program|{
             spawn_local(async move{
-                let msg = match Http::fetch_with_text_response_decoder(&url).await{
+                let msg = match Http::fetch_text(&url).await{
                     Ok(v) => {
                         let data: Result<Data, _> = serde_json::from_str(&v);
                         trace!("data: {:#?}", data);
@@ -85,8 +85,8 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self) -> Cmd<Self, Msg> {
-        Cmd::none()
+    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
+        vec![]
     }
 
     fn view(&self) -> Node<Msg> {
@@ -114,20 +114,26 @@ impl Application<Msg> for App {
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         trace!("App is updating from msg: {:?}", msg);
-        let mut cmd = Cmd::none();
         match msg {
-            Msg::EditName(name) => self.name = name,
+            Msg::EditName(name) => {
+                self.name = name;
+                Cmd::none()
+            }
             Msg::QueryAPI => {
                 self.data = FetchStatus::Loading;
-                cmd = self.fetch_data()
+                self.fetch_data()
             }
-            Msg::ReceivedData(data) => self.data = FetchStatus::Complete(data),
+            Msg::ReceivedData(data) => {
+                self.data = FetchStatus::Complete(data);
+                Cmd::none()
+            }
             Msg::JsonError(err) => {
                 trace!("Error fetching data! {:#?}", err);
                 self.data = FetchStatus::Error(Some(format!(
                     "There was an error reaching the api: {:?}",
                     err
                 )));
+                Cmd::none()
             }
             Msg::RequestError(type_error) => {
                 trace!("Error requesting the page: {:?}", type_error);
@@ -135,16 +141,18 @@ impl Application<Msg> for App {
                     "There was an error fetching the page: {:?}",
                     type_error
                 )));
-            }
-        };
-        cmd
-    }
-
-    fn style(&self) -> String {
-        jss! {
-            "body": {
+                Cmd::none()
             }
         }
+    }
+
+    fn style(&self) -> Vec<String> {
+        vec![
+            jss! {
+                "body": {
+                }
+            }
+        ]
     }
 
 }

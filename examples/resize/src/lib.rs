@@ -14,9 +14,11 @@ pub struct App {
 
 impl Application<Msg> for App {
     fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![sauron::dom::Window::on_resize(|w, h| {
-            log::info!("Window is resized to {w}x{h}");
-            Msg::WindowResized(w, h)
+        vec![Cmd::new(|program| {
+            program.on_resize(|w, h| {
+                log::info!("Window is resized to {w}x{h}");
+                Msg::WindowResized(w, h)
+            })
         })]
     }
 

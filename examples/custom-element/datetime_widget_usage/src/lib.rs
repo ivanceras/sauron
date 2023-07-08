@@ -8,6 +8,10 @@ enum AppMsg {}
 pub struct App {}
 
 impl Application<AppMsg> for App {
+    fn init(&mut self) -> Vec<Cmd<Self, AppMsg>> {
+        vec![]
+    }
+
     fn update(&mut self, _msg: AppMsg) -> Cmd<Self, AppMsg> {
         Cmd::none()
     }
@@ -23,8 +27,8 @@ impl Application<AppMsg> for App {
         }
     }
 
-    fn style(&self) -> String {
-        "".to_string()
+    fn style(&self) -> Vec<String> {
+        vec![]
     }
 }
 

@@ -17,6 +17,9 @@ impl App {
 }
 
 impl Application<Msg> for App {
+    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
+        vec![]
+    }
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
@@ -46,12 +49,12 @@ impl Application<Msg> for App {
         Cmd::none()
     }
 
-    fn style(&self) -> String {
-        jss! {
+    fn style(&self) -> Vec<String> {
+        vec![jss! {
             "body": {
                 font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
             }
-        }
+        }]
     }
 }
 
