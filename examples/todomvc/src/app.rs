@@ -1,7 +1,7 @@
 use sauron::{
     dom::events::KeyboardEvent,
     html::{attributes::*, events::*, *},
-    jss, Application, Cmd, Node, *,
+    jss, Application, Cmd, Node,
 };
 use serde_derive::{Deserialize, Serialize};
 
@@ -349,7 +349,7 @@ impl Model {
         )
     }
 
-    #[allow(unused)]
+    #[cfg(feature = "with-storage")]
     fn save_to_storage(&self) {
         let window = web_sys::window().expect("no global `window` exists");
         let local_storage = window.local_storage();
@@ -361,7 +361,7 @@ impl Model {
         }
     }
 
-    #[allow(unused)]
+    #[cfg(feature = "with-storage")]
     pub fn get_from_storage() -> Self {
         let window = web_sys::window().expect("no global `window` exists");
         let local_storage = window.local_storage();

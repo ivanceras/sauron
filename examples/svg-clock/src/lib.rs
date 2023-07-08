@@ -7,9 +7,6 @@
 use js_sys::Date;
 use sauron::{html::attributes::style, html::text, html::units::*, svg::attributes::*, svg::*, *};
 
-#[macro_use]
-extern crate log;
-
 pub enum Msg {
     Tick,
 }
@@ -144,17 +141,10 @@ impl Application<Msg> for Clock {
     }
 }
 
-// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
-// allocator.
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
 #[wasm_bindgen(start)]
 pub fn main() {
     console_log::init_with_level(log::Level::Trace).unwrap();
     console_error_panic_hook::set_once();
-    trace!("starting svg clock..");
-
+    log::trace!("starting svg clock..");
     Program::mount_to_body(Clock::default());
 }

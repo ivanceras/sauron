@@ -1,4 +1,4 @@
-use sauron::{dom::events::*, html::*, jss, node, Application, Cmd, Node, *};
+use sauron::{dom::events::*, html::*, jss, node, Application, Cmd, Node};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -318,7 +318,7 @@ impl Model {
         }
     }
 
-    #[allow(unused)]
+    #[cfg(feature = "with-storage")]
     pub(crate) fn save_to_storage(&self) {
         let window = web_sys::window().expect("no global `window` exists");
         let local_storage = window.local_storage();
@@ -330,7 +330,7 @@ impl Model {
         }
     }
 
-    #[allow(unused)]
+    #[cfg(feature = "with-storage")]
     pub(crate) fn get_from_storage() -> Self {
         let window = web_sys::window().expect("no global `window` exists");
         let local_storage = window.local_storage();

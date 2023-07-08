@@ -10,7 +10,7 @@ if ! type basic-http-server > /dev/null; then
     cargo install basic-http-server
 fi
 
-wasm-pack build --target web --release -- --features "wee_alloc"
+wasm-pack build --target web --release -- 
 
 dest_dir="../../../ivanceras.github.io/data-viewer"
 
