@@ -195,7 +195,9 @@
     ```rust
         Program::add_event_listener(&self, target_element: EventTarget, event_listeners).
     ```
-
+- [ ] Make the svg attributes follow `snake_case` convention
+    - viewBox -> view_box
+    - preserveAspectRatio -> preserve_aspect_ratio
 
 
 ## Features

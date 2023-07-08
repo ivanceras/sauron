@@ -64,48 +64,33 @@ macro_rules! declare_svg_attributes_special{
 declare_svg_attributes! {
     accumulate;
     additive;
-    allowReorder;
     alphabetic;
     amplitude;
     ascent;
-    attributeName;
-    attributeType;
-    autoReverse;
     azimuth;
-    baseFrequency;
-    baseProfile;
     bbox;
     begin;
     bias;
     by;
-    calcMode;
     clip;
-    clipPathUnits;
     color;
-    contentScriptType;
-    contentStyleType;
     cursor;
     cx;
     cy;
     d;
     decelerate;
     descent;
-    diffuseConstant;
     direction;
     display;
     divisor;
     dur;
     dx;
     dy;
-    edgeMode;
     elevation;
     end;
     exponent;
-    externalResourcesRequired;
     fill;
     filter;
-    filterRes;
-    filterUnits;
     format;
     from;
     fr;
@@ -113,9 +98,6 @@ declare_svg_attributes! {
     fy;
     g1;
     g2;
-    glyphRef;
-    gradientTransform;
-    gradientUnits;
     hanging;
     height;
     href;
@@ -128,22 +110,10 @@ declare_svg_attributes! {
     k2;
     k3;
     k4;
-    kernelMatrix;
-    kernelUnitLength;
     kerning;
-    keyPoints;
-    keySplines;
-    keyTimes;
     lang;
-    lengthAdjust;
-    limitingConeAngle;
     local;
-    markerHeight;
-    markerUnits;
-    markerWidth;
     mask;
-    maskContentUnits;
-    maskUnits;
     mathematical;
     max;
     media;
@@ -151,7 +121,6 @@ declare_svg_attributes! {
     min;
     mode;
     name;
-    numOctaves;
     offset;
     opacity;
     operator;
@@ -160,28 +129,11 @@ declare_svg_attributes! {
     orientation;
     origin;
     overflow;
-    pathLength;
-    patternContentUnits;
-    patternTransform;
-    patternUnits;
     ping;
     points;
-    pointsAtX;
-    pointsAtY;
-    pointsAtZ;
-    preserveAlpha;
-    preserveAspectRatio;
-    primitiveUnits;
     r;
     radius;
-    referrerPolicy;
-    refX;
-    refY;
     rel;
-    repeatCount;
-    repeatDur;
-    requiredExtensions;
-    requiredFeatures;
     restart;
     result;
     rotate;
@@ -191,25 +143,13 @@ declare_svg_attributes! {
     seed;
     slope;
     spacing;
-    specularConstant;
-    specularExponent;
     speed;
-    spreadMethod;
-    startOffset;
-    stdDeviation;
     stemh;
     stemv;
-    stitchTiles;
     string;
     stroke;
-    surfaceScale;
-    systemLanguage;
     tabindex;
-    tableValues;
     target;
-    targetX;
-    targetY;
-    textLength;
     to;
     transform;
     u1;
@@ -217,26 +157,35 @@ declare_svg_attributes! {
     unicode;
     values;
     version;
-    viewBox;
-    viewTarget;
     visibility;
     width;
     widths;
     x;
     x1;
     x2;
-    xChannelSelector;
     xmlns;
     y;
     y1;
     y2;
-    yChannelSelector;
     z;
-    zoomAndPan;
 }
 
-// attributes that has dash
+// These are attributes that is exposed in such a way that is consistent to rust conventions
+// This includes exposing the following:
+// - reserved keywords
+// - kebab-case attributes
+// - namespaced/colon separated attributes such as xml::lang
+// - camelCase attributes
 declare_svg_attributes_special! {
+
+    ///////////////////////////////
+    // rust reserved keywords that are svg attributes
+    ///////////////////////////////
+    r#in => "in";
+
+    /////////////////////////////////
+    // kebab-case svg attributes
+    /////////////////////////////////
     accent_height => "accent-height";
     alignment_baseline => "alignment-baseline";
     arabic_form => "arabic-form";
@@ -307,14 +256,83 @@ declare_svg_attributes_special! {
     word_spacing => "word-spacing";
     writing_mode => "writing-mode";
     x_height => "x-height";
+
+    ////////////////////////////////////////
+    // namespaced svg attributes
+    ////////////////////////////////////////
     xml_base => "xml:base";
     xml_lang => "xml:lang";
     xml_space => "xml:space";
     xmlns_xlink => "xmlns:xlink";
-    r#in => "in";
-    in_ => "in";
-    //r#type => "type"; // already defined in html tags
-    //type_ => "type";  // already defined in html tags
+
+    /////////////////////////////////
+    // camelCase svg attributes
+    /////////////////////////////////
+    allow_reorder => "allowReorder";
+    attribute_name => "attributeName";
+    attribute_type => "attributeType";
+    auto_reverse => "autoReverse";
+    base_frequency => "baseFrequency";
+    base_profile => "baseProfile";
+    calc_mode => "calcMode";
+    clip_path_units => "clipPathUnits";
+    content_script_type => "contentScriptType";
+    content_style_type => "contentStyleType";
+    diffuse_constant => "diffuseConstant";
+    edge_mode => "edgeMode";
+    external_resources_required => "externalResourcesRequired";
+    filter_res => "filterRes";
+    filter_units => "filterUnits";
+    glyph_ref => "glyphRef";
+    gradient_transform => "gradientTransform";
+    gradient_units => "gradientUnits";
+    kernel_matrix => "kernelMatrix";
+    kernel_unit_length => "kernelUnitLength";
+    key_points => "keyPoints";
+    key_splines => "keySplines";
+    key_times => "keyTimes";
+    length_adjust => "lengthAdjust";
+    limiting_coneAngle => "limitingConeAngle";
+    marker_height => "markerHeight";
+    marker_units => "markerUnits";
+    marker_width => "markerWidth";
+    mask_content_units => "maskContentUnits";
+    mask_units => "maskUnits";
+    num_octaves => "numOctaves";
+    path_length => "pathLength";
+    pattern_content_units => "patternContentUnits";
+    pattern_transform => "patternTransform";
+    pattern_units => "patternUnits";
+    points_at_x => "pointsAtX";
+    points_at_y => "pointsAtY";
+    points_at_z => "pointsAtZ";
+    preserve_alpha => "preserveAlpha";
+    preserve_aspect_ratio => "preserveAspectRatio";
+    primitive_units => "primitiveUnits";
+    referrer_policy => "referrerPolicy";
+    ref_x => "refX";
+    ref_y => "refY";
+    repeat_count => "repeatCount";
+    repeat_dur => "repeatDur";
+    required_extensions => "requiredExtensions";
+    required_features => "requiredFeatures";
+    specular_constant => "specularConstant";
+    specular_exponent => "specularExponent";
+    spread_method => "spreadMethod";
+    start_offset => "startOffset";
+    std_deviation => "stdDeviation";
+    stitch_tiles => "stitchTiles";
+    surface_scale => "surfaceScale";
+    system_language => "systemLanguage";
+    table_values => "tableValues";
+    target_x => "targetX";
+    target_y => "targetY";
+    text_length => "textLength";
+    view_box => "viewBox";
+    view_target => "viewTarget";
+    x_channel_selector => "xChannelSelector";
+    y_channel_selector => "yChannelSelector";
+    zoom_and_pan => "zoomAndPan";
 }
 
 declare_xlink_attributes! {

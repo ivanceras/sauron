@@ -3,6 +3,7 @@ use sauron::{
     html::attributes::{attr, class, id, style},
     html::text,
     svg::attributes::*,
+    svg::tags::radial_gradient,
     svg::*,
     *,
 };
@@ -26,7 +27,7 @@ impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         svg(
             [
-                viewBox([0, 0, 800, 500]),
+                view_box([0, 0, 800, 500]),
                 xmlns("http://www.w3.org/2000/svg")
             ],
             [
@@ -39,14 +40,14 @@ impl Application<Msg> for App {
                 defs(
                     [],
                     [
-                        radialGradient(
+                        radial_gradient(
                             [
                                 id("gradient-1"),
-                                gradientUnits("userSpaceOnUse"),
+                                gradient_units("userSpaceOnUse"),
                                 cx(545),
                                 cy(213),
                                 r(500),
-                                gradientTransform(
+                                gradient_transform(
                                     "matrix(0.7, 0, 0, 0.4642, 0, 130)"
                                 )
                             ],
@@ -70,8 +71,8 @@ impl Application<Msg> for App {
                         svg::pattern(
                             [
                                 id("pattern-2"),
-                                viewBox([0, 0, 50, 50]),
-                                patternUnits("userSpaceOnUse"),
+                                view_box([0, 0, 50, 50]),
+                                pattern_units("userSpaceOnUse"),
                                 width(50),
                                 height(50)
                             ],

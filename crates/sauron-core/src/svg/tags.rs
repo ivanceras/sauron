@@ -97,47 +97,18 @@ macro_rules! declare_svg_tags_non_common{
 
 declare_common_svg_tags_and_macro! {
     animate;
-    animateMotion;
-    animateTransform;
     circle;
     clipPath;
     defs;
     desc;
     discard;
     ellipse;
-    feBlend;
-    feColorMatrix;
-    feComponentTransfer;
-    feComposite;
-    feConvolveMatrix;
-    feDiffuseLighting;
-    feDisplacementMap;
-    feDistantLight;
-    feDropShadow;
-    feFlood;
-    feFuncA;
-    feFuncB;
-    feFuncG;
-    feFuncR;
-    feGaussianBlur;
-    feImage;
-    feMerge;
-    feMergeNode;
-    feMorphology;
-    feOffset;
-    fePointLight;
-    feSpecularLighting;
-    feSpotLight;
-    feTile;
-    feTurbulence;
     filter;
-    foreignObject;
     g;
     hatch;
     hatchpath;
     image;
     line;
-    linearGradient;
     marker;
     mask;
     mesh;
@@ -150,7 +121,6 @@ declare_common_svg_tags_and_macro! {
     pattern;
     polygon;
     polyline;
-    radialGradient;
     rect;
     set;
     solidcolor;
@@ -158,14 +128,61 @@ declare_common_svg_tags_and_macro! {
     svg;
     switch;
     symbol;
-    textPath;
     tspan;
     unknown;
     view;
 }
+
+// These are svg tags that is exposed in such a way that is consistent to rust conventions
+// This includes exposing the following to snake_case
+// - reserved keywords
+// - kebab-case tags
+// - camelCase tags
 declare_svg_tags_special! {
-    color_profile => "color-profile";
+    ////////////////////////////
+    // reserved keywords in rust that are svg tags
+    ////////////////////////////
     r#use => "use";
+
+    ////////////////////////
+    // kebab-case svg tags
+    ////////////////////////
+    color_profile => "color-profile";
+
+    /////////////////////
+    // camelCase svg tags
+    ////////////////////
+    animate_motion => "animateMotion";
+    animate_transform => "animateTransform";
+    fe_blend => "feBlend";
+    fe_color_matrix => "feColorMatrix";
+    fe_component_transfer => "feComponentTransfer";
+    fe_composite => "feComposite";
+    fe_convolve_matrix => "feConvolveMatrix";
+    fe_diffuse_lighting => "feDiffuseLighting";
+    fe_displacement_map => "feDisplacementMap";
+    fe_distant_light => "feDistantLight";
+    fe_drop_shadow => "feDropShadow";
+    fe_flood => "feFlood";
+    fe_func_a => "feFuncA";
+    fe_func_b => "feFuncB";
+    fe_func_g => "feFuncG";
+    fe_func_r => "feFuncR";
+    fe_gaussian_blur => "feGaussianBlur";
+    fe_image => "feImage";
+    fe_merge => "feMerge";
+    fe_merge_node => "feMergeNode";
+    fe_morphology => "feMorphology";
+    fe_offset => "feOffset";
+    fe_point_light => "fePointLight";
+    fe_specular_lighting => "feSpecularLighting";
+    fe_spot_light => "feSpotLight";
+    fe_tile => "feTile";
+    fe_turbulence => "feTurbulence";
+    foreign_object => "foreignObject";
+    linear_gradient => "linearGradient";
+    radial_gradient => "radialGradient";
+    text_path => "textPath";
 }
 
 // These are non-common tags

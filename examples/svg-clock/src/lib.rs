@@ -107,7 +107,7 @@ impl Application<Msg> for Clock {
                         style("flex-direction", "column"),
                     ],
                     [svg(
-                        [width(400), height(400), viewBox([0, 0, 200, 200])],
+                        [width(400), height(400), view_box([0, 0, 200, 200])],
                         [
                             circle,
                             hand(subsecond_rotate, "#e2e8f0", 10, 90),
