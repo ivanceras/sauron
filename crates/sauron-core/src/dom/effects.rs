@@ -109,7 +109,7 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
     /// and mapping them with function `f` such that they can be of the same type as local effects
     /// them merge them together into local effects.
     ///
-    pub fn localize<F>(self, f: F) -> Effects<XMSG, ()>
+    pub fn localize<F, XMSG2>(self, f: F) -> Effects<XMSG, XMSG2>
     where
         F: Fn(MSG) -> XMSG + 'static,
     {
