@@ -7,7 +7,6 @@
     unstable_features,
     unused_import_braces
 )]
-#![allow(deprecated)]
 
 //! The core components of sauron
 
