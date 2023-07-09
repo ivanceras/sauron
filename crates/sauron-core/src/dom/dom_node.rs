@@ -13,8 +13,8 @@ use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
     self, Element, EventTarget, HtmlButtonElement, HtmlDataElement, HtmlDetailsElement,
-    HtmlFieldSetElement, HtmlInputElement, HtmlLiElement, HtmlLinkElement, HtmlMenuItemElement,
-    HtmlMeterElement, HtmlOptGroupElement, HtmlOptionElement, HtmlOutputElement, HtmlParamElement,
+    HtmlFieldSetElement, HtmlInputElement, HtmlLiElement, HtmlLinkElement, HtmlMeterElement,
+    HtmlOptGroupElement, HtmlOptionElement, HtmlOutputElement, HtmlParamElement,
     HtmlProgressElement, HtmlSelectElement, HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
 
@@ -368,8 +368,6 @@ where
     fn set_checked(element: &Element, is_checked: bool) {
         if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
             input.set_checked(is_checked);
-        } else if let Some(menu_item) = element.dyn_ref::<HtmlMenuItemElement>() {
-            menu_item.set_checked(is_checked);
         }
     }
 
@@ -421,8 +419,6 @@ where
         } else if let Some(elm) = element.dyn_ref::<HtmlOptGroupElement>() {
             elm.set_disabled(is_disabled);
         } else if let Some(elm) = element.dyn_ref::<HtmlFieldSetElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlMenuItemElement>() {
             elm.set_disabled(is_disabled);
         }
     }
