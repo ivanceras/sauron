@@ -15,16 +15,16 @@ pub use jss;
 
 /// prelude
 pub mod prelude {
-    pub use crate::dom::{
-        AnimationFrameHandle, Callback, Component, Container, Effects, Measurements, MountAction,
-        MountTarget, Task, TimeoutCallbackHandle,
-    };
     pub use crate::html;
     pub use crate::html::{
         attributes::commons::*,
+        attributes::key,
+        attributes::{class_namespaced, classes_flag, classes_flag_namespaced},
         commons::*,
         events::*,
+        text,
         units::{ch, cm, deg, ex, grad, mm, ms, percent, pt, px, rad, s, turn, vh, vw},
+        view_if,
     };
     pub use crate::render::Render;
     pub use crate::style;
@@ -47,7 +47,10 @@ pub mod prelude {
         pub use wasm_bindgen;
         pub use wasm_bindgen::prelude::*;
         pub use serde_wasm_bindgen;
-        pub use crate::dom::{Application, events, Program, document, now, window, CustomElement, Cmd};
+        pub use crate::dom::{Application, events, Program, document, now, window, CustomElement, Cmd,
+            AnimationFrameHandle, Callback, Component, Container, Effects, Measurements, MountAction,
+            MountTarget, Task, TimeoutCallbackHandle,
+        };
     }}
 }
 
