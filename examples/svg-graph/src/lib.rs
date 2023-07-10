@@ -314,7 +314,7 @@ impl Application<Msg> for App {
                         "https://github.com/ivanceras/sauron/blob/master/examples/svg-graph/src/lib.rs"
                     )],
                     [svg::tags::text(
-                        [x(400), y(480), style("fill","blue")],
+                        [x(400), y(480), style!{fill:"blue"}],
                         [text("code")]
                     )]
                 )

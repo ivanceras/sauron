@@ -19,17 +19,20 @@ pub mod prelude {
     pub use crate::html::{
         attributes::commons::*,
         attributes::key,
-        attributes::{class_namespaced, classes_flag, classes_flag_namespaced},
+        attributes::{attr, class_namespaced, classes_flag, classes_flag_namespaced},
         commons::*,
         events::*,
         text,
-        units::{ch, cm, deg, ex, grad, mm, ms, percent, pt, px, rad, s, turn, vh, vw},
+        units::{ch, cm, deg, ex, grad, mm, ms, percent, pt, px, rad, rgb, s, turn, vh, vw},
         view_if,
     };
     pub use crate::render::Render;
     pub use crate::style;
     pub use crate::svg;
-    pub use crate::svg::{attributes::commons::*, commons::*};
+    pub use crate::svg::attributes::commons::*;
+    pub use crate::svg::attributes::special::*;
+    pub use crate::svg::commons::*;
+    pub use crate::svg::special::*;
     pub use crate::vdom::{
         diff,
         map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg},

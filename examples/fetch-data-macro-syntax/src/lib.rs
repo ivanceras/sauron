@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::{*, js_sys::TypeError, jss, dom::spawn_local, dom::Http, html::*, html::attributes::*};
+use sauron::{*, js_sys::TypeError, jss, dom::spawn_local, dom::Http};
 use serde::Deserialize;
 
 #[macro_use]

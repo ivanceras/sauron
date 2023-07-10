@@ -4,7 +4,7 @@ use sauron_core::{
         commons::HTML_TAGS, HTML_SC_TAGS, HTML_TAGS_NON_COMMON, HTML_TAGS_WITH_MACRO_NON_COMMON,
     },
     svg::{
-        tags::{SVG_TAGS, SVG_TAGS_NON_COMMON, SVG_TAGS_SPECIAL},
+        tags::{special::SVG_TAGS_SPECIAL, SVG_TAGS, SVG_TAGS_NON_COMMON},
         SVG_NAMESPACE,
     },
 };

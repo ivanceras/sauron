@@ -1,5 +1,4 @@
 //! Provides macro for creating functions for tags
-
 macro_rules! declare_svg_tags{
 
     ( $(
@@ -134,56 +133,59 @@ declare_common_svg_tags_and_macro! {
     view;
 }
 
-// These are svg tags that is exposed in such a way that is consistent to rust conventions
-// This includes exposing the following to snake_case
-// - reserved keywords
-// - kebab-case tags
-// - camelCase tags
-declare_svg_tags_special! {
-    ////////////////////////////
-    // reserved keywords in rust that are svg tags
-    ////////////////////////////
-    r#use => "use";
+/// special svg tags
+pub mod special {
+    // These are svg tags that is exposed in such a way that is consistent to rust conventions
+    // This includes exposing the following to snake_case
+    // - reserved keywords
+    // - kebab-case tags
+    // - camelCase tags
+    declare_svg_tags_special! {
+        ////////////////////////////
+        // reserved keywords in rust that are svg tags
+        ////////////////////////////
+        r#use => "use";
 
-    ////////////////////////
-    // kebab-case svg tags
-    ////////////////////////
-    color_profile => "color-profile";
+        ////////////////////////
+        // kebab-case svg tags
+        ////////////////////////
+        color_profile => "color-profile";
 
-    /////////////////////
-    // camelCase svg tags
-    ////////////////////
-    animate_motion => "animateMotion";
-    animate_transform => "animateTransform";
-    fe_blend => "feBlend";
-    fe_color_matrix => "feColorMatrix";
-    fe_component_transfer => "feComponentTransfer";
-    fe_composite => "feComposite";
-    fe_convolve_matrix => "feConvolveMatrix";
-    fe_diffuse_lighting => "feDiffuseLighting";
-    fe_displacement_map => "feDisplacementMap";
-    fe_distant_light => "feDistantLight";
-    fe_drop_shadow => "feDropShadow";
-    fe_flood => "feFlood";
-    fe_func_a => "feFuncA";
-    fe_func_b => "feFuncB";
-    fe_func_g => "feFuncG";
-    fe_func_r => "feFuncR";
-    fe_gaussian_blur => "feGaussianBlur";
-    fe_image => "feImage";
-    fe_merge => "feMerge";
-    fe_merge_node => "feMergeNode";
-    fe_morphology => "feMorphology";
-    fe_offset => "feOffset";
-    fe_point_light => "fePointLight";
-    fe_specular_lighting => "feSpecularLighting";
-    fe_spot_light => "feSpotLight";
-    fe_tile => "feTile";
-    fe_turbulence => "feTurbulence";
-    foreign_object => "foreignObject";
-    linear_gradient => "linearGradient";
-    radial_gradient => "radialGradient";
-    text_path => "textPath";
+        /////////////////////
+        // camelCase svg tags
+        ////////////////////
+        animate_motion => "animateMotion";
+        animate_transform => "animateTransform";
+        fe_blend => "feBlend";
+        fe_color_matrix => "feColorMatrix";
+        fe_component_transfer => "feComponentTransfer";
+        fe_composite => "feComposite";
+        fe_convolve_matrix => "feConvolveMatrix";
+        fe_diffuse_lighting => "feDiffuseLighting";
+        fe_displacement_map => "feDisplacementMap";
+        fe_distant_light => "feDistantLight";
+        fe_drop_shadow => "feDropShadow";
+        fe_flood => "feFlood";
+        fe_func_a => "feFuncA";
+        fe_func_b => "feFuncB";
+        fe_func_g => "feFuncG";
+        fe_func_r => "feFuncR";
+        fe_gaussian_blur => "feGaussianBlur";
+        fe_image => "feImage";
+        fe_merge => "feMerge";
+        fe_merge_node => "feMergeNode";
+        fe_morphology => "feMorphology";
+        fe_offset => "feOffset";
+        fe_point_light => "fePointLight";
+        fe_specular_lighting => "feSpecularLighting";
+        fe_spot_light => "feSpotLight";
+        fe_tile => "feTile";
+        fe_turbulence => "feTurbulence";
+        foreign_object => "foreignObject";
+        linear_gradient => "linearGradient";
+        radial_gradient => "radialGradient";
+        text_path => "textPath";
+    }
 }
 
 // These are non-common tags

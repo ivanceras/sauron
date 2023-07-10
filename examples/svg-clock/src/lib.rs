@@ -102,11 +102,11 @@ impl Application<Msg> for Clock {
                     [text("code")],
                 ),
                 div(
-                    [
-                        style("display", "flex"),
-                        style("align-items", "center"),
-                        style("flex-direction", "column"),
-                    ],
+                    [style! {
+                        display: "flex",
+                        align_items: "center",
+                        flex_direction: "column",
+                    }],
                     [svg(
                         [width(400), height(400), view_box([0, 0, 200, 200])],
                         [
