@@ -93,6 +93,18 @@
     ```
 - [X] Call set_attribute in addition to setting the special attributes such as `value`, `checked`, this should trigger the `attribute_changed` callback in web components
 - [ ] The attribute_changed method in CustomElement should return an `MSG` which will be dispatched in the WebComponent struct.
+- [ ] There is conflict with the use of `style`
+    - `style!` macro
+    - `style` attribute function
+    - `style` method in Application, Component, Container
+    - `style` html tag
+    Maybe use `css` or `stylesheet` as the method name.
+    ```rust
+    fn css(&self) -> Vec<String>{
+    }
+    fn stylesheet(&self) -> Vec<String>{
+    }
+    ```
 
 ## Internal
 - ~~[ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`~~
