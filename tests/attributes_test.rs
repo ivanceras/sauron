@@ -1,5 +1,6 @@
 #![deny(warnings)]
-use sauron::{html::attributes::*, html::*, *};
+use sauron::html::attributes::{style, styles};
+use sauron::*;
 
 #[test]
 fn test_style_macro() {
@@ -21,7 +22,10 @@ fn test_style_macro() {
 #[test]
 fn test_styles() {
     let actual: Node<&'static str> = div(
-        vec![styles([("display", "flex"), ("flex-direction", "row")])],
+        vec![html::attributes::styles([
+            ("display", "flex"),
+            ("flex-direction", "row"),
+        ])],
         vec![],
     );
     let mut actual_html = String::new();

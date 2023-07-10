@@ -1,8 +1,5 @@
 #![deny(warnings)]
-use crate::mt_dom::TreePath;
-use sauron::html::attributes::*;
-use sauron::html::events::*;
-use sauron::html::*;
+use sauron::html::attributes::{style, styles, Style};
 use sauron::*;
 
 #[test]

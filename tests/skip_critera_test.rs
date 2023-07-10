@@ -1,6 +1,6 @@
 #![deny(warnings)]
+use sauron::html::attributes::*;
 use sauron::*;
-use sauron::{html::attributes::*, html::*};
 
 #[test]
 fn must_skip_diff() {

@@ -64,7 +64,9 @@ fn elements_with_different_event_should_not_be_recycle() {
         .update_dom_with_vdom(new)
         .expect("must not error");
 
-    let input_element = sauron_core::document().get_element_by_id(elem_id).unwrap();
+    let input_element = sauron_core::dom::document()
+        .get_element_by_id(elem_id)
+        .unwrap();
 
     // before clicking
     assert_eq!(&*text.borrow(), "Start Text");

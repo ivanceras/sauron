@@ -19,13 +19,17 @@ pub mod prelude {
     pub use crate::html::{
         attributes::commons::*,
         attributes::key,
-        attributes::{attr, class_namespaced, classes_flag, classes_flag_namespaced},
+        attributes::{
+            attr, checked, class, class_namespaced, classes, classes_flag, classes_flag_namespaced,
+            disabled, r#type, styles_flag,
+        },
+        comment,
         commons::*,
-        events::*,
-        text,
+        input, text,
         units::{ch, cm, deg, ex, grad, mm, ms, percent, pt, px, rad, rgb, s, turn, vh, vw},
         view_if,
     };
+
     pub use crate::render::Render;
     pub use crate::style;
     pub use crate::svg;
@@ -36,11 +40,11 @@ pub mod prelude {
     pub use crate::vdom::{
         diff,
         map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg},
-        Attribute, Element, Listener, Node, Patch,
+        Attribute, AttributeValue, Element, Listener, Node, Patch,
     };
     pub use jss as jss_crate;
     pub use jss::{jss, jss_ns, jss_ns_pretty, jss_pretty};
-    pub use wasm_bindgen::prelude::*;
+    pub use mt_dom::TreePath;
 
     use cfg_if::cfg_if;
     cfg_if! {if #[cfg(feature = "with-dom")] {
@@ -50,6 +54,7 @@ pub mod prelude {
         pub use wasm_bindgen;
         pub use wasm_bindgen::prelude::*;
         pub use serde_wasm_bindgen;
+        pub use crate::html::events::*;
         pub use crate::dom::{Application, events, Program, document, now, window, CustomElement, Cmd,
             AnimationFrameHandle, Callback, Component, Container, Effects, Measurements, MountAction,
             MountTarget, Task, TimeoutCallbackHandle,

@@ -1,5 +1,4 @@
 #![deny(warnings)]
-use sauron::html::*;
 use sauron::*;
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -8,7 +7,7 @@ mod test_fixtures;
 
 #[test]
 fn simple() {
-    let html: Node<()> = fragment([div([], []), span([], [])]);
+    let html: Node<()> = html::fragment([div([], []), span([], [])]);
     let expected = "<div></div><span></span>";
     assert_eq!(html.render_to_string(), expected);
 }
@@ -34,7 +33,7 @@ fn test_on_client() {
 
     simple_program.set_current_dom(input);
 
-    let container = sauron_core::document()
+    let container = sauron_core::dom::document()
         .get_element_by_id("container")
         .unwrap();
 

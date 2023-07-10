@@ -34,7 +34,9 @@ fn on_input_test() {
     let simple_program = simple_program();
     simple_program.set_current_dom(input);
 
-    let input_element = sauron_core::document().get_element_by_id(&elem_id).unwrap();
+    let input_element = sauron_core::dom::document()
+        .get_element_by_id(&elem_id)
+        .unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 
@@ -85,7 +87,9 @@ fn added_event() {
         .update_dom_with_vdom(new)
         .expect("must not error");
 
-    let input_element = sauron_core::document().get_element_by_id(&elem_id).unwrap();
+    let input_element = sauron_core::dom::document()
+        .get_element_by_id(&elem_id)
+        .unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 
@@ -138,7 +142,9 @@ fn remove_event() {
         .update_dom_with_vdom(new)
         .expect("must not error");
 
-    let input_element = sauron_core::document().get_element_by_id(&elem_id).unwrap();
+    let input_element = sauron_core::dom::document()
+        .get_element_by_id(&elem_id)
+        .unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
 
