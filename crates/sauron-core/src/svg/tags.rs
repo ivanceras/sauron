@@ -49,7 +49,8 @@ macro_rules! declare_svg_tags{
 macro_rules! declare_common_svg_tags_and_macro {
     ($($(#[$attr:meta])* $name:ident;)*) => {
 
-        pub(crate) mod commons {
+        /// commonly used svg tags
+        pub mod commons {
             declare_svg_tags! { $($name;)* }
         }
 

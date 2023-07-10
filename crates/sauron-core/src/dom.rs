@@ -22,13 +22,14 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use http::Http;
     pub use program::{MountAction, MountTarget, Program};
     pub use util::{
-        body, document, history, now, performance,
+        document, history, now, performance,
         spawn_local, window, inject_style,
     };
     pub use raf::{request_animation_frame, AnimationFrameHandle};
     pub use ric::{request_idle_callback, IdleCallbackHandle};
     pub use timeout::{async_delay, request_timeout_callback, TimeoutCallbackHandle};
     pub use cmd::Cmd;
+    use crate::dom::events::MountEvent;
 
     mod application;
     pub mod cmd;
@@ -51,7 +52,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
         /// native dome events web_sys::Events
         WebEvent(web_sys::Event),
         /// custom event here follows
-        MountEvent(crate::events::MountEvent),
+        MountEvent(MountEvent),
     }
 
 }}

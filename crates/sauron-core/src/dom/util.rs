@@ -1,5 +1,6 @@
 //! utility functions
 //!
+use crate::dom;
 pub use wasm_bindgen_futures::spawn_local;
 use web_sys::ScrollToOptions;
 
@@ -57,26 +58,24 @@ pub fn scroll_window_to_top() {
     let mut options = ScrollToOptions::new();
     options.top(0.0);
     options.left(0.0);
-    crate::window().scroll_to_with_scroll_to_options(&options);
+    window().scroll_to_with_scroll_to_options(&options);
 }
 
 /// set the browser location hash
 pub fn set_location_hash(hash: &str) {
-    let window = crate::window();
-    let location = window.location();
+    let location = window().location();
     location.set_hash(hash).expect("must set the location hash");
 }
 
 /// return the hash part of the browser current url location
 /// The hash part are the text right after the `#` sign
 pub fn get_location_hash() -> String {
-    let window = crate::window();
-    window.location().hash().expect("must have a hash")
+    window().location().hash().expect("must have a hash")
 }
 
 /// return the size of the browser at this moment
 pub fn get_window_size() -> (i32, i32) {
-    let window = crate::window();
+    let window = dom::window();
     let window_width = window
         .inner_width()
         .expect("unable to get window width")
@@ -92,5 +91,5 @@ pub fn get_window_size() -> (i32, i32) {
 
 /// set the title of the document
 pub fn set_window_title(title: &str) {
-    crate::document().set_title(title);
+    document().set_title(title);
 }

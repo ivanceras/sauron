@@ -1,7 +1,5 @@
-use crate::dom::{MountAction, MountTarget};
-use crate::wasm_bindgen;
-use crate::{Application, Program};
-use wasm_bindgen::JsValue;
+use crate::dom::{Application, MountAction, MountTarget, Program};
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(module = "/js/define_custom_element.js")]
 extern "C" {
@@ -64,7 +62,6 @@ where
 {
     /// create a new web component, with the node as the target element to be mounted into
     pub fn new(node: JsValue) -> Self {
-        use crate::wasm_bindgen::JsCast;
         let mount_node: &web_sys::Node = node.unchecked_ref();
         Self {
             program: Program::new(

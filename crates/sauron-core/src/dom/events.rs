@@ -1,7 +1,7 @@
 //! Create [events][0] Object
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
-use crate::dom::Event;
+use crate::dom::{window, Event};
 use crate::{
     html::attributes::AttributeValue,
     vdom::{Attribute, Listener},
@@ -81,7 +81,7 @@ where
             let scroll_left = element.scroll_left();
             f((scroll_top, scroll_left))
         } else {
-            let window = crate::window();
+            let window = window();
             let scroll_top = window.page_y_offset().expect("must get page offset") as i32;
             let scroll_left = window.page_x_offset().expect("must get page offset") as i32;
             f((scroll_top, scroll_left))

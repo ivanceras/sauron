@@ -1,5 +1,6 @@
 //! provides functions and macros for building svg attributes
 use crate::html::attributes::{AttributeValue, Value};
+pub use commons::*;
 use mt_dom::{attr, attr_ns};
 
 pub(crate) const XLINK_NAMESPACE: &str = "http://www.w3.org/1999/xlink";
@@ -44,6 +45,20 @@ macro_rules! declare_svg_attributes{
     }
 }
 
+macro_rules! declare_svg_attributes_non_common{
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+        declare_attributes!{ $($name;)*}
+
+        #[cfg(feature = "with-lookup")]
+        /// These are most commonly used svg attributes
+        pub const SVG_ATTRS_NON_COMMON:&[&'static str] = &[$(stringify!($name),)*];
+    }
+}
+
 macro_rules! declare_svg_attributes_special{
     ( $(
          $(#[$attr:meta])*
@@ -59,115 +74,123 @@ macro_rules! declare_svg_attributes_special{
     }
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
-// complete list svg attributes
-declare_svg_attributes! {
-    accumulate;
-    additive;
-    alphabetic;
-    amplitude;
-    ascent;
-    azimuth;
-    bbox;
-    begin;
-    bias;
-    by;
-    clip;
-    color;
-    cursor;
-    cx;
-    cy;
-    d;
-    decelerate;
-    descent;
-    direction;
-    display;
-    divisor;
-    dur;
-    dx;
-    dy;
-    elevation;
-    end;
-    exponent;
-    fill;
-    filter;
-    format;
-    from;
-    fr;
-    fx;
-    fy;
-    g1;
-    g2;
-    hanging;
-    height;
-    href;
-    hreflang;
-    ideographic;
-    in2;
-    intercept;
-    k;
-    k1;
-    k2;
-    k3;
-    k4;
-    kerning;
-    lang;
-    local;
-    mask;
-    mathematical;
-    max;
-    media;
-    method;
-    min;
-    mode;
-    name;
-    offset;
-    opacity;
-    operator;
-    order;
-    orient;
-    orientation;
-    origin;
-    overflow;
-    ping;
-    points;
-    r;
-    radius;
-    rel;
-    restart;
-    result;
-    rotate;
-    rx;
-    ry;
-    scale;
-    seed;
-    slope;
-    spacing;
-    speed;
-    stemh;
-    stemv;
-    string;
-    stroke;
-    tabindex;
-    target;
-    to;
-    transform;
-    u1;
-    u2;
-    unicode;
-    values;
-    version;
-    visibility;
-    width;
-    widths;
-    x;
-    x1;
-    x2;
-    xmlns;
-    y;
-    y1;
-    y2;
-    z;
+/// common svg attributes
+pub mod commons {
+    use crate::html::attributes::{AttributeValue, Value};
+    use mt_dom::attr;
+    // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
+    // complete list svg attributes
+    declare_svg_attributes! {
+        accumulate;
+        additive;
+        alphabetic;
+        amplitude;
+        ascent;
+        azimuth;
+        bbox;
+        begin;
+        bias;
+        by;
+        clip;
+        cursor;
+        cx;
+        cy;
+        d;
+        decelerate;
+        descent;
+        direction;
+        display;
+        divisor;
+        dur;
+        dx;
+        dy;
+        elevation;
+        end;
+        exponent;
+        fill;
+        format;
+        from;
+        fr;
+        fx;
+        fy;
+        g1;
+        g2;
+        hanging;
+        ideographic;
+        in2;
+        intercept;
+        k;
+        k1;
+        k2;
+        k3;
+        k4;
+        kerning;
+        local;
+        mathematical;
+        mode;
+        offset;
+        opacity;
+        operator;
+        order;
+        orient;
+        orientation;
+        origin;
+        overflow;
+        points;
+        r;
+        radius;
+        restart;
+        result;
+        rotate;
+        rx;
+        ry;
+        scale;
+        seed;
+        slope;
+        spacing;
+        speed;
+        stemh;
+        stemv;
+        string;
+        stroke;
+        to;
+        transform;
+        u1;
+        u2;
+        unicode;
+        values;
+        version;
+        visibility;
+        widths;
+        x;
+        x1;
+        x2;
+        xmlns;
+        y;
+        y1;
+        y2;
+        z;
+    }
+}
+
+declare_svg_attributes_non_common! {
+        color; //conflicts with html::attributes::color
+        filter; //conflicts with svg::filter
+        height; //conflicts with html::attributes::height
+        href; //conflicts with html::attributes::href;
+        hreflang;
+        lang;
+        mask; //conflicts with svg::mask
+        max;
+        media;
+        method;
+        min;
+        name;
+        ping;
+        rel;
+        tabindex;
+        target;
+        width;
 }
 
 // These are attributes that is exposed in such a way that is consistent to rust conventions

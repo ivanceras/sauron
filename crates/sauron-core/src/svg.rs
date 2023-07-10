@@ -2,6 +2,7 @@
 use crate::vdom;
 
 pub use mt_dom::{element, element_ns};
+pub use tags::commons;
 pub use tags::commons::*;
 
 pub mod attributes;

@@ -1,6 +1,6 @@
 use crate::dom::Cmd;
 use crate::dom::CustomElement;
-use crate::dom::{Component, Container, Task};
+use crate::dom::{Component, Container, Effects, Task};
 use crate::vdom::Node;
 
 /// An Application is the root component of your program.
@@ -74,23 +74,23 @@ where
     MSG: 'static,
 {
     fn init(&mut self) -> Vec<Cmd<Self, MSG>> {
-        <Self as crate::Component<MSG, ()>>::init(self)
+        <Self as Component<MSG, ()>>::init(self)
             .into_iter()
             .map(Cmd::from)
             .collect()
     }
 
     fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
-        let effects = <Self as crate::Component<MSG, ()>>::update(self, msg);
+        let effects = <Self as Component<MSG, ()>>::update(self, msg);
         Cmd::from(effects)
     }
 
     fn view(&self) -> Node<MSG> {
-        <Self as crate::Component<MSG, ()>>::view(self)
+        <Self as Component<MSG, ()>>::view(self)
     }
 
     fn style(&self) -> Vec<String> {
-        <Self as crate::Component<MSG, ()>>::style(self)
+        <Self as Component<MSG, ()>>::style(self)
     }
 }
 
@@ -104,20 +104,20 @@ where
     MSG: 'static,
 {
     fn init(&mut self) -> Vec<Task<MSG>> {
-        <Self as crate::Container<MSG, ()>>::init(self)
+        <Self as Container<MSG, ()>>::init(self)
     }
 
-    fn update(&mut self, msg: MSG) -> crate::Effects<MSG, ()> {
-        <Self as crate::Container<MSG, ()>>::update(self, msg)
+    fn update(&mut self, msg: MSG) -> Effects<MSG, ()> {
+        <Self as Container<MSG, ()>>::update(self, msg)
     }
 
     fn view(&self) -> Node<MSG> {
         // converting the component to container loses ability
         // for the container to contain children components
-        <Self as crate::Container<MSG, ()>>::view(self, [])
+        <Self as Container<MSG, ()>>::view(self, [])
     }
 
     fn style(&self) -> Vec<String> {
-        <Self as crate::Container<MSG, ()>>::style(self)
+        <Self as Container<MSG, ()>>::style(self)
     }
 }

@@ -1,7 +1,6 @@
 use crate::{
-    dom::{util, Task, Program},
+    dom::{window, Application,util, Task, Program},
     vdom::Attribute,
-    Application,
 };
 use wasm_bindgen::{prelude::*, JsCast};
 use js_sys::Promise;
@@ -17,7 +16,7 @@ where
 
     /// attach event listeners to the window
     pub fn add_window_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
-        self.add_event_listeners(&crate::window(), event_listeners).expect("must add to event listener");
+        self.add_event_listeners(&window(), event_listeners).expect("must add to event listener");
     }
 
 
@@ -34,7 +33,7 @@ where
                 let msg = cb(window_width, window_height);
                 program.dispatch(msg);
             });
-        crate::window().set_onresize(Some(closure.as_ref().unchecked_ref()));
+        window().set_onresize(Some(closure.as_ref().unchecked_ref()));
         self.event_closures.borrow_mut().push(closure);
     }
 
@@ -58,7 +57,7 @@ where
                         *msg_store.borrow_mut() = Some(msg);
                         resolve.call0(&JsValue::NULL).expect("must resolve");
                     });
-                crate::window().set_onresize(Some(resize_callback.as_ref().unchecked_ref()));
+                window().set_onresize(Some(resize_callback.as_ref().unchecked_ref()));
                 resize_callback.forget();
             });
             JsFuture::from(promise).await.expect("must await");
@@ -83,7 +82,7 @@ where
                 let msg = cb(hash);
                 program.dispatch(msg);
             });
-        crate::window().set_onhashchange(Some(closure.as_ref().unchecked_ref()));
+        window().set_onhashchange(Some(closure.as_ref().unchecked_ref()));
         self.event_closures.borrow_mut().push(closure);
     }
 

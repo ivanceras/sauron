@@ -1,9 +1,10 @@
-use crate::dom::Measurements;
+use crate::dom::{document, now, Measurements};
 use crate::vdom;
 use crate::vdom::diff;
-use crate::{Patch, Application, Cmd};
-use crate::dom::{DomPatch, IdleCallbackHandle, AnimationFrameHandle};
+use crate::vdom::Patch;
+use crate::dom::{Application, Cmd, util::body, DomPatch, IdleCallbackHandle, AnimationFrameHandle};
 use crate::dom::dom_node::find_all_nodes;
+use crate::html::{self, text,attributes::class};
 use mt_dom::TreePath;
 use std::collections::VecDeque;
 use std::{any::TypeId, cell::RefCell, rc::Rc};
@@ -11,6 +12,10 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, IdleDeadline, Node};
 use std::collections::BTreeMap;
 use wasm_bindgen::closure::Closure;
+#[cfg(feature = "with-ric")]
+use crate::dom::request_idle_callback;
+#[cfg(feature = "with-raf")]
+use crate::dom::request_animation_frame;
 
 
 /// Program handle the lifecycle of the APP
@@ -249,7 +254,7 @@ where
     /// Program::mount_to_body(App{});
     /// ```
     pub fn mount_to_body(app: APP) -> Self {
-        Self::append_to_mount(app, &crate::dom::body())
+        Self::append_to_mount(app, &body())
     }
 
     /// each element and it's descendant in the vdom is created into
@@ -310,7 +315,7 @@ where
     #[cfg(feature = "with-ric")]
     fn dispatch_pending_msgs_with_ric(&self) -> Result<(), JsValue> {
         let program = self.clone();
-        let handle = crate::dom::request_idle_callback(move |deadline| {
+        let handle = request_idle_callback(move |deadline| {
             program
                 .dispatch_pending_msgs(Some(deadline))
                 .expect("must execute")
@@ -328,7 +333,7 @@ where
             return Ok(());
         }
         let mut i = 0;
-        let t1 = crate::now();
+        let t1 = now();
         let mut did_complete = true;
         while let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front() {
             // Note: each MSG needs to be executed one by one in the same order
@@ -338,7 +343,7 @@ where
             // we put the cmd in the pending_cmd queue
             self.pending_cmds.borrow_mut().push_back(cmd);
 
-            let t2 = crate::now();
+            let t2 = now();
             let elapsed = t2 - t1;
             // break only if a deadline is supplied
             if let Some(deadline) = &deadline {
@@ -361,16 +366,16 @@ where
 
     /// update the browser DOM to reflect the APP's  view
     pub fn update_dom(&self) -> Result<Measurements, JsValue> {
-        let t1 = crate::now();
+        let t1 = now();
         // a new view is created due to the app update
         let view = self.app.borrow().view();
-        let t2 = crate::now();
+        let t2 = now();
 
         let node_count = view.node_count();
 
         // update the last DOM node tree with this new view
         let total_patches = self.update_dom_with_vdom(view).expect("must not error");
-        let t3 = crate::now();
+        let t3 = now();
 
         let measurements = Measurements {
             name: None,
@@ -508,7 +513,7 @@ where
     #[cfg(feature = "with-ric")]
     fn apply_pending_patches_with_ric(&self) -> Result<(), JsValue> {
         let program = self.clone();
-        let handle = crate::dom::request_idle_callback(move |deadline| {
+        let handle = request_idle_callback(move |deadline| {
             program
                 .apply_pending_patches(Some(deadline))
                 .expect("must not error");
@@ -521,7 +526,7 @@ where
     #[cfg(feature = "with-raf")]
     fn apply_pending_patches_with_raf(&self) -> Result<(), JsValue> {
         let program = self.clone();
-        let handle = crate::dom::request_animation_frame(move || {
+        let handle = request_animation_frame(move || {
             program.apply_pending_patches(None).expect("must not error");
         })
         .expect("must execute");
@@ -568,7 +573,7 @@ where
     #[cfg(feature = "with-ric")]
     fn dispatch_inner_with_ric(&self) {
         let program = self.clone();
-        let handle = crate::dom::request_idle_callback(move |deadline| {
+        let handle = request_idle_callback(move |deadline| {
             program.dispatch_inner(Some(deadline));
         })
         .expect("must execute");
@@ -579,7 +584,7 @@ where
     #[cfg(feature = "with-raf")]
     fn dispatch_inner_with_raf(&self) {
         let program = self.clone();
-        let handle = crate::dom::request_animation_frame(move || {
+        let handle = request_animation_frame(move || {
             program.dispatch_inner(None);
         })
         .expect("must execute");
@@ -663,20 +668,20 @@ where
 
     /// Inject a style to the global document
     fn inject_style(&self, type_id: TypeId, style: &str) {
-        let style_node = crate::html::tags::style(
-            [crate::html::attributes::class(format!("{type_id:?}"))],
-            [crate::html::text(style)],
+        let style_node = html::tags::style(
+            [class(format!("{type_id:?}"))],
+            [text(style)],
         );
         let created_node = self.create_dom_node(&style_node);
 
-        let head = crate::document().head().expect("must have a head");
+        let head = document().head().expect("must have a head");
         head.append_child(&created_node)
             .expect("must append style");
     }
 
     /// inject style element to the mount node
     pub fn inject_style_to_mount(&self, style: &str) {
-        let style_node = crate::html::tags::style([], [crate::html::text(style)]);
+        let style_node = html::tags::style([], [text(style)]);
         let created_node = self.create_dom_node(&style_node);
 
         self.mount_node

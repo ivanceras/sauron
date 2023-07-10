@@ -1,4 +1,5 @@
 #![deny(warnings)]
+/*
 use sauron::{
     html::attributes::{attr, class, id, style},
     html::text,
@@ -8,6 +9,8 @@ use sauron::{
     svg::*,
     *,
 };
+*/
+use sauron::prelude::*;
 
 extern crate log;
 

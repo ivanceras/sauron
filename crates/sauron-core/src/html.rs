@@ -2,7 +2,7 @@
 use crate::vdom::{leaf, Attribute, Node, NodeTrait};
 pub use jss::units;
 pub use mt_dom::{element, element_ns};
-pub use tags::{commons::*, self_closing::*};
+pub use tags::{commons::*, self_closing::*, *};
 
 #[macro_use]
 pub mod attributes;

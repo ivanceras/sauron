@@ -2,6 +2,7 @@
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
 use crate::{dom::Event, vdom, vdom::Attribute};
+pub use attribute_macros::commons::*;
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
 pub use jss::Value;

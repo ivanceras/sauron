@@ -1,6 +1,7 @@
 use crate::{
+    dom::events::MountEvent,
     dom::{self, Application, Program},
-    events::MountEvent,
+    dom::{document, window},
     html,
     html::attributes::{AttributeValue, Listener, SegregatedAttributes},
     vdom,
@@ -43,7 +44,7 @@ pub fn intern(s: &str) -> &str {
 }
 
 fn create_element_with_tag(tag: &'static str) -> (&'static str, web_sys::Element) {
-    let elm = crate::document().create_element(intern(tag)).unwrap();
+    let elm = document().create_element(intern(tag)).unwrap();
     (tag, elm)
 }
 
@@ -56,7 +57,7 @@ fn create_element(tag: &'static str) -> web_sys::Element {
                 .expect("must clone node")
                 .unchecked_into()
         } else {
-            let elm = crate::document().create_element(intern(tag)).unwrap();
+            let elm = document().create_element(intern(tag)).unwrap();
             elm
         }
     })
@@ -84,13 +85,13 @@ where
 {
     /// create a text node
     pub fn create_text_node(txt: &str) -> Text {
-        crate::document().create_text_node(txt)
+        document().create_text_node(txt)
     }
 
     fn create_leaf_node(&self, leaf: &Leaf<MSG>) -> Node {
         match leaf {
             Leaf::Text(txt) => Self::create_text_node(txt).into(),
-            Leaf::Comment(comment) => crate::document().create_comment(comment).into(),
+            Leaf::Comment(comment) => document().create_comment(comment).into(),
             Leaf::SafeHtml(_safe_html) => {
                 panic!("safe html must have already been dealt in create_element node");
             }
@@ -101,7 +102,7 @@ where
                 );
             }
             Leaf::Fragment(nodes) => {
-                let document = crate::document();
+                let document = document();
                 let doc_fragment = document.create_document_fragment();
                 for vnode in nodes {
                     let created_node = self.create_dom_node(vnode);
@@ -142,7 +143,7 @@ where
     }
 
     fn is_custom_element(tag: &str) -> bool {
-        let custom_element = crate::window().custom_elements();
+        let custom_element = window().custom_elements();
         let existing = custom_element.get(intern(tag));
         // define the custom element only when it is not yet defined
         !existing.is_undefined()
@@ -151,7 +152,7 @@ where
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
     fn create_element_node(&self, velem: &vdom::Element<MSG>) -> Node {
-        let document = crate::document();
+        let document = document();
 
         if Self::is_custom_element(velem.tag()) {
             //log::info!("This is a custom element: {}", velem.tag());

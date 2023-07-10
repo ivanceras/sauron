@@ -5,7 +5,8 @@
 #![deny(clippy::all)]
 
 use js_sys::Date;
-use sauron::{html::attributes::style, html::units::*, html::*, svg::attributes::*, svg::*, *};
+//use sauron::{html::attributes::style, html::units::*, html::*, svg::attributes::*, svg::*, *};
+use sauron::prelude::*;
 
 pub enum Msg {
     Tick,

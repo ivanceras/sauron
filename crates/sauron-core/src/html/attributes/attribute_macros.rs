@@ -63,7 +63,24 @@ macro_rules! declare_html_attributes{
 
         #[cfg(feature = "with-lookup")]
         /// These are most commonly used html attributes such as class, id, etc
-        pub const HTML_ATTRS:[&'static str; 114] = [$(stringify!($name),)*];
+        pub const HTML_ATTRS:&[&'static str] = &[$(stringify!($name),)*];
+    }
+}
+
+/// declare html attributes that are non commonly used to avoid conflict with commonly used tags
+/// and names
+macro_rules! declare_html_attributes_non_common{
+    ( $(
+         $(#[$attr:meta])*
+         $name:ident;
+       )*
+     ) => {
+        declare_attributes!{ $($name;)*}
+
+        #[cfg(feature = "with-lookup")]
+        /// These are html attributes with names that are non proper rust identifier therefore
+        /// handled differently. ie: (for, in)
+        pub const HTML_ATTRS_NON_COMMON: &[&'static str] = &[$(stringify!($name),)*];
     }
 }
 
@@ -81,127 +98,135 @@ macro_rules! declare_html_attributes_special{
         #[cfg(feature = "with-lookup")]
         /// These are html attributes with names that are non proper rust identifier therefore
         /// handled differently. ie: (for, in)
-        pub const HTML_ATTRS_SPECIAL:[(&'static str,&'static str); 8] = [$((stringify!($name),$attribute),)*];
+        pub const HTML_ATTRS_SPECIAL: &[(&'static str,&'static str)] = &[$((stringify!($name),$attribute),)*];
     }
 }
 
-// List from html attributes
-// https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes
-declare_html_attributes! {
-    accept;
-    accesskey;
-    action;
-    align;
-    allow;
-    alt;
-    autocapitalize;
-    autocomplete;
-    autofocus;
-    autoplay;
-    background;
-    bgcolor;
-    border;
-    buffered;
-    challenge;
-    charset;
-    cite;
-    class;
-    codebase;
-    color;
-    cols;
-    colspan;
-    content;
-    contenteditable;
-    contextmenu;
-    controls;
-    coords;
-    crossorigin;
-    csp;
-    data;
-    datetime;
-    decoding;
-    default;
-    defer;
-    dir;
-    dirname;
-    download;
-    draggable;
-    dropzone;
-    enctype;
-    enterkeyhint;
-    formaction;
-    formnovalidate;
-    headers;
-    height;
-    hidden;
-    high;
-    href;
-    hreflang;
-    http;
-    icon;
-    id;
-    importance;
-    integrity;
-    intrinsicsize;
-    inputmode;
-    ismap;
-    itemprop;
-    keytype;
-    kind;
-    lang;
-    language;
-    loading;
-    list;
-    low;
-    manifest;
-    max;
-    maxlength;
-    minlength;
-    media;
-    method;
-    min;
-    multiple;
-    muted;
-    name;
-    novalidate;
-    optimum;
-    pattern;
-    ping;
-    placeholder;
-    poster;
-    preload;
-    radiogroup;
-    readonly;
-    referrerpolicy;
-    rel;
-    required;
-    reversed;
-    rows;
-    rowspan;
-    sandbox;
-    scope;
-    scoped;
-    selected;
-    shape;
-    size;
-    sizes;
-    slot;
-    spellcheck;
-    src;
-    srcdoc;
-    srclang;
-    srcset;
-    start;
-    step;
-    summary;
-    tabindex;
-    target;
-    title;
-    translate;
-    usemap;
-    value;
-    width;
-    wrap;
+/// common used html attributes
+pub mod commons {
+    use crate::html::attributes::{AttributeValue, Value};
+    use mt_dom::attr;
+    // List from html attributes
+    // https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes
+    declare_html_attributes! {
+        accept;
+        accesskey;
+        action;
+        align;
+        allow;
+        alt;
+        autocapitalize;
+        autocomplete;
+        autofocus;
+        autoplay;
+        background;
+        bgcolor;
+        border;
+        buffered;
+        challenge;
+        charset;
+        class;
+        codebase;
+        color;
+        cols;
+        colspan;
+        content;
+        contenteditable;
+        contextmenu;
+        controls;
+        coords;
+        crossorigin;
+        csp;
+        data;
+        datetime;
+        decoding;
+        default;
+        defer;
+        dir;
+        dirname;
+        download;
+        draggable;
+        dropzone;
+        enctype;
+        enterkeyhint;
+        formaction;
+        formnovalidate;
+        headers;
+        height;
+        hidden;
+        high;
+        href;
+        hreflang;
+        http;
+        icon;
+        id;
+        importance;
+        integrity;
+        intrinsicsize;
+        inputmode;
+        ismap;
+        itemprop;
+        keytype;
+        kind;
+        lang;
+        language;
+        loading;
+        list;
+        low;
+        manifest;
+        max;
+        maxlength;
+        minlength;
+        media;
+        method;
+        min;
+        multiple;
+        muted;
+        name;
+        novalidate;
+        optimum;
+        ping;
+        placeholder;
+        poster;
+        preload;
+        radiogroup;
+        readonly;
+        referrerpolicy;
+        rel;
+        required;
+        reversed;
+        rows;
+        rowspan;
+        sandbox;
+        scope;
+        scoped;
+        selected;
+        shape;
+        size;
+        sizes;
+        slot;
+        spellcheck;
+        src;
+        srcdoc;
+        srclang;
+        srcset;
+        start;
+        step;
+        tabindex;
+        target;
+        title;
+        translate;
+        usemap;
+        value;
+        width;
+        wrap;
+    }
+}
+
+declare_html_attributes_non_common! {
+    cite; //conflicts with html::tag::cite
+    summary; //conflicts with html::tag::summary
+    pattern; //conflicts with svg::pattern
 }
 
 // attributes with dash
