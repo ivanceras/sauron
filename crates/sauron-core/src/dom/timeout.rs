@@ -13,7 +13,6 @@ pub struct TimeoutCallbackHandle {
 
 impl Drop for TimeoutCallbackHandle {
     fn drop(&mut self) {
-        log::info!("timeout callback is being dropped..");
         window().clear_timeout_with_handle(self.handle);
     }
 }

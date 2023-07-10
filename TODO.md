@@ -189,15 +189,29 @@
       closure_id_counter: usize,
       type ActiveClosure: BTreeMap<usize, Closure>;
       ```
-- [ ] unify the `Program::add_event_listener` which attach the event to window
+- [X] unify the `Program::add_event_listener` which attach the event to window
     and the `dom_node::add_event_listener_callback` usage used in `set_element_attributes`
 
     ```rust
         Program::add_event_listener(&self, target_element: EventTarget, event_listeners).
     ```
-- [ ] Make the svg attributes follow `snake_case` convention
+- [X] Make the svg attributes follow `snake_case` convention
     - viewBox -> view_box
     - preserveAspectRatio -> preserve_aspect_ratio
+- [ ] As an alternative to Task where `Component` can not use `Cmd`, due to it referencing Program,
+    we can instead return listeners.
+    - window listeners
+    - document listener
+    ```rust
+    struct GlobalListener{
+        window_listeners: Vec<Attribute<MSG>>;
+        document_listeners: Vec<Attribute<MSG>>;
+    }
+    ```
+    add these events:
+    - `on_interval(|i32|{})` for attaching interval in the Window
+    Http can be done with task
+
 
 
 ## Features

@@ -9,7 +9,6 @@ pub struct AnimationFrameHandle {
 }
 impl Drop for AnimationFrameHandle {
     fn drop(&mut self) {
-        log::debug!("dropping animation frame handle..");
         window()
             .cancel_animation_frame(self.handle)
             .expect("cancel animation handle")

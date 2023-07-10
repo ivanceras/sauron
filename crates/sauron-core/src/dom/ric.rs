@@ -11,7 +11,6 @@ pub struct IdleCallbackHandle {
 /// when dropped, cancel the idle callback
 impl Drop for IdleCallbackHandle {
     fn drop(&mut self) {
-        log::info!("dropping idle callback here..");
         window().cancel_idle_callback(self.handle);
     }
 }
