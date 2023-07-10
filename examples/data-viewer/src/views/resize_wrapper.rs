@@ -53,7 +53,7 @@ impl Application<Msg> for ResizeWrapper {
     fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
         vec![
             Cmd::new(|program| {
-                program.add_event_listeners(vec![
+                program.add_window_event_listeners(vec![
                     on_mouseup(|event| Msg::EndResize(event.client_x(), event.client_y())),
                     on_mousemove(|event| Msg::MouseMove(event.client_x(), event.client_y())),
                 ])

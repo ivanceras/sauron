@@ -2,7 +2,7 @@ use crate::{
     dom::{self, Application, Program},
     events::MountEvent,
     html,
-    html::attributes::{AttributeValue, SegregatedAttributes},
+    html::attributes::{AttributeValue, Listener, SegregatedAttributes},
     vdom,
     vdom::{Attribute, Leaf, NodeTrait},
 };
@@ -12,10 +12,10 @@ use std::collections::HashMap;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
-    self, Element, EventTarget, HtmlButtonElement, HtmlDataElement, HtmlDetailsElement,
-    HtmlFieldSetElement, HtmlInputElement, HtmlLiElement, HtmlLinkElement, HtmlMeterElement,
-    HtmlOptGroupElement, HtmlOptionElement, HtmlOutputElement, HtmlParamElement,
-    HtmlProgressElement, HtmlSelectElement, HtmlStyleElement, HtmlTextAreaElement, Node, Text,
+    self, Element, HtmlButtonElement, HtmlDataElement, HtmlDetailsElement, HtmlFieldSetElement,
+    HtmlInputElement, HtmlLiElement, HtmlLinkElement, HtmlMeterElement, HtmlOptGroupElement,
+    HtmlOptionElement, HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement,
+    HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
 
 /// data attribute name used in assigning the node id of an element with events
@@ -329,34 +329,56 @@ where
             let mut node_closures = self.node_closures.borrow_mut();
             node_closures.insert(unique_id, vec![]);
 
-            let event_str = attr.name();
-            let current_elm: &EventTarget =
-                element.dyn_ref().expect("unable to cast to event targe");
+            let event_name = attr.name();
 
-            // This is where all of the UI events is wired in this part of the code.
-            // All event listener is added to this element.
-            // The callback to this listener emits an Msg which is then \
-            // dispatched to the `program` which then triggers update view cycle.
-            let listener_clone = listener.clone();
-            let program = self.clone();
-            let callback_wrapped: Closure<dyn FnMut(web_sys::Event)> =
-                Closure::new(move |event: web_sys::Event| {
-                    let msg = listener_clone.emit(dom::Event::from(event));
-                    program.dispatch(msg);
-                });
-
-            current_elm
-                .add_event_listener_with_callback(
-                    intern(event_str),
-                    callback_wrapped.as_ref().unchecked_ref(),
-                )
-                .expect("Unable to attached event listener");
+            let closure = self
+                .add_event_listener(element, event_name, listener)
+                .expect("add listener");
 
             node_closures
                 .get_mut(&unique_id)
                 .expect("Unable to get closure")
-                .push((event_str, callback_wrapped));
+                .push((event_name, closure));
         }
+    }
+
+    /// attach and event listener to an event target
+    pub fn add_event_listeners(
+        &self,
+        target: &web_sys::EventTarget,
+        event_listeners: Vec<Attribute<MSG>>,
+    ) -> Result<(), JsValue> {
+        for event_attr in event_listeners.into_iter() {
+            for event_cb in event_attr.value() {
+                let listener = event_cb.as_event_listener().expect("expecting a callback");
+                let closure = self.add_event_listener(target, event_attr.name(), listener)?;
+                self.event_closures.borrow_mut().push(closure);
+            }
+        }
+        Ok(())
+    }
+
+    /// add a event listener to a target element
+    pub fn add_event_listener(
+        &self,
+        event_target: &web_sys::EventTarget,
+        event_name: &str,
+        listener: &Listener<dom::Event, MSG>,
+    ) -> Result<Closure<dyn FnMut(web_sys::Event)>, JsValue> {
+        let program = self.clone();
+        let listener = listener.clone();
+
+        let closure: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let msg = listener.emit(dom::Event::from(event));
+                program.dispatch(msg);
+            });
+
+        event_target.add_event_listener_with_callback(
+            intern(event_name),
+            closure.as_ref().unchecked_ref(),
+        )?;
+        Ok(closure)
     }
 
     /// explicitly call `set_checked` function on the html element

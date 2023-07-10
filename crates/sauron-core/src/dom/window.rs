@@ -1,10 +1,9 @@
 use crate::{
-    dom::{self, util, Task, Program},
+    dom::{util, Task, Program},
     vdom::Attribute,
     Application,
 };
-use wasm_bindgen::{self, prelude::*, JsCast};
-use web_sys::EventTarget;
+use wasm_bindgen::{prelude::*, JsCast};
 use js_sys::Promise;
 use wasm_bindgen_futures::JsFuture;
 use std::rc::Rc;
@@ -15,35 +14,10 @@ where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
-    /// attach an event listender to the window
-    /// TODO: maybe rename to add_window_event_listeners
-    pub fn add_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
-        let window = crate::window();
-        let window: &EventTarget = window
-            .dyn_ref()
-            .expect("unable to cast window to event target");
 
-        for event_attr in event_listeners.into_iter() {
-            let event_str = event_attr.name();
-            for event_cb in event_attr.value() {
-                let listener = event_cb.as_event_listener().expect("expecting a callback");
-                let listener = listener.clone();
-                let program = self.clone();
-                let closure: Closure<dyn FnMut(web_sys::Event)> =
-                Closure::new(move|event: web_sys::Event| {
-                    let msg = listener.emit(dom::Event::from(event));
-                    program.dispatch(msg);
-                });
-
-                window
-                    .add_event_listener_with_callback(
-                        event_str,
-                        closure.as_ref().unchecked_ref(),
-                    )
-                    .expect("Unable to attached event listener");
-                self.event_closures.borrow_mut().push(closure);
-            }
-        }
+    /// attach event listeners to the window
+    pub fn add_window_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
+        self.add_event_listeners(&crate::window(), event_listeners).expect("must add to event listener");
     }
 
 
