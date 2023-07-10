@@ -198,7 +198,7 @@
 - [X] Make the svg attributes follow `snake_case` convention
     - viewBox -> view_box
     - preserveAspectRatio -> preserve_aspect_ratio
-- [ ] As an alternative to Task where `Component` can not use `Cmd`, due to it referencing Program,
+- [X] As an alternative to Task where `Component` can not use `Cmd`, due to it referencing Program,
     we can instead return listeners.
     - window listeners
     - document listener
@@ -211,7 +211,12 @@
     add these events:
     - `on_interval(|i32|{})` for attaching interval in the Window
     Http can be done with task
-
+- [ ] Make `Sub` as counterpart to `Cmd`
+    - We can use `Sub` in the `Component`
+    ```rust
+     fn on_resize(&self) -> Sub<Msg>{
+     }
+    ```
 
 
 ## Features

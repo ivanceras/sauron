@@ -1,5 +1,6 @@
 #![deny(warnings)]
 use sauron::svg::attributes::*;
+use sauron::svg::*;
 use sauron::*;
 
 #[test]

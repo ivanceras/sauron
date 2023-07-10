@@ -1,5 +1,4 @@
 #![deny(warnings)]
-use sauron::*;
 use wasm_bindgen_test::*;
 use sauron::dom::async_delay;
 
