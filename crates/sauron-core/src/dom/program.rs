@@ -414,7 +414,7 @@ where
                 .convert_patches(&patches)
                 .expect("must convert patches");
             self.pending_patches.borrow_mut().extend(dom_patches);
-            self.apply_pending_patches_with_raf();
+            self.apply_pending_patches_using_raf();
             patches.len()
         };
 
@@ -473,7 +473,7 @@ where
     }
 
 
-    fn apply_pending_patches_with_ric(&self)  {
+    fn apply_pending_patches_using_ric(&self)  {
         #[cfg(feature = "with-ric")]
         {
             let program = self.clone();
@@ -495,7 +495,7 @@ where
         }
     }
 
-    fn apply_pending_patches_with_raf(&self) {
+    fn apply_pending_patches_using_raf(&self) {
         #[cfg(feature = "with-raf")]
         {
             let program = self.clone();
@@ -534,7 +534,7 @@ where
         }
         if !did_complete {
             log::warn!("applying pending patches did not complete!..");
-            self.apply_pending_patches_with_ric();
+            self.apply_pending_patches_using_ric();
         }
         Ok(())
     }
