@@ -20,12 +20,7 @@ impl Application<Msg> for App {
                 Msg::WindowResized(w, h)
             })
             .into(),
-            Cmd::new(|program| {
-                program.on_resize(|w, h| {
-                    log::info!("Window is resized to {w}x{h}");
-                    Msg::WindowResized(w, h)
-                })
-            }),
+            Cmd::new(|program| program.on_resize(|w, h| Msg::WindowResized(w, h))),
         ]
     }
 

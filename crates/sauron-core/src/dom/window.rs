@@ -1,5 +1,5 @@
 use crate::{
-    dom::{window, Application,util, Task, Program},
+    dom::{window, Application,util, Task, Program, dom_node::intern},
     vdom::Attribute,
 };
 use wasm_bindgen::{prelude::*, JsCast};
