@@ -14,12 +14,19 @@ pub struct App {
 
 impl Application<Msg> for App {
     fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![Cmd::new(|program| {
-            program.on_resize(|w, h| {
-                log::info!("Window is resized to {w}x{h}");
+        vec![
+            Program::<Self, Msg>::on_resize_task(|w, h| {
+                log::info!("This will trigger only once..");
                 Msg::WindowResized(w, h)
             })
-        })]
+            .into(),
+            Cmd::new(|program| {
+                program.on_resize(|w, h| {
+                    log::info!("Window is resized to {w}x{h}");
+                    Msg::WindowResized(w, h)
+                })
+            }),
+        ]
     }
 
     fn view(&self) -> Node<Msg> {

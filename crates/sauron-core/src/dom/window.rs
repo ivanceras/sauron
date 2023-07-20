@@ -5,8 +5,6 @@ use crate::{
 use wasm_bindgen::{prelude::*, JsCast};
 use js_sys::Promise;
 use wasm_bindgen_futures::JsFuture;
-use std::rc::Rc;
-use std::cell::RefCell;
 
 impl<APP, MSG> Program<APP, MSG>
 where
@@ -33,39 +31,29 @@ where
                 let msg = cb(window_width, window_height);
                 program.dispatch(msg);
             });
-        window().set_onresize(Some(closure.as_ref().unchecked_ref()));
+        window().add_event_listener_with_callback(intern("resize"), closure.as_ref().unchecked_ref()).expect("resize callback");
         self.event_closures.borrow_mut().push(closure);
     }
 
     /// TODO: only executed once, since the Task Future is droped once done
     /// TODO: this should be a stream, instead of just one-time future
     /// a variant of resize task, but instead of returning Cmd, it is returning Task
-    pub fn on_resize_task<F>(cb: F) -> Task<MSG>
+    pub fn on_resize_task<F>(mut cb: F) -> Task<MSG>
     where
         F: FnMut(i32, i32) -> MSG + Clone + 'static,
     {
         Task::new(async move{
-            let msg_store: Rc<RefCell<Option<MSG>>> = Rc::new(RefCell::new(None));
-            let msg_weak = Rc::downgrade(&msg_store);
             let promise = Promise::new(&mut |resolve, _reject|{
-                let mut cb = cb.clone();
-                let msg_store = Rc::clone(&msg_store);
                 let resize_callback: Closure<dyn FnMut(web_sys::Event)> =
                     Closure::new(move|_| {
-                        let (window_width, window_height) = util::get_window_size();
-                        let msg = cb(window_width, window_height);
-                        *msg_store.borrow_mut() = Some(msg);
                         resolve.call0(&JsValue::NULL).expect("must resolve");
                     });
-                window().set_onresize(Some(resize_callback.as_ref().unchecked_ref()));
+                window().add_event_listener_with_callback(intern("resize"), resize_callback.as_ref().unchecked_ref()).expect("add event callback");
                 resize_callback.forget();
             });
             JsFuture::from(promise).await.expect("must await");
-            let msg = msg_weak.upgrade()
-                .expect("upgrade msg_weak")
-                .borrow_mut()
-                .take();
-            msg.expect("must contain the MSG here")
+            let (window_width, window_height) = util::get_window_size();
+            cb(window_width, window_height)
         })
     }
 
