@@ -1,6 +1,4 @@
 use crate::dom::Cmd;
-use crate::dom::CustomElement;
-use crate::dom::{Component, Container, Effects, Task};
 use crate::vdom::Node;
 
 /// An Application is the root component of your program.
@@ -62,62 +60,4 @@ pub struct Measurements {
     pub dom_update_took: f64,
     /// Total time it took for the component dispatch
     pub total_time: f64,
-}
-
-/// Auto implementation of Application trait for Component that
-/// has no external MSG
-/// but only if that Component is intended to be a CustomElement
-impl<COMP, MSG> Application<MSG> for COMP
-where
-    COMP: Component<MSG, ()> + 'static,
-    COMP: CustomElement<MSG>,
-    MSG: 'static,
-{
-    fn init(&mut self) -> Vec<Cmd<Self, MSG>> {
-        <Self as Component<MSG, ()>>::init(self)
-            .into_iter()
-            .map(Cmd::from)
-            .collect()
-    }
-
-    fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
-        let effects = <Self as Component<MSG, ()>>::update(self, msg);
-        Cmd::from(effects)
-    }
-
-    fn view(&self) -> Node<MSG> {
-        <Self as Component<MSG, ()>>::view(self)
-    }
-
-    fn style(&self) -> Vec<String> {
-        <Self as Component<MSG, ()>>::style(self)
-    }
-}
-
-/// Auto implementation of Component trait for Container,
-/// which in turn creates an Auto implementation trait for of Application for Container
-/// but only if that Container is intended to be a CustomElement
-impl<CONT, MSG> Component<MSG, ()> for CONT
-where
-    CONT: Container<MSG, ()>,
-    CONT: CustomElement<MSG>,
-    MSG: 'static,
-{
-    fn init(&mut self) -> Vec<Task<MSG>> {
-        <Self as Container<MSG, ()>>::init(self)
-    }
-
-    fn update(&mut self, msg: MSG) -> Effects<MSG, ()> {
-        <Self as Container<MSG, ()>>::update(self, msg)
-    }
-
-    fn view(&self) -> Node<MSG> {
-        // converting the component to container loses ability
-        // for the container to contain children components
-        <Self as Container<MSG, ()>>::view(self, [])
-    }
-
-    fn style(&self) -> Vec<String> {
-        <Self as Container<MSG, ()>>::style(self)
-    }
 }

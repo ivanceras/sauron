@@ -55,10 +55,12 @@ pub mod prelude {
         pub use wasm_bindgen::prelude::*;
         pub use serde_wasm_bindgen;
         pub use crate::html::events::*;
-        pub use crate::dom::{Application, events, Program, document, now, window, CustomElement, Cmd,
+        pub use crate::dom::{Application, events, Program, document, now, window, Cmd,
             AnimationFrameHandle, Callback, Component, Container, Effects, Measurements, MountAction,
             MountTarget, Task, TimeoutCallbackHandle,
         };
+        #[cfg(feature = "custom_element")]
+        pub use crate::dom::CustomElement;
     }}
 }
 

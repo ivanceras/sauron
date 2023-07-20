@@ -34,6 +34,7 @@ with-debug = ["sauron-core/with-debug"]
 # lets you use node! macro to write html like code in the view
 with-node-macro = ["sauron-macro"]
 with-webcomponent-macro = ["sauron-macro"]
+custom_element = ["sauron-core/custom_element"]
 
 
 [dev-dependencies]
@@ -66,7 +67,7 @@ members = [
 
 # progressive-rendering example has its own workspace
 exclude = [
-    "examples/custom-element", 
+    "examples/custom-element",
     "examples/progressive-rendering",
 ]
 
