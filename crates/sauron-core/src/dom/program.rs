@@ -312,17 +312,28 @@ where
         self.after_mounted();
     }
 
-    #[cfg(feature = "with-ric")]
-    fn dispatch_pending_msgs_with_ric(&self) -> Result<(), JsValue> {
-        let program = self.clone();
-        let handle = request_idle_callback(move |deadline| {
-            program
-                .dispatch_pending_msgs(Some(deadline))
-                .expect("must execute")
-        })
-        .expect("must execute");
-        self.idle_callback_handles.borrow_mut().push(handle);
-        Ok(())
+    fn dispatch_pending_msgs_with_ric(&self) {
+        #[cfg(feature = "with-ric")]
+        {
+            let program = self.clone();
+            let handle = request_idle_callback(move |deadline| {
+                program
+                    .dispatch_pending_msgs(Some(deadline))
+                    .expect("must execute")
+            })
+            .expect("must execute");
+            self.idle_callback_handles.borrow_mut().push(handle);
+        }
+
+        #[cfg(not(feature = "with-ric"))]
+        {
+            let program = self.clone();
+            wasm_bindgen_futures::spawn_local(async move {
+                program
+                    .dispatch_pending_msgs(None)
+                    .expect("must execute")
+            })
+        }
     }
 
     /// executes pending msgs by calling the app update method with the msgs
@@ -357,9 +368,7 @@ where
             i += 1;
         }
         if !did_complete {
-            #[cfg(feature = "with-ric")]
-            self.dispatch_pending_msgs_with_ric()
-                .expect("must complete");
+            self.dispatch_pending_msgs_with_ric();
         }
         Ok(())
     }
@@ -405,7 +414,7 @@ where
                 .convert_patches(&patches)
                 .expect("must convert patches");
             self.pending_patches.borrow_mut().extend(dom_patches);
-            self.apply_pending_patches_with_priority_raf();
+            self.apply_pending_patches_with_raf();
             patches.len()
         };
 
@@ -463,75 +472,47 @@ where
         Ok(dom_patches)
     }
 
-    /// apply pending patches using raf
-    /// if raf is not available, use ric
-    /// if ric is not available call bare function
-    fn apply_pending_patches_with_priority_raf(&self) {
-        #[cfg(feature = "with-raf")]
-        self.apply_pending_patches_with_raf()
-            .expect("must complete");
-        #[cfg(not(feature = "with-raf"))]
-        {
-            #[cfg(feature = "with-ric")]
-            self.apply_pending_patches_with_ric()
-                .expect("must complete");
-            #[cfg(not(feature = "with-ric"))]
-            self.apply_pending_patches(None).expect("must complete");
-            #[cfg(not(feature = "with-ric"))]
-            {
-                let program = self.clone();
-                wasm_bindgen_futures::spawn_local(async move {
-                    program.apply_pending_patches(None).expect("must complete");
-                })
-            }
-        }
-    }
 
-    /// apply pending patches using ric
-    /// if ric is not available, use raf
-    /// if raf is not available call bare function
-    fn apply_pending_patches_with_priority_ric(&self) {
+    fn apply_pending_patches_with_ric(&self)  {
         #[cfg(feature = "with-ric")]
-        self.apply_pending_patches_with_ric()
-            .expect("must complete");
+        {
+            let program = self.clone();
+            let handle = request_idle_callback(move |deadline| {
+                program
+                    .apply_pending_patches(Some(deadline))
+                    .expect("must not error");
+            })
+            .expect("must complete the remaining pending patches..");
+            self.idle_callback_handles.borrow_mut().push(handle);
+        }
+
         #[cfg(not(feature = "with-ric"))]
         {
-            #[cfg(feature = "with-raf")]
-            self.apply_pending_patches_with_raf()
-                .expect("must complete");
-
-            #[cfg(not(feature = "with-raf"))]
-            {
-                let program = self.clone();
-                wasm_bindgen_futures::spawn_local(async move {
-                    program.apply_pending_patches(None).expect("must complete");
-                })
-            }
+            let program = self.clone();
+            wasm_bindgen_futures::spawn_local(async move {
+                program.apply_pending_patches(None).expect("must complete");
+            })
         }
     }
 
-    #[cfg(feature = "with-ric")]
-    fn apply_pending_patches_with_ric(&self) -> Result<(), JsValue> {
-        let program = self.clone();
-        let handle = request_idle_callback(move |deadline| {
-            program
-                .apply_pending_patches(Some(deadline))
-                .expect("must not error");
-        })
-        .expect("must complete the remaining pending patches..");
-        self.idle_callback_handles.borrow_mut().push(handle);
-        Ok(())
-    }
+    fn apply_pending_patches_with_raf(&self) {
+        #[cfg(feature = "with-raf")]
+        {
+            let program = self.clone();
+            let handle = request_animation_frame(move || {
+                program.apply_pending_patches(None).expect("must not error");
+            })
+            .expect("must execute");
+            self.animation_frame_handles.borrow_mut().push(handle);
+        }
 
-    #[cfg(feature = "with-raf")]
-    fn apply_pending_patches_with_raf(&self) -> Result<(), JsValue> {
-        let program = self.clone();
-        let handle = request_animation_frame(move || {
-            program.apply_pending_patches(None).expect("must not error");
-        })
-        .expect("must execute");
-        self.animation_frame_handles.borrow_mut().push(handle);
-        Ok(())
+        #[cfg(not(feature = "with-raf"))]
+        {
+            let program = self.clone();
+            wasm_bindgen_futures::spawn_local(async move {
+                program.apply_pending_patches(None).expect("must complete");
+            })
+        }
     }
 
     /// apply the pending patches into the DOM
@@ -552,7 +533,8 @@ where
             }
         }
         if !did_complete {
-            self.apply_pending_patches_with_priority_ric();
+            log::warn!("applying pending patches did not complete!..");
+            self.apply_pending_patches_with_ric();
         }
         Ok(())
     }
@@ -570,42 +552,23 @@ where
         }
     }
 
-    #[cfg(feature = "with-ric")]
     fn dispatch_inner_with_ric(&self) {
-        let program = self.clone();
-        let handle = request_idle_callback(move |deadline| {
-            program.dispatch_inner(Some(deadline));
-        })
-        .expect("must execute");
-        self.idle_callback_handles.borrow_mut().push(handle);
-    }
-
-    #[allow(unused)]
-    #[cfg(feature = "with-raf")]
-    fn dispatch_inner_with_raf(&self) {
-        let program = self.clone();
-        let handle = request_animation_frame(move || {
-            program.dispatch_inner(None);
-        })
-        .expect("must execute");
-        self.animation_frame_handles.borrow_mut().push(handle);
-    }
-
-    fn dispatch_inner_with_priority_ric(&self) {
         #[cfg(feature = "with-ric")]
-        self.dispatch_inner_with_ric();
+        {
+            let program = self.clone();
+            let handle = request_idle_callback(move |deadline| {
+                program.dispatch_inner(Some(deadline));
+            })
+            .expect("must execute");
+            self.idle_callback_handles.borrow_mut().push(handle);
+        }
+
         #[cfg(not(feature = "with-ric"))]
         {
-            #[cfg(feature = "with-raf")]
-            self.dispatch_inner_with_raf();
-
-            #[cfg(not(feature = "with-raf"))]
-            {
-                let program = self.clone();
-                wasm_bindgen_futures::spawn_local(async move {
-                    program.dispatch_inner(None);
-                })
-            }
+            let program = self.clone();
+            wasm_bindgen_futures::spawn_local(async move {
+                program.dispatch_inner(None);
+            })
         }
     }
 
@@ -701,7 +664,7 @@ where
     /// dispatch multiple MSG
     pub fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>) {
         self.pending_msgs.borrow_mut().extend(msgs);
-        self.dispatch_inner_with_priority_ric();
+        self.dispatch_inner_with_ric();
     }
 
     /// dispatch a single msg
