@@ -25,7 +25,6 @@ with-lookup = ["sauron-core/with-lookup"]
 with-ric = ["sauron-core/with-ric"]
 with-raf = ["sauron-core/with-raf"]
 with-interning = ["sauron-core/with-interning"]
-register_custom_element = ["sauron-core/register_custom_element"]
 
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]

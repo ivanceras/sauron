@@ -118,7 +118,6 @@ with-debug = [] # log debug patches
 with-ric = [] # use of request_idle_callback in javascript
 with-raf = [] # use of request_animation_frame in javascript
 with-interning = [] # use caching of strings when crossing rust to js, for faster transfer
-register_custom_element = [] # include the register_custom_element function, this includes the `import pkg/snippets/*/define_custom_element.js`
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
