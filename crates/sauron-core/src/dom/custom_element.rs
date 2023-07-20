@@ -1,4 +1,3 @@
-#![allow(unused)]
 use crate::dom::{
     Application, Cmd, Component, Container, Effects, MountAction, MountTarget, Program, Task,
 };
@@ -7,7 +6,7 @@ use js_sys::Function;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-/*
+#[cfg(feature = "use-snippets")]
 #[wasm_bindgen(module = "/js/define_custom_element.js")]
 extern "C" {
     // register using custom element define
@@ -17,8 +16,8 @@ extern "C" {
     // ```
     pub fn register_custom_element(custom_tag: &str, adapter: &str);
 }
-*/
 
+#[cfg(not(feature = "use-snippets"))]
 thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: Function = create_register_custom_element_function());
 
 /// register using custom element define
@@ -26,6 +25,7 @@ thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: Function = create_registe
 /// ```rust,ignore
 ///  sauron::register_custom_element("date-time", "DateTimeWidgetCustomElement");
 /// ```
+#[cfg(not(feature = "use-snippets"))]
 pub fn register_custom_element(custom_tag: &str, adapter: &str) {
     REGISTER_CUSTOM_ELEMENT_FUNCTION.with(|func| {
         log::debug!("register_custom_element_function: {}", func.to_string());
@@ -39,6 +39,7 @@ pub fn register_custom_element(custom_tag: &str, adapter: &str) {
 }
 
 /// dynamically create the function which will register the custom tag
+#[cfg(not(feature = "use-snippets"))]
 fn create_register_custom_element_function() -> Function {
     Function::new_with_args(
         "custom_tag, adapterClassName",
