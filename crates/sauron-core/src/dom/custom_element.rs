@@ -1,5 +1,7 @@
-use crate::dom::{Application, MountAction, MountTarget, Program};
-use crate::dom::{Component, Container, Effects, Task};
+use crate::dom::{
+    Application, Cmd, Component, Container, Effects, MountAction, MountTarget, Program, Task,
+};
+use crate::vdom::Node;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
