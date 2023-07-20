@@ -1,10 +1,13 @@
+#![allow(unused)]
 use crate::dom::{
     Application, Cmd, Component, Container, Effects, MountAction, MountTarget, Program, Task,
 };
 use crate::vdom::Node;
+use js_sys::Function;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
+/*
 #[wasm_bindgen(module = "/js/define_custom_element.js")]
 extern "C" {
     // register using custom element define
@@ -13,6 +16,75 @@ extern "C" {
     //  sauron::register_custom_element("date-time", "DateTimeWidgetCustomElement");
     // ```
     pub fn register_custom_element(custom_tag: &str, adapter: &str);
+}
+*/
+
+thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: Function = create_register_custom_element_function());
+
+/// register using custom element define
+/// # Example:
+/// ```rust,ignore
+///  sauron::register_custom_element("date-time", "DateTimeWidgetCustomElement");
+/// ```
+pub fn register_custom_element(custom_tag: &str, adapter: &str) {
+    REGISTER_CUSTOM_ELEMENT_FUNCTION.with(|func| {
+        log::debug!("register_custom_element_function: {}", func.to_string());
+        func.call2(
+            &JsValue::NULL,
+            &JsValue::from_str(custom_tag),
+            &JsValue::from_str(adapter),
+        )
+        .expect("must call");
+    })
+}
+
+/// dynamically create the function which will register the custom tag
+fn create_register_custom_element_function() -> Function {
+    Function::new_with_args(
+        "custom_tag, adapterClassName",
+        r#"
+    function define_custom_element(custom_tag, adapterClassName)
+    {
+         console.log(`custom tag: ${custom_tag}, adapterClassName: ${adapterClassName}`);
+         let adapter = window[adapterClassName];
+         console.log("adapter: ", adapter);
+          if (window.customElements.get(custom_tag) === undefined ){
+            window.customElements.define(custom_tag,
+                class extends HTMLElement{
+                    constructor(){
+                        super();
+                        this.instance = new adapter(this);
+                    }
+
+                    static get observedAttributes(){
+                        return adapter.observedAttributes;
+                    }
+
+                    connectedCallback(){
+                        this.instance.connectedCallback();
+                    }
+                    disconnectedCallback(){
+                        this.instance.disconnectedCallback();
+                    }
+                    adoptedCallback(){
+                        this.instance.adoptedCallback();
+                    }
+                    attributeChangedCallback(name, oldValue, newValue){
+                        this.instance.attributeChangedCallback(name, oldValue, newValue);
+                    }
+
+                    appendChild(child){
+                        console.log("appending a child:", child);
+                        this.instance.appendChild(child);
+                    }
+
+                }
+            );
+        }
+    }
+    define_custom_element(custom_tag, adapterClassName);
+"#,
+    )
 }
 
 /// a trait for implementing CustomElement in the DOM with custom tag
