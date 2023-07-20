@@ -111,7 +111,7 @@ features = [
 
 [features]
 default = ["with-dom"]
-with-dom = ["wasm-bindgen", "js-sys", "web-sys", "wasm-bindgen-futures", "register_custom_element"] # for client-side usage
+with-dom = ["wasm-bindgen", "js-sys", "web-sys", "wasm-bindgen-futures"] # for client-side usage
 with-lookup = [] #enumerates html tags and attributes
 with-measure = [] # log traces for measurements in various parts of the system where performance matters.
 with-debug = [] # log debug patches
