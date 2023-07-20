@@ -30,7 +30,7 @@ impl App {
         executed: Rc<AtomicBool>,
     ) {
         log::info!("in execute delayed...");
-        if let Some(current_handle) = current_handle.borrow().as_ref() {
+        if let Some(current_handle) = current_handle.borrow_mut().take() {
             log::info!("We cancelled {:?}", current_handle);
             drop(current_handle);
         }

@@ -1,0 +1,12 @@
+
+build:
+    wasm-pack build --target web --release
+
+build-use-nightly:
+    rustup run nightly wasm-pack build --target web
+
+serve: build
+    basic-http-server ./ -a 0.0.0.0:4001
+
+nightly-serve: build-use-nightly
+    basic-http-server ./ -a 0.0.0.0:4001
