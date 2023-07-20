@@ -2,6 +2,7 @@ use crate::dom::{Application, MountAction, MountTarget, Program};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
+#[cfg(feature = "register_custom_element")]
 #[wasm_bindgen(module = "/js/define_custom_element.js")]
 extern "C" {
     // register using custom element define
