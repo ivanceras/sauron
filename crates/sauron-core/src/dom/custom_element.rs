@@ -2,7 +2,6 @@ use crate::dom::{
     Application, Cmd, Component, Container, Effects, MountAction, MountTarget, Program, Task,
 };
 use crate::vdom::Node;
-use js_sys::Function;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -18,7 +17,7 @@ extern "C" {
 }
 
 #[cfg(not(feature = "use-snippets"))]
-thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: Function = create_register_custom_element_function());
+thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: js_sys::Function = create_register_custom_element_function());
 
 /// register using custom element define
 /// # Example:
@@ -40,8 +39,8 @@ pub fn register_custom_element(custom_tag: &str, adapter: &str) {
 
 /// dynamically create the function which will register the custom tag
 #[cfg(not(feature = "use-snippets"))]
-fn create_register_custom_element_function() -> Function {
-    Function::new_with_args(
+fn create_register_custom_element_function() -> js_sys::Function {
+    js_sys::Function::new_with_args(
         "custom_tag, adapterClassName",
         r#"
     function define_custom_element(custom_tag, adapterClassName)
