@@ -77,7 +77,7 @@ impl Component<Msg, ()> for FieldView {
         )
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![]
     }
 }

@@ -52,7 +52,7 @@ impl Application<Msg> for App {
         Cmd::none()
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![jss! {
             "body":{
                 font_family: "verdana, arial, monospace",

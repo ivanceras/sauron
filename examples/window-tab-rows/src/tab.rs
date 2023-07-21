@@ -88,7 +88,7 @@ impl Component<Msg, ()> for Tab {
         )
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![]
     }
 }

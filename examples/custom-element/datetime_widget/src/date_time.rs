@@ -122,7 +122,7 @@ where
         }
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![jss! {
             ".datetimebox":{
                 border: "1px solid green",
@@ -137,6 +137,9 @@ where
               border_radius: "5px",
             }
         }]
+    }
+    fn style(&self) -> Vec<String> {
+        vec![]
     }
 
     fn view(&self) -> Node<Msg> {

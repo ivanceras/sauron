@@ -54,7 +54,7 @@ impl Component<Msg, ()> for RowView {
         self.view_with_filter(|(_index, field)| field.borrow().is_normal_field())
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![]
     }
 }

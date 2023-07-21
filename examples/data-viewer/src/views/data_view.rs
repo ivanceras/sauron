@@ -63,20 +63,6 @@ impl Component<Msg, ()> for DataView {
     fn init(&mut self) -> Vec<Task<Msg>> {
         vec![]
     }
-    /*
-    ///TODO: Make this ergonomic, something that is similar
-    ///to init in Application, but designed for Component
-    /// perhaps subscription?
-    fn init(&mut self) -> Vec<Task<Msg>> {
-        debug!("Init in  data view for column resize");
-        Cmd::new(|program| {
-            program.add_event_listeners(vec![
-                on_mouseup(|event| Msg::ColumnEndResize(event.client_x(), event.client_y())),
-                on_mousemove(|event| Msg::MouseMove(event.client_x(), event.client_y())),
-            ])
-        })
-    }
-    */
 
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
@@ -205,7 +191,7 @@ impl Component<Msg, ()> for DataView {
         )
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![]
     }
 }

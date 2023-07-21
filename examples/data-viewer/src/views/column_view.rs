@@ -46,7 +46,7 @@ impl Component<Msg, ()> for ColumnView {
         self.column_view_controls()
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![]
     }
 }

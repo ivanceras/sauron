@@ -26,6 +26,9 @@ impl Application<AppMsg> for App {
             </div>
         }
     }
+    fn stylesheet() -> Vec<String> {
+        vec![]
+    }
 
     fn style(&self) -> Vec<String> {
         vec![]

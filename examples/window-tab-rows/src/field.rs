@@ -69,7 +69,7 @@ impl<XMSG> Component<Msg, XMSG> for Field<XMSG> {
         )
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![]
     }
 }

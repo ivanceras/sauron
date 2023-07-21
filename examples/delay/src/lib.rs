@@ -107,7 +107,7 @@ impl Application<Msg> for App {
         }
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![
             jss! {
                 "body": {

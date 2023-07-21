@@ -97,7 +97,7 @@ impl Component<Msg, ()> for PageView {
         }
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![]
     }
 }

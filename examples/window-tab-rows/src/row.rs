@@ -81,7 +81,7 @@ impl Component<Msg, ()> for Row {
         )
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![]
     }
 }

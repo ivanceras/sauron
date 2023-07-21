@@ -18,7 +18,7 @@ impl Application<()> for App {
         Cmd::none()
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![]
     }
 }
