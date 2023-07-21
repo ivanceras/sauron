@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.56.0
 - 9d4a319 fix: changes in `mt-dom` 0.55.0 where the method names are shorter and concise
 - f0936f7 feat: **breaking** add a new static method for Application, and Components: `stylesheet` which returns a static stylesheet, make `style` optional
 - 657577e feat: linking of `define_custom_element` behind `use-snippets` module
