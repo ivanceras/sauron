@@ -24,7 +24,7 @@ impl Application<()> for SimpleComponent {
         div(vec![], vec![])
     }
 
-    fn style(&self) -> Vec<String> {
+    fn stylesheet() -> Vec<String> {
         vec![]
     }
 }
