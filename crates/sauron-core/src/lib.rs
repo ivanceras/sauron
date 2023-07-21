@@ -21,11 +21,11 @@ pub mod prelude {
         attributes::key,
         attributes::{
             attr, checked, class, class_namespaced, classes, classes_flag, classes_flag_namespaced,
-            disabled, r#type, styles_flag,
+            disabled, empty_attr, r#type, styles_flag,
         },
-        comment,
+        br, comment,
         commons::*,
-        input, text,
+        hr, img, input, safe_html, text,
         units::{ch, cm, deg, ex, grad, mm, ms, percent, pt, px, rad, rgb, s, turn, vh, vw},
         view_if,
     };
