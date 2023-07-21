@@ -8,8 +8,6 @@ pub trait Application<MSG>
 where
     MSG: 'static,
 {
-    /// TODO: Maybe return Vec<> of Cmd here, since most likely we are batching it anyway
-    ///
     ///  The application can implement this method where it can modify its initial state.
     ///  This method is called right after the program is mounted into the DOM.
     fn init(&mut self) -> Vec<Cmd<Self, MSG>>
