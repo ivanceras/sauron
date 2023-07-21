@@ -30,7 +30,7 @@ impl SearchWidget {
                     ],
                     [],
                 )
-                .add_attributes(attributes),
+                .with_attributes(attributes),
             ],
         )
     }

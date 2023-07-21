@@ -57,8 +57,8 @@ where
     // check if the skip attribute is true
     // if it is true, skip diffing and no patches is created at this dom
     let skip = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
-        let new_skip_criteria = new_node.get_attribute_value(&"skip_criteria");
-        let old_skip_criteria = old_node.get_attribute_value(&"skip_criteria");
+        let new_skip_criteria = new_node.attribute_value(&"skip_criteria");
+        let old_skip_criteria = old_node.attribute_value(&"skip_criteria");
         // if old and new skip_criteria didn't change skip diffing this nodes
         match (new_skip_criteria, old_skip_criteria) {
             (Some(new), Some(old)) => new == old,

@@ -202,7 +202,7 @@ pub fn classes_flag_namespaced<MSG>(
 ///
 /// let is_checked = true;
 /// let html: Node<()> =
-///     input(vec![r#type("checkbox")], vec![]).add_attributes(attrs_flag(vec![(
+///     input(vec![r#type("checkbox")], vec![]).with_attributes(attrs_flag(vec![(
 ///                             "checked",
 ///                             "checked",
 ///                             is_checked,

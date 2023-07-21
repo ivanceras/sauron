@@ -117,7 +117,7 @@ impl Application<Msg> for App {
                         ),
                     ],
                 ),
-                div([], []).add_children(self.data.data.iter().map(|user| {
+                div([], []).with_children(self.data.data.iter().map(|user| {
                     ul(
                         [],
                         [

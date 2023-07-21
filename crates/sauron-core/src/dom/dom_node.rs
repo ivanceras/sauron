@@ -120,7 +120,7 @@ where
             vdom::Node::Leaf(leaf_node) => self.create_leaf_node(leaf_node),
             vdom::Node::Element(element_node) => {
                 let created_node = self.create_element_node(element_node);
-                for child in element_node.get_children().iter() {
+                for child in element_node.children().iter() {
                     if child.is_safe_html() {
                         let child_text = child.unwrap_safe_html();
                         // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
@@ -169,7 +169,7 @@ where
         Self::set_element_attributes(
             self,
             &element,
-            &velem.get_attributes().iter().collect::<Vec<_>>(),
+            &velem.attributes().iter().collect::<Vec<_>>(),
         );
 
         element.into()

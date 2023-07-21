@@ -86,7 +86,7 @@ where
     }
 
     fn get_callbacks(&self) -> Vec<&Listener<Event, MSG>> {
-        if let Some(attributes) = self.get_attributes() {
+        if let Some(attributes) = self.attributes() {
             let callbacks = attributes
                 .iter()
                 .flat_map(|att| att.get_callback())

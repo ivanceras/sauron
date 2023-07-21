@@ -161,7 +161,7 @@ impl<MSG> Render for Element<MSG> {
     ) -> fmt::Result {
         write!(buffer, "<{}", self.tag())?;
 
-        let ref_attrs: Vec<&Attribute<MSG>> = self.get_attributes().iter().collect();
+        let ref_attrs: Vec<&Attribute<MSG>> = self.attributes().iter().collect();
         let merged_attributes: Vec<Attribute<MSG>> =
             mt_dom::merge_attributes_of_same_name(&ref_attrs);
 
@@ -180,7 +180,7 @@ impl<MSG> Render for Element<MSG> {
             write!(buffer, ">")?;
         }
 
-        let children = self.get_children();
+        let children = self.children();
         let first_child = children.get(0);
         let is_first_child_text_node = first_child.map(|node| node.is_text()).unwrap_or(false);
 
@@ -193,7 +193,7 @@ impl<MSG> Render for Element<MSG> {
                 .render_with_indent(buffer, indent, compressed)?;
         } else {
             // otherwise print all child nodes with each line and indented
-            for child in self.get_children() {
+            for child in self.children() {
                 self.maybe_indent(buffer, indent + 1, compressed)?;
                 child.render_with_indent(buffer, indent + 1, compressed)?;
             }

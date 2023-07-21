@@ -10,7 +10,7 @@ pub(crate) fn textbox<MSG, V: ToString>(
     v: V,
     attributes: impl IntoIterator<Item = Attribute<MSG>>,
 ) -> Node<MSG> {
-    input([r#type("text"), class("textbox"), value(v.to_string())], []).add_attributes(attributes)
+    input([r#type("text"), class("textbox"), value(v.to_string())], []).with_attributes(attributes)
 }
 
 pub(crate) fn numberbox<MSG, V: ToString>(
@@ -21,7 +21,7 @@ pub(crate) fn numberbox<MSG, V: ToString>(
         [r#type("number"), class("numberbox"), value(v.to_string())],
         [],
     )
-    .add_attributes(attributes)
+    .with_attributes(attributes)
 }
 
 pub(crate) fn text_link<MSG, V: ToString>(
@@ -33,14 +33,14 @@ pub(crate) fn text_link<MSG, V: ToString>(
         [class("linkbox"), href(link.to_string())],
         [text(label.to_string())],
     )
-    .add_attributes(attributes)
+    .with_attributes(attributes)
 }
 
 pub(crate) fn datebox<MSG>(
     v: String,
     attributes: impl IntoIterator<Item = Attribute<MSG>>,
 ) -> Node<MSG> {
-    input([r#type("date"), class("datebox"), value(v)], []).add_attributes(attributes)
+    input([r#type("date"), class("datebox"), value(v)], []).with_attributes(attributes)
 }
 
 /// accepts the checked, container attributes and the actual checkbox attributes
@@ -52,10 +52,10 @@ pub(crate) fn checkbox<MSG>(
     div(
         [class("checkbox")],
         [input([r#type("checkbox")], [])
-            .add_attributes(attrs_flag([("checked", "checked", checked)]))
-            .add_attributes(attributes)],
+            .with_attributes(attrs_flag([("checked", "checked", checked)]))
+            .with_attributes(attributes)],
     )
-    .add_attributes(container_attributes)
+    .with_attributes(container_attributes)
 }
 
 pub(crate) fn selector_box<MSG>(
@@ -73,10 +73,10 @@ pub(crate) fn selector_box<MSG>(
             ],
             [],
         )
-        .add_attributes(attrs_flag([("checked", "checked", checked)]))
-        .add_attributes(attributes)],
+        .with_attributes(attrs_flag([("checked", "checked", checked)]))
+        .with_attributes(attributes)],
     )
-    .add_attributes(container_attributes)
+    .with_attributes(container_attributes)
 }
 
 pub fn search_widget<MSG>(

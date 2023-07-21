@@ -122,13 +122,13 @@ fn test_styles_and_styles_flag() {
 #[test]
 fn classes_test() {
     let html: Node<()> = div(vec![classes(["class1", "class2"])], vec![]);
-    let attrs = html.get_attributes().unwrap();
+    let attrs = html.attributes().unwrap();
     println!("attrs: {:#?}", attrs);
     assert_eq!(attrs.len(), 1);
-    let elm = html.as_element_ref().expect("expecting an element");
+    let elm = html.element_ref().expect("expecting an element");
 
     let classes: &Attribute<()> = elm
-        .get_attributes()
+        .attributes()
         .into_iter()
         .find(|att| att.name() == &"class")
         .unwrap();
@@ -152,13 +152,13 @@ fn should_merge_classes_flag() {
         vec![classes_flag([("class1", true), ("class2", true)])],
         vec![],
     );
-    let attrs = html.get_attributes().unwrap();
+    let attrs = html.attributes().unwrap();
     println!("attrs: {:#?}", attrs);
     assert_eq!(attrs.len(), 1);
-    let elm = html.as_element_ref().expect("expecting an element");
+    let elm = html.element_ref().expect("expecting an element");
 
     let classes: &Attribute<()> = elm
-        .get_attributes()
+        .attributes()
         .into_iter()
         .find(|att| att.name() == &"class")
         .unwrap();

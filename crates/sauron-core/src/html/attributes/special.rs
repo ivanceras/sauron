@@ -19,14 +19,14 @@ pub trait Special {
 
 impl<MSG> Special for Node<MSG> {
     fn get_value<'a>(&'a self, att_name: &'static str) -> Option<&'a Value> {
-        self.get_attribute_value(&att_name)
+        self.attribute_value(&att_name)
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
 }
 
 impl<MSG> Special for Element<MSG> {
     fn get_value<'a>(&'a self, att_name: &'static str) -> Option<&'a Value> {
-        self.get_attribute_value(&att_name)
+        self.attribute_value(&att_name)
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
 }
