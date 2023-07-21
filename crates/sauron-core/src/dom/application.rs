@@ -28,7 +28,12 @@ where
     fn view(&self) -> Node<MSG>;
 
     /// The css style for the application, will be mounted automatically by the program
-    fn style(&self) -> Vec<String>;
+    fn stylesheet() -> Vec<String>;
+
+    /// dynamic style of an application which will be reinjected when the application style changed
+    fn style(&self) -> Vec<String> {
+        vec![]
+    }
 
     /// This is called after dispatching and updating the dom for the component
     /// This is for diagnostic and performance measurement purposes.

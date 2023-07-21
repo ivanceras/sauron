@@ -16,6 +16,8 @@ use wasm_bindgen::closure::Closure;
 use crate::dom::request_idle_callback;
 #[cfg(feature = "with-raf")]
 use crate::dom::request_animation_frame;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash,Hasher};
 
 
 /// Program handle the lifecycle of the APP
@@ -159,13 +161,32 @@ where
         // listening to events (resize, hashchange)
         cmds.into_iter().for_each(|cmd|cmd.emit(self));
 
-        // inject the style style after call the init of the app as
-        // it may be modifying the app state including the style
-        let styles = self.app.borrow().style();
-        if !styles.is_empty() {
-            let type_id = TypeId::of::<APP>();
-            let css_style = styles.join("");
-            self.inject_style(type_id, &css_style);
+        // inject the app's dynamic style after the emitting the init function and it's effects
+        self.inject_dynamic_style();
+    }
+
+    fn app_hash() -> u64{
+        let type_id = TypeId::of::<APP>();
+        let mut hasher = DefaultHasher::new();
+        type_id.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    fn inject_stylesheet(&self){
+        let static_styles = APP::stylesheet();
+        if !static_styles.is_empty() {
+            let static_css = static_styles.join("");
+            let class_names = format!("static {}", Self::app_hash());
+            self.inject_style(class_names, &static_css);
+        }
+    }
+
+    fn inject_dynamic_style(&self){
+        let dynamic_styles = self.app.borrow().style();
+        if !dynamic_styles.is_empty() {
+            let dynamic_css = dynamic_styles.join("");
+            let class_names = format!("dynamic {}", Self::app_hash());
+            self.inject_style(class_names, &dynamic_css);
         }
     }
 
@@ -260,6 +281,7 @@ where
     /// each element and it's descendant in the vdom is created into
     /// an actual DOM node.
     pub fn mount(&self) {
+        self.inject_stylesheet();
         let created_node = self.create_dom_node(
             &self.current_vdom.borrow(),
         );
@@ -667,9 +689,9 @@ where
     }
 
     /// Inject a style to the global document
-    fn inject_style(&self, type_id: TypeId, style: &str) {
+    fn inject_style(&self, class_names: String, style: &str) {
         let style_node = html::tags::style(
-            [class(format!("{type_id:?}"))],
+            [class(class_names)],
             [text(style)],
         );
         let created_node = self.create_dom_node(&style_node);
