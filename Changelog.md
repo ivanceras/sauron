@@ -1,38 +1,47 @@
 # Changelog
 
+## 0.57.0
+ - docs: add warnings on the usage of Fragment
+ - docs: put quote on words that has underscore on it
+ - refactor: migrate to `rstml` since `syn-rsx` is not maintained anymore
+    - also migrate to `syn` `2.0`.
+ - feat: **breaking** change the data type for the old_value and new_value in the attribute_changed function, since everything is a string in the attribute value
+ - feat: include the `custom_tag` in the `web_component` macro
+ - refactor: restructure the declaration of html and svg tag such that the module is wrapping the declaration instead of inside the macro code
+
 ## 0.56.0
-- 9d4a319 fix: changes in `mt-dom` 0.55.0 where the method names are shorter and concise
-- f0936f7 feat: **breaking** add a new static method for Application, and Components: `stylesheet` which returns a static stylesheet, make `style` optional
-- 657577e feat: linking of `define_custom_element` behind `use-snippets` module
-- 0f1958d feat: add an alternative way of making registration of custom element work in sauron using wasm_bindgen and it's limitations
-- 43aa1c0 feat: put the `custom_element` functionality behind `custom_element` feature gate
-- 2d0439d feat: put `regsiter_custom_element` behind a feature gate
-- 8d47b9a refactor: simplify the resize task to not use Rc and RefCell
-- 1619be9 restructure exports and prelude
-- 08e7ebf fix: refine and sanitize the export of modules in sauron
-- f2b7e69 refactor: improve and unify `add_event_listener`
-- 694fee8 fix: remove use of `HtmlMenuItemElement` since it is already deprecated
-- 548c3fb call `update_dom` after calling on the program `connected_callback`
-- e5fc965 refactor: improve the function signature for `attribute_changed`
-- b562898 refactor: **breaking** use snake_case for svg tags and attributes to fit rust conventions
-- 254e1ad fix: use a different generic type to the external in `Effect::localize` function, this way, the user don't have to unzip the Msg
-- b5a9562 fix: remove the use of wee_alloc
-- bd5e4ed refactor: move some `window` functions into `util` module
-- cd5eee9 refactor: remove the use `Closure::forget` in adding event listeners, and store the closures into the Program as `node_closures`
-- 9959084 refactor: put the creating of closure in place rather than calling create_closure_wrap
-- 817921d use `Closure::new` instead of `Closure::wrap` since they have the same effect, only thinner and less complex
-- 94a7bd8 refactor: modularize rif,raf,and timeout into their corresponding modules, now returns the Handle which contains the closure
-- f32069e refactor: rename active_closures to node_closures since it is only storing the closures used in node elements
-- b994456 rename `created_node` to `dom_node` module
-- 8ebb6eb refactor: remove unnecessary wrapper `CreatedNode`
-- b4677fd move `apply_dom_patch` to `dom_patch` module, but still under `Program` implementation
-- 82755d2 append the `active_closures` directly to the `Program` instead of storing it in `CreatedNode`
-- 73a7e07 join styles with blank instead of new_line since the new version of jss has added the necessary lines
-- 9bce93a style now returns `Vec<String>` to make it ergonomic when dealing with Component that has multiple styles
-- 947a451 feature: add a conversion of `Window::on_resize` to , a variant which returns a `Task<MSG>`, instead of `Cmd`
-- 07c3a25 **breaking** change the return type of init in `Application` to `Vec<Cmd>`
-- 5fd178b feature: add utility function to inject style to document head
-- 31749e7 feature: add `Task`
+- fix: changes in `mt-dom` 0.55.0 where the method names are shorter and concise
+- feat: **breaking** add a new static method for Application, and Components: `stylesheet` which returns a static stylesheet, make `style` optional
+- feat: linking of `define_custom_element` behind `use-snippets` module
+- feat: add an alternative way of making registration of custom element work in sauron using wasm_bindgen and it's limitations
+- feat: put the `custom_element` functionality behind `custom_element` feature gate
+- feat: put `regsiter_custom_element` behind a feature gate
+- refactor: simplify the resize task to not use Rc and RefCell
+- restructure exports and prelude
+- fix: refine and sanitize the export of modules in sauron
+- refactor: improve and unify `add_event_listener`
+- fix: remove use of `HtmlMenuItemElement` since it is already deprecated
+- call `update_dom` after calling on the program `connected_callback`
+- refactor: improve the function signature for `attribute_changed`
+- refactor: **breaking** use snake_case for svg tags and attributes to fit rust conventions
+- fix: use a different generic type to the external in `Effect::localize` function, this way, the user don't have to unzip the Msg
+- fix: remove the use of wee_alloc
+- refactor: move some `window` functions into `util` module
+- refactor: remove the use `Closure::forget` in adding event listeners, and store the closures into the Program as `node_closures`
+- refactor: put the creating of closure in place rather than calling create_closure_wrap
+- use `Closure::new` instead of `Closure::wrap` since they have the same effect, only thinner and less complex
+- refactor: modularize rif,raf,and timeout into their corresponding modules, now returns the Handle which contains the closure
+- refactor: rename active_closures to node_closures since it is only storing the closures used in node elements
+- rename `created_node` to `dom_node` module
+- refactor: remove unnecessary wrapper `CreatedNode`
+- move `apply_dom_patch` to `dom_patch` module, but still under `Program` implementation
+- append the `active_closures` directly to the `Program` instead of storing it in `CreatedNode`
+- join styles with blank instead of new_line since the new version of jss has added the necessary lines
+- style now returns `Vec<String>` to make it ergonomic when dealing with Component that has multiple styles
+- feature: add a conversion of `Window::on_resize` to , a variant which returns a `Task<MSG>`, instead of `Cmd`
+- **breaking** change the return type of init in `Application` to `Vec<Cmd>`
+- feature: add utility function to inject style to document head
+- feature: add `Task`
 
 ## 0.55.1
 - fix: call `dispatch_mount_event` to other patching variants, other than just the `Append` variant

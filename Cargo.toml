@@ -1,6 +1,6 @@
 [package]
 name = "sauron"
-version = "0.56.0"
+version = "0.57.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "A versatile web framework and library for building client-side and/or server-side web applications"
@@ -14,8 +14,8 @@ edition = "2021"
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-sauron-core = { version = "0.56", path = "crates/sauron-core", default-features = false }
-sauron-macro = { version = "0.56", path = "crates/sauron-macro", optional = true }
+sauron-core = { version = "0.57", path = "crates/sauron-core", default-features = false }
+sauron-macro = { version = "0.57", path = "crates/sauron-macro", optional = true }
 cfg-if = "0.1"
 
 [features]
