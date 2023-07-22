@@ -1,10 +1,11 @@
 use once_cell::sync::Lazy;
 use sauron_core::{
     html::tags::{
-        commons::HTML_TAGS, HTML_SC_TAGS, HTML_TAGS_NON_COMMON, HTML_TAGS_WITH_MACRO_NON_COMMON,
+        commons::HTML_TAGS, self_closing::HTML_SC_TAGS, HTML_TAGS_NON_COMMON,
+        HTML_TAGS_WITH_MACRO_NON_COMMON,
     },
     svg::{
-        tags::{special::SVG_TAGS_SPECIAL, SVG_TAGS, SVG_TAGS_NON_COMMON},
+        tags::{commons::SVG_TAGS, special::SVG_TAGS_SPECIAL, SVG_TAGS_NON_COMMON},
         SVG_NAMESPACE,
     },
 };

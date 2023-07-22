@@ -31,23 +31,20 @@ macro_rules! declare_sc_tags {
        )*
      ) => {
 
-        /// self closing tags
-        pub(crate) mod self_closing{
-            $(
-                doc_comment!{
-                    concat!("Creates an html [",stringify!($name),"](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/",stringify!($name),") element"),
+        $(
+            doc_comment!{
+                concat!("Creates an html [",stringify!($name),"](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/",stringify!($name),") element"),
 
-                $(#[$attr])*
-                #[inline]
-                #[allow(non_snake_case)]
-                pub fn $name<MSG>(attrs: impl IntoIterator<Item = $crate::vdom::Attribute<MSG>>, children: impl IntoIterator<Item = $crate::vdom::Node<MSG>>) -> $crate::vdom::Node<MSG>
-                    {
-                        $crate::html::html_element(None, stringify!($name), attrs, children, true)
-                    }
+            $(#[$attr])*
+            #[inline]
+            #[allow(non_snake_case)]
+            pub fn $name<MSG>(attrs: impl IntoIterator<Item = $crate::vdom::Attribute<MSG>>, children: impl IntoIterator<Item = $crate::vdom::Node<MSG>>) -> $crate::vdom::Node<MSG>
+                {
+                    $crate::html::html_element(None, stringify!($name), attrs, children, true)
                 }
+            }
 
-             )*
-        }
+         )*
 
         #[cfg(feature = "with-lookup")]
         /// These are the self closing tags such as `<input/>`, `<br/>`,
@@ -221,22 +218,25 @@ declare_tags_and_macro_non_common! {
     data;  // data for local variable is commonly used everywhere
 }
 
-// self closing tags such as `<input/>, `<br/>`
-declare_sc_tags! {
-    area;
-    base;
-    br;
-    col;
-    command;
-    embed;
-    hr;
-    img;
-    input;
-    keygen;
-    link;
-    meta;
-    param;
-    source;
-    track;
-    wbr;
+/// self closing tags
+pub mod self_closing {
+    // self closing tags such as `<input/>, `<br/>`
+    declare_sc_tags! {
+        area;
+        base;
+        br;
+        col;
+        command;
+        embed;
+        hr;
+        img;
+        input;
+        keygen;
+        link;
+        meta;
+        param;
+        source;
+        track;
+        wbr;
+    }
 }

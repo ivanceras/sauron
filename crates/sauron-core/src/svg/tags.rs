@@ -48,11 +48,7 @@ macro_rules! declare_svg_tags{
 macro_rules! declare_common_svg_tags_and_macro {
     ($($(#[$attr:meta])* $name:ident;)*) => {
 
-        /// commonly used svg tags
-        pub mod commons {
-            declare_svg_tags! { $($name;)* }
-        }
-
+        declare_svg_tags! { $($name;)* }
 
         #[cfg(feature = "with-lookup")]
         /// These are the commonly used svg tags such as rect, circle, path, arc, ..etc.
@@ -95,42 +91,45 @@ macro_rules! declare_svg_tags_non_common{
     }
 }
 
-declare_common_svg_tags_and_macro! {
-    animate;
-    circle;
-    clipPath;
-    defs;
-    desc;
-    discard;
-    ellipse;
-    filter;
-    g;
-    hatch;
-    hatchpath;
-    image;
-    line;
-    marker;
-    mask;
-    mesh;
-    meshgradient;
-    meshpatch;
-    meshrow;
-    metadata;
-    mpath;
-    path;
-    pattern;
-    polygon;
-    polyline;
-    rect;
-    set;
-    solidcolor;
-    stop;
-    svg;
-    switch;
-    symbol;
-    tspan;
-    unknown;
-    view;
+/// commonly used svg tags
+pub mod commons {
+    declare_common_svg_tags_and_macro! {
+        animate;
+        circle;
+        clipPath;
+        defs;
+        desc;
+        discard;
+        ellipse;
+        filter;
+        g;
+        hatch;
+        hatchpath;
+        image;
+        line;
+        marker;
+        mask;
+        mesh;
+        meshgradient;
+        meshpatch;
+        meshrow;
+        metadata;
+        mpath;
+        path;
+        pattern;
+        polygon;
+        polyline;
+        rect;
+        set;
+        solidcolor;
+        stop;
+        svg;
+        switch;
+        symbol;
+        tspan;
+        unknown;
+        view;
+    }
 }
 
 /// special svg tags
