@@ -27,7 +27,6 @@ thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: js_sys::Function = create
 #[cfg(not(feature = "use-snippets"))]
 pub fn register_custom_element(custom_tag: &str, adapter: &str) {
     REGISTER_CUSTOM_ELEMENT_FUNCTION.with(|func| {
-        log::debug!("register_custom_element_function: {}", func.to_string());
         func.call2(
             &JsValue::NULL,
             &JsValue::from_str(custom_tag),
@@ -100,8 +99,8 @@ pub trait CustomElement<MSG> {
     fn attribute_changed(
         program: &Program<Self, MSG>,
         attr_name: &str,
-        old_value: JsValue,
-        new_value: JsValue,
+        old_value: Option<String>,
+        new_value: Option<String>,
     ) where
         Self: Sized + Application<MSG>;
 
@@ -214,6 +213,8 @@ where
 
     /// When the attribute of the component is changed, this method will be called
     pub fn attribute_changed(&self, attr_name: &str, old_value: JsValue, new_value: JsValue) {
+        let old_value = old_value.as_string();
+        let new_value = new_value.as_string();
         APP::attribute_changed(&self.program, attr_name, old_value, new_value);
     }
 

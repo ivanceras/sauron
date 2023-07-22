@@ -10,6 +10,7 @@ pub enum Msg {
     DateChange(String),
     TimeChange(String),
     TimeOrDateModified(String),
+    IntervalChange(f64),
     Mounted(MountEvent),
     BtnClick,
 }
@@ -119,6 +120,10 @@ where
                 self.cnt += 1;
                 Effects::none()
             }
+            Msg::IntervalChange(interval) => {
+                log::trace!("There is an interval: {}", interval);
+                Effects::none()
+            }
         }
     }
 
@@ -180,25 +185,38 @@ where
     XMSG: 'static,
 {
     fn observed_attributes() -> Vec<&'static str> {
-        vec!["date", "time"]
+        vec!["date", "time", "interval"]
     }
 
     /// this is called when the attributes in the mount is changed
     fn attribute_changed(
         program: &Program<Self, Msg>,
         attr_name: &str,
-        old_value: JsValue,
-        new_value: JsValue,
+        old_value: Option<String>,
+        new_value: Option<String>,
     ) where
         Self: Sized + Application<Msg>,
     {
         log::info!("old_value: {:?}", old_value);
-        if let Some(new_value) = new_value.as_string() {
-            match &*attr_name {
-                "time" => program.dispatch(Msg::TimeChange(new_value)),
-                "date" => program.dispatch(Msg::DateChange(new_value)),
-                _ => log::warn!("unknown attr_name: {attr_name:?}"),
+        log::info!("new_value: {new_value:?}");
+        match &*attr_name {
+            "time" => {
+                if let Some(new_value) = new_value {
+                    program.dispatch(Msg::TimeChange(new_value))
+                }
             }
+            "date" => {
+                if let Some(new_value) = new_value {
+                    program.dispatch(Msg::DateChange(new_value))
+                }
+            }
+            "interval" => {
+                if let Some(new_value) = new_value {
+                    let new_value: f64 = str::parse(&new_value).expect("must parse to f64");
+                    program.dispatch(Msg::IntervalChange(new_value))
+                }
+            }
+            _ => log::warn!("unknown attr_name: {attr_name:?}"),
         }
     }
 

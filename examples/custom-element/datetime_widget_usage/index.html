@@ -21,6 +21,7 @@
         function dateTimeClicked(e){
             console.log("date time is clicked",e);
             document.getElementById("date1").setAttribute("time", "11:11");
+            document.getElementById("date1").removeAttribute("interval");
         }
 
         window.dateTimeChange = dateTimeChange;
@@ -30,7 +31,7 @@
     </script>
 
     <h1>Using it in plain html</h1>
-    <date-time id="date1" date="2022-02-22" time="22:22"></date-time>
+    <date-time id="date1" date="2022-02-22" time="22:22" interval="1000"></date-time>
     <button onclick="dateTimeClicked()">Some button</button>
   </body>
 </html>
