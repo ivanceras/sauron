@@ -1,6 +1,5 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use quote::TokenStreamExt;
 use rstml::node::{KeyedAttributeValue, Node, NodeAttribute, NodeBlock};
 use syn::{Expr, ExprForLoop, Stmt};
 
@@ -120,8 +119,10 @@ fn nodes_to_tokens(nodes: Vec<Node>) -> TokenStream {
 fn node_attributes(attributes: Vec<NodeAttribute>) -> TokenStream {
     let mut tokens = TokenStream::new();
     for attr in attributes {
-        tokens.extend(attribute_to_tokens(attr));
-        tokens.append(proc_macro2::Punct::new(',', proc_macro2::Spacing::Alone));
+        let attr_token = attribute_to_tokens(attr);
+        tokens.extend(quote! {
+            #attr_token,
+        });
     }
     tokens
 }
@@ -130,7 +131,8 @@ fn attribute_to_tokens(attribute: NodeAttribute) -> TokenStream {
     match attribute {
         NodeAttribute::Block(block) => {
             quote! {
-                sauron::Attribute::from(#block)
+                #[allow(unused_braces)]
+                #block
             }
         }
         NodeAttribute::Attribute(attribute) => {
@@ -152,6 +154,7 @@ fn attribute_to_tokens(attribute: NodeAttribute) -> TokenStream {
                         }
                     } else {
                         quote! {
+                            #[allow(unused_braces)]
                             sauron::html::attributes::attr(#attr, #value)
                         }
                     }
