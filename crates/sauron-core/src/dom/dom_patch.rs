@@ -219,7 +219,9 @@ where
                 let first_node = replacement.pop().expect("must have a first node");
                 target_element
                     .replace_with_with_node_1(&first_node)
-                    .expect("must replace node");
+                    .unwrap_or_else(|e| {
+                        panic!("unable to replace node with {first_node:?}, {e:?}");
+                    });
 
                 Self::dispatch_mount_event(&first_node);
 

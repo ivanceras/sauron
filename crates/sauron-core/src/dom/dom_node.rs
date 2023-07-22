@@ -102,8 +102,7 @@ where
                 );
             }
             Leaf::Fragment(nodes) => {
-                let document = document();
-                let doc_fragment = document.create_document_fragment();
+                let doc_fragment = document().create_document_fragment();
                 for vnode in nodes {
                     let created_node = self.create_dom_node(vnode);
                     Self::append_child_and_dispatch_mount_event(&doc_fragment, &created_node)

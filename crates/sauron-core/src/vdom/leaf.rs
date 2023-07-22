@@ -11,6 +11,7 @@ pub enum Leaf<MSG> {
     /// A comment node
     Comment(String),
     /// a vec of nodes
+    /// Warning: Nodes inside fragments are not diff in mt-dom, use with caution
     Fragment(Vec<Node<MSG>>),
     /// doctype: html, math, svg
     /// <https://www.w3.org/QA/2002/04/valid-dtd-list.html>
