@@ -166,8 +166,8 @@ impl Model {
                 <input
                         class="toggle-all"
                         type="checkbox"
-                        checked={self.is_all_completed()}
-                        on_click={|_| Msg::ToggleAll}
+                        checked=self.is_all_completed()
+                        on_click=|_| Msg::ToggleAll
                 />
                 <ul class="todo-list">
                     {for entry in entries{
@@ -186,10 +186,10 @@ impl Model {
                     } else {
                         "not-selected"
                     }}
-                    href={visibility.to_uri()}
-                    on_click={move |_| {
+                    href=visibility.to_uri()
+                    on_click=move |_| {
                         Msg::ChangeVisibility(visibility)
-                    }}>
+                    }>
                     {text(visibility.to_string())}
                 </a>
             </li>
@@ -205,17 +205,17 @@ impl Model {
                         id="new-todo"
                         placeholder="What needs to be done?"
                         autofocus=true
-                        value={self.value.to_string()}
-                        on_input={|v: InputEvent| {
+                        value=self.value.to_string()
+                        on_input=|v: InputEvent| {
                             Msg::Update(v.value)
-                        }}
-                        on_keypress={|event: KeyboardEvent| {
+                        }
+                        on_keypress=|event: KeyboardEvent| {
                             if event.key() == "Enter" {
                                 Msg::Add
                             } else {
                                 Msg::NoOp
                             }
-                        }}
+                        }
                 />
             </header>
         }
@@ -232,37 +232,37 @@ impl Model {
         let entry_id = entry.id;
 
         node! {
-            <li class={class_name} key={format!("todo-{}", entry.id)}>
+            <li class=class_name key=format!("todo-{}", entry.id)>
                   <div class="view">
                        <input class="toggle"
                            type="checkbox"
-                           checked={entry.completed}
-                           on_click={move |_| Msg::Toggle(entry_id)}
+                           checked=entry.completed
+                           on_click=move |_| Msg::Toggle(entry_id)
                        />
-                       <label on_doubleclick={move |_| {
+                       <label on_doubleclick=move |_| {
                                Msg::ToggleEdit(entry_id)
-                           }}>
+                           }>
                            {text(entry.description.to_string())}
                        </label>
                        <button class="destroy"
-                             on_click={move |_| Msg::Delete(entry_id)}>
+                             on_click=move |_| Msg::Delete(entry_id)>
                        </button>
                     </div>
                     <input class="edit"
                         type="text"
-                        hidden={!entry.editing}
-                        value={&entry.description}
-                        on_input={move |input: InputEvent| {
+                        hidden=!entry.editing
+                        value=&entry.description
+                        on_input=move |input: InputEvent| {
                             Msg::UpdateEntry(entry_id, input.value)
-                        }}
-                        on_blur={move |_| Msg::EditingEntry(entry_id, false)}
-                        on_keypress={move |event: KeyboardEvent| {
+                        }
+                        on_blur=move |_| Msg::EditingEntry(entry_id, false)
+                        on_keypress=move |event: KeyboardEvent| {
                             if event.key_code() == 13 {
                                 Msg::EditingEntry(entry_id, false)
                             } else {
                                 Msg::NoOp
                             }
-                        }}
+                        }
                     />
             </li>
         }
@@ -286,8 +286,8 @@ impl Model {
                         {self.view_filter(Visibility::Completed)}
                     </ul>
                     <button class="clear-completed"
-                            hidden={entries_completed == 0}
-                            on_click={|_| Msg::ClearCompleted}>
+                            hidden=entries_completed == 0
+                            on_click=|_| Msg::ClearCompleted>
                         {text(format!(
                             "Clear completed ({})",
                             entries_completed

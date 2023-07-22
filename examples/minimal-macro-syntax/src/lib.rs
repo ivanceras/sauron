@@ -29,13 +29,13 @@ impl Application<Msg> for App {
                             type="button"
                             value="Click me!"
                             key=1
-                            on_click={|_| {
+                            on_click=|_| {
                                 log::trace!("Button is clicked");
                                 Msg::Click
-                            }}
+                            }
                     />
                     <div>{text(format!("Clicked: {}", self.click_count))}</div>
-                    <input type="text" value={self.click_count}/>
+                    <input type="text" value=self.click_count/>
                 </div>
             </main>
         }

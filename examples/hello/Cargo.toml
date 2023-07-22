@@ -8,3 +8,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 sauron = { path = "../../" }
+log = "0.4"
+console_log = "1.0"

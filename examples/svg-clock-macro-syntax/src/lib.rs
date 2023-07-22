@@ -67,15 +67,15 @@ impl Application<Msg> for Clock {
                     <line
                             x1="100"
                             y1="100"
-                            x2={100 - height}
+                            x2=100 - height
                             y2="100"
-                            stroke={stroke_color}
-                            stroke-width={stroke_width_value}
+                            stroke=stroke_color
+                            stroke-width=stroke_width_value
                             stroke-linecap="round"
-                            transform={format!(
+                            transform=format!(
                                 "rotate({} 100 100)",
                                 (rotate * 10.0).round() / 10.0
-                            )}
+                            )
                     />
                 }
             };
