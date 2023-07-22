@@ -188,7 +188,7 @@
     - [X] some fields in `Program`
     - [X] struct types that are not meant to be public
 - [X] Use the deadline object in `request_idle_callback_with_deadline`, instead of just `f64`, which calculates the remaining time manually
-- [ ] Migrate to rshtml, since syn-rsx is unmaintained.
+- [X] Migrate to rstml, since syn-rsx is unmaintained.
 - [X] Remove `Dispatch` and just pass `Program` around
 - [X] Make an alternative to `Effects` and `Cmd` that can be used in `Component`.
     - call it `Task` a wrapper to a future, will resolve into MSG which will then be dispatched into the program
