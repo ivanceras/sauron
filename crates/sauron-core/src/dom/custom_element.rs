@@ -222,8 +222,10 @@ where
     pub fn connected_callback(&mut self) {
         self.program.mount();
         self.program.app.borrow_mut().connected_callback();
-        let component_style = <APP as Application<MSG>>::stylesheet().join("");
-        self.program.inject_style_to_mount(&component_style);
+        let static_style = <APP as Application<MSG>>::stylesheet().join("");
+        self.program.inject_style_to_mount(&static_style);
+        let dynamic_style = <APP as Application<MSG>>::style(&self.program.app.borrow()).join("");
+        self.program.inject_style_to_mount(&dynamic_style);
         self.program.update_dom().expect("must update dom");
     }
 
