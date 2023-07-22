@@ -124,7 +124,7 @@
 - [ ] Make each component have a reference to the root dom where it is mounted.
     - This will make local state changes to the component easier to do, as opposed to diffing the whole DOM tree.
 - [X] Unify the code of Program replace_mount, append_mount
-- ~~[ ] replace the request_animation_frame with the code from execute_request_animation frame~~
+- ~~[ ] replace the request_animation_frame with the code from `execute_request_animation` frame~~
 - [ ] Create a function to derive Component name from the struct name of the Component
     and preprocess the jss with it before injecting it to the main program
 - [X] Clean up `CreateNode`
@@ -133,7 +133,7 @@
         - Cmd{ commands:Vec<..>,should_update }
         - Cmd::noop() // no update operation
         - Fixed in `0.36.0`
-- [X] Remove the Dispatch trait and pass Program as it is in dom_updater and apply_patches module
+- [X] Remove the Dispatch trait and pass Program as it is in `dom_updater` and `apply_patches` module
     - There is only one implementation of `Dispatch` trait anyway, that is `Program`
     - Dispatch serve its purpose to make the code less clutter, by passing arguments around with less generics.
 - [X] ISSUE: sauron `node!` macro doesn't work on svg tags since it is using only `html_element` function which `namespace` is not supplied.
@@ -161,7 +161,7 @@
     - This issue manifested in `performance-test-sauron` repo
     - Suspecting it has to do with `mount_node` and `root_node` as replace and append could have a different behavior in the 2.
     - Solved by: using mutable reference to the `root_node` rather than a mutable reference to a clond one.
-- [X] Rethink about the replace_mount in Program
+- [X] Rethink about the `replace_mount` in Program
     - It is useful for replacing the preload spinner when the application is finished loading
     - [X] Have an enum for mount action
         ```rust
@@ -174,7 +174,7 @@
                 Replace
             }
         ```
-    - [X] Mount event should have a reference to the host_node and the root_node
+    - [X] Mount event should have a reference to the `host_node` and the `root_node`
             - host_node is the node where the view is mounted, usually the parent
             - in case of replace host_node is the same as the root_node.
 - [X] Maybe we don't need the `async` in update.
@@ -183,7 +183,7 @@
 - [X] BUG: if the `dispatch_inner` is not called in a callback which is `request_animation_frame` or `request_idle_callback`
     - This will cause the `dispatch_mount` event to dispatch before the `root_node` is set in the program when the program is to be mounted
     - Note the `dispatch_mount` is triggered when the view has `on_mount` event.
-    - [X] mitigation: make the dispatch_inner spawn in a thead either via callback, or `spawn_local` from `wasm_bindgen_futures`.
+    - [X] mitigation: make the `dispatch_inner` spawn in a thead either via callback, or `spawn_local` from `wasm_bindgen_futures`.
 - [X] Tighten visibility of objects that are not meant to be `pub`
     - [X] some fields in `Program`
     - [X] struct types that are not meant to be public
@@ -208,8 +208,8 @@
         Program::add_event_listener(&self, target_element: EventTarget, event_listeners).
     ```
 - [X] Make the svg attributes follow `snake_case` convention
-    - viewBox -> view_box
-    - preserveAspectRatio -> preserve_aspect_ratio
+    - `viewBox` -> `view_box`
+    - `preserveAspectRatio` -> `preserve_aspect_ratio`
 - [X] As an alternative to Task where `Component` can not use `Cmd`, due to it referencing Program,
     we can instead return listeners.
     - window listeners
