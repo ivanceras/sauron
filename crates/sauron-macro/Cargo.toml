@@ -11,8 +11,8 @@ keywords = ["html", "dom", "web"]
 edition = "2021"
 
 [dependencies]
-syn = { version = "1", features = ["full"] }
-syn-rsx = { version = "0.8" }
+syn = { version = "2", features = ["full"] }
+rstml = { version = "0.11" }
 quote = {package = "quote", version = "1.0.3"}
 proc-macro2 = { version = "1" }
 once_cell = "1.8"
