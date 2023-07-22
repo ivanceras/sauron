@@ -32,7 +32,7 @@ pub fn to_token_stream(
     let custom_element_name = format!("{struct_name}__CustomElement");
     let widget_wrapper = quote::format_ident!("{custom_element_name}");
     let simplified_type = quote::format_ident!("{struct_name}__Simple");
-    let custom_tag = format!("{}", attr_parsed.value());
+    let custom_tag = attr_parsed.value();
 
     let expanded = quote::quote! {
         type #simplified_type = #self_type<()>;
