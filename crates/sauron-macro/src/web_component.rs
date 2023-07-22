@@ -1,5 +1,9 @@
-pub fn to_token_stream(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn to_token_stream(
+    attr: proc_macro::TokenStream,
+    input: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
     let mut tokens = proc_macro::TokenStream::new();
+    let attr_parsed = syn::parse_macro_input!(attr as syn::LitStr);
     let input_clone = input.clone();
     let result = syn::parse_macro_input!(input_clone as syn::ItemImpl);
     assert!(result.trait_.is_some(), "must be a trait");
@@ -28,6 +32,7 @@ pub fn to_token_stream(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     let custom_element_name = format!("{struct_name}__CustomElement");
     let widget_wrapper = quote::format_ident!("{custom_element_name}");
     let simplified_type = quote::format_ident!("{struct_name}__Simple");
+    let custom_tag = format!("{}", attr_parsed.value());
 
     let expanded = quote::quote! {
         type #simplified_type = #self_type<()>;
@@ -82,7 +87,7 @@ pub fn to_token_stream(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
             }
 
             pub fn register() {
-                register_custom_element(#simplified_type::custom_tag(), Self::struct_name());
+                register_custom_element(#custom_tag, Self::struct_name());
             }
         }
 

@@ -174,15 +174,11 @@ where
     }
 }
 
-#[sauron::web_component]
+#[sauron::web_component("date-time")]
 impl<XMSG> sauron::CustomElement<Msg> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
-    fn custom_tag() -> &'static str {
-        "date-time"
-    }
-
     fn observed_attributes() -> Vec<&'static str> {
         vec!["date", "time"]
     }
@@ -226,11 +222,5 @@ pub fn date_time<MSG>(
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG> {
     register();
-    html_element(
-        None,
-        DateTimeWidget::<()>::custom_tag(),
-        attrs,
-        children,
-        true,
-    )
+    html_element(None, "date-time", attrs, children, true)
 }

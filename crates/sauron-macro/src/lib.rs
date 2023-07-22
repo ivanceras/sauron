@@ -187,8 +187,8 @@ pub fn node(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// use this in each module, multiple web_components should be in different modules
 #[proc_macro_attribute]
 pub fn web_component(
-    _attr: proc_macro::TokenStream,
+    attr: proc_macro::TokenStream,
     input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
-    web_component::to_token_stream(input)
+    web_component::to_token_stream(attr, input)
 }

@@ -89,9 +89,6 @@ fn create_register_custom_element_function() -> js_sys::Function {
 
 /// a trait for implementing CustomElement in the DOM with custom tag
 pub trait CustomElement<MSG> {
-    /// the custom tag that this custom element will be registerd to the browser
-    fn custom_tag() -> &'static str;
-
     /// returns the attributes that is observed by this component
     /// These are the names of the attributes the component is interested in
     fn observed_attributes() -> Vec<&'static str>;
