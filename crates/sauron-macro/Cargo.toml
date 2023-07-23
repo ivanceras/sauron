@@ -1,6 +1,6 @@
 [package]
 name = "sauron-macro"
-version = "0.57.0"
+version = "0.57.1"
 authors = ["John-John Tedro <udoprog@tedro.se>", "Jovansonlee Cesar <ivanceras@gmail.com>"]
 license = "MIT"
 description = "An html library for building client side webapps"
@@ -16,7 +16,7 @@ rstml = { version = "0.11" }
 quote = {package = "quote", version = "1.0.31"}
 proc-macro2 = { version = "1" }
 once_cell = "1.8"
-sauron-core = {version = "0.57.0", path = "../sauron-core", features = ["with-lookup"] }
+sauron-core = {version = "0.57.1", path = "../sauron-core", features = ["with-lookup"] }
 
 [dev-dependencies]
 sauron = { path = "../../"}
