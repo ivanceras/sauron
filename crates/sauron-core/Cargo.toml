@@ -17,7 +17,7 @@ maintenance = { status = "actively-developed" }
 js-sys = { version = "0.3", optional = true }
 wasm-bindgen-futures = { version = "0.4.31", optional = true}
 log = "0.4"
-cfg-if = "0.1"
+cfg-if = "1.0"
 thiserror = "1.0"
 doc-comment = "0.3"
 mt-dom = { version = "0.55.1" }
@@ -120,8 +120,8 @@ use-snippets = [] # link and export the define_custom_element.js into `pkg/snipp
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
-console_error_panic_hook = "0.1"
-console_log = "0.2"
+console_error_panic_hook = "0.1.7"
+console_log = "1.0"
 sauron = { path = "../../" }
 
 [dev-dependencies.web-sys]
@@ -137,7 +137,7 @@ features = [
 ]
 
 [dev-dependencies.criterion]
-version = "0.3"
+version = "0.5.1"
 
 [[bench]]
 name = "nodes_benchmark"

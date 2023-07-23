@@ -16,7 +16,6 @@ maintenance = { status = "actively-developed" }
 [dependencies]
 sauron-core = { version = "0.57", path = "crates/sauron-core", default-features = false }
 sauron-macro = { version = "0.57", path = "crates/sauron-macro", optional = true }
-cfg-if = "0.1"
 
 [features]
 default = ["with-dom", "with-node-macro", "with-webcomponent-macro", "with-interning"]
@@ -38,13 +37,12 @@ custom_element = ["sauron-core/custom_element"]
 
 
 [dev-dependencies]
-console_error_panic_hook = "0.1"
-console_log = "0.2"
+console_error_panic_hook = "0.1.7"
+console_log = "1.0"
 log = "0.4"
 wasm-bindgen-test = "0.3"
 wasm-bindgen-futures = "0.4.31"
 regex = "1"
-async-trait = "0.1.58"
 
 [dev-dependencies.web-sys]
 version = "0.3"
