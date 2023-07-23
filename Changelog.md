@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.57.1
+- update dependencies
+
 ## 0.57.0
  - docs: add warnings on the usage of Fragment
  - docs: put quote on words that has underscore on it
