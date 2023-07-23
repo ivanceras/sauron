@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.57.2
+- allow users to surround braces on closure in html events. ie: `on_click={|_|..}`
+
 ## 0.57.1
 - update dependencies
 
