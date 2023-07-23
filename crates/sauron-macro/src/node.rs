@@ -88,6 +88,7 @@ fn single_node(node: Node) -> TokenStream {
                         {
                             let mut receiver = vec![];
                             for #pat in #expr {
+                                #[allow(unused_braces)]
                                 receiver.push(#body)
                             }
                             sauron::html::node_list(receiver)
@@ -150,6 +151,7 @@ fn attribute_to_tokens(attribute: NodeAttribute) -> TokenStream {
                     if is_event {
                         let event = quote::format_ident!("{attr}");
                         quote! {
+                            #[allow(unused_braces)]
                             sauron::html::events::#event(#value)
                         }
                     } else {
