@@ -1,3 +1,4 @@
+use crate::dom::dom_node::find_all_nodes;
 use crate::dom::dom_node::find_node;
 use crate::dom::dom_node::intern;
 use crate::dom::{Application, Program};
@@ -73,6 +74,45 @@ where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
+    /// get the real DOM target node and make a DomPatch object for each of the Patch
+    pub(crate) fn convert_patches(
+        &self,
+        patches: &[Patch<MSG>],
+    ) -> Result<Vec<DomPatch<MSG>>, JsValue> {
+        let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
+            .iter()
+            .map(|patch| (patch.path(), patch.tag()))
+            .collect();
+
+        let nodes_to_patch = find_all_nodes(
+            self.root_node
+                .borrow()
+                .as_ref()
+                .expect("must have a root node"),
+            &nodes_to_find,
+        );
+
+        let dom_patches:Vec<DomPatch<MSG>> = patches.iter().map(|patch|{
+            let patch_path = patch.path();
+            let patch_tag = patch.tag();
+            if let Some(target_node) = nodes_to_patch.get(patch_path) {
+                let target_element: &Element = target_node.unchecked_ref();
+                if let Some(tag) = patch_tag {
+                    let target_tag = target_element.tag_name().to_lowercase();
+                    if target_tag != **tag {
+                        panic!(
+                            "expecting a tag: {tag:?}, but found: {target_tag:?}"
+                        );
+                    }
+                }
+                self.convert_patch(target_element, patch)
+            } else {
+                unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
+            }
+        }).collect();
+
+        Ok(dom_patches)
+    }
     /// convert a virtual DOM Patch into a created DOM node Patch
     pub fn convert_patch(&self, target_element: &Element, patch: &Patch<MSG>) -> DomPatch<MSG> {
         let target_element = target_element.clone();

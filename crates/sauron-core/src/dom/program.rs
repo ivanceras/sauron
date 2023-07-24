@@ -1,11 +1,8 @@
 use crate::dom::{document, now, Measurements};
 use crate::vdom;
 use crate::vdom::diff;
-use crate::vdom::Patch;
 use crate::dom::{Application, Cmd, util::body, DomPatch, IdleCallbackHandle, AnimationFrameHandle};
-use crate::dom::dom_node::find_all_nodes;
 use crate::html::{self, text,attributes::class};
-use mt_dom::TreePath;
 use std::collections::VecDeque;
 use std::{any::TypeId, cell::RefCell, rc::Rc};
 use wasm_bindgen::{JsCast, JsValue};
@@ -448,42 +445,6 @@ where
         *self.current_vdom.borrow_mut() = new_vdom;
     }
 
-    /// get the real DOM target node and make a DomPatch object for each of the Patch
-    fn convert_patches(&self, patches: &[Patch<MSG>]) -> Result<Vec<DomPatch<MSG>>, JsValue> {
-        let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
-            .iter()
-            .map(|patch| (patch.path(), patch.tag()))
-            .collect();
-
-        let nodes_to_patch = find_all_nodes(
-            self.root_node
-                .borrow()
-                .as_ref()
-                .expect("must have a root node"),
-            &nodes_to_find,
-        );
-
-        let dom_patches:Vec<DomPatch<MSG>> = patches.iter().map(|patch|{
-            let patch_path = patch.path();
-            let patch_tag = patch.tag();
-            if let Some(target_node) = nodes_to_patch.get(patch_path) {
-                let target_element: &Element = target_node.unchecked_ref();
-                if let Some(tag) = patch_tag {
-                    let target_tag = target_element.tag_name().to_lowercase();
-                    if target_tag != **tag {
-                        panic!(
-                            "expecting a tag: {tag:?}, but found: {target_tag:?}"
-                        );
-                    }
-                }
-                self.convert_patch(target_element, patch)
-            } else {
-                unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
-            }
-        }).collect();
-
-        Ok(dom_patches)
-    }
 
     /// apply pending patches using raf
     /// if raf is not available, use ric
