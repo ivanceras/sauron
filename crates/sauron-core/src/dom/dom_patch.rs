@@ -59,12 +59,12 @@ pub enum PatchVariant<MSG> {
     /// Move the target node before the node specified in the path location
     MoveBeforeNode {
         /// before the node at this location
-        node: Node,
+        for_moving: Vec<Node>,
     },
     /// Move the target node after the node specified in the path location
     MoveAfterNode {
         /// after the node at this location
-        node: Node,
+        for_moving: Vec<Node>,
     },
 }
 
@@ -139,36 +139,50 @@ where
                 target_element,
                 patch_variant: PatchVariant::RemoveNode,
             },
-            PatchType::MoveBeforeNode { path } => {
-                let mut path = path.clone();
-                let node = find_node(
-                    self.root_node
-                        .borrow()
-                        .as_ref()
-                        .expect("must have a root node"),
-                    &mut path,
-                )
-                .expect("must find the node");
+            PatchType::MoveBeforeNode { nodes_path } => {
+                //TODO: include this in find_all_nodes
+                let for_moving: Vec<Node> = nodes_path
+                    .iter()
+                    .map(|path| {
+                        let mut path = path.clone();
+                        let node = find_node(
+                            self.root_node
+                                .borrow()
+                                .as_ref()
+                                .expect("must have a root node"),
+                            &mut path,
+                        )
+                        .expect("must find the node");
+                        node
+                    })
+                    .collect();
                 DomPatch {
                     patch_path,
                     target_element,
-                    patch_variant: PatchVariant::MoveBeforeNode { node },
+                    patch_variant: PatchVariant::MoveBeforeNode { for_moving },
                 }
             }
-            PatchType::MoveAfterNode { path } => {
-                let mut path = path.clone();
-                let node = find_node(
-                    self.root_node
-                        .borrow()
-                        .as_ref()
-                        .expect("must have a root node"),
-                    &mut path,
-                )
-                .expect("must find the node");
+            PatchType::MoveAfterNode { nodes_path } => {
+                //TODO: include this in find_all_nodes
+                let for_moving: Vec<Node> = nodes_path
+                    .iter()
+                    .map(|path| {
+                        let mut path = path.clone();
+                        let node = find_node(
+                            self.root_node
+                                .borrow()
+                                .as_ref()
+                                .expect("must have a root node"),
+                            &mut path,
+                        )
+                        .expect("must find the node");
+                        node
+                    })
+                    .collect();
                 DomPatch {
                     patch_path,
                     target_element,
-                    patch_variant: PatchVariant::MoveAfterNode { node },
+                    patch_variant: PatchVariant::MoveAfterNode { for_moving },
                 }
             }
             PatchType::AppendChildren { children } => {
@@ -300,37 +314,38 @@ where
                     self.remove_event_listeners(&target_element)?;
                 }
             }
-            PatchVariant::MoveBeforeNode { node: before_node } => {
-                if let Some(parent_target) = target_element.parent_node() {
-                    let before_node_parent =
-                        before_node.parent_node().expect("must have a parent node");
-
-                    let target_element = parent_target
-                        .remove_child(&target_element)
-                        .expect("must return the removed element");
-
-                    before_node_parent
-                        .insert_before(&target_element, Some(&before_node))
-                        .expect("must insert before this node");
+            PatchVariant::MoveBeforeNode { for_moving } => {
+                if let Some(target_parent) = target_element.parent_node() {
+                    for move_node in for_moving {
+                        let move_node_parent = move_node
+                            .parent_node()
+                            .expect("node for moving must have parent");
+                        let move_node = move_node_parent
+                            .remove_child(&move_node)
+                            .expect("must remove child");
+                        target_parent
+                            .insert_before(&move_node, Some(&target_element))
+                            .expect("must insert before this node");
+                    }
                 } else {
                     panic!("unable to get the parent node of the target element");
                 }
             }
 
-            PatchVariant::MoveAfterNode { node: after_node } => {
-                if let Some(parent_target) = target_element.parent_node() {
-                    let node_for_moving = parent_target
-                        .remove_child(&target_element)
-                        .expect("must return the removed element");
-                    let element_for_moving: &web_sys::Element =
-                        node_for_moving.dyn_ref().expect("an element");
-                    let after_element: &web_sys::Element =
-                        after_node.dyn_ref().expect("an element");
-                    after_element
-                        .insert_adjacent_element(intern("afterend"), &element_for_moving)
+            PatchVariant::MoveAfterNode { for_moving } => {
+                for move_node in for_moving {
+                    let move_node_parent = move_node
+                        .parent_node()
+                        .expect("node for moving must have parent");
+                    let to_move_node = move_node_parent
+                        .remove_child(&move_node)
+                        .expect("must remove child");
+
+                    let to_move_element: &web_sys::Element =
+                        to_move_node.dyn_ref().expect("an element");
+                    target_element
+                        .insert_adjacent_element(intern("afterend"), to_move_element)
                         .expect("must insert before this node");
-                } else {
-                    panic!("unable to get the parent node of the target element");
                 }
             }
         }

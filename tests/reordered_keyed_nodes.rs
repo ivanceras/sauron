@@ -50,6 +50,8 @@ fn failing_reordered_keys() {
     let simple_program = simple_program();
     simple_program.set_current_dom(old);
 
+    let expected1 = update1.render_to_string();
+
     simple_program
         .update_dom_with_vdom(update1)
         .expect("must not error");
@@ -59,6 +61,5 @@ fn failing_reordered_keys() {
         .expect("must not error")
         .expect("must exist");
 
-    let expected1 = "<main class=\"reordered\"><ul class=\"todo\"><li key=\"3\">item3</li><li key=\"2\">item2</li><li key=\"1\">item1</li></ul></main>";
     assert_eq!(expected1, container.outer_html());
 }
