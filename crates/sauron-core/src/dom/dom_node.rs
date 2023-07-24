@@ -583,7 +583,7 @@ where
     }
 }
 
-fn find_node(node: &Node, path: &mut TreePath) -> Option<Node> {
+pub(crate) fn find_node(node: &Node, path: &mut TreePath) -> Option<Node> {
     if path.is_empty() {
         Some(node.clone())
     } else {
