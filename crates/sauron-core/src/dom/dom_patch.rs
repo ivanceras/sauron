@@ -1,9 +1,9 @@
 use crate::dom::dom_node::find_all_nodes;
-use crate::dom::dom_node::find_node;
 use crate::dom::dom_node::intern;
 use crate::dom::{Application, Program};
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use mt_dom::TreePath;
+use std::collections::BTreeMap;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
@@ -82,9 +82,15 @@ where
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
             .iter()
             .map(|patch| (patch.path(), patch.tag()))
+            .chain(
+                patches
+                    .iter()
+                    .flat_map(|patch| patch.node_paths())
+                    .map(|path| (path, None)),
+            )
             .collect();
 
-        let nodes_to_patch = find_all_nodes(
+        let nodes_lookup = find_all_nodes(
             self.root_node
                 .borrow()
                 .as_ref()
@@ -95,7 +101,7 @@ where
         let dom_patches:Vec<DomPatch<MSG>> = patches.iter().map(|patch|{
             let patch_path = patch.path();
             let patch_tag = patch.tag();
-            if let Some(target_node) = nodes_to_patch.get(patch_path) {
+            if let Some(target_node) = nodes_lookup.get(patch_path) {
                 let target_element: &Element = target_node.unchecked_ref();
                 if let Some(tag) = patch_tag {
                     let target_tag = target_element.tag_name().to_lowercase();
@@ -105,7 +111,7 @@ where
                         );
                     }
                 }
-                self.convert_patch(target_element, patch)
+                self.convert_patch(&nodes_lookup, target_element, patch)
             } else {
                 unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
             }
@@ -114,7 +120,12 @@ where
         Ok(dom_patches)
     }
     /// convert a virtual DOM Patch into a created DOM node Patch
-    pub fn convert_patch(&self, target_element: &Element, patch: &Patch<MSG>) -> DomPatch<MSG> {
+    pub fn convert_patch(
+        &self,
+        nodes_lookup: &BTreeMap<TreePath, Node>,
+        target_element: &Element,
+        patch: &Patch<MSG>,
+    ) -> DomPatch<MSG> {
         let target_element = target_element.clone();
         let Patch {
             patch_path,
@@ -180,20 +191,13 @@ where
                 patch_variant: PatchVariant::RemoveNode,
             },
             PatchType::MoveBeforeNode { nodes_path } => {
-                //TODO: include this in find_all_nodes
                 let for_moving: Vec<Node> = nodes_path
                     .iter()
                     .map(|path| {
-                        let mut path = path.clone();
-                        let node = find_node(
-                            self.root_node
-                                .borrow()
-                                .as_ref()
-                                .expect("must have a root node"),
-                            &mut path,
-                        )
-                        .expect("must find the node");
-                        node
+                        nodes_lookup
+                            .get(path)
+                            .expect("must have found the node")
+                            .clone()
                     })
                     .collect();
                 DomPatch {
@@ -203,20 +207,13 @@ where
                 }
             }
             PatchType::MoveAfterNode { nodes_path } => {
-                //TODO: include this in find_all_nodes
                 let for_moving: Vec<Node> = nodes_path
                     .iter()
                     .map(|path| {
-                        let mut path = path.clone();
-                        let node = find_node(
-                            self.root_node
-                                .borrow()
-                                .as_ref()
-                                .expect("must have a root node"),
-                            &mut path,
-                        )
-                        .expect("must find the node");
-                        node
+                        nodes_lookup
+                            .get(path)
+                            .expect("must have found the node")
+                            .clone()
                     })
                     .collect();
                 DomPatch {
