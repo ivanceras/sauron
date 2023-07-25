@@ -36,6 +36,8 @@ pub fn register_custom_element(custom_tag: &str, adapter: &str) {
     })
 }
 
+/// TODO: refer to https://github.com/gbj/custom-elements
+/// for improvements
 /// dynamically create the function which will register the custom tag
 #[cfg(not(feature = "use-snippets"))]
 fn create_register_custom_element_function() -> js_sys::Function {
