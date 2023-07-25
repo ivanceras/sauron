@@ -11,5 +11,5 @@ crate-type = ["cdylib"]
 sauron = { path = "../../" }
 console_error_panic_hook = "0.1"
 log = "0.4"
-console_log = { version = "0.2", features = ["color"] }
+console_log = { version = "1.0", features = ["color"] }
 
