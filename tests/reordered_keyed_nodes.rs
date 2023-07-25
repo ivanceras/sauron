@@ -61,5 +61,12 @@ fn failing_reordered_keys() {
         .expect("must not error")
         .expect("must exist");
 
+    let todos = document
+        .query_selector(".reordered .todo")
+        .expect("must not error")
+        .expect("must exist");
+
+    assert_eq!(todos.child_element_count(), 3);
+
     assert_eq!(expected1, container.outer_html());
 }
