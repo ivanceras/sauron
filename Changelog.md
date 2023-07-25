@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.57.3
+- update to mt-dom `0.56.0`, which contains bug fixes when swapping rows with keyed elements
+- new PatchVariant in `mt-dom` which has `MoveBeforeNode` and `MoveAfterNode` for moving existing keyed elements
+
 ## 0.57.2
 - allow users to surround braces on closure in html events. ie: `on_click={|_|..}`
 
