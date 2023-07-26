@@ -87,7 +87,7 @@ pub fn to_token_stream(
             }
 
             pub fn register() {
-                register_custom_element(#custom_tag, Self::struct_name());
+                sauron::dom::register_custom_element(#custom_tag, Self::struct_name());
             }
         }
 

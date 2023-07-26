@@ -262,6 +262,8 @@
     - [ ] custom element should also need access to the `textContent` of the tag for further processing
 - [X] Properly trigger the MountEvent at the appending of the component to the DOM
     - Right now, it is triggered when the virtual Node is created into a real Node.
+- [ ] Maybe rename `#[web_component]` macro to `#[custom_element]`
+    - Also `WebComponent` to `CustomElementWrapper`
 
 
 ## Performance

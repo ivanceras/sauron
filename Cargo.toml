@@ -33,7 +33,7 @@ with-debug = ["sauron-core/with-debug"]
 # lets you use node! macro to write html like code in the view
 with-node-macro = ["sauron-macro"]
 with-webcomponent-macro = ["sauron-macro"]
-custom_element = ["sauron-core/custom_element"]
+custom_element = ["sauron-core/custom_element", "with-webcomponent-macro"]
 
 
 [dev-dependencies]
