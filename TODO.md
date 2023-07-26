@@ -325,6 +325,8 @@
 - [X] Add more test for recycled nodes with keys
 - [X] When 2 text are next to each other, the second text will become a comment
 - [ ] Runtime errors when using fragments
+- [ ] usage of `classes_flag` seems to be broken with complext trait requirement.
+    - This should work very simply `classes_flag([("todo", true), ("editor", is_editing)])`
 
 ## Limitations
 - In rust, no two closures, even if identical, have the same type. Therefore closure can not be check for equality.
