@@ -316,17 +316,15 @@ where
             }
         }
 
-        let listener_closures: Vec<_> = listeners
-            .iter()
-            .map(|listener| {
+        let listener_closures: BTreeMap<&'static str, Closure<dyn FnMut(web_sys::Event)>> =
+            BTreeMap::from_iter(listeners.iter().map(|listener| {
                 let event_name = attr.name();
                 let closure = self
                     .add_event_listener(element, event_name, listener)
                     .expect("add listener");
 
                 (*event_name, closure)
-            })
-            .collect();
+            }));
 
         if !listeners.is_empty() {
             let unique_id = create_unique_identifier();
@@ -567,7 +565,7 @@ where
                     }
                 }
 
-                old_closure.retain(|(event, _oc)| *event != event_name);
+                old_closure.retain(|event, _oc| *event != event_name);
 
                 // remove closure active_closure in dom_updater to free up memory
                 if old_closure.is_empty() {

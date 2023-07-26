@@ -69,7 +69,7 @@ where
 ///
 /// The usize is a unique identifier that is associated with the DOM element that this closure is
 /// attached to.
-pub type ActiveClosure = BTreeMap<usize, Vec<(&'static str, Closure<dyn FnMut(web_sys::Event)>)>>;
+pub type ActiveClosure = BTreeMap<usize, BTreeMap<&'static str, Closure<dyn FnMut(web_sys::Event)>>>;
 
 /// specify how the App is mounted to the DOM
 #[derive(Clone, Copy)]
