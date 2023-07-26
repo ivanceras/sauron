@@ -23,7 +23,7 @@ impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
-                <h1>"Minimal example"</h1>
+                <h1>Minimal example</h1>
                 <div class="some-class" id="some-id" {attr("data-id", 1)}>
                     <input class="client"
                             type="button"

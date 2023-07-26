@@ -91,9 +91,9 @@ impl Application<Msg> for Clock {
 
         node! {
             <article>
-                <h2>"Sauron clock demonstrating svg dom manipulation"</h2>
+                <h2>Sauron clock demonstrating svg dom manipulation</h2>
                 <a href="https://github.com/ivanceras/sauron/tree/master/examples/svg-clock">
-                    "code"
+                    code
                 </a>
                 <div style="display:flex; align-items:center; flex-direction: column">
                     <svg width="400" height="400" view_box="0 0 200 200">
