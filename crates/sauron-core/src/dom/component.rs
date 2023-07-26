@@ -11,7 +11,9 @@ use crate::{
 /// on the parent component that mounts it.
 pub trait Component<MSG, XMSG> {
     /// init the component
-    fn init(&mut self) -> Vec<Task<MSG>>;
+    fn init(&mut self) -> Vec<Task<MSG>> {
+        vec![]
+    }
 
     /// Update the model of this component and return
     /// follow up and/or effects that will be executed on the next update loop
@@ -21,7 +23,9 @@ pub trait Component<MSG, XMSG> {
     fn view(&self) -> Node<MSG>;
 
     /// component can have static styles
-    fn stylesheet() -> Vec<String>;
+    fn stylesheet() -> Vec<String> {
+        vec![]
+    }
 
     /// in addition, component can contain dynamic style
     /// which can change when the model is updated
@@ -39,7 +43,9 @@ pub trait Component<MSG, XMSG> {
 /// can not listen to events on its view
 pub trait Container<MSG, XMSG> {
     /// init the container
-    fn init(&mut self) -> Vec<Task<MSG>>;
+    fn init(&mut self) -> Vec<Task<MSG>> {
+        vec![]
+    }
     /// update the model of this component and return follow ups and/or effects
     /// that will be executed on the next update loop.
     fn update(&mut self, msg: MSG) -> Effects<MSG, XMSG>;
@@ -50,7 +56,9 @@ pub trait Container<MSG, XMSG> {
     fn view(&self, content: impl IntoIterator<Item = Node<XMSG>>) -> Node<MSG>;
 
     /// optionally a Container can specify its own css style
-    fn stylesheet() -> Vec<String>;
+    fn stylesheet() -> Vec<String> {
+        vec![]
+    }
 
     /// dynamic style
     fn style(&self) -> Vec<String> {
@@ -69,7 +77,9 @@ pub trait Widget<MSG> {
     /// how the widget display itself
     fn view(&self) -> Node<MSG>;
     /// Widget can have a style
-    fn stylesheet() -> Vec<String>;
+    fn stylesheet() -> Vec<String> {
+        vec![]
+    }
 
     /// dynamic styles
     fn style(&self) -> Vec<String> {

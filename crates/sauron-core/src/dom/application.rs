@@ -12,7 +12,10 @@ where
     ///  This method is called right after the program is mounted into the DOM.
     fn init(&mut self) -> Vec<Cmd<Self, MSG>>
     where
-        Self: Sized + 'static;
+        Self: Sized + 'static,
+    {
+        vec![]
+    }
 
     /// Update the component with a message.
     /// The update function returns a Cmd, which can be executed by the runtime.
@@ -26,7 +29,9 @@ where
     fn view(&self) -> Node<MSG>;
 
     /// The css style for the application, will be mounted automatically by the program
-    fn stylesheet() -> Vec<String>;
+    fn stylesheet() -> Vec<String> {
+        vec![]
+    }
 
     /// dynamic style of an application which will be reinjected when the application style changed
     fn style(&self) -> Vec<String> {
