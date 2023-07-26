@@ -303,10 +303,7 @@ where
                 Self::append_child_and_dispatch_mount_event(&mount_node,  &created_node);
             }
             MountAction::ClearAppend => {
-                let mount_element: &Element = mount_node.unchecked_ref();
-                log::debug!("mount_node: {:?}", mount_element.outer_html());
                 let children = mount_node.child_nodes();
-                log::debug!("There are {}", children.length());
                 let child_nodes: Vec<Node> = (0..children.length())
                     .map(|i| children.item(i).expect("must have a child"))
                     .collect();
@@ -350,8 +347,6 @@ where
         if self.pending_msgs.borrow().is_empty() {
             return Ok(());
         }
-        let mut i = 0;
-        let t1 = now();
         let mut did_complete = true;
         while let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front() {
             // Note: each MSG needs to be executed one by one in the same order
@@ -361,18 +356,13 @@ where
             // we put the cmd in the pending_cmd queue
             self.pending_cmds.borrow_mut().push_back(cmd);
 
-            let t2 = now();
-            let elapsed = t2 - t1;
             // break only if a deadline is supplied
             if let Some(deadline) = &deadline {
                 if deadline.did_timeout() {
-                    log::warn!("elapsed time: {}ms", elapsed);
-                    log::warn!("we should be breaking at {}..", i);
                     did_complete = false;
                     break;
                 }
             }
-            i += 1;
         }
         if !did_complete {
             #[cfg(feature = "with-ric")]

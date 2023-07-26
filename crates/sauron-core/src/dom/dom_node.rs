@@ -235,7 +235,6 @@ where
                 let attr_name = attr.name();
                 match *attr_name {
                     "value" => {
-                        log::info!("setting value for {}", element.outer_html());
                         element
                             .set_attribute(intern(attr_name), &merged_plain_values)
                             .unwrap_or_else(|_| {
@@ -504,8 +503,6 @@ where
         element: &Element,
         attr: &Attribute<MSG>,
     ) -> Result<(), JsValue> {
-        log::trace!("removing attribute: {}", attr.name());
-
         match *attr.name() {
             "value" => {
                 Self::set_value_str(element, "");
@@ -549,6 +546,9 @@ where
     }
 
     /// remove the event listener which matches the given event name
+    /// TODO: this is iterating over the decedant nodes to find the `vdom-id`
+    /// maybe we can make the dropping of closure faster
+    /// by making it automatically dropped by wrapping the Node with its closure
     pub(crate) fn remove_event_listener_with_name(
         &self,
         event_name: &'static str,

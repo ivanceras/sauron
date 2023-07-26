@@ -27,6 +27,7 @@ thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: js_sys::Function = create
 /// ```
 #[cfg(not(feature = "use-snippets"))]
 pub fn register_custom_element(custom_tag: &str, adapter: &str) {
+    log::info!("registering a custom element: {:?}", custom_tag);
     REGISTER_CUSTOM_ELEMENT_FUNCTION.with(|func| {
         func.call2(
             &JsValue::NULL,
@@ -82,6 +83,8 @@ fn create_register_custom_element_function() -> js_sys::Function {
 
                 }
             );
+        }else{
+            console.log(`${custom_tag} is already defined`);
         }
     }
     define_custom_element(custom_tag, adapterClassName);
