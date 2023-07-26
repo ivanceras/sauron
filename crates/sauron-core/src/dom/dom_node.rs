@@ -316,29 +316,29 @@ where
             }
         }
 
-        // add listeners using add_event_listener
-        for listener in listeners {
-            let unique_id = create_unique_identifier();
+        let listener_closures: Vec<_> = listeners
+            .iter()
+            .map(|listener| {
+                let event_name = attr.name();
+                let closure = self
+                    .add_event_listener(element, event_name, listener)
+                    .expect("add listener");
 
+                (*event_name, closure)
+            })
+            .collect();
+
+        if !listeners.is_empty() {
+            let unique_id = create_unique_identifier();
             // set the data-sauron_vdom-id this will be read later on
             // when it's time to remove this element and its closures and event listeners
             element
                 .set_attribute(intern(DATA_VDOM_ID), &unique_id.to_string())
                 .expect("Could not set attribute on element");
 
-            let mut node_closures = self.node_closures.borrow_mut();
-            node_closures.insert(unique_id, vec![]);
-
-            let event_name = attr.name();
-
-            let closure = self
-                .add_event_listener(element, event_name, listener)
-                .expect("add listener");
-
-            node_closures
-                .get_mut(&unique_id)
-                .expect("Unable to get closure")
-                .push((event_name, closure));
+            self.node_closures
+                .borrow_mut()
+                .insert(unique_id, listener_closures);
         }
     }
 
