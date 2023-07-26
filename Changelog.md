@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.57.4
+
+- make `init` and `stylsheet` an optional method for `Application` and `Component` trait.
+- update mt-dom version to 0.56.1
+
 ## 0.57.3
 - update to mt-dom `0.56.0`, which contains bug fixes when swapping rows with keyed elements
 - new PatchVariant in `mt-dom` which has `MoveBeforeNode` and `MoveAfterNode` for moving existing keyed elements
