@@ -29,6 +29,7 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
         }
     }
 
+    ///Warning this is unsound since the modifier is lost
     /// split the local and external MSG of this effect
     pub fn unzip(self) -> (Vec<MSG>, Vec<XMSG>) {
         let Self {
@@ -132,6 +133,7 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
     /// Append this msgs to the local effects
     pub fn append_local(mut self, local: impl IntoIterator<Item = MSG>) -> Self {
         self.local.extend(local);
+        log::info!("name is still {}", self.modifier.measurement_name);
         self
     }
 
@@ -147,15 +149,25 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
         self
     }
 
+    /// Modify the Effect such that it will log measurement tag with the name supplied
+    pub fn measure_with_name(mut self, name: &str) -> Self {
+        self.modifier.measurement_name = name.to_string();
+        self.measure()
+    }
+
     /// Merge all the internal objects of this Vec of Effects to produce only one.
     pub fn merge_all(all_effects: Vec<Self>) -> Self {
-        let mut local = vec![];
-        let mut external = vec![];
+        let mut local = Vec::with_capacity(all_effects.len());
+        let mut external = Vec::with_capacity(all_effects.len());
+        let mut modifier = Modifier::default();
         for effect in all_effects {
             local.extend(effect.local);
             external.extend(effect.external);
+            modifier.coalesce(&effect.modifier);
         }
-        Effects::new(local, external)
+        let mut effects = Effects::new(local, external);
+        effects.modifier = modifier;
+        effects
     }
 
     /// Extern the local and external MSG of this Effect

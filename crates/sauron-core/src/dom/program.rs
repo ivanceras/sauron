@@ -1,4 +1,4 @@
-use crate::dom::{document, now, Measurements};
+use crate::dom::{document, now, Measurements, Modifier};
 use crate::vdom;
 use crate::vdom::diff;
 use crate::dom::{Application, Cmd, util::body, DomPatch, IdleCallbackHandle, AnimationFrameHandle};
@@ -326,7 +326,6 @@ where
                 *self.mount_node.borrow_mut() = created_node.clone()
             }
         }
-        log::debug!("Root node is now set..");
         *self.root_node.borrow_mut() = Some(created_node);
         self.after_mounted();
     }
@@ -384,7 +383,7 @@ where
     }
 
     /// update the browser DOM to reflect the APP's  view
-    pub fn update_dom(&self) -> Result<Measurements, JsValue> {
+    pub fn update_dom(&self, modifier: &Modifier) -> Result<Measurements, JsValue> {
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app.borrow().view();
@@ -397,7 +396,7 @@ where
         let t3 = now();
 
         let measurements = Measurements {
-            name: None,
+            name: modifier.measurement_name.to_string(),
             node_count,
             build_view_took: t2 - t1,
             total_patches,
@@ -542,13 +541,14 @@ where
     }
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    #[allow(unused_variables)]
-    fn dispatch_dom_changes(&self, log_measurements: bool) {
-        let measurements = self.update_dom().expect("must update dom");
+    fn dispatch_dom_changes(&self, modifier: &Modifier) {
+
+        #[allow(unused_variables)]
+        let measurements = self.update_dom(modifier).expect("must update dom");
 
         #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied
-        if log_measurements && measurements.total_patches > 0 {
+        if modifier.log_measurements && measurements.total_patches > 0 {
             let cmd_measurement = self.app.borrow().measurements(measurements).no_render();
             cmd_measurement.emit(self);
         }
@@ -627,8 +627,7 @@ where
         }
 
         if cmd.modifier.should_update_view {
-            let log_measurements = cmd.modifier.log_measurements;
-            self.dispatch_dom_changes(log_measurements);
+            self.dispatch_dom_changes(&cmd.modifier);
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update

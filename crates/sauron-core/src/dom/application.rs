@@ -57,7 +57,7 @@ where
 pub struct Measurements {
     /// The application can name this measurement to determine where this measurement is coming
     /// from.
-    pub name: Option<String>,
+    pub name: String,
     /// The number of DOM nodes in this Component
     pub node_count: usize,
     /// Time it took for the Component to build it's view

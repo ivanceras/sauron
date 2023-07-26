@@ -41,24 +41,14 @@ where
     /// then together.
     pub fn batch(cmds: impl IntoIterator<Item = Self>) -> Self {
         let mut commands = vec![];
-        let mut should_update_view = false;
-        let mut log_measurements = false;
+        let mut modifier = Modifier::default();
         for cmd in cmds {
-            if cmd.modifier.should_update_view {
-                should_update_view = true;
-            }
-            if cmd.modifier.log_measurements {
-                log_measurements = true;
-            }
+            modifier.coalesce(&cmd.modifier);
             commands.extend(cmd.commands);
         }
         Self {
             commands,
-            modifier: Modifier {
-                should_update_view,
-                log_measurements,
-                ..Default::default()
-            },
+            modifier,
         }
     }
 
@@ -70,12 +60,7 @@ where
     /// Append more cmd into this cmd and return self
     pub fn append(&mut self, cmds: impl IntoIterator<Item = Self>) {
         for cmd in cmds {
-            if cmd.modifier.should_update_view {
-                self.modifier.should_update_view = true;
-            }
-            if cmd.modifier.log_measurements {
-                self.modifier.log_measurements = true;
-            }
+            self.modifier.coalesce(&cmd.modifier);
             self.commands.extend(cmd.commands);
         }
     }
@@ -110,9 +95,8 @@ where
     /// Modify the Cmd such that it will log a measuregment when it is executed
     /// The `measurement_name` is set to distinguish the measurements from each other.
     pub fn measure_with_name(mut self, name: &str) -> Self {
-        self = self.measure();
         self.modifier.measurement_name = name.to_string();
-        self
+        self.measure()
     }
 
     /// Executes the Cmd

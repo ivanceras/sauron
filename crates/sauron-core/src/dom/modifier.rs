@@ -31,3 +31,18 @@ impl Default for Modifier {
         }
     }
 }
+
+impl Modifier {
+    /// coalesece the implicitly set values
+    pub fn coalesce(&mut self, other: &Self) {
+        if other.should_update_view {
+            self.should_update_view = true;
+        }
+        if other.log_measurements {
+            self.log_measurements = true;
+        }
+        if !other.measurement_name.is_empty() {
+            self.measurement_name = other.measurement_name.to_string();
+        }
+    }
+}
