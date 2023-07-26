@@ -1,5 +1,6 @@
 use crate::dom::{
-    Application, Cmd, Component, Container, Effects, MountAction, MountTarget, Program, Task,
+    Application, Cmd, Component, Container, Effects, Modifier, MountAction, MountTarget, Program,
+    Task,
 };
 use crate::vdom::Node;
 use wasm_bindgen::prelude::*;
@@ -228,7 +229,9 @@ where
         let dynamic_style = <APP as Application<MSG>>::style(&self.program.app.borrow()).join("");
         self.program.inject_style_to_mount(&dynamic_style);
         self.program.app.borrow_mut().connected_callback();
-        self.program.update_dom().expect("must update dom");
+        self.program
+            .update_dom(&Modifier::default())
+            .expect("must update dom");
     }
 
     /// called when the web component is removed
