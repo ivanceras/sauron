@@ -11,6 +11,9 @@ pub trait NodeTrait {
     /// unwrap the text content of the text node, panics if it is not a text node
     fn unwrap_text(&self) -> &str;
 
+    /// return the text content if it is a text node
+    fn as_text(&self) -> Option<&str>;
+
     /// unwrap the html text content of this node, panics if it is not a safe html node
     fn unwrap_safe_html(&self) -> &str;
 }
@@ -36,6 +39,13 @@ impl<MSG> NodeTrait for Node<MSG> {
         match self {
             Self::Leaf(ref leaf) => leaf.unwrap_text(),
             _ => panic!("not a leaf node"),
+        }
+    }
+
+    fn as_text(&self) -> Option<&str> {
+        match self {
+            Self::Leaf(ref leaf) => leaf.as_text(),
+            _ => None,
         }
     }
 

@@ -38,6 +38,14 @@ impl<MSG> Leaf<MSG> {
         }
     }
 
+    /// return the text content if it is a text node
+    pub fn as_text(&self) -> Option<&str> {
+        match self {
+            Self::Text(ref text) => Some(text),
+            _ => None,
+        }
+    }
+
     /// unwrap the text content if this a text node,
     /// panics if it is not a text node
     pub fn unwrap_safe_html(&self) -> &str {
