@@ -48,9 +48,7 @@ fn create_register_custom_element_function() -> js_sys::Function {
         r#"
     function define_custom_element(custom_tag, adapterClassName)
     {
-         console.log(`custom tag: ${custom_tag}, adapterClassName: ${adapterClassName}`);
          let adapter = window[adapterClassName];
-         console.log("adapter: ", adapter);
           if (window.customElements.get(custom_tag) === undefined ){
             window.customElements.define(custom_tag,
                 class extends HTMLElement{
@@ -83,8 +81,6 @@ fn create_register_custom_element_function() -> js_sys::Function {
 
                 }
             );
-        }else{
-            console.log(`${custom_tag} is already defined`);
         }
     }
     define_custom_element(custom_tag, adapterClassName);
