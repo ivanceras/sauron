@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.57.5
+- update to `mt-dom` `0.57.0`
+- feat: add method as_text to NodeTrait for extracting optional str from a leaf text node
+- remove too many logging in `define_custom_element`
+- `custom_element` should include the `web_component` macro
+- don't lock third-party dependencies to latest version, otherwise, it will disallow other dependent crate to use older version of the mentioned third-party dep causing failure to select version of dependencies
+- chore: remove unnecessary logging
+- fix: `custom_element` Modifier arg
+- feat: improvement on `Modifier` and `Measurement` to contain the name as tag
+- refactor: improvement on the data structure of `ActiveClosure`
+- improve code for attaching `node_closures`
+
 ## 0.57.4
 
 - make `init` and `stylsheet` an optional method for `Application` and `Component` trait.
