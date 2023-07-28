@@ -13,8 +13,8 @@
 //! for building view of web app components
 extern crate proc_macro;
 
+mod custom_element;
 mod node;
-mod web_component;
 
 /// Quasi-quoting macro for building sauron [Node]s.
 ///
@@ -186,9 +186,9 @@ pub fn node(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 /// This also adds the register function into the module it is called in, so make sure you only
 /// use this in each module, multiple web_components should be in different modules
 #[proc_macro_attribute]
-pub fn web_component(
+pub fn custom_element(
     attr: proc_macro::TokenStream,
     input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
-    web_component::to_token_stream(attr, input)
+    custom_element::to_token_stream(attr, input)
 }

@@ -60,7 +60,9 @@ pub mod prelude {
             MountTarget, Task, TimeoutCallbackHandle,
         };
         #[cfg(feature = "custom_element")]
-        pub use crate::dom::CustomElement;
+        pub use crate::dom::WebComponent;
+        #[cfg(feature = "custom_element")]
+        pub use crate::dom::WebComponentWrapper;
     }}
 }
 

@@ -1,7 +1,7 @@
 use sauron::wasm_bindgen::JsCast;
 use sauron::{
-    dom::register_custom_element, dom::Callback, html::attributes::*, html::events::*, html::*,
-    jss, wasm_bindgen, web_sys, Attribute, CustomElement, Effects, JsValue, Node, *,
+    custom_element, dom::Callback, html::attributes::*, html::events::*, html::*, jss,
+    wasm_bindgen, web_sys, Attribute, Effects, JsValue, Node, WebComponent, *,
 };
 use std::fmt::Debug;
 
@@ -179,8 +179,8 @@ where
     }
 }
 
-#[sauron::web_component("date-time")]
-impl<XMSG> sauron::CustomElement<Msg> for DateTimeWidget<XMSG>
+#[custom_element("date-time")]
+impl<XMSG> sauron::WebComponent<Msg> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {

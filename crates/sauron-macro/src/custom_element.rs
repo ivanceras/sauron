@@ -13,9 +13,9 @@ pub fn to_token_stream(
         .last()
         .expect("must have a custom element trait");
     assert_eq!(
-        "CustomElement",
+        "WebComponent",
         custom_element_last.to_string(),
-        "must only be used on impl CustomElement"
+        "must only be used on impl WebComponent"
     );
     let msg_types = extract_custom_element_msg(path);
     assert_eq!(msg_types.len(), 1);
@@ -38,7 +38,7 @@ pub fn to_token_stream(
         type #simplified_type = #self_type<()>;
         #[wasm_bindgen]
         pub struct #widget_wrapper{
-            web_component: sauron::dom::WebComponent<#simplified_type, #msg_type>,
+            web_component: sauron::dom::WebComponentWrapper<#simplified_type, #msg_type>,
         }
 
         #[wasm_bindgen]
@@ -46,7 +46,7 @@ pub fn to_token_stream(
             #[wasm_bindgen(constructor)]
             pub fn new(node: JsValue) -> Self {
                 Self{
-                    web_component: sauron::dom::WebComponent::new(node)
+                    web_component: sauron::dom::WebComponentWrapper::new(node)
                 }
             }
 
@@ -87,7 +87,7 @@ pub fn to_token_stream(
             }
 
             pub fn register() {
-                sauron::dom::register_custom_element(#custom_tag, Self::struct_name());
+                sauron::dom::register_web_component(#custom_tag, Self::struct_name());
             }
         }
 

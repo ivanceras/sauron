@@ -6,15 +6,42 @@ use crate::vdom::Node;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
+/// a trait for implementing WebComponent in the DOM with custom tag
+pub trait WebComponent<MSG> {
+    /// returns the attributes that is observed by this component
+    /// These are the names of the attributes the component is interested in
+    fn observed_attributes() -> Vec<&'static str>;
+
+    /// This will be invoked when a component is used as a custom element
+    /// and the attributes of the custom-element has been modified
+    ///
+    /// if the listed attributes in the observed attributes are modified
+    fn attribute_changed(
+        program: &Program<Self, MSG>,
+        attr_name: &str,
+        old_value: Option<String>,
+        new_value: Option<String>,
+    ) where
+        Self: Sized + Application<MSG>;
+
+    /// the component is attached to the dom
+    fn connected_callback(&mut self);
+    /// the component is removed from the DOM
+    fn disconnected_callback(&mut self);
+
+    /// the component is moved or attached to the dom
+    fn adopted_callback(&mut self);
+}
+
 #[cfg(feature = "use-snippets")]
 #[wasm_bindgen(module = "/js/define_custom_element.js")]
 extern "C" {
     // register using custom element define
     // # Example:
     // ```rust,ignore
-    //  sauron::register_custom_element("date-time", "DateTimeWidgetCustomElement");
+    //  sauron::register_web_component("date-time", "DateTimeWidgetCustomElement");
     // ```
-    pub fn register_custom_element(custom_tag: &str, adapter: &str);
+    pub fn register_web_component(custom_tag: &str, adapter: &str);
 }
 
 #[cfg(not(feature = "use-snippets"))]
@@ -23,10 +50,10 @@ thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: js_sys::Function = create
 /// register using custom element define
 /// # Example:
 /// ```rust,ignore
-///  sauron::register_custom_element("date-time", "DateTimeWidgetCustomElement");
+///  sauron::register_web_component("date-time", "DateTimeWidgetCustomElement");
 /// ```
 #[cfg(not(feature = "use-snippets"))]
-pub fn register_custom_element(custom_tag: &str, adapter: &str) {
+pub fn register_web_component(custom_tag: &str, adapter: &str) {
     log::info!("registering a custom element: {:?}", custom_tag);
     REGISTER_CUSTOM_ELEMENT_FUNCTION.with(|func| {
         func.call2(
@@ -88,53 +115,13 @@ fn create_register_custom_element_function() -> js_sys::Function {
     )
 }
 
-/// a trait for implementing CustomElement in the DOM with custom tag
-pub trait CustomElement<MSG> {
-    /// returns the attributes that is observed by this component
-    /// These are the names of the attributes the component is interested in
-    fn observed_attributes() -> Vec<&'static str>;
-
-    /// This will be invoked when a component is used as a custom element
-    /// and the attributes of the custom-element has been modified
-    ///
-    /// if the listed attributes in the observed attributes are modified
-    fn attribute_changed(
-        program: &Program<Self, MSG>,
-        attr_name: &str,
-        old_value: Option<String>,
-        new_value: Option<String>,
-    ) where
-        Self: Sized + Application<MSG>;
-
-    /// the component is attached to the dom
-    fn connected_callback(&mut self);
-    /// the component is removed from the DOM
-    fn disconnected_callback(&mut self);
-
-    /// the component is moved or attached to the dom
-    fn adopted_callback(&mut self);
-}
-
-/// A self contain web component
-/// This is needed to move some of the code from the #web_component macro
-/// This is also necessary, since #[wasm_bindgen] macro can not process impl types which uses
-/// generics, we use generics here to simplify the code and do the type checks for us, rather than
-/// in the code derived from the #[web_component] macro
-pub struct WebComponent<APP, MSG>
-where
-    MSG: 'static,
-{
-    /// the underlying program running this web component
-    pub program: Program<APP, MSG>,
-}
-
-/// Auto implementation of Application trait for Component that
+/// Blanket implementation of Application trait for Component that
 /// has no external MSG
-/// but only if that Component is intended to be a CustomElement
+/// but only if that Component is intended to be a WebComponent
 impl<COMP, MSG> Application<MSG> for COMP
 where
     COMP: Component<MSG, ()> + 'static,
-    COMP: CustomElement<MSG>,
+    COMP: WebComponent<MSG>,
     MSG: 'static,
 {
     fn init(&mut self) -> Vec<Cmd<Self, MSG>> {
@@ -162,13 +149,13 @@ where
     }
 }
 
-/// Auto implementation of Component trait for Container,
+/// Blanket implementation of Component trait for Container,
 /// which in turn creates an Auto implementation trait for of Application for Container
-/// but only if that Container is intended to be a CustomElement
+/// but only if that Container is intended to be a WebComponent
 impl<CONT, MSG> Component<MSG, ()> for CONT
 where
     CONT: Container<MSG, ()>,
-    CONT: CustomElement<MSG>,
+    CONT: WebComponent<MSG>,
     MSG: 'static,
 {
     fn init(&mut self) -> Vec<Task<MSG>> {
@@ -194,10 +181,23 @@ where
     }
 }
 
-impl<APP, MSG> WebComponent<APP, MSG>
+/// A self contain web component
+/// This is needed to move some of the code from the #custom_element macro
+/// This is also necessary, since #[wasm_bindgen] macro can not process impl types which uses
+/// generics, we use generics here to simplify the code and do the type checks for us, rather than
+/// in the code derived from the #[web_component] macro
+pub struct WebComponentWrapper<APP, MSG>
+where
+    MSG: 'static,
+{
+    /// the underlying program running this web component
+    pub program: Program<APP, MSG>,
+}
+
+impl<APP, MSG> WebComponentWrapper<APP, MSG>
 where
     APP: Application<MSG> + Default + 'static,
-    APP: CustomElement<MSG>,
+    APP: WebComponent<MSG>,
     MSG: 'static,
 {
     /// create a new web component, with the node as the target element to be mounted into
