@@ -73,7 +73,7 @@ where
         self.pending_msgs.borrow_mut().extend(msgs);
     }
 
-    pub fn update(&self, msg: MSG) -> Cmd<APP, MSG> {
+    pub fn update_app(&self, msg: MSG) -> Cmd<APP, MSG> {
         self.app.borrow_mut().update(msg)
     }
 
@@ -88,7 +88,7 @@ where
         if let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front() {
             // Note: each MSG needs to be executed one by one in the same order
             // as APP's state can be affected by the previous MSG
-            let cmd = self.update(pending_msg);
+            let cmd = self.update_app(pending_msg);
 
             // we put the cmd in the pending_cmd queue
             self.pending_cmds.borrow_mut().push_back(cmd);
