@@ -99,13 +99,6 @@ where
     }
 
     pub fn batch_pending_cmds(&self) -> Cmd<APP, MSG> {
-        let mut all_cmd = vec![];
-        let mut pending_cmds = self.pending_cmds.borrow_mut();
-        while let Some(cmd) = pending_cmds.pop_front() {
-            all_cmd.push(cmd);
-        }
-        log::trace!("batching {} cmds", all_cmd.len());
-        // we can execute all the cmd here at once
-        Cmd::batch(all_cmd)
+        Cmd::batch(self.pending_cmds.borrow_mut().drain(..))
     }
 }
