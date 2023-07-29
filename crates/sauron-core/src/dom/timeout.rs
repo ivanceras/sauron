@@ -35,7 +35,7 @@ where
 
 
 /// simulate a delay using promise in js
-pub async fn async_delay(timeout: i32) -> Result<TimeoutCallbackHandle, JsValue>{
+pub(crate) async fn async_delay(timeout: i32) -> Result<TimeoutCallbackHandle, JsValue>{
     let mut result = Err(JsValue::NULL);
     let promise = Promise::new(&mut |resolve, _reject| {
         let handle = request_timeout_callback(
@@ -50,4 +50,9 @@ pub async fn async_delay(timeout: i32) -> Result<TimeoutCallbackHandle, JsValue>
     });
     JsFuture::from(promise).await.expect("must not error");
     result
+}
+
+/// wrapper of async delay but return no result, assume success
+pub async fn delay(timeout: i32) {
+    async_delay(timeout).await.expect("must not error");
 }

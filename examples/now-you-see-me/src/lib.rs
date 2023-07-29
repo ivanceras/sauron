@@ -1,4 +1,4 @@
-use sauron::dom::{async_delay, spawn_local};
+use sauron::dom::{delay, spawn_local};
 use sauron::*;
 
 #[wasm_bindgen(start)]
@@ -16,9 +16,7 @@ struct App {
 impl Application<Msg> for App {
     fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
         vec![Cmd::new(|program| {
-            spawn_local(async move {
                 program.dispatch(Msg::ToggleShow);
-            })
         })]
     }
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
@@ -32,7 +30,7 @@ impl Application<Msg> for App {
                 }
                 Cmd::new(|program| {
                     spawn_local(async move {
-                        async_delay(2000).await.expect("error");
+                        delay(2000).await;
                         program.dispatch(Msg::ToggleShow);
                     })
                 })

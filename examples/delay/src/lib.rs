@@ -3,7 +3,7 @@
 use log::trace;
 use sauron::{text, jss, html::*, html::events::*, html::attributes::*,
     Application, Node, Program, Cmd, wasm_bindgen,
-    dom::{async_delay, TimeoutCallbackHandle},
+    dom::{delay, TimeoutCallbackHandle},
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -121,11 +121,11 @@ impl Application<Msg> for App {
 async fn some_async_function() {
     let t1 = sauron::now();
     log::debug!("t1: {}", t1);
-    async_delay(1000).await.unwrap();
+    delay(1000).await;
     let t2 = sauron::now();
     log::debug!("t2: {}", t2);
     log::debug!("elapsed: {}", t2 - t1);
-    async_delay(5000).await.unwrap();
+    delay(5000).await;
     let t3 = sauron::now();
     log::debug!("t3: {}", t3);
     log::debug!("elapsed: {}", t3 - t2);
