@@ -264,10 +264,15 @@ where
         Self::append_to_mount(app, &body())
     }
 
+    /// executed right before the app is mounted to the dom
+    pub fn pre_mount(&self) {
+        self.inject_stylesheet();
+    }
+
     /// each element and it's descendant in the vdom is created into
     /// an actual DOM node.
     pub fn mount(&self) {
-        self.inject_stylesheet();
+        self.pre_mount();
         let created_node = self.create_dom_node(
             &self.server_context.current_vdom.borrow(),
         );
@@ -639,15 +644,7 @@ where
             .append_child(&created_node)
             .expect("could not append child to mount shadow");
     }
-}
 
-/// This will be called when the actual event is triggered.
-/// Defined in the DomUpdater::create_closure_wrap function
-impl<APP, MSG> Program<APP, MSG>
-where
-    MSG: 'static,
-    APP: Application<MSG> + 'static,
-{
     /// dispatch multiple MSG
     pub fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>) {
         self.server_context.dispatch_multiple(msgs);
