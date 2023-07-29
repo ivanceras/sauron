@@ -1,7 +1,7 @@
 use crate::dom::{document, now, Measurements, Modifier};
 use crate::vdom;
 use crate::vdom::diff;
-use crate::dom::{Application, Cmd, util::body, DomPatch, IdleCallbackHandle, AnimationFrameHandle};
+use crate::dom::{Application, util::body, DomPatch, IdleCallbackHandle, AnimationFrameHandle};
 use crate::html::{self, text,attributes::class};
 use std::collections::VecDeque;
 use std::{any::TypeId, cell::RefCell, rc::Rc};
@@ -15,6 +15,9 @@ use crate::dom::request_idle_callback;
 use crate::dom::request_animation_frame;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash,Hasher};
+use server_context::ServerContext;
+
+mod server_context;
 
 
 /// Program handle the lifecycle of the APP
@@ -22,19 +25,9 @@ pub struct Program<APP, MSG>
 where
     MSG: 'static,
 {
-    /// holds the user application
-    pub app: Rc<RefCell<APP>>,
-    /// The MSG that hasn't been applied to the APP yet
-    ///
-    /// Note: MSG has to be executed in the same succession one by one
-    /// since the APP's state may be affected by the previous MSG
-    pending_msgs: Rc<RefCell<VecDeque<MSG>>>,
 
-    /// pending cmds that hasn't been emited yet
-    pending_cmds: Rc<RefCell<VecDeque<Cmd<APP, MSG>>>>,
+    pub(crate) server_context: ServerContext<APP,MSG>,
 
-    /// the current vdom representation
-    current_vdom: Rc<RefCell<vdom::Node<MSG>>>,
     /// the first element of the app view, where the patch is generated is relative to
     pub(crate) root_node: Rc<RefCell<Option<Node>>>,
 
@@ -63,6 +56,7 @@ where
     #[allow(clippy::type_complexity)]
     pub(crate) event_closures: Rc<RefCell<Vec<Closure<dyn FnMut(web_sys::Event)>>>>,
 }
+
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
 /// VirtualNode is dropped.
@@ -104,10 +98,7 @@ where
 {
     fn clone(&self) -> Self {
         Program {
-            app: Rc::clone(&self.app),
-            pending_msgs: Rc::clone(&self.pending_msgs),
-            pending_cmds: Rc::clone(&self.pending_cmds),
-            current_vdom: Rc::clone(&self.current_vdom),
+            server_context: self.server_context.clone(),
             root_node: Rc::clone(&self.root_node),
             mount_node: Rc::clone(&self.mount_node),
             node_closures: Rc::clone(&self.node_closures),
@@ -135,10 +126,12 @@ where
     ) -> Self {
         let view = app.view();
         Program {
-            app: Rc::new(RefCell::new(app)),
-            pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
-            pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
-            current_vdom: Rc::new(RefCell::new(view)),
+            server_context: ServerContext{
+                app: Rc::new(RefCell::new(app)),
+                current_vdom: Rc::new(RefCell::new(view)),
+                pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
+                pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
+            },
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(mount_node.clone())),
             node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
@@ -153,7 +146,7 @@ where
     /// executed after the program has been mounted
     fn after_mounted(&self) {
         // call the init of the component
-        let cmds = self.app.borrow_mut().init();
+        let cmds = self.server_context.init_app();
         // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
         // listening to events (resize, hashchange)
         cmds.into_iter().for_each(|cmd|cmd.emit(self));
@@ -170,20 +163,18 @@ where
     }
 
     fn inject_stylesheet(&self){
-        let static_styles = APP::stylesheet();
-        if !static_styles.is_empty() {
-            let static_css = static_styles.join("");
+        let static_style = self.server_context.static_style();
+        if !static_style.is_empty() {
             let class_names = format!("static {}", Self::app_hash());
-            self.inject_style(class_names, &static_css);
+            self.inject_style(class_names, &static_style);
         }
     }
 
     fn inject_dynamic_style(&self){
-        let dynamic_styles = self.app.borrow().style();
-        if !dynamic_styles.is_empty() {
-            let dynamic_css = dynamic_styles.join("");
+        let dynamic_style = self.server_context.dynamic_style();
+        if !dynamic_style.is_empty() {
             let class_names = format!("dynamic {}", Self::app_hash());
-            self.inject_style(class_names, &dynamic_css);
+            self.inject_style(class_names, &dynamic_style);
         }
     }
 
@@ -280,7 +271,7 @@ where
     pub fn mount(&self) {
         self.inject_stylesheet();
         let created_node = self.create_dom_node(
-            &self.current_vdom.borrow(),
+            &self.server_context.current_vdom.borrow(),
         );
 
         let mount_node: web_sys::Node = match self.mount_procedure.target {
@@ -344,18 +335,11 @@ where
     /// as parameters.
     /// If there is no deadline specified all the pending messages are executed
     fn dispatch_pending_msgs(&self, deadline: Option<IdleDeadline>) -> Result<(), JsValue> {
-        if self.pending_msgs.borrow().is_empty() {
+        if !self.server_context.has_pending_msgs() {
             return Ok(());
         }
         let mut did_complete = true;
-        while let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front() {
-            // Note: each MSG needs to be executed one by one in the same order
-            // as APP's state can be affected by the previous MSG
-            let cmd = self.app.borrow_mut().update(pending_msg);
-
-            // we put the cmd in the pending_cmd queue
-            self.pending_cmds.borrow_mut().push_back(cmd);
-
+        while self.server_context.dispatch_pending_msg() {
             // break only if a deadline is supplied
             if let Some(deadline) = &deadline {
                 if deadline.did_timeout() {
@@ -376,7 +360,7 @@ where
     pub fn update_dom(&self, modifier: &Modifier) -> Result<Measurements, JsValue> {
         let t1 = now();
         // a new view is created due to the app update
-        let view = self.app.borrow().view();
+        let view = self.server_context.view();
         let t2 = now();
 
         let node_count = view.node_count();
@@ -403,7 +387,7 @@ where
     /// patch the DOM to reflect the App's view
     pub fn update_dom_with_vdom(&self, new_vdom: vdom::Node<MSG>) -> Result<usize, JsValue> {
         let total_patches = {
-            let current_vdom = self.current_vdom.borrow();
+            let current_vdom = self.server_context.current_vdom.borrow();
             let patches = diff(&current_vdom, &new_vdom);
             #[cfg(all(feature = "with-debug", feature = "log-patches"))]
             {
@@ -418,7 +402,7 @@ where
             patches.len()
         };
 
-        *self.current_vdom.borrow_mut() = new_vdom;
+        self.server_context.set_current_dom(new_vdom);
         Ok(total_patches)
     }
 
@@ -432,7 +416,7 @@ where
             .expect("Could not append child to mount");
 
         *self.root_node.borrow_mut() = Some(created_node);
-        *self.current_vdom.borrow_mut() = new_vdom;
+        self.server_context.set_current_dom(new_vdom);
     }
 
 
@@ -539,9 +523,10 @@ where
         #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied
         if modifier.log_measurements && measurements.total_patches > 0 {
-            let cmd_measurement = self.app.borrow().measurements(measurements).no_render();
-            cmd_measurement.emit(self);
+             let cmd_measurement = self.server_context.measurements(measurements);
+             cmd_measurement.emit(self);
         }
+
     }
 
     #[cfg(feature = "with-ric")]
@@ -593,21 +578,15 @@ where
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
-        if !self.pending_msgs.borrow().is_empty() {
+        if self.server_context.has_pending_msgs() {
             self.dispatch_pending_msgs(None)
                 .expect("must dispatch all pending msgs");
         }
-        if !self.pending_msgs.borrow().is_empty() {
+        if self.server_context.has_pending_msgs() {
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
-        let mut all_cmd = vec![];
-        let mut pending_cmds = self.pending_cmds.borrow_mut();
-        while let Some(cmd) = pending_cmds.pop_front() {
-            all_cmd.push(cmd);
-        }
-        // we can execute all the cmd here at once
-        let cmd = Cmd::batch(all_cmd);
+        let cmd = self.server_context.batch_pending_cmds();
 
         if !self.pending_patches.borrow().is_empty() {
             log::error!(
@@ -673,7 +652,7 @@ where
 {
     /// dispatch multiple MSG
     pub fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>) {
-        self.pending_msgs.borrow_mut().extend(msgs);
+        self.server_context.dispatch_multiple(msgs);
         self.dispatch_inner_with_priority_ric();
     }
 
