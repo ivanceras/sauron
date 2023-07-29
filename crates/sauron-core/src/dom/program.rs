@@ -647,7 +647,7 @@ where
 
     /// dispatch multiple MSG
     pub fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>) {
-        self.server_context.dispatch_multiple(msgs);
+        self.server_context.push_msgs(msgs);
         self.dispatch_inner_with_priority_ric();
     }
 

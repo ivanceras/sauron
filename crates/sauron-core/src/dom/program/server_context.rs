@@ -69,7 +69,7 @@ where
         self.app.borrow().measurements(measurements).no_render()
     }
 
-    pub fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>) {
+    pub fn push_msgs(&self, msgs: impl IntoIterator<Item = MSG>) {
         self.pending_msgs.borrow_mut().extend(msgs);
     }
 
