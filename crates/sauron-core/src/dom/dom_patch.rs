@@ -312,7 +312,6 @@ where
                     // Only allowed when it is top level element
                     assert!(patch_path.is_empty());
                     let mount_node = self.mount_node();
-                    let mount_elm: &web_sys::Element = mount_node.unchecked_ref();
                     Self::clear_children(&mount_node);
                     mount_node
                         .append_child(&first_node)
