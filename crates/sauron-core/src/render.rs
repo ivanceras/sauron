@@ -87,6 +87,12 @@ impl<MSG> Render for Node<MSG> {
         match self {
             Node::Element(element) => element.render_with_indent(buffer, indent, compressed),
             Node::Leaf(leaf) => leaf.render_with_indent(buffer, indent, compressed),
+            Node::Fragment(nodes) => {
+                for node in nodes {
+                    node.render_with_indent(buffer, indent, compressed)?;
+                }
+                Ok(())
+            }
             Node::NodeList(node_list) => {
                 for node in node_list {
                     node.render_with_indent(buffer, indent, compressed)?;
@@ -97,12 +103,12 @@ impl<MSG> Render for Node<MSG> {
     }
 }
 
-impl<MSG> Render for Leaf<MSG> {
+impl Render for Leaf {
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
-        indent: usize,
-        compressed: bool,
+        _indent: usize,
+        _compressed: bool,
     ) -> fmt::Result {
         match self {
             Leaf::Text(text) => {
@@ -114,15 +120,6 @@ impl<MSG> Render for Leaf<MSG> {
             }
             Leaf::Comment(comment) => {
                 write!(buffer, "<!--{comment}-->")
-            }
-            Leaf::Fragment(fragment) => {
-                for (i, frag) in fragment.iter().enumerate() {
-                    if i > 0 {
-                        self.maybe_indent(buffer, indent, compressed)?;
-                    }
-                    frag.render_with_indent(buffer, indent, compressed)?;
-                }
-                Ok(())
             }
             Leaf::DocType(doctype) => {
                 write!(buffer, "<!doctype {doctype}>")

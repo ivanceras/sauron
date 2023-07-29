@@ -97,7 +97,7 @@ where
         doc_fragment.into()
     }
 
-    fn create_leaf_node(&self, leaf: &Leaf<MSG>) -> Node {
+    fn create_leaf_node(&self, leaf: &Leaf) -> Node {
         match leaf {
             Leaf::Text(txt) => Self::create_text_node(txt).into(),
             Leaf::Comment(comment) => document().create_comment(comment).into(),
@@ -110,7 +110,6 @@ where
                     doctype is only used in rendering"
                 );
             }
-            Leaf::Fragment(nodes) => self.create_document_fragment(nodes),
         }
     }
 
@@ -137,6 +136,7 @@ where
                 }
                 created_node
             }
+            vdom::Node::Fragment(nodes) => self.create_document_fragment(nodes),
             // NodeList that goes here is only possible when it is the root_node,
             // since node_list as children will be unrolled into as child_elements of the parent
             // We need to wrap this node_list into doc_fragment since root_node is only 1 element
@@ -610,7 +610,6 @@ pub(crate) fn find_all_nodes(
     nodes_to_find: &[(&TreePath, Option<&&'static str>)],
 ) -> BTreeMap<TreePath, Node> {
     let mut nodes_to_patch: BTreeMap<TreePath, Node> = BTreeMap::new();
-
     for (path, tag) in nodes_to_find {
         let mut traverse_path: TreePath = (*path).clone();
         if let Some(found) = find_node(node, &mut traverse_path) {

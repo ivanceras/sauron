@@ -1,6 +1,6 @@
 use crate::{
     html::attributes::{AttributeValue, Listener},
-    vdom::{Attribute, Element, Event, Leaf, Node},
+    vdom::{Attribute, Element, Event, Node},
 };
 
 /// Add mapping function for Node, Element, Attribute,
@@ -75,7 +75,13 @@ where
     {
         match self {
             Node::Element(element) => Node::Element(element.map_callback(cb)),
-            Node::Leaf(leaf) => Node::Leaf(leaf.map_callback(cb)),
+            Node::Leaf(leaf) => Node::Leaf(leaf),
+            Node::Fragment(nodes) => Node::Fragment(
+                nodes
+                    .into_iter()
+                    .map(|node| node.map_callback(cb.clone()))
+                    .collect(),
+            ),
             Node::NodeList(node_list) => Node::NodeList(
                 node_list
                     .into_iter()
@@ -181,26 +187,6 @@ where
                 AttributeValue::EventListener(this.map_callback(cb))
             }
             AttributeValue::Empty => AttributeValue::Empty,
-        }
-    }
-}
-
-impl<MSG> Leaf<MSG>
-where
-    MSG: 'static,
-{
-    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Leaf<MSG2>
-    where
-        MSG2: 'static,
-    {
-        match self {
-            Self::Text(v) => Leaf::Text(v),
-            Self::SafeHtml(v) => Leaf::SafeHtml(v),
-            Self::Comment(v) => Leaf::Comment(v),
-            Self::Fragment(v) => {
-                Leaf::Fragment(v.into_iter().map(|n| n.map_callback(cb.clone())).collect())
-            }
-            Self::DocType(v) => Leaf::DocType(v),
         }
     }
 }

@@ -132,7 +132,7 @@ where
 /// let node: Node<()> = fragment([div([],[]), span([],[])]);
 /// ```
 pub fn fragment<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
-    Node::Leaf(leaf::fragment(nodes))
+    mt_dom::fragment(nodes)
 }
 
 /// create a doctype

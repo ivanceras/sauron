@@ -309,19 +309,24 @@ where
             PatchVariant::ReplaceNode { mut replacement } => {
                 let first_node = replacement.pop().expect("must have a first node");
                 if target_element.node_type() == Node::DOCUMENT_FRAGMENT_NODE {
-                    // Only allowed when it is top level element
-                    assert!(patch_path.is_empty());
-                    let mount_node = self.mount_node();
-                    Self::clear_children(&mount_node);
-                    mount_node
-                        .append_child(&first_node)
-                        .expect("must append child");
-                    Self::dispatch_mount_event(&first_node);
+                    // if we are patching a fragment mode in the top-level document
+                    // it has no access to it's parent other than accessing the mount-node itself
+                    if patch_path.is_empty() {
+                        let mount_node = self.mount_node();
+                        Self::clear_children(&mount_node);
+                        mount_node
+                            .append_child(&first_node)
+                            .expect("must append child");
+                        Self::dispatch_mount_event(&first_node);
 
-                    for node in replacement.into_iter() {
-                        let node_elm: &web_sys::Element = node.unchecked_ref();
-                        mount_node.append_child(node_elm).expect("append child");
-                        Self::dispatch_mount_event(node_elm);
+                        for node in replacement.into_iter() {
+                            let node_elm: &web_sys::Element = node.unchecked_ref();
+                            mount_node.append_child(node_elm).expect("append child");
+                            Self::dispatch_mount_event(node_elm);
+                        }
+                    } else {
+                        // deal with fragment node in replacement here
+                        todo!()
                     }
                 } else {
                     if target_element.node_type() == Node::ELEMENT_NODE {
