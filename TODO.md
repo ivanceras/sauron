@@ -193,8 +193,8 @@
 - [X] Make an alternative to `Effects` and `Cmd` that can be used in `Component`.
     - call it `Task` a wrapper to a future, will resolve into MSG which will then be dispatched into the program
     - does not have access to program for dispatching
-- [ ] Remove the use of `Closure::forget()`
-- [ ] Refactor `ActiveClosure` to use
+- [X] Remove the use of `Closure::forget()`
+- [X] Refactor `ActiveClosure` to use
       - add a field `dom_closures` in `Program` which stores all closure for a certain Element
       - all other closures is stored in `active_closure`
       ```rust
@@ -229,6 +229,9 @@
      fn on_resize(&self) -> Sub<Msg>{
      }
     ```
+- [ ] Bring back CreatedNode maybe with a different name: `DomNode` which wraps the `Node` or `Element` along with it's closures from event listener
+    - These are then saved into the `Program` where when removed or dropped, it will also drop the associated closures with them, thereby simplifying the code.
+    - Right now, we are attaching a `vdom-data` attribute for nodes that have listeners
 
 
 ## Features
@@ -248,10 +251,10 @@
     - [X] expose the `sauron-md` as `sauron::markdown` module, behind a feature flag
 - [X] Add example using markdown
 - [X] Make use of `serde_json` to parse `style` into components
-- [ ] Add an example where a program is a custom html element, that way sauron could be used as a way to migrate parts of an existing html/js code base.
+- [X] Add an example where a program is a custom html element, that way sauron could be used as a way to migrate parts of an existing html/js code base.
     - [X] Custom element which is defiend as a web component where it can be used by some other Application.
     - [ ] The App should be serializable and each of the fields will become an html attribute which
-    - [ ] There is an issue with the patch not being able to find the element to be patch when using custom element
+    - [X] There is an issue with the patch not being able to find the element to be patch when using custom element
         due to the reason that the root_node stored in the dom updater is not the first element of the view, but rather
         the root_node in the dom updater is the first element of the view.
         The old technique was the replace the root node with the created first element but this is not ideal when used for custom_element since we need to get the attributes from the custom element
@@ -262,16 +265,16 @@
     - [ ] custom element should also need access to the `textContent` of the tag for further processing
 - [X] Properly trigger the MountEvent at the appending of the component to the DOM
     - Right now, it is triggered when the virtual Node is created into a real Node.
-- [ ] Maybe rename `#[web_component]` macro to `#[custom_element]`
+- [X] Maybe rename `#[web_component]` macro to `#[custom_element]`
     - Also `WebComponent` to `CustomElementWrapper`
 
 
 ## Performance
 - [X] Fix the reported issues with benchmarks
     - fixed by setting the target to web when building the wasm
-- [ ] Create a new benchmark for the js-comprehensive-benchmark suite
+- [X] Create a new benchmark for the js-comprehensive-benchmark suite
     - [link](https://github.com/krausest/js-framework-benchmark)
-    - [ ] Initial attempt https://github.com/ivanceras/performance-test-sauron
+    - Initial attempt https://github.com/ivanceras/performance-test-sauron
 - ~~[ ] Use Weak pointer for program instead of Rc where strong reference is not needed.~~
        - Program stays as long as the user is using the app.
 - [X] Add `Program::batch_dispatch(&self, msgs: Vec<MSG>)` to call update on each of the messages before
@@ -311,8 +314,8 @@
 - [X] Move `html::units` to `jss` crate
 - [X] Rename `DomUpdater` to `DomPatcher`.
     - [X] move apply_patches into `DomPatcher`.
-- [ ] Rename `CreatedNode` to `DomNode`.
-    - [ ] Maybe completely remove CreatedNode
+- [X] Rename `CreatedNode` to `DomNode`.
+    - [X] Maybe completely remove CreatedNode
 - [X] Move fields from `DomUpdater` into `Program` such as
      - [X] current_vdom
      - [X] root_node,
@@ -326,7 +329,7 @@
      - This is solved by getting the type_id of the closure.
 - [X] Add more test for recycled nodes with keys
 - [X] When 2 text are next to each other, the second text will become a comment
-- [ ] Runtime errors when using fragments
+- [X] Runtime errors when using fragments
 - [ ] usage of `classes_flag` seems to be broken with complext trait requirement.
     - This should work very simply `classes_flag([("todo", true), ("editor", is_editing)])`
 
