@@ -4,6 +4,8 @@ use crate::dom::{Application, Cmd};
 use crate::vdom;
 use std::{cell::RefCell, collections::VecDeque, rc::Rc};
 
+/// ServerContext module pertains only to application state and manages objects that affects it.
+/// It has no access to the dom, threads or any of the processing details that Program has to do.
 pub(crate) struct ServerContext<APP, MSG>
 where
     MSG: 'static,
@@ -43,8 +45,9 @@ where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
-    pub fn init_app(&self) -> Vec<Cmd<APP, MSG>> {
-        self.app.borrow_mut().init()
+    pub fn init_app(&self) -> Cmd<APP, MSG> {
+        let cmds = self.app.borrow_mut().init();
+        Cmd::batch(cmds)
     }
     pub fn view(&self) -> vdom::Node<MSG> {
         self.app.borrow().view()

@@ -146,10 +146,8 @@ where
     /// executed after the program has been mounted
     fn after_mounted(&self) {
         // call the init of the component
-        let cmds = self.server_context.init_app();
-        // then emit the cmds, so it starts executing initial calls such (ie: fetching data,
-        // listening to events (resize, hashchange)
-        cmds.into_iter().for_each(|cmd|cmd.emit(self));
+        let cmd = self.server_context.init_app();
+        cmd.emit(&self);
 
         // inject the app's dynamic style after the emitting the init function and it's effects
         self.inject_dynamic_style();
