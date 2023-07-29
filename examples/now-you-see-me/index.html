@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <title>Now, you see me...</title>
+  </head>
+  <body>
+    <script type=module>
+      import init from './dist/nusm.js';
+      await init().catch(console.error);
+    </script>
+  </body>
+</html>

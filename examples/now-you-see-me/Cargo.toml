@@ -1,0 +1,16 @@
+
+[package]
+name = "now-you-see-me"
+version = "0.1.0"
+authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
+license = "MIT"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+sauron = { path = "../../"}
+console_error_panic_hook = "0.1"
+log = "0.4"
+console_log = { version = "0.2", features = ["color"] }

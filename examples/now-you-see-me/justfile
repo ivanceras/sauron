@@ -1,0 +1,5 @@
+build:
+    wasm-pack build --target web --release --out-name nusm --out-dir dist
+
+serve: build
+    basic-http-server . -a 127.0.0.1:4042
