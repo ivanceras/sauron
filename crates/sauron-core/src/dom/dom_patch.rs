@@ -307,26 +307,46 @@ where
             // including the associated closures of the descendant of replaced node
             // before it is actully replaced in the DOM
             PatchVariant::ReplaceNode { mut replacement } => {
-                if target_element.node_type() == Node::ELEMENT_NODE {
-                    self.remove_event_listeners(&target_element)?;
-                }
                 let first_node = replacement.pop().expect("must have a first node");
-                target_element
-                    .replace_with_with_node_1(&first_node)
-                    .unwrap_or_else(|e| {
-                        panic!("unable to replace node with {first_node:?}, {e:?}");
-                    });
+                if target_element.node_type() == Node::DOCUMENT_FRAGMENT_NODE {
+                    // Only allowed when it is top level element
+                    assert!(patch_path.is_empty());
+                    let mount_node = self.mount_node();
+                    let mount_elm: &web_sys::Element = mount_node.unchecked_ref();
+                    Self::clear_children(&mount_node);
+                    mount_node
+                        .append_child(&first_node)
+                        .expect("must append child");
+                    Self::dispatch_mount_event(&first_node);
 
-                Self::dispatch_mount_event(&first_node);
+                    for node in replacement.into_iter() {
+                        let node_elm: &web_sys::Element = node.unchecked_ref();
+                        mount_node.append_child(node_elm).expect("append child");
+                        Self::dispatch_mount_event(node_elm);
+                    }
+                } else {
+                    if target_element.node_type() == Node::ELEMENT_NODE {
+                        log::info!("an ELEMENT_NODE");
+                        self.remove_event_listeners(&target_element)?;
+                    }
+                    //let first_node = replacement.pop().expect("must have a first node");
+                    target_element
+                        .replace_with_with_node_1(&first_node)
+                        .unwrap_or_else(|e| {
+                            panic!("unable to replace node with {first_node:?}, {e:?}");
+                        });
 
-                let first_node_elm: &web_sys::Element = first_node.unchecked_ref();
+                    Self::dispatch_mount_event(&first_node);
 
-                for node in replacement.into_iter() {
-                    let node_elm: &web_sys::Element = node.unchecked_ref();
-                    first_node_elm
-                        .insert_adjacent_element(intern("beforebegin"), node_elm)
-                        .expect("append child");
-                    Self::dispatch_mount_event(node_elm);
+                    let first_node_elm: &web_sys::Element = first_node.unchecked_ref();
+
+                    for node in replacement.into_iter() {
+                        let node_elm: &web_sys::Element = node.unchecked_ref();
+                        first_node_elm
+                            .insert_adjacent_element(intern("beforebegin"), node_elm)
+                            .expect("append child");
+                        Self::dispatch_mount_event(node_elm);
+                    }
                 }
 
                 //Note: it is important that root_node points to the original mutable reference here

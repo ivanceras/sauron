@@ -88,6 +88,15 @@ where
         document().create_text_node(txt)
     }
 
+    fn create_document_fragment(&self, nodes: &[vdom::Node<MSG>]) -> Node {
+        let doc_fragment = document().create_document_fragment();
+        for vnode in nodes {
+            let created_node = self.create_dom_node(vnode);
+            Self::append_child_and_dispatch_mount_event(&doc_fragment, &created_node)
+        }
+        doc_fragment.into()
+    }
+
     fn create_leaf_node(&self, leaf: &Leaf<MSG>) -> Node {
         match leaf {
             Leaf::Text(txt) => Self::create_text_node(txt).into(),
@@ -101,14 +110,7 @@ where
                     doctype is only used in rendering"
                 );
             }
-            Leaf::Fragment(nodes) => {
-                let doc_fragment = document().create_document_fragment();
-                for vnode in nodes {
-                    let created_node = self.create_dom_node(vnode);
-                    Self::append_child_and_dispatch_mount_event(&doc_fragment, &created_node)
-                }
-                doc_fragment.into()
-            }
+            Leaf::Fragment(nodes) => self.create_document_fragment(nodes),
         }
     }
 
@@ -135,9 +137,10 @@ where
                 }
                 created_node
             }
-            vdom::Node::NodeList(_node_list) => {
-                panic!("Node list must have already been unrolled");
-            }
+            // NodeList that goes here is only possible when it is the root_node,
+            // since node_list as children will be unrolled into as child_elements of the parent
+            // We need to wrap this node_list into doc_fragment since root_node is only 1 element
+            vdom::Node::NodeList(node_list) => self.create_document_fragment(node_list),
         }
     }
 
@@ -192,6 +195,13 @@ where
             .append_child(child_node)
             .expect("must append child node");
         Self::dispatch_mount_event(child_node);
+    }
+
+    /// clear all children of the element
+    pub(crate) fn clear_children(node: &Node) {
+        while let Some(first_child) = node.first_child() {
+            node.remove_child(&first_child).expect("must remove child");
+        }
     }
 
     /// set the element attribute
