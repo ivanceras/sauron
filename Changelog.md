@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.58.0
+- use the latest published version of mt-dom
+- refactor: move `fragment` into `mt-dom,` so it can be diff there, therefore will still be performant when in used in Application view
+- fix: **breaking** expose `delay` function, in replacement to `async_delay`
+- fix: issue with `fragment` node and `node_list` when used in the top-level view of the app
+- refactor: **breaking** swap names for `custom_element` and `web_component` since it is more concise to swap the two
+
 ## 0.57.5
 - update to `mt-dom` `0.57.0`
 - feat: add method as_text to NodeTrait for extracting optional str from a leaf text node
