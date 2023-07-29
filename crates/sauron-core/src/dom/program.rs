@@ -124,14 +124,8 @@ where
         action: MountAction,
         target: MountTarget,
     ) -> Self {
-        let view = app.view();
         Program {
-            server_context: ServerContext{
-                app: Rc::new(RefCell::new(app)),
-                current_vdom: Rc::new(RefCell::new(view)),
-                pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
-                pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
-            },
+            server_context: ServerContext::new(app),
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(mount_node.clone())),
             node_closures: Rc::new(RefCell::new(ActiveClosure::new())),

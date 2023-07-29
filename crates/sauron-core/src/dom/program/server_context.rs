@@ -45,6 +45,15 @@ where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
+    pub fn new(app: APP) -> Self {
+        let view = app.view();
+        Self {
+            app: Rc::new(RefCell::new(app)),
+            current_vdom: Rc::new(RefCell::new(view)),
+            pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
+            pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
+        }
+    }
     pub fn init_app(&self) -> Cmd<APP, MSG> {
         let cmds = self.app.borrow_mut().init();
         Cmd::batch(cmds)
