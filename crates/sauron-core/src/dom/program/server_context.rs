@@ -85,11 +85,17 @@ where
     /// dispatch a single pending msg, return true successfully dispatch one
     /// false if there is no more pending msg
     pub fn dispatch_pending_msg(&self) -> bool {
-        if let Some(pending_msg) = self.pending_msgs.borrow_mut().pop_front() {
+        let pending_msg = self.pending_msgs.borrow_mut().pop_front();
+        let cmd = if let Some(pending_msg) = pending_msg {
             // Note: each MSG needs to be executed one by one in the same order
             // as APP's state can be affected by the previous MSG
             let cmd = self.update_app(pending_msg);
+            Some(cmd)
+        } else {
+            None
+        };
 
+        if let Some(cmd) = cmd {
             // we put the cmd in the pending_cmd queue
             self.pending_cmds.borrow_mut().push_back(cmd);
             true
