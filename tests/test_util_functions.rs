@@ -1,6 +1,6 @@
 #![deny(warnings)]
 use wasm_bindgen_test::*;
-use sauron::dom::async_delay;
+use sauron::dom::delay;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -14,7 +14,7 @@ async fn test_delays() {
 
     let t1 = sauron::now();
     log::debug!("t1: {}", t1);
-    async_delay(5000).await.unwrap();
+    delay(5000).await;
     let t2 = sauron::now();
     log::debug!("t2: {}", t2);
 
