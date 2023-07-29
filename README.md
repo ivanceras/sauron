@@ -10,7 +10,14 @@
 ![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png)
 
 **Sauron** is a versatile web framework and library for building client-side and/or server-side web applications
-with strong focus on simplicity. It is suited for developing web application which uses progressive rendering.
+with strong focus on simplicity and minimalism.
+This allows you to write least amount of code possible, and focus more on the business logic rather than the inner details of the framework.
+It is suited for developing web application which uses progressive rendering.
+
+In a sauron application, there is only the model, view and update.
+The model is your application state.
+The view describes how to present the model to the user.
+The update function describes how to update the model, this uses message which contains the data needed for updating the model.
 
 
 #### Counter example
@@ -37,7 +44,7 @@ impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
-                <h1>"Minimal example"</h1>
+                <h1>Minimal example</h1>
                 <div class="some-class" id="some-id" {attr("data-id", 1)}>
                     <input class="client"
                             type="button"
