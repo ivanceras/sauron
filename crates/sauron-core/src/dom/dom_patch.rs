@@ -325,7 +325,6 @@ where
                     }
                 } else {
                     if target_element.node_type() == Node::ELEMENT_NODE {
-                        log::info!("an ELEMENT_NODE");
                         self.remove_event_listeners(&target_element)?;
                     }
                     //let first_node = replacement.pop().expect("must have a first node");
