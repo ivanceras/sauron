@@ -165,7 +165,7 @@ fn add_children() {
     assert_eq!(
         dbg!(diff(&old, &new)),
         vec![Patch::append_children(
-            &"div",
+            Some(&"div"),
             TreePath::new(vec![]),
             vec![&html_element(None, "new", vec![], vec![], false)]
         )],
