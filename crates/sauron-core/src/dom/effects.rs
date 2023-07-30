@@ -21,13 +21,15 @@ pub struct Effects<MSG, XMSG> {
 impl<MSG, XMSG> Effects<MSG, XMSG>
 where
     MSG: 'static,
-    XMSG: 'static,
 {
     /// create a new Effects with local and external expects respectively
     pub fn new(
         local: impl IntoIterator<Item = MSG>,
         external: impl IntoIterator<Item = XMSG>,
-    ) -> Self {
+    ) -> Self
+    where
+        XMSG: 'static,
+    {
         Self {
             local: local.into_iter().map(|l| Task::new(ready(l))).collect(),
             external: external.into_iter().map(|x| Task::new(ready(x))).collect(),
@@ -45,7 +47,10 @@ where
     }
 
     /// Create an Effects with extern messages that will be executed on the parent Component
-    pub fn with_external(external: impl IntoIterator<Item = XMSG>) -> Self {
+    pub fn with_external(external: impl IntoIterator<Item = XMSG>) -> Self
+    where
+        XMSG: 'static,
+    {
         Self {
             local: vec![],
             external: external.into_iter().map(|x| Task::new(ready(x))).collect(),
@@ -88,6 +93,7 @@ where
     pub fn map_external<F, XMSG2>(self, f: F) -> Effects<MSG, XMSG2>
     where
         F: Fn(XMSG) -> XMSG2 + Clone + 'static,
+        XMSG: 'static,
         XMSG2: 'static,
     {
         let Effects {
@@ -109,6 +115,7 @@ where
     pub fn localize<F, XMSG2>(self, f: F) -> Effects<XMSG, XMSG2>
     where
         F: Fn(MSG) -> XMSG + Clone + 'static,
+        XMSG: 'static,
         XMSG2: 'static,
     {
         let Effects {
@@ -174,7 +181,10 @@ where
         mut self,
         local: impl IntoIterator<Item = MSG>,
         external: impl IntoIterator<Item = XMSG>,
-    ) -> Self {
+    ) -> Self
+    where
+        XMSG: 'static,
+    {
         self.local
             .extend(local.into_iter().map(|l| Task::new(ready(l))));
         self.external

@@ -22,7 +22,10 @@ pub struct Field<XMSG> {
     on_interact: Vec<Box<dyn Fn(Interaction) -> XMSG>>,
 }
 
-impl<XMSG> Field<XMSG> {
+impl<XMSG> Field<XMSG>
+where
+    XMSG: 'static,
+{
     pub fn new(field_name: String) -> Self {
         Field {
             field_clicks: 0,
@@ -36,7 +39,10 @@ impl<XMSG> Field<XMSG> {
     }
 }
 
-impl<XMSG> Component<Msg, XMSG> for Field<XMSG> {
+impl<XMSG> Component<Msg, XMSG> for Field<XMSG>
+where
+    XMSG: 'static,
+{
     fn init(&mut self) -> Vec<Task<Msg>> {
         vec![]
     }
