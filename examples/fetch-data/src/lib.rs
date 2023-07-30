@@ -1,12 +1,12 @@
 #![deny(warnings)]
-use sauron::js_sys::TypeError;
-use serde::Deserialize;
 use sauron::dom::spawn_local;
 use sauron::dom::Http;
-use sauron::{text, jss, Cmd, Program, Application, Node, wasm_bindgen};
-use sauron::html::*;
 use sauron::html::attributes::*;
 use sauron::html::events::*;
+use sauron::html::*;
+use sauron::js_sys::TypeError;
+use sauron::{jss, text, wasm_bindgen, Application, Cmd, Node, Program};
+use serde::Deserialize;
 
 #[macro_use]
 extern crate log;
@@ -74,7 +74,7 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self) ->Cmd<Self, Msg> {
+    fn init(&mut self) -> Cmd<Self, Msg> {
         console_log::init_with_level(log::Level::Trace).unwrap();
         self.fetch_page()
     }
@@ -176,13 +176,11 @@ impl Application<Msg> for App {
     }
 
     fn stylesheet() -> Vec<String> {
-        vec![
-            jss! {
-                "body": {
-                    font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
-                }
+        vec![jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
             }
-        ]
+        }]
     }
 }
 

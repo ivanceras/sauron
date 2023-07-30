@@ -70,7 +70,9 @@ fn updates_active_closure_on_replace() {
     assert_eq!(&*text.borrow(), "Start Text");
 
     // After dispatching the on_input event our `text` should have a value of the input elements value.
-    let input = sauron_core::dom::document().get_element_by_id(&elem_id).unwrap();
+    let input = sauron_core::dom::document()
+        .get_element_by_id(&elem_id)
+        .unwrap();
     web_sys::EventTarget::from(input)
         .dispatch_event(&input_event)
         .unwrap();
@@ -122,7 +124,9 @@ async fn updates_active_closures_on_append() {
     assert_eq!(&*text.borrow(), "Start Text");
 
     // After dispatching the on_input event our `text` should have a value of the input elements value.
-    let input = sauron_core::dom::document().get_element_by_id(elem_id).unwrap();
+    let input = sauron_core::dom::document()
+        .get_element_by_id(elem_id)
+        .unwrap();
     web_sys::EventTarget::from(input)
         .dispatch_event(&input_event)
         .unwrap();

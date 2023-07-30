@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::{*, js_sys::TypeError, jss, dom::spawn_local, dom::Http};
+use sauron::{dom::spawn_local, dom::Http, js_sys::TypeError, jss, *};
 use serde::Deserialize;
 
 #[macro_use]
@@ -159,13 +159,11 @@ impl Application<Msg> for App {
     }
 
     fn stylesheet() -> Vec<String> {
-        vec![
-            jss! {
-                "body": {
-                    font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
-                }
+        vec![jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
             }
-        ]
+        }]
     }
 }
 

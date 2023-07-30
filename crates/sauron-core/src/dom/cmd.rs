@@ -46,10 +46,7 @@ where
             modifier.coalesce(&cmd.modifier);
             commands.extend(cmd.commands);
         }
-        Self {
-            commands,
-            modifier,
-        }
+        Self { commands, modifier }
     }
 
     /// Add a cmd
@@ -150,22 +147,18 @@ where
     }
 }
 
-impl<APP,MSG> From<Task<MSG>> for Cmd<APP,MSG>
+impl<APP, MSG> From<Task<MSG>> for Cmd<APP, MSG>
 where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
-
     fn from(task: Task<MSG>) -> Self {
         let task = task.task;
-        Cmd::new(move|program|{
-            spawn_local(async move{
+        Cmd::new(move |program| {
+            spawn_local(async move {
                 let msg = task.await;
                 program.dispatch(msg)
             });
         })
     }
 }
-
-
-

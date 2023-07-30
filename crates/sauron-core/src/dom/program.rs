@@ -1,32 +1,34 @@
-use crate::dom::{document, now, Measurements, Modifier};
-use crate::vdom;
-use crate::vdom::diff;
-use crate::dom::{Application, util::body, DomPatch, IdleCallbackHandle, AnimationFrameHandle};
-use crate::html::{self, text,attributes::class};
-use std::collections::VecDeque;
-use std::{any::TypeId, cell::{Ref,RefCell}, rc::Rc};
-use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{self, Element, IdleDeadline, Node};
-use std::collections::BTreeMap;
-use wasm_bindgen::closure::Closure;
-#[cfg(feature = "with-ric")]
-use crate::dom::request_idle_callback;
 #[cfg(feature = "with-raf")]
 use crate::dom::request_animation_frame;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash,Hasher};
+#[cfg(feature = "with-ric")]
+use crate::dom::request_idle_callback;
+use crate::dom::{document, now, Measurements, Modifier};
+use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
+use crate::html::{self, attributes::class, text};
+use crate::vdom;
+use crate::vdom::diff;
 use app_context::AppContext;
+use std::collections::hash_map::DefaultHasher;
+use std::collections::BTreeMap;
+use std::collections::VecDeque;
+use std::hash::{Hash, Hasher};
+use std::{
+    any::TypeId,
+    cell::{Ref, RefCell},
+    rc::Rc,
+};
+use wasm_bindgen::closure::Closure;
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{self, Element, IdleDeadline, Node};
 
 mod app_context;
-
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP, MSG>
 where
     MSG: 'static,
 {
-
-    pub(crate) app_context: AppContext<APP,MSG>,
+    pub(crate) app_context: AppContext<APP, MSG>,
 
     /// the first element of the app view, where the patch is generated is relative to
     pub(crate) root_node: Rc<RefCell<Option<Node>>>,
@@ -57,13 +59,13 @@ where
     pub(crate) event_closures: Rc<RefCell<Vec<Closure<dyn FnMut(web_sys::Event)>>>>,
 }
 
-
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
 /// VirtualNode is dropped.
 ///
 /// The usize is a unique identifier that is associated with the DOM element that this closure is
 /// attached to.
-pub type ActiveClosure = BTreeMap<usize, BTreeMap<&'static str, Closure<dyn FnMut(web_sys::Event)>>>;
+pub type ActiveClosure =
+    BTreeMap<usize, BTreeMap<&'static str, Closure<dyn FnMut(web_sys::Event)>>>;
 
 /// specify how the App is mounted to the DOM
 #[derive(Clone, Copy)]
@@ -152,14 +154,14 @@ where
         self.inject_dynamic_style();
     }
 
-    fn app_hash() -> u64{
+    fn app_hash() -> u64 {
         let type_id = TypeId::of::<APP>();
         let mut hasher = DefaultHasher::new();
         type_id.hash(&mut hasher);
         hasher.finish()
     }
 
-    fn inject_stylesheet(&self){
+    fn inject_stylesheet(&self) {
         let static_style = self.app_context.static_style();
         if !static_style.is_empty() {
             let class_names = format!("static {}", Self::app_hash());
@@ -167,7 +169,7 @@ where
         }
     }
 
-    fn inject_dynamic_style(&self){
+    fn inject_dynamic_style(&self) {
         let dynamic_style = self.app_context.dynamic_style();
         if !dynamic_style.is_empty() {
             let class_names = format!("dynamic {}", Self::app_hash());
@@ -272,9 +274,7 @@ where
     /// an actual DOM node.
     pub fn mount(&self) {
         self.pre_mount();
-        let created_node = self.create_dom_node(
-            &self.app_context.current_vdom(),
-        );
+        let created_node = self.create_dom_node(&self.app_context.current_vdom());
 
         let mount_node: web_sys::Node = match self.mount_procedure.target {
             MountTarget::MountNode => self.mount_node.borrow().clone(),
@@ -293,7 +293,7 @@ where
 
         match self.mount_procedure.action {
             MountAction::Append => {
-                Self::append_child_and_dispatch_mount_event(&mount_node,  &created_node);
+                Self::append_child_and_dispatch_mount_event(&mount_node, &created_node);
             }
             MountAction::ClearAppend => {
                 let children = mount_node.child_nodes();
@@ -410,8 +410,7 @@ where
 
     /// replace the current vdom with the `new_vdom`.
     pub fn set_current_dom(&self, new_vdom: vdom::Node<MSG>) {
-        let created_node =
-            self.create_dom_node(&new_vdom);
+        let created_node = self.create_dom_node(&new_vdom);
         self.mount_node
             .borrow_mut()
             .append_child(&created_node)
@@ -420,7 +419,6 @@ where
         *self.root_node.borrow_mut() = Some(created_node);
         self.app_context.set_current_dom(new_vdom);
     }
-
 
     /// apply pending patches using raf
     /// if raf is not available, use ric
@@ -518,17 +516,15 @@ where
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
     fn dispatch_dom_changes(&self, modifier: &Modifier) {
-
         #[allow(unused_variables)]
         let measurements = self.update_dom(modifier).expect("must update dom");
 
         #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied
         if modifier.log_measurements && measurements.total_patches > 0 {
-             let cmd_measurement = self.app_context.measurements(measurements);
-             cmd_measurement.emit(self);
+            let cmd_measurement = self.app_context.measurements(measurements);
+            cmd_measurement.emit(self);
         }
-
     }
 
     #[cfg(feature = "with-ric")]
@@ -622,15 +618,11 @@ where
 
     /// Inject a style to the global document
     fn inject_style(&self, class_names: String, style: &str) {
-        let style_node = html::tags::style(
-            [class(class_names)],
-            [text(style)],
-        );
+        let style_node = html::tags::style([class(class_names)], [text(style)]);
         let created_node = self.create_dom_node(&style_node);
 
         let head = document().head().expect("must have a head");
-        head.append_child(&created_node)
-            .expect("must append style");
+        head.append_child(&created_node).expect("must append style");
     }
 
     /// inject style element to the mount node

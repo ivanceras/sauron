@@ -1,6 +1,6 @@
 #![deny(warnings)]
-use wasm_bindgen_test::*;
 use sauron::dom::delay;
+use wasm_bindgen_test::*;
 
 wasm_bindgen_test_configure!(run_in_browser);
 

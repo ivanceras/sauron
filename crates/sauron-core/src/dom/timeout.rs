@@ -1,8 +1,8 @@
 use crate::dom::window;
+use js_sys::Promise;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
-use js_sys::Promise;
 
 /// handle for request_idle_callback calls
 #[derive(Debug)]
@@ -33,9 +33,8 @@ where
     })
 }
 
-
 /// simulate a delay using promise in js
-pub(crate) async fn async_delay(timeout: i32) -> Result<TimeoutCallbackHandle, JsValue>{
+pub(crate) async fn async_delay(timeout: i32) -> Result<TimeoutCallbackHandle, JsValue> {
     let mut result = Err(JsValue::NULL);
     let promise = Promise::new(&mut |resolve, _reject| {
         let handle = request_timeout_callback(

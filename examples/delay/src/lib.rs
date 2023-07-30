@@ -1,9 +1,12 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
 use log::trace;
-use sauron::{text, jss, html::*, html::events::*, html::attributes::*,
-    Application, Node, Program, Cmd, wasm_bindgen,
+use sauron::{
     dom::{delay, TimeoutCallbackHandle},
+    html::attributes::*,
+    html::events::*,
+    html::*,
+    jss, text, wasm_bindgen, Application, Cmd, Node, Program,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -105,13 +108,11 @@ impl Application<Msg> for App {
     }
 
     fn stylesheet() -> Vec<String> {
-        vec![
-            jss! {
-                "body": {
-                    font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
-                }
+        vec![jss! {
+            "body": {
+                font_family: "Fira Sans, Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace",
             }
-        ]
+        }]
     }
 }
 
