@@ -14,10 +14,10 @@ struct App {
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![Cmd::new(|program| {
-                program.dispatch(Msg::ToggleShow);
-        })]
+    fn init(&mut self) -> Cmd<Self, Msg> {
+        Cmd::new(|program| {
+            program.dispatch(Msg::ToggleShow);
+        })
     }
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {

@@ -50,22 +50,16 @@ impl Application<Msg> for ResizeWrapper {
     /// Unliked when listen by the this view container, which the mouse
     /// can be outside of this view, which causes the mousmove event
     /// not being triggered
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![
+    fn init(&mut self) -> Cmd<Self, Msg> {
+        Cmd::batch([
             Cmd::new(|program| {
                 program.add_window_event_listeners(vec![
                     on_mouseup(|event| Msg::EndResize(event.client_x(), event.client_y())),
                     on_mousemove(|event| Msg::MouseMove(event.client_x(), event.client_y())),
                 ])
             }),
-            Cmd::batch(
-                self.data_view
-                    .init()
-                    .into_iter()
-                    .map(|task| task.map_msg(Msg::DataViewMsg))
-                    .map(Cmd::from),
-            ),
-        ]
+            Cmd::from(self.data_view.init().map_msg(Msg::DataViewMsg)),
+        ])
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {

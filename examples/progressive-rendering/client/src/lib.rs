@@ -85,9 +85,6 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![]
-    }
 
     fn view(&self) -> Node<Msg> {
         node! {
@@ -144,15 +141,6 @@ impl Application<Msg> for App {
                 Cmd::none()
             }
         }
-    }
-
-    fn stylesheet() -> Vec<String> {
-        vec![
-            jss! {
-                "body": {
-                }
-            }
-        ]
     }
 
 }

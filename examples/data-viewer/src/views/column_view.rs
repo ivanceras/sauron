@@ -1,6 +1,5 @@
 use crate::{assets, widgets::search_widget, ColumnDef};
 use sauron::{
-    dom::Task,
     html::{attributes::*, events::*, units::*, *},
     Component, Effects, Node,
 };
@@ -29,10 +28,6 @@ impl ColumnView {
 }
 
 impl Component<Msg, ()> for ColumnView {
-    fn init(&mut self) -> Vec<Task<Msg>> {
-        vec![]
-    }
-
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::ChangeSearch(search) => {
@@ -44,10 +39,6 @@ impl Component<Msg, ()> for ColumnView {
 
     fn view(&self) -> Node<Msg> {
         self.column_view_controls()
-    }
-
-    fn stylesheet() -> Vec<String> {
-        vec![]
     }
 }
 

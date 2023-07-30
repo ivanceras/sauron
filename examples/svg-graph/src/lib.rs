@@ -1,15 +1,4 @@
 #![deny(warnings)]
-/*
-use sauron::{
-    html::attributes::{attr, class, id, style},
-    html::text,
-    html::units::{percent, px, rgb},
-    svg::attributes::*,
-    svg::tags::radial_gradient,
-    svg::*,
-    *,
-};
-*/
 use sauron::prelude::*;
 
 extern crate log;
@@ -24,10 +13,6 @@ pub struct App {
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![]
-    }
-
     fn view(&self) -> Node<Msg> {
         svg(
             [

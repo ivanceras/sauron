@@ -43,9 +43,6 @@ impl Tab {
 }
 
 impl Component<Msg, ()> for Tab {
-    fn init(&mut self) -> Vec<Task<Msg>> {
-        vec![]
-    }
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::TabClick => {
@@ -86,9 +83,5 @@ impl Component<Msg, ()> for Tab {
                 ),
             ],
         )
-    }
-
-    fn stylesheet() -> Vec<String> {
-        vec![]
     }
 }

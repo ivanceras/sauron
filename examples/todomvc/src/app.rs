@@ -1,7 +1,7 @@
 use sauron::{
     dom::events::KeyboardEvent,
     html::{attributes::*, events::*, *},
-    jss, Application, Cmd, Node,
+    jss, text, Application, Cmd, Node,
 };
 use serde_derive::{Deserialize, Serialize};
 
@@ -43,10 +43,6 @@ pub enum Msg {
 }
 
 impl Application<Msg> for Model {
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![]
-    }
-
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Add => {
@@ -176,7 +172,6 @@ impl Model {
                             Visibility::Completed => entry.completed,
                         })
                         .map(|entry| self.view_entry(entry))
-                        .collect::<Vec<Node<Msg>>>()
                 }),
             ],
         )
@@ -295,10 +290,7 @@ impl Model {
             [
                 span(
                     [class("todo-count")],
-                    [
-                        strong([], [text(entries_left)]),
-                        text(format!(" {} left", item)),
-                    ],
+                    [strong([], [text(entries_left)]), text!(" {} left", item)],
                 ),
                 ul(
                     [class("filters")],
@@ -314,7 +306,7 @@ impl Model {
                         hidden(entries_completed == 0),
                         on_click(|_| Msg::ClearCompleted),
                     ],
-                    [text(format!("Clear completed ({})", entries_completed))],
+                    [text!("Clear completed ({})", entries_completed)],
                 ),
             ],
         )

@@ -8,10 +8,6 @@ enum AppMsg {}
 pub struct App {}
 
 impl Application<AppMsg> for App {
-    fn init(&mut self) -> Vec<Cmd<Self, AppMsg>> {
-        vec![]
-    }
-
     fn update(&mut self, _msg: AppMsg) -> Cmd<Self, AppMsg> {
         Cmd::none()
     }
@@ -25,13 +21,6 @@ impl Application<AppMsg> for App {
                 {date_time([date("2022-07-07"), time("07:07")],[])}
             </div>
         }
-    }
-    fn stylesheet() -> Vec<String> {
-        vec![]
-    }
-
-    fn style(&self) -> Vec<String> {
-        vec![]
     }
 }
 

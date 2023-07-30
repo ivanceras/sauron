@@ -10,9 +10,6 @@ pub enum Msg {
 pub struct App;
 
 impl Application<Msg> for App {
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![]
-    }
     fn update(&mut self, _msg: Msg) -> Cmd<Self, Msg> {
         Cmd::none()
     }

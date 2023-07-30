@@ -14,8 +14,8 @@ struct App {
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![Cmd::new(|program| {
+    fn init(&mut self) -> Cmd<Self, Msg> {
+        Cmd::new(|program| {
             spawn_local(async move {
                 delay(1000).await;
                 program.dispatch(Msg::AddItem);
@@ -28,7 +28,7 @@ impl Application<Msg> for App {
                 delay(5000).await;
                 program.dispatch(Msg::AddItem);
             })
-        })]
+        })
     }
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg>
     where

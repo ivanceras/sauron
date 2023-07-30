@@ -1,7 +1,6 @@
 use crate::widgets::*;
 use restq::{ast::Value, data_value::cast_data_value, ColumnDef, DataType, DataValue};
 use sauron::{
-    dom::Task,
     html::{
         attributes::{class, classes_flag, r#type, styles},
         events::*,
@@ -34,10 +33,6 @@ pub struct FieldView {
 }
 
 impl Component<Msg, ()> for FieldView {
-    fn init(&mut self) -> Vec<Task<Msg>> {
-        vec![]
-    }
-
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         trace!("field updated: {:?}", msg);
         match msg {
@@ -75,10 +70,6 @@ impl Component<Msg, ()> for FieldView {
             ],
             [self.view_value()],
         )
-    }
-
-    fn stylesheet() -> Vec<String> {
-        vec![]
     }
 }
 

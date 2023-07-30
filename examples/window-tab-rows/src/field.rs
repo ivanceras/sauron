@@ -1,6 +1,6 @@
 use sauron::{
     html::{attributes::*, events::*, *},
-    Component, Effects, Node, Task,
+    Component, Effects, Node,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -43,9 +43,6 @@ impl<XMSG> Component<Msg, XMSG> for Field<XMSG>
 where
     XMSG: 'static,
 {
-    fn init(&mut self) -> Vec<Task<Msg>> {
-        vec![]
-    }
     fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::FieldClick => {
@@ -73,9 +70,5 @@ where
             ],
             [text(format!("{} ({})", self.field_name, self.field_clicks))],
         )
-    }
-
-    fn stylesheet() -> Vec<String> {
-        vec![]
     }
 }

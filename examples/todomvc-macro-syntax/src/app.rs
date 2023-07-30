@@ -1,4 +1,4 @@
-use sauron::{dom::events::*, html::*, jss, node, Application, Cmd, Node};
+use sauron::{dom::events::*, jss, node, text, Application, Cmd, Node};
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -39,9 +39,6 @@ pub enum Msg {
 }
 
 impl Application<Msg> for Model {
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![]
-    }
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         match msg {
             Msg::Add => {
@@ -151,15 +148,11 @@ impl Model {
     }
 
     fn view_entries(&self) -> Node<Msg> {
-        let entries = self
-            .entries
-            .iter()
-            .filter(|entry| match self.visibility {
-                Visibility::All => true,
-                Visibility::Active => !entry.completed,
-                Visibility::Completed => entry.completed,
-            })
-            .collect::<Vec<_>>();
+        let entries = self.entries.iter().filter(|entry| match self.visibility {
+            Visibility::All => true,
+            Visibility::Active => !entry.completed,
+            Visibility::Completed => entry.completed,
+        });
 
         node! {
             <section class="main">
@@ -278,7 +271,7 @@ impl Model {
             <footer class="footer">
                     <span class="todo-count">
                         <strong>{text(entries_left)}</strong>
-                        {text(format!(" {} left", item))}
+                        {text!(" {} left", item)}
                     </span>
                     <ul class="filters">
                         {self.view_filter(Visibility::All)}
@@ -288,10 +281,10 @@ impl Model {
                     <button class="clear-completed"
                             hidden=entries_completed == 0
                             on_click=|_| Msg::ClearCompleted>
-                        {text(format!(
+                        {text!(
                             "Clear completed ({})",
                             entries_completed
-                        ))}
+                        )}
                     </button>
             </footer>
         }
@@ -300,18 +293,18 @@ impl Model {
     fn info_footer(&self) -> Node<Msg> {
         node! {
             <footer class="info">
-                <p>{text("Double-click to edit a todo")}</p>
+                <p>Double-click to edit a todo</p>
                 <p>
-                    {text("Written by ")}
+                    "Written by "
                     <a href="https://github.com/ivanceras/"
                        target="_blank">
-                        {text("Jovansonlee Cesar")}
+                        Jovansonlee Cesar
                     </a>
                 </p>
                 <p>
-                    {text("Part of ")}
+                    "Part of "
                     <a href="http://todomvc.com/" target="_blank">
-                        {text("TodoMVC")}
+                        TodoMVC
                     </a>
                 </p>
             </footer>

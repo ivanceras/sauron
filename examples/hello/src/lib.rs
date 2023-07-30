@@ -3,9 +3,6 @@ use sauron::*;
 struct App;
 
 impl Application<()> for App {
-    fn init(&mut self) -> Vec<Cmd<Self, ()>> {
-        vec![]
-    }
     fn view(&self) -> Node<()> {
         let count = 0;
         node! {
@@ -18,10 +15,6 @@ impl Application<()> for App {
 
     fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
         Cmd::none()
-    }
-
-    fn stylesheet() -> Vec<String> {
-        vec![]
     }
 }
 

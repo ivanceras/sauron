@@ -9,7 +9,7 @@ use sauron::{
         units::*,
         *,
     },
-    Component, Effects, Node, NodeMapMsg, Task,
+    Component, Effects, Node, NodeMapMsg,
 };
 
 #[derive(Debug, PartialEq)]
@@ -54,9 +54,6 @@ impl PageView {
 }
 
 impl Component<Msg, ()> for PageView {
-    fn init(&mut self) -> Vec<Task<Msg>> {
-        vec![]
-    }
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::RowMsg(row_index, row_msg) => {
@@ -95,10 +92,6 @@ impl Component<Msg, ()> for PageView {
                 [],
             )
         }
-    }
-
-    fn stylesheet() -> Vec<String> {
-        vec![]
     }
 }
 

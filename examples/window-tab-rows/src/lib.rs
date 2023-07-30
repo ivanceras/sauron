@@ -60,10 +60,6 @@ impl Window {
 }
 
 impl Application<Msg> for Window {
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![]
-    }
-
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
         self.window_activities += 1;
         match msg {

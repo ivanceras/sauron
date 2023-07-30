@@ -69,11 +69,9 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
+    fn init(&mut self) -> Cmd<Self, Msg> {
         console_log::init_with_level(log::Level::Trace).unwrap();
-        vec![
         self.fetch_page()
-        ]
     }
 
     fn view(&self) -> Node<Msg> {

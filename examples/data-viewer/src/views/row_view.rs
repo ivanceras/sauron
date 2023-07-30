@@ -2,7 +2,7 @@ use crate::views::{field_view, FieldView};
 use restq::{ColumnDef, DataValue};
 use sauron::{
     html::{attributes::*, events::*, units::*, *},
-    Component, Effects, Node, NodeMapMsg, Task,
+    Component, Effects, Node, NodeMapMsg,
 };
 use std::{cell::RefCell, rc::Rc};
 
@@ -36,9 +36,6 @@ impl RowView {
 }
 
 impl Component<Msg, ()> for RowView {
-    fn init(&mut self) -> Vec<Task<Msg>> {
-        vec![]
-    }
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::FieldMsg(field_index, field_msg) => {
@@ -52,10 +49,6 @@ impl Component<Msg, ()> for RowView {
 
     fn view(&self) -> Node<Msg> {
         self.view_with_filter(|(_index, field)| field.borrow().is_normal_field())
-    }
-
-    fn stylesheet() -> Vec<String> {
-        vec![]
     }
 }
 

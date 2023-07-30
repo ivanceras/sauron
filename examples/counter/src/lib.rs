@@ -19,10 +19,6 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![]
-    }
-
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
