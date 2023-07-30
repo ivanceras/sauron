@@ -400,7 +400,13 @@ where
                 .convert_patches(&patches)
                 .expect("must convert patches");
             self.pending_patches.borrow_mut().extend(dom_patches);
-            self.apply_pending_patches_with_priority_raf();
+
+            #[cfg(feature = "with-raf")]
+            self.apply_pending_patches_with_raf().expect("raf");
+
+            #[cfg(not(feature = "with-raf"))]
+            self.apply_pending_patches().expect("raf");
+
             patches.len()
         };
 
@@ -420,71 +426,11 @@ where
         self.app_context.set_current_dom(new_vdom);
     }
 
-    /// apply pending patches using raf
-    /// if raf is not available, use ric
-    /// if ric is not available call bare function
-    fn apply_pending_patches_with_priority_raf(&self) {
-        #[cfg(feature = "with-raf")]
-        self.apply_pending_patches_with_raf()
-            .expect("must complete");
-        #[cfg(not(feature = "with-raf"))]
-        {
-            #[cfg(feature = "with-ric")]
-            self.apply_pending_patches_with_ric()
-                .expect("must complete");
-            #[cfg(not(feature = "with-ric"))]
-            self.apply_pending_patches(None).expect("must complete");
-            #[cfg(not(feature = "with-ric"))]
-            {
-                let program = self.clone();
-                wasm_bindgen_futures::spawn_local(async move {
-                    program.apply_pending_patches(None).expect("must complete");
-                })
-            }
-        }
-    }
-
-    /// apply pending patches using ric
-    /// if ric is not available, use raf
-    /// if raf is not available call bare function
-    fn apply_pending_patches_with_priority_ric(&self) {
-        #[cfg(feature = "with-ric")]
-        self.apply_pending_patches_with_ric()
-            .expect("must complete");
-        #[cfg(not(feature = "with-ric"))]
-        {
-            #[cfg(feature = "with-raf")]
-            self.apply_pending_patches_with_raf()
-                .expect("must complete");
-
-            #[cfg(not(feature = "with-raf"))]
-            {
-                let program = self.clone();
-                wasm_bindgen_futures::spawn_local(async move {
-                    program.apply_pending_patches(None).expect("must complete");
-                })
-            }
-        }
-    }
-
-    #[cfg(feature = "with-ric")]
-    fn apply_pending_patches_with_ric(&self) -> Result<(), JsValue> {
-        let program = self.clone();
-        let handle = request_idle_callback(move |deadline| {
-            program
-                .apply_pending_patches(Some(deadline))
-                .expect("must not error");
-        })
-        .expect("must complete the remaining pending patches..");
-        self.idle_callback_handles.borrow_mut().push(handle);
-        Ok(())
-    }
-
     #[cfg(feature = "with-raf")]
     fn apply_pending_patches_with_raf(&self) -> Result<(), JsValue> {
         let program = self.clone();
         let handle = request_animation_frame(move || {
-            program.apply_pending_patches(None).expect("must not error");
+            program.apply_pending_patches().expect("must not error");
         })
         .expect("must execute");
         self.animation_frame_handles.borrow_mut().push(handle);
@@ -492,24 +438,13 @@ where
     }
 
     /// apply the pending patches into the DOM
-    fn apply_pending_patches(&self, deadline: Option<IdleDeadline>) -> Result<(), JsValue> {
+    fn apply_pending_patches(&self) -> Result<(), JsValue> {
         if self.pending_patches.borrow().is_empty() {
             return Ok(());
         }
-        let mut did_complete = true;
         while let Some(dom_patch) = self.pending_patches.borrow_mut().pop_front() {
             self.apply_dom_patch(dom_patch)
                 .expect("must apply dom patch");
-            // only break if deadline is specified
-            if let Some(deadline) = &deadline {
-                if deadline.did_timeout() {
-                    did_complete = false;
-                    break;
-                }
-            }
-        }
-        if !did_complete {
-            self.apply_pending_patches_with_priority_ric();
         }
         Ok(())
     }
@@ -599,7 +534,7 @@ where
 
         // Ensure all pending patches are applied before emiting the Cmd from update
         if !self.pending_patches.borrow().is_empty() {
-            self.apply_pending_patches(None)
+            self.apply_pending_patches()
                 .expect("applying pending patches..");
         }
 
