@@ -137,7 +137,6 @@ pub mod commons {
         coords;
         crossorigin;
         csp;
-        data;
         datetime;
         decoding;
         default;
@@ -227,6 +226,7 @@ declare_html_attributes_non_common! {
     cite; //conflicts with html::tag::cite
     summary; //conflicts with html::tag::summary
     pattern; //conflicts with svg::pattern
+    data; //data is a commonly used in local variables
 }
 
 // attributes with dash
