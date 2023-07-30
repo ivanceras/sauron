@@ -28,3 +28,13 @@ impl<MSG> Task<MSG> where MSG: 'static{
         })
     }
 }
+
+impl<F,MSG> From<F> for Task<MSG>
+where F: Future<Output = MSG> + 'static,
+MSG: 'static
+{
+
+    fn from(f: F) -> Self {
+        Task::new(f)
+    }
+}

@@ -1,7 +1,4 @@
-use crate::{
-    dom::{Effects, Task},
-    vdom::Node,
-};
+use crate::{dom::Effects, vdom::Node};
 
 /// A component has a view and can update itself.
 ///
@@ -9,10 +6,13 @@ use crate::{
 /// follow ups and effects. Follow ups are executed on the next
 /// update loop of this component, while the effects are executed
 /// on the parent component that mounts it.
-pub trait Component<MSG, XMSG> {
+pub trait Component<MSG, XMSG>
+where
+    MSG: 'static,
+{
     /// init the component
-    fn init(&mut self) -> Vec<Task<MSG>> {
-        vec![]
+    fn init(&mut self) -> Effects<MSG, XMSG> {
+        Effects::none()
     }
 
     /// Update the model of this component and return
@@ -41,10 +41,13 @@ pub trait Component<MSG, XMSG> {
 ///
 /// The view in the container is set by the parent component. The container itself
 /// can not listen to events on its view
-pub trait Container<MSG, XMSG> {
+pub trait Container<MSG, XMSG>
+where
+    MSG: 'static,
+{
     /// init the container
-    fn init(&mut self) -> Vec<Task<MSG>> {
-        vec![]
+    fn init(&mut self) -> Effects<MSG, XMSG> {
+        Effects::none()
     }
     /// update the model of this component and return follow ups and/or effects
     /// that will be executed on the next update loop.

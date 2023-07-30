@@ -55,8 +55,7 @@ where
         }
     }
     pub fn init_app(&self) -> Cmd<APP, MSG> {
-        let cmds = self.app.borrow_mut().init();
-        Cmd::batch(cmds)
+        self.app.borrow_mut().init()
     }
     pub fn view(&self) -> vdom::Node<MSG> {
         self.app.borrow().view()
