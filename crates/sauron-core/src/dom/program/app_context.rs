@@ -2,7 +2,11 @@
 use crate::dom::Measurements;
 use crate::dom::{Application, Cmd};
 use crate::vdom;
-use std::{cell::RefCell, collections::VecDeque, rc::Rc};
+use std::{
+    cell::{Ref, RefCell},
+    collections::VecDeque,
+    rc::Rc,
+};
 
 /// AppContext module pertains only to application state and manages objects that affects it.
 /// It has no access to the dom, threads or any of the processing details that Program has to do.
@@ -70,6 +74,10 @@ where
 
     pub fn set_current_dom(&self, new_vdom: vdom::Node<MSG>) {
         *self.current_vdom.borrow_mut() = new_vdom;
+    }
+
+    pub fn current_vdom(&self) -> Ref<'_, vdom::Node<MSG>> {
+        self.current_vdom.borrow()
     }
 
     #[cfg(feature = "with-measure")]

@@ -4,7 +4,7 @@ use crate::vdom::diff;
 use crate::dom::{Application, util::body, DomPatch, IdleCallbackHandle, AnimationFrameHandle};
 use crate::html::{self, text,attributes::class};
 use std::collections::VecDeque;
-use std::{any::TypeId, cell::RefCell, rc::Rc};
+use std::{any::TypeId, cell::{Ref,RefCell}, rc::Rc};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, IdleDeadline, Node};
 use std::collections::BTreeMap;
@@ -135,6 +135,11 @@ where
             animation_frame_handles: Rc::new(RefCell::new(vec![])),
             event_closures: Rc::new(RefCell::new(vec![])),
         }
+    }
+
+    /// get a reference to the APP
+    pub fn app(&self) -> Ref<'_, APP> {
+        self.app_context.app.borrow()
     }
 
     /// executed after the program has been mounted
@@ -268,7 +273,7 @@ where
     pub fn mount(&self) {
         self.pre_mount();
         let created_node = self.create_dom_node(
-            &self.app_context.current_vdom.borrow(),
+            &self.app_context.current_vdom(),
         );
 
         let mount_node: web_sys::Node = match self.mount_procedure.target {
@@ -384,7 +389,7 @@ where
     /// patch the DOM to reflect the App's view
     pub fn update_dom_with_vdom(&self, new_vdom: vdom::Node<MSG>) -> Result<usize, JsValue> {
         let total_patches = {
-            let current_vdom = self.app_context.current_vdom.borrow();
+            let current_vdom = self.app_context.current_vdom();
             let patches = diff(&current_vdom, &new_vdom);
             #[cfg(all(feature = "with-debug", feature = "log-patches"))]
             {
