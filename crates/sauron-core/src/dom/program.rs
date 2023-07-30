@@ -15,9 +15,9 @@ use crate::dom::request_idle_callback;
 use crate::dom::request_animation_frame;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash,Hasher};
-use server_context::ServerContext;
+use app_context::AppContext;
 
-mod server_context;
+mod app_context;
 
 
 /// Program handle the lifecycle of the APP
@@ -26,7 +26,7 @@ where
     MSG: 'static,
 {
 
-    pub(crate) server_context: ServerContext<APP,MSG>,
+    pub(crate) app_context: AppContext<APP,MSG>,
 
     /// the first element of the app view, where the patch is generated is relative to
     pub(crate) root_node: Rc<RefCell<Option<Node>>>,
@@ -98,7 +98,7 @@ where
 {
     fn clone(&self) -> Self {
         Program {
-            server_context: self.server_context.clone(),
+            app_context: self.app_context.clone(),
             root_node: Rc::clone(&self.root_node),
             mount_node: Rc::clone(&self.mount_node),
             node_closures: Rc::clone(&self.node_closures),
@@ -125,7 +125,7 @@ where
         target: MountTarget,
     ) -> Self {
         Program {
-            server_context: ServerContext::new(app),
+            app_context: AppContext::new(app),
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(mount_node.clone())),
             node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
@@ -140,8 +140,8 @@ where
     /// executed after the program has been mounted
     fn after_mounted(&self) {
         // call the init of the component
-        let cmd = self.server_context.init_app();
-        cmd.emit(&self);
+        let cmd = self.app_context.init_app();
+        cmd.emit(self);
 
         // inject the app's dynamic style after the emitting the init function and it's effects
         self.inject_dynamic_style();
@@ -155,7 +155,7 @@ where
     }
 
     fn inject_stylesheet(&self){
-        let static_style = self.server_context.static_style();
+        let static_style = self.app_context.static_style();
         if !static_style.is_empty() {
             let class_names = format!("static {}", Self::app_hash());
             self.inject_style(class_names, &static_style);
@@ -163,7 +163,7 @@ where
     }
 
     fn inject_dynamic_style(&self){
-        let dynamic_style = self.server_context.dynamic_style();
+        let dynamic_style = self.app_context.dynamic_style();
         if !dynamic_style.is_empty() {
             let class_names = format!("dynamic {}", Self::app_hash());
             self.inject_style(class_names, &dynamic_style);
@@ -268,7 +268,7 @@ where
     pub fn mount(&self) {
         self.pre_mount();
         let created_node = self.create_dom_node(
-            &self.server_context.current_vdom.borrow(),
+            &self.app_context.current_vdom.borrow(),
         );
 
         let mount_node: web_sys::Node = match self.mount_procedure.target {
@@ -332,11 +332,11 @@ where
     /// as parameters.
     /// If there is no deadline specified all the pending messages are executed
     fn dispatch_pending_msgs(&self, deadline: Option<IdleDeadline>) -> Result<(), JsValue> {
-        if !self.server_context.has_pending_msgs() {
+        if !self.app_context.has_pending_msgs() {
             return Ok(());
         }
         let mut did_complete = true;
-        while self.server_context.dispatch_pending_msg() {
+        while self.app_context.dispatch_pending_msg() {
             // break only if a deadline is supplied
             if let Some(deadline) = &deadline {
                 if deadline.did_timeout() {
@@ -357,7 +357,7 @@ where
     pub fn update_dom(&self, modifier: &Modifier) -> Result<Measurements, JsValue> {
         let t1 = now();
         // a new view is created due to the app update
-        let view = self.server_context.view();
+        let view = self.app_context.view();
         let t2 = now();
 
         let node_count = view.node_count();
@@ -384,7 +384,7 @@ where
     /// patch the DOM to reflect the App's view
     pub fn update_dom_with_vdom(&self, new_vdom: vdom::Node<MSG>) -> Result<usize, JsValue> {
         let total_patches = {
-            let current_vdom = self.server_context.current_vdom.borrow();
+            let current_vdom = self.app_context.current_vdom.borrow();
             let patches = diff(&current_vdom, &new_vdom);
             #[cfg(all(feature = "with-debug", feature = "log-patches"))]
             {
@@ -399,7 +399,7 @@ where
             patches.len()
         };
 
-        self.server_context.set_current_dom(new_vdom);
+        self.app_context.set_current_dom(new_vdom);
         Ok(total_patches)
     }
 
@@ -413,7 +413,7 @@ where
             .expect("Could not append child to mount");
 
         *self.root_node.borrow_mut() = Some(created_node);
-        self.server_context.set_current_dom(new_vdom);
+        self.app_context.set_current_dom(new_vdom);
     }
 
 
@@ -520,7 +520,7 @@ where
         #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied
         if modifier.log_measurements && measurements.total_patches > 0 {
-             let cmd_measurement = self.server_context.measurements(measurements);
+             let cmd_measurement = self.app_context.measurements(measurements);
              cmd_measurement.emit(self);
         }
 
@@ -575,15 +575,15 @@ where
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
-        if self.server_context.has_pending_msgs() {
+        if self.app_context.has_pending_msgs() {
             self.dispatch_pending_msgs(None)
                 .expect("must dispatch all pending msgs");
         }
-        if self.server_context.has_pending_msgs() {
+        if self.app_context.has_pending_msgs() {
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
-        let cmd = self.server_context.batch_pending_cmds();
+        let cmd = self.app_context.batch_pending_cmds();
 
         if !self.pending_patches.borrow().is_empty() {
             log::error!(
@@ -641,7 +641,7 @@ where
 
     /// dispatch multiple MSG
     pub fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>) {
-        self.server_context.push_msgs(msgs);
+        self.app_context.push_msgs(msgs);
         self.dispatch_inner_with_priority_ric();
     }
 

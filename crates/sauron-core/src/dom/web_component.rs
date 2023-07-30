@@ -226,10 +226,10 @@ where
         let static_style = <APP as Application<MSG>>::stylesheet().join("");
         self.program.inject_style_to_mount(&static_style);
         let dynamic_style =
-            <APP as Application<MSG>>::style(&self.program.server_context.app.borrow()).join("");
+            <APP as Application<MSG>>::style(&self.program.app_context.app.borrow()).join("");
         self.program.inject_style_to_mount(&dynamic_style);
         self.program
-            .server_context
+            .app_context
             .app
             .borrow_mut()
             .connected_callback();
@@ -241,7 +241,7 @@ where
     /// called when the web component is removed
     pub fn disconnected_callback(&mut self) {
         self.program
-            .server_context
+            .app_context
             .app
             .borrow_mut()
             .disconnected_callback();
@@ -249,10 +249,6 @@ where
 
     /// called when web componented is moved into other parts of the document
     pub fn adopted_callback(&mut self) {
-        self.program
-            .server_context
-            .app
-            .borrow_mut()
-            .adopted_callback();
+        self.program.app_context.app.borrow_mut().adopted_callback();
     }
 }

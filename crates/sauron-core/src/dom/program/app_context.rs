@@ -4,9 +4,9 @@ use crate::dom::{Application, Cmd};
 use crate::vdom;
 use std::{cell::RefCell, collections::VecDeque, rc::Rc};
 
-/// ServerContext module pertains only to application state and manages objects that affects it.
+/// AppContext module pertains only to application state and manages objects that affects it.
 /// It has no access to the dom, threads or any of the processing details that Program has to do.
-pub(crate) struct ServerContext<APP, MSG>
+pub(crate) struct AppContext<APP, MSG>
 where
     MSG: 'static,
 {
@@ -26,7 +26,7 @@ where
     pub(crate) pending_cmds: Rc<RefCell<VecDeque<Cmd<APP, MSG>>>>,
 }
 
-impl<APP, MSG> Clone for ServerContext<APP, MSG>
+impl<APP, MSG> Clone for AppContext<APP, MSG>
 where
     MSG: 'static,
 {
@@ -40,7 +40,7 @@ where
     }
 }
 
-impl<APP, MSG> ServerContext<APP, MSG>
+impl<APP, MSG> AppContext<APP, MSG>
 where
     MSG: 'static,
     APP: Application<MSG> + 'static,
