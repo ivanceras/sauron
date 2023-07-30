@@ -238,3 +238,13 @@ where
         self
     }
 }
+
+impl<MSG, XMSG> From<Task<MSG>> for Effects<MSG, XMSG> {
+    fn from(task: Task<MSG>) -> Effects<MSG, XMSG> {
+        Effects {
+            local: vec![task],
+            external: vec![],
+            modifier: Modifier::default(),
+        }
+    }
+}
