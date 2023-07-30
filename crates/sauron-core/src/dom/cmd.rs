@@ -133,8 +133,7 @@ where
             modifier,
         } = effects;
 
-        let cmds:Vec<_> = local.into_iter().map(|l|Cmd::from(l)).collect();
-        let mut cmd = Cmd::batch(cmds);
+        let mut cmd = Cmd::batch(local.into_iter().map(Cmd::from));
         cmd.modifier = modifier;
         cmd
     }
@@ -147,7 +146,7 @@ where
     IN: IntoIterator<Item = Effects<MSG, ()>>,
 {
     fn from(effects: IN) -> Self {
-        Cmd::batch(effects.into_iter().map(|effect|Cmd::from(effect)))
+        Cmd::batch(effects.into_iter().map(Cmd::from))
     }
 }
 
