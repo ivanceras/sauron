@@ -24,6 +24,7 @@ with-lookup = ["sauron-core/with-lookup"]
 with-ric = ["sauron-core/with-ric"]
 with-raf = ["sauron-core/with-raf"]
 with-interning = ["sauron-core/with-interning"]
+ric-polyfill = ["sauron-core/ric-polyfill"]
 
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]

@@ -119,6 +119,7 @@ with-raf = [] # use of request_animation_frame in javascript
 with-interning = [] # use caching of strings when crossing rust to js, for faster transfer
 custom_element = [] # use of register_custom_element, adding this will add the js snippets
 use-snippets = [] # link and export the define_custom_element.js into `pkg/snippets` directory
+ric-polyfill = [] # attach a requestIdleCallback polyfill to the window when it is not available
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

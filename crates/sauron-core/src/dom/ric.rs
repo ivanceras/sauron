@@ -33,3 +33,36 @@ where
         _closure: closure,
     })
 }
+
+#[cfg(feature = "ric-polyfill")]
+thread_local!(static RIC_POLYFILL_FUNCTION: js_sys::Function = create_ric_polyfill_function());
+
+#[allow(unused)]
+#[cfg(feature = "ric-polyfill")]
+pub fn create_ric_polyfill_function() -> js_sys::Function {
+    js_sys::Function::new_with_args(
+        "cb",
+        r#"
+        window.requestIdleCallback =
+            window.requestIdleCallback ||
+            function(cb) {
+                console.log("executing requestIdleCallback from the polyfill");
+                var start = Date.now();
+                return setTimeout(function() {
+                    cb({
+                        didTimeout: false,
+                        timeRemaining: function() {
+                            return Math.max(0, 50 - (Date.now() - start));
+                        },
+                    });
+                }, 1);
+            };
+
+        window.cancelIdleCallback =
+            window.cancelIdleCallback ||
+            function(id) {
+                clearTimeout(id);
+            };
+        "#,
+    )
+}
