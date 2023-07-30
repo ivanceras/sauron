@@ -2,7 +2,7 @@
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
-use crate::dom::{document, now, Measurements, Modifier};
+use crate::dom::{document, now, Measurements, Modifier, IdleDeadline};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
 use crate::html::{self, attributes::class, text};
 use crate::vdom;
@@ -19,7 +19,7 @@ use std::{
 };
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{self, Element, IdleDeadline, Node};
+use web_sys::{self, Element, Node};
 
 mod app_context;
 

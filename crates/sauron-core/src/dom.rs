@@ -27,7 +27,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
         spawn_local, window, inject_style,
     };
     pub use raf::{request_animation_frame, AnimationFrameHandle};
-    pub use ric::{request_idle_callback, IdleCallbackHandle};
+    pub use ric::{request_idle_callback, IdleCallbackHandle, IdleDeadline};
     pub use timeout::{delay, request_timeout_callback, TimeoutCallbackHandle};
     pub use cmd::Cmd;
     use crate::dom::events::MountEvent;
