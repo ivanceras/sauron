@@ -11,13 +11,8 @@
   </div>
 
   <script type="module">
-    import init,{Client} from './pkg/interactive.js';
-      init('pkg/interactive_bg.wasm')
-            .then( main )
-            .catch(console.error)
-      function main(){
-        new Client(window.initialState)
-      }
+    import init from './pkg/interactive.js';
+    await init().catch(console.err);
   </script>
   <script>
       window.initialState = '#INITIAL_STATE_JSON#'

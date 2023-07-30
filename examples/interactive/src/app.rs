@@ -34,8 +34,19 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn init(&mut self) -> Vec<Cmd<Self, Msg>> {
-        vec![]
+    fn init(&mut self) -> Cmd<Self, Msg> {
+        Cmd::new(|program| {
+            let clock: Closure<dyn Fn()> = Closure::wrap(Box::new(move || {
+                program.dispatch(Msg::Clock);
+            }));
+            window()
+                .set_interval_with_callback_and_timeout_and_arguments_0(
+                    clock.as_ref().unchecked_ref(),
+                    1000,
+                )
+                .expect("Unable to start interval");
+            clock.forget();
+        })
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
