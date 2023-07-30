@@ -1,4 +1,6 @@
 use crate::dom::Modifier;
+use crate::dom::Task;
+use std::future::ready;
 
 /// Effects is a convenient way to group Msg for component to execute subsequent updates based on certain conditions.
 /// This can be used for doing animation and incremental changes to the view to provide an effect
@@ -9,41 +11,34 @@ use crate::dom::Modifier;
 /// that are sent to the parent Component in response to an event that has been triggerred.
 pub struct Effects<MSG, XMSG> {
     /// Messages that will be executed locally in the Component
-    pub local: Vec<MSG>,
+    pub local: Vec<Task<MSG>>,
     /// effects that will be executed on the parent Component which instantiate
     /// this component
-    pub external: Vec<XMSG>,
+    pub external: Vec<Task<XMSG>>,
     pub(crate) modifier: Modifier,
 }
 
-impl<MSG, XMSG> Effects<MSG, XMSG> {
+impl<MSG, XMSG> Effects<MSG, XMSG>
+where
+    MSG: 'static,
+    XMSG: 'static,
+{
     /// create a new Effects with local and external expects respectively
     pub fn new(
         local: impl IntoIterator<Item = MSG>,
         external: impl IntoIterator<Item = XMSG>,
     ) -> Self {
         Self {
-            local: local.into_iter().collect(),
-            external: external.into_iter().collect(),
+            local: local.into_iter().map(|l| Task::new(ready(l))).collect(),
+            external: external.into_iter().map(|x| Task::new(ready(x))).collect(),
             modifier: Modifier::default(),
         }
-    }
-
-    ///Warning this is unsound since the modifier is lost
-    /// split the local and external MSG of this effect
-    pub fn unzip(self) -> (Vec<MSG>, Vec<XMSG>) {
-        let Self {
-            local,
-            external,
-            modifier: _,
-        } = self;
-        (local, external)
     }
 
     /// Create an Effects with  local messages that will be executed on the next update loop on this Component
     pub fn with_local(local: impl IntoIterator<Item = MSG>) -> Self {
         Self {
-            local: local.into_iter().collect(),
+            local: local.into_iter().map(|l| Task::new(ready(l))).collect(),
             external: vec![],
             modifier: Modifier::default(),
         }
@@ -53,7 +48,7 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
     pub fn with_external(external: impl IntoIterator<Item = XMSG>) -> Self {
         Self {
             local: vec![],
-            external: external.into_iter().collect(),
+            external: external.into_iter().map(|x| Task::new(ready(x))).collect(),
             modifier: Modifier::default(),
         }
     }
@@ -73,16 +68,16 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
     /// The external messages stays the same.
     pub fn map_msg<F, MSG2>(self, f: F) -> Effects<MSG2, XMSG>
     where
-        F: Fn(MSG) -> MSG2 + 'static,
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
     {
         let Effects {
             local,
             external,
             modifier,
         } = self;
-
         Effects {
-            local: local.into_iter().map(f).collect(),
+            local: local.into_iter().map(|l| l.map_msg(f.clone())).collect(),
             external,
             modifier,
         }
@@ -92,7 +87,8 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
     /// with the use of the mapping function `f`
     pub fn map_external<F, XMSG2>(self, f: F) -> Effects<MSG, XMSG2>
     where
-        F: Fn(XMSG) -> XMSG2 + 'static,
+        F: Fn(XMSG) -> XMSG2 + Clone + 'static,
+        XMSG2: 'static,
     {
         let Effects {
             local,
@@ -101,7 +97,7 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
         } = self;
         Effects {
             local,
-            external: external.into_iter().map(f).collect(),
+            external: external.into_iter().map(|l| l.map_msg(f.clone())).collect(),
             modifier,
         }
     }
@@ -112,7 +108,8 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
     ///
     pub fn localize<F, XMSG2>(self, f: F) -> Effects<XMSG, XMSG2>
     where
-        F: Fn(MSG) -> XMSG + 'static,
+        F: Fn(MSG) -> XMSG + Clone + 'static,
+        XMSG2: 'static,
     {
         let Effects {
             local,
@@ -123,7 +120,7 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
         Effects {
             local: external
                 .into_iter()
-                .chain(local.into_iter().map(f))
+                .chain(local.into_iter().map(|x| x.map_msg(f.clone())))
                 .collect(),
             external: vec![],
             modifier,
@@ -132,7 +129,8 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
 
     /// Append this msgs to the local effects
     pub fn append_local(mut self, local: impl IntoIterator<Item = MSG>) -> Self {
-        self.local.extend(local);
+        self.local
+            .extend(local.into_iter().map(|l| Task::new(ready(l))));
         self
     }
 
@@ -155,18 +153,20 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
     }
 
     /// Merge all the internal objects of this Vec of Effects to produce only one.
-    pub fn merge_all(all_effects: Vec<Self>) -> Self {
-        let mut local = Vec::with_capacity(all_effects.len());
-        let mut external = Vec::with_capacity(all_effects.len());
+    pub fn batch(all_effects: impl IntoIterator<Item = Self>) -> Self {
+        let mut local = vec![];
+        let mut external = vec![];
         let mut modifier = Modifier::default();
         for effect in all_effects {
             local.extend(effect.local);
             external.extend(effect.external);
             modifier.coalesce(&effect.modifier);
         }
-        let mut effects = Effects::new(local, external);
-        effects.modifier = modifier;
-        effects
+        Effects {
+            local,
+            external,
+            modifier,
+        }
     }
 
     /// Extern the local and external MSG of this Effect
@@ -175,8 +175,10 @@ impl<MSG, XMSG> Effects<MSG, XMSG> {
         local: impl IntoIterator<Item = MSG>,
         external: impl IntoIterator<Item = XMSG>,
     ) -> Self {
-        self.local.extend(local);
-        self.external.extend(external);
+        self.local
+            .extend(local.into_iter().map(|l| Task::new(ready(l))));
+        self.external
+            .extend(external.into_iter().map(|x| Task::new(ready(x))));
         self
     }
 }

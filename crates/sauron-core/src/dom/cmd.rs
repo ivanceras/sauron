@@ -132,19 +132,22 @@ where
             external: _,
             modifier,
         } = effects;
-        let mut cmd = Cmd::batch_msg(local);
+
+        let cmds:Vec<_> = local.into_iter().map(|l|Cmd::from(l)).collect();
+        let mut cmd = Cmd::batch(cmds);
         cmd.modifier = modifier;
         cmd
     }
 }
 
-impl<APP, MSG> From<Vec<Effects<MSG, ()>>> for Cmd<APP, MSG>
+impl<APP, MSG, IN> From<IN> for Cmd<APP, MSG>
 where
     MSG: 'static,
     APP: Application<MSG> + 'static,
+    IN: IntoIterator<Item = Effects<MSG, ()>>,
 {
-    fn from(effects: Vec<Effects<MSG, ()>>) -> Self {
-        Cmd::from(Effects::merge_all(effects))
+    fn from(effects: IN) -> Self {
+        Cmd::batch(effects.into_iter().map(|effect|Cmd::from(effect)))
     }
 }
 
@@ -164,5 +167,6 @@ where
         })
     }
 }
+
 
 
