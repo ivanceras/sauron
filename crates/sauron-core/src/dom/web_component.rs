@@ -1,6 +1,5 @@
 use crate::dom::{
     Application, Cmd, Component, Container, Effects, Modifier, MountAction, MountTarget, Program,
-    Task,
 };
 use crate::vdom::Node;
 use wasm_bindgen::prelude::*;
@@ -124,11 +123,8 @@ where
     COMP: WebComponent<MSG>,
     MSG: 'static,
 {
-    fn init(&mut self) -> Vec<Cmd<Self, MSG>> {
-        <Self as Component<MSG, ()>>::init(self)
-            .into_iter()
-            .map(Cmd::from)
-            .collect()
+    fn init(&mut self) -> Cmd<Self, MSG> {
+        Cmd::from(<Self as Component<MSG, ()>>::init(self))
     }
 
     fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
@@ -158,7 +154,7 @@ where
     CONT: WebComponent<MSG>,
     MSG: 'static,
 {
-    fn init(&mut self) -> Vec<Task<MSG>> {
+    fn init(&mut self) -> Effects<MSG, ()> {
         <Self as Container<MSG, ()>>::init(self)
     }
 
