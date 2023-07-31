@@ -325,8 +325,8 @@ where
                             Self::dispatch_mount_event(node_elm);
                         }
                     } else {
-                        // deal with fragment node in replacement here
-                        todo!()
+                        // the diffing algorithmn doesn't concern with fragment, instead it test the nodes contain in the fragment as if it where a list of nodes
+                        unreachable!("patching a document fragment other than the root_node should not happen");
                     }
                 } else {
                     if target_element.node_type() == Node::ELEMENT_NODE {

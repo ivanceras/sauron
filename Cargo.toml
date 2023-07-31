@@ -29,6 +29,7 @@ with-interning = ["sauron-core/with-interning"]
 with-measure = ["sauron-core/with-measure"]
 # log debug patches
 with-debug = ["sauron-core/with-debug"]
+log-patches = ["with-debug", "sauron-core/log-patches"]
 
 # lets you use node! macro to write html like code in the view
 with-node-macro = ["sauron-macro"]
