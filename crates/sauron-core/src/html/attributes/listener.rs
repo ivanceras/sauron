@@ -75,17 +75,17 @@ where
         (self.func)(input)
     }
 
-    /// map this callback using another callback such that
-    /// OUT becomes MSG2
-    pub fn map_callback<MSG2>(self, cb: Listener<OUT, MSG2>) -> Listener<IN, MSG2>
+    /// map this Listener msg such that `Listener<IN, OUT>` becomes `Listener<IN, MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb2: F) -> Listener<IN, MSG2>
     where
+        F: Fn(OUT) -> MSG2 + Clone + 'static,
         MSG2: 'static,
     {
-        let func_wrap = move |input| {
+        let cb = move |input| {
             let out = self.emit(input);
-            cb.emit(out)
+            cb2(out)
         };
-        Listener::from(func_wrap)
+        Listener::from(cb)
     }
 }
 
