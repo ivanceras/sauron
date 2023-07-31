@@ -56,8 +56,12 @@ impl<MSG> PartialEq for AttributeValue<MSG> {
             }
             (AttributeValue::Simple(this), AttributeValue::Simple(other)) => this == other,
             (AttributeValue::Style(this), AttributeValue::Style(other)) => this == other,
-            (AttributeValue::EventListener(this), AttributeValue::EventListener(other)) => {
-                this == other
+            (AttributeValue::EventListener(_this), AttributeValue::EventListener(_other)) => {
+                // event listeners on the same event name assumed to be the same as the old
+                // we don't compare the callback _this and _other here, since it points
+                // to different and transformed closures, therefore will return false.
+                // we return true here to tell the diffing algorithm that the callback stays
+                true
             }
             (AttributeValue::Empty, AttributeValue::Empty) => true,
             (_, _) => false,

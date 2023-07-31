@@ -1,6 +1,6 @@
 use crate::{
     html::attributes::{AttributeValue, Listener},
-    vdom::{Attribute, Element, Event, Node},
+    vdom::{Attribute, Element, Node},
 };
 
 /// Add mapping function for Node, Element, Attribute,
@@ -8,19 +8,14 @@ pub trait NodeMapMsg<MSG>
 where
     MSG: 'static,
 {
-    /// map the msg of callback of this node
-    fn map_msg<F, MSG2>(self, func: F) -> Node<MSG2>
+    /// map the msg of this node such that Node<MSG> becomes Node<MSG2>
+    fn map_msg<F, MSG2>(self, cb: F) -> Node<MSG2>
     where
-        F: Fn(MSG) -> MSG2 + 'static,
-        MSG2: 'static;
-
-    /// map the msg of callback of this element node
-    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Node<MSG2>
-    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
         MSG2: 'static;
 
     /// Return the callbacks present on this node
-    fn get_callbacks(&self) -> Vec<&Listener<Event, MSG>>;
+    fn get_callbacks(&self) -> Vec<&Listener<MSG>>;
 }
 
 /// Add mapping function for Element
@@ -28,9 +23,10 @@ pub trait ElementMapMsg<MSG>
 where
     MSG: 'static,
 {
-    /// map_callback the return of the callback from MSG to MSG2
-    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Element<MSG2>
+    /// map the msg of this element such that `Element<MSG>` becomes `Element<MSG2>`
+    fn map_msg<F, MSG2>(self, cb: F) -> Element<MSG2>
     where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
         MSG2: 'static;
 }
 
@@ -39,59 +35,44 @@ pub trait AttributeMapMsg<MSG>
 where
     MSG: 'static,
 {
-    /// map the msg
-    fn map_msg<F, MSG2>(self, func: F) -> Attribute<MSG2>
+    /// map the msg of this attribute such that `Attribute<MSG>` becomes `Attribute<MSG2>`
+    fn map_msg<F, MSG2>(self, cb: F) -> Attribute<MSG2>
     where
-        F: Fn(MSG) -> MSG2 + 'static,
-        MSG2: 'static;
-
-    /// transform the callback of this attribute
-    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Attribute<MSG2>
-    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
         MSG2: 'static;
 
     /// return the callback values of this attribute
-    fn get_callback(&self) -> Vec<&Listener<Event, MSG>>;
+    fn get_callback(&self) -> Vec<&Listener<MSG>>;
 }
 
 impl<MSG> NodeMapMsg<MSG> for Node<MSG>
 where
     MSG: 'static,
 {
-    /// map the msg of callback of this element node
-    fn map_msg<F, MSG2>(self, func: F) -> Node<MSG2>
+    fn map_msg<F, MSG2>(self, cb: F) -> Node<MSG2>
     where
-        F: Fn(MSG) -> MSG2 + 'static,
-        MSG2: 'static,
-    {
-        let cb = Listener::from(func);
-        self.map_callback(cb)
-    }
-
-    /// map the msg of callback of this element node
-    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Node<MSG2>
-    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
         MSG2: 'static,
     {
         match self {
-            Node::Element(element) => Node::Element(element.map_callback(cb)),
+            Node::Element(element) => Node::Element(element.map_msg(cb)),
             Node::Leaf(leaf) => Node::Leaf(leaf),
             Node::Fragment(nodes) => Node::Fragment(
                 nodes
                     .into_iter()
-                    .map(|node| node.map_callback(cb.clone()))
+                    .map(|node| node.map_msg(cb.clone()))
                     .collect(),
             ),
             Node::NodeList(node_list) => Node::NodeList(
                 node_list
                     .into_iter()
-                    .map(|node| node.map_callback(cb.clone()))
+                    .map(|node| node.map_msg(cb.clone()))
                     .collect(),
             ),
         }
     }
 
-    fn get_callbacks(&self) -> Vec<&Listener<Event, MSG>> {
+    fn get_callbacks(&self) -> Vec<&Listener<MSG>> {
         if let Some(attributes) = self.attributes() {
             let callbacks = attributes
                 .iter()
@@ -108,9 +89,9 @@ impl<MSG> ElementMapMsg<MSG> for Element<MSG>
 where
     MSG: 'static,
 {
-    /// map_callback the return of the callback from MSG to MSG2
-    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Element<MSG2>
+    fn map_msg<F, MSG2>(self, cb: F) -> Element<MSG2>
     where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
         MSG2: 'static,
     {
         Element {
@@ -119,12 +100,12 @@ where
             attrs: self
                 .attrs
                 .into_iter()
-                .map(|attr| attr.map_callback(cb.clone()))
+                .map(|attr| attr.map_msg(cb.clone()))
                 .collect(),
             children: self
                 .children
                 .into_iter()
-                .map(|child| child.map_callback(cb.clone()))
+                .map(|child| child.map_msg(cb.clone()))
                 .collect(),
             self_closing: self.self_closing,
         }
@@ -135,19 +116,9 @@ impl<MSG> AttributeMapMsg<MSG> for Attribute<MSG>
 where
     MSG: 'static,
 {
-    /// map the msg
-    fn map_msg<F, MSG2>(self, func: F) -> Attribute<MSG2>
+    fn map_msg<F, MSG2>(self, cb: F) -> Attribute<MSG2>
     where
-        F: Fn(MSG) -> MSG2 + 'static,
-        MSG2: 'static,
-    {
-        let cb = Listener::from(func);
-        self.map_callback(cb)
-    }
-
-    /// transform the callback of this attribute
-    fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> Attribute<MSG2>
-    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
         MSG2: 'static,
     {
         Attribute {
@@ -155,14 +126,13 @@ where
             value: self
                 .value
                 .into_iter()
-                .map(|v| v.map_callback(cb.clone()))
+                .map(|v| v.map_msg(cb.clone()))
                 .collect(),
             namespace: self.namespace,
         }
     }
 
-    /// return the callback values of this attribute
-    fn get_callback(&self) -> Vec<&Listener<Event, MSG>> {
+    fn get_callback(&self) -> Vec<&Listener<MSG>> {
         self.value
             .iter()
             .filter_map(|v| v.as_event_listener())
@@ -174,18 +144,18 @@ impl<MSG> AttributeValue<MSG>
 where
     MSG: 'static,
 {
-    /// map the callback of this attribute using another callback
-    pub fn map_callback<MSG2>(self, cb: Listener<MSG, MSG2>) -> AttributeValue<MSG2>
+    /// map the msg of this AttributeValue such that `AttributeValue<MSG>` becomes
+    /// `AttributeValue<MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb: F) -> AttributeValue<MSG2>
     where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
         MSG2: 'static,
     {
         match self {
             AttributeValue::FunctionCall(this) => AttributeValue::FunctionCall(this),
             AttributeValue::Simple(this) => AttributeValue::Simple(this),
             AttributeValue::Style(this) => AttributeValue::Style(this),
-            AttributeValue::EventListener(this) => {
-                AttributeValue::EventListener(this.map_callback(cb))
-            }
+            AttributeValue::EventListener(this) => AttributeValue::EventListener(this.map_msg(cb)),
             AttributeValue::Empty => AttributeValue::Empty,
         }
     }

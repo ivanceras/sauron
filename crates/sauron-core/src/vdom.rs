@@ -5,8 +5,9 @@
 //! All the code in this module are run in purely rust environment, that is there is NO code here
 //! involves accessing the real DOM.
 //!
+pub use crate::dom::Callback;
+use crate::dom::Event;
 pub use crate::html::attributes::AttributeValue;
-use crate::{dom::Event, html::attributes};
 pub use leaf::Leaf;
 pub use node_trait::NodeTrait;
 
@@ -42,7 +43,7 @@ pub type Attribute<MSG> = mt_dom::Attribute<Namespace, AttributeName, AttributeV
 
 /// Callback where Event type is supplied
 /// for Components
-pub type Listener<MSG> = attributes::Listener<Event, MSG>;
+pub type Listener<MSG> = Callback<Event, MSG>;
 
 /// This is a sauron html specific functionality
 /// diff 2 nodes with attribute using `&'static str` instead of generic ATT

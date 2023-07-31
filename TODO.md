@@ -81,7 +81,7 @@
         - [X] Redo it, maybe we don't need it and then manually implement all the Components
         - ~~[ ] Make Application trait for internal usage only~~
 - [ ] Make Http api pass a decoder function
-- [ ] Additional to the dispatching of mount event.
+- [X] Additional to the dispatching of mount event.
     - [X] on_mount
          - on_will_mount
     - [X] on_dismount

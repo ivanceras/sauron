@@ -1,19 +1,18 @@
 //! Create html [attributes][0]
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
-use crate::{dom::Event, vdom, vdom::Attribute};
+pub use crate::vdom::Listener;
+use crate::{vdom, vdom::Attribute};
 pub use attribute_macros::commons::*;
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
 pub use jss::Value;
-pub use listener::Listener;
 pub use special::{key, replace, skip, skip_criteria, Special};
 pub use style::Style;
 
 #[macro_use]
 mod attribute_macros;
 mod attribute_value;
-mod listener;
 mod special;
 mod style;
 
@@ -409,7 +408,7 @@ pub(crate) fn merge_styles_attributes_values<MSG>(
 /// The Attributes partition into 4 different types
 pub struct SegregatedAttributes<'a, MSG> {
     /// the listeners of the event listeners
-    pub listeners: Vec<&'a Listener<Event, MSG>>,
+    pub listeners: Vec<&'a Listener<MSG>>,
     /// plain attribute values
     pub plain_values: Vec<&'a AttributeValue<MSG>>,
     /// style attribute values
