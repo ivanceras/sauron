@@ -296,15 +296,7 @@ where
                 Self::append_child_and_dispatch_mount_event(&mount_node, &created_node);
             }
             MountAction::ClearAppend => {
-                let children = mount_node.child_nodes();
-                let child_nodes: Vec<Node> = (0..children.length())
-                    .map(|i| children.item(i).expect("must have a child"))
-                    .collect();
-
-                child_nodes.into_iter().for_each(|child| {
-                    mount_node.remove_child(&child).expect("must remove child");
-                });
-
+                Self::clear_children(&mount_node);
                 Self::append_child_and_dispatch_mount_event(&mount_node, &created_node);
             }
             MountAction::Replace => {
