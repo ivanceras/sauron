@@ -18,6 +18,41 @@ use web_sys::{
     HtmlTextAreaElement,
 };
 
+
+#[derive(Clone, Copy)]
+#[repr(i16)]
+/// Mouse button used in the MouseEvent
+pub enum MouseButton{
+    /// Main button pressed, usually the left button or the un-initialized state
+    Primary = 0,
+
+    /// Auxiliary button pressed, usually the wheel button or the middle button (if present)
+    Auxiliary = 1,
+
+    /// Secondary button pressed, usually the right button
+    Secondary = 2,
+
+    /// Fourth button, typically the Browser Back button
+    Fourth = 3,
+
+    /// Fifth button, typically the Browser Forward button
+    Fifth = 4,
+}
+
+impl MouseButton{
+
+    /// check if the mouse event is on the primary button
+    pub fn is_primary(me: &MouseEvent) -> bool {
+        me.button() == MouseButton::Primary as i16
+    }
+
+    /// check if the mouse event is on the auxiliary button
+    pub fn is_auxiliary(me: &MouseEvent) -> bool {
+        me.button() == MouseButton::Auxiliary as i16
+    }
+
+}
+
 impl Event {
     /// convert to web event
     pub fn as_web(self) -> Option<web_sys::Event> {

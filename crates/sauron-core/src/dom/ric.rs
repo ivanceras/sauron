@@ -83,14 +83,12 @@ where
 {
     let is_ric_available = window().get("requestIdleCallback").is_some();
     if is_ric_available {
-        log::debug!("There is a requestIdleCallback available");
         let handle = request_idle_callback_real(move |dl| {
             let deadline = IdleDeadline::Real(dl);
             f(deadline)
         })?;
         Ok(IdleCallbackHandle::Real(handle))
     } else {
-        log::debug!("----> Now using the shim for ric");
         let handle = request_idle_callback_shim(move || f(IdleDeadline::polyfill()))?;
         Ok(IdleCallbackHandle::Polyfill(handle))
     }
