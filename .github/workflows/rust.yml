@@ -55,7 +55,7 @@ jobs:
     - name: Run test on wasm bindgen
       run: wasm-pack test --firefox --headless
 
-  clippy_check:
+  benchmark:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
