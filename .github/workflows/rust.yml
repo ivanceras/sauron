@@ -3,7 +3,7 @@ name: Rust
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-and-test:
 
     runs-on: ubuntu-latest
 
@@ -51,6 +51,9 @@ jobs:
     
     - name: Test firefox version
       run: firefox --version
+
+    - name: Install wasm-pack
+      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
     - name: Run test on wasm bindgen
       run: wasm-pack test --firefox --headless
