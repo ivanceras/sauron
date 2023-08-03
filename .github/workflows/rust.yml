@@ -62,5 +62,5 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
             toolchain: stable
-    - name: Run Benchmark
-      run: cargo bench -p sauron-core
+      - name: Run Benchmark
+        run: cargo bench -p sauron-core
