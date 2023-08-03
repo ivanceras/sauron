@@ -8,15 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Setup firefox
-      uses: browser-actions/setup-firefox@latest
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
       with:
-        firefox-version: ${{ matrix.firefox }}
-    - run: firefox --version
-
-    - name: Install stable
-      run: rustup toolchain install stable && rustup component add clippy && cargo install wasm-pack
+          toolchain: stable
+          components: clippy
 
     - name: Build allow all warnings
       run: RUSTFLAGS=-Awarnings cargo build --all --no-default-features
@@ -37,12 +33,34 @@ jobs:
     - name: Run tests with dom features
       run: cargo test --all --features "with-dom with-measure"
 
-    - name: Run clippy with all features
-      run: cargo clippy --all-features
+
+  clippy_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
+            components: clippy
+
+  wasm-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup firefox
+      uses: browser-actions/setup-firefox@latest
+      with:
+        firefox-version: ${{ matrix.firefox }}
+      run: firefox --version
 
     - name: Run test on wasm bindgen
       run: wasm-pack test --firefox --headless
 
+  clippy_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
     - name: Run Benchmark
       run: cargo bench -p sauron-core
-
