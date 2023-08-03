@@ -50,14 +50,14 @@ jobs:
       - uses: actions-rs/toolchain@v1
       - uses: browser-actions/setup-firefox@latest
     
-    - name: Test firefox version
-      run: firefox --version
+      - name: Test firefox version
+        run: firefox --version
 
-    - name: Install wasm-pack
-      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-    - name: Run test on wasm bindgen
-      run: wasm-pack test --firefox --headless
+      - name: Run test on wasm bindgen
+        run: wasm-pack test --firefox --headless
 
   benchmark:
     runs-on: ubuntu-latest
