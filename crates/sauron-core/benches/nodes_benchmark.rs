@@ -1,12 +1,12 @@
 #[macro_use]
 extern crate criterion;
 
-use criterion::{Criterion, Fun};
+use criterion::Criterion;
 
 use sauron_core::{
-    diff,
     html::{attributes::*, *},
-    Node,
+    vdom::diff,
+    vdom::Node,
 };
 
 use std::{
@@ -568,20 +568,15 @@ fn build_100_nodes_with_100_child_nodes() {
     );
 }
 
-fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_functions(
-        "nodes",
-        vec![
-            Fun::new("100x100", |b, _i| {
-                b.iter(|| build_100_nodes_with_100_child_nodes())
-            }),
-            Fun::new("100", |b, _i| b.iter(|| build_100_child_nodes())),
-            Fun::new("diff_100", |b, _i| b.iter(|| diff_100())),
-            Fun::new("build_editor", |b, _i| b.iter(|| build_editor())),
-        ],
-        0,
-    );
+fn bench1(c: &mut Criterion) {
+    c.bench_function("100x100", |b| {
+        b.iter(|| build_100_nodes_with_100_child_nodes())
+    });
+    c.bench_function("100", |b| b.iter(|| build_100_child_nodes()));
+    c.bench_function("diff_100", |b| b.iter(|| diff_100()));
+    c.bench_function("build_editor", |b| b.iter(|| build_editor()));
 }
 
-criterion_group!(benches, criterion_benchmark);
+criterion_group!(benches, bench1);
+
 criterion_main!(benches);

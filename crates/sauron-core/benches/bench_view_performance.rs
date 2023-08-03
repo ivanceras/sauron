@@ -2,7 +2,7 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 use sauron_core::{
     html::{attributes::*, *},
-    Node,
+    vdom::Node,
 };
 
 fn bench_view_builing_100_child_nodes(c: &mut Criterion) {

@@ -1,6 +1,6 @@
 name: Rust
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -42,4 +42,7 @@ jobs:
 
     - name: Run test on wasm bindgen
       run: wasm-pack test --firefox --headless
+
+    - name: Run Benchmark
+      run: cargo bench -p sauron-core
 
