@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.59.0
+- refactor: **breaking** change the methods which extracts inner values to not panic but instead return `Option`
+    - `unwrap_text` -> `as_text`
+    - `unwrap_safe_html` -> `as_safe_html`
+- refactor: remove the use of unnecessary map_callback, since it can be done using map_msg since Fn pointer can just be clone
+- refactor: use the clear_children function
+- patching a document fragment other than in root node should not happen
+- refactor: convert the shell scripts to justfile
+- refactor: use raf for doing patches, use ric for anything else
+- feat: add a request_idle_callback to make ric work in safari
+- feat: expose a reference to the underlying field in Program's app_context
+- fix: move `data` attribute out of the commons, since it is commonly used in local variables
+- fix: `web_component` init method
+- feat: add a conversion from Task to Effects
+- fix: to the new version of sauron, improve code for interactive example
+- feat: **breaking** `Effects` now wraps `Task` which could now accept ready MSG or an Future MSG
+    - **breaking** change Component signature which returns Effects on the init function
+    - **breaking** change Application signature which returns Cmd on the init function, to match that of  the Component
+- fix clippy, no need to collect iterators
+- fix: add `'static` constraint to `XMSG` in components
+- refactor: such that borrows end at line, which open for a more flexible data structure for the `AppContext`
+- refactor: rename `dispatch_multiple` to `push_msgs` in `AppContext`
+- refactor: use update_app as function name for updating the app
+- refactor: simplify the batching of `pending_cmds` code
+- inject the css before mounting the App to the dom
+- feat: create `AppContext` module which moves app, current_vdom,  pending_msgs, pending_cmds, which pertains to the state to the Application's model
+
 ## 0.58.0
 - use the latest published version of mt-dom
 - refactor: move `fragment` into `mt-dom,` so it can be diff there, therefore will still be performant when in used in Application view
