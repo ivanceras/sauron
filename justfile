@@ -20,7 +20,11 @@ wasm-test-with-features:
 
 test-all: test wasm-test
 
-publish:
-    cd crates/sauron-core && cargo publish && cd - && \
-    cd crates/sauron-macro && cargo publish && cd - &&
+publish-core:
+    cargo publish -p sauron-core
+
+publish-macro:
+    cargo publish -p sauron-macro
+
+publish: publish-core publish-macro
     cargo publish
