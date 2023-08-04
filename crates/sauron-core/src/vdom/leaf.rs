@@ -25,15 +25,6 @@ impl Leaf {
         matches!(self, Self::SafeHtml(_))
     }
 
-    /// unwrap the text content if this a text node,
-    /// panics if it is not a text node
-    pub fn unwrap_text(&self) -> &str {
-        match self {
-            Self::Text(ref text) => text,
-            _ => panic!("node is not a text"),
-        }
-    }
-
     /// return the text content if it is a text node
     pub fn as_text(&self) -> Option<&str> {
         match self {
@@ -42,12 +33,11 @@ impl Leaf {
         }
     }
 
-    /// unwrap the text content if this a text node,
-    /// panics if it is not a text node
-    pub fn unwrap_safe_html(&self) -> &str {
+    /// return the text content if this a text node,
+    pub fn as_safe_html(&self) -> Option<&str> {
         match self {
-            Self::SafeHtml(ref html) => html,
-            _ => panic!("node is not a text"),
+            Self::SafeHtml(ref html) => Some(html),
+            _ => None,
         }
     }
 }

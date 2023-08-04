@@ -8,14 +8,11 @@ pub trait NodeTrait {
     /// returns true if this is text node with safe html as the content
     fn is_safe_html(&self) -> bool;
 
-    /// unwrap the text content of the text node, panics if it is not a text node
-    fn unwrap_text(&self) -> &str;
-
     /// return the text content if it is a text node
     fn as_text(&self) -> Option<&str>;
 
-    /// unwrap the html text content of this node, panics if it is not a safe html node
-    fn unwrap_safe_html(&self) -> &str;
+    /// returns the html text content of this node
+    fn as_safe_html(&self) -> Option<&str>;
 }
 
 impl<MSG> NodeTrait for Node<MSG> {
@@ -35,13 +32,6 @@ impl<MSG> NodeTrait for Node<MSG> {
         }
     }
 
-    fn unwrap_text(&self) -> &str {
-        match self {
-            Self::Leaf(ref leaf) => leaf.unwrap_text(),
-            _ => panic!("not a leaf node"),
-        }
-    }
-
     fn as_text(&self) -> Option<&str> {
         match self {
             Self::Leaf(ref leaf) => leaf.as_text(),
@@ -49,10 +39,10 @@ impl<MSG> NodeTrait for Node<MSG> {
         }
     }
 
-    fn unwrap_safe_html(&self) -> &str {
+    fn as_safe_html(&self) -> Option<&str> {
         match self {
-            Self::Leaf(ref leaf) => leaf.unwrap_safe_html(),
-            _ => panic!("not a leaf node"),
+            Self::Leaf(ref leaf) => leaf.as_safe_html(),
+            _ => None,
         }
     }
 }

@@ -121,8 +121,7 @@ where
             vdom::Node::Element(element_node) => {
                 let created_node = self.create_element_node(element_node);
                 for child in element_node.children().iter() {
-                    if child.is_safe_html() {
-                        let child_text = child.unwrap_safe_html();
+                    if let Some(child_text) = child.as_safe_html() {
                         // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
                         let created_element: &Element = created_node.unchecked_ref();
                         created_element

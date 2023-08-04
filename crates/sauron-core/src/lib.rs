@@ -7,6 +7,8 @@
     unstable_features,
     unused_import_braces
 )]
+#![forbid(unsafe_code)]
+#![deny(clippy::all)]
 //! The core components of sauron
 #[macro_use]
 extern crate doc_comment;
@@ -40,7 +42,7 @@ pub mod prelude {
     pub use crate::vdom::{
         diff,
         map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg},
-        Attribute, AttributeValue, Element, Listener, Node, Patch,
+        Attribute, AttributeValue, Element, Listener, Node, NodeTrait, Patch,
     };
     pub use jss as jss_crate;
     pub use jss::{jss, jss_ns, jss_ns_pretty, jss_pretty};
