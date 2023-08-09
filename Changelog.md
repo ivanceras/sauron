@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.59.2
+- refactor: remove the `use-snippets` feature, since we are  using `js_sys::Function`
+
+## 0.59.1
+- feat: add `as_str` method for returning the str value of an attribute
+
 ## 0.59.0
 - refactor: **breaking** change the methods which extracts inner values to not panic but instead return `Option`
     - `unwrap_text` -> `as_text`
