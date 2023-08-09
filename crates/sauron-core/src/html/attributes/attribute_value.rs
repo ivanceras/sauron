@@ -99,6 +99,15 @@ impl<MSG> AttributeValue<MSG> {
         }
     }
 
+    /// return the &str value if the value is str value
+    pub fn as_str(&self) -> Option<&str> {
+        if let Some(simple) = self.get_simple() {
+            simple.as_str()
+        } else {
+            None
+        }
+    }
+
     /// return the function call argument value if it is a FunctionCall variant
     pub fn get_function_call_value(&self) -> Option<&Value> {
         match self {
