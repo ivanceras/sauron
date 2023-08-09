@@ -32,26 +32,13 @@ pub trait WebComponent<MSG> {
     fn adopted_callback(&mut self);
 }
 
-#[cfg(feature = "use-snippets")]
-#[wasm_bindgen(module = "/js/define_custom_element.js")]
-extern "C" {
-    // register using custom element define
-    // # Example:
-    // ```rust,ignore
-    //  sauron::register_web_component("date-time", "DateTimeWidgetCustomElement");
-    // ```
-    pub fn register_web_component(custom_tag: &str, adapter: &str);
-}
-
-#[cfg(not(feature = "use-snippets"))]
-thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: js_sys::Function = create_register_custom_element_function());
+thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: js_sys::Function = declare_custom_element_function());
 
 /// register using custom element define
 /// # Example:
 /// ```rust,ignore
 ///  sauron::register_web_component("date-time", "DateTimeWidgetCustomElement");
 /// ```
-#[cfg(not(feature = "use-snippets"))]
 pub fn register_web_component(custom_tag: &str, adapter: &str) {
     log::info!("registering a custom element: {:?}", custom_tag);
     REGISTER_CUSTOM_ELEMENT_FUNCTION.with(|func| {
@@ -67,26 +54,21 @@ pub fn register_web_component(custom_tag: &str, adapter: &str) {
 /// TODO: refer to https://github.com/gbj/custom-elements
 /// for improvements
 /// dynamically create the function which will register the custom tag
-#[cfg(not(feature = "use-snippets"))]
-fn create_register_custom_element_function() -> js_sys::Function {
+fn declare_custom_element_function() -> js_sys::Function {
     js_sys::Function::new_with_args(
         "custom_tag, adapterClassName",
         r#"
-    function define_custom_element(custom_tag, adapterClassName)
-    {
-         let adapter = window[adapterClassName];
+          let adapter = window[adapterClassName];
           if (window.customElements.get(custom_tag) === undefined ){
-            window.customElements.define(custom_tag,
+             window.customElements.define(custom_tag,
                 class extends HTMLElement{
                     constructor(){
                         super();
                         this.instance = new adapter(this);
                     }
-
                     static get observedAttributes(){
                         return adapter.observedAttributes;
                     }
-
                     connectedCallback(){
                         this.instance.connectedCallback();
                     }
@@ -99,18 +81,13 @@ fn create_register_custom_element_function() -> js_sys::Function {
                     attributeChangedCallback(name, oldValue, newValue){
                         this.instance.attributeChangedCallback(name, oldValue, newValue);
                     }
-
                     appendChild(child){
                         console.log("appending a child:", child);
                         this.instance.appendChild(child);
                     }
-
                 }
-            );
-        }
-    }
-    define_custom_element(custom_tag, adapterClassName);
-"#,
+             );
+         }"#,
     )
 }
 
