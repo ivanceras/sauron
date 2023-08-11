@@ -322,6 +322,9 @@
      - [X] active_closures,
      - [X] pending_patches
 - [X] Remove the use of `wee_alloc` crate
+- [ ] sauron-core and jss should have a different version of Value, where jss value can be converted into.
+    - `Value` struct needs to reside here, since it is a corner-stone data structure and used eveywhere.
+    - Maybe `Value` should be in a very common crate. Say `sauron-common`.
 
 ## Bug
 - [X] When 2 nodes with multiple similar keys, multiple replace node patch is generated. But it couldn't seem to find the correct target element.
