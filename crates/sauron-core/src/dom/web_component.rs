@@ -39,13 +39,14 @@ thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: js_sys::Function = declar
 /// ```rust,ignore
 ///  sauron::register_web_component("date-time", "DateTimeWidgetCustomElement");
 /// ```
-pub fn register_web_component(custom_tag: &str, adapter: &str) {
+pub fn register_web_component(custom_tag: &str, adapter: JsValue, observed_attributes: JsValue) {
     log::info!("registering a custom element: {:?}", custom_tag);
     REGISTER_CUSTOM_ELEMENT_FUNCTION.with(|func| {
-        func.call2(
+        func.call3(
             &JsValue::NULL,
             &JsValue::from_str(custom_tag),
-            &JsValue::from_str(adapter),
+            &adapter,
+            &observed_attributes,
         )
         .expect("must call");
     })
@@ -54,20 +55,26 @@ pub fn register_web_component(custom_tag: &str, adapter: &str) {
 /// TODO: refer to https://github.com/gbj/custom-elements
 /// for improvements
 /// dynamically create the function which will register the custom tag
+///
+/// This is needed since there is no way to do `class extends HTMLElement` in rust code
 fn declare_custom_element_function() -> js_sys::Function {
     js_sys::Function::new_with_args(
-        "custom_tag, adapterClassName",
+        "custom_tag, adapter, observed_attributes",
         r#"
-          let adapter = window[adapterClassName];
           if (window.customElements.get(custom_tag) === undefined ){
              window.customElements.define(custom_tag,
                 class extends HTMLElement{
                     constructor(){
                         super();
-                        this.instance = new adapter(this);
+                        // the adapter execute the closure which attached the `new` function into `this`
+                        // object.
+                        adapter(this);
+                        // we then call that newly attached `new` function to give us an instance
+                        // of the CustomElement WebComponent
+                        this.instance = this.new(this);
                     }
                     static get observedAttributes(){
-                        return adapter.observedAttributes;
+                        return observed_attributes;
                     }
                     connectedCallback(){
                         this.instance.connectedCallback();

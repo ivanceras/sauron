@@ -87,7 +87,21 @@ pub fn to_token_stream(
             }
 
             pub fn register() {
-                sauron::dom::register_web_component(#custom_tag, Self::struct_name());
+                let constructor: Closure<dyn FnMut(JsValue)> = Closure::new(|node: JsValue| {
+                    let new:Closure<dyn FnMut(JsValue) -> Self> = Closure::new(|node: JsValue| {
+                        Self::new(node)
+                    });
+                    // assign the `new` closure into the `new` function to be called in the
+                    // javascript side.
+                    js_sys::Reflect::set(&node, &JsValue::from_str("new"), &new.into_js_value())
+                        .unwrap_throw();
+                });
+
+                sauron::dom::register_web_component(
+                    #custom_tag,
+                    constructor.into_js_value(),
+                    Self::observed_attributes(),
+                );
             }
         }
 
