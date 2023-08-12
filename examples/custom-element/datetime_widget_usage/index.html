@@ -6,12 +6,7 @@
   </head>
   <body>
     <script type=module>
-        import init, * as components from './pkg/datetime_widget_usage.js';
-        console.log(Object.keys(components));
-        /// attached the components in the window, so we access them from other scripts
-        /// This is important, otherwise the register_custom_element will not work
-        /// This must be called before the init function
-        Object.assign(window, components);
+        import init from './pkg/datetime_widget_usage.js';
         await init().catch(console.error);
 
         function dateTimeChange(e){
