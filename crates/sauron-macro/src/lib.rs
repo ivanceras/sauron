@@ -194,21 +194,87 @@ pub fn custom_element(
     custom_element::to_token_stream(attr, input)
 }
 
-/// TODO: docs
+/// build a css string
+///
+/// # Example:
+/// ```rust
+/// use sauron::jss;
+///
+/// let css = jss!(
+///     ".layer": {
+///         background_color: "red",
+///         border: "1px solid green",
+///     },
+///
+///     ".hide .layer": {
+///         opacity: 0,
+///     },
+/// );
+///
+/// let expected = "\
+///     .layer {\
+///     \n  background-color: red;\
+///     \n  border: 1px solid green;\
+///     \n}\
+///     \n\
+///     \n.hide .layer {\
+///     \n  opacity: 0;\
+///     \n}\
+///     \n";
+/// assert_eq!(expected, css);
+/// ```
 #[proc_macro]
 pub fn jss(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let style_sheet = syn::parse_macro_input!(input as jss::StyleSheet);
     style_sheet.to_token_stream().into()
 }
 
-/// TODO: docs
+/// build css string that has media selector or any other conditional group
+///
+/// # Example:
+/// ```rust
+/// use sauron::jss_with_media;
+///
+/// let css = jss_with_media!(
+///     "@media screen and (max-width: 800px)": {
+///       ".layer": {
+///         width: "100%",
+///       }
+///     },
+/// );
+///
+/// let expected = "\
+///     @media screen and (max-width: 800px) {\
+///         \n.layer {\
+///         \n  width: 100%;\
+///         \n}\
+///         \n\
+///         \n}\
+///         \n";
+/// assert_eq!(expected, css);
+/// ```
 #[proc_macro]
 pub fn jss_with_media(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let css_media = syn::parse_macro_input!(input as jss::StyleSheetWithConditionalGroup);
     css_media.to_token_stream().into()
 }
 
-/// TODO: docs
+/// build a style attribute
+///
+/// # Example:
+/// ```rust
+/// use sauron::style;
+/// use sauron::html::units::{px, percent};
+/// use sauron::html::attributes::{Attribute,attr};
+///
+/// let s1 = style! {
+///     background_color: "red",
+///     border: (px(1), "solid", "green"),
+///     width: percent(100),
+/// };
+/// let expected: Attribute<()> = attr("style","background-color:red;border:1px solid green;width:100%;");
+/// assert_eq!(expected, s1);
+/// ```
 #[proc_macro]
 pub fn style(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let style = syn::parse_macro_input!(input as jss::Style);

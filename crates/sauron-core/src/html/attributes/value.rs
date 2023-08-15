@@ -4,7 +4,7 @@ use std::fmt;
 /// This is needed since html attributes can have different value types
 /// such as checked(bool), name(String), tab_index(i32)
 /// Note: memory size of Value is 32 bytes, in comparison String is 24 bytes
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub enum Value {
     /// bool value
     Bool(bool),
@@ -123,6 +123,40 @@ impl Value {
             _ => {
                 *self = Value::Vec(vec![self.clone(), new_value]);
             }
+        }
+    }
+}
+
+impl PartialEq for Value {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Bool(v), Self::Bool(o)) => v == o,
+            (Self::String(v), other) => match other {
+                Self::String(o) => v == o,
+                Self::Str(o) => v == o,
+                _ => false,
+            },
+            (Self::Str(v), other) => match other {
+                Self::String(o) => v == o,
+                Self::Str(o) => v == o,
+                _ => false,
+            },
+            (Self::Vec(v), Self::Vec(o)) => v == o,
+            (Self::U8(v), Self::U8(o)) => v == o,
+            (Self::U16(v), Self::U16(o)) => v == o,
+            (Self::U32(v), Self::U32(o)) => v == o,
+            (Self::U64(v), Self::U64(o)) => v == o,
+            (Self::U128(v), Self::U128(o)) => v == o,
+            (Self::Usize(v), Self::Usize(o)) => v == o,
+            (Self::I8(v), Self::I8(o)) => v == o,
+            (Self::I16(v), Self::I16(o)) => v == o,
+            (Self::I32(v), Self::I32(o)) => v == o,
+            (Self::I64(v), Self::I64(o)) => v == o,
+            (Self::I128(v), Self::I128(o)) => v == o,
+            (Self::Isize(v), Self::Isize(o)) => v == o,
+            (Self::F32(v), Self::F32(o)) => v == o,
+            (Self::F64(v), Self::F64(o)) => v == o,
+            _ => false,
         }
     }
 }
