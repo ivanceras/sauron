@@ -1,5 +1,6 @@
 use crate::dom::{
-    Application, Cmd, Component, Container, Effects, Modifier, MountAction, MountTarget, Program,
+    Application, Cmd, Component, /*Container, Effects,*/ Modifier, MountAction, MountTarget,
+    Program,
 };
 use crate::vdom::Node;
 use wasm_bindgen::prelude::*;
@@ -103,8 +104,7 @@ fn declare_custom_element_function() -> js_sys::Function {
 /// but only if that Component is intended to be a WebComponent
 impl<COMP, MSG> Application<MSG> for COMP
 where
-    COMP: Component<MSG, ()> + 'static,
-    COMP: WebComponent<MSG>,
+    COMP: Component<MSG, ()> + WebComponent<MSG> + 'static,
     MSG: 'static,
 {
     fn init(&mut self) -> Cmd<Self, MSG> {
@@ -129,38 +129,6 @@ where
     }
 }
 
-/// Blanket implementation of Component trait for Container,
-/// which in turn creates an Auto implementation trait for of Application for Container
-/// but only if that Container is intended to be a WebComponent
-impl<CONT, MSG> Component<MSG, ()> for CONT
-where
-    CONT: Container<MSG, ()>,
-    CONT: WebComponent<MSG>,
-    MSG: 'static,
-{
-    fn init(&mut self) -> Effects<MSG, ()> {
-        <Self as Container<MSG, ()>>::init(self)
-    }
-
-    fn update(&mut self, msg: MSG) -> Effects<MSG, ()> {
-        <Self as Container<MSG, ()>>::update(self, msg)
-    }
-
-    fn view(&self) -> Node<MSG> {
-        // converting the component to container loses ability
-        // for the container to contain children components
-        <Self as Container<MSG, ()>>::view(self, [])
-    }
-
-    fn stylesheet() -> Vec<String> {
-        <Self as Container<MSG, ()>>::stylesheet()
-    }
-
-    fn style(&self) -> Vec<String> {
-        <Self as Container<MSG, ()>>::style(self)
-    }
-}
-
 /// A self contain web component
 /// This is needed to move some of the code from the #custom_element macro
 /// This is also necessary, since #[wasm_bindgen] macro can not process impl types which uses
@@ -176,8 +144,7 @@ where
 
 impl<APP, MSG> WebComponentWrapper<APP, MSG>
 where
-    APP: Application<MSG> + Default + 'static,
-    APP: WebComponent<MSG>,
+    APP: Application<MSG> + WebComponent<MSG> + Default + 'static,
     MSG: 'static,
 {
     /// create a new web component, with the node as the target element to be mounted into
