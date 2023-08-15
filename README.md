@@ -10,7 +10,7 @@
 ![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png)
 
 **Sauron** is a versatile web framework and library for building client-side and/or server-side web applications
-with strong focus on simplicity and minimalism.
+with strong focus on egonomics, simplicity and minimalism.
 This allows you to write least amount of code possible, and focus more on the business logic rather than the inner details of the framework.
 It is suited for developing web application which uses progressive rendering.
 
@@ -23,20 +23,23 @@ The update function describes how to update the model, this uses message which c
 #### Counter example
 In your `src/lib.rs`
 ```rust
-use sauron::prelude::*;
+use sauron::{
+    html::text, html::units::px, jss, node, wasm_bindgen, Application, Cmd, Node, Program,
+};
 
-#[derive(Debug)]
 enum Msg {
-    Click,
+    Increment,
+    Decrement,
+    Reset,
 }
 
 struct App {
-    click_count: u32,
+    count: i32,
 }
 
 impl App {
-    pub fn new() -> Self {
-        App { click_count: 0 }
+    fn new() -> Self {
+        App { count: 0 }
     }
 }
 
@@ -44,61 +47,67 @@ impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
-                <h1>Minimal example</h1>
-                <div class="some-class" id="some-id" {attr("data-id", 1)}>
-                    <input class="client"
-                            type="button"
-                            value="Click me!"
-                            key=1
-                            on_click={|_| {
-                                log::trace!("Button is clicked");
-                                Msg::Click
-                            }}
-                    />
-                    <div>{text(format!("Clicked: {}", self.click_count))}</div>
-                    <input type="text" value={self.click_count}/>
-                </div>
+                <input type="button"
+                    value="+"
+                    on_click=|_| {
+                        Msg::Increment
+                    }
+                />
+                <button class="count" on_click=|_|{Msg::Reset} >{text(self.count)}</button>
+                <input type="button"
+                    value="-"
+                    on_click=|_| {
+                        Msg::Decrement
+                    }
+                />
             </main>
         }
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-        log::trace!("App is updating with msg: {:?}", msg);
         match msg {
-            Msg::Click => self.click_count += 1,
+            Msg::Increment => self.count += 1,
+            Msg::Decrement => self.count -= 1,
+            Msg::Reset => self.count = 0,
         }
         Cmd::none()
+    }
+
+    fn stylesheet() -> Vec<String> {
+        vec![jss! {
+            "body":{
+                font_family: "verdana, arial, monospace",
+            },
+
+            "main":{
+                width:px(30),
+                height: px(100),
+                margin: "auto",
+                text_align: "center",
+            },
+
+            "input, .count":{
+                font_size: px(40),
+                padding: px(30),
+                margin: px(30),
+            }
+        }]
     }
 }
 
 #[wasm_bindgen(start)]
-pub fn main() {
-    console_log::init_with_level(log::Level::Trace).unwrap();
-    console_error_panic_hook::set_once();
+pub fn start() {
     Program::mount_to_body(App::new());
 }
-
 ```
 
 `index.html`
 ```html
+<!doctype html>
 <html>
   <head>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
     <title>Counter</title>
-    <style type="text/css">
-        body { font-family: verdana, arial, monospace; }
-        main {
-            width:30px;
-            height: 100px;
-            margin:auto;
-            text-align: center;
-        }
-        input, .count{
-            font-size: 40px;
-            padding: 30px;
-        }
-    </style>
     <script type=module>
         import init from './pkg/counter.js';
         await init().catch(console.error);
@@ -120,7 +129,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = "0.53.0"
+sauron = "0.59.0"
 ```
 
 #### Prerequisite:
