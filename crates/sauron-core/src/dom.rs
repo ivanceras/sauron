@@ -2,7 +2,7 @@
 //! manipulating the actual Document Object Model in the browser
 
 pub use callback::Callback;
-pub use component::{Component, Container, Widget};
+pub use component::{Component, Container};
 pub use effects::Effects;
 pub use modifier::Modifier;
 pub use task::Task;
