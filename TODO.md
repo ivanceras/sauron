@@ -105,6 +105,8 @@
     fn stylesheet(&self) -> Vec<String>{
     }
     ```
+- [ ] Make the compilation error in `jss!`, `style!`, more informative
+
 
 ## Internal
 - ~~[ ] Find a way to map `Cmd<APP,MSG>` to `Cmd<APP2, MSG2>`~~
