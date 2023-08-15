@@ -1,14 +1,6 @@
 use crate::html::attributes::Value;
 use std::fmt;
 
-/// Creat a style attribute
-#[macro_export]
-macro_rules! style {
-    ( $($arg: tt)* ) => {
-        $crate::html::attributes::attr("style", $crate::jss::style!{$($arg)*})
-    };
-}
-
 /// css styles
 /// style can be converted into an attribute
 #[derive(Debug, Clone, PartialEq)]

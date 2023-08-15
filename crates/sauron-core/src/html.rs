@@ -1,12 +1,14 @@
 //! Provides functions and macros to build html elements
 use crate::vdom::{leaf, Attribute, Node, NodeTrait};
-pub use jss::units;
 pub use mt_dom::{element, element_ns};
 pub use tags::{commons::*, self_closing::*, *};
 
 #[macro_use]
 pub mod attributes;
+#[cfg(feature = "with-lookup")]
+pub mod lookup;
 pub mod tags;
+pub mod units;
 
 #[cfg(feature = "with-dom")]
 pub use crate::dom::events;

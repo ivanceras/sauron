@@ -5,10 +5,10 @@ use crate::{dom::Event, vdom, vdom::Attribute};
 pub use attribute_macros::commons::*;
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
-pub use jss::Value;
 pub use listener::Listener;
 pub use special::{key, replace, skip, skip_criteria, Special};
 pub use style::Style;
+pub use value::Value;
 
 #[macro_use]
 mod attribute_macros;
@@ -16,6 +16,7 @@ mod attribute_value;
 mod listener;
 mod special;
 mod style;
+mod value;
 
 /// create a style attribute
 /// # Examples
@@ -140,56 +141,6 @@ pub fn classes<MSG>(class_list: impl IntoIterator<Item = impl ToString>) -> Attr
         .map(|v| AttributeValue::from(Value::from(v.to_string())));
 
     Attribute::with_multiple_values(None, "class", class_values)
-}
-
-/// return a class attribute where the classnames are transformed with
-/// namespace
-/// # Example:
-/// ```rust
-/// use sauron::html::attributes::class_namespaced;
-/// use sauron::Attribute;
-/// use sauron::html::attributes::class;
-///
-/// let component = "fui";
-/// let expected: Attribute<()> = class("fui__border".to_string());
-/// assert_eq!(expected, class_namespaced(component, "border"));
-///
-/// let expected: Attribute<()> =
-///     class("fui__border fui__corner".to_string());
-/// assert_eq!(expected, class_namespaced(component, "border corner"));
-/// ```
-pub fn class_namespaced<MSG>(
-    namespace: impl ToString,
-    class_names: impl ToString,
-) -> vdom::Attribute<MSG> {
-    class(jss::class_namespaced(namespace, class_names))
-}
-
-/// return a class namespaced with flag
-/// # Examples
-/// ```rust
-/// use sauron::*;
-///
-/// let component = "fui";
-/// let is_border = true;
-/// let is_corner = false;
-///
-/// let expected: Attribute<()> = class("fui__border".to_string());
-/// assert_eq!(expected, classes_flag_namespaced(component, [("border", is_border),("corner",
-/// is_corner)]));
-/// ```
-pub fn classes_flag_namespaced<MSG>(
-    namespace: impl ToString,
-    pair: impl IntoIterator<Item = (impl ToString, bool)>,
-) -> vdom::Attribute<MSG> {
-    let class_list = pair.into_iter().filter_map(|(class_name, flag)| {
-        if flag {
-            Some(jss::class_namespaced(namespace.to_string(), class_name))
-        } else {
-            None
-        }
-    });
-    classes(class_list)
 }
 
 /// A helper function for setting attributes with no values such as checked

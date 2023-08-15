@@ -17,6 +17,7 @@ quote = { version = "1"}
 proc-macro2 = { version = "1" }
 once_cell = "1.8"
 sauron-core = {version = "0.59", path = "../sauron-core", features = ["with-lookup"] }
+phf = { version = "0.11.2", features = ["macros"] }
 
 [dev-dependencies]
 sauron = { path = "../../"}

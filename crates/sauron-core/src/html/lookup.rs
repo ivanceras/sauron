@@ -1,5 +1,5 @@
-use once_cell::sync::Lazy;
-use sauron_core::{
+//! Provides list of HTML and SVG tags, style properties
+use crate::{
     html::tags::{
         commons::HTML_TAGS, self_closing::HTML_SC_TAGS, HTML_TAGS_NON_COMMON,
         HTML_TAGS_WITH_MACRO_NON_COMMON,
@@ -9,7 +9,10 @@ use sauron_core::{
         SVG_NAMESPACE,
     },
 };
+use once_cell::sync::Lazy;
 use std::collections::BTreeSet;
+pub use style_lookup::match_property;
+mod style_lookup;
 
 /// All of the svg tags
 static ALL_SVG_TAGS: Lazy<BTreeSet<&&'static str>> = Lazy::new(|| {

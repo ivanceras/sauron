@@ -11,9 +11,10 @@
 
 //! node macro facilitates users of sauron to use html-like syntax
 //! for building view of web app components
-extern crate proc_macro;
+use quote::ToTokens;
 
 mod custom_element;
+mod jss;
 mod node;
 
 /// Quasi-quoting macro for building sauron [Node]s.
@@ -191,4 +192,25 @@ pub fn custom_element(
     input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     custom_element::to_token_stream(attr, input)
+}
+
+/// TODO: docs
+#[proc_macro]
+pub fn jss(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let style_sheet = syn::parse_macro_input!(input as jss::StyleSheet);
+    style_sheet.to_token_stream().into()
+}
+
+/// TODO: docs
+#[proc_macro]
+pub fn jss_with_media(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let css_media = syn::parse_macro_input!(input as jss::StyleSheetWithConditionalGroup);
+    css_media.to_token_stream().into()
+}
+
+/// TODO: docs
+#[proc_macro]
+pub fn style(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let style = syn::parse_macro_input!(input as jss::Style);
+    style.to_attr_tokens().into()
 }

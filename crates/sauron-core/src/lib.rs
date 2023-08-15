@@ -13,8 +13,6 @@
 #[macro_use]
 extern crate doc_comment;
 
-pub use jss;
-
 /// prelude
 pub mod prelude {
     pub use crate::html;
@@ -22,8 +20,7 @@ pub mod prelude {
         attributes::commons::*,
         attributes::key,
         attributes::{
-            attr, checked, class, class_namespaced, classes, classes_flag, classes_flag_namespaced,
-            disabled, empty_attr, r#type, styles_flag,
+            attr, checked, class, classes, classes_flag, disabled, empty_attr, r#type, styles_flag,
         },
         br, comment,
         commons::*,
@@ -33,7 +30,6 @@ pub mod prelude {
     };
 
     pub use crate::render::Render;
-    pub use crate::style;
     pub use crate::svg;
     pub use crate::svg::attributes::commons::*;
     pub use crate::svg::attributes::special::*;
@@ -44,8 +40,6 @@ pub mod prelude {
         map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg},
         Attribute, AttributeValue, Element, Listener, Node, NodeTrait, Patch,
     };
-    pub use jss as jss_crate;
-    pub use jss::{jss, jss_ns, jss_ns_pretty, jss_pretty};
     pub use mt_dom::TreePath;
 
     use cfg_if::cfg_if;

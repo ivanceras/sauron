@@ -1,9 +1,8 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 use rstml::node::{KeyedAttributeValue, Node, NodeAttribute, NodeBlock};
+use sauron_core::html::lookup;
 use syn::{Expr, ExprForLoop, Stmt};
-
-pub(crate) mod lookup;
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match rstml::parse(input) {

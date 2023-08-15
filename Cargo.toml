@@ -18,12 +18,13 @@ sauron-core = { version = "0.59", path = "crates/sauron-core", default-features 
 sauron-macro = { version = "0.59", path = "crates/sauron-macro", optional = true }
 
 [features]
-default = ["with-dom", "with-node-macro", "custom_element", "with-interning"]
+default = ["with-dom", "with-node-macro", "custom_element", "with-interning", "with-jss"]
 with-dom = ["sauron-core/with-dom"]
 with-lookup = ["sauron-core/with-lookup"]
 with-ric = ["sauron-core/with-ric"]
 with-raf = ["sauron-core/with-raf"]
 with-interning = ["sauron-core/with-interning"]
+with-jss = ["sauron-macro", "with-lookup"] #enable use of jss (css style in json format)
 
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]

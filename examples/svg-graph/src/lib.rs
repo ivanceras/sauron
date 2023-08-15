@@ -1,4 +1,5 @@
 #![deny(warnings)]
+use sauron::html::units::rgb;
 use sauron::prelude::*;
 
 extern crate log;
@@ -82,6 +83,7 @@ impl Application<Msg> for App {
                         html::tags::style(
                             [],
                             [html::text(
+                                [
                                 jss!{
                                     "text": {
                                         font_family: "arial, monospace",
@@ -109,7 +111,9 @@ impl Application<Msg> for App {
                                         text_anchor: "end",
                                         word_spacing: 0,
                                     },
+                                },
 
+                                jss_with_media!{
                                     "@media (max-width: 500px)": {
                                         ".x-axis text:nth-of-type(2n),
                                         .y-axis text:nth-of-type(2n)": {
@@ -129,6 +133,7 @@ impl Application<Msg> for App {
                                         },
                                     },
                                 }
+                                ].join("\n")
                             )]
                         ),
                     ]
