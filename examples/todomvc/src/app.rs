@@ -224,16 +224,13 @@ impl Model {
     }
 
     fn view_entry(&self, entry: &Entry) -> Node<Msg> {
-        let mut class_name = "todo".to_string();
-        if entry.editing {
-            class_name.push_str(" editing");
-        }
-        if entry.completed {
-            class_name.push_str(" completed");
-        }
         let entry_id = entry.id;
         li(
-            [class(class_name), key(format!("todo-{}", entry.id))],
+            [
+                class("todo"),
+                classes_flag([("editing", entry.editing), ("completed", entry.completed)]),
+                key(format!("todo-{}", entry.id)),
+            ],
             [
                 div(
                     [class("view")],
