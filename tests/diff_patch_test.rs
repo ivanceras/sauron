@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::html::attributes::{style, styles, Style};
+use sauron::html::attributes::{styles, Style};
 use sauron::*;
 
 #[test]
@@ -258,14 +258,14 @@ fn add_attributes() {
 
 #[test]
 fn add_style_attributes() {
-    let old: Node<()> = div(vec![style("display", "block")], vec![]);
-    let new = div(vec![style("display", "none")], vec![]);
+    let old: Node<()> = div(vec![style!("display": "block")], vec![]);
+    let new = div(vec![style!("display": "none")], vec![]);
     assert_eq!(
         diff(&old, &new),
         vec![Patch::add_attributes(
             &"div",
             TreePath::new(vec![]),
-            vec![&style("display", "none")]
+            vec![&style!("display": "none")]
         )],
         "Add attributes",
     );
@@ -313,14 +313,14 @@ fn add_style_attributes_no_changes() {
 
 #[test]
 fn remove_style_attributes() {
-    let old: Node<()> = div(vec![style("display", "block")], vec![]);
+    let old: Node<()> = div(vec![style!("display": "block")], vec![]);
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
         vec![Patch::remove_attributes(
             &"div",
             TreePath::new(vec![]),
-            vec![&style("display", "block")]
+            vec![&style!("display": "block")]
         )],
         "Add attributes",
     );
@@ -395,7 +395,10 @@ fn multiple_style_calls() {
         vec![],
     );
     let new: Node<&'static str> = div(
-        vec![style("font-family", "monospace1"), style("display", "flex")],
+        vec![
+            style!("font-family": "monospace1"),
+            style!("display": "flex"),
+        ],
         vec![],
     );
     let patches = diff(&old, &new);
@@ -406,8 +409,8 @@ fn multiple_style_calls() {
             &"div",
             TreePath::new(vec![]),
             vec![
-                &style("font-family", "monospace1"),
-                &style("display", "flex")
+                &style!("font-family": "monospace1"),
+                &style!("display": "flex")
             ]
         )]
     );

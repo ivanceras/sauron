@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::html::attributes::{style, styles};
+use sauron::html::attributes::styles;
 use sauron::*;
 
 #[test]
@@ -88,7 +88,7 @@ fn test_styles_flag() {
     );
     let mut actual_html = String::new();
     actual.render(&mut actual_html).unwrap();
-    let expected: Node<&'static str> = div(vec![style("font-family", "monospace")], vec![]);
+    let expected: Node<&'static str> = div(vec![style! {"font-family": "monospace"}], vec![]);
     let mut expected_html = String::new();
     expected.render(&mut expected_html).unwrap();
 
@@ -110,7 +110,10 @@ fn test_styles_and_styles_flag() {
     let mut actual_html = String::new();
     actual.render(&mut actual_html).unwrap();
     let expected: Node<&'static str> = div(
-        vec![style("font-family", "monospace"), style("display", "flex")],
+        vec![
+            style! {"font-family": "monospace"},
+            style! {"display": "flex"},
+        ],
         vec![],
     );
     let mut expected_html = String::new();
