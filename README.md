@@ -10,9 +10,27 @@
 ![sauron](https://raw.githubusercontent.com/ivanceras/sauron/master/assets/sauron.png)
 
 **Sauron** is a versatile web framework and library for building client-side and/or server-side web applications
-with strong focus on egonomics, simplicity and minimalism.
+with strong focus on ergonomics, simplicity and elegance.
 This allows you to write least amount of code possible, and focus more on the business logic rather than the inner details of the framework.
-It is suited for developing web application which uses progressive rendering.
+
+Sauron is inspired by elm-lang and is following The Elm Architecture.
+
+#### Features
+- server-side rendering
+- static site generation
+- progressive rendering
+- web components / custom-element
+- html syntax for writing views
+- elegant macro to write styles
+- batteries included
+
+### Devoid of unnecessary framework complexities
+- **no** framework specific cli needed
+- **no** template specific language as everything is in rust.
+    - Model and update function is all in rust.
+    - view? in rust
+    - events handling? rust
+    - styling? believe it or not: rust
 
 In a sauron application, there is only the model, view and update.
 The model is your application state.
@@ -80,7 +98,7 @@ impl Application<Msg> for App {
             },
 
             "main":{
-                width:px(30),
+                width: px(30),
                 height: px(100),
                 margin: "auto",
                 text_align: "center",
@@ -129,7 +147,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = "0.59.0"
+sauron = "0.60.0"
 ```
 
 #### Prerequisite:
