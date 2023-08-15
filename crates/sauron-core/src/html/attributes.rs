@@ -20,21 +20,6 @@ mod special;
 mod style;
 mod value;
 
-/// create a style attribute
-/// # Examples
-/// ```rust
-/// use sauron::*;
-/// use sauron::html::attributes::style;
-///
-/// let flex:Attribute<()> = style("display", "flex");
-/// ```
-pub fn style<MSG>(style_name: impl ToString, value: impl Into<Value>) -> Attribute<MSG> {
-    mt_dom::attr(
-        "style",
-        AttributeValue::from_styles([Style::new(style_name, value.into())]),
-    )
-}
-
 /// A helper function which creates a style attribute by assembling the tuples into a string for the style value.
 /// # Example
 /// ```rust
