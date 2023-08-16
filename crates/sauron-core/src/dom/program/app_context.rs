@@ -102,7 +102,7 @@ where
         self.pending_msgs.borrow_mut().extend(msgs);
     }
 
-    pub fn update_app(&self, msg: MSG) -> Cmd<APP, MSG> {
+    pub fn update_app(&mut self, msg: MSG) -> Cmd<APP, MSG> {
         self.app.borrow_mut().update(msg)
     }
 
@@ -113,7 +113,7 @@ where
 
     /// dispatch a single pending msg, return true successfully dispatch one
     /// false if there is no more pending msg
-    pub fn dispatch_pending_msg(&self) -> bool {
+    pub fn dispatch_pending_msg(&mut self) -> bool {
         let pending_msg = self.pending_msgs.borrow_mut().pop_front();
         let cmd = if let Some(pending_msg) = pending_msg {
             // Note: each MSG needs to be executed one by one in the same order
@@ -133,7 +133,7 @@ where
         }
     }
 
-    pub fn batch_pending_cmds(&self) -> Cmd<APP, MSG> {
+    pub fn batch_pending_cmds(&mut self) -> Cmd<APP, MSG> {
         Cmd::batch(self.pending_cmds.borrow_mut().drain(..))
     }
 }
