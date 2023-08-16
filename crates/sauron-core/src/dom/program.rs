@@ -145,7 +145,7 @@ where
     }
 
     /// executed after the program has been mounted
-    fn after_mounted(&self) {
+    fn after_mounted(&mut self) {
         // call the init of the component
         let cmd = self.app_context.init_app();
         cmd.emit(self);
@@ -161,7 +161,7 @@ where
         hasher.finish()
     }
 
-    fn inject_stylesheet(&self) {
+    fn inject_stylesheet(&mut self) {
         let static_style = self.app_context.static_style();
         if !static_style.is_empty() {
             let class_names = format!("static {}", Self::app_hash());
@@ -169,7 +169,7 @@ where
         }
     }
 
-    fn inject_dynamic_style(&self) {
+    fn inject_dynamic_style(&mut self) {
         let dynamic_style = self.app_context.dynamic_style();
         if !dynamic_style.is_empty() {
             let class_names = format!("dynamic {}", Self::app_hash());
@@ -200,7 +200,7 @@ where
     /// Program::append_to_mount(App{}, &mount);
     /// ```
     pub fn append_to_mount(app: APP, mount_node: &web_sys::Node) -> Self {
-        let program = Self::new(app, mount_node, MountAction::Append, MountTarget::MountNode);
+        let mut program = Self::new(app, mount_node, MountAction::Append, MountTarget::MountNode);
         program.mount();
         program
     }
@@ -223,7 +223,7 @@ where
     /// Program::replace_mount(App{}, &mount);
     /// ```
     pub fn replace_mount(app: APP, mount_node: &web_sys::Node) -> Self {
-        let program = Self::new(
+        let mut program = Self::new(
             app,
             mount_node,
             MountAction::Replace,
@@ -235,7 +235,7 @@ where
 
     /// clear the existing children of the mount first before appending
     pub fn clear_append_to_mount(app: APP, mount_node: &web_sys::Node) -> Self {
-        let program = Self::new(
+        let mut program = Self::new(
             app,
             mount_node,
             MountAction::ClearAppend,
@@ -266,13 +266,13 @@ where
     }
 
     /// executed right before the app is mounted to the dom
-    pub fn pre_mount(&self) {
+    pub fn pre_mount(&mut self) {
         self.inject_stylesheet();
     }
 
     /// each element and it's descendant in the vdom is created into
     /// an actual DOM node.
-    pub fn mount(&self) {
+    pub fn mount(&mut self) {
         self.pre_mount();
         let created_node = self.create_dom_node(&self.app_context.current_vdom());
 
@@ -313,8 +313,8 @@ where
     }
 
     #[cfg(feature = "with-ric")]
-    fn dispatch_pending_msgs_with_ric(&self) -> Result<(), JsValue> {
-        let program = self.clone();
+    fn dispatch_pending_msgs_with_ric(&mut self) -> Result<(), JsValue> {
+        let mut program = self.clone();
         let handle = request_idle_callback(move |deadline| {
             program
                 .dispatch_pending_msgs(Some(deadline))
@@ -328,7 +328,7 @@ where
     /// executes pending msgs by calling the app update method with the msgs
     /// as parameters.
     /// If there is no deadline specified all the pending messages are executed
-    fn dispatch_pending_msgs(&self, deadline: Option<IdleDeadline>) -> Result<(), JsValue> {
+    fn dispatch_pending_msgs(&mut self, deadline: Option<IdleDeadline>) -> Result<(), JsValue> {
         if !self.app_context.has_pending_msgs() {
             return Ok(());
         }
@@ -388,29 +388,31 @@ where
         Ok(measurements)
     }
 
+    fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch<MSG>>{
+        let current_vdom = self.app_context.current_vdom();
+        let patches = diff(&current_vdom, &new_vdom);
+        #[cfg(all(feature = "with-debug", feature = "log-patches"))]
+        {
+            log::debug!("There are {} patches", patches.len());
+            log::debug!("patches: {patches:#?}");
+        }
+        let dom_patches = self
+            .convert_patches(&patches)
+            .expect("must convert patches");
+        dom_patches
+    }
+
     /// patch the DOM to reflect the App's view
     pub fn update_dom_with_vdom(&mut self, new_vdom: vdom::Node<MSG>) -> Result<usize, JsValue> {
-        let total_patches = {
-            let current_vdom = self.app_context.current_vdom();
-            let patches = diff(&current_vdom, &new_vdom);
-            #[cfg(all(feature = "with-debug", feature = "log-patches"))]
-            {
-                log::debug!("There are {} patches", patches.len());
-                log::debug!("patches: {patches:#?}");
-            }
-            let dom_patches = self
-                .convert_patches(&patches)
-                .expect("must convert patches");
-            self.pending_patches.borrow_mut().extend(dom_patches);
+        let dom_patches = self.create_dom_patch(&new_vdom);
+        let total_patches = dom_patches.len();
+        self.pending_patches.borrow_mut().extend(dom_patches);
 
-            #[cfg(feature = "with-raf")]
-            self.apply_pending_patches_with_raf().expect("raf");
+        #[cfg(feature = "with-raf")]
+        self.apply_pending_patches_with_raf().expect("raf");
 
-            #[cfg(not(feature = "with-raf"))]
-            self.apply_pending_patches().expect("raf");
-
-            patches.len()
-        };
+        #[cfg(not(feature = "with-raf"))]
+        self.apply_pending_patches().expect("raf");
 
         self.app_context.set_current_dom(new_vdom);
         Ok(total_patches)
@@ -429,8 +431,8 @@ where
     }
 
     #[cfg(feature = "with-raf")]
-    fn apply_pending_patches_with_raf(&self) -> Result<(), JsValue> {
-        let program = self.clone();
+    fn apply_pending_patches_with_raf(&mut self) -> Result<(), JsValue> {
+        let mut program = self.clone();
         let handle = request_animation_frame(move || {
             program.apply_pending_patches().expect("must not error");
         })
@@ -440,11 +442,12 @@ where
     }
 
     /// apply the pending patches into the DOM
-    fn apply_pending_patches(&self) -> Result<(), JsValue> {
+    fn apply_pending_patches(&mut self) -> Result<(), JsValue> {
         if self.pending_patches.borrow().is_empty() {
             return Ok(());
         }
-        while let Some(dom_patch) = self.pending_patches.borrow_mut().pop_front() {
+        let dom_patches:Vec<DomPatch<MSG>> = self.pending_patches.borrow_mut().drain(..).collect();
+        for dom_patch in dom_patches{
             self.apply_dom_patch(dom_patch)
                 .expect("must apply dom patch");
         }
@@ -554,7 +557,7 @@ where
     }
 
     /// Inject a style to the global document
-    fn inject_style(&self, class_names: String, style: &str) {
+    fn inject_style(&mut self, class_names: String, style: &str) {
         let style_node = html::tags::style([class(class_names)], [text(style)]);
         let created_node = self.create_dom_node(&style_node);
 
@@ -563,7 +566,7 @@ where
     }
 
     /// inject style element to the mount node
-    pub fn inject_style_to_mount(&self, style: &str) {
+    pub fn inject_style_to_mount(&mut self, style: &str) {
         let style_node = html::tags::style([], [text(style)]);
         let created_node = self.create_dom_node(&style_node);
 

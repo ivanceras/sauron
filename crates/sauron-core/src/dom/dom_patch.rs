@@ -237,7 +237,7 @@ where
         }
     }
 
-    pub(crate) fn apply_dom_patch(&self, dom_patch: DomPatch<MSG>) -> Result<(), JsValue> {
+    pub(crate) fn apply_dom_patch(&mut self, dom_patch: DomPatch<MSG>) -> Result<(), JsValue> {
         let DomPatch {
             patch_path,
             target_element,
