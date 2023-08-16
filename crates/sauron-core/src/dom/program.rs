@@ -420,18 +420,6 @@ where
         Ok(total_patches)
     }
 
-    /// replace the current vdom with the `new_vdom`.
-    pub fn set_current_dom(&mut self, new_vdom: vdom::Node<MSG>) {
-        let created_node = self.create_dom_node(&new_vdom);
-        self.mount_node
-            .borrow_mut()
-            .append_child(&created_node)
-            .expect("Could not append child to mount");
-
-        *self.root_node.borrow_mut() = Some(created_node);
-        self.app_context.set_current_dom(new_vdom);
-    }
-
     #[cfg(feature = "with-raf")]
     fn apply_pending_patches_with_raf(&mut self) -> Result<(), JsValue> {
         let mut program = self.clone();
