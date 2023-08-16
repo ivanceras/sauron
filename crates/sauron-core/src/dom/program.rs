@@ -363,6 +363,10 @@ where
         let total_patches = self.update_dom_with_vdom(view).expect("must not error");
         let t3 = now();
 
+        let strong_count = self.app_context.strong_count();
+        let weak_count = self.app_context.weak_count();
+        let root_node_count = Rc::strong_count(&self.root_node);
+        assert_eq!(strong_count, root_node_count);
         let measurements = Measurements {
             name: modifier.measurement_name.to_string(),
             node_count,
@@ -370,10 +374,16 @@ where
             total_patches,
             dom_update_took: t3 - t2,
             total_time: t3 - t1,
+            strong_count,
+            weak_count,
         };
+
+        log::debug!("There are {} strong count", strong_count);
         if measurements.total_time > 16.0 {
             #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-            log::warn!("dispatch took {}ms", measurements.total_time.round());
+            {
+                log::warn!("dispatch took {}ms", measurements.total_time.round());
+            }
         }
         Ok(measurements)
     }

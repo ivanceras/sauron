@@ -61,6 +61,19 @@ where
     pub fn init_app(&self) -> Cmd<APP, MSG> {
         self.app.borrow_mut().init()
     }
+    pub fn strong_count(&self) -> usize {
+        let c1 = Rc::strong_count(&self.app);
+        let c2 = Rc::strong_count(&self.current_vdom);
+        assert_eq!(c1, c2);
+        c1
+    }
+    pub fn weak_count(&self) -> usize {
+        let w1 = Rc::weak_count(&self.app);
+        let w2 = Rc::weak_count(&self.current_vdom);
+        assert_eq!(w1, w2);
+        w1
+    }
+
     pub fn view(&self) -> vdom::Node<MSG> {
         self.app.borrow().view()
     }

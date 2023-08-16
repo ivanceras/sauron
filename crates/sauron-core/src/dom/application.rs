@@ -53,7 +53,7 @@ where
 
 /// Contains the time it took for the last app update call for the component
 /// TODO: Maybe rename to Diagnostics
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct Measurements {
     /// The application can name this measurement to determine where this measurement is coming
     /// from.
@@ -68,4 +68,8 @@ pub struct Measurements {
     pub dom_update_took: f64,
     /// Total time it took for the component dispatch
     pub total_time: f64,
+    /// The total count reference of the Program App
+    pub strong_count: usize,
+    /// The total weak count reference of the Program App
+    pub weak_count: usize,
 }
