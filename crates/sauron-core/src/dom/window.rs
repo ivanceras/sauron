@@ -23,7 +23,7 @@ where
     where
         F: FnMut(i32, i32) -> MSG + Clone + 'static,
     {
-        let program = self.clone();
+        let mut program = self.clone();
         let closure: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_| {
             let (window_width, window_height) = util::get_window_size();
             let msg = cb(window_width, window_height);
@@ -67,7 +67,7 @@ where
     where
         F: FnMut(String) -> MSG + 'static,
     {
-        let program = self.clone();
+        let mut program = self.clone();
         let closure: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_| {
             let hash = util::get_location_hash();
             let msg = cb(hash);

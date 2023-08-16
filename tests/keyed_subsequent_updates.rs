@@ -143,7 +143,7 @@ fn subsequent_updates() {
 
     assert_eq!(old_html, expected_old);
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old.clone());
 
     let container = document

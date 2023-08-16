@@ -31,7 +31,7 @@ fn on_input_test() {
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(input);
 
     let input_element = sauron_core::dom::document()
@@ -79,7 +79,7 @@ fn added_event() {
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
 
     simple_program.set_current_dom(old);
     // update to new dom with no event attached
@@ -135,7 +135,7 @@ fn remove_event() {
 
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
     // update to new dom with no event attached
     simple_program
@@ -175,7 +175,7 @@ fn remove_event_from_truncated_children() {
 
     let new: Node<()> = div(vec![], vec![button(vec![cb.clone()], vec![])]);
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     let diff = diff(&old, &new);
     log::debug!("{:#?}", diff);
     assert_eq!(
@@ -222,7 +222,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
 
     let new: Node<()> = div(vec![], vec![button(vec![cb.clone()], vec![])]);
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     let diff = diff(&old, &new);
     log::debug!("{:#?}", diff);
     assert_eq!(
@@ -262,7 +262,7 @@ fn remove_event_from_replaced_node() {
 
     let new: Node<()> = p(vec![], vec![]);
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     let diff = diff(&old, &new);
     log::info!("{:#?}", diff);
     assert_eq!(

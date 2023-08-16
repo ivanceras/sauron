@@ -35,10 +35,10 @@ impl App {
 
 impl Application<Msg> for App {
     fn init(&mut self) -> Cmd<Self, Msg> {
-        Cmd::new(|program| {
-            let clock: Closure<dyn Fn()> = Closure::wrap(Box::new(move || {
+        Cmd::new(|mut program| {
+            let clock: Closure<dyn FnMut()> = Closure::new(move || {
                 program.dispatch(Msg::Clock);
-            }));
+            });
             window()
                 .set_interval_with_callback_and_timeout_and_arguments_0(
                     clock.as_ref().unchecked_ref(),

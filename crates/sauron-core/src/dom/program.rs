@@ -351,7 +351,7 @@ where
     }
 
     /// update the browser DOM to reflect the APP's  view
-    pub fn update_dom(&self, modifier: &Modifier) -> Result<Measurements, JsValue> {
+    pub fn update_dom(&mut self, modifier: &Modifier) -> Result<Measurements, JsValue> {
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app_context.view();
@@ -389,7 +389,7 @@ where
     }
 
     /// patch the DOM to reflect the App's view
-    pub fn update_dom_with_vdom(&self, new_vdom: vdom::Node<MSG>) -> Result<usize, JsValue> {
+    pub fn update_dom_with_vdom(&mut self, new_vdom: vdom::Node<MSG>) -> Result<usize, JsValue> {
         let total_patches = {
             let current_vdom = self.app_context.current_vdom();
             let patches = diff(&current_vdom, &new_vdom);
@@ -417,7 +417,7 @@ where
     }
 
     /// replace the current vdom with the `new_vdom`.
-    pub fn set_current_dom(&self, new_vdom: vdom::Node<MSG>) {
+    pub fn set_current_dom(&mut self, new_vdom: vdom::Node<MSG>) {
         let created_node = self.create_dom_node(&new_vdom);
         self.mount_node
             .borrow_mut()
@@ -452,7 +452,7 @@ where
     }
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    fn dispatch_dom_changes(&self, modifier: &Modifier) {
+    fn dispatch_dom_changes(&mut self, modifier: &Modifier) {
         #[allow(unused_variables)]
         let measurements = self.update_dom(modifier).expect("must update dom");
 
@@ -466,7 +466,7 @@ where
 
     #[cfg(feature = "with-ric")]
     fn dispatch_inner_with_ric(&self) {
-        let program = self.clone();
+        let mut program = self.clone();
         let handle = request_idle_callback(move |deadline| {
             program.dispatch_inner(Some(deadline));
         })
@@ -477,7 +477,7 @@ where
     #[allow(unused)]
     #[cfg(feature = "with-raf")]
     fn dispatch_inner_with_raf(&self) {
-        let program = self.clone();
+        let mut program = self.clone();
         let handle = request_animation_frame(move || {
             program.dispatch_inner(None);
         })
@@ -495,7 +495,7 @@ where
 
             #[cfg(not(feature = "with-raf"))]
             {
-                let program = self.clone();
+                let mut program = self.clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     program.dispatch_inner(None);
                 })
@@ -509,7 +509,7 @@ where
     /// - The returned Cmd from the component update is then emitted.
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
-    fn dispatch_inner(&self, deadline: Option<IdleDeadline>) {
+    fn dispatch_inner(&mut self, deadline: Option<IdleDeadline>) {
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
@@ -574,13 +574,13 @@ where
     }
 
     /// dispatch multiple MSG
-    pub fn dispatch_multiple(&self, msgs: impl IntoIterator<Item = MSG>) {
+    pub fn dispatch_multiple(&mut self, msgs: impl IntoIterator<Item = MSG>) {
         self.app_context.push_msgs(msgs);
         self.dispatch_inner_with_priority_ric();
     }
 
     /// dispatch a single msg
-    pub fn dispatch(&self, msg: MSG) {
+    pub fn dispatch(&mut self, msg: MSG) {
         self.dispatch_multiple([msg])
     }
 }

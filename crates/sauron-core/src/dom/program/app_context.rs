@@ -85,7 +85,7 @@ where
         APP::stylesheet().join("")
     }
 
-    pub fn set_current_dom(&self, new_vdom: vdom::Node<MSG>) {
+    pub fn set_current_dom(&mut self, new_vdom: vdom::Node<MSG>) {
         *self.current_vdom.borrow_mut() = new_vdom;
     }
 
@@ -98,7 +98,7 @@ where
         self.app.borrow().measurements(measurements).no_render()
     }
 
-    pub fn push_msgs(&self, msgs: impl IntoIterator<Item = MSG>) {
+    pub fn push_msgs(&mut self, msgs: impl IntoIterator<Item = MSG>) {
         self.pending_msgs.borrow_mut().extend(msgs);
     }
 

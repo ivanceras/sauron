@@ -81,7 +81,7 @@ fn click_event() {
         vec![],
     );
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
 
     simple_program.set_current_dom(vdiv);
 

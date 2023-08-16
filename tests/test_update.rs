@@ -106,7 +106,7 @@ fn test1() {
 
     dbg!(&patch);
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
 
     simple_program.set_current_dom(current_dom.clone());
 

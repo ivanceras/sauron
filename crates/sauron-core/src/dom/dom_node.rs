@@ -371,7 +371,7 @@ where
         event_name: &str,
         listener: &Listener<dom::Event, MSG>,
     ) -> Result<Closure<dyn FnMut(web_sys::Event)>, JsValue> {
-        let program = self.clone();
+        let mut program = self.clone();
         let listener = listener.clone();
 
         let closure: Closure<dyn FnMut(web_sys::Event)> =

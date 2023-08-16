@@ -16,7 +16,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 fn test_on_client() {
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     let input = node! {
         <div id="container">{ some_view() }</div>
     };

@@ -113,7 +113,7 @@ fn multiple_match_on_keyed_elements() {
     log::trace!("current_dom: {}", current_dom.render_to_string());
     log::trace!("target_dom: {}", target_dom.render_to_string());
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(current_dom.clone());
 
     let target_dom_html = target_dom.render_to_string();

@@ -32,7 +32,7 @@ fn node_mounted_properly() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let container = document
@@ -82,7 +82,7 @@ fn node_patched_properly() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let container = document
@@ -155,7 +155,7 @@ fn node_patched_properly_remove_from_start() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let container = document
@@ -229,7 +229,7 @@ fn node_patched_properly_text_changed() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let container = document
@@ -309,7 +309,7 @@ fn mixed_keyed_and_non_keyed_elements() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
 
     simple_program.set_current_dom(old);
 

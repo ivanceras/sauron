@@ -48,7 +48,7 @@ fn test_multiple_replace() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let container = document
@@ -112,7 +112,7 @@ fn test_multiple_replace_and_parent_is_replaced_too() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let container = document

@@ -54,7 +54,7 @@ fn swap_rows_non_keyed() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let expected1 = update1.render_to_string();
@@ -113,7 +113,7 @@ fn swap_rows_keyed() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let expected1 = update1.render_to_string();
@@ -182,7 +182,7 @@ fn swap_1_and_8() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let expected1 = update1.render_to_string();

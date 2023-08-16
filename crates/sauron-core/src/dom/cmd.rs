@@ -109,7 +109,7 @@ where
     ///
     pub fn batch_msg(msg_list: impl IntoIterator<Item = MSG>) -> Self {
         let msg_list: Vec<MSG> = msg_list.into_iter().collect();
-        Cmd::new(move |program| {
+        Cmd::new(move |mut program| {
             program.dispatch_multiple(msg_list);
         })
     }
@@ -154,7 +154,7 @@ where
 {
     fn from(task: Task<MSG>) -> Self {
         let task = task.task;
-        Cmd::new(move |program| {
+        Cmd::new(move |mut program| {
             spawn_local(async move {
                 let msg = task.await;
                 program.dispatch(msg)

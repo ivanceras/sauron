@@ -183,7 +183,7 @@ where
 
     /// this is called when the attributes in the mount is changed
     fn attribute_changed(
-        program: &Program<Self, Msg>,
+        mut program: Program<Self, Msg>,
         attr_name: &str,
         old_value: Option<String>,
         new_value: Option<String>,

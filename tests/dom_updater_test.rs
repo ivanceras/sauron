@@ -19,7 +19,7 @@ fn patches_dom() {
     let document = web_sys::window().unwrap().document().unwrap();
 
     let vdom: Node<()> = div(vec![], vec![]);
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(vdom);
 
     let new_vdom = div(vec![id("patched")], vec![]); //html! { <div id="patched"></div> };
@@ -37,7 +37,7 @@ fn patches_dom() {
 fn updates_active_closure_on_replace() {
     console_error_panic_hook::set_once();
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     let old = div(vec![], vec![]);
 
     simple_program.set_current_dom(old);
@@ -88,7 +88,7 @@ async fn updates_active_closures_on_append() {
     console_error_panic_hook::set_once();
 
     let old = div(vec![], vec![]);
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));

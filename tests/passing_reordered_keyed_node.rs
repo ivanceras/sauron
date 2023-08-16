@@ -41,7 +41,7 @@ fn reordered_keys2() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let update1_html = update1.render_to_string();
@@ -97,7 +97,7 @@ fn reordered_keys3() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let update1_html = update1.render_to_string();

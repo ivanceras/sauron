@@ -48,7 +48,7 @@ fn test_patch_insert_node() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let container = document
@@ -113,7 +113,7 @@ fn test_patch_insert_node_in_the_middle() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
 
     simple_program.set_current_dom(old);
 
@@ -182,7 +182,7 @@ fn multiple_insert_should_work() {
     let mut old_html = String::new();
     old.render(&mut old_html).expect("must render");
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     simple_program.set_current_dom(old);
 
     let container = document

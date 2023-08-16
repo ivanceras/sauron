@@ -49,7 +49,7 @@ fn remove_event_from_replaced_node() {
 
     let new: Node<()> = p(vec![], vec![]);
 
-    let simple_program = simple_program();
+    let mut simple_program = simple_program();
     let diff = diff(&old, &new);
     log::info!("{:#?}", diff);
     assert_eq!(

@@ -15,7 +15,7 @@ struct App {
 
 impl Application<Msg> for App {
     fn init(&mut self) -> Cmd<Self, Msg> {
-        Cmd::new(|program| {
+        Cmd::new(|mut program| {
             program.dispatch(Msg::ToggleShow);
         })
     }
@@ -28,7 +28,7 @@ impl Application<Msg> for App {
                 } else {
                     document().set_title("Now, you don't!");
                 }
-                Cmd::new(|program| {
+                Cmd::new(|mut program| {
                     spawn_local(async move {
                         delay(2000).await;
                         program.dispatch(Msg::ToggleShow);

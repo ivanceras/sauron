@@ -28,7 +28,7 @@ pub struct App {
 
 impl App {
     fn execute_delayed(
-        program: Program<Self, Msg>,
+        mut program: Program<Self, Msg>,
         current_handle: Rc<RefCell<Option<TimeoutCallbackHandle>>>,
         executed: Rc<AtomicBool>,
     ) {

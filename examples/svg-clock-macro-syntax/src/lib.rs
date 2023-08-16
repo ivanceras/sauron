@@ -30,10 +30,10 @@ impl Application<Msg> for Clock {
     // we wire the window set_interval api to trigger an Msg::Tick
     // by dispatching it from the program, through the Cmd interface
     fn init(&mut self) -> Cmd<Self, Msg> {
-        Cmd::new(move |program| {
-            let clock: Closure<dyn Fn()> = Closure::wrap(Box::new(move || {
+        Cmd::new(move |mut program| {
+            let clock: Closure<dyn FnMut()> = Closure::new(move || {
                 program.dispatch(Msg::Tick);
-            }));
+            });
 
             web_sys::window()
                 .expect("no global `window` exists")

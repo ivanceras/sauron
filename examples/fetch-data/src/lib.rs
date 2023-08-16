@@ -58,7 +58,7 @@ impl App {
 
     fn fetch_page(&self) -> Cmd<Self, Msg> {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
-        Cmd::new(|program| {
+        Cmd::new(|mut program| {
             spawn_local(async move {
                 let msg = match Http::fetch_text(&url).await {
                     Ok(v) => match serde_json::from_str(&v) {
