@@ -14,7 +14,7 @@ use std::collections::VecDeque;
 use std::hash::{Hash, Hasher};
 use std::{
     any::TypeId,
-    cell::{Ref, RefCell},
+    cell::RefCell,
     rc::Rc,
 };
 use wasm_bindgen::closure::Closure;
@@ -28,7 +28,7 @@ pub struct Program<APP, MSG>
 where
     MSG: 'static,
 {
-    pub(crate) app_context: AppContext<APP, MSG>,
+    pub(crate) app_context: Rc<RefCell<AppContext<APP, MSG>>>,
 
     /// the first element of the app view, where the patch is generated is relative to
     pub(crate) root_node: Rc<RefCell<Option<Node>>>,
@@ -100,7 +100,7 @@ where
 {
     fn clone(&self) -> Self {
         Program {
-            app_context: self.app_context.clone(),
+            app_context: Rc::clone(&self.app_context),
             root_node: Rc::clone(&self.root_node),
             mount_node: Rc::clone(&self.mount_node),
             node_closures: Rc::clone(&self.node_closures),
@@ -127,7 +127,7 @@ where
         target: MountTarget,
     ) -> Self {
         Program {
-            app_context: AppContext::new(app),
+            app_context: Rc::new(RefCell::new(AppContext::new(app))),
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(mount_node.clone())),
             node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
@@ -139,15 +139,11 @@ where
         }
     }
 
-    /// get a reference to the APP
-    pub fn app(&self) -> Ref<'_, APP> {
-        self.app_context.app.borrow()
-    }
 
     /// executed after the program has been mounted
     fn after_mounted(&mut self) {
         // call the init of the component
-        let cmd = self.app_context.init_app();
+        let cmd = self.app_context.borrow_mut().init_app();
         cmd.emit(self);
 
         // inject the app's dynamic style after the emitting the init function and it's effects
@@ -162,7 +158,7 @@ where
     }
 
     fn inject_stylesheet(&mut self) {
-        let static_style = self.app_context.static_style();
+        let static_style = self.app_context.borrow().static_style();
         if !static_style.is_empty() {
             let class_names = format!("static {}", Self::app_hash());
             self.inject_style(class_names, &static_style);
@@ -170,7 +166,7 @@ where
     }
 
     fn inject_dynamic_style(&mut self) {
-        let dynamic_style = self.app_context.dynamic_style();
+        let dynamic_style = self.app_context.borrow().dynamic_style();
         if !dynamic_style.is_empty() {
             let class_names = format!("dynamic {}", Self::app_hash());
             self.inject_style(class_names, &dynamic_style);
@@ -274,7 +270,7 @@ where
     /// an actual DOM node.
     pub fn mount(&mut self) {
         self.pre_mount();
-        let created_node = self.create_dom_node(&self.app_context.current_vdom());
+        let created_node = self.create_dom_node(&self.app_context.borrow().current_vdom());
 
         let mount_node: web_sys::Node = match self.mount_procedure.target {
             MountTarget::MountNode => self.mount_node.borrow().clone(),
@@ -329,11 +325,11 @@ where
     /// as parameters.
     /// If there is no deadline specified all the pending messages are executed
     fn dispatch_pending_msgs(&mut self, deadline: Option<IdleDeadline>) -> Result<(), JsValue> {
-        if !self.app_context.has_pending_msgs() {
+        if !self.app_context.borrow().has_pending_msgs() {
             return Ok(());
         }
         let mut did_complete = true;
-        while self.app_context.dispatch_pending_msg() {
+        while self.app_context.borrow_mut().dispatch_pending_msg() {
             // break only if a deadline is supplied
             if let Some(deadline) = &deadline {
                 if deadline.did_timeout() {
@@ -354,7 +350,7 @@ where
     pub fn update_dom(&mut self, modifier: &Modifier) -> Result<Measurements, JsValue> {
         let t1 = now();
         // a new view is created due to the app update
-        let view = self.app_context.view();
+        let view = self.app_context.borrow().view();
         let t2 = now();
 
         let node_count = view.node_count();
@@ -363,8 +359,8 @@ where
         let total_patches = self.update_dom_with_vdom(view).expect("must not error");
         let t3 = now();
 
-        let strong_count = self.app_context.strong_count();
-        let weak_count = self.app_context.weak_count();
+        let strong_count = Rc::strong_count(&self.app_context);
+        let weak_count = Rc::weak_count(&self.app_context);
         let root_node_count = Rc::strong_count(&self.root_node);
         assert_eq!(strong_count, root_node_count);
         let measurements = Measurements {
@@ -389,8 +385,9 @@ where
     }
 
     fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch<MSG>>{
-        let current_vdom = self.app_context.current_vdom();
-        let patches = diff(&current_vdom, &new_vdom);
+        let context = self.app_context.borrow();
+        let current_vdom = context.current_vdom();
+        let patches = diff(current_vdom, &new_vdom);
         #[cfg(all(feature = "with-debug", feature = "log-patches"))]
         {
             log::debug!("There are {} patches", patches.len());
@@ -416,7 +413,7 @@ where
         #[cfg(not(feature = "with-raf"))]
         self.apply_pending_patches().expect("raf");
 
-        self.app_context.set_current_dom(new_vdom);
+        self.app_context.borrow_mut().set_current_dom(new_vdom);
         Ok(total_patches)
     }
 
@@ -429,7 +426,7 @@ where
             .expect("Could not append child to mount");
 
         *self.root_node.borrow_mut() = Some(created_node);
-        self.app_context.set_current_dom(new_vdom);
+        self.app_context.borrow_mut().set_current_dom(new_vdom);
     }
 
     #[cfg(feature = "with-raf")]
@@ -464,7 +461,7 @@ where
         #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied
         if modifier.log_measurements && measurements.total_patches > 0 {
-            let cmd_measurement = self.app_context.measurements(measurements);
+            let cmd_measurement = self.app_context.borrow().measurements(measurements);
             cmd_measurement.emit(self);
         }
     }
@@ -518,15 +515,15 @@ where
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
-        if self.app_context.has_pending_msgs() {
+        if self.app_context.borrow().has_pending_msgs() {
             self.dispatch_pending_msgs(None)
                 .expect("must dispatch all pending msgs");
         }
-        if self.app_context.has_pending_msgs() {
+        if self.app_context.borrow().has_pending_msgs() {
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
-        let cmd = self.app_context.batch_pending_cmds();
+        let cmd = self.app_context.borrow_mut().batch_pending_cmds();
 
         if !self.pending_patches.borrow().is_empty() {
             log::error!(
@@ -580,7 +577,9 @@ where
 
     /// dispatch multiple MSG
     pub fn dispatch_multiple(&mut self, msgs: impl IntoIterator<Item = MSG>) {
-        self.app_context.push_msgs(msgs);
+        let strong_count = Rc::strong_count(&self.app_context);
+        log::info!("app context strong count: {}", strong_count);
+        self.app_context.borrow_mut().push_msgs(msgs);
         self.dispatch_inner_with_priority_ric();
     }
 
