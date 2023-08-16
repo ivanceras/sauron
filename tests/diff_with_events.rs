@@ -60,7 +60,7 @@ fn remove_event_from_replaced_node() {
             vec![&p(vec![], vec![])]
         )],
     );
-    simple_program.set_current_dom(old);
+    simple_program.update_dom_with_vdom(old).expect("must update dom");
 
     assert_eq!(
         simple_program.node_closures.borrow().len(),

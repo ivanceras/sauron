@@ -57,7 +57,9 @@ fn elements_with_different_event_should_not_be_recycle() {
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
     let mut simple_program = simple_program();
-    simple_program.set_current_dom(old.clone());
+    simple_program
+        .update_dom_with_vdom(old.clone())
+        .expect("must not error");
 
     // update to new dom with no event attached
     simple_program

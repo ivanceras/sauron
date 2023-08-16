@@ -32,7 +32,9 @@ fn on_input_test() {
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
     let mut simple_program = simple_program();
-    simple_program.set_current_dom(input);
+    simple_program
+        .update_dom_with_vdom(input)
+        .expect("must not error");
 
     let input_element = sauron_core::dom::document()
         .get_element_by_id(&elem_id)
@@ -81,7 +83,9 @@ fn added_event() {
 
     let mut simple_program = simple_program();
 
-    simple_program.set_current_dom(old);
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
     // update to new dom with no event attached
     simple_program
         .update_dom_with_vdom(new)
@@ -136,7 +140,9 @@ fn remove_event() {
     let input_event = web_sys::InputEvent::new("input").unwrap();
 
     let mut simple_program = simple_program();
-    simple_program.set_current_dom(old);
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
     // update to new dom with no event attached
     simple_program
         .update_dom_with_vdom(new)
@@ -188,7 +194,9 @@ fn remove_event_from_truncated_children() {
         ],
     );
 
-    simple_program.set_current_dom(old);
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
     assert_eq!(
         simple_program.node_closures.borrow().len(),
         5,
@@ -236,7 +244,9 @@ fn remove_event_from_truncated_children_some_with_no_events() {
         "Should be a Truncate patch"
     );
 
-    simple_program.set_current_dom(old);
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
 
     assert_eq!(
         simple_program.node_closures.borrow().len(),
@@ -273,7 +283,9 @@ fn remove_event_from_replaced_node() {
             vec![&p(vec![], vec![])]
         )],
     );
-    simple_program.set_current_dom(old);
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
     assert_eq!(
         simple_program.node_closures.borrow().len(),
         1,

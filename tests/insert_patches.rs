@@ -49,7 +49,7 @@ fn test_patch_insert_node() {
     old.render(&mut old_html).expect("must render");
 
     let mut simple_program = simple_program();
-    simple_program.set_current_dom(old);
+    simple_program.update_dom_with_vdom(old).expect("must update dom");
 
     let container = document
         .query_selector(".test1")
@@ -115,7 +115,7 @@ fn test_patch_insert_node_in_the_middle() {
 
     let mut simple_program = simple_program();
 
-    simple_program.set_current_dom(old);
+    simple_program.update_dom_with_vdom(old).expect("must update dom");
 
     let container = document
         .query_selector(".test_middle")
@@ -183,7 +183,7 @@ fn multiple_insert_should_work() {
     old.render(&mut old_html).expect("must render");
 
     let mut simple_program = simple_program();
-    simple_program.set_current_dom(old);
+    simple_program.update_dom_with_vdom(old).expect("must update dom");
 
     let container = document
         .query_selector(".test5")

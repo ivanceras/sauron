@@ -31,7 +31,9 @@ fn test_on_client() {
 
     let expected = input.render_to_string();
 
-    simple_program.set_current_dom(input);
+    simple_program
+        .update_dom_with_vdom(input)
+        .expect("must update dom");
 
     let container = sauron_core::dom::document()
         .get_element_by_id("container")

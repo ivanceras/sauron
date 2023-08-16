@@ -49,7 +49,7 @@ fn test_multiple_replace() {
     old.render(&mut old_html).expect("must render");
 
     let mut simple_program = simple_program();
-    simple_program.set_current_dom(old);
+    simple_program.update_dom_with_vdom(old).expect("must update dom");
 
     let container = document
         .query_selector(".multi_replace")
@@ -113,7 +113,7 @@ fn test_multiple_replace_and_parent_is_replaced_too() {
     old.render(&mut old_html).expect("must render");
 
     let mut simple_program = simple_program();
-    simple_program.set_current_dom(old);
+    simple_program.update_dom_with_vdom(old).expect("must update dom");
 
     let container = document
         .query_selector(".parent_replaced")
