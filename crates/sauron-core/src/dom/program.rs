@@ -403,6 +403,8 @@ where
     }
 
     /// patch the DOM to reflect the App's view
+    ///
+    /// Note: This is in another function so as to allow tests to use this shared code
     pub fn update_dom_with_vdom(&mut self, new_vdom: vdom::Node<MSG>) -> Result<usize, JsValue> {
         let dom_patches = self.create_dom_patch(&new_vdom);
         let total_patches = dom_patches.len();
