@@ -65,7 +65,7 @@ impl App {
     }
     fn fetch_data(&self) -> Cmd<Self, Msg> {
         let url = format!("{}/{}", DATA_URL, self.name);
-        Cmd::new(|program|{
+        Cmd::new(|mut program|{
             spawn_local(async move{
                 let msg = match Http::fetch_text(&url).await{
                     Ok(v) => {
