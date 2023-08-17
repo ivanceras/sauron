@@ -188,6 +188,25 @@ where
     }
 }
 
+impl<APP, MSG> Clone for Program<APP, MSG>
+where
+    MSG: 'static,
+{
+    fn clone(&self) -> Self {
+        Program {
+            app_context: self.app_context.clone(),
+            root_node: Rc::clone(&self.root_node),
+            mount_node: Rc::clone(&self.mount_node),
+            node_closures: Rc::clone(&self.node_closures),
+            mount_procedure: self.mount_procedure,
+            pending_patches: Rc::clone(&self.pending_patches),
+            idle_callback_handles: Rc::clone(&self.idle_callback_handles),
+            animation_frame_handles: Rc::clone(&self.animation_frame_handles),
+            event_closures: Rc::clone(&self.event_closures),
+        }
+    }
+}
+
 impl<APP, MSG> Drop for Program<APP, MSG>
 where
     MSG: 'static,
@@ -236,7 +255,7 @@ where
     fn after_mounted(&mut self) {
         // call the init of the component
         let cmd = self.app_context.init_app();
-        cmd.emit(Program::downgrade(&self));
+        cmd.emit(self.clone());
 
         // inject the app's dynamic style after the emitting the init function and it's effects
         self.inject_dynamic_style();
@@ -543,7 +562,7 @@ where
         // tell the app about the performance measurement and only if there was patches applied
         if modifier.log_measurements && measurements.total_patches > 0 {
             let cmd_measurement = self.app_context.measurements(measurements);
-            cmd_measurement.emit(Program::downgrade(&self));
+            cmd_measurement.emit(self.clone());
         }
     }
 
@@ -643,7 +662,7 @@ where
             );
         }
 
-        cmd.emit(Program::downgrade(&self));
+        cmd.emit(self.clone());
     }
 
     /// Inject a style to the global document

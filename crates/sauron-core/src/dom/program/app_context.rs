@@ -104,6 +104,20 @@ where
     }
 }
 
+impl<APP, MSG> Clone for AppContext<APP, MSG>
+where
+    MSG: 'static,
+{
+    fn clone(&self) -> Self {
+        Self {
+            app: Rc::clone(&self.app),
+            current_vdom: Rc::clone(&self.current_vdom),
+            pending_msgs: Rc::clone(&self.pending_msgs),
+            pending_cmds: Rc::clone(&self.pending_cmds),
+        }
+    }
+}
+
 impl<APP, MSG> AppContext<APP, MSG>
 where
     MSG: 'static,

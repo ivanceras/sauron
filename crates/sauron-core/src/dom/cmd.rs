@@ -3,7 +3,7 @@
 //!
 use crate::dom::{Application, Effects, Modifier, Task};
 use wasm_bindgen_futures::spawn_local;
-use crate::dom::program::WeakProgram;
+use crate::dom::Program;
 
 /// Cmd is a command to be executed by the system.
 /// This is returned at the init function of a component and is executed right
@@ -17,7 +17,7 @@ where
 {
     /// the functions that would be executed when this Cmd is emited
     #[allow(clippy::type_complexity)]
-    pub(crate) commands: Vec<Box<dyn FnOnce(WeakProgram<APP, MSG>)>>,
+    pub(crate) commands: Vec<Box<dyn FnOnce(Program<APP, MSG>)>>,
     pub(crate) modifier: Modifier,
 }
 
@@ -29,7 +29,7 @@ where
     /// creates a new Cmd from a function
     pub fn new<F>(f: F) -> Self
     where
-        F: FnOnce(WeakProgram<APP, MSG>) + 'static,
+        F: FnOnce(Program<APP, MSG>) + 'static,
     {
         Self {
             commands: vec![Box::new(f)],
@@ -97,7 +97,7 @@ where
     }
 
     /// Executes the Cmd
-    pub(crate) fn emit(self, program: WeakProgram<APP, MSG>) {
+    pub(crate) fn emit(self, program: Program<APP, MSG>) {
         for cb in self.commands {
             let program_clone = program.clone();
             cb(program_clone);
@@ -109,8 +109,7 @@ where
     ///
     pub fn batch_msg(msg_list: impl IntoIterator<Item = MSG>) -> Self {
         let msg_list: Vec<MSG> = msg_list.into_iter().collect();
-        Cmd::new(move |program| {
-            let mut program = program.upgrade().expect("must upgrade");
+        Cmd::new(move |mut program| {
             program.dispatch_multiple(msg_list);
         })
     }
@@ -155,14 +154,10 @@ where
 {
     fn from(task: Task<MSG>) -> Self {
         let task = task.task;
-        Cmd::new(move |program| {
+        Cmd::new(move |mut program| {
             spawn_local(async move {
                 let msg = task.await;
-                if let Some(mut program) = program.upgrade(){
-                    program.dispatch(msg)
-                }else{
-                    log::error!("unable to upgrade program");
-                }
+                program.dispatch(msg)
             });
         })
     }
