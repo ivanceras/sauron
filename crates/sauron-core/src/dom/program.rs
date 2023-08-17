@@ -22,6 +22,7 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
 use crate::dom::program::app_context::WeakContext;
+use std::mem::ManuallyDrop;
 
 mod app_context;
 
@@ -306,10 +307,10 @@ where
     /// let mount = document().query_selector("#app").ok().flatten().unwrap();
     /// Program::append_to_mount(App{}, &mount);
     /// ```
-    pub fn append_to_mount(app: APP, mount_node: &web_sys::Node) -> Self {
+    pub fn append_to_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
         let mut program = Self::new(app, mount_node, MountAction::Append, MountTarget::MountNode);
         program.mount();
-        program
+        ManuallyDrop::new(program)
     }
 
     /// Creates an Rc wrapped instance of Program and replace the root_node with the app view
@@ -329,7 +330,7 @@ where
     /// let mount = document().query_selector(".container").ok().flatten().unwrap();
     /// Program::replace_mount(App{}, &mount);
     /// ```
-    pub fn replace_mount(app: APP, mount_node: &web_sys::Node) -> Self {
+    pub fn replace_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
         let mut program = Self::new(
             app,
             mount_node,
@@ -337,11 +338,11 @@ where
             MountTarget::MountNode,
         );
         program.mount();
-        program
+        ManuallyDrop::new(program)
     }
 
     /// clear the existing children of the mount first before appending
-    pub fn clear_append_to_mount(app: APP, mount_node: &web_sys::Node) -> Self {
+    pub fn clear_append_to_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
         let mut program = Self::new(
             app,
             mount_node,
@@ -349,7 +350,7 @@ where
             MountTarget::MountNode,
         );
         program.mount();
-        program
+        ManuallyDrop::new(program)
     }
 
     /// Instantiate the app and then append it to the document body
@@ -368,7 +369,7 @@ where
     /// # }
     /// Program::mount_to_body(App{});
     /// ```
-    pub fn mount_to_body(app: APP) -> Self {
+    pub fn mount_to_body(app: APP) -> ManuallyDrop<Self> {
         Self::append_to_mount(app, &body())
     }
 
