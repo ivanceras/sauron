@@ -213,9 +213,7 @@ where
     MSG: 'static,
 {
     fn drop(&mut self) {
-        let strong_count = self.app_context.strong_count();
-        let weak_count = self.app_context.weak_count();
-        log::error!("About to drop program, which it's apps contains strong_count: {strong_count}, weak_count: {weak_count}");
+        // program is dropped
     }
 }
 
@@ -487,7 +485,6 @@ where
             weak_count,
         };
 
-        log::debug!("There are {} strong count", strong_count);
         if measurements.total_time > 16.0 {
             #[cfg(all(feature = "with-measure", feature = "with-debug"))]
             {
