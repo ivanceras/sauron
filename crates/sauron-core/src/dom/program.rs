@@ -16,12 +16,16 @@ use std::{
     any::TypeId,
     cell::{Ref, RefCell},
     rc::Rc,
+    rc::Weak,
 };
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
+use crate::dom::program::app_context::WeakContext;
 
 mod app_context;
+
+pub(crate) type Closures = Vec<Closure<dyn FnMut(web_sys::Event)>>;
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP, MSG>
@@ -55,8 +59,22 @@ where
     animation_frame_handles: Rc<RefCell<Vec<AnimationFrameHandle>>>,
 
     /// event listener closures
-    #[allow(clippy::type_complexity)]
-    pub(crate) event_closures: Rc<RefCell<Vec<Closure<dyn FnMut(web_sys::Event)>>>>,
+    pub(crate) event_closures: Rc<RefCell<Closures>>,
+}
+
+pub struct WeakProgram<APP, MSG>
+where
+    MSG: 'static,
+{
+    pub(crate) app_context: WeakContext<APP, MSG>,
+    pub(crate) root_node: Weak<RefCell<Option<Node>>>,
+    mount_node: Weak<RefCell<Node>>,
+    pub node_closures: Weak<RefCell<ActiveClosure>>,
+    mount_procedure: MountProcedure,
+    pending_patches: Weak<RefCell<VecDeque<DomPatch<MSG>>>>,
+    idle_callback_handles: Weak<RefCell<Vec<IdleCallbackHandle>>>,
+    animation_frame_handles: Weak<RefCell<Vec<AnimationFrameHandle>>>,
+    pub(crate) event_closures: Weak<RefCell<Closures>>,
 }
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
@@ -94,24 +112,94 @@ struct MountProcedure {
     target: MountTarget,
 }
 
-impl<APP, MSG> Clone for Program<APP, MSG>
+impl<APP, MSG> WeakProgram<APP, MSG>
+where
+    MSG: 'static,
+{ 
+    ///
+    pub fn upgrade(&self) -> Option<Program<APP, MSG>> {
+        if let Some(app_context) = self.app_context.upgrade() {
+            if let Some(root_node) = self.root_node.upgrade() {
+                if let Some(mount_node) = self.mount_node.upgrade() {
+                    if let Some(node_closures) = self.node_closures.upgrade() {
+                        if let Some(pending_patches) = self.pending_patches.upgrade() {
+                            if let Some(idle_callback_handles) = self.idle_callback_handles.upgrade() {
+                                if let Some(animation_frame_handles) = self.animation_frame_handles.upgrade() {
+                                    if let Some(event_closures) = self.event_closures.upgrade() {
+                                        return Some(Program {
+                                            app_context,
+                                            root_node,
+                                            mount_node,
+                                            node_closures,
+                                            mount_procedure: self.mount_procedure,
+                                            pending_patches,
+                                            idle_callback_handles,
+                                            animation_frame_handles,
+                                            event_closures,
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+
+impl<APP, MSG> Clone for WeakProgram<APP, MSG>
 where
     MSG: 'static,
 {
     fn clone(&self) -> Self {
-        Program {
+        WeakProgram {
             app_context: self.app_context.clone(),
-            root_node: Rc::clone(&self.root_node),
-            mount_node: Rc::clone(&self.mount_node),
-            node_closures: Rc::clone(&self.node_closures),
+            root_node: Weak::clone(&self.root_node),
+            mount_node: Weak::clone(&self.mount_node),
+            node_closures: Weak::clone(&self.node_closures),
             mount_procedure: self.mount_procedure,
-            pending_patches: Rc::clone(&self.pending_patches),
-            idle_callback_handles: Rc::clone(&self.idle_callback_handles),
-            animation_frame_handles: Rc::clone(&self.animation_frame_handles),
-            event_closures: Rc::clone(&self.event_closures),
+            pending_patches: Weak::clone(&self.pending_patches),
+            idle_callback_handles: Weak::clone(&self.idle_callback_handles),
+            animation_frame_handles: Weak::clone(&self.animation_frame_handles),
+            event_closures: Weak::clone(&self.event_closures),
         }
     }
 }
+
+impl<APP, MSG> Program<APP, MSG>
+where
+    MSG: 'static,
+{
+    ///
+    pub fn downgrade(&self) -> WeakProgram<APP,MSG> {
+        WeakProgram {
+            app_context: AppContext::downgrade(&self.app_context),
+            root_node: Rc::downgrade(&self.root_node),
+            mount_node: Rc::downgrade(&self.mount_node),
+            node_closures: Rc::downgrade(&self.node_closures),
+            mount_procedure: self.mount_procedure,
+            pending_patches: Rc::downgrade(&self.pending_patches),
+            idle_callback_handles: Rc::downgrade(&self.idle_callback_handles),
+            animation_frame_handles: Rc::downgrade(&self.animation_frame_handles),
+            event_closures: Rc::downgrade(&self.event_closures),
+        }
+    }
+}
+
+impl<APP, MSG> Drop for Program<APP, MSG>
+where
+    MSG: 'static,
+{
+    fn drop(&mut self) {
+        let strong_count = self.app_context.strong_count();
+        let weak_count = self.app_context.weak_count();
+        log::error!("About to drop program, which it's apps contains strong_count: {strong_count}, weak_count: {weak_count}");
+    }
+}
+
+
 
 impl<APP, MSG> Program<APP, MSG>
 where
@@ -148,7 +236,7 @@ where
     fn after_mounted(&mut self) {
         // call the init of the component
         let cmd = self.app_context.init_app();
-        cmd.emit(self);
+        cmd.emit(Program::downgrade(&self));
 
         // inject the app's dynamic style after the emitting the init function and it's effects
         self.inject_dynamic_style();
@@ -314,8 +402,9 @@ where
 
     #[cfg(feature = "with-ric")]
     fn dispatch_pending_msgs_with_ric(&mut self) -> Result<(), JsValue> {
-        let mut program = self.clone();
+        let program = Program::downgrade(&self);
         let handle = request_idle_callback(move |deadline| {
+            let mut program = program.upgrade().expect("must upgrade");
             program
                 .dispatch_pending_msgs(Some(deadline))
                 .expect("must execute")
@@ -422,8 +511,9 @@ where
 
     #[cfg(feature = "with-raf")]
     fn apply_pending_patches_with_raf(&mut self) -> Result<(), JsValue> {
-        let mut program = self.clone();
+        let program = Program::downgrade(&self);
         let handle = request_animation_frame(move || {
+            let mut program = program.upgrade().expect("must upgrade");
             program.apply_pending_patches().expect("must not error");
         })
         .expect("must execute");
@@ -453,15 +543,19 @@ where
         // tell the app about the performance measurement and only if there was patches applied
         if modifier.log_measurements && measurements.total_patches > 0 {
             let cmd_measurement = self.app_context.measurements(measurements);
-            cmd_measurement.emit(self);
+            cmd_measurement.emit(Program::downgrade(&self));
         }
     }
 
     #[cfg(feature = "with-ric")]
     fn dispatch_inner_with_ric(&self) {
-        let mut program = self.clone();
+        let program = Program::downgrade(&self);
         let handle = request_idle_callback(move |deadline| {
-            program.dispatch_inner(Some(deadline));
+            if let Some(mut program) = program.upgrade(){
+                program.dispatch_inner(Some(deadline));
+            }else{
+                log::warn!("unable to upgrade program.. maybe try again next time..");
+            }
         })
         .expect("must execute");
         self.idle_callback_handles.borrow_mut().push(handle);
@@ -470,8 +564,9 @@ where
     #[allow(unused)]
     #[cfg(feature = "with-raf")]
     fn dispatch_inner_with_raf(&self) {
-        let mut program = self.clone();
+        let program = Program::downgrade(&self);
         let handle = request_animation_frame(move || {
+            let mut program = program.upgrade().expect("must upgrade");
             program.dispatch_inner(None);
         })
         .expect("must execute");
@@ -488,9 +583,13 @@ where
 
             #[cfg(not(feature = "with-raf"))]
             {
-                let mut program = self.clone();
+                let program = Program::downgrade(&self);
                 wasm_bindgen_futures::spawn_local(async move {
-                    program.dispatch_inner(None);
+                    if let Some(mut program) = program.upgrade(){
+                        program.dispatch_inner(None);
+                    }else{
+                        log::warn!("unable to upgrade program here, in dispatch_inner_with_priority_ric");
+                    }
                 })
             }
         }
@@ -543,7 +642,8 @@ where
             has not been applied yet!"
             );
         }
-        cmd.emit(self);
+
+        cmd.emit(Program::downgrade(&self));
     }
 
     /// Inject a style to the global document

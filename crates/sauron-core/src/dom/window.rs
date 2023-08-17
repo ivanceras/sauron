@@ -23,10 +23,11 @@ where
     where
         F: FnMut(i32, i32) -> MSG + Clone + 'static,
     {
-        let mut program = self.clone();
+        let program = Program::downgrade(&self);
         let closure: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_| {
             let (window_width, window_height) = util::get_window_size();
             let msg = cb(window_width, window_height);
+            let mut program = program.upgrade().expect("must upgrade");
             program.dispatch(msg);
         });
         window()
@@ -67,10 +68,11 @@ where
     where
         F: FnMut(String) -> MSG + 'static,
     {
-        let mut program = self.clone();
+        let program = Program::downgrade(&self);
         let closure: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_| {
             let hash = util::get_location_hash();
             let msg = cb(hash);
+            let mut program = program.upgrade().expect("must upgrade");
             program.dispatch(msg);
         });
         window().set_onhashchange(Some(closure.as_ref().unchecked_ref()));

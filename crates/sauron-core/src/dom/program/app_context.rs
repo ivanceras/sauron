@@ -6,6 +6,7 @@ use std::{
     cell::{Ref, RefCell},
     collections::VecDeque,
     rc::Rc,
+    rc::Weak,
 };
 
 /// AppContext module pertains only to application state and manages objects that affects it.
@@ -30,17 +31,76 @@ where
     pub(crate) pending_cmds: Rc<RefCell<VecDeque<Cmd<APP, MSG>>>>,
 }
 
-impl<APP, MSG> Clone for AppContext<APP, MSG>
+pub(crate) struct WeakContext<APP, MSG>
+where
+    MSG: 'static,
+{
+    pub(crate) app: Weak<RefCell<APP>>,
+    pub(crate) current_vdom: Weak<RefCell<vdom::Node<MSG>>>,
+    pub(crate) pending_msgs: Weak<RefCell<VecDeque<MSG>>>,
+    pub(crate) pending_cmds: Weak<RefCell<VecDeque<Cmd<APP, MSG>>>>,
+}
+
+impl<APP, MSG> WeakContext<APP, MSG>
+where
+    MSG: 'static,
+{
+    pub(crate) fn upgrade(&self) -> Option<AppContext<APP, MSG>> {
+        if let Some(app) = self.app.upgrade() {
+            if let Some(current_vdom) = self.current_vdom.upgrade() {
+                if let Some(pending_msgs) = self.pending_msgs.upgrade() {
+                    if let Some(pending_cmds) = self.pending_cmds.upgrade() {
+                        return Some(AppContext {
+                            app,
+                            current_vdom,
+                            pending_msgs,
+                            pending_cmds,
+                        });
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+
+impl<APP, MSG> Clone for WeakContext<APP, MSG>
 where
     MSG: 'static,
 {
     fn clone(&self) -> Self {
         Self {
-            app: Rc::clone(&self.app),
-            current_vdom: Rc::clone(&self.current_vdom),
-            pending_msgs: Rc::clone(&self.pending_msgs),
-            pending_cmds: Rc::clone(&self.pending_cmds),
+            app: Weak::clone(&self.app),
+            current_vdom: Weak::clone(&self.current_vdom),
+            pending_msgs: Weak::clone(&self.pending_msgs),
+            pending_cmds: Weak::clone(&self.pending_cmds),
         }
+    }
+}
+
+impl<APP, MSG> AppContext<APP, MSG>
+where
+    MSG: 'static,
+{
+    pub(crate) fn downgrade(this: &Self) -> WeakContext<APP, MSG> {
+        WeakContext {
+            app: Rc::downgrade(&this.app),
+            current_vdom: Rc::downgrade(&this.current_vdom),
+            pending_msgs: Rc::downgrade(&this.pending_msgs),
+            pending_cmds: Rc::downgrade(&this.pending_cmds),
+        }
+    }
+    pub fn strong_count(&self) -> usize {
+        let c1 = Rc::strong_count(&self.app);
+        let c2 = Rc::strong_count(&self.current_vdom);
+        assert_eq!(c1, c2);
+        c1
+    }
+    pub fn weak_count(&self) -> usize {
+        let w1 = Rc::weak_count(&self.app);
+        let w2 = Rc::weak_count(&self.current_vdom);
+        assert_eq!(w1, w2);
+        w1
     }
 }
 
@@ -60,18 +120,6 @@ where
     }
     pub fn init_app(&self) -> Cmd<APP, MSG> {
         self.app.borrow_mut().init()
-    }
-    pub fn strong_count(&self) -> usize {
-        let c1 = Rc::strong_count(&self.app);
-        let c2 = Rc::strong_count(&self.current_vdom);
-        assert_eq!(c1, c2);
-        c1
-    }
-    pub fn weak_count(&self) -> usize {
-        let w1 = Rc::weak_count(&self.app);
-        let w2 = Rc::weak_count(&self.current_vdom);
-        assert_eq!(w1, w2);
-        w1
     }
 
     pub fn view(&self) -> vdom::Node<MSG> {

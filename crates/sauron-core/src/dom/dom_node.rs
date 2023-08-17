@@ -371,12 +371,13 @@ where
         event_name: &str,
         listener: &Listener<dom::Event, MSG>,
     ) -> Result<Closure<dyn FnMut(web_sys::Event)>, JsValue> {
-        let mut program = self.clone();
+        let program = Program::downgrade(&self);
         let listener = listener.clone();
 
         let closure: Closure<dyn FnMut(web_sys::Event)> =
             Closure::new(move |event: web_sys::Event| {
                 let msg = listener.emit(dom::Event::from(event));
+                let mut program = program.upgrade().expect("must upgrade");
                 program.dispatch(msg);
             });
 
