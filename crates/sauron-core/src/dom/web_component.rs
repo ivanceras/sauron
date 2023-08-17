@@ -14,7 +14,7 @@ pub trait WebComponent<MSG> {
     ///
     /// if the listed attributes in the observed attributes are modified
     fn attribute_changed(
-        program: &Program<Self, MSG>,
+        program: Program<Self, MSG>,
         attr_name: &str,
         old_value: Option<String>,
         new_value: Option<String>,
@@ -161,7 +161,7 @@ where
     pub fn attribute_changed(&self, attr_name: &str, old_value: JsValue, new_value: JsValue) {
         let old_value = old_value.as_string();
         let new_value = new_value.as_string();
-        APP::attribute_changed(&self.program, attr_name, old_value, new_value);
+        APP::attribute_changed(self.program.clone(), attr_name, old_value, new_value);
     }
 
     /// called when the web component is mounted
