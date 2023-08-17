@@ -5,6 +5,7 @@
 //!
 use log::*;
 use sauron::{html::div, Application, Cmd, Node, Program};
+use std::mem::ManuallyDrop;
 
 /// This is a simple component for the puprpose of testing
 #[derive(Copy, Clone, Debug)]
@@ -22,6 +23,6 @@ impl Application<()> for SimpleComponent {
 }
 
 /// creates a program from SimpleComponent
-pub fn simple_program() -> Program<SimpleComponent, ()> {
+pub fn simple_program() -> ManuallyDrop<Program<SimpleComponent, ()>> {
     Program::mount_to_body(SimpleComponent)
 }
