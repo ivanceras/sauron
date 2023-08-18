@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+- sauron@771b393 feat: add lazy_view_if function to lazily evaluate the node function only when the flag is true
+- 881dc46 fix: web_component, use Program clone for attribute_change
+- ea69b90 fix: Program has to be wrap with ManuallyDrop so as not to drop it at the start function
+- f95c7a1 fix: Cmd should use Program instead of WeakProgram
+- cccc18c feat: **breaking** all references to Program is now Weak and will go out of scope, and so an AppLoader is needed
+- 0b28843 fix: test, use update_dom_with_vdom instead of just setting the current vdom using set_current_dom function
+- 3958310 fix: remove set_current_dom function which has a different functionality with app_context.set_current_dom
+- 0386767 use mutable methods in app_context
+- 0405544 docs: add a Note on why the function update_dom_with_vdom is not unified into update_dom
+- c56057d refactor: use mutable function when applicable
+- ead0f15 fix: progressive rendering example
+- c3e924d refactor: make dispatching messages and updating dom mutable
+- 8aae08e feat: include strong_count and weak_count to the measurements
+- 655e7d9 add a test-case for issue#75
+
 ## 0.60.0
 fix: remove the auto-implementation fo `Container+WebComponent` as it conflicts with other usage
 feat: add utility method to the component to create a consistent namespace class names and selector for building view and css nicely
