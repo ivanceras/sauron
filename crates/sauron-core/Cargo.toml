@@ -1,6 +1,6 @@
 [package]
 name = "sauron-core"
-version = "0.60.0"
+version = "0.60.1"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "An html library for building client side webapps"
