@@ -17,14 +17,14 @@
 - add a test-case for issue#75
 
 ## 0.60.0
-fix: remove the auto-implementation fo `Container+WebComponent` as it conflicts with other usage
-feat: add utility method to the component to create a consistent namespace class names and selector for building view and css nicely
-remove the style attribute function, since it conflicts with the name of the style! macro which is more useful than the removed one
-fix: comparison of Value for string variants to compare stringly types
-feat: make use of `classes_flag` in `todomvc` for more pleasant syntax
-feat: **breaking** migrated `jss` from independent `jss` crate back to sauron
-feat: improvement on the ergonomics of writing web_components
-feat: improvement on registration of web component, as this eliminates the need to attaching component to the Window object
+- fix: remove the auto-implementation fo `Container+WebComponent` as it conflicts with other usage
+- feat: add utility method to the component to create a consistent namespace class names and selector for building view and css nicely
+- remove the style attribute function, since it conflicts with the name of the style! macro which is more useful than the removed one
+- fix: comparison of Value for string variants to compare stringly types
+- feat: make use of `classes_flag` in `todomvc` for more pleasant syntax
+- feat: **breaking** migrated `jss` from independent `jss` crate back to sauron
+- feat: improvement on the ergonomics of writing web_components
+- feat: improvement on registration of web component, as this eliminates the need to attaching component to the Window object
 
 ## 0.59.2
 - refactor: remove the `use-snippets` feature, since we are  using `js_sys::Function`
