@@ -25,9 +25,31 @@ pub use crate::dom::events;
 ///
 /// assert_eq!(node!{<p>"hello world"</p>}, html);
 /// ```
+/// Note: that the node here is already evaluated therefore not suitable for building the nodes
+/// prior and will end up not being displayed.
+/// An alternative would be to just use if else statement like so:
+/// ```ignore
+/// if flag{
+///     expensive_code_to_build_the_view()
+/// }else{
+///     comment("not yet ready")
+/// }
+/// ```
 pub fn view_if<MSG>(flag: bool, node: Node<MSG>) -> Node<MSG> {
     if flag {
         node
+    } else {
+        comment("hidden")
+    }
+}
+
+/// evaluate the fn_node only if flag is true and return the evaluated Node
+pub fn lazy_view_if<F, MSG>(flag: bool, fn_node: F) -> Node<MSG>
+where
+    F: Fn() -> Node<MSG>,
+{
+    if flag {
+        fn_node()
     } else {
         comment("hidden")
     }
