@@ -7,7 +7,12 @@ use syn::{Expr, Ident, Lit, Result, Token};
 /// border: (px(1), "solid", "green"),
 /// ```
 pub(crate) struct Style {
-    properties: Vec<Property>,
+    properties: Vec<(Option<Annotation>, Property)>,
+}
+
+pub(crate) struct Annotation {
+    punct: Token![#],
+    group: proc_macro2::Group,
 }
 
 /// key value pair of a style
@@ -32,11 +37,17 @@ impl Parse for Style {
     fn parse(input: ParseStream) -> Result<Self> {
         let mut properties = vec![];
         while !input.is_empty() {
+            // must be attribute annotations
+            let anotation = if input.peek(Token![#]) {
+                Some(input.parse()?)
+            } else {
+                None
+            };
             let kv = input.parse()?;
             if input.peek(Token![,]) && !input.peek2(syn::token::Brace) {
                 input.parse::<Token![,]>()?;
             }
-            properties.push(kv);
+            properties.push((anotation, kv));
         }
         Ok(Self { properties })
     }
@@ -61,9 +72,9 @@ impl Style {
         let expanded_properties: Vec<_> = self
             .properties
             .iter()
-            .map(|pair| {
+            .map(|(anotation, pair)| {
                 let pair = pair.to_tokens_with_pretty(use_pretty);
-                quote! {#pair,}
+                quote! { #anotation #pair,}
             })
             .collect();
 
@@ -74,6 +85,22 @@ impl Style {
         quote! {
             [#properties_tokens].join(#separator)
         }
+    }
+}
+
+impl Parse for Annotation {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let punct = input.parse::<Token![#]>()?;
+        let group: proc_macro2::Group = input.parse()?;
+        Ok(Self { punct, group })
+    }
+}
+
+impl ToTokens for Annotation {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let punct = &self.punct;
+        let group = &self.group;
+        tokens.extend(quote! {#punct #group});
     }
 }
 
