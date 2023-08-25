@@ -18,11 +18,10 @@ use web_sys::{
     HtmlTextAreaElement,
 };
 
-
 #[derive(Clone, Copy)]
 #[repr(i16)]
 /// Mouse button used in the MouseEvent
-pub enum MouseButton{
+pub enum MouseButton {
     /// Main button pressed, usually the left button or the un-initialized state
     Primary = 0,
 
@@ -39,8 +38,7 @@ pub enum MouseButton{
     Fifth = 4,
 }
 
-impl MouseButton{
-
+impl MouseButton {
     /// check if the mouse event is on the primary button
     pub fn is_primary(me: &MouseEvent) -> bool {
         me.button() == MouseButton::Primary as i16
@@ -50,7 +48,6 @@ impl MouseButton{
     pub fn is_auxiliary(me: &MouseEvent) -> bool {
         me.button() == MouseButton::Auxiliary as i16
     }
-
 }
 
 impl Event {
@@ -249,6 +246,8 @@ fn to_hashchange_event(event: Event) -> HashChangeEvent {
         .expect("unable to cast to hashchange event")
 }
 
+/// TODO: expand this much farther by getting the InputEvent data, data_transfer, event_type,
+/// is_composing events.
 /// a custom InputEvent to contain the input string value
 #[derive(Debug)]
 pub struct InputEvent {
