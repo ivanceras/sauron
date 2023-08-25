@@ -33,7 +33,9 @@ fn node_mounted_properly() {
     old.render(&mut old_html).expect("must render");
 
     let mut simple_program = simple_program();
-    simple_program.update_dom_with_vdom(old).expect("must update dom");
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
 
     let container = document
         .query_selector(".container1")
@@ -83,7 +85,9 @@ fn node_patched_properly() {
     old.render(&mut old_html).expect("must render");
 
     let mut simple_program = simple_program();
-    simple_program.update_dom_with_vdom(old).expect("must update dom");
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
 
     let container = document
         .query_selector(".container2")
@@ -156,7 +160,9 @@ fn node_patched_properly_remove_from_start() {
     old.render(&mut old_html).expect("must render");
 
     let mut simple_program = simple_program();
-    simple_program.update_dom_with_vdom(old).expect("must update dom");
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
 
     let container = document
         .query_selector(".test3")
@@ -230,7 +236,9 @@ fn node_patched_properly_text_changed() {
     old.render(&mut old_html).expect("must render");
 
     let mut simple_program = simple_program();
-    simple_program.update_dom_with_vdom(old).expect("must update dom");
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
 
     let container = document
         .query_selector(".test4")
@@ -311,7 +319,9 @@ fn mixed_keyed_and_non_keyed_elements() {
 
     let mut simple_program = simple_program();
 
-    simple_program.update_dom_with_vdom(old).expect("must update dom");
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
 
     let container = document
         .query_selector(".test5")

@@ -1,8 +1,9 @@
+use crate::dom::program::app_context::WeakContext;
 #[cfg(feature = "with-raf")]
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
-use crate::dom::{document, now, Measurements, Modifier, IdleDeadline};
+use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
 use crate::html::{self, attributes::class, text};
 use crate::vdom;
@@ -12,6 +13,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
 use std::hash::{Hash, Hasher};
+use std::mem::ManuallyDrop;
 use std::{
     any::TypeId,
     cell::{Ref, RefCell},
@@ -21,8 +23,6 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
-use crate::dom::program::app_context::WeakContext;
-use std::mem::ManuallyDrop;
 
 mod app_context;
 
@@ -116,7 +116,7 @@ struct MountProcedure {
 impl<APP, MSG> WeakProgram<APP, MSG>
 where
     MSG: 'static,
-{ 
+{
     ///
     pub fn upgrade(&self) -> Option<Program<APP, MSG>> {
         if let Some(app_context) = self.app_context.upgrade() {
@@ -124,8 +124,12 @@ where
                 if let Some(mount_node) = self.mount_node.upgrade() {
                     if let Some(node_closures) = self.node_closures.upgrade() {
                         if let Some(pending_patches) = self.pending_patches.upgrade() {
-                            if let Some(idle_callback_handles) = self.idle_callback_handles.upgrade() {
-                                if let Some(animation_frame_handles) = self.animation_frame_handles.upgrade() {
+                            if let Some(idle_callback_handles) =
+                                self.idle_callback_handles.upgrade()
+                            {
+                                if let Some(animation_frame_handles) =
+                                    self.animation_frame_handles.upgrade()
+                                {
                                     if let Some(event_closures) = self.event_closures.upgrade() {
                                         return Some(Program {
                                             app_context,
@@ -174,7 +178,7 @@ where
     MSG: 'static,
 {
     ///
-    pub fn downgrade(&self) -> WeakProgram<APP,MSG> {
+    pub fn downgrade(&self) -> WeakProgram<APP, MSG> {
         WeakProgram {
             app_context: AppContext::downgrade(&self.app_context),
             root_node: Rc::downgrade(&self.root_node),
@@ -216,8 +220,6 @@ where
         // program is dropped
     }
 }
-
-
 
 impl<APP, MSG> Program<APP, MSG>
 where
@@ -494,7 +496,7 @@ where
         Ok(measurements)
     }
 
-    fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch<MSG>>{
+    fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch<MSG>> {
         let current_vdom = self.app_context.current_vdom();
         let patches = diff(&current_vdom, &new_vdom);
         #[cfg(all(feature = "with-debug", feature = "log-patches"))]
@@ -543,8 +545,8 @@ where
         if self.pending_patches.borrow().is_empty() {
             return Ok(());
         }
-        let dom_patches:Vec<DomPatch<MSG>> = self.pending_patches.borrow_mut().drain(..).collect();
-        for dom_patch in dom_patches{
+        let dom_patches: Vec<DomPatch<MSG>> = self.pending_patches.borrow_mut().drain(..).collect();
+        for dom_patch in dom_patches {
             self.apply_dom_patch(dom_patch)
                 .expect("must apply dom patch");
         }
@@ -568,9 +570,9 @@ where
     fn dispatch_inner_with_ric(&self) {
         let program = Program::downgrade(&self);
         let handle = request_idle_callback(move |deadline| {
-            if let Some(mut program) = program.upgrade(){
+            if let Some(mut program) = program.upgrade() {
                 program.dispatch_inner(Some(deadline));
-            }else{
+            } else {
                 log::warn!("unable to upgrade program.. maybe try again next time..");
             }
         })
@@ -602,10 +604,12 @@ where
             {
                 let program = Program::downgrade(&self);
                 wasm_bindgen_futures::spawn_local(async move {
-                    if let Some(mut program) = program.upgrade(){
+                    if let Some(mut program) = program.upgrade() {
                         program.dispatch_inner(None);
-                    }else{
-                        log::warn!("unable to upgrade program here, in dispatch_inner_with_priority_ric");
+                    } else {
+                        log::warn!(
+                            "unable to upgrade program here, in dispatch_inner_with_priority_ric"
+                        );
                     }
                 })
             }

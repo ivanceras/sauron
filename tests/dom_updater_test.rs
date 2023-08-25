@@ -20,7 +20,9 @@ fn patches_dom() {
 
     let vdom: Node<()> = div(vec![], vec![]);
     let mut simple_program = simple_program();
-    simple_program.update_dom_with_vdom(vdom).expect("must not error");
+    simple_program
+        .update_dom_with_vdom(vdom)
+        .expect("must not error");
 
     let new_vdom = div(vec![id("patched")], vec![]); //html! { <div id="patched"></div> };
     simple_program
@@ -40,7 +42,9 @@ fn updates_active_closure_on_replace() {
     let mut simple_program = simple_program();
     let old = div(vec![], vec![]);
 
-    simple_program.update_dom_with_vdom(old).expect("must update dom");
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);
@@ -89,7 +93,9 @@ async fn updates_active_closures_on_append() {
 
     let old = div(vec![], vec![]);
     let mut simple_program = simple_program();
-    simple_program.update_dom_with_vdom(old).expect("must update dom");
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
     let text_clone = Rc::clone(&text);

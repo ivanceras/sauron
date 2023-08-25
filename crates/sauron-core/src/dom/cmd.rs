@@ -1,9 +1,9 @@
 //! provides functionalities for commands to be executed by the system, such as
 //! when the application starts or after the application updates.
 //!
+use crate::dom::Program;
 use crate::dom::{Application, Effects, Modifier, Task};
 use wasm_bindgen_futures::spawn_local;
-use crate::dom::Program;
 
 /// Cmd is a command to be executed by the system.
 /// This is returned at the init function of a component and is executed right

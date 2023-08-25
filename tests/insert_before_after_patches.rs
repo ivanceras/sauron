@@ -52,7 +52,9 @@ fn insert_multiple_before_nodes() {
 
     let mut simple_program = simple_program();
 
-    simple_program.update_dom_with_vdom(old).expect("must update dom");
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
 
     let container = document
         .query_selector(".before_nodes_test1")
@@ -117,7 +119,9 @@ fn insert_multiple_after_nodes() {
     old.render(&mut old_html).expect("must render");
 
     let mut simple_program = simple_program();
-    simple_program.update_dom_with_vdom(old).expect("must update dom");
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
 
     let container = document
         .query_selector(".after_nodes_test1")
