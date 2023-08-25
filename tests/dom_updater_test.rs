@@ -51,7 +51,7 @@ fn updates_active_closure_on_replace() {
         vec![
             id(elem_id),
             on_input(move |event: sauron_core::html::events::InputEvent| {
-                *text_clone.borrow_mut() = event.value.to_string();
+                *text_clone.borrow_mut() = event.value();
             }),
             value("End Text"),
         ],
@@ -103,7 +103,7 @@ async fn updates_active_closures_on_append() {
                 vec![
                     id(elem_id),
                     on_input(move |event: sauron_core::html::events::InputEvent| {
-                        *text_clone.borrow_mut() = event.value.to_string();
+                        *text_clone.borrow_mut() = event.value();
                     }),
                     value("End Text"),
                 ],

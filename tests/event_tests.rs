@@ -22,7 +22,7 @@ fn on_input_test() {
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
             on_input(move |event: InputEvent| {
-                *text_clone.borrow_mut() = event.value.to_string();
+                *text_clone.borrow_mut() = event.value();
             }),
             value("End Text"),
         ],
@@ -73,7 +73,7 @@ fn added_event() {
             id(elem_id),
             value("End Text"),
             on_input(move |event: InputEvent| {
-                *text_clone.borrow_mut() = event.value.to_string();
+                *text_clone.borrow_mut() = event.value();
             }),
         ],
         vec![],
@@ -120,7 +120,7 @@ fn remove_event() {
             id(elem_id),
             value("End Text"),
             on_input(move |event: InputEvent| {
-                *text_clone.borrow_mut() = event.value.to_string();
+                *text_clone.borrow_mut() = event.value();
             }),
         ],
         vec![],
