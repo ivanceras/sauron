@@ -111,7 +111,7 @@ impl ColumnView {
                     [class("column_view__search")],
                     [search_widget(
                         self.width,
-                        [on_input(|input| Msg::ChangeSearch(input.value.to_string()))],
+                        [on_input(|input| Msg::ChangeSearch(input.value()))],
                     )],
                 ),
             ],

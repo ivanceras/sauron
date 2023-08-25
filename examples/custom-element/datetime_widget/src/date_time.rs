@@ -150,7 +150,7 @@ where
                         class("datetimebox__date"),
                         on_change(|input| {
                             log::trace!("input: {:?}", input);
-                            Msg::DateChange(input.value)
+                            Msg::DateChange(input.value())
                         }),
                         value(&self.date),
                     ],
@@ -160,7 +160,7 @@ where
                     [
                         r#type("time"),
                         class("datetimebox__time"),
-                        on_change(|input| Msg::TimeChange(input.value)),
+                        on_change(|input| Msg::TimeChange(input.value())),
                         value(&self.time),
                     ],
                     [],

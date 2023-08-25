@@ -200,7 +200,7 @@ impl Model {
                         autofocus=true
                         value=self.value.to_string()
                         on_input=|v: InputEvent| {
-                            Msg::Update(v.value)
+                            Msg::Update(v.value())
                         }
                         on_keypress=|event: KeyboardEvent| {
                             if event.key() == "Enter" {
@@ -246,7 +246,7 @@ impl Model {
                         hidden=!entry.editing
                         value=&entry.description
                         on_input=move |input: InputEvent| {
-                            Msg::UpdateEntry(entry_id, input.value)
+                            Msg::UpdateEntry(entry_id, input.value())
                         }
                         on_blur=move |_| Msg::EditingEntry(entry_id, false)
                         on_keypress=move |event: KeyboardEvent| {

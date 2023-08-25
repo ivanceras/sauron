@@ -99,7 +99,7 @@ impl Application<Msg> for App {
                             name="name"
                             type="text"
                             value={&self.name}
-                            on_input={|e| Msg::EditName(e.value)}
+                            on_input={|e| Msg::EditName(e.value())}
                         />
                     </label>
                     <button type="submit">"Okay!"</button>

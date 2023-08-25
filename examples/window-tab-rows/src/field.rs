@@ -66,7 +66,7 @@ where
                 r#type("text"),
                 class("field"),
                 on_click(|_| Msg::FieldClick),
-                on_input(|input| Msg::InputChange(input.value)),
+                on_input(|input| Msg::InputChange(input.value())),
             ],
             [text(format!("{} ({})", self.field_name, self.field_clicks))],
         )

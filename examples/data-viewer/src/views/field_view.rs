@@ -178,9 +178,7 @@ impl FieldView {
                 DataType::Bool => checkbox(
                     false,
                     [classes, size, padding],
-                    [on_change(|input| {
-                        Msg::CheckedChange(input.value.to_string())
-                    })],
+                    [on_change(|input| Msg::CheckedChange(input.value()))],
                 ),
                 _ => textbox("", [r#type("text"), classes]),
             },
@@ -190,7 +188,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::Uuid(v) => textbox(
@@ -199,15 +197,13 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::Bool(v) => checkbox(
                 *v,
                 [classes, size, padding],
-                [on_change(|input| {
-                    Msg::CheckedChange(input.value.to_string())
-                })],
+                [on_change(|input| Msg::CheckedChange(input.value()))],
             ),
             DataValue::S8(v) => numberbox(
                 v,
@@ -215,7 +211,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::S16(v) => numberbox(
@@ -224,7 +220,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::S32(v) => numberbox(
@@ -233,7 +229,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::S64(v) => numberbox(
@@ -242,7 +238,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::U8(v) => numberbox(
@@ -251,7 +247,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::U16(v) => numberbox(
@@ -260,7 +256,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::U32(v) => numberbox(
@@ -269,7 +265,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::U64(v) => numberbox(
@@ -278,7 +274,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::F32(v) => numberbox(
@@ -287,7 +283,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::F64(v) => numberbox(
@@ -296,7 +292,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::Utc(v) => datebox(
@@ -305,7 +301,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             DataValue::Local(v) => datebox(
@@ -314,7 +310,7 @@ impl FieldView {
                     classes,
                     size,
                     padding,
-                    on_change(|input| Msg::TextChange(input.value.to_string())),
+                    on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
             _ => {

@@ -208,7 +208,7 @@ impl Model {
                         placeholder("What needs to be done?"),
                         autofocus(true),
                         value(self.value.to_string()),
-                        on_input(|v: InputEvent| Msg::Update(v.value)),
+                        on_input(|v: InputEvent| Msg::Update(v.value())),
                         on_keypress(|event: KeyboardEvent| {
                             if event.key() == "Enter" {
                                 Msg::Add
@@ -260,7 +260,9 @@ impl Model {
                         r#type("text"),
                         hidden(!entry.editing),
                         value(&entry.description),
-                        on_input(move |input: InputEvent| Msg::UpdateEntry(entry_id, input.value)),
+                        on_input(move |input: InputEvent| {
+                            Msg::UpdateEntry(entry_id, input.value())
+                        }),
                         on_blur(move |_| Msg::EditingEntry(entry_id, false)),
                         on_keypress(move |event: KeyboardEvent| {
                             if event.key_code() == 13 {
