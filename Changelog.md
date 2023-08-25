@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.60.2
+- improve the Input event
+    - InputEvent now call on `value()` to get the value
+- update to mt-dom 0.59.1 to force crate user to use this version, since it has a fix of critical bug
+- feat: allow annotation to style properties
+    - add test for annotated styles
+
 ## 0.60.1
 - feat: add lazy_view_if function to lazily evaluate the node function only when the flag is true
 - fix: web_component, use Program clone for attribute_change
