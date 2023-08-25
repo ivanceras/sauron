@@ -251,17 +251,32 @@ fn to_hashchange_event(event: Event) -> HashChangeEvent {
 /// a custom InputEvent to contain the input string value
 #[derive(Debug)]
 pub struct InputEvent {
-    /// the input value
-    /// TODO: this should be optional since there will be custom component
-    /// aside from `input`, `textarea`, `select`
-    pub value: String,
     /// the actual dom event
     pub event: web_sys::Event,
 }
 
 impl InputEvent {
-    fn new(value: String, event: web_sys::Event) -> Self {
-        InputEvent { value, event }
+    fn new(event: web_sys::Event) -> Self {
+        InputEvent { event }
+    }
+
+    /// the input value
+    /// TODO: this should be optional since there will be custom component
+    /// aside from `input`, `textarea`, `select`
+    pub fn value(&self) -> String {
+        let target: EventTarget = self.event.target().expect("Unable to get event target");
+        if let Some(input) = target.dyn_ref::<HtmlInputElement>() {
+            input.value()
+        } else if let Some(textarea) = target.dyn_ref::<HtmlTextAreaElement>() {
+            textarea.value()
+        } else if let Some(select) = target.dyn_ref::<HtmlSelectElement>() {
+            select.value()
+        } else if let Some(html_elm) = target.dyn_ref::<HtmlElement>() {
+            let content = html_elm.get_attribute("content").expect("get content");
+            content
+        } else {
+            panic!("fail in mapping event into input event");
+        }
     }
 
     /// create a native web event
@@ -279,20 +294,7 @@ impl InputEvent {
 
 fn to_input_event(event: Event) -> InputEvent {
     let web_event = event.as_web().expect("must be a web event");
-    let target: EventTarget = web_event.target().expect("Unable to get event target");
-    if let Some(input) = target.dyn_ref::<HtmlInputElement>() {
-        InputEvent::new(input.value(), web_event)
-    } else if let Some(textarea) = target.dyn_ref::<HtmlTextAreaElement>() {
-        InputEvent::new(textarea.value(), web_event)
-    } else if let Some(select) = target.dyn_ref::<HtmlSelectElement>() {
-        InputEvent::new(select.value(), web_event)
-    } else if let Some(html_elm) = target.dyn_ref::<HtmlElement>() {
-        //NOTE: this our custom component where we set the value into the content attribute
-        let content = html_elm.get_attribute("content").expect("get content");
-        InputEvent::new(content, web_event)
-    } else {
-        panic!("fail in mapping event into input event");
-    }
+    InputEvent::new(web_event)
 }
 
 fn to_checked(event: Event) -> bool {
