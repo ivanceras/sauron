@@ -1,6 +1,38 @@
 use sauron::*;
 
 #[test]
+fn annotated_properties_will_not_be_inlcuded() {
+    let css = jss! {
+        ".shape_buffer": {
+            position: "absolute",
+            top: 0,
+            left: 0,
+            #[cfg(feature = "with-debug")]
+            border: "1px solid red",
+        },
+
+        ".shape_buffer .bounds": {
+            position: "absolute",
+            #[cfg(feature = "with-debug")]
+            border: "1px solid blue",
+        },
+    };
+
+    let expected = "\
+        .shape_buffer {\
+            \n  position: absolute;\
+            \n  top: 0;\
+            \n  left: 0;\
+            \n}\
+    \n\
+        \n.shape_buffer .bounds {\
+            \n  position: absolute;\
+            \n}\
+    \n";
+    assert_eq!(expected, css);
+}
+
+#[test]
 fn test_jss() {
     let css = jss!(
         ".layer": {
