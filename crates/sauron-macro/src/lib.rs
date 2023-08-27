@@ -129,7 +129,7 @@ mod node;
 ///                id="new-todo"
 ///                placeholder="What needs to be done?"
 ///                value={self.value.to_string()}
-///                on_input={|v: InputEvent| Msg::Update(v.value.to_string())}
+///                on_input={|v: InputEvent| Msg::Update(v.value())}
 ///                on_keypress={|event: KeyboardEvent| {
 ///                    if event.key() == "Enter" {
 ///                        Msg::Add
