@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.60.3
+- return `Option` for style property lookup instead of panicking.
+- Make `style!` provides a helpful error when property names used is not found in the lookup.
+
 ## 0.60.2
 - improve the Input event
     - InputEvent now call on `value()` to get the value
