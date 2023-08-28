@@ -151,7 +151,10 @@ impl Parse for PropertyName {
         } else if let Ok(Lit::Str(v)) = input.parse::<Lit>() {
             v.value()
         } else {
-            return Err(syn::Error::new(input.span(), "Expecting a property"));
+            return Err(syn::Error::new(
+                input.span(),
+                format!("Expecting a property, found: \n\t{}", input.to_string()),
+            ));
         };
         match sauron_core::html::lookup::match_property(&property_name) {
             Some(matched) => Ok(PropertyName(matched.to_string())),
