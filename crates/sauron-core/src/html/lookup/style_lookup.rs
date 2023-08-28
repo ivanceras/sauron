@@ -4,15 +4,15 @@ use std::collections::BTreeSet;
 use std::iter::FromIterator;
 
 /// return the corrected property name
-pub fn match_property(property: &str) -> &str {
+pub fn match_property(property: &str) -> Option<&str> {
     if let Some(html_style) = HTML_STYLES.get(property) {
-        return *html_style;
+        Some(*html_style)
     } else if let Some(svg_style) = SVG_STYLES.get(property) {
-        return *svg_style;
+        Some(svg_style)
     } else if let Some(style) = ALL_STYLES.get(property) {
-        return *style;
+        Some(style)
     } else {
-        panic!("unknown property: {property}");
+        None
     }
 }
 

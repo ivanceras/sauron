@@ -19,16 +19,13 @@ pub(crate) struct Annotation {
 /// `background_color: "red"`
 /// `border: (px(1), "solid", "green")`
 struct Property {
-    property: IdentOrString,
+    property: PropertyName,
     value: Expr,
 }
 
 /// `border`
 /// `"background-color"`
-enum IdentOrString {
-    Ident(Ident),
-    String(String),
-}
+struct PropertyName(String);
 
 impl Parse for Style {
     /// ```ignore
@@ -144,37 +141,31 @@ impl Property {
     }
 }
 
-impl Parse for IdentOrString {
+impl Parse for PropertyName {
     /// ```ignore
     /// "<literal>" | ident
     /// ```
     fn parse(input: ParseStream) -> Result<Self> {
-        if let Ok(ident) = input.parse::<Ident>() {
-            Ok(Self::Ident(ident))
+        let property_name = if let Ok(ident) = input.parse::<Ident>() {
+            ident.to_string()
         } else if let Ok(Lit::Str(v)) = input.parse::<Lit>() {
-            Ok(Self::String(v.value()))
+            v.value()
         } else {
-            Err(syn::Error::new(
+            return Err(syn::Error::new(input.span(), "Expecting a property"));
+        };
+        match sauron_core::html::lookup::match_property(&property_name) {
+            Some(matched) => Ok(PropertyName(matched.to_string())),
+            None => Err(syn::Error::new(
                 input.span(),
-                "Expecting an identifier or a string literal",
-            ))
+                format!("unknown property: {property_name}"),
+            )),
         }
     }
 }
 
-impl ToTokens for IdentOrString {
+impl ToTokens for PropertyName {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let expanded = match self {
-            Self::Ident(ident) => {
-                let ident = ident.to_string();
-                let property = sauron_core::html::lookup::match_property(&ident);
-                quote! {#property}
-            }
-            Self::String(v) => {
-                let property = sauron_core::html::lookup::match_property(&v);
-                quote! {#property}
-            }
-        };
-        tokens.extend(expanded);
+        let property = &self.0;
+        tokens.extend(quote! {#property});
     }
 }
