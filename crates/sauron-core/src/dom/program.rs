@@ -341,7 +341,8 @@ where
         ManuallyDrop::new(program)
     }
 
-    /// clear the existing children of the mount first before appending
+
+    /// clear the existing children of the mount before mounting the app
     pub fn clear_append_to_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
         let mut program = Self::new(
             app,
@@ -351,6 +352,16 @@ where
         );
         program.mount();
         ManuallyDrop::new(program)
+    }
+
+    /// clear the existing children of the mount before mounting the app
+    pub fn clear_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
+        Self::clear_append_to_mount(app, mount_node)
+    }
+
+    /// clear the existing children of the document body before mounting the app
+    pub fn clear_mount_to_body(app: APP) -> ManuallyDrop<Self> {
+        Self::clear_append_to_mount(app, &body())
     }
 
     /// Instantiate the app and then append it to the document body
