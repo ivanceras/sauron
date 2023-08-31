@@ -3,6 +3,7 @@
 ## 0.60.4
 - fix: check only for non-matching property when the property name is not quoted.
   - quoted property name in `style!` macro will be an escape hatch for few cases such as the use of prefixes, ie: "-webkit, -ms, -moz"
+- add `Program::clear_mount` as alias to `clear_append_to_mount`, add `clear_mount_to_body`
 
 ## 0.60.3
 - return `Option` for style property lookup instead of panicking.
