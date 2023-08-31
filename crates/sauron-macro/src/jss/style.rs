@@ -1,4 +1,5 @@
 use quote::{quote, ToTokens};
+use sauron_core::html::lookup::match_property;
 use syn::parse::{Parse, ParseStream};
 use syn::{Expr, Ident, Lit, Result, Token};
 
@@ -146,22 +147,28 @@ impl Parse for PropertyName {
     /// "<literal>" | ident
     /// ```
     fn parse(input: ParseStream) -> Result<Self> {
-        let property_name = if let Ok(ident) = input.parse::<Ident>() {
-            ident.to_string()
+        if let Ok(ident) = input.parse::<Ident>() {
+            let property_name = ident.to_string();
+            match match_property(&property_name) {
+                Some(matched) => Ok(PropertyName(matched.to_string())),
+                None => Err(syn::Error::new(
+                    input.span(),
+                    format!(
+                        "invalid property name: {property_name}
+                        \nIf this is intended, then use \"{property_name}\" to ignore this check"
+                    ),
+                )),
+            }
         } else if let Ok(Lit::Str(v)) = input.parse::<Lit>() {
-            v.value()
+            Ok(PropertyName(v.value()))
         } else {
-            return Err(syn::Error::new(
+            Err(syn::Error::new(
                 input.span(),
-                format!("Expecting a property, found: \n\t{}", input.to_string()),
-            ));
-        };
-        match sauron_core::html::lookup::match_property(&property_name) {
-            Some(matched) => Ok(PropertyName(matched.to_string())),
-            None => Err(syn::Error::new(
-                input.span(),
-                format!("unknown property: {property_name}"),
-            )),
+                format!(
+                    "Expecting a property name, found: \n\t{}",
+                    input.to_string()
+                ),
+            ))
         }
     }
 }

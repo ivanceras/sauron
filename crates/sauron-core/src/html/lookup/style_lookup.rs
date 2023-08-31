@@ -459,7 +459,6 @@ static HTML_STYLES: phf::Map<&'static str, &'static str> = phf_map! {
     "unicode_range" => "unicode-range",
     "unset" => "unset",
     "user_select" => "user-select",
-    "-webkit-user-select" => "-webkit-user-select",
     "user_zoom" => "user-zoom",
     "vertical_align" => "vertical-align",
     "@viewport" => "@viewport",
