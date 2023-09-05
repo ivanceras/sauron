@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.60.6
+- feat: Add a new crate html-parser for dynamically parsing html content
+
 ## 0.60.5
 -  feat: add rgba css function
 
