@@ -23,8 +23,11 @@ test-all: test wasm-test
 publish-core:
     cargo publish -p sauron-core
 
+publish-html-parser:
+    cargo publish -p sauron-html-parser
+
 publish-macro:
     cargo publish -p sauron-macro
 
-publish: publish-core publish-macro
+publish: publish-core publish-html-parser publish-macro
     cargo publish
