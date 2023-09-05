@@ -84,7 +84,7 @@
 - [ ] Additional to the dispatching of mount event.
     - [X] on_mount
          - on_will_mount
-    - [X] on_dismount
+    - [ ] on_dismount
          - on_will_dismount
 - [X] Make the mount event be wrap as a real event, this way we can dispatch it in the real dom instead of from the virtual node
     ```javascript
@@ -277,7 +277,7 @@
 - [X] Create a new benchmark for the js-comprehensive-benchmark suite
     - [link](https://github.com/krausest/js-framework-benchmark)
     - Initial attempt https://github.com/ivanceras/performance-test-sauron
-- ~~[ ] Use Weak pointer for program instead of Rc where strong reference is not needed.~~
+- [X] Use Weak pointer for program instead of Rc where strong reference is not needed.
        - Program stays as long as the user is using the app.
 - [X] Add `Program::batch_dispatch(&self, msgs: Vec<MSG>)` to call update on each of the messages before
     calling on the view, this would improve performance when there are multiple messages to be dispatched to the application
@@ -310,7 +310,7 @@
 - [X] Move `jss` into a new crate `sauron-jss` for keeping sauron slim.
     - [x] Use [json](https://github.com/maciejhirsz/json-rust) crate for `jss`.
         - The quote on keys are optional, so this is good for use in writing css.
-- [ ] Enumerate the exported modules and structs in prelude instead of just using glob(ie: *).
+- [X] Enumerate the exported modules and structs in prelude instead of just using glob(ie: *).
 - [X] Fix the data-viewer example to use Components on the views rather than Application
 - [X] Revisit and use style_name identifier in usage of jss in examples
 - [X] Move `html::units` to `jss` crate
@@ -324,9 +324,11 @@
      - [X] active_closures,
      - [X] pending_patches
 - [X] Remove the use of `wee_alloc` crate
-- [ ] sauron-core and jss should have a different version of Value, where jss value can be converted into.
+- [X] sauron-core and jss should have a different version of Value, where jss value can be converted into.
     - `Value` struct needs to reside here, since it is a corner-stone data structure and used eveywhere.
     - Maybe `Value` should be in a very common crate. Say `sauron-common`.
+- [ ] Use `xtask` for scripting: building, checking, publishing, running the examples
+- [ ] Use `{ workspace = true }` to common dependencies for easieir maintenance work.
 
 ## Bug
 - [X] When 2 nodes with multiple similar keys, multiple replace node patch is generated. But it couldn't seem to find the correct target element.
