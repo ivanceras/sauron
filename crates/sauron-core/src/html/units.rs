@@ -1,7 +1,7 @@
 //! provides function and macro for html units such as px, %, em, etc.
 
 use crate::html::attributes::Value;
-pub use fns::{rgb, rotate};
+pub use fns::{rgb, rgba, rotate};
 
 mod fns;
 
