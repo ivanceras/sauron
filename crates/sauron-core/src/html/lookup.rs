@@ -1,15 +1,20 @@
 //! Provides list of HTML and SVG tags, style properties
 use crate::{
-    html::tags::{
-        commons::HTML_TAGS, self_closing::HTML_SC_TAGS, HTML_TAGS_NON_COMMON,
-        HTML_TAGS_WITH_MACRO_NON_COMMON,
+    html::{
+        attributes::{HTML_ATTRS, HTML_ATTRS_SPECIAL},
+        tags::{
+            commons::HTML_TAGS, self_closing::HTML_SC_TAGS, HTML_TAGS_NON_COMMON,
+            HTML_TAGS_WITH_MACRO_NON_COMMON,
+        },
     },
     svg::{
+        attributes::{SVG_ATTRS, SVG_ATTRS_SPECIAL, SVG_ATTRS_XLINK},
         tags::{commons::SVG_TAGS, special::SVG_TAGS_SPECIAL, SVG_TAGS_NON_COMMON},
         SVG_NAMESPACE,
     },
 };
 use once_cell::sync::Lazy;
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 pub use style_lookup::match_property;
 mod style_lookup;
@@ -36,6 +41,22 @@ static ALL_HTML_TAGS: Lazy<BTreeSet<&&'static str>> = Lazy::new(|| {
 static SELF_CLOSING_TAGS: Lazy<BTreeSet<&&'static str>> =
     Lazy::new(|| HTML_SC_TAGS.iter().collect());
 
+static ALL_ATTRS: Lazy<BTreeMap<&'static str, &'static str>> = Lazy::new(|| {
+    BTreeMap::from_iter(
+        HTML_ATTRS
+            .iter()
+            .chain(SVG_ATTRS.iter())
+            .map(|att| (*att, *att))
+            .chain(
+                HTML_ATTRS_SPECIAL
+                    .iter()
+                    .chain(SVG_ATTRS_SPECIAL.iter())
+                    .chain(SVG_ATTRS_XLINK.iter())
+                    .map(|(func, att)| (*func, *att)),
+            ),
+    )
+});
+
 /// Find the namespace of this tag
 /// if the arg tag is an SVG tag, return the svg namespace
 /// html tags don't need to have namespace while svg does, otherwise it will not be properly
@@ -58,6 +79,31 @@ pub fn tag_namespace(tag: &str) -> Option<&'static str> {
     } else {
         None
     }
+}
+
+/// return the matching attribute
+pub fn match_attribute(att: &str) -> Option<&'static str> {
+    ALL_ATTRS
+        .iter()
+        .find(|(_k, v)| v == &&att)
+        .map(|(_k, v)| *v)
+}
+
+/// given the attribute return the function name
+pub fn attribute_function(att: &str) -> Option<&'static str> {
+    ALL_ATTRS
+        .iter()
+        .find(|(_k, v)| v == &&att)
+        .map(|(k, _v)| *k)
+}
+
+/// return the matching tag
+pub fn match_tag(tag: &str) -> Option<&'static str> {
+    ALL_HTML_TAGS
+        .iter()
+        .chain(ALL_SVG_TAGS.iter())
+        .find(|t| **t == &tag)
+        .map(|t| **t)
 }
 
 /// Returns true if this html tag is self closing

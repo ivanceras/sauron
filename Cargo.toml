@@ -16,6 +16,7 @@ maintenance = { status = "actively-developed" }
 [dependencies]
 sauron-core = { version = "0.60", path = "crates/sauron-core", default-features = false }
 sauron-macro = { version = "0.60", path = "crates/sauron-macro", optional = true }
+sauron-html-parser = { version = "0.60", path = "crates/html-parser", optional = true }
 
 [features]
 default = ["with-dom", "with-node-macro", "custom_element", "with-interning", "with-jss"]
@@ -35,6 +36,7 @@ log-patches = ["with-debug", "sauron-core/log-patches"]
 # lets you use node! macro to write html like code in the view
 with-node-macro = ["sauron-macro"]
 custom_element = ["sauron-macro","sauron-core/custom_element"]
+html-parser = ["sauron-html-parser"]
 
 
 [dev-dependencies]

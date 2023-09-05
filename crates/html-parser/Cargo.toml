@@ -1,0 +1,17 @@
+[package]
+name = "sauron-html-parser"
+version = "0.60.5"
+edition = "2021"
+authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
+license = "MIT"
+description = "A utility crate for parsing dynamically parsing html at runtime"
+repository = "https://github.com/ivanceras/sauron"
+documentation = "https://docs.rs/sauron-html-parser"
+readme = "../../README.md"
+keywords = ["html", "parser", "web"]
+
+[dependencies]
+rphtml = "0.5.9"
+sauron-core = { version = "0.60", path = "../sauron-core", default-features = false, features = ["with-lookup"] }
+log = "0.4"
+thiserror = "1.0.48"
