@@ -1,3 +1,4 @@
+#![deny(warnings)]
 use rphtml::config::ParseOptions;
 use rphtml::parser::Doc;
 use rphtml::parser::NodeType;
@@ -5,7 +6,6 @@ use rphtml::types::BoxDynError;
 use sauron_core::{
     html::{attributes::*, lookup, *},
     vdom::Node,
-    *,
 };
 use std::fmt;
 use std::io;
