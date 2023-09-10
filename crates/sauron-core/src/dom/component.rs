@@ -1,4 +1,4 @@
-use crate::html::attributes::{class, Attribute};
+use crate::html::attributes::{class, classes, Attribute};
 use crate::{dom::Effects, vdom::Node};
 
 /// A component has a view and can update itself.
@@ -40,14 +40,32 @@ where
         extract_simple_struct_name::<Self>()
     }
 
-    /// create a classname prepended with this component name
-    fn class_ns(class_name: &str) -> Attribute<MSG> {
+    /// prefix the class bane
+    fn prefix_class(class_name: &str) -> String {
         let component_name = Self::component_name();
         if class_name.is_empty() {
-            class(component_name)
+            component_name
         } else {
-            class(format!("{component_name}__{class_name}"))
+            format!("{component_name}__{class_name}")
         }
+    }
+
+    /// create a classname prepended with this component name
+    fn class_ns(class_name: &str) -> Attribute<MSG> {
+        class(Self::prefix_class(class_name))
+    }
+
+    /// create namespaced class names to pair that evaluates to true
+    fn classes_ns_flag(pair: impl IntoIterator<Item = (impl ToString, bool)>) -> Attribute<MSG> {
+        let class_list = pair.into_iter().filter_map(|(class, flag)| {
+            if flag {
+                Some(Self::prefix_class(&class.to_string()))
+            } else {
+                None
+            }
+        });
+
+        classes(class_list)
     }
 
     /// create a selector class prepended with this component name
@@ -97,6 +115,50 @@ where
 
     /// containers can append children
     fn append_child(&mut self, child: Node<XMSG>);
+
+    /// return the component name
+    /// defaults to the struct simplified name
+    fn component_name() -> String {
+        extract_simple_struct_name::<Self>()
+    }
+
+    /// prefix the class bane
+    fn prefix_class(class_name: &str) -> String {
+        let component_name = Self::component_name();
+        if class_name.is_empty() {
+            component_name
+        } else {
+            format!("{component_name}__{class_name}")
+        }
+    }
+
+    /// create a classname prepended with this component name
+    fn class_ns(class_name: &str) -> Attribute<MSG> {
+        class(Self::prefix_class(class_name))
+    }
+
+    /// create namespaced class names to pair that evaluates to true
+    fn classes_ns_flag(pair: impl IntoIterator<Item = (impl ToString, bool)>) -> Attribute<MSG> {
+        let class_list = pair.into_iter().filter_map(|(class, flag)| {
+            if flag {
+                Some(Self::prefix_class(&class.to_string()))
+            } else {
+                None
+            }
+        });
+
+        classes(class_list)
+    }
+
+    /// create a selector class prepended with this component name
+    fn selector_ns(class_name: &str) -> String {
+        let component_name = Self::component_name();
+        if class_name.is_empty() {
+            format!(".{component_name}")
+        } else {
+            format!(".{component_name}__{class_name}")
+        }
+    }
 }
 
 pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {

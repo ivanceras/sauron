@@ -16,7 +16,7 @@ use std::hash::{Hash, Hasher};
 use std::mem::ManuallyDrop;
 use std::{
     any::TypeId,
-    cell::{Ref, RefCell},
+    cell::{Ref, RefCell, RefMut},
     rc::Rc,
     rc::Weak,
 };
@@ -224,6 +224,21 @@ where
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
+{
+    /// get a reference to the APP
+    pub fn app(&self) -> Ref<'_, APP> {
+        self.app_context.app.borrow()
+    }
+
+    /// get a mutable reference to the APP
+    pub fn app_mut(&self) -> RefMut<'_, APP> {
+        self.app_context.app.borrow_mut()
+    }
+}
+
+impl<APP, MSG> Program<APP, MSG>
+where
+    MSG: 'static,
     APP: Application<MSG> + 'static,
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
@@ -247,10 +262,6 @@ where
         }
     }
 
-    /// get a reference to the APP
-    pub fn app(&self) -> Ref<'_, APP> {
-        self.app_context.app.borrow()
-    }
 
     /// executed after the program has been mounted
     fn after_mounted(&mut self) {
