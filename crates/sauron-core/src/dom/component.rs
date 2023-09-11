@@ -77,6 +77,15 @@ where
             format!(".{component_name}__{class_name}")
         }
     }
+
+    /// create namesspaced selector from multiple classnames
+    fn selectors_ns(class_names: impl IntoIterator<Item = impl ToString>) -> String {
+        let selectors: Vec<String> = class_names
+            .into_iter()
+            .map(|class_name| Self::selector_ns(&class_name.to_string()))
+            .collect();
+        selectors.join(" ")
+    }
 }
 
 /// A Container have children that is set from the parent component
@@ -158,6 +167,15 @@ where
         } else {
             format!(".{component_name}__{class_name}")
         }
+    }
+
+    /// create namesspaced selector from multiple classnames
+    fn selectors_ns(class_names: impl IntoIterator<Item = impl ToString>) -> String {
+        let selectors: Vec<String> = class_names
+            .into_iter()
+            .map(|class_name| Self::selector_ns(&class_name.to_string()))
+            .collect();
+        selectors.join(" ")
     }
 }
 
