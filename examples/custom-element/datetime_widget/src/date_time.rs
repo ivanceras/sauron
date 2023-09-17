@@ -64,7 +64,7 @@ where
     }
 }
 
-impl<XMSG> sauron::Component<Msg, XMSG> for DateTimeWidget<XMSG>
+impl<XMSG> sauron::Container<Msg, XMSG> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
@@ -123,6 +123,10 @@ where
         }
     }
 
+    fn append_child(&mut self, _child: Node<XMSG>) {
+        log::warn!("This doesn't support child nodes");
+    }
+
     fn stylesheet() -> Vec<String> {
         vec![jss! {
             ".datetimebox":{
@@ -140,7 +144,7 @@ where
         }]
     }
 
-    fn view(&self) -> Node<Msg> {
+    fn view(&self, _content: impl IntoIterator<Item = Node<XMSG>>) -> Node<Msg> {
         div(
             [class("datetimebox"), on_mount(Msg::Mounted)],
             [
