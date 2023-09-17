@@ -1,4 +1,4 @@
-use crate::dom::{Application, Cmd, Component, Modifier, MountAction, MountTarget, Program};
+use crate::dom::{Application, Cmd, Container, Modifier, MountAction, MountTarget, Program};
 use crate::vdom::Node;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -96,33 +96,30 @@ fn declare_custom_element_function() -> js_sys::Function {
     )
 }
 
-/// Blanket implementation of Application trait for Component that
-/// has no external MSG
-/// but only if that Component is intended to be a WebComponent
 impl<COMP, MSG> Application<MSG> for COMP
 where
-    COMP: Component<MSG, ()> + WebComponent<MSG> + 'static,
+    COMP: Container<MSG, ()> + WebComponent<MSG> + 'static,
     MSG: 'static,
 {
     fn init(&mut self) -> Cmd<Self, MSG> {
-        Cmd::from(<Self as Component<MSG, ()>>::init(self))
+        Cmd::from(<Self as Container<MSG, ()>>::init(self))
     }
 
     fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
-        let effects = <Self as Component<MSG, ()>>::update(self, msg);
+        let effects = <Self as Container<MSG, ()>>::update(self, msg);
         Cmd::from(effects)
     }
 
     fn view(&self) -> Node<MSG> {
-        <Self as Component<MSG, ()>>::view(self)
+        <Self as Container<MSG, ()>>::view(self, [])
     }
 
     fn stylesheet() -> Vec<String> {
-        <Self as Component<MSG, ()>>::stylesheet()
+        <Self as Container<MSG, ()>>::stylesheet()
     }
 
     fn style(&self) -> Vec<String> {
-        <Self as Component<MSG, ()>>::style(self)
+        <Self as Container<MSG, ()>>::style(self)
     }
 }
 
