@@ -1,7 +1,7 @@
 //! Create [events][0] Object
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
-use crate::dom::{window, Event};
+use crate::dom::{document, window, Event};
 use crate::{
     html::attributes::AttributeValue,
     vdom::{Attribute, Listener},
@@ -10,7 +10,7 @@ use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
 pub use web_sys::{
-    AnimationEvent, FocusEvent, HashChangeEvent, KeyboardEvent, MouseEvent, TouchEvent,
+    AnimationEvent, FocusEvent, HashChangeEvent, KeyboardEvent, MouseEvent, Selection, TouchEvent,
     TransitionEvent,
 };
 use web_sys::{
@@ -329,6 +329,14 @@ fn to_clipboard_event(event: Event) -> ClipboardEvent {
         .expect("unable to cast to clipboard event")
 }
 
+fn to_selection(_event: Event) -> Option<Selection> {
+    if let Ok(Some(selection)) = document().get_selection() {
+        Some(selection)
+    } else {
+        None
+    }
+}
+
 // Mouse events
 declare_html_events! {
     on_auxclick => auxclick => to_mouse_event => MouseEvent;
@@ -370,4 +378,5 @@ declare_html_events! {
     on_broadcast => broadcast => to_input_event => InputEvent;
     on_hashchange => hashchange => to_hashchange_event => HashChangeEvent;
     on_readystatechange => readystatechange => to_webevent => web_sys::Event;
+    on_selectionchange => selectionchange => to_selection => Option<Selection>;
 }

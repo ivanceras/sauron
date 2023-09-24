@@ -1,5 +1,5 @@
 use crate::{
-    dom::{dom_node::intern, util, window, Application, Program, Task},
+    dom::{dom_node::intern, util, window, document, Application, Program, Task},
     vdom::Attribute,
 };
 use js_sys::Promise;
@@ -11,9 +11,15 @@ where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
-    /// attach event listeners to the window
+    /// attach event listeners to the window object
     pub fn add_window_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
         self.add_event_listeners(&window(), event_listeners)
+            .expect("must add to event listener");
+    }
+
+    /// attach event listeners to the document object
+    pub fn add_document_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
+        self.add_event_listeners(&document(), event_listeners)
             .expect("must add to event listener");
     }
 
