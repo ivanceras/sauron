@@ -87,7 +87,6 @@ fn declare_custom_element_function() -> js_sys::Function {
                         this.instance.attributeChangedCallback(name, oldValue, newValue);
                     }
                     appendChild(child){
-                        console.log("appending a child:", child);
                         this.instance.appendChild(child);
                     }
                 }
