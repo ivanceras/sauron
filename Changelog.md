@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.60.7
+- feat: add selectionchange event and document_event_listener
+
 ## 0.60.6
 - feat: Add a new crate html-parser for dynamically parsing html content
 
