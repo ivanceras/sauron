@@ -81,13 +81,13 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = "0.50.0"
+sauron = "0.60.0"
 ```
 Next, we modify `src/lib.rs` with our application code.
 This will just display a "hello" text inside a paragraph.
 
 ```rust
-use sauron::prelude::*;
+use sauron::{node, wasm_bindgen, Application, Cmd, Node, Program};
 
 struct App;
 
