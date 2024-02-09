@@ -1,0 +1,16 @@
+
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <title>Fetch data from component</title>
+  </head>
+  <body>
+    <script type=module>
+        import init from './pkg/fetch_data_component.js';
+        async function start(){
+            await init().catch(console.error);
+        }
+        await start();
+    </script>
+  </body>
+</html>
