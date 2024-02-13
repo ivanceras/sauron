@@ -645,6 +645,9 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&mut self, deadline: Option<IdleDeadline>) {
+
+        let old_expr =  self.app().pre_eval();
+
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
@@ -655,6 +658,8 @@ where
         if self.app_context.has_pending_msgs() {
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
+
+
 
         let cmd = self.app_context.batch_pending_cmds();
 

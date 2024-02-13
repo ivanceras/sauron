@@ -1,5 +1,56 @@
 use crate::dom::Cmd;
 use crate::vdom::Node;
+use mt_dom::TreePath;
+
+
+pub struct Expr<V>{
+    expr: V,
+    children: Vec<Expr<V>>,
+}
+
+impl<V> Expr<V> where V:PartialEq{
+
+    fn traverse_recursive(&self, old: &Self, current: TreePath) -> Vec<TreePath> {
+        let mut paths = vec![];
+        if self.expr == old.expr {
+            paths.push(current.clone());
+        }
+        for (i, (child, old_child)) in self.children.iter().zip(old.children.iter()).enumerate(){
+            let more_paths = child.traverse_recursive(old_child, current.traverse(i));
+            paths.extend(more_paths);
+        }
+        paths
+    }
+}
+
+pub enum Eval<V>{
+    Expr(Expr<V>),
+    List(Vec<Eval<V>>),
+}
+
+#[allow(unused)]
+impl<V> Eval<V> where V:PartialEq{
+    fn traverse(&self, old:&Self) -> Vec<TreePath>{
+       self.traverse_recursive(old, TreePath::root())
+    }
+    fn traverse_recursive(&self, old: &Self, current: TreePath) -> Vec<TreePath> {
+        match self{
+            Self::Expr(expr) => {
+                let Self::Expr(old_expr) = old else{unreachable!()};
+                expr.traverse_recursive(old_expr, current)
+            }
+            Self::List(evals) => {
+                let mut paths = vec![];
+                let Self::List(old_evals) = old else{unreachable!()};
+                for (i, (eval, old_eval)) in evals.iter().zip(old_evals.iter()).enumerate(){
+                    let more_paths = eval.traverse_recursive(old_eval, current.traverse(i));
+                    paths.extend(more_paths);
+                }
+                paths
+            }
+        }
+    }
+}
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
@@ -24,6 +75,11 @@ where
     fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>
     where
         Self: Sized + 'static;
+
+    ///
+    fn pre_eval<V>(&self) -> Eval<V> {
+        todo!()
+    }
 
     /// Returns a node on how the component is presented.
     fn view(&self) -> Node<MSG>;
