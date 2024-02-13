@@ -121,7 +121,7 @@ where
 impl<APP, MSG> AppContext<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + Clone + 'static,
+    APP: Application<MSG> + 'static,
 {
     pub fn new(app: APP) -> Self {
         let view = app.view();

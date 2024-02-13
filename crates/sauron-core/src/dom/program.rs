@@ -241,19 +241,22 @@ where
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + Clone + 'static,
+    APP: Application<MSG> + 'static,
 {
 
     /// clone the app
     pub fn app_clone(&self) -> APP {
-        self.app_context.app.borrow().clone()
+        unsafe{
+            let app: APP = std::mem::transmute_copy(&self.app_context.app.borrow());
+            app
+        }
     }
 }
 
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + Clone + 'static,
+    APP: Application<MSG> + 'static,
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.

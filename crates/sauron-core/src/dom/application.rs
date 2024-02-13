@@ -45,7 +45,12 @@ impl Eval{
 
     ///
     pub fn traverse(evals: &[Eval]) -> Vec<TreePath> {
-        Self::traverse_list(evals, TreePath::root())
+        let root = TreePath::root();
+        if evals.len() == 1 {
+            Self::traverse_recursive(&evals[0], root)
+        }else{
+            Self::traverse_list(evals, root)
+        }
     }
 
     ///
@@ -81,7 +86,7 @@ where
     ///  This method is called right after the program is mounted into the DOM.
     fn init(&mut self) -> Cmd<Self, MSG>
     where
-        Self: Clone + Sized + 'static,
+        Self: Sized + 'static,
     {
         Cmd::none()
     }
@@ -119,7 +124,7 @@ where
     /// Warning: DO NOT use for anything else other than the intended purpose
     fn measurements(&self, measurements: Measurements) -> Cmd<Self, MSG>
     where
-        Self: Clone + Sized + 'static,
+        Self: Sized + 'static,
     {
         log::debug!("Measurements: {:#?}", measurements);
         Cmd::none().no_render()
