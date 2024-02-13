@@ -9,7 +9,7 @@ use wasm_bindgen_futures::JsFuture;
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + 'static,
+    APP: Application<MSG> + Clone + 'static,
 {
     /// attach event listeners to the window object
     pub fn add_window_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {

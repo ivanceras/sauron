@@ -81,7 +81,7 @@ fn create_unique_identifier() -> usize {
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + 'static,
+    APP: Application<MSG> + Clone + 'static,
 {
     /// create a text node
     pub fn create_text_node(txt: &str) -> Text {

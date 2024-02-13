@@ -16,7 +16,7 @@ mod task;
 use cfg_if::cfg_if;
 
 cfg_if! {if #[cfg(feature = "with-dom")] {
-    pub use application::{Application, Measurements};
+    pub use application::{Application, Measurements, Eval};
     #[cfg(feature = "custom_element")]
     pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
     pub use dom_patch::{DomPatch, PatchVariant};

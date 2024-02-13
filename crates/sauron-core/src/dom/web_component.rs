@@ -97,7 +97,7 @@ fn declare_custom_element_function() -> js_sys::Function {
 
 impl<COMP, MSG> Application<MSG> for COMP
 where
-    COMP: Container<MSG, ()> + WebComponent<MSG> + 'static,
+    COMP: Container<MSG, ()> + WebComponent<MSG> + Clone + 'static,
     MSG: 'static,
 {
     fn init(&mut self) -> Cmd<Self, MSG> {
@@ -137,7 +137,7 @@ where
 
 impl<APP, MSG> WebComponentWrapper<APP, MSG>
 where
-    APP: Application<MSG> + WebComponent<MSG> + Default + 'static,
+    APP: Application<MSG> + WebComponent<MSG> + Default + Clone + 'static,
     MSG: 'static,
 {
     /// create a new web component, with the node as the target element to be mounted into

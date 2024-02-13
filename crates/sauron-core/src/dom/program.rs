@@ -23,6 +23,7 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
+use crate::dom::Eval;
 
 mod app_context;
 
@@ -230,6 +231,7 @@ where
         self.app_context.app.borrow()
     }
 
+
     /// get a mutable reference to the APP
     pub fn app_mut(&self) -> RefMut<'_, APP> {
         self.app_context.app.borrow_mut()
@@ -239,7 +241,19 @@ where
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + 'static,
+    APP: Application<MSG> + Clone + 'static,
+{
+
+    /// clone the app
+    pub fn app_clone(&self) -> APP {
+        self.app_context.app.borrow().clone()
+    }
+}
+
+impl<APP, MSG> Program<APP, MSG>
+where
+    MSG: 'static,
+    APP: Application<MSG> + Clone + 'static,
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
@@ -645,6 +659,7 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&mut self, deadline: Option<IdleDeadline>) {
+        let old_app = self.app_clone();
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
@@ -655,6 +670,12 @@ where
         if self.app_context.has_pending_msgs() {
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
+
+
+        let eval = self.app().pre_eval(&old_app);
+        log::info!("eval: {eval:?}");
+        let treepath = Eval::traverse(&eval);
+        log::info!("tree paths: {treepath:?}");
 
         let cmd = self.app_context.batch_pending_cmds();
 

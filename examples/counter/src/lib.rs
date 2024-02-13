@@ -1,5 +1,6 @@
 use sauron::{
     html::text, html::units::px, jss, node, wasm_bindgen, Application, Cmd, Node, Program,
+    Eval,
 };
 
 enum Msg {
@@ -8,6 +9,7 @@ enum Msg {
     Reset,
 }
 
+#[derive(Clone)]
 struct App {
     count: i32,
 }
@@ -19,6 +21,15 @@ impl App {
 }
 
 impl Application<Msg> for App {
+    fn pre_eval(&self, old: &Self) -> Vec<Eval> {
+        vec![
+            Eval::new(false, [
+                Eval::new(false, []),
+                Eval::new(false, [Eval::new(self.count != old.count, [])]),
+                Eval::new(false, []),
+            ])
+        ]
+    }
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
@@ -72,5 +83,7 @@ impl Application<Msg> for App {
 
 #[wasm_bindgen(start)]
 pub fn start() {
+    console_log::init_with_level(log::Level::Trace).unwrap();
+    console_error_panic_hook::set_once();
     Program::mount_to_body(App::new());
 }
