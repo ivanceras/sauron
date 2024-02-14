@@ -234,6 +234,8 @@
 - [ ] Bring back CreatedNode maybe with a different name: `DomNode` which wraps the `Node` or `Element` along with it's closures from event listener
     - These are then saved into the `Program` where when removed or dropped, it will also drop the associated closures with them, thereby simplifying the code.
     - Right now, we are attaching a `vdom-data` attribute for nodes that have listeners
+- [ ] Make use of `Arc<RwLock>` to check if can solve copying the `APP` via `transmute_copy`.
+    - See if there are performance penalty
 
 
 ## Features
