@@ -49,13 +49,13 @@ fn failing_reordered_keys() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old)
+        .update_dom_with_vdom(old, None)
         .expect("must update dom");
 
     let expected1 = update1.render_to_string();
 
     simple_program
-        .update_dom_with_vdom(update1)
+        .update_dom_with_vdom(update1, None)
         .expect("must not error");
 
     let container = document

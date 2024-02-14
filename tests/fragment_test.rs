@@ -32,7 +32,7 @@ fn test_on_client() {
     let expected = input.render_to_string();
 
     simple_program
-        .update_dom_with_vdom(input)
+        .update_dom_with_vdom(input, None)
         .expect("must update dom");
 
     let container = sauron_core::dom::document()

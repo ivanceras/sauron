@@ -75,6 +75,11 @@ impl Eval{
     }
 }
 
+/// evaluate check
+pub fn eval(val: bool, children: impl IntoIterator<Item = Eval>) -> Eval{
+    Eval::new(val, children)
+}
+
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
 ///
@@ -101,8 +106,8 @@ where
 
     /// pre evaluate the expression to determine
     /// whether to diff the nodes
-    fn pre_eval(&self, _other: &Self) -> Vec<Eval> {
-        vec![]
+    fn pre_eval(&self, _other: &Self) -> Option<Vec<Eval>> {
+        None
     }
 
     /// Returns a node on how the component is presented.

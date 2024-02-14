@@ -1,6 +1,6 @@
 use sauron::{
     html::text, html::units::px, jss, node, wasm_bindgen, Application, Cmd, Node, Program,
-    Eval,
+    eval, Eval,
 };
 
 enum Msg {
@@ -20,14 +20,15 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn pre_eval(&self, old: &Self) -> Vec<Eval> {
-        vec![
-            Eval::new(false, [
-                Eval::new(false, []),
-                Eval::new(false, [Eval::new(self.count != old.count, [])]),
-                Eval::new(false, []),
+    fn pre_eval(&self, old: &Self) -> Option<Vec<Eval>> {
+        Some(
+            vec![
+                eval(false, [
+                    eval(false, []),
+                    eval(false, [eval(self.count != old.count, [])]),
+                    eval(false, []),
+                ])
             ])
-        ]
     }
     fn view(&self) -> Node<Msg> {
         node! {

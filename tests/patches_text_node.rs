@@ -40,7 +40,7 @@ fn patches_text() {
     let mut simple_program = simple_program();
 
     simple_program
-        .update_dom_with_vdom(old)
+        .update_dom_with_vdom(old, None)
         .expect("must update dom");
 
     let container = document
@@ -55,7 +55,7 @@ fn patches_text() {
         </main>";
 
     simple_program
-        .update_dom_with_vdom(update1)
+        .update_dom_with_vdom(update1, None)
         .expect("must not error");
     let result = container.outer_html();
     log::info!("result: {}", result);

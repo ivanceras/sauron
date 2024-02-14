@@ -145,7 +145,7 @@ fn subsequent_updates() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old.clone())
+        .update_dom_with_vdom(old.clone(), None)
         .expect("must not error");
 
     let container = document
@@ -180,7 +180,7 @@ fn subsequent_updates() {
     assert_eq!(expected, container.outer_html());
 
     simple_program
-        .update_dom_with_vdom(update1.clone())
+        .update_dom_with_vdom(update1.clone(), None)
         .expect("must not error");
 
     let container = document
@@ -277,7 +277,7 @@ fn subsequent_updates() {
     log::trace!("-->patches2: {:#?}", patches2);
 
     simple_program
-        .update_dom_with_vdom(update2.clone())
+        .update_dom_with_vdom(update2.clone(), None)
         .expect("must not error");
 
     let container = document
@@ -380,7 +380,7 @@ fn subsequent_updates() {
     log::trace!("\n---->patches3: {:#?}", patches3);
 
     simple_program
-        .update_dom_with_vdom(update3.clone())
+        .update_dom_with_vdom(update3.clone(), None)
         .expect("must not error");
 
     let container = document

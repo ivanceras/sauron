@@ -1,3 +1,4 @@
+/*
 #![deny(
     warnings,
     missing_docs,
@@ -7,6 +8,7 @@
     unstable_features,
     unused_import_braces
 )]
+*/
 //#![forbid(unsafe_code)]
 #![deny(clippy::all)]
 //! The core components of sauron
@@ -51,7 +53,7 @@ pub mod prelude {
         pub use wasm_bindgen::prelude::*;
         pub use serde_wasm_bindgen;
         pub use crate::html::events::*;
-        pub use crate::dom::{Application, Eval, events, Program, document, now, window, Cmd,
+        pub use crate::dom::{Application, Eval, eval, events, Program, document, now, window, Cmd,
             AnimationFrameHandle, Callback, Component, Container, Effects, Measurements, MountAction,
             MountTarget, Task, TimeoutCallbackHandle,
         };

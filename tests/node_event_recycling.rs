@@ -58,12 +58,12 @@ fn elements_with_different_event_should_not_be_recycle() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old.clone())
+        .update_dom_with_vdom(old.clone(), None)
         .expect("must not error");
 
     // update to new dom with no event attached
     simple_program
-        .update_dom_with_vdom(new)
+        .update_dom_with_vdom(new, None)
         .expect("must not error");
 
     let input_element = sauron_core::dom::document()

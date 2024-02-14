@@ -61,7 +61,7 @@ fn remove_event_from_replaced_node() {
         )],
     );
     simple_program
-        .update_dom_with_vdom(old)
+        .update_dom_with_vdom(old, None)
         .expect("must update dom");
 
     assert_eq!(
@@ -71,7 +71,7 @@ fn remove_event_from_replaced_node() {
     );
 
     simple_program
-        .update_dom_with_vdom(new)
+        .update_dom_with_vdom(new, None)
         .expect("must not error");
 
     assert_eq!(

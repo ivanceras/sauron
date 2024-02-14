@@ -44,6 +44,9 @@ pub type Attribute<MSG> = mt_dom::Attribute<Namespace, AttributeName, AttributeV
 /// for Components
 pub type Listener<MSG> = attributes::Listener<Event, MSG>;
 
+/// used as key for "key"
+pub static KEY: &str = "key";
+
 /// This is a sauron html specific functionality
 /// diff 2 nodes with attribute using `&'static str` instead of generic ATT
 pub fn diff<'a, MSG>(old: &'a Node<MSG>, new: &'a Node<MSG>) -> Vec<Patch<'a, MSG>>
@@ -84,5 +87,5 @@ where
 
         explicit_replace_attr || forbid_recycle
     };
-    mt_dom::diff::diff_with_functions(old, new, &"key", &skip, &replace)
+    mt_dom::diff::diff_with_functions(old, new, &KEY, &skip, &replace)
 }

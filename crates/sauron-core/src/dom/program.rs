@@ -24,6 +24,8 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
 use crate::dom::Eval;
+use mt_dom::{TreePath, diff_recursive};
+use crate::vdom::KEY;
 
 mod app_context;
 
@@ -247,7 +249,10 @@ where
     /// clone the app
     pub fn app_clone(&self) -> APP {
         unsafe{
-            let app: APP = std::mem::transmute_copy(&self.app_context.app.borrow());
+            log::debug!("size APP: {}", std::mem::size_of::<APP>());
+            let borrowed_app = self.app_context.app.borrow();
+            log::debug!("size of borrowed_app: {}", std::mem::size_of_val(&*borrowed_app));
+            let app: APP = std::mem::transmute_copy(&*borrowed_app);
             app
         }
     }
@@ -499,7 +504,7 @@ where
     }
 
     /// update the browser DOM to reflect the APP's  view
-    pub fn update_dom(&mut self, modifier: &Modifier) -> Result<Measurements, JsValue> {
+    pub fn update_dom(&mut self, modifier: &Modifier, treepath: Option<Vec<TreePath>>) -> Result<Measurements, JsValue> {
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app_context.view();
@@ -508,7 +513,7 @@ where
         let node_count = view.node_count();
 
         // update the last DOM node tree with this new view
-        let total_patches = self.update_dom_with_vdom(view).expect("must not error");
+        let total_patches = self.update_dom_with_vdom(view, treepath).expect("must not error");
         let t3 = now();
 
         let strong_count = self.app_context.strong_count();
@@ -535,9 +540,29 @@ where
         Ok(measurements)
     }
 
-    fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch<MSG>> {
+    fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>, treepath: Option<Vec<TreePath>>) -> Vec<DomPatch<MSG>> {
         let current_vdom = self.app_context.current_vdom();
-        let patches = diff(&current_vdom, &new_vdom);
+        let patches = if let Some(treepath) = treepath{
+            log::debug!("using treepath from pre_eval: {treepath:?}");
+            let patches = treepath.into_iter().flat_map(|path|{
+                let new_node = path.find_node_by_path(new_vdom).expect("new_node");
+                let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
+                diff_recursive(
+                    &old_node,
+                    &new_node,
+                    &path,
+                    &KEY,
+                    &|_old, _new| false,
+                    &|_old, _new| false,
+                )
+            }).collect::<Vec<_>>();
+            log::info!("patches: {patches:#?}");
+            patches
+        }else{
+            log::debug!("using classic diff...");
+            let patches = diff(&current_vdom, &new_vdom);
+            patches
+        };
         #[cfg(all(feature = "with-debug", feature = "log-patches"))]
         {
             log::debug!("There are {} patches", patches.len());
@@ -552,8 +577,8 @@ where
     /// patch the DOM to reflect the App's view
     ///
     /// Note: This is in another function so as to allow tests to use this shared code
-    pub fn update_dom_with_vdom(&mut self, new_vdom: vdom::Node<MSG>) -> Result<usize, JsValue> {
-        let dom_patches = self.create_dom_patch(&new_vdom);
+    pub fn update_dom_with_vdom(&mut self, new_vdom: vdom::Node<MSG>, treepath: Option<Vec<TreePath>>) -> Result<usize, JsValue> {
+        let dom_patches = self.create_dom_patch(&new_vdom, treepath);
         let total_patches = dom_patches.len();
         self.pending_patches.borrow_mut().extend(dom_patches);
 
@@ -593,9 +618,9 @@ where
     }
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    fn dispatch_dom_changes(&mut self, modifier: &Modifier) {
+    fn dispatch_dom_changes(&mut self, modifier: &Modifier, treepath: Option<Vec<TreePath>>) {
         #[allow(unused_variables)]
-        let measurements = self.update_dom(modifier).expect("must update dom");
+        let measurements = self.update_dom(modifier, treepath).expect("must update dom");
 
         #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied
@@ -675,10 +700,7 @@ where
         }
 
 
-        let eval = self.app().pre_eval(&old_app);
-        log::info!("eval: {eval:?}");
-        let treepath = Eval::traverse(&eval);
-        log::info!("tree paths: {treepath:?}");
+        let treepath = self.app().pre_eval(&old_app).map(|eval|Eval::traverse(&eval));
 
         let cmd = self.app_context.batch_pending_cmds();
 
@@ -690,7 +712,7 @@ where
         }
 
         if cmd.modifier.should_update_view {
-            self.dispatch_dom_changes(&cmd.modifier);
+            self.dispatch_dom_changes(&cmd.modifier, treepath);
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update
