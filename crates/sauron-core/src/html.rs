@@ -79,7 +79,9 @@ pub fn html_element<MSG>(
     let mut corrected_children: Vec<Node<MSG>> = vec![];
     for child in children {
         if let Some(last) = corrected_children.last() {
-            if last.is_text() {
+            //TODO: put this behind a flag: #auto-separator to automatically
+            //add separator between text nodes
+            if last.is_text() && child.is_text(){
                 corrected_children.push(comment("separator"));
             }
         }

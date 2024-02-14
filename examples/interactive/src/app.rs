@@ -54,6 +54,7 @@ impl Application<Msg> for App {
         match msg {
             Msg::Click => {
                 self.click_count += 1;
+                log::info!("click count: {}", self.click_count);
             }
             Msg::DoubleClick => {
                 self.double_clicks += 1;
@@ -76,6 +77,47 @@ impl Application<Msg> for App {
             }
         }
         Cmd::none()
+    }
+
+    fn pre_eval(&self, old: &Self) -> Option<Vec<Eval>> {
+        Some(vec![
+            eval(false,
+                [
+                    eval(false, [eval(true, [])]),
+                    eval(false,
+                        [
+                            eval(false, []),
+                            eval(false, []),
+                            eval(false, []),
+                            eval(false,
+                                [eval(self.double_clicks != old.double_clicks, [])],
+                            ),
+                        ],
+                    ),
+                    eval(false,
+                        [
+                            eval(self.name != old.name, []),
+                            eval(false, []), // separator for in between text here
+                            eval(self.click_count != old.click_count, [])
+                        ],
+                    ),
+                    eval(false,
+                        [
+                            eval(false, []),
+                            eval(false, []),
+                            eval(false, [eval(self.biography != old.biography, [])]),
+                        ],
+                    ),
+                    eval(false,
+                        [
+                            eval(false, []),
+                            eval(false, []),
+                            eval(self.thought != old.thought, []),
+                        ],
+                    ),
+                ],
+            )]
+       )
     }
 
     fn view(&self) -> Node<Msg> {
@@ -126,7 +168,7 @@ impl Application<Msg> for App {
                                 if self.click_count > 1 { "s" } else { "" }
                             )
                         } else {
-                            span([], [])
+                            text("here..")
                         },
                     ],
                 ),

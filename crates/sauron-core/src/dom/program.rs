@@ -249,11 +249,10 @@ where
     /// clone the app
     pub fn app_clone(&self) -> APP {
         /*
+        //TODO: This doesn't work all the time, maybe use Arc::RwLock as a replacement to
+        //Rc::RefCell
         unsafe{
-            log::debug!("size APP: {}", std::mem::size_of::<APP>());
-            let borrowed_app = self.app_context.app.borrow();
-            log::debug!("size of borrowed_app: {}", std::mem::size_of_val(&*borrowed_app));
-            let app: APP = std::mem::transmute_copy(&*borrowed_app);
+            let app: APP = std::mem::transmute_copy(&*self.app_context.app.borrow());
             app
         }
         */
@@ -551,6 +550,8 @@ where
             let patches = treepath.into_iter().flat_map(|path|{
                 let new_node = path.find_node_by_path(new_vdom).expect("new_node");
                 let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
+                log::debug!("new_node: {new_node:#?}");
+                log::debug!("old_node: {old_node:#?}");
                 diff_recursive(
                     &old_node,
                     &new_node,
@@ -704,7 +705,10 @@ where
         }
 
 
-        let treepath = self.app().pre_eval(&old_app).map(|eval|Eval::traverse(&eval));
+        let treepath = self.app().pre_eval(&old_app).map(|eval|{
+                log::debug!("eval: {eval:#?}");
+                Eval::traverse(&eval)
+           });
 
         let cmd = self.app_context.batch_pending_cmds();
 
