@@ -9,6 +9,7 @@ enum Msg {
     Reset,
 }
 
+#[derive(Clone)]
 struct App {
     count: i32,
 }

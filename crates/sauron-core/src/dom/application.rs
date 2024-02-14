@@ -91,7 +91,7 @@ where
     ///  This method is called right after the program is mounted into the DOM.
     fn init(&mut self) -> Cmd<Self, MSG>
     where
-        Self: Sized + 'static,
+        Self: Sized + Clone + 'static,
     {
         Cmd::none()
     }
@@ -102,7 +102,7 @@ where
     /// Called each time an action is triggered from the view
     fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>
     where
-        Self: Sized + 'static;
+        Self: Sized + Clone + 'static;
 
     /// pre evaluate the expression to determine
     /// whether to diff the nodes
@@ -129,7 +129,7 @@ where
     /// Warning: DO NOT use for anything else other than the intended purpose
     fn measurements(&self, measurements: Measurements) -> Cmd<Self, MSG>
     where
-        Self: Sized + 'static,
+        Self: Sized + Clone + 'static,
     {
         log::debug!("Measurements: {:#?}", measurements);
         Cmd::none().no_render()

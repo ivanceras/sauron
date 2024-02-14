@@ -243,11 +243,12 @@ where
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + 'static,
+    APP: Application<MSG> + Clone + 'static,
 {
 
     /// clone the app
     pub fn app_clone(&self) -> APP {
+        /*
         unsafe{
             log::debug!("size APP: {}", std::mem::size_of::<APP>());
             let borrowed_app = self.app_context.app.borrow();
@@ -255,13 +256,16 @@ where
             let app: APP = std::mem::transmute_copy(&*borrowed_app);
             app
         }
+        */
+        let borrowed_app = self.app_context.app.borrow();
+        borrowed_app.clone()
     }
 }
 
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + 'static,
+    APP: Application<MSG> + Clone + 'static,
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.

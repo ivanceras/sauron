@@ -11,6 +11,7 @@ pub enum Msg {
     ChangeThought(String),
 }
 
+#[derive(Clone)]
 pub struct App {
     click_count: u32,
     double_clicks: u32,
