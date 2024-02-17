@@ -308,47 +308,51 @@ where
             // before it is actully replaced in the DOM
             PatchVariant::ReplaceNode { mut replacement } => {
                 let first_node = replacement.pop().expect("must have a first node");
-                if target_element.node_type() == Node::DOCUMENT_FRAGMENT_NODE {
-                    // if we are patching a fragment mode in the top-level document
-                    // it has no access to it's parent other than accessing the mount-node itself
-                    if patch_path.is_empty() {
-                        let mount_node = self.mount_node();
-                        Self::clear_children(&mount_node);
-                        mount_node
-                            .append_child(&first_node)
-                            .expect("must append child");
+                log::info!("checking if it is a fragment node...");
+                if target_element.is_object(){
+                    if target_element.node_type() == Node::DOCUMENT_FRAGMENT_NODE {
+                        // if we are patching a fragment mode in the top-level document
+                        // it has no access to it's parent other than accessing the mount-node itself
+                        if patch_path.is_empty() {
+                            let mount_node = self.mount_node();
+                            Self::clear_children(&mount_node);
+                            mount_node
+                                .append_child(&first_node)
+                                .expect("must append child");
+                            Self::dispatch_mount_event(&first_node);
+
+                            for node in replacement.into_iter() {
+                                let node_elm: &web_sys::Element = node.unchecked_ref();
+                                mount_node.append_child(node_elm).expect("append child");
+                                Self::dispatch_mount_event(node_elm);
+                            }
+                        } else {
+                            // the diffing algorithmn doesn't concern with fragment, instead it test the nodes contain in the fragment as if it where a list of nodes
+                            unreachable!("patching a document fragment other than the root_node should not happen");
+                        }
+                    } else {
+                        log::info!("checking if it is element node");
+                        if target_element.node_type() == Node::ELEMENT_NODE {
+                            self.remove_event_listeners(&target_element)?;
+                        }
+                        //let first_node = replacement.pop().expect("must have a first node");
+                        target_element
+                            .replace_with_with_node_1(&first_node)
+                            .unwrap_or_else(|e| {
+                                panic!("unable to replace node with {first_node:?}, {e:?}");
+                            });
+
                         Self::dispatch_mount_event(&first_node);
+
+                        let first_node_elm: &web_sys::Element = first_node.unchecked_ref();
 
                         for node in replacement.into_iter() {
                             let node_elm: &web_sys::Element = node.unchecked_ref();
-                            mount_node.append_child(node_elm).expect("append child");
+                            first_node_elm
+                                .insert_adjacent_element(intern("beforebegin"), node_elm)
+                                .expect("append child");
                             Self::dispatch_mount_event(node_elm);
                         }
-                    } else {
-                        // the diffing algorithmn doesn't concern with fragment, instead it test the nodes contain in the fragment as if it where a list of nodes
-                        unreachable!("patching a document fragment other than the root_node should not happen");
-                    }
-                } else {
-                    if target_element.node_type() == Node::ELEMENT_NODE {
-                        self.remove_event_listeners(&target_element)?;
-                    }
-                    //let first_node = replacement.pop().expect("must have a first node");
-                    target_element
-                        .replace_with_with_node_1(&first_node)
-                        .unwrap_or_else(|e| {
-                            panic!("unable to replace node with {first_node:?}, {e:?}");
-                        });
-
-                    Self::dispatch_mount_event(&first_node);
-
-                    let first_node_elm: &web_sys::Element = first_node.unchecked_ref();
-
-                    for node in replacement.into_iter() {
-                        let node_elm: &web_sys::Element = node.unchecked_ref();
-                        first_node_elm
-                            .insert_adjacent_element(intern("beforebegin"), node_elm)
-                            .expect("append child");
-                        Self::dispatch_mount_event(node_elm);
                     }
                 }
 
@@ -371,6 +375,7 @@ where
                 parent_target
                     .remove_child(&target_element)
                     .expect("must remove target node");
+                log::info!("checking if it is an element node");
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     self.remove_event_listeners(&target_element)?;
                 }

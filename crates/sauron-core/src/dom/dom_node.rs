@@ -598,6 +598,7 @@ pub(crate) fn find_node(node: &Node, path: &mut TreePath) -> Option<Node> {
     } else {
         let idx = path.remove_first();
         let children = node.child_nodes();
+        assert!(children.is_object());
         if let Some(child) = children.item(idx as u32) {
             find_node(&child, path)
         } else {
@@ -638,6 +639,7 @@ fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<usize> {
     let child_node_count = children.length();
     for i in 0..child_node_count {
         let child_node = children.item(i).expect("Expecting a child node");
+        log::info!("checking here is it is an element node..");
         if child_node.node_type() == Node::ELEMENT_NODE {
             let child_element = child_node.unchecked_ref::<Element>();
             let child_data_vdom_id = get_node_descendant_data_vdom_id(child_element);

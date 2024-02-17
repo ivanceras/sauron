@@ -60,6 +60,7 @@ fn process_node<MSG>(node: &rphtml::parser::Node) -> Result<Option<Node<MSG>>, P
         vec![]
     };
 
+    log::info!("accessing node_type here");
     match node.node_type {
         NodeType::Tag => {
             let tag = &node.meta.as_ref().expect("must have a tag");

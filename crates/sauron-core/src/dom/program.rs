@@ -251,11 +251,13 @@ where
 
     /// clone the app
     pub fn app_clone(&self) -> APP {
-        /*
+        log::info!("BEFORE app_clone");
         //TODO: This doesn't work all the time, maybe use Arc::RwLock as a replacement to
         //Rc::RefCell
+        /*
         unsafe{
-            let app: APP = std::mem::transmute_copy(&*self.app_context.app.borrow());
+            let app: APP = std::mem::transmute_copy(&*self.app_context.app.write().expect("poisoned"));
+            log::info!("AFTER transmute_copy..");
             app
         }
         */
