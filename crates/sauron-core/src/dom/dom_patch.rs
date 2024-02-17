@@ -92,7 +92,7 @@ where
 
         let nodes_lookup = find_all_nodes(
             self.root_node
-                .borrow()
+                .read().expect("poisoned")
                 .as_ref()
                 .expect("must have a root node"),
             &nodes_to_find,
@@ -358,7 +358,8 @@ where
                 // we replace the root node here, so that's reference is updated
                 // to the newly created node
                 if patch_path.path.is_empty() {
-                    *self.root_node.borrow_mut() = Some(first_node);
+                    let mut root = self.root_node.write().expect("poisoned");
+                        *root = Some(first_node);
                     #[cfg(feature = "with-debug")]
                     log::info!("the root_node is replaced with {:?}", &self.root_node);
                 }

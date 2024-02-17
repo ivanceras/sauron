@@ -17,8 +17,9 @@ use std::mem::ManuallyDrop;
 use std::{
     any::TypeId,
     cell::{Ref, RefCell, RefMut},
-    rc::Rc,
-    rc::Weak,
+    sync::Arc,
+    sync::Weak,
+    sync::RwLock,
 };
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
@@ -26,6 +27,8 @@ use web_sys::{self, Element, Node};
 use crate::dom::Eval;
 use mt_dom::{TreePath, diff_recursive};
 use crate::vdom::KEY;
+use std::sync::RwLockReadGuard;
+use std::sync::RwLockWriteGuard;
 
 mod app_context;
 
@@ -39,14 +42,14 @@ where
     pub(crate) app_context: AppContext<APP, MSG>,
 
     /// the first element of the app view, where the patch is generated is relative to
-    pub(crate) root_node: Rc<RefCell<Option<Node>>>,
+    pub(crate) root_node: Arc<RwLock<Option<Node>>>,
 
     /// the actual DOM element where the APP is mounted to.
-    mount_node: Rc<RefCell<Node>>,
+    mount_node: Arc<RwLock<Node>>,
 
     /// The closures that are currently attached to all the nodes used in the Application
     /// We keep these around so that they don't get dropped (and thus stop working);
-    pub node_closures: Rc<RefCell<ActiveClosure>>,
+    pub node_closures: Arc<RwLock<ActiveClosure>>,
 
     /// specify how the root node is mounted into the mount node
     mount_procedure: MountProcedure,
@@ -55,15 +58,15 @@ where
     /// for optimization purposes to avoid sluggishness of the app, when a patch
     /// can not be run in 1 execution due to limited remaining time deadline
     /// it will be put into the pending patches to be executed on the next run.
-    pending_patches: Rc<RefCell<VecDeque<DomPatch<MSG>>>>,
+    pending_patches: Arc<RwLock<VecDeque<DomPatch<MSG>>>>,
 
     /// store the Closure used in request_idle_callback calls
-    idle_callback_handles: Rc<RefCell<Vec<IdleCallbackHandle>>>,
+    idle_callback_handles: Arc<RwLock<Vec<IdleCallbackHandle>>>,
     /// store the Closure used in request_animation_frame calls
-    animation_frame_handles: Rc<RefCell<Vec<AnimationFrameHandle>>>,
+    animation_frame_handles: Arc<RwLock<Vec<AnimationFrameHandle>>>,
 
     /// event listener closures
-    pub(crate) event_closures: Rc<RefCell<Closures>>,
+    pub(crate) event_closures: Arc<RwLock<Closures>>,
 }
 
 pub struct WeakProgram<APP, MSG>
@@ -71,14 +74,14 @@ where
     MSG: 'static,
 {
     pub(crate) app_context: WeakContext<APP, MSG>,
-    pub(crate) root_node: Weak<RefCell<Option<Node>>>,
-    mount_node: Weak<RefCell<Node>>,
-    pub node_closures: Weak<RefCell<ActiveClosure>>,
+    pub(crate) root_node: Weak<RwLock<Option<Node>>>,
+    mount_node: Weak<RwLock<Node>>,
+    pub node_closures: Weak<RwLock<ActiveClosure>>,
     mount_procedure: MountProcedure,
-    pending_patches: Weak<RefCell<VecDeque<DomPatch<MSG>>>>,
-    idle_callback_handles: Weak<RefCell<Vec<IdleCallbackHandle>>>,
-    animation_frame_handles: Weak<RefCell<Vec<AnimationFrameHandle>>>,
-    pub(crate) event_closures: Weak<RefCell<Closures>>,
+    pending_patches: Weak<RwLock<VecDeque<DomPatch<MSG>>>>,
+    idle_callback_handles: Weak<RwLock<Vec<IdleCallbackHandle>>>,
+    animation_frame_handles: Weak<RwLock<Vec<AnimationFrameHandle>>>,
+    pub(crate) event_closures: Weak<RwLock<Closures>>,
 }
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
@@ -184,14 +187,14 @@ where
     pub fn downgrade(&self) -> WeakProgram<APP, MSG> {
         WeakProgram {
             app_context: AppContext::downgrade(&self.app_context),
-            root_node: Rc::downgrade(&self.root_node),
-            mount_node: Rc::downgrade(&self.mount_node),
-            node_closures: Rc::downgrade(&self.node_closures),
+            root_node: Arc::downgrade(&self.root_node),
+            mount_node: Arc::downgrade(&self.mount_node),
+            node_closures: Arc::downgrade(&self.node_closures),
             mount_procedure: self.mount_procedure,
-            pending_patches: Rc::downgrade(&self.pending_patches),
-            idle_callback_handles: Rc::downgrade(&self.idle_callback_handles),
-            animation_frame_handles: Rc::downgrade(&self.animation_frame_handles),
-            event_closures: Rc::downgrade(&self.event_closures),
+            pending_patches: Arc::downgrade(&self.pending_patches),
+            idle_callback_handles: Arc::downgrade(&self.idle_callback_handles),
+            animation_frame_handles: Arc::downgrade(&self.animation_frame_handles),
+            event_closures: Arc::downgrade(&self.event_closures),
         }
     }
 }
@@ -203,14 +206,14 @@ where
     fn clone(&self) -> Self {
         Program {
             app_context: self.app_context.clone(),
-            root_node: Rc::clone(&self.root_node),
-            mount_node: Rc::clone(&self.mount_node),
-            node_closures: Rc::clone(&self.node_closures),
+            root_node: Arc::clone(&self.root_node),
+            mount_node: Arc::clone(&self.mount_node),
+            node_closures: Arc::clone(&self.node_closures),
             mount_procedure: self.mount_procedure,
-            pending_patches: Rc::clone(&self.pending_patches),
-            idle_callback_handles: Rc::clone(&self.idle_callback_handles),
-            animation_frame_handles: Rc::clone(&self.animation_frame_handles),
-            event_closures: Rc::clone(&self.event_closures),
+            pending_patches: Arc::clone(&self.pending_patches),
+            idle_callback_handles: Arc::clone(&self.idle_callback_handles),
+            animation_frame_handles: Arc::clone(&self.animation_frame_handles),
+            event_closures: Arc::clone(&self.event_closures),
         }
     }
 }
@@ -229,14 +232,14 @@ where
     MSG: 'static,
 {
     /// get a reference to the APP
-    pub fn app(&self) -> Ref<'_, APP> {
-        self.app_context.app.borrow()
+    pub fn app(&self) -> RwLockReadGuard<'_, APP> {
+        self.app_context.app.read().expect("poisoned")
     }
 
 
     /// get a mutable reference to the APP
-    pub fn app_mut(&self) -> RefMut<'_, APP> {
-        self.app_context.app.borrow_mut()
+    pub fn app_mut(&self) -> RwLockWriteGuard<'_, APP> {
+        self.app_context.app.write().expect("poisoned")
     }
 }
 
@@ -256,7 +259,7 @@ where
             app
         }
         */
-        let borrowed_app = self.app_context.app.borrow();
+        let borrowed_app = self.app_context.app.read().expect("poisoned");
         borrowed_app.clone()
     }
 }
@@ -276,14 +279,14 @@ where
     ) -> Self {
         Program {
             app_context: AppContext::new(app),
-            root_node: Rc::new(RefCell::new(None)),
-            mount_node: Rc::new(RefCell::new(mount_node.clone())),
-            node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
+            root_node: Arc::new(RwLock::new(None)),
+            mount_node: Arc::new(RwLock::new(mount_node.clone())),
+            node_closures: Arc::new(RwLock::new(ActiveClosure::new())),
             mount_procedure: MountProcedure { action, target },
-            pending_patches: Rc::new(RefCell::new(VecDeque::new())),
-            idle_callback_handles: Rc::new(RefCell::new(vec![])),
-            animation_frame_handles: Rc::new(RefCell::new(vec![])),
-            event_closures: Rc::new(RefCell::new(vec![])),
+            pending_patches: Arc::new(RwLock::new(VecDeque::new())),
+            idle_callback_handles: Arc::new(RwLock::new(vec![])),
+            animation_frame_handles: Arc::new(RwLock::new(vec![])),
+            event_closures: Arc::new(RwLock::new(vec![])),
         }
     }
 
@@ -323,7 +326,7 @@ where
 
     /// return the node where the app is mounted into
     pub fn mount_node(&self) -> web_sys::Node {
-        self.mount_node.borrow().clone()
+        self.mount_node.read().expect("poisoned").clone()
     }
 
     ///  Instantiage an app and append the view to the root_node
@@ -432,17 +435,18 @@ where
         let created_node = self.create_dom_node(&self.app_context.current_vdom());
 
         let mount_node: web_sys::Node = match self.mount_procedure.target {
-            MountTarget::MountNode => self.mount_node.borrow().clone(),
+            MountTarget::MountNode => self.mount_node.read().expect("poisoned").clone(),
             MountTarget::ShadowRoot => {
                 let mount_element: web_sys::Element =
-                    self.mount_node.borrow().clone().unchecked_into();
+                    self.mount_node.read().expect("poisoned").clone().unchecked_into();
                 mount_element
                     .attach_shadow(&web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open))
                     .expect("unable to attached shadow");
                 let mount_shadow = mount_element.shadow_root().expect("must have a shadow");
 
-                *self.mount_node.borrow_mut() = mount_shadow.unchecked_into();
-                self.mount_node.borrow().clone()
+                let mut mount_node = self.mount_node.write().expect("poisoned");
+                *mount_node = mount_shadow.unchecked_into();
+                mount_node.clone()
             }
         };
 
@@ -460,10 +464,14 @@ where
                     .replace_with_with_node_1(&created_node)
                     .expect("Could not append child to mount");
                 Self::dispatch_mount_event(&created_node);
-                *self.mount_node.borrow_mut() = created_node.clone()
+                let mut mount_node = self.mount_node.write().expect("poisoned");
+                    *mount_node = created_node.clone()
             }
         }
-        *self.root_node.borrow_mut() = Some(created_node);
+        {
+        let mut root_node = self.root_node.write().expect("poisoned");
+            *root_node = Some(created_node);
+        }
         self.after_mounted();
     }
 
@@ -521,7 +529,7 @@ where
 
         let strong_count = self.app_context.strong_count();
         let weak_count = self.app_context.weak_count();
-        let root_node_count = Rc::strong_count(&self.root_node);
+        let root_node_count = Arc::strong_count(&self.root_node);
         assert_eq!(strong_count, root_node_count);
         let measurements = Measurements {
             name: modifier.measurement_name.to_string(),
@@ -585,7 +593,10 @@ where
     pub fn update_dom_with_vdom(&mut self, new_vdom: vdom::Node<MSG>, treepath: Option<Vec<TreePath>>) -> Result<usize, JsValue> {
         let dom_patches = self.create_dom_patch(&new_vdom, treepath);
         let total_patches = dom_patches.len();
-        self.pending_patches.borrow_mut().extend(dom_patches);
+        {
+        let mut pending_patches = self.pending_patches.write().expect("poisoned");
+            pending_patches.extend(dom_patches);
+        }
 
         #[cfg(feature = "with-raf")]
         self.apply_pending_patches_with_raf().expect("raf");
@@ -611,10 +622,14 @@ where
 
     /// apply the pending patches into the DOM
     fn apply_pending_patches(&mut self) -> Result<(), JsValue> {
-        if self.pending_patches.borrow().is_empty() {
+        if self.pending_patches.read().expect("poisoned").is_empty() {
             return Ok(());
         }
-        let dom_patches: Vec<DomPatch<MSG>> = self.pending_patches.borrow_mut().drain(..).collect();
+
+        let dom_patches: Vec<DomPatch<MSG>> = {
+            let mut pending_patches = self.pending_patches.write().expect("poisoned");
+            pending_patches.drain(..).collect()
+        };
         for dom_patch in dom_patches {
             self.apply_dom_patch(dom_patch)
                 .expect("must apply dom patch");
@@ -712,10 +727,10 @@ where
 
         let cmd = self.app_context.batch_pending_cmds();
 
-        if !self.pending_patches.borrow().is_empty() {
+        if !self.pending_patches.read().expect("poisoned").is_empty() {
             log::error!(
                 "BEFORE DOM updates there are still Remaining pending patches: {}",
-                self.pending_patches.borrow().len()
+                self.pending_patches.read().expect("poisoned").len()
             );
         }
 
@@ -724,15 +739,15 @@ where
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update
-        if !self.pending_patches.borrow().is_empty() {
+        if !self.pending_patches.read().expect("poisoned").is_empty() {
             self.apply_pending_patches()
                 .expect("applying pending patches..");
         }
 
-        if !self.pending_patches.borrow().is_empty() {
+        if !self.pending_patches.read().expect("poisoned").is_empty() {
             log::error!(
                 "Remaining pending patches: {}",
-                self.pending_patches.borrow().len()
+                self.pending_patches.read().expect("poisoned").len()
             );
             panic!(
                 "There are still pending patches.. can not emit cmd, if all pending patches
@@ -757,9 +772,10 @@ where
         let style_node = html::tags::style([], [text(style)]);
         let created_node = self.create_dom_node(&style_node);
 
-        self.mount_node
-            .borrow_mut()
-            .append_child(&created_node)
+        let mut mount_node = self.mount_node
+            .write().expect("poisoned");
+
+           mount_node.append_child(&created_node)
             .expect("could not append child to mount shadow");
     }
 

@@ -165,14 +165,19 @@ where
         self.program.mount();
         let static_style = <APP as Application<MSG>>::stylesheet().join("");
         self.program.inject_style_to_mount(&static_style);
+
         let dynamic_style =
-            <APP as Application<MSG>>::style(&self.program.app_context.app.borrow()).join("");
+            <APP as Application<MSG>>::style(&self.program.app_context.app.read().expect("poisoned")).join("");
         self.program.inject_style_to_mount(&dynamic_style);
-        self.program
+
+        {
+        let mut app = self.program
             .app_context
             .app
-            .borrow_mut()
-            .connected_callback();
+            .write().expect("poisoned");
+
+            app.connected_callback();
+        }
         self.program
             .update_dom(&Modifier::default(), None)
             .expect("must update dom");
@@ -180,15 +185,19 @@ where
 
     /// called when the web component is removed
     pub fn disconnected_callback(&mut self) {
-        self.program
+        let mut app = self.program
             .app_context
             .app
-            .borrow_mut()
-            .disconnected_callback();
+            .write().expect("poisoned");
+            app.disconnected_callback();
     }
 
     /// called when web componented is moved into other parts of the document
     pub fn adopted_callback(&mut self) {
-        self.program.app_context.app.borrow_mut().adopted_callback();
+        let mut app = self.program
+            .app_context
+            .app
+            .write().expect("poisoned");
+        app.adopted_callback();
     }
 }

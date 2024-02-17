@@ -342,9 +342,9 @@ where
                 .set_attribute(intern(DATA_VDOM_ID), &unique_id.to_string())
                 .expect("Could not set attribute on element");
 
-            self.node_closures
-                .borrow_mut()
-                .insert(unique_id, listener_closures);
+            let mut node_closures = self.node_closures
+                .write().expect("poisoned");
+                node_closures.insert(unique_id, listener_closures);
         }
     }
 
@@ -358,7 +358,8 @@ where
             for event_cb in event_attr.value() {
                 let listener = event_cb.as_event_listener().expect("expecting a callback");
                 let closure = self.add_event_listener(target, event_attr.name(), listener)?;
-                self.event_closures.borrow_mut().push(closure);
+                let mut node_closures = self.event_closures.write().expect("poisoned");
+                node_closures.push(closure);
             }
         }
         Ok(())
@@ -537,7 +538,7 @@ where
     /// remove all the event listeners for this node
     pub(crate) fn remove_event_listeners(&self, node: &Element) -> Result<(), JsValue> {
         let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
-        let mut node_closures = self.node_closures.borrow_mut();
+        let mut node_closures = self.node_closures.write().expect("poisoned");
         for vdom_id in all_descendant_vdom_id {
             if let Some(old_closure) = node_closures.get(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
@@ -565,7 +566,7 @@ where
         node: &Element,
     ) -> Result<(), JsValue> {
         let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
-        let mut node_closures = self.node_closures.borrow_mut();
+        let mut node_closures = self.node_closures.write().expect("poisoned");
         for vdom_id in all_descendant_vdom_id {
             if let Some(old_closure) = node_closures.get_mut(&vdom_id) {
                 for (event, oc) in old_closure.iter() {

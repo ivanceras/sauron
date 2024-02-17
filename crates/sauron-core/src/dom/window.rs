@@ -39,7 +39,8 @@ where
         window()
             .add_event_listener_with_callback(intern("resize"), closure.as_ref().unchecked_ref())
             .expect("resize callback");
-        self.event_closures.borrow_mut().push(closure);
+        let mut event_closures = self.event_closures.write().expect("poisoned");
+        event_closures.push(closure);
     }
 
     /// TODO: only executed once, since the Task Future is droped once done
@@ -82,6 +83,7 @@ where
             program.dispatch(msg);
         });
         window().set_onhashchange(Some(closure.as_ref().unchecked_ref()));
-        self.event_closures.borrow_mut().push(closure);
+        let mut event_closures = self.event_closures.write().expect("poisoned");
+        event_closures.push(closure);
     }
 }
