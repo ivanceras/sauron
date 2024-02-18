@@ -79,40 +79,40 @@ impl Application<Msg> for App {
         Cmd::none()
     }
 
-    fn pre_eval(&self, old: &Self) -> Option<Vec<Eval>> {
+    fn pre_diff(&self, old: &Self) -> Option<Vec<PreDiff>> {
         Some(vec![
-            eval(false,
+            diff_if(false,
                 [
-                    eval(false, [eval(true, [])]),
-                    eval(false,
+                    diff_if(false, [diff_if(true, [])]),
+                    diff_if(false,
                         [
-                            eval(false, []),
-                            eval(false, []),
-                            eval(false, []),
-                            eval(false,
-                                [eval(self.double_clicks != old.double_clicks, [])],
+                            diff_if(false, []),
+                            diff_if(false, []),
+                            diff_if(false, []),
+                            diff_if(false,
+                                [diff_if(self.double_clicks != old.double_clicks, [])],
                             ),
                         ],
                     ),
-                    eval(false,
+                    diff_if(false,
                         [
-                            eval(self.name != old.name, []),
-                            eval(false, []), // separator for in between text here
-                            eval(self.click_count != old.click_count, [])
+                            diff_if(self.name != old.name, []),
+                            diff_if(false, []), // separator for in between text here
+                            diff_if(self.click_count != old.click_count, [])
                         ],
                     ),
-                    eval(false,
+                    diff_if(false,
                         [
-                            eval(false, []),
-                            eval(false, []),
-                            eval(false, [eval(self.biography != old.biography, [])]),
+                            diff_if(false, []),
+                            diff_if(false, []),
+                            diff_if(false, [diff_if(self.biography != old.biography, [])]),
                         ],
                     ),
-                    eval(false,
+                    diff_if(false,
                         [
-                            eval(false, []),
-                            eval(false, []),
-                            eval(self.thought != old.thought, []),
+                            diff_if(false, []),
+                            diff_if(false, []),
+                            diff_if(self.thought != old.thought, []),
                         ],
                     ),
                 ],

@@ -8,7 +8,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = { path = "../../", features = ["log-patches"] }
+sauron = { path = "../../", features = ["log-patches", "pre-diff"] }
 console_error_panic_hook = "0.1"
 log = "0.4"
 console_log = { version = "0.2", features = ["color"] }
