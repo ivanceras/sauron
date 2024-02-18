@@ -23,7 +23,7 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
-use crate::dom::Eval;
+use crate::dom::PreDiff;
 use mt_dom::{TreePath, diff_recursive};
 use crate::vdom::KEY;
 
@@ -705,10 +705,14 @@ where
         }
 
 
-        let treepath = self.app().pre_eval(&old_app).map(|eval|{
+        #[cfg(feature = "pre-diff")]
+        let treepath = self.app().pre_diff(&old_app).map(|eval|{
                 log::debug!("eval: {eval:#?}");
-                Eval::traverse(&eval)
+                PreDiff::traverse(&eval)
            });
+
+        #[cfg(not(feature = "pre-diff"))]
+        let treepath = None;
 
         let cmd = self.app_context.batch_pending_cmds();
 

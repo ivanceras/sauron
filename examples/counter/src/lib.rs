@@ -1,6 +1,6 @@
 use sauron::{
     html::text, html::units::px, jss, node, wasm_bindgen, Application, Cmd, Node, Program,
-    eval, Eval,
+    diff_if, PreDiff,
 };
 
 enum Msg {
@@ -21,13 +21,13 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn pre_eval(&self, old: &Self) -> Option<Vec<Eval>> {
+    fn pre_diff(&self, old: &Self) -> Option<Vec<PreDiff>> {
         Some(
             vec![
-                eval(false, [
-                    eval(false, []),
-                    eval(false, [eval(self.count != old.count, [])]),
-                    eval(false, []),
+                diff_if(false, [
+                    diff_if(false, []),
+                    diff_if(false, [diff_if(self.count != old.count, [])]),
+                    diff_if(false, []),
                 ])
             ])
     }
