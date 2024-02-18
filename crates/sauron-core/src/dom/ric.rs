@@ -1,11 +1,13 @@
 use crate::dom::{now, request_timeout_callback, window, TimeoutCallbackHandle};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
+use std::rc::Rc;
 
 /// request idle callback handle
+#[derive(Clone)]
 pub struct IdleCallbackHandleReal {
     handle: u32,
-    _closure: Closure<dyn FnMut(JsValue)>,
+    _closure: Rc<Closure<dyn FnMut(JsValue)>>,
 }
 
 /// when dropped, cancel the idle callback
@@ -30,12 +32,13 @@ where
     let handle = window().request_idle_callback(closure.as_ref().unchecked_ref())?;
     Ok(IdleCallbackHandleReal {
         handle,
-        _closure: closure,
+        _closure: Rc::new(closure),
     })
 }
 
 /// Idle deadline interface which could be the real idle deadline if supported, otherwise the
 /// polyfill
+#[derive(Clone)]
 pub enum IdleDeadline {
     /// the web native IdleDeadline object wrap together with polyfill version
     Real(web_sys::IdleDeadline),
@@ -47,6 +50,7 @@ pub enum IdleDeadline {
 }
 
 ///
+#[derive(Clone)]
 pub enum IdleCallbackHandle {
     /// wrapper to the real web native IdleCallbackHandle
     Real(IdleCallbackHandleReal),

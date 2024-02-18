@@ -1,11 +1,13 @@
 use crate::dom::window;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
+use std::rc::Rc;
 
 /// request animation frame handle
+#[derive(Clone)]
 pub struct AnimationFrameHandle {
     handle: i32,
-    _closure: Closure<dyn FnMut()>,
+    _closure: Rc<Closure<dyn FnMut()>>,
 }
 impl Drop for AnimationFrameHandle {
     fn drop(&mut self) {
@@ -24,6 +26,6 @@ where
     let handle = window().request_animation_frame(closure.as_ref().unchecked_ref())?;
     Ok(AnimationFrameHandle {
         handle,
-        _closure: closure,
+        _closure: Rc::new(closure),
     })
 }

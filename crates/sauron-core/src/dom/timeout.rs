@@ -3,12 +3,13 @@ use js_sys::Promise;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
+use std::rc::Rc;
 
 /// handle for request_idle_callback calls
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct TimeoutCallbackHandle {
     handle: i32,
-    _closure: Closure<dyn FnMut()>,
+    _closure: Rc<Closure<dyn FnMut()>>,
 }
 
 impl Drop for TimeoutCallbackHandle {
@@ -29,7 +30,7 @@ where
     )?;
     Ok(TimeoutCallbackHandle {
         handle,
-        _closure: closure,
+        _closure: Rc::new(closure),
     })
 }
 
