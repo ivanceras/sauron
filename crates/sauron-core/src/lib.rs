@@ -50,6 +50,7 @@ pub mod prelude {
         pub use wasm_bindgen_futures;
         pub use js_sys;
         pub use wasm_bindgen;
+        #[doc(hidden)]
         pub use wasm_bindgen::prelude::*;
         pub use serde_wasm_bindgen;
         pub use crate::html::events::*;
