@@ -64,6 +64,7 @@ where
 
     /// event listener closures
     pub(crate) event_closures: Rc<RefCell<Closures>>,
+    last_update: Rc<RefCell<Option<f64>>>,
 }
 
 pub struct WeakProgram<APP, MSG>
@@ -79,6 +80,7 @@ where
     idle_callback_handles: Weak<RefCell<Vec<IdleCallbackHandle>>>,
     animation_frame_handles: Weak<RefCell<Vec<AnimationFrameHandle>>>,
     pub(crate) event_closures: Weak<RefCell<Closures>>,
+    last_update: Weak<RefCell<Option<f64>>>,
 }
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
@@ -134,17 +136,20 @@ where
                                     self.animation_frame_handles.upgrade()
                                 {
                                     if let Some(event_closures) = self.event_closures.upgrade() {
-                                        return Some(Program {
-                                            app_context,
-                                            root_node,
-                                            mount_node,
-                                            node_closures,
-                                            mount_procedure: self.mount_procedure,
-                                            pending_patches,
-                                            idle_callback_handles,
-                                            animation_frame_handles,
-                                            event_closures,
-                                        });
+                                        if let Some(last_update) = self.last_update.upgrade() {
+                                            return Some(Program {
+                                                app_context,
+                                                root_node,
+                                                mount_node,
+                                                node_closures,
+                                                mount_procedure: self.mount_procedure,
+                                                pending_patches,
+                                                idle_callback_handles,
+                                                animation_frame_handles,
+                                                event_closures,
+                                                last_update,
+                                            });
+                                        }
                                     }
                                 }
                             }
@@ -172,6 +177,7 @@ where
             idle_callback_handles: Weak::clone(&self.idle_callback_handles),
             animation_frame_handles: Weak::clone(&self.animation_frame_handles),
             event_closures: Weak::clone(&self.event_closures),
+            last_update: Weak::clone(&self.last_update),
         }
     }
 }
@@ -192,6 +198,7 @@ where
             idle_callback_handles: Rc::downgrade(&self.idle_callback_handles),
             animation_frame_handles: Rc::downgrade(&self.animation_frame_handles),
             event_closures: Rc::downgrade(&self.event_closures),
+            last_update: Rc::downgrade(&self.last_update),
         }
     }
 }
@@ -211,6 +218,7 @@ where
             idle_callback_handles: Rc::clone(&self.idle_callback_handles),
             animation_frame_handles: Rc::clone(&self.animation_frame_handles),
             event_closures: Rc::clone(&self.event_closures),
+            last_update: Rc::clone(&self.last_update),
         }
     }
 }
@@ -286,6 +294,7 @@ where
             idle_callback_handles: Rc::new(RefCell::new(vec![])),
             animation_frame_handles: Rc::new(RefCell::new(vec![])),
             event_closures: Rc::new(RefCell::new(vec![])),
+            last_update: Rc::new(RefCell::new(None)),
         }
     }
 
@@ -520,6 +529,16 @@ where
         // update the last DOM node tree with this new view
         let total_patches = self.update_dom_with_vdom(view, treepath).expect("must not error");
         let t3 = now();
+        if let Some(last_update) = self.last_update.borrow().as_ref(){
+            let frame_time = 1000.0 / 60.0; // 1s in 60 frames
+            let time_delta = t3 - last_update;
+            let remaining = frame_time - time_delta;
+            log::info!("time_delta: {time_delta}");
+            if time_delta < frame_time {
+                log::warn!("update is {} too soon!... time_delta: {}", remaining, time_delta);
+            }
+        }
+        *self.last_update.borrow_mut() = Some(t3);
 
         let strong_count = self.app_context.strong_count();
         let weak_count = self.app_context.weak_count();

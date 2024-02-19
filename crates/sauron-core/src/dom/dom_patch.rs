@@ -14,6 +14,7 @@ use web_sys::Node;
 /// as opposed to Patch which contains reference to the vdom, which makes it hard
 /// to be included in a struct
 ///
+#[derive(Clone)]
 pub struct DomPatch<MSG> {
     /// The path to traverse to get to the target_element
     pub patch_path: TreePath,
@@ -24,6 +25,7 @@ pub struct DomPatch<MSG> {
 }
 
 /// patch variant
+#[derive(Clone)]
 pub enum PatchVariant<MSG> {
     /// Insert nodes before the target node
     InsertBeforeNode {
