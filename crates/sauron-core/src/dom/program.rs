@@ -3,12 +3,15 @@ use crate::dom::program::app_context::WeakContext;
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
+use crate::dom::PreDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
 use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
+use crate::vdom::KEY;
 use app_context::AppContext;
+use mt_dom::{diff_recursive, TreePath};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
@@ -23,9 +26,6 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
-use crate::dom::PreDiff;
-use mt_dom::{TreePath, diff_recursive};
-use crate::vdom::KEY;
 
 mod app_context;
 
@@ -241,13 +241,11 @@ where
         self.app_context.app.borrow()
     }
 
-
     /// get a mutable reference to the APP
     pub fn app_mut(&self) -> RefMut<'_, APP> {
         self.app_context.app.borrow_mut()
     }
 }
-
 
 #[cfg(feature = "pre-diff")]
 impl<APP, MSG> Program<APP, MSG>
@@ -255,7 +253,6 @@ where
     MSG: 'static,
     APP: Application<MSG> + Clone + 'static,
 {
-
     /// clone the app
     pub fn app_clone(&self) -> APP {
         /*
@@ -297,7 +294,6 @@ where
             last_update: Rc::new(RefCell::new(None)),
         }
     }
-
 
     /// executed after the program has been mounted
     fn after_mounted(&mut self) {
@@ -387,7 +383,6 @@ where
         program.mount();
         ManuallyDrop::new(program)
     }
-
 
     /// clear the existing children of the mount before mounting the app
     pub fn clear_append_to_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
@@ -518,7 +513,11 @@ where
     }
 
     /// update the browser DOM to reflect the APP's  view
-    pub fn update_dom(&mut self, modifier: &Modifier, treepath: Option<Vec<TreePath>>) -> Result<Measurements, JsValue> {
+    pub fn update_dom(
+        &mut self,
+        modifier: &Modifier,
+        treepath: Option<Vec<TreePath>>,
+    ) -> Result<Measurements, JsValue> {
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app_context.view();
@@ -527,15 +526,21 @@ where
         let node_count = view.node_count();
 
         // update the last DOM node tree with this new view
-        let total_patches = self.update_dom_with_vdom(view, treepath).expect("must not error");
+        let total_patches = self
+            .update_dom_with_vdom(view, treepath)
+            .expect("must not error");
         let t3 = now();
-        if let Some(last_update) = self.last_update.borrow().as_ref(){
+        if let Some(last_update) = self.last_update.borrow().as_ref() {
             let frame_time = 1000.0 / 60.0; // 1s in 60 frames
             let time_delta = t3 - last_update;
             let remaining = frame_time - time_delta;
             log::info!("time_delta: {time_delta}");
             if time_delta < frame_time {
-                log::warn!("update is {} too soon!... time_delta: {}", remaining, time_delta);
+                log::warn!(
+                    "update is {} too soon!... time_delta: {}",
+                    remaining,
+                    time_delta
+                );
             }
         }
         *self.last_update.borrow_mut() = Some(t3);
@@ -564,27 +569,34 @@ where
         Ok(measurements)
     }
 
-    fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>, treepath: Option<Vec<TreePath>>) -> Vec<DomPatch<MSG>> {
+    fn create_dom_patch(
+        &self,
+        new_vdom: &vdom::Node<MSG>,
+        treepath: Option<Vec<TreePath>>,
+    ) -> Vec<DomPatch<MSG>> {
         let current_vdom = self.app_context.current_vdom();
-        let patches = if let Some(treepath) = treepath{
+        let patches = if let Some(treepath) = treepath {
             log::debug!("using treepath from pre_eval: {treepath:?}");
-            let patches = treepath.into_iter().flat_map(|path|{
-                let new_node = path.find_node_by_path(new_vdom).expect("new_node");
-                let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
-                log::debug!("new_node: {new_node:#?}");
-                log::debug!("old_node: {old_node:#?}");
-                diff_recursive(
-                    &old_node,
-                    &new_node,
-                    &path,
-                    &KEY,
-                    &|_old, _new| false,
-                    &|_old, _new| false,
-                )
-            }).collect::<Vec<_>>();
+            let patches = treepath
+                .into_iter()
+                .flat_map(|path| {
+                    let new_node = path.find_node_by_path(new_vdom).expect("new_node");
+                    let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
+                    log::debug!("new_node: {new_node:#?}");
+                    log::debug!("old_node: {old_node:#?}");
+                    diff_recursive(
+                        &old_node,
+                        &new_node,
+                        &path,
+                        &KEY,
+                        &|_old, _new| false,
+                        &|_old, _new| false,
+                    )
+                })
+                .collect::<Vec<_>>();
             log::info!("patches: {patches:#?}");
             patches
-        }else{
+        } else {
             log::debug!("using classic diff...");
             let patches = diff(&current_vdom, &new_vdom);
             patches
@@ -603,7 +615,11 @@ where
     /// patch the DOM to reflect the App's view
     ///
     /// Note: This is in another function so as to allow tests to use this shared code
-    pub fn update_dom_with_vdom(&mut self, new_vdom: vdom::Node<MSG>, treepath: Option<Vec<TreePath>>) -> Result<usize, JsValue> {
+    pub fn update_dom_with_vdom(
+        &mut self,
+        new_vdom: vdom::Node<MSG>,
+        treepath: Option<Vec<TreePath>>,
+    ) -> Result<usize, JsValue> {
         let dom_patches = self.create_dom_patch(&new_vdom, treepath);
         let total_patches = dom_patches.len();
         self.pending_patches.borrow_mut().extend(dom_patches);
@@ -646,7 +662,9 @@ where
     /// execute DOM changes in order to reflect the APP's view into the browser representation
     fn dispatch_dom_changes(&mut self, modifier: &Modifier, treepath: Option<Vec<TreePath>>) {
         #[allow(unused_variables)]
-        let measurements = self.update_dom(modifier, treepath).expect("must update dom");
+        let measurements = self
+            .update_dom(modifier, treepath)
+            .expect("must update dom");
 
         #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied
@@ -726,12 +744,11 @@ where
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
-
         #[cfg(feature = "pre-diff")]
-        let treepath = self.app().pre_diff(&old_app).map(|eval|{
-                log::debug!("eval: {eval:#?}");
-                PreDiff::traverse(&eval)
-           });
+        let treepath = self.app().pre_diff(&old_app).map(|eval| {
+            log::debug!("eval: {eval:#?}");
+            PreDiff::traverse(&eval)
+        });
 
         #[cfg(not(feature = "pre-diff"))]
         let treepath = None;

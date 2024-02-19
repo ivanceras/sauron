@@ -1,5 +1,5 @@
 use crate::{
-    dom::{dom_node::intern, util, window, document, Application, Program, Task},
+    dom::{document, dom_node::intern, util, window, Application, Program, Task},
     vdom::Attribute,
 };
 use js_sys::Promise;

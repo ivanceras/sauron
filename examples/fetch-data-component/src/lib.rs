@@ -1,12 +1,11 @@
 #![deny(warnings)]
-use sauron::*;
 use fetcher::Fetcher;
+use sauron::*;
 
 #[macro_use]
 extern crate log;
 
 mod fetcher;
-
 
 #[derive(Debug)]
 pub enum Msg {
@@ -20,10 +19,9 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         App {
-            fetcher: Fetcher::new()
+            fetcher: Fetcher::new(),
         }
     }
-
 }
 
 impl Application<Msg> for App {
@@ -42,8 +40,8 @@ impl Application<Msg> for App {
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
-        match msg{
-            Msg::FetcherMsg(fmsg) => Cmd::from(self.fetcher.update(fmsg).map_msg(Msg::FetcherMsg))
+        match msg {
+            Msg::FetcherMsg(fmsg) => Cmd::from(self.fetcher.update(fmsg).map_msg(Msg::FetcherMsg)),
         }
     }
 

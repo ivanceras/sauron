@@ -80,44 +80,48 @@ impl Application<Msg> for App {
     }
 
     fn pre_diff(&self, old: &Self) -> Option<Vec<PreDiff>> {
-        Some(vec![
-            diff_if(false,
-                [
-                    diff_if(false, [diff_if(true, [])]),
-                    diff_if(false,
-                        [
-                            diff_if(false, []),
-                            diff_if(false, []),
-                            diff_if(false, []),
-                            diff_if(false,
-                                [diff_if(self.double_clicks != old.double_clicks, [])],
-                            ),
-                        ],
-                    ),
-                    diff_if(false,
-                        [
-                            diff_if(self.name != old.name, []),
-                            diff_if(false, []), // separator for in between text here
-                            diff_if(self.click_count != old.click_count, [])
-                        ],
-                    ),
-                    diff_if(false,
-                        [
-                            diff_if(false, []),
-                            diff_if(false, []),
-                            diff_if(false, [diff_if(self.biography != old.biography, [])]),
-                        ],
-                    ),
-                    diff_if(false,
-                        [
-                            diff_if(false, []),
-                            diff_if(false, []),
-                            diff_if(self.thought != old.thought, []),
-                        ],
-                    ),
-                ],
-            )]
-       )
+        Some(vec![diff_if(
+            false,
+            [
+                diff_if(false, [diff_if(true, [])]),
+                diff_if(
+                    false,
+                    [
+                        diff_if(false, []),
+                        diff_if(false, []),
+                        diff_if(false, []),
+                        diff_if(
+                            false,
+                            [diff_if(self.double_clicks != old.double_clicks, [])],
+                        ),
+                    ],
+                ),
+                diff_if(
+                    false,
+                    [
+                        diff_if(self.name != old.name, []),
+                        diff_if(false, []), // separator for in between text here
+                        diff_if(self.click_count != old.click_count, []),
+                    ],
+                ),
+                diff_if(
+                    false,
+                    [
+                        diff_if(false, []),
+                        diff_if(false, []),
+                        diff_if(false, [diff_if(self.biography != old.biography, [])]),
+                    ],
+                ),
+                diff_if(
+                    false,
+                    [
+                        diff_if(false, []),
+                        diff_if(false, []),
+                        diff_if(self.thought != old.thought, []),
+                    ],
+                ),
+            ],
+        )])
     }
 
     fn view(&self) -> Node<Msg> {

@@ -1,12 +1,12 @@
 use crate::dom::window;
 use js_sys::Promise;
+use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
-use std::rc::Rc;
 
 /// handle for request_idle_callback calls
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct TimeoutCallbackHandle {
     handle: i32,
     _closure: Rc<Closure<dyn FnMut()>>,

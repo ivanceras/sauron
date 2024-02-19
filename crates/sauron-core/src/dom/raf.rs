@@ -1,7 +1,7 @@
 use crate::dom::window;
+use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
-use std::rc::Rc;
 
 /// request animation frame handle
 #[derive(Clone)]

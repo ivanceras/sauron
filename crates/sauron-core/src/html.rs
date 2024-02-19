@@ -81,7 +81,7 @@ pub fn html_element<MSG>(
         if let Some(last) = corrected_children.last() {
             //TODO: put this behind a flag: #auto-separator to automatically
             //add separator between text nodes
-            if last.is_text() && child.is_text(){
+            if last.is_text() && child.is_text() {
                 corrected_children.push(comment("separator"));
             }
         }
