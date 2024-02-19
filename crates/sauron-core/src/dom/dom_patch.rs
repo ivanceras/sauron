@@ -1,5 +1,6 @@
 use crate::dom::dom_node::find_all_nodes;
 use crate::dom::dom_node::intern;
+use crate::dom::request_animation_frame;
 use crate::dom::{Application, Program};
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use mt_dom::TreePath;
@@ -250,12 +251,15 @@ where
             PatchVariant::InsertBeforeNode { nodes } => {
                 // we insert the node before this target element
                 if let Some(parent_target) = target_element.parent_node() {
-                    for for_insert in nodes {
-                        parent_target
-                            .insert_before(&for_insert, Some(&target_element))
-                            .expect("must remove target node");
-                        Self::dispatch_mount_event(&for_insert);
-                    }
+                    request_animation_frame(move || {
+                        for for_insert in nodes.iter() {
+                            parent_target
+                                .insert_before(&for_insert, Some(&target_element))
+                                .expect("must remove target node");
+                            Self::dispatch_mount_event(&for_insert);
+                        }
+                    })
+                    .expect("must execute");
                 } else {
                     panic!("unable to get parent node of the target element: {target_element:?} for patching: {nodes:#?}");
                 }
@@ -263,46 +267,67 @@ where
 
             PatchVariant::InsertAfterNode { nodes } => {
                 // we insert the node before this target element
-                for for_insert in nodes.into_iter().rev() {
-                    let created_element: &Element = for_insert
-                        .dyn_ref()
-                        .expect("only elements is supported for now");
-                    target_element
-                        .insert_adjacent_element(intern("afterend"), created_element)
-                        .expect("must insert after the target element");
-                    Self::dispatch_mount_event(&for_insert);
-                }
+                request_animation_frame(move || {
+                    for for_insert in nodes.iter().rev() {
+                        let created_element: &Element = for_insert
+                            .dyn_ref()
+                            .expect("only elements is supported for now");
+                        target_element
+                            .insert_adjacent_element(intern("afterend"), created_element)
+                            .expect("must insert after the target element");
+                        Self::dispatch_mount_event(&for_insert);
+                    }
+                })
+                .expect("must execute");
             }
             PatchVariant::AppendChildren { children } => {
-                for child in children.into_iter() {
-                    Self::append_child_and_dispatch_mount_event(
-                        target_element.unchecked_ref(),
-                        &child,
-                    );
-                }
+                request_animation_frame(move || {
+                    for child in children.iter() {
+                        Self::append_child_and_dispatch_mount_event(
+                            target_element.unchecked_ref(),
+                            &child,
+                        );
+                    }
+                })
+                .expect("must execute");
             }
 
             PatchVariant::AddAttributes { attrs } => {
-                let attrs: Vec<&Attribute<MSG>> = attrs.iter().collect();
-                self.set_element_attributes(&target_element, &attrs);
+                let program = self.clone();
+                request_animation_frame(move || {
+                    let attrs: Vec<&Attribute<MSG>> = attrs.iter().collect();
+                    program.set_element_attributes(&target_element, &attrs);
+                })
+                .expect("must execute");
             }
             PatchVariant::RemoveAttributes { attrs } => {
-                for attr in attrs.iter() {
-                    for att_value in attr.value() {
-                        match att_value {
-                            AttributeValue::Simple(_) => {
-                                Self::remove_element_attribute(&target_element, attr)?;
+                let program = self.clone();
+                request_animation_frame(move || {
+                    for attr in attrs.iter() {
+                        for att_value in attr.value() {
+                            match att_value {
+                                AttributeValue::Simple(_) => {
+                                    let target_element = target_element.clone();
+                                    Self::remove_element_attribute(&target_element, &attr)
+                                        .expect("must remove attribute");
+                                }
+                                // it is an event listener
+                                AttributeValue::EventListener(_) => {
+                                    program
+                                        .remove_event_listener_with_name(
+                                            attr.name(),
+                                            &target_element,
+                                        )
+                                        .expect("must remove listener");
+                                }
+                                AttributeValue::FunctionCall(_)
+                                | AttributeValue::Style(_)
+                                | AttributeValue::Empty => (),
                             }
-                            // it is an event listener
-                            AttributeValue::EventListener(_) => {
-                                self.remove_event_listener_with_name(attr.name(), &target_element)?;
-                            }
-                            AttributeValue::FunctionCall(_)
-                            | AttributeValue::Style(_)
-                            | AttributeValue::Empty => (),
                         }
                     }
-                }
+                })
+                .expect("must execute");
             }
 
             // This also removes the associated closures and event listeners to the node being replaced
@@ -314,27 +339,34 @@ where
                     // if we are patching a fragment mode in the top-level document
                     // it has no access to it's parent other than accessing the mount-node itself
                     if patch_path.is_empty() {
-                        let mount_node = self.mount_node();
-                        Self::clear_children(&mount_node);
-                        mount_node
-                            .append_child(&first_node)
-                            .expect("must append child");
-                        Self::dispatch_mount_event(&first_node);
+                        let program = self.clone();
+                        let first_node = first_node.clone();
+                        request_animation_frame(move || {
+                            let mount_node = program.mount_node();
+                            Self::clear_children(&mount_node);
+                            mount_node
+                                .append_child(&first_node)
+                                .expect("must append child");
+                            Self::dispatch_mount_event(&first_node);
 
-                        for node in replacement.into_iter() {
-                            let node_elm: &web_sys::Element = node.unchecked_ref();
-                            mount_node.append_child(node_elm).expect("append child");
-                            Self::dispatch_mount_event(node_elm);
-                        }
+                            for node in replacement.iter() {
+                                let node_elm: &web_sys::Element = node.unchecked_ref();
+                                mount_node.append_child(node_elm).expect("append child");
+                                Self::dispatch_mount_event(node_elm);
+                            }
+                        })
+                        .expect("must execute");
                     } else {
                         // the diffing algorithmn doesn't concern with fragment, instead it test the nodes contain in the fragment as if it where a list of nodes
                         unreachable!("patching a document fragment other than the root_node should not happen");
                     }
                 } else {
                     if target_element.node_type() == Node::ELEMENT_NODE {
-                        self.remove_event_listeners(&target_element)?;
+                        let program = self.clone();
+                        program
+                            .remove_event_listeners(&target_element)
+                            .expect("must remove");
                     }
-                    //let first_node = replacement.pop().expect("must have a first node");
                     target_element
                         .replace_with_with_node_1(&first_node)
                         .unwrap_or_else(|e| {
@@ -345,7 +377,7 @@ where
 
                     let first_node_elm: &web_sys::Element = first_node.unchecked_ref();
 
-                    for node in replacement.into_iter() {
+                    for node in replacement.iter() {
                         let node_elm: &web_sys::Element = node.unchecked_ref();
                         first_node_elm
                             .insert_adjacent_element(intern("beforebegin"), node_elm)
@@ -360,55 +392,67 @@ where
                 // we replace the root node here, so that's reference is updated
                 // to the newly created node
                 if patch_path.path.is_empty() {
-                    *self.root_node.borrow_mut() = Some(first_node);
+                    *self.root_node.borrow_mut() = Some(first_node.clone());
                     #[cfg(feature = "with-debug")]
                     log::info!("the root_node is replaced with {:?}", &self.root_node);
                 }
             }
             PatchVariant::RemoveNode => {
-                let parent_target = target_element
-                    .parent_node()
-                    .expect("must have a parent node");
-                parent_target
-                    .remove_child(&target_element)
-                    .expect("must remove target node");
-                if target_element.node_type() == Node::ELEMENT_NODE {
-                    self.remove_event_listeners(&target_element)?;
-                }
+                let program = self.clone();
+                request_animation_frame(move || {
+                    let parent_target = target_element
+                        .parent_node()
+                        .expect("must have a parent node");
+                    parent_target
+                        .remove_child(&target_element)
+                        .expect("must remove target node");
+                    if target_element.node_type() == Node::ELEMENT_NODE {
+                        program
+                            .remove_event_listeners(&target_element)
+                            .expect("must remove");
+                    }
+                })
+                .expect("must execute");
             }
             PatchVariant::MoveBeforeNode { for_moving } => {
                 if let Some(target_parent) = target_element.parent_node() {
-                    for move_node in for_moving {
-                        let move_node_parent = move_node
-                            .parent_node()
-                            .expect("node for moving must have parent");
-                        let move_node = move_node_parent
-                            .remove_child(&move_node)
-                            .expect("must remove child");
-                        target_parent
-                            .insert_before(&move_node, Some(&target_element))
-                            .expect("must insert before this node");
-                    }
+                    request_animation_frame(move || {
+                        for move_node in for_moving.iter() {
+                            let move_node_parent = move_node
+                                .parent_node()
+                                .expect("node for moving must have parent");
+                            let move_node = move_node_parent
+                                .remove_child(&move_node)
+                                .expect("must remove child");
+                            target_parent
+                                .insert_before(&move_node, Some(&target_element))
+                                .expect("must insert before this node");
+                        }
+                    })
+                    .expect("must execute");
                 } else {
                     panic!("unable to get the parent node of the target element");
                 }
             }
 
             PatchVariant::MoveAfterNode { for_moving } => {
-                for move_node in for_moving {
-                    let move_node_parent = move_node
-                        .parent_node()
-                        .expect("node for moving must have parent");
-                    let to_move_node = move_node_parent
-                        .remove_child(&move_node)
-                        .expect("must remove child");
+                request_animation_frame(move || {
+                    for move_node in for_moving.iter() {
+                        let move_node_parent = move_node
+                            .parent_node()
+                            .expect("node for moving must have parent");
+                        let to_move_node = move_node_parent
+                            .remove_child(&move_node)
+                            .expect("must remove child");
 
-                    let to_move_element: &web_sys::Element =
-                        to_move_node.dyn_ref().expect("an element");
-                    target_element
-                        .insert_adjacent_element(intern("afterend"), to_move_element)
-                        .expect("must insert before this node");
-                }
+                        let to_move_element: &web_sys::Element =
+                            to_move_node.dyn_ref().expect("an element");
+                        target_element
+                            .insert_adjacent_element(intern("afterend"), to_move_element)
+                            .expect("must insert before this node");
+                    }
+                })
+                .expect("must execute");
             }
         }
         Ok(())
