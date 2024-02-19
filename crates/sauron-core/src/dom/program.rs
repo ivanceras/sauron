@@ -3,6 +3,7 @@ use crate::dom::program::app_context::WeakContext;
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
+#[cfg(feature = "pre-diff")]
 use crate::dom::PreDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};

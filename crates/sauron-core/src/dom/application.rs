@@ -1,8 +1,6 @@
 use crate::dom::Cmd;
 use crate::vdom::Node;
-use mt_dom::TreePath;
 pub use pre_diff::{diff_if, PreDiff};
-use std::fmt;
 
 mod pre_diff;
 
