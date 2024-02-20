@@ -1,6 +1,5 @@
 use crate::dom::dom_node::find_all_nodes;
 use crate::dom::dom_node::intern;
-use crate::dom::request_animation_frame;
 use crate::dom::{Application, Program};
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use mt_dom::TreePath;
@@ -251,15 +250,12 @@ where
             PatchVariant::InsertBeforeNode { nodes } => {
                 // we insert the node before this target element
                 if let Some(parent_target) = target_element.parent_node() {
-                    request_animation_frame(move || {
                         for for_insert in nodes.iter() {
                             parent_target
                                 .insert_before(&for_insert, Some(&target_element))
                                 .expect("must remove target node");
                             Self::dispatch_mount_event(&for_insert);
                         }
-                    })
-                    .expect("must execute");
                 } else {
                     panic!("unable to get parent node of the target element: {target_element:?} for patching: {nodes:#?}");
                 }
@@ -267,7 +263,6 @@ where
 
             PatchVariant::InsertAfterNode { nodes } => {
                 // we insert the node before this target element
-                request_animation_frame(move || {
                     for for_insert in nodes.iter().rev() {
                         let created_element: &Element = for_insert
                             .dyn_ref()
@@ -277,32 +272,23 @@ where
                             .expect("must insert after the target element");
                         Self::dispatch_mount_event(&for_insert);
                     }
-                })
-                .expect("must execute");
             }
             PatchVariant::AppendChildren { children } => {
-                request_animation_frame(move || {
                     for child in children.iter() {
                         Self::append_child_and_dispatch_mount_event(
                             target_element.unchecked_ref(),
                             &child,
                         );
                     }
-                })
-                .expect("must execute");
             }
 
             PatchVariant::AddAttributes { attrs } => {
                 let program = self.clone();
-                request_animation_frame(move || {
                     let attrs: Vec<&Attribute<MSG>> = attrs.iter().collect();
                     program.set_element_attributes(&target_element, &attrs);
-                })
-                .expect("must execute");
             }
             PatchVariant::RemoveAttributes { attrs } => {
                 let program = self.clone();
-                request_animation_frame(move || {
                     for attr in attrs.iter() {
                         for att_value in attr.value() {
                             match att_value {
@@ -326,8 +312,6 @@ where
                             }
                         }
                     }
-                })
-                .expect("must execute");
             }
 
             // This also removes the associated closures and event listeners to the node being replaced
@@ -341,7 +325,6 @@ where
                     if patch_path.is_empty() {
                         let program = self.clone();
                         let first_node = first_node.clone();
-                        request_animation_frame(move || {
                             let mount_node = program.mount_node();
                             Self::clear_children(&mount_node);
                             mount_node
@@ -354,8 +337,6 @@ where
                                 mount_node.append_child(node_elm).expect("append child");
                                 Self::dispatch_mount_event(node_elm);
                             }
-                        })
-                        .expect("must execute");
                     } else {
                         // the diffing algorithmn doesn't concern with fragment, instead it test the nodes contain in the fragment as if it where a list of nodes
                         unreachable!("patching a document fragment other than the root_node should not happen");
@@ -399,7 +380,6 @@ where
             }
             PatchVariant::RemoveNode => {
                 let program = self.clone();
-                request_animation_frame(move || {
                     let parent_target = target_element
                         .parent_node()
                         .expect("must have a parent node");
@@ -411,12 +391,9 @@ where
                             .remove_event_listeners(&target_element)
                             .expect("must remove");
                     }
-                })
-                .expect("must execute");
             }
             PatchVariant::MoveBeforeNode { for_moving } => {
                 if let Some(target_parent) = target_element.parent_node() {
-                    request_animation_frame(move || {
                         for move_node in for_moving.iter() {
                             let move_node_parent = move_node
                                 .parent_node()
@@ -428,15 +405,12 @@ where
                                 .insert_before(&move_node, Some(&target_element))
                                 .expect("must insert before this node");
                         }
-                    })
-                    .expect("must execute");
                 } else {
                     panic!("unable to get the parent node of the target element");
                 }
             }
 
             PatchVariant::MoveAfterNode { for_moving } => {
-                request_animation_frame(move || {
                     for move_node in for_moving.iter() {
                         let move_node_parent = move_node
                             .parent_node()
@@ -451,8 +425,6 @@ where
                             .insert_adjacent_element(intern("afterend"), to_move_element)
                             .expect("must insert before this node");
                     }
-                })
-                .expect("must execute");
             }
         }
         Ok(())
