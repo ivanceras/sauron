@@ -535,7 +535,6 @@ where
             let frame_time = 1000.0 / 60.0; // 1s in 60 frames
             let time_delta = t3 - last_update;
             let remaining = frame_time - time_delta;
-            log::info!("time_delta: {time_delta}");
             if time_delta < frame_time {
                 log::warn!(
                     "update is {} too soon!... time_delta: {}",
