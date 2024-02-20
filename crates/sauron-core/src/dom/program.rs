@@ -252,7 +252,7 @@ where
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + Clone + 'static,
+    APP: Application<MSG>
 {
     /// clone the app
     pub fn app_clone(&self) -> APP {
@@ -272,7 +272,7 @@ where
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + Clone + 'static,
+    APP: Application<MSG>,
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.

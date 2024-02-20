@@ -24,7 +24,7 @@ where
 impl<APP, MSG> Cmd<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + Clone + 'static,
+    APP: Application<MSG>,
 {
     /// creates a new Cmd from a function
     pub fn new<F>(f: F) -> Self
@@ -118,7 +118,7 @@ where
 impl<APP, MSG> From<Effects<MSG, ()>> for Cmd<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + Clone + 'static,
+    APP: Application<MSG>,
 {
     /// Convert Effects that has only follow ups
     fn from(effects: Effects<MSG, ()>) -> Self {
@@ -139,7 +139,7 @@ where
 impl<APP, MSG, IN> From<IN> for Cmd<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + Clone + 'static,
+    APP: Application<MSG>,
     IN: IntoIterator<Item = Effects<MSG, ()>>,
 {
     fn from(effects: IN) -> Self {
@@ -150,7 +150,7 @@ where
 impl<APP, MSG> From<Task<MSG>> for Cmd<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + Clone + 'static,
+    APP: Application<MSG>,
 {
     fn from(task: Task<MSG>) -> Self {
         let task = task.task;

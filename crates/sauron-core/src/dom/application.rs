@@ -7,16 +7,13 @@ mod pre_diff;
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
 ///
-pub trait Application<MSG>
+pub trait Application<MSG> : Clone + Sized + 'static
 where
     MSG: 'static,
 {
     ///  The application can implement this method where it can modify its initial state.
     ///  This method is called right after the program is mounted into the DOM.
-    fn init(&mut self) -> Cmd<Self, MSG>
-    where
-        Self: Sized + Clone + 'static,
-    {
+    fn init(&mut self) -> Cmd<Self, MSG> {
         Cmd::none()
     }
 
@@ -24,9 +21,7 @@ where
     /// The update function returns a Cmd, which can be executed by the runtime.
     ///
     /// Called each time an action is triggered from the view
-    fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>
-    where
-        Self: Sized + Clone + 'static;
+    fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>;
 
     #[cfg(feature = "pre-diff")]
     /// an optimization solution.
@@ -54,8 +49,6 @@ where
     ///
     /// Warning: DO NOT use for anything else other than the intended purpose
     fn measurements(&self, measurements: Measurements) -> Cmd<Self, MSG>
-    where
-        Self: Sized + Clone + 'static,
     {
         log::debug!("Measurements: {:#?}", measurements);
         Cmd::none().no_render()

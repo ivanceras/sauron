@@ -75,7 +75,7 @@ pub enum PatchVariant<MSG> {
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + Clone + 'static,
+    APP: Application<MSG>,
 {
     /// get the real DOM target node and make a DomPatch object for each of the Patch
     pub(crate) fn convert_patches(

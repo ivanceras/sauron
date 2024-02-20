@@ -137,7 +137,7 @@ where
 
 impl<APP, MSG> WebComponentWrapper<APP, MSG>
 where
-    APP: Application<MSG> + WebComponent<MSG> + Default + Clone + 'static,
+    APP: Application<MSG> + WebComponent<MSG> + Default + 'static,
     MSG: 'static,
 {
     /// create a new web component, with the node as the target element to be mounted into
