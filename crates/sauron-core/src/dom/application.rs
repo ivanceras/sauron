@@ -24,7 +24,6 @@ where
     /// Called each time an action is triggered from the view
     fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>;
 
-    #[cfg(feature = "pre-diff")]
     /// an optimization solution.
     /// pre evaluate the expression to determine
     /// whether to diff the nodes
@@ -60,7 +59,7 @@ where
 /// Everything that happens in your application is done here.
 ///
 #[cfg(not(feature = "pre-diff"))]
-pub trait Application<MSG> : Clone + Sized + 'static
+pub trait Application<MSG> : Sized + 'static
 where
     MSG: 'static,
 {
