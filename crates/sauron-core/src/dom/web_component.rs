@@ -2,7 +2,6 @@ use crate::dom::{Application, Cmd, Container, Modifier, MountAction, MountTarget
 use crate::vdom::Node;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use serde::{Serialize, de::DeserializeOwned};
 
 /// a trait for implementing WebComponent in the DOM with custom tag
 pub trait WebComponent<MSG> {
@@ -98,7 +97,7 @@ fn declare_custom_element_function() -> js_sys::Function {
 
 impl<COMP, MSG> Application<MSG> for COMP
 where
-    COMP: Container<MSG, ()> + WebComponent<MSG> + Clone + Serialize + DeserializeOwned + 'static,
+    COMP: Container<MSG, ()> + WebComponent<MSG> + Clone + 'static,
     MSG: 'static,
 {
     fn init(&mut self) -> Cmd<Self, MSG> {
