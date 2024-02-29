@@ -307,6 +307,7 @@
 - [ ] Add benchmark function for using CACHE_ELEMENT and not
 - [ ] Make dispatch pending patches break when the animation frame timeouts, same way as dispatching pending msgs
 - [ ] Check the last time the dom is updated, if it is less than 17ms, delay the dom update until 17ms has elapsed since the last update.
+- [ ] Make use of [talc](https://github.com/SFBdragon/talc) allocator for faster and leaner memory
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.
