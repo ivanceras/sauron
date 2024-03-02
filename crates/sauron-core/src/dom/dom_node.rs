@@ -295,7 +295,7 @@ where
                         element
                             .set_attribute(intern(attr_name), &merged_plain_values)
                             .unwrap_or_else(|_| {
-                                panic!("Error setting an attribute for {element:?}")
+                                panic!("Error setting an attribute for {element:?}, {attr_name}, {merged_plain_values:?}")
                             });
                     }
                 }

@@ -40,7 +40,7 @@ impl Application<Msg> for App {
                         Msg::Increment
                     }
                 />
-                <button class="count" on_click=|_|{Msg::Reset} >{text(self.count)}</button>
+                <button class="count" on_click=|_|{Msg::Reset} value={self.count}>{text(self.count)}</button>
                 <input type="button"
                     value="-"
                     on_click=|_| {

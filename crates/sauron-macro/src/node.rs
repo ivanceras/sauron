@@ -2,33 +2,37 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use rstml::node::{KeyedAttributeValue, Node, NodeAttribute, NodeBlock};
 use sauron_core::html::lookup;
-use syn::{Expr, ExprForLoop, Stmt};
+use syn::{Expr, ExprForLoop, Stmt, ExprLit};
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match rstml::parse(input) {
-        Ok(nodes) => multiple_nodes(nodes),
+        Ok(nodes) => {
+            let (nodes_exprs, ts) = multiple_nodes(nodes);
+            dbg!(nodes_exprs);
+            ts
+        }
         Err(error) => error.to_compile_error(),
     }
 }
 
-fn multiple_nodes(mut nodes: Vec<Node>) -> TokenStream {
+fn multiple_nodes(mut nodes: Vec<Node>) -> (Vec<DiffExpr>, TokenStream) {
     let only_one_node = nodes.len() == 1;
     if only_one_node {
-        let node_tokens = single_node(nodes.remove(0));
-        quote! {
+        let (diff_expr, node_tokens) = single_node(nodes.remove(0));
+        (vec![diff_expr], quote! {
             #node_tokens
-        }
+        })
     } else {
-        let children_tokens = nodes_to_tokens(nodes);
-        quote! {
+        let (nodes_diff_exprs, children_tokens) = nodes_to_tokens(nodes);
+        (nodes_diff_exprs, quote! {
             sauron::html::node_list([
                 #children_tokens
             ])
-        }
+        })
     }
 }
 
-fn single_node(node: Node) -> TokenStream {
+fn single_node(node: Node) -> (DiffExpr, TokenStream) {
     match node {
         Node::Element(elm) => {
             let open_tag = elm.open_tag;
@@ -36,54 +40,55 @@ fn single_node(node: Node) -> TokenStream {
 
             let self_closing = lookup::is_self_closing(&tag);
             let namespace = lookup::tag_namespace(&tag);
-            let attributes = node_attributes(open_tag.attributes);
-            let children = nodes_to_tokens(elm.children);
+            let (diff_vars, attributes) = node_attributes(open_tag.attributes);
+            let (children_diff_vars, children) = nodes_to_tokens(elm.children);
             if let Some(namespace) = namespace {
-                quote! {
+                (diff_expr(diff_vars, children_diff_vars), quote! {
                     sauron::html::element_ns(Some(#namespace), #tag, [#attributes], [#children], #self_closing)
-                }
+                })
             } else {
-                quote! {
+                (diff_expr(diff_vars, children_diff_vars), quote! {
                     sauron::html::element_ns(None, #tag, [#attributes], [#children], #self_closing)
-                }
+                })
             }
         }
-        Node::Fragment(fragment) => multiple_nodes(fragment.children),
+        Node::Fragment(fragment) => {
+            let (fragment_diff_vars, nodes) = multiple_nodes(fragment.children);
+            (diff_expr(vec![], fragment_diff_vars), nodes)
+        }
         Node::Text(node_text) => {
             let text = node_text.value_string();
-            quote! {
+            (DiffExpr::none(), quote! {
                 sauron::html::text(#text)
-            }
+            })
         }
         Node::RawText(raw_text) => {
             let text = raw_text.to_token_stream_string();
-            quote! {
+            (DiffExpr::none(), quote! {
                 sauron::html::text(#text)
-            }
+            })
         }
         Node::Comment(comment) => {
             let comment_text = comment.value.value();
-            quote! {
+            (DiffExpr::none(),quote! {
                 sauron::html::comment(#comment_text)
-            }
+            })
         }
         Node::Doctype(doctype) => {
             let value = doctype.value.to_token_stream_string();
-            quote! {
+            (DiffExpr::none(),quote! {
                 sauron::html::doctype(#value)
-            }
+            })
         }
         Node::Block(block) => match block {
             NodeBlock::Invalid { .. } => {
-                quote! {
+                (DiffExpr::none(),quote! {
                     compile_error!("invalid block: {:?}", #block);
-                }
+                })
             }
-            NodeBlock::ValidBlock(block) => match braced_for_loop(&block) {
-                Some(ExprForLoop {
-                    pat, expr, body, ..
-                }) => {
-                    quote! {
+            NodeBlock::ValidBlock(block) => {
+                if let Some(ExprForLoop { pat, expr, body, .. })= braced_for_loop(&block) {
+                    (diff_expr(vec![expr.as_ref().clone()], vec![]),quote! {
                         {
                             let mut receiver = vec![];
                             for #pat in #expr {
@@ -92,78 +97,122 @@ fn single_node(node: Node) -> TokenStream {
                             }
                             sauron::html::node_list(receiver)
                         }
-                    }
-                }
-                _ => {
-                    quote! {
+                    })
+                } else if let Some(lit) = lit_expr(&block) {
+                    (DiffExpr::none(),quote!{
+                        #lit
+                    })
+                } else if let Some(expr) = some_expr(&block) {
+                    (diff_expr(vec![expr.clone()],vec![]), quote!{
+                        #expr
+                    })
+                } else {
+                    (DiffExpr::none(), quote! {
                         #block
-                    }
+                    })
                 }
-            },
+            }
         },
     }
 }
 
-fn nodes_to_tokens(nodes: Vec<Node>) -> TokenStream {
+#[derive(Debug)]
+struct DiffExpr{
+    expr: Vec<Expr>,
+    children: Vec<DiffExpr>,
+}
+
+impl DiffExpr{
+    fn none() -> Self {
+        Self{
+            expr: vec![],
+            children: vec![],
+        }
+    }
+}
+
+fn diff_expr(expr: Vec<Expr>, children: Vec<DiffExpr>) -> DiffExpr{
+    DiffExpr{
+        expr,
+        children
+    }
+}
+
+fn nodes_to_tokens(nodes: Vec<Node>) -> (Vec<DiffExpr>, TokenStream) {
     let mut tokens = TokenStream::new();
+    let mut nodes_diff_var =vec![];
     for node in nodes {
-        let node_token = single_node(node);
+        let (diff_vars, node_token) = single_node(node);
+        nodes_diff_var.push(diff_vars);
         tokens.extend(quote! {
             #node_token,
         });
     }
-
-    tokens
+    (nodes_diff_var, tokens)
 }
 
-fn node_attributes(attributes: Vec<NodeAttribute>) -> TokenStream {
+fn node_attributes(attributes: Vec<NodeAttribute>) -> (Vec<Expr>,TokenStream) {
     let mut tokens = TokenStream::new();
+    let mut diff_vars = vec![];
     for attr in attributes {
-        let attr_token = attribute_to_tokens(attr);
+        let (diff_var, attr_token) = attribute_to_tokens(attr);
+        if let Some(diff_var) = diff_var{
+            diff_vars.push(diff_var);
+        }
         tokens.extend(quote! {
             #attr_token,
         });
     }
-    tokens
+    (diff_vars, tokens)
 }
 
-fn attribute_to_tokens(attribute: NodeAttribute) -> TokenStream {
+fn attribute_to_tokens(attribute: NodeAttribute) -> (Option<Expr>, TokenStream) {
     match attribute {
         NodeAttribute::Block(block) => {
-            quote! {
+            (None,quote! {
                 #[allow(unused_braces)]
                 #block
-            }
+            })
         }
         NodeAttribute::Attribute(attribute) => {
             let attr = attribute.key.to_string();
             let value = attribute.possible_value;
             match value {
                 KeyedAttributeValue::Binding(binding) => {
-                    quote! {
+                    (None,quote! {
                         compile_error!("Function binding is not supported! {:?}",#binding)
-                    }
+                    })
                 }
                 KeyedAttributeValue::Value(value) => {
                     let value = value.value;
                     let is_event = attr.starts_with("on_");
                     if is_event {
                         let event = quote::format_ident!("{attr}");
-                        quote! {
+                        (None, quote! {
                             #[allow(unused_braces)]
                             sauron::html::events::#event(#value)
-                        }
+                        })
                     } else {
-                        quote! {
-                            #[allow(unused_braces)]
-                            sauron::html::attributes::attr(#attr, #value)
+                        match value{
+                            Expr::Lit(lit) => {
+                                (None, quote! {
+                                    #[allow(unused_braces)]
+                                    sauron::html::attributes::attr(#attr, #lit)
+                                })
+                            }
+                            _ => {
+                                (Some(value.clone()), quote! {
+                                    #[allow(unused_braces)]
+                                    sauron::html::attributes::attr(#attr, #value)
+                                })
+                            }
                         }
                     }
                 }
                 KeyedAttributeValue::None => {
-                    quote! {
+                    (None, quote! {
                         sauron::html::attributes::empty_attr()
-                    }
+                    })
                 }
             }
         }
@@ -178,6 +227,32 @@ fn braced_for_loop(block: &syn::Block) -> Option<&ExprForLoop> {
         let stmt = &block.stmts[0];
         match stmt {
             Stmt::Expr(Expr::ForLoop(expr), _semi) => Some(expr),
+            _ => None,
+        }
+    }
+}
+
+fn lit_expr(block: &syn::Block) -> Option<&ExprLit> {
+    let len = block.stmts.len();
+    if len != 1 {
+        None
+    } else {
+        let stmt = &block.stmts[0];
+        match stmt {
+            Stmt::Expr(Expr::Lit(lit), _semi) => Some(lit),
+            _ => None,
+        }
+    }
+}
+
+fn some_expr(block: &syn::Block) -> Option<&Expr> {
+    let len = block.stmts.len();
+    if len != 1 {
+        None
+    } else {
+        let stmt = &block.stmts[0];
+        match stmt {
+            Stmt::Expr(expr, _semi) => Some(expr),
             _ => None,
         }
     }
