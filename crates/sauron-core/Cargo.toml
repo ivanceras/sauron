@@ -117,7 +117,7 @@ with-ric = [] # use of request_idle_callback in javascript
 with-raf = [] # use of request_animation_frame in javascript
 with-interning = [] # use caching of strings when crossing rust to js, for faster transfer
 custom_element = [] # use of register_custom_element, adding this will add the js snippets
-pre-diff = [] # diffing optimization
+prediff = [] # diffing optimization
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"

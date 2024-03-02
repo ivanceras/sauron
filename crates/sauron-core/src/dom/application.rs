@@ -1,14 +1,13 @@
 use crate::dom::Cmd;
 use crate::vdom::Node;
-pub use pre_diff::{diff_if, PreDiff};
+pub use prediff::{diff_if, PreDiff};
 
-mod pre_diff;
+mod prediff;
 
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
 ///
-//#[cfg(not(feature = "pre-diff"))]
 pub trait Application<MSG> : Sized + 'static
 where
     MSG: 'static,
@@ -28,8 +27,8 @@ where
     /// an optimization solution.
     /// pre evaluate the expression to determine
     /// whether to diff the nodes
-    #[cfg(feature = "pre-diff")]
-    fn pre_diff(&self, _other: &Self) -> Option<Vec<PreDiff>> {
+    #[cfg(feature = "prediff")]
+    fn prediff(&self, _other: &Self) -> Option<Vec<PreDiff>> {
         None
     }
 

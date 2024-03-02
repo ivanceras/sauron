@@ -3,7 +3,7 @@ use crate::dom::program::app_context::WeakContext;
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
-#[cfg(feature = "pre-diff")]
+#[cfg(feature = "prediff")]
 use crate::dom::PreDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
@@ -715,7 +715,7 @@ where
     }
 
     /// clone the app
-    #[cfg(feature = "pre-diff")]
+    #[cfg(feature = "prediff")]
     #[allow(unsafe_code)]
     pub fn app_clone(&self) -> ManuallyDrop<APP> {
         unsafe{
@@ -737,7 +737,7 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&mut self, deadline: Option<IdleDeadline>) {
-        #[cfg(feature = "pre-diff")]
+        #[cfg(feature = "prediff")]
         let old_app = self.app_clone();
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
@@ -750,13 +750,13 @@ where
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
-        #[cfg(feature = "pre-diff")]
-        let treepath = self.app().pre_diff(&old_app).map(|eval| {
+        #[cfg(feature = "prediff")]
+        let treepath = self.app().prediff(&old_app).map(|eval| {
             log::debug!("eval: {eval:#?}");
             PreDiff::traverse(&eval)
         });
 
-        #[cfg(not(feature = "pre-diff"))]
+        #[cfg(not(feature = "prediff"))]
         let treepath = None;
 
         let cmd = self.app_context.batch_pending_cmds();
