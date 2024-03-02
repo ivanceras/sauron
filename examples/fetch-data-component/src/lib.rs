@@ -58,7 +58,7 @@ pub fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::fetcher::Data;
 
     #[test]
     fn test_json() {
