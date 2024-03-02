@@ -1,5 +1,5 @@
 [package]
-name = "interactive"
+name = "interactive-prediff"
 version = "0.1.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
