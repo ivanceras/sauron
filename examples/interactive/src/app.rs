@@ -37,6 +37,7 @@ impl App {
 impl Application<Msg> for App {
     fn init(&mut self) -> Cmd<Self, Msg> {
         Cmd::new(|mut program| {
+            let program2 = program.clone();
             let clock: Closure<dyn FnMut()> = Closure::new(move || {
                 program.dispatch(Msg::Clock);
             });
@@ -46,7 +47,7 @@ impl Application<Msg> for App {
                     1000,
                 )
                 .expect("Unable to start interval");
-            clock.forget();
+            program2.closures.borrow_mut().push(clock);
         })
     }
 

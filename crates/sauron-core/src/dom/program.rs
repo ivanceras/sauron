@@ -30,7 +30,8 @@ use web_sys::{self, Element, Node};
 
 mod app_context;
 
-pub(crate) type Closures = Vec<Closure<dyn FnMut(web_sys::Event)>>;
+pub(crate) type EventClosures = Vec<Closure<dyn FnMut(web_sys::Event)>>;
+pub(crate) type Closures = Vec<Closure<dyn FnMut()>>;
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP, MSG>
@@ -64,7 +65,9 @@ where
     animation_frame_handles: Rc<RefCell<Vec<AnimationFrameHandle>>>,
 
     /// event listener closures
-    pub(crate) event_closures: Rc<RefCell<Closures>>,
+    pub(crate) event_closures: Rc<RefCell<EventClosures>>,
+    /// generic closures that has no argument
+    pub closures: Rc<RefCell<Closures>>,
     last_update: Rc<RefCell<Option<f64>>>,
 }
 
@@ -80,7 +83,8 @@ where
     pending_patches: Weak<RefCell<VecDeque<DomPatch<MSG>>>>,
     idle_callback_handles: Weak<RefCell<Vec<IdleCallbackHandle>>>,
     animation_frame_handles: Weak<RefCell<Vec<AnimationFrameHandle>>>,
-    pub(crate) event_closures: Weak<RefCell<Closures>>,
+    pub(crate) event_closures: Weak<RefCell<EventClosures>>,
+    pub(crate) closures: Weak<RefCell<Closures>>,
     last_update: Weak<RefCell<Option<f64>>>,
 }
 
@@ -137,19 +141,22 @@ where
                                     self.animation_frame_handles.upgrade()
                                 {
                                     if let Some(event_closures) = self.event_closures.upgrade() {
-                                        if let Some(last_update) = self.last_update.upgrade() {
-                                            return Some(Program {
-                                                app_context,
-                                                root_node,
-                                                mount_node,
-                                                node_closures,
-                                                mount_procedure: self.mount_procedure,
-                                                pending_patches,
-                                                idle_callback_handles,
-                                                animation_frame_handles,
-                                                event_closures,
-                                                last_update,
-                                            });
+                                        if let Some(closures) = self.closures.upgrade(){
+                                            if let Some(last_update) = self.last_update.upgrade() {
+                                                return Some(Program {
+                                                    app_context,
+                                                    root_node,
+                                                    mount_node,
+                                                    node_closures,
+                                                    mount_procedure: self.mount_procedure,
+                                                    pending_patches,
+                                                    idle_callback_handles,
+                                                    animation_frame_handles,
+                                                    event_closures,
+                                                    closures,
+                                                    last_update,
+                                                });
+                                            }
                                         }
                                     }
                                 }
@@ -178,6 +185,7 @@ where
             idle_callback_handles: Weak::clone(&self.idle_callback_handles),
             animation_frame_handles: Weak::clone(&self.animation_frame_handles),
             event_closures: Weak::clone(&self.event_closures),
+            closures: Weak::clone(&self.closures),
             last_update: Weak::clone(&self.last_update),
         }
     }
@@ -199,6 +207,7 @@ where
             idle_callback_handles: Rc::downgrade(&self.idle_callback_handles),
             animation_frame_handles: Rc::downgrade(&self.animation_frame_handles),
             event_closures: Rc::downgrade(&self.event_closures),
+            closures: Rc::downgrade(&self.closures),
             last_update: Rc::downgrade(&self.last_update),
         }
     }
@@ -219,6 +228,7 @@ where
             idle_callback_handles: Rc::clone(&self.idle_callback_handles),
             animation_frame_handles: Rc::clone(&self.animation_frame_handles),
             event_closures: Rc::clone(&self.event_closures),
+            closures: Rc::clone(&self.closures),
             last_update: Rc::clone(&self.last_update),
         }
     }
@@ -292,6 +302,7 @@ where
             idle_callback_handles: Rc::new(RefCell::new(vec![])),
             animation_frame_handles: Rc::new(RefCell::new(vec![])),
             event_closures: Rc::new(RefCell::new(vec![])),
+            closures: Rc::new(RefCell::new(vec![])),
             last_update: Rc::new(RefCell::new(None)),
         }
     }
