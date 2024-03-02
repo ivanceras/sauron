@@ -36,6 +36,7 @@ impl App {
 impl Application<Msg> for App {
     fn init(&mut self) -> Cmd<Self, Msg> {
         Cmd::new(|mut program| {
+            let program2 = program.clone();
             let clock: Closure<dyn FnMut()> = Closure::new(move || {
                 program.dispatch(Msg::Clock);
             });
@@ -45,7 +46,7 @@ impl Application<Msg> for App {
                     1000,
                 )
                 .expect("Unable to start interval");
-            clock.forget();
+            program2.closures.borrow_mut().push(clock);
         })
     }
 
@@ -53,6 +54,7 @@ impl Application<Msg> for App {
         match msg {
             Msg::Click => {
                 self.click_count += 1;
+                log::info!("click count: {}", self.click_count);
             }
             Msg::DoubleClick => {
                 self.double_clicks += 1;
@@ -75,6 +77,51 @@ impl Application<Msg> for App {
             }
         }
         Cmd::none()
+    }
+
+    fn prediff(&self, old: &Self) -> Option<Vec<PreDiff>> {
+        Some(vec![diff_if(
+            false,
+            [
+                diff_if(false, [diff_if(true, [])]),
+                diff_if(
+                    false,
+                    [
+                        diff_if(false, []),
+                        diff_if(false, []),
+                        diff_if(false, []),
+                        diff_if(
+                            false,
+                            [diff_if(self.double_clicks != old.double_clicks, [])],
+                        ),
+                    ],
+                ),
+                diff_if(
+                    false,
+                    [
+                        diff_if(self.name != old.name, []),
+                        diff_if(false, []), // separator for in between text here
+                        diff_if(self.click_count != old.click_count, []),
+                    ],
+                ),
+                diff_if(
+                    false,
+                    [
+                        diff_if(false, []),
+                        diff_if(false, []),
+                        diff_if(false, [diff_if(self.biography != old.biography, [])]),
+                    ],
+                ),
+                diff_if(
+                    false,
+                    [
+                        diff_if(false, []),
+                        diff_if(false, []),
+                        diff_if(self.thought != old.thought, []),
+                    ],
+                ),
+            ],
+        )])
     }
 
     fn view(&self) -> Node<Msg> {
@@ -125,7 +172,7 @@ impl Application<Msg> for App {
                                 if self.click_count > 1 { "s" } else { "" }
                             )
                         } else {
-                            span([], [])
+                            text("here..")
                         },
                     ],
                 ),
