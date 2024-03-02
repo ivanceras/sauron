@@ -1,5 +1,5 @@
 use crate::{
-    dom::{dom_node::intern, util, window, document, Application, Program, Task},
+    dom::{document, dom_node::intern, util, window, Application, Program, Task},
     vdom::Attribute,
 };
 use js_sys::Promise;
@@ -9,7 +9,7 @@ use wasm_bindgen_futures::JsFuture;
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + 'static,
+    APP: Application<MSG>,
 {
     /// attach event listeners to the window object
     pub fn add_window_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Interactive sauron app</title>
+</head>
+<body style='margin: 0; padding: 0; width: 100%; height: 100%;'>
+  <div id="web-app" style='width: 100%; height: 100%;'>
+       #HTML_INSERTED_HERE_BY_SERVER#
+  </div>
+
+  <script type="module">
+    import init from './pkg/interactive_prediff.js';
+    await init().catch(console.err);
+  </script>
+  <script>
+      window.initialState = '#INITIAL_STATE_JSON#'
+  </script>
+</body>
+</html>

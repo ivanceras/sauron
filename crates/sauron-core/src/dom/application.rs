@@ -1,19 +1,20 @@
 use crate::dom::Cmd;
 use crate::vdom::Node;
+pub use prediff::{diff_if, PreDiff};
+
+mod prediff;
+
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
 ///
-pub trait Application<MSG>
+pub trait Application<MSG> : Sized + 'static
 where
     MSG: 'static,
 {
     ///  The application can implement this method where it can modify its initial state.
     ///  This method is called right after the program is mounted into the DOM.
-    fn init(&mut self) -> Cmd<Self, MSG>
-    where
-        Self: Sized + 'static,
-    {
+    fn init(&mut self) -> Cmd<Self, MSG> {
         Cmd::none()
     }
 
@@ -21,9 +22,15 @@ where
     /// The update function returns a Cmd, which can be executed by the runtime.
     ///
     /// Called each time an action is triggered from the view
-    fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>
-    where
-        Self: Sized + 'static;
+    fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>;
+
+    /// an optimization solution.
+    /// pre evaluate the expression to determine
+    /// whether to diff the nodes
+    #[cfg(feature = "prediff")]
+    fn prediff(&self, _other: &Self) -> Option<Vec<PreDiff>> {
+        None
+    }
 
     /// Returns a node on how the component is presented.
     fn view(&self) -> Node<MSG>;
@@ -43,8 +50,6 @@ where
     ///
     /// Warning: DO NOT use for anything else other than the intended purpose
     fn measurements(&self, measurements: Measurements) -> Cmd<Self, MSG>
-    where
-        Self: Sized + 'static,
     {
         log::debug!("Measurements: {:#?}", measurements);
         Cmd::none().no_render()

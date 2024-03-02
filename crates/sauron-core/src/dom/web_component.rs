@@ -97,7 +97,7 @@ fn declare_custom_element_function() -> js_sys::Function {
 
 impl<COMP, MSG> Application<MSG> for COMP
 where
-    COMP: Container<MSG, ()> + WebComponent<MSG> + 'static,
+    COMP: Container<MSG, ()> + WebComponent<MSG> + Clone + 'static,
     MSG: 'static,
 {
     fn init(&mut self) -> Cmd<Self, MSG> {
@@ -174,7 +174,7 @@ where
             .borrow_mut()
             .connected_callback();
         self.program
-            .update_dom(&Modifier::default())
+            .update_dom(&Modifier::default(), None)
             .expect("must update dom");
     }
 

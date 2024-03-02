@@ -34,7 +34,7 @@ fn node_mounted_properly() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old)
+        .update_dom_with_vdom(old, None)
         .expect("must update dom");
 
     let container = document
@@ -86,7 +86,7 @@ fn node_patched_properly() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old)
+        .update_dom_with_vdom(old, None)
         .expect("must update dom");
 
     let container = document
@@ -104,7 +104,7 @@ fn node_patched_properly() {
     assert_eq!(expected, container.outer_html());
 
     simple_program
-        .update_dom_with_vdom(update1)
+        .update_dom_with_vdom(update1, None)
         .expect("must not error");
 
     let container = document
@@ -161,7 +161,7 @@ fn node_patched_properly_remove_from_start() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old)
+        .update_dom_with_vdom(old, None)
         .expect("must update dom");
 
     let container = document
@@ -180,7 +180,7 @@ fn node_patched_properly_remove_from_start() {
     assert_eq!(expected, container.outer_html());
 
     simple_program
-        .update_dom_with_vdom(update1)
+        .update_dom_with_vdom(update1, None)
         .expect("must not error");
 
     let container = document
@@ -237,7 +237,7 @@ fn node_patched_properly_text_changed() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old)
+        .update_dom_with_vdom(old, None)
         .expect("must update dom");
 
     let container = document
@@ -256,7 +256,7 @@ fn node_patched_properly_text_changed() {
     assert_eq!(expected, container.outer_html());
 
     simple_program
-        .update_dom_with_vdom(update1)
+        .update_dom_with_vdom(update1, None)
         .expect("must not error");
 
     let container = document
@@ -320,7 +320,7 @@ fn mixed_keyed_and_non_keyed_elements() {
     let mut simple_program = simple_program();
 
     simple_program
-        .update_dom_with_vdom(old)
+        .update_dom_with_vdom(old, None)
         .expect("must update dom");
 
     let container = document
@@ -340,7 +340,7 @@ fn mixed_keyed_and_non_keyed_elements() {
     assert_eq!(expected, container.outer_html());
 
     simple_program
-        .update_dom_with_vdom(update1)
+        .update_dom_with_vdom(update1, None)
         .expect("must not error");
 
     let container = document

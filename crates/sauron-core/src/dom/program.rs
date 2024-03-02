@@ -3,12 +3,16 @@ use crate::dom::program::app_context::WeakContext;
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
+#[cfg(feature = "prediff")]
+use crate::dom::PreDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
 use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
+use crate::vdom::KEY;
 use app_context::AppContext;
+use mt_dom::{diff_recursive, TreePath};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
@@ -26,7 +30,8 @@ use web_sys::{self, Element, Node};
 
 mod app_context;
 
-pub(crate) type Closures = Vec<Closure<dyn FnMut(web_sys::Event)>>;
+pub(crate) type EventClosures = Vec<Closure<dyn FnMut(web_sys::Event)>>;
+pub(crate) type Closures = Vec<Closure<dyn FnMut()>>;
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP, MSG>
@@ -60,7 +65,10 @@ where
     animation_frame_handles: Rc<RefCell<Vec<AnimationFrameHandle>>>,
 
     /// event listener closures
-    pub(crate) event_closures: Rc<RefCell<Closures>>,
+    pub(crate) event_closures: Rc<RefCell<EventClosures>>,
+    /// generic closures that has no argument
+    pub closures: Rc<RefCell<Closures>>,
+    last_update: Rc<RefCell<Option<f64>>>,
 }
 
 pub struct WeakProgram<APP, MSG>
@@ -75,7 +83,9 @@ where
     pending_patches: Weak<RefCell<VecDeque<DomPatch<MSG>>>>,
     idle_callback_handles: Weak<RefCell<Vec<IdleCallbackHandle>>>,
     animation_frame_handles: Weak<RefCell<Vec<AnimationFrameHandle>>>,
-    pub(crate) event_closures: Weak<RefCell<Closures>>,
+    pub(crate) event_closures: Weak<RefCell<EventClosures>>,
+    pub(crate) closures: Weak<RefCell<Closures>>,
+    last_update: Weak<RefCell<Option<f64>>>,
 }
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
@@ -131,17 +141,23 @@ where
                                     self.animation_frame_handles.upgrade()
                                 {
                                     if let Some(event_closures) = self.event_closures.upgrade() {
-                                        return Some(Program {
-                                            app_context,
-                                            root_node,
-                                            mount_node,
-                                            node_closures,
-                                            mount_procedure: self.mount_procedure,
-                                            pending_patches,
-                                            idle_callback_handles,
-                                            animation_frame_handles,
-                                            event_closures,
-                                        });
+                                        if let Some(closures) = self.closures.upgrade(){
+                                            if let Some(last_update) = self.last_update.upgrade() {
+                                                return Some(Program {
+                                                    app_context,
+                                                    root_node,
+                                                    mount_node,
+                                                    node_closures,
+                                                    mount_procedure: self.mount_procedure,
+                                                    pending_patches,
+                                                    idle_callback_handles,
+                                                    animation_frame_handles,
+                                                    event_closures,
+                                                    closures,
+                                                    last_update,
+                                                });
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -169,6 +185,8 @@ where
             idle_callback_handles: Weak::clone(&self.idle_callback_handles),
             animation_frame_handles: Weak::clone(&self.animation_frame_handles),
             event_closures: Weak::clone(&self.event_closures),
+            closures: Weak::clone(&self.closures),
+            last_update: Weak::clone(&self.last_update),
         }
     }
 }
@@ -189,6 +207,8 @@ where
             idle_callback_handles: Rc::downgrade(&self.idle_callback_handles),
             animation_frame_handles: Rc::downgrade(&self.animation_frame_handles),
             event_closures: Rc::downgrade(&self.event_closures),
+            closures: Rc::downgrade(&self.closures),
+            last_update: Rc::downgrade(&self.last_update),
         }
     }
 }
@@ -208,6 +228,8 @@ where
             idle_callback_handles: Rc::clone(&self.idle_callback_handles),
             animation_frame_handles: Rc::clone(&self.animation_frame_handles),
             event_closures: Rc::clone(&self.event_closures),
+            closures: Rc::clone(&self.closures),
+            last_update: Rc::clone(&self.last_update),
         }
     }
 }
@@ -239,7 +261,7 @@ where
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
-    APP: Application<MSG> + 'static,
+    APP: Application<MSG>,
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
@@ -259,9 +281,10 @@ where
             idle_callback_handles: Rc::new(RefCell::new(vec![])),
             animation_frame_handles: Rc::new(RefCell::new(vec![])),
             event_closures: Rc::new(RefCell::new(vec![])),
+            closures: Rc::new(RefCell::new(vec![])),
+            last_update: Rc::new(RefCell::new(None)),
         }
     }
-
 
     /// executed after the program has been mounted
     fn after_mounted(&mut self) {
@@ -351,7 +374,6 @@ where
         program.mount();
         ManuallyDrop::new(program)
     }
-
 
     /// clear the existing children of the mount before mounting the app
     pub fn clear_append_to_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
@@ -482,7 +504,11 @@ where
     }
 
     /// update the browser DOM to reflect the APP's  view
-    pub fn update_dom(&mut self, modifier: &Modifier) -> Result<Measurements, JsValue> {
+    pub fn update_dom(
+        &mut self,
+        modifier: &Modifier,
+        treepath: Option<Vec<TreePath>>,
+    ) -> Result<Measurements, JsValue> {
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app_context.view();
@@ -491,8 +517,23 @@ where
         let node_count = view.node_count();
 
         // update the last DOM node tree with this new view
-        let total_patches = self.update_dom_with_vdom(view).expect("must not error");
+        let total_patches = self
+            .update_dom_with_vdom(view, treepath)
+            .expect("must not error");
         let t3 = now();
+        if let Some(last_update) = self.last_update.borrow().as_ref() {
+            let frame_time = 1000.0 / 60.0; // 1s in 60 frames
+            let time_delta = t3 - last_update;
+            let remaining = frame_time - time_delta;
+            if time_delta < frame_time {
+                log::warn!(
+                    "update is {} too soon!... time_delta: {}",
+                    remaining,
+                    time_delta
+                );
+            }
+        }
+        *self.last_update.borrow_mut() = Some(t3);
 
         let strong_count = self.app_context.strong_count();
         let weak_count = self.app_context.weak_count();
@@ -518,9 +559,38 @@ where
         Ok(measurements)
     }
 
-    fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch<MSG>> {
+    fn create_dom_patch(
+        &self,
+        new_vdom: &vdom::Node<MSG>,
+        treepath: Option<Vec<TreePath>>,
+    ) -> Vec<DomPatch<MSG>> {
         let current_vdom = self.app_context.current_vdom();
-        let patches = diff(&current_vdom, &new_vdom);
+        let patches = if let Some(treepath) = treepath {
+            log::debug!("using treepath from pre_eval: {treepath:?}");
+            let patches = treepath
+                .into_iter()
+                .flat_map(|path| {
+                    let new_node = path.find_node_by_path(new_vdom).expect("new_node");
+                    let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
+                    log::debug!("new_node: {new_node:#?}");
+                    log::debug!("old_node: {old_node:#?}");
+                    diff_recursive(
+                        &old_node,
+                        &new_node,
+                        &path,
+                        &KEY,
+                        &|_old, _new| false,
+                        &|_old, _new| false,
+                    )
+                })
+                .collect::<Vec<_>>();
+            log::info!("patches: {patches:#?}");
+            patches
+        } else {
+            log::debug!("using classic diff...");
+            let patches = diff(&current_vdom, &new_vdom);
+            patches
+        };
         #[cfg(all(feature = "with-debug", feature = "log-patches"))]
         {
             log::debug!("There are {} patches", patches.len());
@@ -535,8 +605,12 @@ where
     /// patch the DOM to reflect the App's view
     ///
     /// Note: This is in another function so as to allow tests to use this shared code
-    pub fn update_dom_with_vdom(&mut self, new_vdom: vdom::Node<MSG>) -> Result<usize, JsValue> {
-        let dom_patches = self.create_dom_patch(&new_vdom);
+    pub fn update_dom_with_vdom(
+        &mut self,
+        new_vdom: vdom::Node<MSG>,
+        treepath: Option<Vec<TreePath>>,
+    ) -> Result<usize, JsValue> {
+        let dom_patches = self.create_dom_patch(&new_vdom, treepath);
         let total_patches = dom_patches.len();
         self.pending_patches.borrow_mut().extend(dom_patches);
 
@@ -576,9 +650,11 @@ where
     }
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    fn dispatch_dom_changes(&mut self, modifier: &Modifier) {
+    fn dispatch_dom_changes(&mut self, modifier: &Modifier, treepath: Option<Vec<TreePath>>) {
         #[allow(unused_variables)]
-        let measurements = self.update_dom(modifier).expect("must update dom");
+        let measurements = self
+            .update_dom(modifier, treepath)
+            .expect("must update dom");
 
         #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied
@@ -638,6 +714,22 @@ where
         }
     }
 
+    /// clone the app
+    #[cfg(feature = "prediff")]
+    #[allow(unsafe_code)]
+    pub fn app_clone(&self) -> ManuallyDrop<APP> {
+        unsafe{
+            let app: APP = std::mem::transmute_copy(&*self.app_context.app.borrow());
+            //TODO: We are creating a copy of the app everytime,
+            // as dropping the app will error in the runtime
+            // This might be leaking the memory
+            ManuallyDrop::new(app)
+        }
+        // An alternative to transmute_copy is to just plainly clone the app
+        //let borrowed_app = self.app_context.app.borrow();
+        //borrowed_app.clone()
+    }
+
     /// This is called when an event is triggered in the html DOM.
     /// The sequence of things happening here:
     /// - The app component update is executed.
@@ -645,6 +737,8 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&mut self, deadline: Option<IdleDeadline>) {
+        #[cfg(feature = "prediff")]
+        let old_app = self.app_clone();
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
@@ -656,6 +750,15 @@ where
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
+        #[cfg(feature = "prediff")]
+        let treepath = self.app().prediff(&old_app).map(|eval| {
+            log::debug!("eval: {eval:#?}");
+            PreDiff::traverse(&eval)
+        });
+
+        #[cfg(not(feature = "prediff"))]
+        let treepath = None;
+
         let cmd = self.app_context.batch_pending_cmds();
 
         if !self.pending_patches.borrow().is_empty() {
@@ -666,7 +769,7 @@ where
         }
 
         if cmd.modifier.should_update_view {
-            self.dispatch_dom_changes(&cmd.modifier);
+            self.dispatch_dom_changes(&cmd.modifier, treepath);
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update

@@ -17,6 +17,7 @@
     unused_import_braces
 )]
 
+#[doc(inline)]
 pub use prelude::*;
 
 /// prelude

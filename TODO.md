@@ -234,7 +234,8 @@
 - [ ] Bring back CreatedNode maybe with a different name: `DomNode` which wraps the `Node` or `Element` along with it's closures from event listener
     - These are then saved into the `Program` where when removed or dropped, it will also drop the associated closures with them, thereby simplifying the code.
     - Right now, we are attaching a `vdom-data` attribute for nodes that have listeners
-
+- [ ] Make use of `Arc<RwLock>` to check if can solve copying the `APP` via `transmute_copy`. ~~it didn't solve it~~
+    - See if there are performance penalty
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
@@ -304,6 +305,9 @@
 - [ ] Find a way to break up building the view into multiple frames, since view can take a long time to build
 - [ ] Find a way to break up diffing the current vdom and the new vdom as they can also take a bit of long time as well.
 - [ ] Add benchmark function for using CACHE_ELEMENT and not
+- [ ] Make dispatch pending patches break when the animation frame timeouts, same way as dispatching pending msgs
+- [ ] Check the last time the dom is updated, if it is less than 17ms, delay the dom update until 17ms has elapsed since the last update.
+- [ ] Make use of [talc](https://github.com/SFBdragon/talc) allocator for faster and leaner memory
 
 ## Maintenance
 - [X] Move `sauron-markdown` into it's own repo, for keeping sauron slim.

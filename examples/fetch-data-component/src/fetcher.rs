@@ -1,7 +1,5 @@
-
 use sauron::{dom::Http, js_sys::TypeError, jss, *};
 use serde::Deserialize;
-
 
 const DATA_URL: &str = "https://reqres.in/api/users";
 const PER_PAGE: i32 = 4;
@@ -51,21 +49,19 @@ impl Fetcher {
     fn fetch_page(&self) -> Effects<Msg, ()> {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
 
-        Effects::with_local_async([
-            async move {
-                 match Http::fetch_text(&url).await {
-                    Ok(v) => match serde_json::from_str(&v) {
-                        Ok(data1) => Msg::ReceivedData(data1),
-                        Err(err) => Msg::JsonError(err),
-                    },
-                    Err(e) => Msg::RequestError(e),
-                }
+        Effects::with_local_async([async move {
+            match Http::fetch_text(&url).await {
+                Ok(v) => match serde_json::from_str(&v) {
+                    Ok(data1) => Msg::ReceivedData(data1),
+                    Err(err) => Msg::JsonError(err),
+                },
+                Err(e) => Msg::RequestError(e),
             }
-        ])
+        }])
     }
 }
 
-impl Component<Msg,()> for Fetcher {
+impl Component<Msg, ()> for Fetcher {
     fn init(&mut self) -> Effects<Msg, ()> {
         self.fetch_page()
     }
@@ -162,4 +158,3 @@ impl Component<Msg,()> for Fetcher {
         }]
     }
 }
-
