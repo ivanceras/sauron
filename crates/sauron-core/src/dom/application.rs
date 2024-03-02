@@ -4,11 +4,12 @@ pub use pre_diff::{diff_if, PreDiff};
 
 mod pre_diff;
 
+
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
 ///
-#[cfg(feature = "pre-diff")]
-pub trait Application<MSG> : Clone + Sized + 'static
+//#[cfg(not(feature = "pre-diff"))]
+pub trait Application<MSG> : Sized + 'static
 where
     MSG: 'static,
 {
@@ -27,53 +28,10 @@ where
     /// an optimization solution.
     /// pre evaluate the expression to determine
     /// whether to diff the nodes
+    #[cfg(feature = "pre-diff")]
     fn pre_diff(&self, _other: &Self) -> Option<Vec<PreDiff>> {
         None
     }
-
-    /// Returns a node on how the component is presented.
-    fn view(&self) -> Node<MSG>;
-
-    /// The css style for the application, will be mounted automatically by the program
-    fn stylesheet() -> Vec<String> {
-        vec![]
-    }
-
-    /// dynamic style of an application which will be reinjected when the application style changed
-    fn style(&self) -> Vec<String> {
-        vec![]
-    }
-
-    /// This is called after dispatching and updating the dom for the component
-    /// This is for diagnostic and performance measurement purposes.
-    ///
-    /// Warning: DO NOT use for anything else other than the intended purpose
-    fn measurements(&self, measurements: Measurements) -> Cmd<Self, MSG>
-    {
-        log::debug!("Measurements: {:#?}", measurements);
-        Cmd::none().no_render()
-    }
-}
-
-/// An Application is the root component of your program.
-/// Everything that happens in your application is done here.
-///
-#[cfg(not(feature = "pre-diff"))]
-pub trait Application<MSG> : Sized + 'static
-where
-    MSG: 'static,
-{
-    ///  The application can implement this method where it can modify its initial state.
-    ///  This method is called right after the program is mounted into the DOM.
-    fn init(&mut self) -> Cmd<Self, MSG> {
-        Cmd::none()
-    }
-
-    /// Update the component with a message.
-    /// The update function returns a Cmd, which can be executed by the runtime.
-    ///
-    /// Called each time an action is triggered from the view
-    fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>;
 
     /// Returns a node on how the component is presented.
     fn view(&self) -> Node<MSG>;

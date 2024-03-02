@@ -7,7 +7,7 @@
     unstable_features,
     unused_import_braces
 )]
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![deny(clippy::all)]
 //! The core components of sauron
 #[macro_use]

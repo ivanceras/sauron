@@ -258,27 +258,6 @@ where
     }
 }
 
-#[cfg(feature = "pre-diff")]
-impl<APP, MSG> Program<APP, MSG>
-where
-    MSG: 'static,
-    APP: Application<MSG>
-{
-    /// clone the app
-    pub fn app_clone(&self) -> APP {
-        /*
-        //TODO: This doesn't work all the time, maybe use Arc::RwLock as a replacement to
-        //Rc::RefCell
-        unsafe{
-            let app: APP = std::mem::transmute_copy(&*self.app_context.app.borrow());
-            app
-        }
-        */
-        let borrowed_app = self.app_context.app.borrow();
-        borrowed_app.clone()
-    }
-}
-
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
@@ -733,6 +712,22 @@ where
                 })
             }
         }
+    }
+
+    /// clone the app
+    #[cfg(feature = "pre-diff")]
+    #[allow(unsafe_code)]
+    pub fn app_clone(&self) -> ManuallyDrop<APP> {
+        unsafe{
+            let app: APP = std::mem::transmute_copy(&*self.app_context.app.borrow());
+            //TODO: We are creating a copy of the app everytime,
+            // as dropping the app will error in the runtime
+            // This might be leaking the memory
+            ManuallyDrop::new(app)
+        }
+        // An alternative to transmute_copy is to just plainly clone the app
+        //let borrowed_app = self.app_context.app.borrow();
+        //borrowed_app.clone()
     }
 
     /// This is called when an event is triggered in the html DOM.
