@@ -537,15 +537,11 @@ where
             .expect("must not error");
         let t3 = now();
         if let Some(last_update) = self.last_update.borrow().as_ref() {
-            let frame_time = 1000.0 / 60.0; // 1s in 60 frames
+            let frame_time = (1000_f64 / 60_f64).floor(); // 1s in 60 frames
             let time_delta = t3 - last_update;
             let remaining = frame_time - time_delta;
             if time_delta < frame_time {
-                log::warn!(
-                    "update is {} too soon!... time_delta: {}",
-                    remaining,
-                    time_delta
-                );
+                log::warn!("update is {remaining} too soon!... time_delta: {time_delta}, frame_time: {frame_time}");
             }
         }
         *self.last_update.borrow_mut() = Some(t3);
