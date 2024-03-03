@@ -32,8 +32,8 @@ where
         XMSG: 'static,
     {
         Self {
-            local: local.into_iter().map(|l| Task::new(ready(l))).collect(),
-            external: external.into_iter().map(|x| Task::new(ready(x))).collect(),
+            local: local.into_iter().map(|l| Task::single(ready(l))).collect(),
+            external: external.into_iter().map(|x| Task::single(ready(x))).collect(),
             modifier: Modifier::default(),
         }
     }
@@ -50,8 +50,8 @@ where
         XMSG: 'static,
     {
         Self {
-            local: local.into_iter().map(Task::from).collect(),
-            external: external.into_iter().map(Task::from).collect(),
+            local: local.into_iter().map(Task::single).collect(),
+            external: external.into_iter().map(Task::single).collect(),
             modifier: Modifier::default(),
         }
     }
@@ -59,7 +59,7 @@ where
     /// Create an Effects with  local messages that will be executed on the next update loop on this Component
     pub fn with_local(local: impl IntoIterator<Item = MSG>) -> Self {
         Self {
-            local: local.into_iter().map(|l| Task::new(ready(l))).collect(),
+            local: local.into_iter().map(|l| Task::single(ready(l))).collect(),
             external: vec![],
             modifier: Modifier::default(),
         }
@@ -72,7 +72,7 @@ where
         F: Future<Output = MSG> + 'static,
     {
         Self {
-            local: local.into_iter().map(Task::from).collect(),
+            local: local.into_iter().map(Task::single).collect(),
             external: vec![],
             modifier: Modifier::default(),
         }
@@ -85,7 +85,7 @@ where
     {
         Self {
             local: vec![],
-            external: external.into_iter().map(|x| Task::new(ready(x))).collect(),
+            external: external.into_iter().map(|x| Task::single(ready(x))).collect(),
             modifier: Modifier::default(),
         }
     }
@@ -99,7 +99,7 @@ where
     {
         Self {
             local: vec![],
-            external: external.into_iter().map(Task::from).collect(),
+            external: external.into_iter().map(Task::single).collect(),
             modifier: Modifier::default(),
         }
     }
@@ -183,7 +183,7 @@ where
     /// Append this msgs to the local effects
     pub fn append_local(mut self, local: impl IntoIterator<Item = MSG>) -> Self {
         self.local
-            .extend(local.into_iter().map(|l| Task::new(ready(l))));
+            .extend(local.into_iter().map(|l| Task::single(ready(l))));
         self
     }
 
@@ -232,9 +232,9 @@ where
         XMSG: 'static,
     {
         self.local
-            .extend(local.into_iter().map(|l| Task::new(ready(l))));
+            .extend(local.into_iter().map(|l| Task::single(ready(l))));
         self.external
-            .extend(external.into_iter().map(|x| Task::new(ready(x))));
+            .extend(external.into_iter().map(|x| Task::single(ready(x))));
         self
     }
 }

@@ -2,9 +2,9 @@ use crate::{
     dom::{document, dom_node::intern, util, window, Application, Program, Task},
     vdom::Attribute,
 };
-use js_sys::Promise;
 use wasm_bindgen::{prelude::*, JsCast};
-use wasm_bindgen_futures::JsFuture;
+use futures::channel::mpsc;
+use crate::dom::task::RecurringTask;
 
 impl<APP, MSG> Program<APP, MSG>
 where
@@ -42,29 +42,30 @@ where
         self.event_closures.borrow_mut().push(closure);
     }
 
-    /// TODO: only executed once, since the Task Future is droped once done
-    /// TODO: this should be a stream, instead of just one-time future
-    /// a variant of resize task, but instead of returning Cmd, it is returning Task
+
+    /// a recurring task
     pub fn on_resize_task<F>(mut cb: F) -> Task<MSG>
     where
         F: FnMut(i32, i32) -> MSG + Clone + 'static,
     {
-        Task::new(async move {
-            let promise = Promise::new(&mut |resolve, _reject| {
-                let resize_callback: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_| {
-                    resolve.call0(&JsValue::NULL).expect("must resolve");
-                });
-                window()
-                    .add_event_listener_with_callback(
-                        intern("resize"),
-                        resize_callback.as_ref().unchecked_ref(),
-                    )
-                    .expect("add event callback");
-                resize_callback.forget();
-            });
-            JsFuture::from(promise).await.expect("must await");
-            let (window_width, window_height) = util::get_window_size();
-            cb(window_width, window_height)
+        let (mut tx, rx) = mpsc::unbounded();
+        let resize_callback: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |e: web_sys::Event| {
+            log::info!("event: {}",e.type_());
+            let (w, h) = util::get_window_size();
+            let msg = cb(w, h);
+            tx.start_send(msg).unwrap();
+        });
+        window()
+            .add_event_listener_with_callback(
+                intern("resize"),
+                resize_callback.as_ref().unchecked_ref(),
+            )
+            .expect("add event callback");
+        resize_callback.forget();
+
+        Task::Recurring(
+            RecurringTask{
+                receiver: rx,
         })
     }
 
