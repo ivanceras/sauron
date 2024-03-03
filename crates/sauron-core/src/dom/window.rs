@@ -1,17 +1,16 @@
+use crate::dom::task::RecurringTask;
 use crate::{
     dom::{document, dom_node::intern, util, window, Application, Program, Task},
     vdom::Attribute,
 };
-use wasm_bindgen::{prelude::*, JsCast};
 use futures::channel::mpsc;
-use crate::dom::task::RecurringTask;
+use wasm_bindgen::{prelude::*, JsCast};
 
 /// Provides function for window related functions
 #[derive(Clone, Copy)]
 pub struct Window;
 
-impl Window{
-
+impl Window {
     /// Create a recurring Task which will be triggered
     /// everytime the window is resized
     pub fn on_resize<F, MSG>(mut cb: F) -> Task<MSG>
@@ -20,12 +19,13 @@ impl Window{
         MSG: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
-        let resize_callback: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |e: web_sys::Event| {
-            log::info!("event: {}",e.type_());
-            let (w, h) = util::get_window_size();
-            let msg = cb(w, h);
-            tx.start_send(msg).unwrap();
-        });
+        let resize_callback: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |e: web_sys::Event| {
+                log::info!("event: {}", e.type_());
+                let (w, h) = util::get_window_size();
+                let msg = cb(w, h);
+                tx.start_send(msg).unwrap();
+            });
         window()
             .add_event_listener_with_callback(
                 intern("resize"),
@@ -34,13 +34,9 @@ impl Window{
             .expect("add event callback");
         resize_callback.forget();
 
-        Task::Recurring(
-            RecurringTask{
-                receiver: rx,
-        })
+        Task::Recurring(RecurringTask { receiver: rx })
     }
 }
-
 
 impl<APP, MSG> Program<APP, MSG>
 where
