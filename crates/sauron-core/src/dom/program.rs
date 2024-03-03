@@ -503,6 +503,21 @@ where
         Ok(())
     }
 
+    /// execute DOM changes in order to reflect the APP's view into the browser representation
+    fn dispatch_dom_changes(&mut self, modifier: &Modifier, treepath: Option<Vec<TreePath>>) {
+        #[allow(unused_variables)]
+        let measurements = self
+            .update_dom(modifier, treepath)
+            .expect("must update dom");
+
+        #[cfg(feature = "with-measure")]
+        // tell the app about the performance measurement and only if there was patches applied
+        if modifier.log_measurements && measurements.total_patches > 0 {
+            let cmd_measurement = self.app_context.measurements(measurements);
+            cmd_measurement.emit(self.clone());
+        }
+    }
+
     /// update the browser DOM to reflect the APP's  view
     pub fn update_dom(
         &mut self,
@@ -559,6 +574,28 @@ where
         Ok(measurements)
     }
 
+    /// patch the DOM to reflect the App's view
+    ///
+    /// Note: This is in another function so as to allow tests to use this shared code
+    pub fn update_dom_with_vdom(
+        &mut self,
+        new_vdom: vdom::Node<MSG>,
+        treepath: Option<Vec<TreePath>>,
+    ) -> Result<usize, JsValue> {
+        let dom_patches = self.create_dom_patch(&new_vdom, treepath);
+        let total_patches = dom_patches.len();
+        self.pending_patches.borrow_mut().extend(dom_patches);
+
+        #[cfg(feature = "with-raf")]
+        self.apply_pending_patches_with_raf().expect("raf");
+
+        #[cfg(not(feature = "with-raf"))]
+        self.apply_pending_patches().expect("raf");
+
+        self.app_context.set_current_dom(new_vdom);
+        Ok(total_patches)
+    }
+
     fn create_dom_patch(
         &self,
         new_vdom: &vdom::Node<MSG>,
@@ -602,27 +639,6 @@ where
         dom_patches
     }
 
-    /// patch the DOM to reflect the App's view
-    ///
-    /// Note: This is in another function so as to allow tests to use this shared code
-    pub fn update_dom_with_vdom(
-        &mut self,
-        new_vdom: vdom::Node<MSG>,
-        treepath: Option<Vec<TreePath>>,
-    ) -> Result<usize, JsValue> {
-        let dom_patches = self.create_dom_patch(&new_vdom, treepath);
-        let total_patches = dom_patches.len();
-        self.pending_patches.borrow_mut().extend(dom_patches);
-
-        #[cfg(feature = "with-raf")]
-        self.apply_pending_patches_with_raf().expect("raf");
-
-        #[cfg(not(feature = "with-raf"))]
-        self.apply_pending_patches().expect("raf");
-
-        self.app_context.set_current_dom(new_vdom);
-        Ok(total_patches)
-    }
 
     #[cfg(feature = "with-raf")]
     fn apply_pending_patches_with_raf(&mut self) -> Result<(), JsValue> {
@@ -649,20 +665,6 @@ where
         Ok(())
     }
 
-    /// execute DOM changes in order to reflect the APP's view into the browser representation
-    fn dispatch_dom_changes(&mut self, modifier: &Modifier, treepath: Option<Vec<TreePath>>) {
-        #[allow(unused_variables)]
-        let measurements = self
-            .update_dom(modifier, treepath)
-            .expect("must update dom");
-
-        #[cfg(feature = "with-measure")]
-        // tell the app about the performance measurement and only if there was patches applied
-        if modifier.log_measurements && measurements.total_patches > 0 {
-            let cmd_measurement = self.app_context.measurements(measurements);
-            cmd_measurement.emit(self.clone());
-        }
-    }
 
     #[cfg(feature = "with-ric")]
     fn dispatch_inner_with_ric(&self) {
