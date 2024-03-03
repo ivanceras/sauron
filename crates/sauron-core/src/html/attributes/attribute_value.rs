@@ -121,6 +121,15 @@ impl<MSG> AttributeValue<MSG> {
         matches!(self, Self::Style(_))
     }
 
+    pub(crate) fn is_static_str(&self) -> bool {
+        match self {
+            Self::Simple(v) =>  v.is_static_str(),
+            Self::Style(values) => values.iter().all(|v|v.is_static_str()),
+            Self::Empty => true,
+            _ => false,
+        }
+    }
+
     /// return the styles if the attribute value is a style
     pub fn as_event_listener(&self) -> Option<&Listener<MSG>> {
         match self {

@@ -125,6 +125,11 @@ impl Value {
             }
         }
     }
+
+    /// returns true if this value is a static str
+    pub(crate) fn is_static_str(&self) -> bool {
+        matches!(self, Self::Str(_))
+    }
 }
 
 impl PartialEq for Value {

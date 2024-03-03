@@ -236,6 +236,8 @@
     - Right now, we are attaching a `vdom-data` attribute for nodes that have listeners
 - [ ] Make use of `Arc<RwLock>` to check if can solve copying the `APP` via `transmute_copy`. ~~it didn't solve it~~
     - See if there are performance penalty
+- [ ] Make template node for when app view is first created
+    - [ ] The template is then patched when the app is mounted.
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)

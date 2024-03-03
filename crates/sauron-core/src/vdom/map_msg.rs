@@ -43,6 +43,9 @@ where
 
     /// return the callback values of this attribute
     fn get_callback(&self) -> Vec<&Listener<MSG>>;
+
+    /// returns true if the value of this attribute is static str
+    fn is_static_str(&self) -> bool;
 }
 
 impl<MSG> NodeMapMsg<MSG> for Node<MSG>
@@ -137,6 +140,10 @@ where
             .iter()
             .filter_map(|v| v.as_event_listener())
             .collect()
+    }
+
+    fn is_static_str(&self) -> bool {
+        self.value.iter().all(|v|v.is_static_str())
     }
 }
 

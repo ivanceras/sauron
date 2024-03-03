@@ -79,6 +79,7 @@ impl Application<Msg> for App {
         Cmd::none()
     }
 
+    /*
     fn prediff(&self, old: &Self) -> Option<Vec<PreDiff>> {
         Some(vec![diff_if(
             false,
@@ -123,6 +124,7 @@ impl Application<Msg> for App {
             ],
         )])
     }
+    */
 
     fn view(&self) -> Node<Msg> {
         node!{

@@ -123,8 +123,13 @@ where
     MSG: 'static,
     APP: Application<MSG>,
 {
+    /// Creates a new app, the view is created
     pub fn new(app: APP) -> Self {
+        use crate::render::Render;
         let view = app.view();
+        let template = Self::extract_template(&view);
+        log::debug!("template: {:#?}", template);
+        log::info!("template: {}", template.render_to_string());
         Self {
             app: Rc::new(RefCell::new(app)),
             current_vdom: Rc::new(RefCell::new(view)),
@@ -132,6 +137,34 @@ where
             pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
         }
     }
+
+    fn extract_template(node: &vdom::Node<MSG>) -> vdom::Node<MSG>{
+        use crate::render::Render;
+        use crate::vdom::map_msg::AttributeMapMsg;
+
+        match node{
+            vdom::Node::Element(elm) => {
+                mt_dom::element_ns(
+                    elm.namespace,
+                    elm.tag,
+                    elm.attributes().iter().filter(|att|att.is_static_str()).cloned(),
+                    elm.children().iter().map(Self::extract_template),
+                    elm.self_closing,
+                )
+            }
+            vdom::Node::Fragment(nodes) => {
+                vdom::Node::Fragment(nodes.iter().map(|node|{
+                    Self::extract_template(node)
+                }).collect())
+            }
+            vdom::Node::Leaf(leaf) => {
+                log::info!("Templating {:?}", leaf.render_to_string());
+                node.clone()
+            }
+            vdom::Node::NodeList(_node_list) => unreachable!("This has been unrolled"),
+        }
+    }
+
     pub fn init_app(&self) -> Cmd<APP, MSG> {
         self.app.borrow_mut().init()
     }

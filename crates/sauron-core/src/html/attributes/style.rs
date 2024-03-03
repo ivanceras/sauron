@@ -20,6 +20,11 @@ impl Style {
             value: value.into(),
         }
     }
+
+    /// returns true if both the name and value is static str
+    pub(crate) fn is_static_str(&self) -> bool {
+        matches!(self.name, Cow::Borrowed(_)) && self.value.is_static_str()
+    }
 }
 
 impl fmt::Display for Style {
