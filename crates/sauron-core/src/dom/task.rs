@@ -49,6 +49,10 @@ where
 /// SingleTask is used to do asynchronous operations
 pub struct SingleTask<MSG> {
     task: Pin<Box<dyn Future<Output = MSG>>>,
+    /// a marker to indicate if the value of the future is awaited.
+    /// any attempt to await it again will error,
+    /// saying that the async function is resumed after completion.
+    done: bool,
 }
 
 impl<MSG> SingleTask<MSG>
@@ -60,7 +64,7 @@ where
     where
         F: Future<Output = MSG> + 'static,
     {
-        Self { task: Box::pin(f) }
+        Self { task: Box::pin(f), done: false }
     }
 
     /// apply a function to the msg to create a different task which has a different msg
@@ -78,8 +82,15 @@ where
 
     /// get the next value
     async fn next(&mut self) -> Option<MSG> {
-        let msg = self.task.as_mut().await;
-        Some(msg)
+        // return None is already done since awaiting it again is an error
+        if self.done{
+            None
+        }else{
+            let msg = self.task.as_mut().await;
+            // mark as done
+            self.done = true;
+            Some(msg)
+        }
     }
 }
 
