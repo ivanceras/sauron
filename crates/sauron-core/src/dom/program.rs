@@ -620,7 +620,6 @@ where
             log::info!("patches: {patches:#?}");
             patches
         } else {
-            log::debug!("using classic diff...");
             let patches = diff(&current_vdom, &new_vdom);
             patches
         };
@@ -741,6 +740,7 @@ where
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
         if self.app_context.has_pending_msgs() {
+            log::info!("There are still: {} pending msgs", self.app_context.pending_msgs_count());
             self.dispatch_pending_msgs(None)
                 .expect("must dispatch all pending msgs");
         }

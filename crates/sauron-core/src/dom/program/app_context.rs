@@ -173,6 +173,11 @@ where
         !self.pending_msgs.borrow().is_empty()
     }
 
+    /// return the current number of pending msgs
+    pub fn pending_msgs_count(&self) -> usize {
+        self.pending_msgs.borrow().len()
+    }
+
     /// dispatch a single pending msg, return true successfully dispatch one
     /// false if there is no more pending msg
     pub fn dispatch_pending_msg(&mut self) -> bool {
