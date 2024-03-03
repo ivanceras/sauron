@@ -17,16 +17,10 @@ impl Application<Msg> for App {
     fn init(&mut self) -> Cmd<Self, Msg> {
         Cmd::new(|mut program| {
             spawn_local(async move {
-                delay(1000).await;
-                program.dispatch(Msg::AddItem);
-                delay(2000).await;
-                program.dispatch(Msg::AddItem);
-                delay(3000).await;
-                program.dispatch(Msg::AddItem);
-                delay(4000).await;
-                program.dispatch(Msg::AddItem);
-                delay(5000).await;
-                program.dispatch(Msg::AddItem);
+                loop{
+                    delay(1000).await;
+                    program.dispatch(Msg::AddItem);
+                }
             })
         })
     }
@@ -37,7 +31,7 @@ impl Application<Msg> for App {
         match msg {
             Msg::AddItem => self
                 .items
-                .push(node! { <li>{text(self.items.len() + 1)}</li> }),
+                .push(node! { <li>{text!("Item {}", self.items.len() + 1)}</li> }),
         }
 
         Cmd::none()
