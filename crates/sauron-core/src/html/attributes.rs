@@ -1,6 +1,7 @@
 //! Create html [attributes][0]
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
+use std::borrow::Cow;
 use crate::vdom;
 
 pub use crate::{dom::Event, vdom::Attribute};
@@ -35,21 +36,21 @@ mod value;
 /// let html: Node<()> = div(vec![style!{"display":"flex","flex-direction":"row"}],vec![]);
 /// ```
 pub fn styles<MSG>(
-    pairs: impl IntoIterator<Item = (impl ToString, impl Into<Value>)>,
+    pairs: impl IntoIterator<Item = (impl Into<Cow<'static, str>>, impl Into<Value>)>,
 ) -> Attribute<MSG> {
     let styles = pairs
         .into_iter()
-        .map(|(key, value)| Style::new(key.to_string(), Into::<Value>::into(value)));
+        .map(|(key, value)| Style::new(key, Into::<Value>::into(value)));
     mt_dom::attr("style", AttributeValue::from_styles(styles))
 }
 
 /// A helper function to build styles by accepting pairs
 pub fn styles_values<MSG>(
-    pairs: impl IntoIterator<Item = (impl ToString, impl Into<Value>)>,
+    pairs: impl IntoIterator<Item = (impl Into<Cow<'static, str>>, impl Into<Value>)>,
 ) -> Attribute<MSG> {
     let styles = pairs
         .into_iter()
-        .map(|(key, value)| Style::new(key.to_string(), value));
+        .map(|(key, value)| Style::new(key, value));
     mt_dom::attr("style", AttributeValue::from_styles(styles))
 }
 
@@ -74,7 +75,7 @@ pub fn styles_values<MSG>(
 ///     styles([("display", if is_active { "block" }else{ "none" })]);
 /// ```
 pub fn styles_flag<MSG>(
-    trio: impl IntoIterator<Item = (impl ToString, impl Into<Value>, bool)>,
+    trio: impl IntoIterator<Item = (impl Into<Cow<'static, str>>, impl Into<Value>, bool)>,
 ) -> Attribute<MSG> {
     let styles = trio.into_iter().filter_map(|(key, value, flag)| {
         if flag {
@@ -99,11 +100,11 @@ pub fn styles_flag<MSG>(
 ///        ("error", has_error),
 ///    ]);
 /// ```
-pub fn classes_flag<MSG>(pair: impl IntoIterator<Item = (impl ToString, bool)>) -> Attribute<MSG> {
+pub fn classes_flag<MSG>(pair: impl IntoIterator<Item = (impl Into<Value>, bool)>) -> Attribute<MSG> {
     let class_list = pair.into_iter().filter_map(
         |(class, flag)| {
             if flag {
-                Some(class.to_string())
+                Some(class.into())
             } else {
                 None
             }
@@ -122,10 +123,10 @@ pub fn classes_flag<MSG>(pair: impl IntoIterator<Item = (impl ToString, bool)>) 
 /// let html: Node<()> =
 ///    div(vec![classes(["dashed", "error"])], vec![]);
 /// ```
-pub fn classes<MSG>(class_list: impl IntoIterator<Item = impl ToString>) -> Attribute<MSG> {
+pub fn classes<MSG>(class_list: impl IntoIterator<Item = impl Into<Value>>) -> Attribute<MSG> {
     let class_values = class_list
         .into_iter()
-        .map(|v| AttributeValue::from(Value::from(v.to_string())));
+        .map(|v| AttributeValue::from(v.into()));
 
     Attribute::with_multiple_values(None, "class", class_values)
 }
@@ -244,10 +245,7 @@ pub fn open<MSG>(is_open: bool) -> Attribute<MSG> {
 /// let html:Node<()> =
 ///     div(vec![inner_html("<p>This is a paragraph <b>injected</b> into a <strong>div</strong> via <i>inner_html</i></p>")], vec![]);
 /// ```
-pub fn inner_html<V, MSG>(inner_html: V) -> Attribute<MSG>
-where
-    V: Into<Value> + Clone,
-{
+pub fn inner_html<MSG>(inner_html: impl Into<Value>) -> Attribute<MSG> {
     mt_dom::attr(
         "inner_html",
         AttributeValue::function_call(inner_html.into()),
@@ -272,7 +270,7 @@ pub fn focus<MSG>(is_focus: bool) -> Attribute<MSG> {
 ///
 /// let data_id: Attribute<()> = attr("data-id", 42);
 /// ```
-pub fn attr<MSG, V: Into<Value>>(att: &'static str, v: V) -> Attribute<MSG> {
+pub fn attr<MSG>(att: &'static str, v: impl Into<Value>) -> Attribute<MSG> {
     mt_dom::attr(att, AttributeValue::from(v.into()))
 }
 

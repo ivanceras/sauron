@@ -1,17 +1,18 @@
 //! Leaf node for html dom tree
 use std::fmt;
+use std::borrow::Cow;
 
 /// A leaf node value of html dom tree
 pub enum Leaf {
     /// Text variant of a virtual node
-    Text(String),
+    Text(Cow<'static, str>),
     /// A safe html variant
-    SafeHtml(String),
+    SafeHtml(Cow<'static, str>),
     /// A comment node
-    Comment(String),
+    Comment(Cow<'static, str>),
     /// doctype: html, math, svg
     /// <https://www.w3.org/QA/2002/04/valid-dtd-list.html>
-    DocType(String),
+    DocType(Cow<'static, str>),
 }
 
 impl Leaf {
@@ -76,22 +77,3 @@ impl PartialEq for Leaf {
     }
 }
 
-/// create a text leaf
-pub fn text(s: impl ToString) -> Leaf {
-    Leaf::Text(s.to_string())
-}
-
-/// create a safe html leaf
-pub fn safe_html(s: impl ToString) -> Leaf {
-    Leaf::SafeHtml(s.to_string())
-}
-
-/// create a comment leaf
-pub fn comment(s: impl ToString) -> Leaf {
-    Leaf::Comment(s.to_string())
-}
-
-/// create a doctype leaf
-pub fn doctype(s: impl ToString) -> Leaf {
-    Leaf::DocType(s.to_string())
-}

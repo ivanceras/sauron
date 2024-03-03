@@ -1,7 +1,9 @@
 //! Provides functions and macros to build html elements
-use crate::vdom::{leaf, Attribute, Node, NodeTrait};
+use crate::vdom::{Attribute, Node, NodeTrait};
 pub use mt_dom::{element, element_ns};
 pub use tags::{commons::*, self_closing::*, *};
+use std::borrow::Cow;
+use crate::vdom::Leaf;
 
 #[macro_use]
 pub mod attributes;
@@ -113,11 +115,9 @@ macro_rules! text {
 /// use sauron::*;
 /// let node: Node<()> = text("hi");
 /// ```
-pub fn text<S, MSG>(s: S) -> Node<MSG>
-where
-    S: ToString,
+pub fn text<MSG>(s: impl ToString) -> Node<MSG>
 {
-    Node::Leaf(leaf::text(s))
+    Node::Leaf(Leaf::Text(Cow::from(s.to_string())))
 }
 
 /// Create an html and instruct the DOM renderer and/or DOM patcher that the operation is safe.
@@ -130,11 +130,9 @@ where
 ///
 /// let node: Node<()> = safe_html("<div>In a safe html</div>");
 /// ```
-pub fn safe_html<S, MSG>(s: S) -> Node<MSG>
-where
-    S: ToString,
+pub fn safe_html<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG>
 {
-    Node::Leaf(leaf::safe_html(s))
+    Node::Leaf(Leaf::SafeHtml(s.into()))
 }
 
 /// create a comment node
@@ -143,11 +141,9 @@ where
 /// use sauron::*;
 /// let node: Node<()> = comment("This is a comment");
 /// ```
-pub fn comment<S, MSG>(s: S) -> Node<MSG>
-where
-    S: ToString,
+pub fn comment<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG>
 {
-    Node::Leaf(leaf::comment(s))
+    Node::Leaf(Leaf::Comment(s.into()))
 }
 
 /// fragment is a list of nodes
@@ -162,8 +158,8 @@ pub fn fragment<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
 }
 
 /// create a doctype
-pub fn doctype<MSG>(s: impl ToString) -> Node<MSG> {
-    Node::Leaf(leaf::doctype(s))
+pub fn doctype<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG> {
+    Node::Leaf(Leaf::DocType(s.into()))
 }
 
 /// create a node which contains a list of nodes
