@@ -14,13 +14,10 @@ pub struct App {
 
 impl Application<Msg> for App {
     fn init(&mut self) -> Cmd<Self, Msg> {
-        Cmd::batch([
-            Cmd::from(Program::<Self, Msg>::on_resize_task(|w, h| {
-                log::info!("This will trigger only once.. {w}x{h}");
-                Msg::WindowResized(w, h)
-            })),
-           // Cmd::new(|program| program.on_resize(|w, h| Msg::WindowResized(w, h))),
-        ])
+        Cmd::from(Window::on_resize(|w, h| {
+            log::info!("This will trigger only once.. {w}x{h}");
+            Msg::WindowResized(w, h)
+        }))
     }
 
     fn view(&self) -> Node<Msg> {

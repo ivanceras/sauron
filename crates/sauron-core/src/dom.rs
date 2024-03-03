@@ -31,6 +31,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use timeout::{delay, request_timeout_callback, TimeoutCallbackHandle};
     pub use cmd::Cmd;
     use crate::dom::events::MountEvent;
+    pub use window::Window;
 
     mod application;
     pub mod cmd;

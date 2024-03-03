@@ -52,7 +52,7 @@ pub mod prelude {
         pub use wasm_bindgen::prelude::*;
         pub use serde_wasm_bindgen;
         pub use crate::html::events::*;
-        pub use crate::dom::{Application, PreDiff, diff_if, events, Program, document, now, window, Cmd,
+        pub use crate::dom::{Application, PreDiff, diff_if, events, Program, document, now, window, Window, Cmd,
             AnimationFrameHandle, Callback, Component, Container, Effects, Measurements, MountAction,
             MountTarget, Task, TimeoutCallbackHandle,
         };

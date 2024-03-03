@@ -6,47 +6,18 @@ use wasm_bindgen::{prelude::*, JsCast};
 use futures::channel::mpsc;
 use crate::dom::task::RecurringTask;
 
-impl<APP, MSG> Program<APP, MSG>
-where
-    MSG: 'static,
-    APP: Application<MSG>,
-{
-    /// attach event listeners to the window object
-    pub fn add_window_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
-        self.add_event_listeners(&window(), event_listeners)
-            .expect("must add to event listener");
-    }
+/// Provides function for window related functions
+#[derive(Clone, Copy)]
+pub struct Window;
 
-    /// attach event listeners to the document object
-    pub fn add_document_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
-        self.add_event_listeners(&document(), event_listeners)
-            .expect("must add to event listener");
-    }
+impl Window{
 
-    /// Creates a Cmd in which the MSG will be emitted
-    /// whenever the browser is resized
-    pub fn on_resize<F>(&self, mut cb: F)
+    /// Create a recurring Task which will be triggered
+    /// everytime the window is resized
+    pub fn on_resize<F, MSG>(mut cb: F) -> Task<MSG>
     where
         F: FnMut(i32, i32) -> MSG + Clone + 'static,
-    {
-        let program = Program::downgrade(&self);
-        let closure: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_| {
-            let (window_width, window_height) = util::get_window_size();
-            let msg = cb(window_width, window_height);
-            let mut program = program.upgrade().expect("must upgrade");
-            program.dispatch(msg);
-        });
-        window()
-            .add_event_listener_with_callback(intern("resize"), closure.as_ref().unchecked_ref())
-            .expect("resize callback");
-        self.event_closures.borrow_mut().push(closure);
-    }
-
-
-    /// a recurring task
-    pub fn on_resize_task<F>(mut cb: F) -> Task<MSG>
-    where
-        F: FnMut(i32, i32) -> MSG + Clone + 'static,
+        MSG: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
         let resize_callback: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |e: web_sys::Event| {
@@ -67,6 +38,25 @@ where
             RecurringTask{
                 receiver: rx,
         })
+    }
+}
+
+
+impl<APP, MSG> Program<APP, MSG>
+where
+    MSG: 'static,
+    APP: Application<MSG>,
+{
+    /// attach event listeners to the window object
+    pub fn add_window_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
+        self.add_event_listeners(&window(), event_listeners)
+            .expect("must add to event listener");
+    }
+
+    /// attach event listeners to the document object
+    pub fn add_document_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
+        self.add_event_listeners(&document(), event_listeners)
+            .expect("must add to event listener");
     }
 
     /// attached a callback and will be triggered when the hash portion of the window location
