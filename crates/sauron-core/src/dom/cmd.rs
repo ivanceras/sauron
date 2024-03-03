@@ -113,7 +113,6 @@ where
             program.dispatch_multiple(msg_list);
         })
     }
-
 }
 
 impl<APP, MSG> From<Effects<MSG, ()>> for Cmd<APP, MSG>
@@ -156,7 +155,7 @@ where
     fn from(mut task: Task<MSG>) -> Self {
         Cmd::new(move |mut program| {
             spawn_local(async move {
-                while let Some(msg) = task.next().await{
+                while let Some(msg) = task.next().await {
                     program.dispatch(msg)
                 }
             });

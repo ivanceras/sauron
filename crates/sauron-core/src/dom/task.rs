@@ -1,24 +1,26 @@
-use std::future::Future;
-use std::pin::Pin;
-use futures::channel::mpsc::UnboundedReceiver;
-use futures::StreamExt;
 use crate::dom::spawn_local;
 use futures::channel::mpsc;
-
+use futures::channel::mpsc::UnboundedReceiver;
+use futures::StreamExt;
+use std::future::Future;
+use std::pin::Pin;
 
 /// encapsulate anything a component can do
-pub enum Task<MSG>{
+pub enum Task<MSG> {
     /// A task with one single resulting MSG
     Single(SingleTask<MSG>),
     /// A task with recurring resulting MSG
     Recurring(RecurringTask<MSG>),
 }
 
-impl<MSG> Task<MSG> where MSG: 'static{
-
+impl<MSG> Task<MSG>
+where
+    MSG: 'static,
+{
     ///
     pub fn single<F>(f: F) -> Self
-    where F: Future<Output = MSG> + 'static
+    where
+        F: Future<Output = MSG> + 'static,
     {
         Self::Single(SingleTask::new(f))
     }
@@ -29,7 +31,7 @@ impl<MSG> Task<MSG> where MSG: 'static{
         F: Fn(MSG) -> MSG2 + 'static,
         MSG2: 'static,
     {
-        match self{
+        match self {
             Self::Single(task) => Task::Single(task.map_msg(f)),
             Self::Recurring(task) => Task::Recurring(task.map_msg(f)),
         }
@@ -37,12 +39,11 @@ impl<MSG> Task<MSG> where MSG: 'static{
 
     /// return the next value
     pub async fn next(&mut self) -> Option<MSG> {
-        match self{
+        match self {
             Self::Single(task) => task.next().await,
-            Self::Recurring(task) => task.next().await
+            Self::Recurring(task) => task.next().await,
         }
     }
-
 }
 
 /// SingleTask is used to do asynchronous operations
@@ -92,13 +93,14 @@ where
     }
 }
 
-
-pub struct RecurringTask<MSG>{
+pub struct RecurringTask<MSG> {
     pub(crate) receiver: UnboundedReceiver<MSG>,
 }
 
-impl<MSG> RecurringTask<MSG> where MSG: 'static{
-
+impl<MSG> RecurringTask<MSG>
+where
+    MSG: 'static,
+{
     async fn next(&mut self) -> Option<MSG> {
         self.receiver.next().await
     }
@@ -107,16 +109,14 @@ impl<MSG> RecurringTask<MSG> where MSG: 'static{
     fn map_msg<F, MSG2>(mut self, f: F) -> RecurringTask<MSG2>
     where
         F: Fn(MSG) -> MSG2 + 'static,
-        MSG2: 'static
+        MSG2: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
-        spawn_local(async move{
-            while let Some(msg) = self.next().await{
+        spawn_local(async move {
+            while let Some(msg) = self.next().await {
                 tx.start_send(f(msg)).expect("must send");
             }
         });
-        RecurringTask{
-            receiver: rx,
-        }
+        RecurringTask { receiver: rx }
     }
 }

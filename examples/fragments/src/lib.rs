@@ -17,7 +17,7 @@ impl Application<Msg> for App {
     fn init(&mut self) -> Cmd<Self, Msg> {
         Cmd::new(|mut program| {
             spawn_local(async move {
-                loop{
+                loop {
                     delay(1000).await;
                     program.dispatch(Msg::AddItem);
                 }

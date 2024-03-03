@@ -4,11 +4,10 @@ pub use prediff::{diff_if, PreDiff};
 
 mod prediff;
 
-
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
 ///
-pub trait Application<MSG> : Sized + 'static
+pub trait Application<MSG>: Sized + 'static
 where
     MSG: 'static,
 {
@@ -49,8 +48,7 @@ where
     /// This is for diagnostic and performance measurement purposes.
     ///
     /// Warning: DO NOT use for anything else other than the intended purpose
-    fn measurements(&self, measurements: Measurements) -> Cmd<Self, MSG>
-    {
+    fn measurements(&self, measurements: Measurements) -> Cmd<Self, MSG> {
         log::debug!("Measurements: {:#?}", measurements);
         Cmd::none().no_render()
     }

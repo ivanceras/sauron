@@ -33,7 +33,10 @@ where
     {
         Self {
             local: local.into_iter().map(|l| Task::single(ready(l))).collect(),
-            external: external.into_iter().map(|x| Task::single(ready(x))).collect(),
+            external: external
+                .into_iter()
+                .map(|x| Task::single(ready(x)))
+                .collect(),
             modifier: Modifier::default(),
         }
     }
@@ -85,7 +88,10 @@ where
     {
         Self {
             local: vec![],
-            external: external.into_iter().map(|x| Task::single(ready(x))).collect(),
+            external: external
+                .into_iter()
+                .map(|x| Task::single(ready(x)))
+                .collect(),
             modifier: Modifier::default(),
         }
     }

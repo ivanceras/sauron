@@ -141,7 +141,7 @@ where
                                     self.animation_frame_handles.upgrade()
                                 {
                                     if let Some(event_closures) = self.event_closures.upgrade() {
-                                        if let Some(closures) = self.closures.upgrade(){
+                                        if let Some(closures) = self.closures.upgrade() {
                                             if let Some(last_update) = self.last_update.upgrade() {
                                                 return Some(Program {
                                                     app_context,
@@ -634,7 +634,6 @@ where
         dom_patches
     }
 
-
     #[cfg(feature = "with-raf")]
     fn apply_pending_patches_with_raf(&mut self) -> Result<(), JsValue> {
         let program = Program::downgrade(&self);
@@ -659,7 +658,6 @@ where
         }
         Ok(())
     }
-
 
     #[cfg(feature = "with-ric")]
     fn dispatch_inner_with_ric(&self) {
@@ -715,7 +713,7 @@ where
     #[cfg(feature = "prediff")]
     #[allow(unsafe_code)]
     pub fn app_clone(&self) -> ManuallyDrop<APP> {
-        unsafe{
+        unsafe {
             let app: APP = std::mem::transmute_copy(&*self.app_context.app.borrow());
             //TODO: We are creating a copy of the app everytime,
             // as dropping the app will error in the runtime
@@ -740,7 +738,10 @@ where
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
         if self.app_context.has_pending_msgs() {
-            log::info!("There are still: {} pending msgs", self.app_context.pending_msgs_count());
+            log::info!(
+                "There are still: {} pending msgs",
+                self.app_context.pending_msgs_count()
+            );
             self.dispatch_pending_msgs(None)
                 .expect("must dispatch all pending msgs");
         }
