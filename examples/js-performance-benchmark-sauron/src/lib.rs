@@ -239,6 +239,7 @@ impl App {
 
 #[wasm_bindgen(start)]
 pub fn start() {
+    console_log::init().unwrap();
     let mount_el = sauron::document().query_selector("#main").unwrap().unwrap();
     Program::append_to_mount(App::new(), &mount_el);
 }
