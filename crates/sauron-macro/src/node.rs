@@ -52,25 +52,25 @@ fn single_node(node: Node) -> TokenStream {
         Node::Text(node_text) => {
             let text = node_text.value_string();
             quote! {
-                sauron::html::text(#text)
+                sauron::Node::Leaf(sauron::vdom::Leaf::Text(#text.into()))
             }
         }
         Node::RawText(raw_text) => {
             let text = raw_text.to_token_stream_string();
             quote! {
-                sauron::html::text(#text)
+                sauron::Node::Leaf(sauron::vdom::Leaf::Text(#text.into()))
             }
         }
         Node::Comment(comment) => {
             let comment_text = comment.value.value();
             quote! {
-                sauron::html::comment(#comment_text)
+                sauron::Node::Leaf(sauron::vdom::Leaf::Comment(#comment_text.into()))
             }
         }
         Node::Doctype(doctype) => {
             let value = doctype.value.to_token_stream_string();
             quote! {
-                sauron::html::doctype(#value)
+                sauron::Node::Leaf(sauron::vdom::Leaf::DocType(#value.into()))
             }
         }
         Node::Block(block) => match block {
