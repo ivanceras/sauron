@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use crate::mt_dom::TreePath;
+use crate::vdom::TreePath;
 use sauron::{
     dom::Event,
     events::on,

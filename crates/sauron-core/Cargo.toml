@@ -29,6 +29,7 @@ phf = { version = "0.11.2", features = ["macros"] }
 futures = "=0.3.30"
 indexmap = "2.2.5"
 longest-increasing-subsequence = "0.1.0"
+derive-where = "1.2.7"
 
 
 [dependencies.wasm-bindgen]

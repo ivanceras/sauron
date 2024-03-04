@@ -4,6 +4,7 @@ use std::fmt;
 use std::fmt::{Debug, Formatter};
 pub use element::Element;
 use crate::vdom::Leaf;
+use derive_where::derive_where;
 
 pub(crate) mod attribute;
 mod element;
@@ -21,6 +22,7 @@ mod element;
 /// virtual dom implementation
 /// AttributeValue - is the type for the value of the attribute, this will be String, f64, or just another
 /// generics that suits the implementing library which used mt-dom for just dom-diffing purposes
+#[derive_where(Clone, Debug, PartialEq, Eq)]
 pub enum Node<MSG> {
     /// Element variant of a virtual node
     Element(Element<MSG>),
@@ -33,25 +35,6 @@ pub enum Node<MSG> {
     Leaf(Leaf),
 }
 
-impl<MSG> Clone for Node<MSG>{
-    fn clone(&self) -> Self {
-        todo!()
-    }
-}
-
-impl<MSG> fmt::Debug for Node<MSG>{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        todo!()
-    }
-}
-
-impl<MSG> PartialEq for Node<MSG>{
-    fn eq(&self, other: &Self) -> bool {
-        todo!()
-    }
-}
-
-impl<MSG> Eq for Node<MSG>{ }
 
 
 #[derive(Debug, Copy, Clone)]

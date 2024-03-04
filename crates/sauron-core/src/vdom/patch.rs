@@ -4,6 +4,7 @@ use super::Tag;
 use super::{Attribute, Node};
 use std::fmt::Debug;
 use std::fmt;
+use derive_where::derive_where;
 
 pub use tree_path::TreePath;
 
@@ -59,6 +60,7 @@ mod tree_path;
 /// 0 - is the root element which is always zero.
 /// 1 - is the `footer` element since it is the 2nd element of the body.
 /// 2 - is the `nav` element since it is the 3rd node in the `footer` element.
+#[derive_where(Clone, Debug, PartialEq, Eq)]
 pub struct Patch<'a, MSG> {
     /// the tag of the node at patch_path
     pub tag: Option<&'a Tag>,
@@ -68,6 +70,7 @@ pub struct Patch<'a, MSG> {
     pub patch_type: PatchType<'a, MSG>,
 }
 
+/*
 impl<'a, MSG> Clone for Patch<'a, MSG>{
     fn clone(&self) -> Self {
         todo!()
@@ -87,8 +90,10 @@ impl<'a, MSG> PartialEq for Patch<'a, MSG>{
 }
 
 impl<'a, MSG> Eq for Patch<'a, MSG>{ }
+*/
 
 /// the patch variant
+#[derive_where(Clone, Debug, PartialEq, Eq)]
 pub enum PatchType<'a, MSG> {
     /// insert the nodes before the node at patch_path
     InsertBeforeNode {
@@ -142,25 +147,6 @@ pub enum PatchType<'a, MSG> {
     },
 }
 
-impl<'a, MSG> Clone for PatchType<'a, MSG>{
-    fn clone(&self) -> Self {
-        todo!()
-    }
-}
-
-impl<'a, MSG> fmt::Debug for PatchType<'a, MSG>{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        todo!()
-    }
-}
-
-impl<'a, MSG> PartialEq for PatchType<'a, MSG>{
-    fn eq(&self, other: &Self) -> bool {
-        todo!()
-    }
-}
-
-impl<'a, MSG> Eq for PatchType<'a, MSG>{ }
 
 impl<'a, MSG> Patch<'a, MSG> {
     /// return the path to traverse for this patch to get to the target Node

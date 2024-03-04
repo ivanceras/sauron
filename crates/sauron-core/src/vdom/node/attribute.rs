@@ -3,6 +3,7 @@ use std::fmt::Debug;
 use indexmap::IndexMap;
 use std::fmt;
 use crate::vdom::AttributeValue;
+use derive_where::derive_where;
 
 /// The type of the Namspace
 pub type Namespace = &'static str;
@@ -18,6 +19,7 @@ pub type AttributeName = &'static str;
 pub static KEY: &AttributeName = &"key";
 
 /// These are the plain attributes of an element
+#[derive_where(Clone, Debug, PartialEq, Eq)]
 pub struct Attribute<MSG> {
     /// namespace of an attribute.
     /// This is specifically used by svg attributes
@@ -30,25 +32,6 @@ pub struct Attribute<MSG> {
     pub value: Vec<AttributeValue<MSG>>,
 }
 
-impl<MSG> Clone for Attribute<MSG>{
-    fn clone(&self) -> Self {
-        todo!()
-    }
-}
-
-impl<MSG> fmt::Debug for Attribute<MSG>{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        todo!()
-    }
-}
-
-impl<MSG> PartialEq for Attribute<MSG>{
-    fn eq(&self, other: &Self) -> bool {
-        todo!()
-    }
-}
-
-impl<MSG> Eq for Attribute<MSG>{ }
 
 impl<MSG> Attribute<MSG> {
     /// create a plain attribute with namespace

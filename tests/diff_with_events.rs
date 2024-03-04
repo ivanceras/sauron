@@ -2,7 +2,7 @@
 
 #[macro_use]
 extern crate log;
-use crate::mt_dom::TreePath;
+use crate::vdom::TreePath;
 use sauron::{html::attributes::*, html::events::*, html::*, *};
 
 use test_fixtures::simple_program;

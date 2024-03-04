@@ -161,9 +161,8 @@ fn traverse_node_by_path<'a, MSG>(
 mod tests {
     use super::*;
     use crate::*;
-    use alloc::format;
-    use alloc::string::String;
-    use alloc::string::ToString;
+    use crate::vdom::*;
+    use crate::render::Render;
 
     #[test]
     fn test_traverse() {
@@ -172,8 +171,8 @@ mod tests {
         assert_eq!(path.traverse(1), TreePath::from([0, 1]));
     }
 
-    fn sample_node() -> Node {
-        let node: Node = element(
+    fn sample_node() -> Node<()> {
+        let node: Node<()> = element(
             "div",
             vec![attr("class", "[]"), attr("id", "0")],
             vec![
@@ -221,14 +220,14 @@ mod tests {
 
     // index is the index of this code with respect to it's sibling
     fn assert_traverse_match(
-        node: &Node,
+        node: &Node<()>,
         node_idx: &mut usize,
         path: Vec<usize>,
     ) {
         let id = node.attribute_value(&"id").unwrap()[0];
         let class = node.attribute_value(&"class").unwrap()[0];
-        assert_eq!(id.to_string(), node_idx.to_string());
-        assert_eq!(class.to_string(), format_vec(&path));
+        assert_eq!(id.as_str(), Some(node_idx.to_string()).as_deref());
+        assert_eq!(class.as_str(), Some(format_vec(&path)).as_deref());
         for (i, child) in node.children().iter().enumerate() {
             *node_idx += 1;
             let mut child_path = path.clone();
@@ -237,11 +236,11 @@ mod tests {
         }
     }
 
-    fn traverse_tree_path(node: &Node, path: &TreePath, node_idx: &mut usize) {
+    fn traverse_tree_path(node: &Node<()>, path: &TreePath, node_idx: &mut usize) {
         let id = node.attribute_value(&"id").unwrap()[0];
         let class = node.attribute_value(&"class").unwrap()[0];
-        assert_eq!(id.to_string(), node_idx.to_string());
-        assert_eq!(class.to_string(), format_vec(&path.path));
+        assert_eq!(id.as_str(), Some(node_idx.to_string()).as_deref());
+        assert_eq!(class.as_str(), Some(format_vec(&path.path)).as_deref());
         for (i, child) in node.children().iter().enumerate() {
             *node_idx += 1;
             let mut child_path = path.clone();

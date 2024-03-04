@@ -3,6 +3,7 @@ use super::{Attribute, Node};
 use std::fmt::Debug;
 use std::fmt;
 use crate::vdom::AttributeValue;
+use derive_where::derive_where;
 
 /// Represents an element of the virtual node
 /// An element has a generic tag, this tag could be a static str tag, such as usage in html dom.
@@ -17,6 +18,7 @@ use crate::vdom::AttributeValue;
 ///
 /// The namespace is also needed in attributes where namespace are necessary such as `xlink:href`
 /// where the namespace `xlink` is needed in order for the linked element in an svg image to work.
+#[derive_where(Clone, Debug, PartialEq, Eq)]
 pub struct Element<MSG> {
     /// namespace of this element,
     /// svg elements requires namespace to render correcly in the browser
@@ -31,25 +33,6 @@ pub struct Element<MSG> {
     pub self_closing: bool,
 }
 
-impl<MSG> Clone for Element<MSG>{
-    fn clone(&self) -> Self {
-        todo!()
-    }
-}
-
-impl<MSG> fmt::Debug for Element<MSG>{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        todo!()
-    }
-}
-
-impl<MSG> PartialEq for Element<MSG>{
-    fn eq(&self, other: &Self) -> bool {
-        todo!()
-    }
-}
-
-impl<MSG> Eq for Element<MSG>{ }
 
 impl<MSG> Element<MSG> {
     /// create a new instance of an element
