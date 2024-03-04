@@ -39,7 +39,6 @@ pub mod prelude {
     pub use crate::svg::special::*;
     pub use crate::vdom::{
         diff,
-        map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg},
         Attribute, AttributeValue, Element, Listener, Node, NodeTrait, Patch,
         TreePath,
     };

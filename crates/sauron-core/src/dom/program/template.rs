@@ -1,5 +1,4 @@
 use crate::vdom;
-use crate::vdom::map_msg::AttributeMapMsg;
 use crate::vdom::{Node, Leaf};
 
 /// extract the template from a node

@@ -6,6 +6,8 @@ use super::{
     diff_lis,
 };
 use std::{cmp, mem};
+use crate::vdom::attributes::Value;
+use crate::vdom::AttributeValue;
 
 /// Return the patches needed for `old_node` to have the same DOM as `new_node`
 ///
@@ -70,7 +72,19 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
     if mem::discriminant(old_node) != mem::discriminant(new_node) {
         return true;
     }
+    let replace = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
+        let explicit_replace_attr = new_node
+            .get_value(&"replace")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
 
+        let old_node_has_event = !old_node.get_callbacks().is_empty();
+        let new_node_has_event = !new_node.get_callbacks().is_empty();
+        // don't recycle when old node has event while new new doesn't have
+        let forbid_recycle = old_node_has_event && !new_node_has_event;
+
+        explicit_replace_attr || forbid_recycle
+    };
     /*
     let replace = |_old, new: &Node<MSG>| {
         if let Some(attributes) = new.attributes() {
@@ -83,11 +97,11 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
             false
         }
     };
+    */
     // handle explicit replace if the Rep fn evaluates to true
     if replace(old_node, new_node) {
         return true;
     }
-    */
 
     // replace if the old key does not match the new key
     if let (Some(old_key), Some(new_key)) =
@@ -115,23 +129,22 @@ pub fn diff_recursive<'a, MSG>(
     new_node: &'a Node<MSG>,
     path: &TreePath,
 ) -> Vec<Patch<'a, MSG>>  {
-    /*
-    let skip = |_old, new: &Node<MSG>| {
-        if let Some(attributes) = new.attributes() {
-            attributes
-                .iter()
-                .filter(|a| a.name == "skip")
-                .flat_map(|a| a.value())
-                .any(|v| *v == "true")
-        } else {
-            false
+    let skip = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
+        let new_skip_criteria = new_node.attribute_value(&"skip_criteria");
+        let old_skip_criteria = old_node.attribute_value(&"skip_criteria");
+        // if old and new skip_criteria didn't change skip diffing this nodes
+        match (new_skip_criteria, old_skip_criteria) {
+            (Some(new), Some(old)) => new == old,
+            _ => new_node
+                .get_value(&"skip")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(false),
         }
     };
     // skip diffing if the function evaluates to true
     if skip(old_node, new_node) {
         return vec![];
     }
-    */
 
     // replace node and return early
     if should_replace(old_node, new_node) {
@@ -142,12 +155,10 @@ pub fn diff_recursive<'a, MSG>(
         )];
     }
 
-    /*
     // skip diffing if they are essentially the same node
     if old_node == new_node {
         return vec![];
     }
-    */
 
     let mut patches = vec![];
 

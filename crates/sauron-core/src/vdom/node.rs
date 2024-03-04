@@ -289,6 +289,7 @@ impl<MSG> Node<MSG> {
             None
         }
     }
+
 }
 
 /// create a virtual node with tag, attrs and children

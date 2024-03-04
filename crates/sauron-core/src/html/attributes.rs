@@ -9,7 +9,7 @@ pub use attribute_macros::commons::*;
 pub use attribute_macros::*;
 pub use attribute_value::AttributeValue;
 pub use listener::Listener;
-pub use special::{key, replace, skip, skip_criteria, Special};
+pub use special::{key, replace, skip, skip_criteria};
 pub use style::Style;
 pub use value::Value;
 
