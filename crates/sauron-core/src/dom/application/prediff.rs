@@ -1,4 +1,4 @@
-use mt_dom::TreePath;
+use crate::vdom::TreePath;
 use std::fmt;
 
 ///

@@ -65,6 +65,8 @@ impl<MSG> PartialEq for AttributeValue<MSG> {
     }
 }
 
+impl<MSG> Eq for AttributeValue<MSG>{}
+
 impl<MSG> From<Listener<MSG>> for AttributeValue<MSG> {
     fn from(listener: Listener<MSG>) -> Self {
         Self::EventListener(listener)

@@ -1,5 +1,5 @@
 use crate::html::attributes::{AttributeValue, Value};
-use mt_dom::attr;
+use crate::vdom::attr;
 
 /// declare a function with the name corresponds to attribute name for easy usage in html elements
 /// Example:
@@ -105,7 +105,7 @@ macro_rules! declare_html_attributes_special{
 /// common used html attributes
 pub mod commons {
     use crate::html::attributes::{AttributeValue, Value};
-    use mt_dom::attr;
+    use crate::vdom::attr;
     // List from html attributes
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes
     declare_html_attributes! {

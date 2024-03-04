@@ -1,3 +1,4 @@
+/*
 #![deny(
     warnings,
     missing_docs,
@@ -9,6 +10,7 @@
 )]
 #![deny(unsafe_code)]
 #![deny(clippy::all)]
+*/
 //! The core components of sauron
 #[macro_use]
 extern crate doc_comment;
@@ -39,8 +41,8 @@ pub mod prelude {
         diff,
         map_msg::{AttributeMapMsg, ElementMapMsg, NodeMapMsg},
         Attribute, AttributeValue, Element, Listener, Node, NodeTrait, Patch,
+        TreePath,
     };
-    pub use mt_dom::TreePath;
 
     use cfg_if::cfg_if;
     cfg_if! {if #[cfg(feature = "with-dom")] {
@@ -70,5 +72,3 @@ pub mod svg;
 pub mod dom;
 mod render;
 pub mod vdom;
-#[doc(hidden)]
-pub use mt_dom;

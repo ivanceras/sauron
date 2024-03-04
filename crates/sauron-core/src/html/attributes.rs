@@ -41,7 +41,7 @@ pub fn styles<MSG>(
     let styles = pairs
         .into_iter()
         .map(|(key, value)| Style::new(key, Into::<Value>::into(value)));
-    mt_dom::attr("style", AttributeValue::from_styles(styles))
+    vdom::attr("style", AttributeValue::from_styles(styles))
 }
 
 /// A helper function to build styles by accepting pairs
@@ -51,7 +51,7 @@ pub fn styles_values<MSG>(
     let styles = pairs
         .into_iter()
         .map(|(key, value)| Style::new(key, value));
-    mt_dom::attr("style", AttributeValue::from_styles(styles))
+    vdom::attr("style", AttributeValue::from_styles(styles))
 }
 
 /// A helper function which creates a style attribute by assembling only the parts that passed the
@@ -84,7 +84,7 @@ pub fn styles_flag<MSG>(
             None
         }
     });
-    mt_dom::attr("style", AttributeValue::from_styles(styles))
+    vdom::attr("style", AttributeValue::from_styles(styles))
 }
 
 /// A helper function which takes an array of tuple of class and a flag. The final class is
@@ -246,7 +246,7 @@ pub fn open<MSG>(is_open: bool) -> Attribute<MSG> {
 ///     div(vec![inner_html("<p>This is a paragraph <b>injected</b> into a <strong>div</strong> via <i>inner_html</i></p>")], vec![]);
 /// ```
 pub fn inner_html<MSG>(inner_html: impl Into<Value>) -> Attribute<MSG> {
-    mt_dom::attr(
+    vdom::attr(
         "inner_html",
         AttributeValue::function_call(inner_html.into()),
     )
@@ -271,7 +271,7 @@ pub fn focus<MSG>(is_focus: bool) -> Attribute<MSG> {
 /// let data_id: Attribute<()> = attr("data-id", 42);
 /// ```
 pub fn attr<MSG>(att: &'static str, v: impl Into<Value>) -> Attribute<MSG> {
-    mt_dom::attr(att, AttributeValue::from(v.into()))
+    vdom::attr(att, AttributeValue::from(v.into()))
 }
 
 /// a utility function to return create an empty attr, useful for cases where branch expression
@@ -291,7 +291,7 @@ pub fn attr<MSG>(att: &'static str, v: impl Into<Value>) -> Attribute<MSG> {
 /// assert_eq!(title("this is the image"), result);
 /// ```
 pub fn empty_attr<MSG>() -> Attribute<MSG> {
-    mt_dom::attr("", AttributeValue::Empty)
+    vdom::attr("", AttributeValue::Empty)
 }
 
 /// merge the plain values

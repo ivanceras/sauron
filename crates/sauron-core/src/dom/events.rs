@@ -7,6 +7,7 @@ use crate::{
     vdom::{Attribute, Listener},
 };
 use wasm_bindgen::JsCast;
+use crate::vdom;
 #[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
 pub use web_sys::{
@@ -87,7 +88,7 @@ where
     F: Fn(Event) -> MSG + 'static,
     MSG: 'static,
 {
-    mt_dom::attr(event_name, AttributeValue::EventListener(Listener::from(f)))
+    vdom::attr(event_name, AttributeValue::EventListener(Listener::from(f)))
 }
 
 /// on click event

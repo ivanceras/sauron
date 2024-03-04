@@ -12,7 +12,7 @@ use crate::vdom;
 use crate::vdom::diff;
 use crate::vdom::KEY;
 use app_context::AppContext;
-use mt_dom::{diff_recursive, TreePath};
+use crate::vdom::{diff_recursive, TreePath};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
@@ -612,9 +612,6 @@ where
                         &old_node,
                         &new_node,
                         &path,
-                        &KEY,
-                        &|_old, _new| false,
-                        &|_old, _new| false,
                     )
                 })
                 .collect::<Vec<_>>();

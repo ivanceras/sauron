@@ -6,7 +6,7 @@ use crate::vdom::{Node, Leaf};
 pub(crate) fn extract_template<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> where MSG: 'static{
 
     match node {
-        Node::Element(elm) => mt_dom::element_ns(
+        Node::Element(elm) => vdom::element_ns(
             elm.namespace,
             elm.tag,
             elm.attributes()

@@ -3,6 +3,7 @@ use std::fmt;
 use std::borrow::Cow;
 
 /// A leaf node value of html dom tree
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Leaf {
     /// Text variant of a virtual node
     Text(Cow<'static, str>),
@@ -53,6 +54,7 @@ impl Leaf {
     }
 }
 
+/*
 impl fmt::Debug for Leaf {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -86,4 +88,5 @@ impl PartialEq for Leaf {
         }
     }
 }
+*/
 

@@ -8,7 +8,7 @@ use crate::{
     vdom::{Attribute, Leaf, NodeTrait},
 };
 use js_sys::Function;
-use mt_dom::TreePath;
+use crate::vdom::TreePath;
 use std::collections::HashMap;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
@@ -205,7 +205,7 @@ where
 
     /// set the element attribute
     pub fn set_element_attributes(&self, element: &Element, attrs: &[&Attribute<MSG>]) {
-        let attrs = mt_dom::merge_attributes_of_same_name(attrs);
+        let attrs = vdom::merge_attributes_of_same_name(attrs);
         for att in attrs {
             self.set_element_attribute(element, &att);
         }

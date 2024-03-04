@@ -1,7 +1,7 @@
 //! Provides functions and macros to build svg elements
 use crate::vdom;
 
-pub use mt_dom::{element, element_ns};
+pub use crate::vdom::{element, element_ns};
 pub use tags::commons;
 pub use tags::commons::*;
 pub use tags::special;

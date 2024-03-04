@@ -6,6 +6,7 @@ use crate::{
     vdom::{Attribute, Element, Leaf, Node, NodeTrait},
 };
 use std::fmt;
+use crate::vdom;
 
 const DEFAULT_INDENT_SIZE: usize = 2;
 
@@ -160,7 +161,7 @@ impl<MSG> Render for Element<MSG> {
 
         let ref_attrs: Vec<&Attribute<MSG>> = self.attributes().iter().collect();
         let merged_attributes: Vec<Attribute<MSG>> =
-            mt_dom::merge_attributes_of_same_name(&ref_attrs);
+            vdom::merge_attributes_of_same_name(&ref_attrs);
 
         for attr in &merged_attributes {
             // dont render empty attribute

@@ -1,9 +1,10 @@
 //! Provides functions and macros to build html elements
 use crate::vdom::{Attribute, Node, NodeTrait};
-pub use mt_dom::{element, element_ns};
+pub use crate::vdom::{element, element_ns};
 pub use tags::{commons::*, self_closing::*, *};
 use std::borrow::Cow;
 use crate::vdom::Leaf;
+use crate::vdom;
 
 #[macro_use]
 pub mod attributes;
@@ -154,7 +155,7 @@ pub fn comment<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG>
 /// let node: Node<()> = fragment([div([],[]), span([],[])]);
 /// ```
 pub fn fragment<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
-    mt_dom::fragment(nodes)
+    vdom::fragment(nodes)
 }
 
 /// create a doctype
