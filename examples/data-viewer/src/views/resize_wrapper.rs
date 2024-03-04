@@ -1,7 +1,7 @@
 use crate::views::{data_view, DataView};
 use sauron::{
     html::{attributes::*, events::*, *},
-    jss, Application, Cmd, Component, Node, NodeMapMsg,
+    jss, Application, Cmd, Component, Node,
 };
 
 #[derive(Debug, PartialEq)]

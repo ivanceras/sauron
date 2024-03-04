@@ -11,7 +11,7 @@ use sauron::{
         units::*,
         *,
     },
-    Component, Effects, Node, NodeMapMsg,
+    Component, Effects, Node,
 };
 use std::{
     cell::RefCell,
