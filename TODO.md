@@ -238,6 +238,9 @@
     - See if there are performance penalty
 - [ ] Make template node for when app view is first created
     - [ ] The template is then patched when the app is mounted.
+- [ ] Create a `view!` macro which generated the view function + template + prediff functions
+- [ ] Make a variant of `Node` leaf to be `Component`, component can contain attributes and optionally children components + elements
+    - [ ] This requires moving the mt-dom types into sauron-core so as to make a specific diff function for component
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)

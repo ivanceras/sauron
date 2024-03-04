@@ -8,6 +8,7 @@ use std::{
     rc::Rc,
     rc::Weak,
 };
+use super::template::extract_template;
 
 /// AppContext module pertains only to application state and manages objects that affects it.
 /// It has no access to the dom, threads or any of the processing details that Program has to do.
@@ -127,7 +128,8 @@ where
     pub fn new(app: APP) -> Self {
         use crate::render::Render;
         let view = app.view();
-        let template = Self::extract_template(&view);
+        //TODO: do something with the template here
+        let template = extract_template(&view);
         log::info!("{}", template.render_to_string());
         Self {
             app: Rc::new(RefCell::new(app)),
@@ -137,30 +139,6 @@ where
         }
     }
 
-    fn extract_template(node: &vdom::Node<MSG>) -> vdom::Node<MSG> {
-        use crate::vdom::map_msg::AttributeMapMsg;
-
-        match node {
-            vdom::Node::Element(elm) => mt_dom::element_ns(
-                elm.namespace,
-                elm.tag,
-                elm.attributes()
-                    .iter()
-                    .filter(|att| att.is_static_str())
-                    .cloned(),
-                elm.children().iter().map(Self::extract_template),
-                elm.self_closing,
-            ),
-            vdom::Node::Fragment(nodes) => vdom::Node::Fragment(
-                nodes
-                    .iter()
-                    .map(|node| Self::extract_template(node))
-                    .collect(),
-            ),
-            vdom::Node::Leaf(leaf) => vdom::Node::Leaf(leaf.clone()),
-            vdom::Node::NodeList(_node_list) => unreachable!("This has been unrolled"),
-        }
-    }
 
     pub fn init_app(&self) -> Cmd<APP, MSG> {
         self.app.borrow_mut().init()

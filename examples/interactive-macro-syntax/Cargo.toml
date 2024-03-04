@@ -1,5 +1,5 @@
 [package]
-name = "interactive-prediff"
+name = "interactive-macro-syntax"
 version = "0.1.0"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"

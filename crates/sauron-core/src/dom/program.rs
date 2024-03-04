@@ -29,6 +29,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
 
 mod app_context;
+pub(crate) mod template;
 
 pub(crate) type EventClosures = Vec<Closure<dyn FnMut(web_sys::Event)>>;
 pub(crate) type Closures = Vec<Closure<dyn FnMut()>>;
