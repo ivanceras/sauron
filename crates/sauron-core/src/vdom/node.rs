@@ -294,9 +294,9 @@ impl<MSG> Node<MSG> {
 /// create a virtual node with tag, attrs and children
 /// # Example
 /// ```rust
-/// use mt_dom::{Node,element,attr};
+/// use sauron::{Node,vdom::element,attr};
 ///
-/// let div:Node = element(
+/// let div:Node<()> = element(
 ///          "div",
 ///          vec![attr("class", "container")],
 ///          vec![],
@@ -314,9 +314,9 @@ pub fn element<MSG>(
 /// create a virtual node with namespace, tag, attrs and children
 /// # Example
 /// ```rust
-/// use mt_dom::{Node,element_ns,attr};
+/// use sauron::{Node, vdom::element_ns,attr};
 ///
-/// let svg: Node = element_ns(
+/// let svg: Node<()> = element_ns(
 ///         Some("http://www.w3.org/2000/svg"),
 ///          "svg",
 ///          vec![attr("width","400"), attr("height","400")],

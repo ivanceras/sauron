@@ -75,8 +75,8 @@ impl<MSG> Attribute<MSG> {
 /// Create an attribute
 /// # Example
 /// ```rust
-/// use mt_dom::{Attribute,attr};
-/// let class: Attribute = attr("class", "container");
+/// use sauron::vdom::{Attribute,attr};
+/// let class: Attribute<()> = attr("class", "container");
 /// ```
 #[inline]
 pub fn attr<MSG>(name: AttributeName, value: impl Into<AttributeValue<MSG>>) -> Attribute<MSG> {
@@ -86,9 +86,9 @@ pub fn attr<MSG>(name: AttributeName, value: impl Into<AttributeValue<MSG>>) -> 
 /// Create an attribute with namespace
 /// # Example
 /// ```rust
-/// use mt_dom::{Attribute,attr_ns};
+/// use sauron::vdom::{Attribute,attr_ns};
 ///
-/// let href: Attribute = attr_ns(Some("http://www.w3.org/1999/xlink"), "href", "cool-script.js");
+/// let href: Attribute<()> = attr_ns(Some("http://www.w3.org/1999/xlink"), "href", "cool-script.js");
 /// ```
 #[inline]
 pub fn attr_ns<MSG>(

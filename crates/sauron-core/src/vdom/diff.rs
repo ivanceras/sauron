@@ -16,10 +16,10 @@ use std::{cmp, mem};
 ///
 /// # Example
 /// ```rust
-/// use mt_dom::{diff::*, patch::*, *};
+/// use sauron::{diff::*, vdom::element, *};
 ///
 ///
-/// let old: Node = element(
+/// let old: Node<()> = element(
 ///     "main",
 ///     vec![attr("class", "container")],
 ///     vec![
@@ -28,7 +28,7 @@ use std::{cmp, mem};
 ///     ],
 /// );
 ///
-/// let new: Node = element(
+/// let new: Node<()> = element(
 ///     "main",
 ///     vec![attr("class", "container")],
 ///     vec![element("div", vec![attr("key", "2")], vec![])],
