@@ -29,5 +29,7 @@ fn must_diff() {
 
     let patch = diff(&old, &new);
     dbg!(&patch);
-    assert_eq!(patch, vec![]);
+    assert_eq!(patch, vec![Patch::add_attributes(&"div", TreePath::new([]), &[skip_criteria(1001)]),
+        Patch::replace_node(None, TreePath::new([0]), &[text("the difference here")])
+    ]);
 }
