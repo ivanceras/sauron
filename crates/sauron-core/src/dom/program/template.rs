@@ -1,11 +1,12 @@
 use crate::vdom;
 use crate::vdom::map_msg::AttributeMapMsg;
+use crate::vdom::{Node, Leaf};
 
 /// extract the template from a node
-pub(crate) fn extract_template<MSG>(node: &vdom::Node<MSG>) -> vdom::Node<MSG> where MSG: 'static{
+pub(crate) fn extract_template<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> where MSG: 'static{
 
     match node {
-        vdom::Node::Element(elm) => mt_dom::element_ns(
+        Node::Element(elm) => mt_dom::element_ns(
             elm.namespace,
             elm.tag,
             elm.attributes()
@@ -15,13 +16,24 @@ pub(crate) fn extract_template<MSG>(node: &vdom::Node<MSG>) -> vdom::Node<MSG> w
             elm.children().iter().map(extract_template),
             elm.self_closing,
         ),
-        vdom::Node::Fragment(nodes) => vdom::Node::Fragment(
+        Node::Fragment(nodes) => Node::Fragment(
             nodes
                 .iter()
                 .map(|node| extract_template(node))
                 .collect(),
         ),
-        vdom::Node::Leaf(leaf) => vdom::Node::Leaf(leaf.clone()),
-        vdom::Node::NodeList(_node_list) => unreachable!("This has been unrolled"),
+        Node::Leaf(leaf) => {
+            if leaf.is_static_str(){
+                Node::Leaf(leaf.clone())
+            }else{
+                match leaf{
+                    Leaf::Text(_) => Node::Leaf(Leaf::Text("".into())),
+                    Leaf::SafeHtml(_) => Node::Leaf(Leaf::SafeHtml("".into())),
+                    Leaf::Comment(_) => Node::Leaf(Leaf::Comment("".into())),
+                    Leaf::DocType(_) => Node::Leaf(Leaf::DocType("".into())),
+                }
+            }
+        }
+        Node::NodeList(_node_list) => unreachable!("This has been unrolled"),
     }
 }

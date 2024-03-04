@@ -84,7 +84,7 @@ impl Application<Msg> for App {
             <div class="some-class" id="some-id" {attr("data-id", 1)}>
                 <div id="current-time">{text!("Today is {}",self.date.to_locale_string("en-GB", &JsValue::undefined()))}</div>
                 <div>
-                        {text("Your name is: ")}
+                        "Your name is: "
                         <input type="text"
                                 on_input=|event: InputEvent| Msg::ChangeName(event.value())
                                 placeholder="John Smith"
@@ -93,7 +93,7 @@ impl Application<Msg> for App {
                         <button on_click=|event: MouseEvent| {
                                 trace!("Clicked at ({},{})", event.x(), event.y());
                                 Msg::Click}>
-                            {text!("Click me!")}
+                            Click me!
                         </button>
                         <button on_dblclick=|event: MouseEvent| {
                                 trace!("Double clicked at ({},{})", event.x(), event.y());
@@ -126,7 +126,7 @@ impl Application<Msg> for App {
                         <p>{text!("{}", self.biography)}</p>
                 </div>
                 <div>
-                        {text("What are you thinking right now?")}
+                        "What are you thinking right now?"
                         <input type="text"
                                 on_change=|event: InputEvent| Msg::ChangeThought(event.value())
                                 placeholder="Elephants..."
