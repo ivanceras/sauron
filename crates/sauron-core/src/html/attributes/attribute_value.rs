@@ -3,8 +3,10 @@ use crate::{
     vdom::Listener,
 };
 use std::fmt::{self, Debug};
+use derive_where::derive_where;
 
 /// Values of an attribute can be in these variants
+#[derive_where(Clone, Debug)]
 pub enum AttributeValue<MSG> {
     /// an argument value, to be called as parameter, the function is called to the element
     FunctionCall(Value),
@@ -19,35 +21,8 @@ pub enum AttributeValue<MSG> {
 }
 
 /// This is written manually, so we don't push
-/// constraint on MSG to be Clone
-impl<MSG> Clone for AttributeValue<MSG> {
-    fn clone(&self) -> Self {
-        match self {
-            AttributeValue::FunctionCall(this) => AttributeValue::FunctionCall(this.clone()),
-            AttributeValue::Simple(this) => AttributeValue::Simple(this.clone()),
-            AttributeValue::Style(this) => AttributeValue::Style(this.clone()),
-            AttributeValue::EventListener(this) => AttributeValue::EventListener(this.clone()),
-            AttributeValue::Empty => AttributeValue::Empty,
-        }
-    }
-}
-
-/// This is written manually, so we don't push
-/// constraint on MSG to be Debug
-impl<MSG> Debug for AttributeValue<MSG> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            AttributeValue::FunctionCall(this) => this.fmt(f),
-            AttributeValue::Simple(this) => this.fmt(f),
-            AttributeValue::Style(this) => this.fmt(f),
-            AttributeValue::EventListener(this) => this.fmt(f),
-            AttributeValue::Empty => write!(f, "Empty"),
-        }
-    }
-}
-
-/// This is written manually, so we don't push
 /// constraint on MSG to be PartialEq
+/// and also, derive_where can not equate on event listeners
 impl<MSG> PartialEq for AttributeValue<MSG> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
