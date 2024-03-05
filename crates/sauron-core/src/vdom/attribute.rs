@@ -2,8 +2,17 @@
 
 use indexmap::IndexMap;
 use derive_where::derive_where;
-use crate::vdom::AttributeValue;
 
+pub use attribute_value::AttributeValue;
+pub use value::Value;
+pub use listener::Listener;
+pub use style::Style;
+
+
+mod attribute_value;
+mod listener;
+mod style;
+mod value;
 
 /// The type of the Namspace
 pub type Namespace = &'static str;

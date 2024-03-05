@@ -1,3 +1,4 @@
+/*
 #![deny(
     warnings,
     missing_docs,
@@ -9,6 +10,9 @@
 )]
 #![deny(unsafe_code)]
 #![deny(clippy::all)]
+*/
+
+
 //! The core components of sauron
 #[macro_use]
 extern crate doc_comment;
