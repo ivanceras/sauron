@@ -6,10 +6,7 @@ pub use fns::{rgb, rgba, rotate};
 mod fns;
 
 #[inline]
-fn unit<V>(unit_name: &str, v: V) -> String
-where
-    V: Into<Value>,
-{
+fn unit(unit_name: &str, v: impl Into<Value>) -> String {
     let value: Value = v.into();
     match value {
         Value::Vec(values) => values
@@ -33,9 +30,7 @@ macro_rules! declare_units{
             $(#[$attr])*
             ///
             /// [MDN reference](https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Values_and_units)
-            pub fn $name<V>(v: V) -> String
-                where V: Into<Value>
-            {
+            pub fn $name(v: impl Into<Value>) -> String {
                 unit(stringify!($name), v)
             }
         )*
@@ -50,11 +45,9 @@ macro_rules! declare_units{
             $(#[$attr])*
             ///
             /// [MDN reference](https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Values_and_units)
-            pub fn $name<V>(v: V) -> String
-                where V: Into<Value>
-              {
+            pub fn $name(v: impl Into<Value>) -> String {
                   unit($unit, v)
-              }
+            }
         )*
     }
 }
