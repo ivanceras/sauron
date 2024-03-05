@@ -1,6 +1,7 @@
 use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::vdom::AttributeValue;
+use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
 
 /// A component has a view and can update itself.
@@ -220,9 +221,11 @@ pub trait StatefulComponent<MSG>: Component<MSG, MSG>
 where
     MSG: 'static,
 {
-    /// returns the attributes that is observed by this component
-    /// These are the names of the attributes the component is interested in
-    fn observed_attributes() -> Vec<AttributeName>
+    /// create the stateful component with this attributes
+    fn build(
+        atts: impl IntoIterator<Item = Attribute<MSG>>,
+        children: impl IntoIterator<Item = Node<MSG>>,
+    ) -> Self
     where
         Self: Sized;
 
@@ -238,6 +241,15 @@ where
     ) where
         Self: Sized;
 
+    /// remove the attribute with this name
+    fn remove_attribute(&mut self, attr_name: AttributeName);
+
+    /// append a child into this component
+    fn append_child(&mut self, child: Node<MSG>);
+
+    /// remove a child in this index
+    fn remove_child(&mut self, index: usize);
+
     /// the component is attached to the dom
     fn connected_callback(&mut self);
     /// the component is removed from the DOM
@@ -245,6 +257,19 @@ where
 
     /// the component is moved or attached to the dom
     fn adopted_callback(&mut self);
+}
+
+/// create a stateful component node
+pub fn component<COMP, MSG>(
+    attrs: impl IntoIterator<Item = Attribute<MSG>>,
+    children: impl IntoIterator<Item = Node<MSG>>,
+) -> Node<MSG>
+where
+    COMP: StatefulComponent<MSG> + 'static,
+    MSG: 'static,
+{
+    let comp = COMP::build(attrs, children);
+    Node::Leaf(Leaf::Component(Box::new(comp)))
 }
 
 #[cfg(test)]
