@@ -1,10 +1,10 @@
 //! Provides functions and macros to build html elements
-use crate::vdom::{Attribute, Node, NodeTrait};
-pub use crate::vdom::{element, element_ns};
-pub use tags::{commons::*, self_closing::*, *};
-use std::borrow::Cow;
-use crate::vdom::Leaf;
 use crate::vdom;
+use crate::vdom::Leaf;
+pub use crate::vdom::{element, element_ns};
+use crate::vdom::{Attribute, Node, NodeTrait};
+use std::borrow::Cow;
+pub use tags::{commons::*, self_closing::*, *};
 
 #[macro_use]
 pub mod attributes;
@@ -116,8 +116,7 @@ macro_rules! text {
 /// use sauron::*;
 /// let node: Node<()> = text("hi");
 /// ```
-pub fn text<MSG>(s: impl ToString) -> Node<MSG>
-{
+pub fn text<MSG>(s: impl ToString) -> Node<MSG> {
     Node::Leaf(Leaf::Text(Cow::from(s.to_string())))
 }
 
@@ -131,8 +130,7 @@ pub fn text<MSG>(s: impl ToString) -> Node<MSG>
 ///
 /// let node: Node<()> = safe_html("<div>In a safe html</div>");
 /// ```
-pub fn safe_html<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG>
-{
+pub fn safe_html<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG> {
     Node::Leaf(Leaf::SafeHtml(s.into()))
 }
 
@@ -142,8 +140,7 @@ pub fn safe_html<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG>
 /// use sauron::*;
 /// let node: Node<()> = comment("This is a comment");
 /// ```
-pub fn comment<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG>
-{
+pub fn comment<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG> {
     Node::Leaf(Leaf::Comment(s.into()))
 }
 

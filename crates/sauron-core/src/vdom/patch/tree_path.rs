@@ -160,9 +160,8 @@ fn traverse_node_by_path<'a, MSG>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     use crate::vdom::*;
-    
 
     #[test]
     fn test_traverse() {
@@ -180,37 +179,17 @@ mod tests {
                     "div",
                     vec![attr("class", "[0]"), attr("id", "1")],
                     vec![
-                        element(
-                            "div",
-                            vec![attr("class", "[0,0]"), attr("id", "2")],
-                            vec![],
-                        ),
-                        element(
-                            "div",
-                            vec![attr("class", "[0,1]"), attr("id", "3")],
-                            vec![],
-                        ),
+                        element("div", vec![attr("class", "[0,0]"), attr("id", "2")], vec![]),
+                        element("div", vec![attr("class", "[0,1]"), attr("id", "3")], vec![]),
                     ],
                 ),
                 element(
                     "div",
                     vec![attr("class", "[1]"), attr("id", "4")],
                     vec![
-                        element(
-                            "div",
-                            vec![attr("class", "[1,0]"), attr("id", "5")],
-                            vec![],
-                        ),
-                        element(
-                            "div",
-                            vec![attr("class", "[1,1]"), attr("id", "6")],
-                            vec![],
-                        ),
-                        element(
-                            "div",
-                            vec![attr("class", "[1,2]"), attr("id", "7")],
-                            vec![],
-                        ),
+                        element("div", vec![attr("class", "[1,0]"), attr("id", "5")], vec![]),
+                        element("div", vec![attr("class", "[1,1]"), attr("id", "6")], vec![]),
+                        element("div", vec![attr("class", "[1,2]"), attr("id", "7")], vec![]),
                     ],
                 ),
             ],
@@ -219,11 +198,7 @@ mod tests {
     }
 
     // index is the index of this code with respect to it's sibling
-    fn assert_traverse_match(
-        node: &Node<()>,
-        node_idx: &mut usize,
-        path: Vec<usize>,
-    ) {
+    fn assert_traverse_match(node: &Node<()>, node_idx: &mut usize, path: Vec<usize>) {
         let id = node.attribute_value(&"id").unwrap()[0];
         let class = node.attribute_value(&"class").unwrap()[0];
         assert_eq!(id.as_str(), Some(node_idx.to_string()).as_deref());
@@ -283,16 +258,8 @@ mod tests {
             "div",
             vec![attr("class", "[0]"), attr("id", "1")],
             vec![
-                element(
-                    "div",
-                    vec![attr("class", "[0,0]"), attr("id", "2")],
-                    vec![],
-                ),
-                element(
-                    "div",
-                    vec![attr("class", "[0,1]"), attr("id", "3")],
-                    vec![],
-                ),
+                element("div", vec![attr("class", "[0,0]"), attr("id", "2")], vec![]),
+                element("div", vec![attr("class", "[0,1]"), attr("id", "3")], vec![]),
             ],
         );
         assert_eq!(Some(&expected), found);
@@ -303,11 +270,7 @@ mod tests {
         let node = sample_node();
         let path = TreePath::new(vec![0, 0]);
         let found = path.find_node_by_path(&node);
-        let expected = element(
-            "div",
-            vec![attr("class", "[0,0]"), attr("id", "2")],
-            vec![],
-        );
+        let expected = element("div", vec![attr("class", "[0,0]"), attr("id", "2")], vec![]);
         assert_eq!(Some(&expected), found);
     }
 
@@ -316,11 +279,7 @@ mod tests {
         let node = sample_node();
         let path = TreePath::new(vec![0, 1]);
         let found = path.find_node_by_path(&node);
-        let expected = element(
-            "div",
-            vec![attr("class", "[0,1]"), attr("id", "3")],
-            vec![],
-        );
+        let expected = element("div", vec![attr("class", "[0,1]"), attr("id", "3")], vec![]);
         assert_eq!(Some(&expected), found);
     }
 
@@ -333,21 +292,9 @@ mod tests {
             "div",
             vec![attr("class", "[1]"), attr("id", "4")],
             vec![
-                element(
-                    "div",
-                    vec![attr("class", "[1,0]"), attr("id", "5")],
-                    vec![],
-                ),
-                element(
-                    "div",
-                    vec![attr("class", "[1,1]"), attr("id", "6")],
-                    vec![],
-                ),
-                element(
-                    "div",
-                    vec![attr("class", "[1,2]"), attr("id", "7")],
-                    vec![],
-                ),
+                element("div", vec![attr("class", "[1,0]"), attr("id", "5")], vec![]),
+                element("div", vec![attr("class", "[1,1]"), attr("id", "6")], vec![]),
+                element("div", vec![attr("class", "[1,2]"), attr("id", "7")], vec![]),
             ],
         );
         assert_eq!(Some(&expected), found);
@@ -358,11 +305,7 @@ mod tests {
         let node = sample_node();
         let path = TreePath::new(vec![1, 0]);
         let found = path.find_node_by_path(&node);
-        let expected = element(
-            "div",
-            vec![attr("class", "[1,0]"), attr("id", "5")],
-            vec![],
-        );
+        let expected = element("div", vec![attr("class", "[1,0]"), attr("id", "5")], vec![]);
         assert_eq!(Some(&expected), found);
     }
 
@@ -371,11 +314,7 @@ mod tests {
         let node = sample_node();
         let path = TreePath::new(vec![1, 1]);
         let found = path.find_node_by_path(&node);
-        let expected = element(
-            "div",
-            vec![attr("class", "[1,1]"), attr("id", "6")],
-            vec![],
-        );
+        let expected = element("div", vec![attr("class", "[1,1]"), attr("id", "6")], vec![]);
         assert_eq!(Some(&expected), found);
     }
 

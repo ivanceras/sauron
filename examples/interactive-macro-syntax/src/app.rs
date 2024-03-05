@@ -80,7 +80,7 @@ impl Application<Msg> for App {
     }
 
     fn view(&self) -> Node<Msg> {
-        node!{
+        node! {
             <div class="some-class" id="some-id" {attr("data-id", 1)}>
                 <div id="current-time">{text!("Today is {}",self.date.to_locale_string("en-GB", &JsValue::undefined()))}</div>
                 <div>

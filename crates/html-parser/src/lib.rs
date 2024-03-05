@@ -5,8 +5,8 @@ use rphtml::parser::NodeType;
 use rphtml::types::BoxDynError;
 use sauron_core::{
     html::{attributes::*, lookup, *},
-    vdom::Node,
     vdom::AttributeValue,
+    vdom::Node,
     vdom::Value,
 };
 use std::fmt;

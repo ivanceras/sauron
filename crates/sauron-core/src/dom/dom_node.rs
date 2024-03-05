@@ -1,3 +1,4 @@
+use crate::vdom::TreePath;
 use crate::{
     dom::events::MountEvent,
     dom::{self, Application, Program},
@@ -5,10 +6,9 @@ use crate::{
     html,
     html::attributes::{Listener, SegregatedAttributes},
     vdom,
-    vdom::{Attribute, Leaf, NodeTrait, AttributeValue, },
+    vdom::{Attribute, AttributeValue, Leaf, NodeTrait},
 };
 use js_sys::Function;
-use crate::vdom::TreePath;
 use std::collections::HashMap;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};

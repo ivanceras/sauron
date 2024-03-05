@@ -1,6 +1,6 @@
 use crate::vdom::Value;
-use std::fmt;
 use std::borrow::Cow;
+use std::fmt;
 
 /// css styles
 /// style can be converted into an attribute

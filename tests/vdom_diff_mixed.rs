@@ -57,16 +57,8 @@ fn mixed_key_and_no_key_with_2_matched() {
     assert_eq!(
         diff,
         vec![
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![1, 0]),
-                vec![&leaf("1")]
-            ),
-            Patch::replace_node(
-                None,
-                TreePath::new(vec![2, 0]),
-                vec![&leaf("3")]
-            ),
+            Patch::replace_node(None, TreePath::new(vec![1, 0]), vec![&leaf("1")]),
+            Patch::replace_node(None, TreePath::new(vec![2, 0]), vec![&leaf("3")]),
         ]
     );
 }

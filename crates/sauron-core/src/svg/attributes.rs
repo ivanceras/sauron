@@ -1,8 +1,8 @@
 //! provides functions and macros for building svg attributes
-use crate::vdom::Value;
 use crate::vdom::AttributeValue;
-pub use commons::*;
+use crate::vdom::Value;
 use crate::vdom::{attr, attr_ns};
+pub use commons::*;
 pub use special::*;
 
 pub(crate) const XLINK_NAMESPACE: &str = "http://www.w3.org/1999/xlink";

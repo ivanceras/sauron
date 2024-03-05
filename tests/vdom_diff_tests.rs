@@ -31,8 +31,7 @@ fn test_replace_text_node() {
 
 #[test]
 fn test_replace_node_in_child() {
-    let old: Node<()> =
-        element("main", vec![], vec![element("div", vec![], vec![])]);
+    let old: Node<()> = element("main", vec![], vec![element("div", vec![], vec![])]);
     let new = element("main", vec![], vec![element("span", vec![], vec![])]);
 
     let diff = diff(&old, &new);
@@ -56,10 +55,7 @@ fn test_205() {
             element(
                 "b",
                 vec![],
-                vec![
-                    element("i", vec![], vec![]),
-                    element("i", vec![], vec![]),
-                ],
+                vec![element("i", vec![], vec![]), element("i", vec![], vec![])],
             ),
             element("b", vec![], vec![]),
         ],
@@ -258,8 +254,7 @@ fn test_multiple_calls_to_style() {
 fn inner_html_func_calls() {
     let old: Node<()> = element("div", vec![], vec![]);
 
-    let new: Node<()> =
-        element("div", vec![attr("inner_html", "<h1>Hello</h2>")], vec![]);
+    let new: Node<()> = element("div", vec![attr("inner_html", "<h1>Hello</h2>")], vec![]);
 
     let diff = diff(&old, &new);
     assert_eq!(

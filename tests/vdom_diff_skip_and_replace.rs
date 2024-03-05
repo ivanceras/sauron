@@ -3,15 +3,10 @@ use sauron::vdom::{diff::diff, patch::*, *};
 
 #[test]
 fn force_replace() {
-    let old: Node<()> =
-        element("div", vec![attr("class", "[0]"), attr("id", "0")], vec![]);
+    let old: Node<()> = element("div", vec![attr("class", "[0]"), attr("id", "0")], vec![]);
     let new = element(
         "div",
-        vec![
-            attr("class", "[0]"),
-            attr("id", "0"),
-            attr("replace", true),
-        ],
+        vec![attr("class", "[0]"), attr("id", "0"), attr("replace", true)],
         vec![],
     );
 
@@ -28,8 +23,7 @@ fn force_replace() {
 
 #[test]
 fn force_skip() {
-    let old: Node<()> =
-        element("div", vec![attr("class", "[0]"), attr("id", "0")], vec![]);
+    let old: Node<()> = element("div", vec![attr("class", "[0]"), attr("id", "0")], vec![]);
     let new = element(
         "div",
         vec![attr("class", "[0]"), attr("id", "0"), attr("skip", true)],
@@ -42,8 +36,7 @@ fn force_skip() {
 
 #[test]
 fn skip_in_attribute() {
-    let old: Node<()> =
-        element("div", vec![attr("class", "[0]"), attr("id", "0")], vec![]);
+    let old: Node<()> = element("div", vec![attr("class", "[0]"), attr("id", "0")], vec![]);
     let new = element(
         "div",
         vec![attr("skip", true), attr("class", "[1]"), attr("id", "1")],
@@ -56,15 +49,10 @@ fn skip_in_attribute() {
 
 #[test]
 fn replace_true_in_attribute_must_replace_old_node_regardless() {
-    let old: Node<()> =
-        element("div", vec![attr("class", "[0]"), attr("id", "0")], vec![]);
+    let old: Node<()> = element("div", vec![attr("class", "[0]"), attr("id", "0")], vec![]);
     let new = element(
         "div",
-        vec![
-            attr("replace", true),
-            attr("class", "[1]"),
-            attr("id", "1"),
-        ],
+        vec![attr("replace", true), attr("class", "[1]"), attr("id", "1")],
         vec![],
     );
 

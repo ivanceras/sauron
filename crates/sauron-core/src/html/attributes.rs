@@ -1,17 +1,17 @@
 //! Create html [attributes][0]
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
-use std::borrow::Cow;
 use crate::vdom;
 use crate::vdom::AttributeValue;
 use crate::vdom::Value;
+use std::borrow::Cow;
 
+pub use crate::vdom::Listener;
+pub use crate::vdom::Style;
 pub use crate::{dom::Event, vdom::Attribute};
 pub use attribute_macros::commons::*;
 pub use attribute_macros::*;
-pub use crate::vdom::Listener;
 pub use special::{key, replace, skip, skip_criteria};
-pub use crate::vdom::Style;
 
 #[macro_use]
 mod attribute_macros;
@@ -44,9 +44,7 @@ pub fn styles<MSG>(
 pub fn styles_values<MSG>(
     pairs: impl IntoIterator<Item = (impl Into<Cow<'static, str>>, impl Into<Value>)>,
 ) -> Attribute<MSG> {
-    let styles = pairs
-        .into_iter()
-        .map(|(key, value)| Style::new(key, value));
+    let styles = pairs.into_iter().map(|(key, value)| Style::new(key, value));
     vdom::attr("style", AttributeValue::from_styles(styles))
 }
 
@@ -96,16 +94,12 @@ pub fn styles_flag<MSG>(
 ///        ("error", has_error),
 ///    ]);
 /// ```
-pub fn classes_flag<MSG>(pair: impl IntoIterator<Item = (impl Into<Value>, bool)>) -> Attribute<MSG> {
-    let class_list = pair.into_iter().filter_map(
-        |(class, flag)| {
-            if flag {
-                Some(class.into())
-            } else {
-                None
-            }
-        },
-    );
+pub fn classes_flag<MSG>(
+    pair: impl IntoIterator<Item = (impl Into<Value>, bool)>,
+) -> Attribute<MSG> {
+    let class_list =
+        pair.into_iter()
+            .filter_map(|(class, flag)| if flag { Some(class.into()) } else { None });
 
     classes(class_list)
 }

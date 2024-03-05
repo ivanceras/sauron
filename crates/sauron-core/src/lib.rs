@@ -1,4 +1,3 @@
-/*
 #![deny(
     warnings,
     missing_docs,
@@ -10,8 +9,6 @@
 )]
 #![deny(unsafe_code)]
 #![deny(clippy::all)]
-*/
-
 
 //! The core components of sauron
 #[macro_use]
@@ -40,9 +37,7 @@ pub mod prelude {
     pub use crate::svg::commons::*;
     pub use crate::svg::special::*;
     pub use crate::vdom::{
-        diff,
-        Attribute, AttributeValue, Value, Element, Listener, Node, NodeTrait, Patch,
-        TreePath,
+        diff, Attribute, AttributeValue, Element, Listener, Node, NodeTrait, Patch, TreePath, Value,
     };
 
     use cfg_if::cfg_if;

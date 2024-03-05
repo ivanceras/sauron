@@ -1,12 +1,11 @@
 use super::{AttributeName, Namespace, Tag};
-use std::fmt;
-use std::fmt::{Debug, Formatter};
-use crate::vdom::Leaf;
-use derive_where::derive_where;
-use crate::vdom::Element;
 use crate::vdom::Attribute;
 use crate::vdom::AttributeValue;
-
+use crate::vdom::Element;
+use crate::vdom::Leaf;
+use derive_where::derive_where;
+use std::fmt;
+use std::fmt::{Debug, Formatter};
 
 /// represents a node in a virtual dom
 /// A node could be an element which can contain one or more children of nodes.
@@ -33,8 +32,6 @@ pub enum Node<MSG> {
     /// A Leaf node
     Leaf(Leaf),
 }
-
-
 
 #[derive(Debug, Copy, Clone)]
 pub enum Error {
@@ -113,10 +110,7 @@ impl<MSG> Node<MSG> {
     /// Consume a mutable self and add a children to this node it if is an element
     /// will have no effect if it is a text node.
     /// This is used in building the nodes in a builder pattern
-    pub fn with_children(
-        mut self,
-        children: impl IntoIterator<Item = Node<MSG>>,
-    ) -> Self {
+    pub fn with_children(mut self, children: impl IntoIterator<Item = Node<MSG>>) -> Self {
         if let Some(element) = self.element_mut() {
             element.add_children(children);
         } else {
@@ -140,10 +134,7 @@ impl<MSG> Node<MSG> {
 
     /// add attributes to the node and returns itself
     /// this is used in view building
-    pub fn with_attributes(
-        mut self,
-        attributes: impl IntoIterator<Item = Attribute<MSG>>,
-    ) -> Self {
+    pub fn with_attributes(mut self, attributes: impl IntoIterator<Item = Attribute<MSG>>) -> Self {
         if let Some(elm) = self.element_mut() {
             elm.add_attributes(attributes);
         } else {
@@ -288,7 +279,6 @@ impl<MSG> Node<MSG> {
             None
         }
     }
-
 }
 
 /// create a virtual node with tag, attrs and children

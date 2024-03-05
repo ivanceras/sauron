@@ -1,13 +1,7 @@
 //! provides diffing algorithm which returns patches
+use super::{diff_lis, group_attributes_per_name, Attribute, Element, Node, Patch, TreePath};
 use super::{Tag, KEY};
-use super::{
-    group_attributes_per_name, Attribute, Element, Node,
-    Patch, TreePath,
-    diff_lis,
-};
 use std::{cmp, mem};
-
-
 
 /// Return the patches needed for `old_node` to have the same DOM as `new_node`
 ///
@@ -46,18 +40,16 @@ use std::{cmp, mem};
 ///     ]
 /// );
 /// ```
-pub fn diff<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> Vec<Patch<'a, MSG>> 
-
-{
+pub fn diff<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> Vec<Patch<'a, MSG>> {
     diff_recursive(old_node, new_node, &TreePath::root())
 }
 
-fn is_any_keyed<MSG>(nodes: &[Node<MSG>]) -> bool  {
+fn is_any_keyed<MSG>(nodes: &[Node<MSG>]) -> bool {
     nodes.iter().any(|child| is_keyed_node(child))
 }
 
 /// returns true any attributes of this node attribute has key in it
-fn is_keyed_node<MSG>(node: &Node<MSG>) -> bool  {
+fn is_keyed_node<MSG>(node: &Node<MSG>) -> bool {
     if let Some(attributes) = node.attributes() {
         attributes.iter().any(|att| att.name == *KEY)
     } else {
@@ -65,9 +57,7 @@ fn is_keyed_node<MSG>(node: &Node<MSG>) -> bool  {
     }
 }
 
-fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> bool 
-
-{
+fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> bool {
     // replace if they have different enum variants
     if mem::discriminant(old_node) != mem::discriminant(new_node) {
         return true;
@@ -112,9 +102,7 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
         }
     }
     // replace if they have different element tag
-    if let (Node::Element(old_element), Node::Element(new_element)) =
-        (old_node, new_node)
-    {
+    if let (Node::Element(old_element), Node::Element(new_element)) = (old_node, new_node) {
         // Replace if there are different element tags
         if old_element.tag != new_element.tag {
             return true;
@@ -128,7 +116,7 @@ pub fn diff_recursive<'a, MSG>(
     old_node: &'a Node<MSG>,
     new_node: &'a Node<MSG>,
     path: &TreePath,
-) -> Vec<Patch<'a, MSG>>  {
+) -> Vec<Patch<'a, MSG>> {
     let skip = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
         let new_skip_criteria = new_node.attribute_value(&"skip_criteria");
         let old_skip_criteria = old_node.attribute_value(&"skip_criteria");
@@ -168,11 +156,7 @@ pub fn diff_recursive<'a, MSG>(
     match (old_node, new_node) {
         (Node::Leaf(old_leaf), Node::Leaf(new_leaf)) => {
             if old_leaf != new_leaf {
-                let ct = Patch::replace_node(
-                    old_node.tag(),
-                    path.clone(),
-                    vec![new_node],
-                );
+                let ct = Patch::replace_node(old_node.tag(), path.clone(), vec![new_node]);
                 patches.push(ct);
             }
         }
@@ -184,14 +168,11 @@ pub fn diff_recursive<'a, MSG>(
         (Node::Fragment(old_nodes), Node::Fragment(new_nodes)) => {
             // we back track since Fragment is not a real node, but it would still
             // be traversed from the prior call
-            let patch =
-                diff_nodes(None, old_nodes, new_nodes, &path.backtrack());
+            let patch = diff_nodes(None, old_nodes, new_nodes, &path.backtrack());
             patches.extend(patch);
         }
         (Node::NodeList(_old_elements), Node::NodeList(_new_elements)) => {
-            panic!(
-                "Node list must have already unrolled when creating an element"
-            );
+            panic!("Node list must have already unrolled when creating an element");
         }
         _ => {
             unreachable!("Unequal variant discriminants should already have been handled");
@@ -205,7 +186,7 @@ fn diff_element<'a, MSG>(
     old_element: &'a Element<MSG>,
     new_element: &'a Element<MSG>,
     path: &TreePath,
-) -> Vec<Patch<'a, MSG>>  {
+) -> Vec<Patch<'a, MSG>> {
     let mut patches = create_attribute_patches(old_element, new_element, path);
 
     let more_patches = diff_nodes(
@@ -224,21 +205,14 @@ fn diff_nodes<'a, MSG>(
     old_children: &'a [Node<MSG>],
     new_children: &'a [Node<MSG>],
     path: &TreePath,
-) -> Vec<Patch<'a, MSG>>  {
-    let diff_as_keyed =
-        is_any_keyed(old_children) || is_any_keyed(new_children);
+) -> Vec<Patch<'a, MSG>> {
+    let diff_as_keyed = is_any_keyed(old_children) || is_any_keyed(new_children);
 
     if diff_as_keyed {
-        let keyed_patches = diff_lis::diff_keyed_nodes(
-            old_tag,
-            old_children,
-            new_children,
-            path,
-        );
+        let keyed_patches = diff_lis::diff_keyed_nodes(old_tag, old_children, new_children, path);
         keyed_patches
     } else {
-        let non_keyed_patches =
-            diff_non_keyed_nodes(old_tag, old_children, new_children, path);
+        let non_keyed_patches = diff_non_keyed_nodes(old_tag, old_children, new_children, path);
         non_keyed_patches
     }
 }
@@ -268,8 +242,7 @@ fn diff_non_keyed_nodes<'a, MSG>(
         // if we iterate trough the old elements, a new child_path is created for that iteration
         let child_path = path.traverse(index);
 
-        let old_child =
-            &old_children.get(index).expect("No old_node child node");
+        let old_child = &old_children.get(index).expect("No old_node child node");
         let new_child = &new_children.get(index).expect("No new child node");
 
         let more_patches = diff_recursive(old_child, new_child, &child_path);
@@ -292,10 +265,7 @@ fn diff_non_keyed_nodes<'a, MSG>(
             .skip(new_child_count)
             .enumerate()
             .map(|(i, old_child)| {
-                Patch::remove_node(
-                    old_child.tag(),
-                    path.traverse(new_child_count + i),
-                )
+                Patch::remove_node(old_child.tag(), path.traverse(new_child_count + i))
             })
             .collect::<Vec<_>>();
 
@@ -313,7 +283,7 @@ fn create_attribute_patches<'a, MSG>(
     old_element: &'a Element<MSG>,
     new_element: &'a Element<MSG>,
     path: &TreePath,
-) -> Vec<Patch<'a, MSG>>  {
+) -> Vec<Patch<'a, MSG>> {
     let new_attributes = new_element.attributes();
     let old_attributes = old_element.attributes();
 
@@ -336,19 +306,16 @@ fn create_attribute_patches<'a, MSG>(
     // or the values differ
     // add it to the AddAttribute patches
     for (new_attr_name, new_attrs) in new_attributes_grouped.iter() {
-        let old_attr_values =
-            old_attributes_grouped.get(new_attr_name).map(|attrs| {
-                attrs.iter().map(|attr| &attr.value).collect::<Vec<_>>()
-            });
+        let old_attr_values = old_attributes_grouped
+            .get(new_attr_name)
+            .map(|attrs| attrs.iter().map(|attr| &attr.value).collect::<Vec<_>>());
 
-        let new_attr_values =
-            new_attributes_grouped.get(new_attr_name).map(|attrs| {
-                attrs.iter().map(|attr| &attr.value).collect::<Vec<_>>()
-            });
+        let new_attr_values = new_attributes_grouped
+            .get(new_attr_name)
+            .map(|attrs| attrs.iter().map(|attr| &attr.value).collect::<Vec<_>>());
 
         if let Some(old_attr_values) = old_attr_values {
-            let new_attr_values =
-                new_attr_values.expect("must have new attr values");
+            let new_attr_values = new_attr_values.expect("must have new attr values");
             if old_attr_values != new_attr_values {
                 add_attributes.extend(new_attrs);
             }

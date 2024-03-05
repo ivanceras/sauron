@@ -64,7 +64,10 @@ where
     where
         F: Future<Output = MSG> + 'static,
     {
-        Self { task: Box::pin(f), done: false }
+        Self {
+            task: Box::pin(f),
+            done: false,
+        }
     }
 
     /// apply a function to the msg to create a different task which has a different msg
@@ -83,9 +86,9 @@ where
     /// get the next value
     async fn next(&mut self) -> Option<MSG> {
         // return None is already done since awaiting it again is an error
-        if self.done{
+        if self.done {
             None
-        }else{
+        } else {
             let msg = self.task.as_mut().await;
             // mark as done
             self.done = true;

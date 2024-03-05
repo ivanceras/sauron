@@ -1,8 +1,8 @@
 use crate::dom::dom_node::find_all_nodes;
 use crate::dom::dom_node::intern;
 use crate::dom::{Application, Program};
-use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use crate::vdom::TreePath;
+use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use std::collections::BTreeMap;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;

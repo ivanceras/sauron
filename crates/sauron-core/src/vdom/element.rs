@@ -1,7 +1,6 @@
 use super::attribute::{AttributeName, Namespace, Tag};
 use super::{Attribute, Node};
 
-
 use crate::vdom::AttributeValue;
 use derive_where::derive_where;
 
@@ -33,7 +32,6 @@ pub struct Element<MSG> {
     pub self_closing: bool,
 }
 
-
 impl<MSG> Element<MSG> {
     /// create a new instance of an element
     pub fn new(
@@ -61,10 +59,7 @@ impl<MSG> Element<MSG> {
     }
 
     /// add attributes to this element
-    pub fn add_attributes(
-        &mut self,
-        attrs: impl IntoIterator<Item = Attribute<MSG>>,
-    ) {
+    pub fn add_attributes(&mut self, attrs: impl IntoIterator<Item = Attribute<MSG>>) {
         self.attrs.extend(attrs)
     }
 
@@ -149,10 +144,7 @@ impl<MSG> Element<MSG> {
 
     /// remove the existing values of this attribute
     /// and add the new values
-    pub fn set_attributes(
-        &mut self,
-        attrs: impl IntoIterator<Item = Attribute<MSG>>,
-    ) {
+    pub fn set_attributes(&mut self, attrs: impl IntoIterator<Item = Attribute<MSG>>) {
         for attr in attrs {
             self.remove_attribute(&attr.name);
             self.attrs.push(attr);
@@ -160,13 +152,9 @@ impl<MSG> Element<MSG> {
     }
 
     /// merge to existing attributes if it exist
-    pub fn merge_attributes(
-        &mut self,
-        new_attrs: impl IntoIterator<Item = Attribute<MSG>>,
-    ) {
+    pub fn merge_attributes(&mut self, new_attrs: impl IntoIterator<Item = Attribute<MSG>>) {
         for new_att in new_attrs {
-            if let Some(existing_attr) =
-                self.attrs.iter_mut().find(|att| att.name == new_att.name)
+            if let Some(existing_attr) = self.attrs.iter_mut().find(|att| att.name == new_att.name)
             {
                 existing_attr.value.extend(new_att.value);
             } else {

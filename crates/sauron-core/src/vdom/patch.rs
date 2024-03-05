@@ -3,7 +3,6 @@
 use super::Tag;
 use super::{Attribute, Node};
 
-
 use derive_where::derive_where;
 
 pub use tree_path::TreePath;
@@ -147,7 +146,6 @@ pub enum PatchType<'a, MSG> {
     },
 }
 
-
 impl<'a, MSG> Patch<'a, MSG> {
     /// return the path to traverse for this patch to get to the target Node
     pub fn path(&self) -> &TreePath {
@@ -211,10 +209,7 @@ impl<'a, MSG> Patch<'a, MSG> {
 
     /// create a patch where the target element that can be traverse
     /// using the patch path will be remove
-    pub fn remove_node(
-        tag: Option<&'a Tag>,
-        patch_path: TreePath,
-    ) -> Patch<'a, MSG> {
+    pub fn remove_node(tag: Option<&'a Tag>, patch_path: TreePath) -> Patch<'a, MSG> {
         Patch {
             tag,
             patch_path,

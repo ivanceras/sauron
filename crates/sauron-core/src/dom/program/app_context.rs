@@ -1,3 +1,4 @@
+use super::template::extract_template;
 #[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
 use crate::dom::{Application, Cmd};
@@ -8,7 +9,6 @@ use std::{
     rc::Rc,
     rc::Weak,
 };
-use super::template::extract_template;
 
 /// AppContext module pertains only to application state and manages objects that affects it.
 /// It has no access to the dom, threads or any of the processing details that Program has to do.
@@ -138,7 +138,6 @@ where
             pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
         }
     }
-
 
     pub fn init_app(&self) -> Cmd<APP, MSG> {
         self.app.borrow_mut().init()

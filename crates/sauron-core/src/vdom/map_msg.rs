@@ -1,11 +1,6 @@
-use crate::{
-    vdom::{Attribute, Element, Listener, Node, AttributeValue},
-};
+use crate::vdom::{Attribute, AttributeValue, Element, Listener, Node};
 
-
-
-impl<MSG> Node<MSG>
-{
+impl<MSG> Node<MSG> {
     /// map the msg of this node such that Node<MSG> becomes Node<MSG2>
     pub fn map_msg<F, MSG2>(self, cb: F) -> Node<MSG2>
     where
@@ -44,8 +39,7 @@ impl<MSG> Node<MSG>
     }
 }
 
-impl<MSG> Element<MSG>
-{
+impl<MSG> Element<MSG> {
     /// map the msg of this element such that `Element<MSG>` becomes `Element<MSG2>`
     pub fn map_msg<F, MSG2>(self, cb: F) -> Element<MSG2>
     where
@@ -71,8 +65,7 @@ impl<MSG> Element<MSG>
     }
 }
 
-impl<MSG> Attribute<MSG>
-{
+impl<MSG> Attribute<MSG> {
     /// map the msg of this attribute such that `Attribute<MSG>` becomes `Attribute<MSG2>`
     pub fn map_msg<F, MSG2>(self, cb: F) -> Attribute<MSG2>
     where
@@ -99,12 +92,11 @@ impl<MSG> Attribute<MSG>
     }
 
     pub(crate) fn is_static_str(&self) -> bool {
-        self.value.iter().all(|v|v.is_static_str())
+        self.value.iter().all(|v| v.is_static_str())
     }
 }
 
-impl<MSG> AttributeValue<MSG>
-{
+impl<MSG> AttributeValue<MSG> {
     /// map the msg of this AttributeValue such that `AttributeValue<MSG>` becomes
     /// `AttributeValue<MSG2>`
     pub fn map_msg<F, MSG2>(self, cb: F) -> AttributeValue<MSG2>

@@ -2,11 +2,9 @@
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
 use crate::dom::{document, window, Event};
-use crate::{
-    vdom::{Attribute, Listener, AttributeValue},
-};
-use wasm_bindgen::JsCast;
 use crate::vdom;
+use crate::vdom::{Attribute, AttributeValue, Listener};
+use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
 pub use web_sys::{
@@ -272,7 +270,6 @@ impl InputEvent {
         } else if let Some(select) = target.dyn_ref::<HtmlSelectElement>() {
             select.value()
         } else if let Some(html_elm) = target.dyn_ref::<HtmlElement>() {
-            
             html_elm.get_attribute("content").expect("get content")
         } else {
             panic!("fail in mapping event into input event");

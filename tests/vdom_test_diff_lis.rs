@@ -51,42 +51,18 @@ fn key_lis_1_to_9() {
                 Some(&"div"),
                 TreePath::new(vec![8]),
                 vec![
-                    &element(
-                        "div",
-                        vec![attr("key", "XXX4")],
-                        vec![leaf("lineXXX")]
-                    ),
-                    &element(
-                        "div",
-                        vec![attr("key", "XXX5")],
-                        vec![leaf("lineXXX")]
-                    ),
-                    &element(
-                        "div",
-                        vec![attr("key", "XXX6")],
-                        vec![leaf("lineXXX")]
-                    ),
+                    &element("div", vec![attr("key", "XXX4")], vec![leaf("lineXXX")]),
+                    &element("div", vec![attr("key", "XXX5")], vec![leaf("lineXXX")]),
+                    &element("div", vec![attr("key", "XXX6")], vec![leaf("lineXXX")]),
                 ]
             ),
             Patch::insert_before_node(
                 Some(&"div"),
                 TreePath::new(vec![0]),
                 vec![
-                    &element(
-                        "div",
-                        vec![attr("key", "XXX1")],
-                        vec![leaf("lineXXX")]
-                    ),
-                    &element(
-                        "div",
-                        vec![attr("key", "XXX2")],
-                        vec![leaf("lineXXX")]
-                    ),
-                    &element(
-                        "div",
-                        vec![attr("key", "XXX3")],
-                        vec![leaf("lineXXX")]
-                    ),
+                    &element("div", vec![attr("key", "XXX1")], vec![leaf("lineXXX")]),
+                    &element("div", vec![attr("key", "XXX2")], vec![leaf("lineXXX")]),
+                    &element("div", vec![attr("key", "XXX3")], vec![leaf("lineXXX")]),
                 ]
             )
         ]

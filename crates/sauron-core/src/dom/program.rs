@@ -11,8 +11,8 @@ use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
 
-use app_context::AppContext;
 use crate::vdom::{diff_recursive, TreePath};
+use app_context::AppContext;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
@@ -608,11 +608,7 @@ where
                     let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
                     log::debug!("new_node: {new_node:#?}");
                     log::debug!("old_node: {old_node:#?}");
-                    diff_recursive(
-                        old_node,
-                        new_node,
-                        &path,
-                    )
+                    diff_recursive(old_node, new_node, &path)
                 })
                 .collect::<Vec<_>>();
             log::info!("patches: {patches:#?}");
@@ -626,9 +622,8 @@ where
             log::debug!("There are {} patches", patches.len());
             log::debug!("patches: {patches:#?}");
         }
-        
-        self
-            .convert_patches(&patches)
+
+        self.convert_patches(&patches)
             .expect("must convert patches")
     }
 

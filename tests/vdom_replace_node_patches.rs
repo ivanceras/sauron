@@ -44,21 +44,9 @@ fn test_multiple_replace() {
                 Some(&"li"),
                 TreePath::new(vec![0, 0]),
                 vec![
-                    &element(
-                        "li",
-                        vec![attr("key", "10")],
-                        vec![leaf("item10")]
-                    ),
-                    &element(
-                        "li",
-                        vec![attr("key", "20")],
-                        vec![leaf("item20")]
-                    ),
-                    &element(
-                        "li",
-                        vec![attr("key", "30")],
-                        vec![leaf("item30")]
-                    ),
+                    &element("li", vec![attr("key", "10")], vec![leaf("item10")]),
+                    &element("li", vec![attr("key", "20")], vec![leaf("item20")]),
+                    &element("li", vec![attr("key", "30")], vec![leaf("item30")]),
                 ],
             ),
         ]

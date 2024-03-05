@@ -36,16 +36,8 @@ fn swap_999() {
     assert_eq!(
         diff,
         vec![
-            Patch::move_before_node(
-                Some(&"li"),
-                TreePath::new([1]),
-                [TreePath::new([998])]
-            ),
-            Patch::move_after_node(
-                Some(&"li"),
-                TreePath::new([997]),
-                [TreePath::new([1])]
-            ),
+            Patch::move_before_node(Some(&"li"), TreePath::new([1]), [TreePath::new([998])]),
+            Patch::move_after_node(Some(&"li"), TreePath::new([997]), [TreePath::new([1])]),
         ]
     );
 }
@@ -83,21 +75,9 @@ fn swap_rows_non_keyed() {
     assert_eq!(
         diff,
         vec![
-            Patch::add_attributes(
-                &"div",
-                TreePath::new([1]),
-                vec![&attr("class", "4")],
-            ),
-            Patch::replace_node(
-                None,
-                TreePath::new([1, 0]),
-                vec![&leaf("line4")]
-            ),
-            Patch::add_attributes(
-                &"div",
-                TreePath::new([3],),
-                [&attr("class", "2")],
-            ),
+            Patch::add_attributes(&"div", TreePath::new([1]), vec![&attr("class", "4")],),
+            Patch::replace_node(None, TreePath::new([1, 0]), vec![&leaf("line4")]),
+            Patch::add_attributes(&"div", TreePath::new([3],), [&attr("class", "2")],),
             Patch::replace_node(None, TreePath::new([3, 0],), [&leaf("line2")],)
         ]
     );
@@ -240,16 +220,8 @@ fn swap_rows_keyed() {
     assert_eq!(
         diff,
         vec![
-            Patch::move_before_node(
-                Some(&"div"),
-                TreePath::new([1]),
-                [TreePath::new([6])]
-            ),
-            Patch::move_after_node(
-                Some(&"div",),
-                TreePath::new([5]),
-                [TreePath::new([1])]
-            ),
+            Patch::move_before_node(Some(&"div"), TreePath::new([1]), [TreePath::new([6])]),
+            Patch::move_after_node(Some(&"div",), TreePath::new([5]), [TreePath::new([1])]),
         ]
     );
 }
@@ -289,16 +261,8 @@ fn swap_rows_keyed_6_items() {
     assert_eq!(
         diff,
         vec![
-            Patch::move_before_node(
-                Some(&"div",),
-                TreePath::new([1]),
-                [TreePath::new([4])]
-            ),
-            Patch::move_after_node(
-                Some(&"div"),
-                TreePath::new([3]),
-                [TreePath::new([1])]
-            ),
+            Patch::move_before_node(Some(&"div",), TreePath::new([1]), [TreePath::new([4])]),
+            Patch::move_after_node(Some(&"div"), TreePath::new([3]), [TreePath::new([1])]),
         ]
     );
 }

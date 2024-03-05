@@ -1,8 +1,4 @@
-use crate::{
-    html::attributes::Style,
-    vdom::Value,
-    vdom::Listener,
-};
+use crate::{html::attributes::Style, vdom::Listener, vdom::Value};
 
 use derive_where::derive_where;
 
@@ -41,7 +37,7 @@ impl<MSG> PartialEq for AttributeValue<MSG> {
     }
 }
 
-impl<MSG> Eq for AttributeValue<MSG>{}
+impl<MSG> Eq for AttributeValue<MSG> {}
 
 impl<MSG> From<Listener<MSG>> for AttributeValue<MSG> {
     fn from(listener: Listener<MSG>) -> Self {
@@ -101,8 +97,8 @@ impl<MSG> AttributeValue<MSG> {
 
     pub(crate) fn is_static_str(&self) -> bool {
         match self {
-            Self::Simple(v) =>  v.is_static_str(),
-            Self::Style(values) => values.iter().all(|v|v.is_static_str()),
+            Self::Simple(v) => v.is_static_str(),
+            Self::Style(values) => values.iter().all(|v| v.is_static_str()),
             Self::Empty => true,
             _ => false,
         }

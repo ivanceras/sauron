@@ -26,10 +26,7 @@ fn node_count5() {
             element(
                 "b",
                 vec![],
-                vec![
-                    element("i", vec![], vec![]),
-                    element("i", vec![], vec![]),
-                ],
+                vec![element("i", vec![], vec![]), element("i", vec![], vec![])],
             ),
             element("b", vec![], vec![]),
         ],

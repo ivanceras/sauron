@@ -1,13 +1,12 @@
 #![allow(clippy::type_complexity)]
 
-use indexmap::IndexMap;
 use derive_where::derive_where;
+use indexmap::IndexMap;
 
 pub use attribute_value::AttributeValue;
-pub use value::Value;
 pub use listener::Listener;
 pub use style::Style;
-
+pub use value::Value;
 
 mod attribute_value;
 mod listener;
@@ -22,7 +21,6 @@ pub type Tag = &'static str;
 
 /// The type of Attribute Name
 pub type AttributeName = &'static str;
-
 
 /// The key attribute
 pub static KEY: &AttributeName = &"key";
@@ -41,10 +39,13 @@ pub struct Attribute<MSG> {
     pub value: Vec<AttributeValue<MSG>>,
 }
 
-
 impl<MSG> Attribute<MSG> {
     /// create a plain attribute with namespace
-    pub fn new(namespace: Option<Namespace>, name: AttributeName, value: AttributeValue<MSG>) -> Self {
+    pub fn new(
+        namespace: Option<Namespace>,
+        name: AttributeName,
+        value: AttributeValue<MSG>,
+    ) -> Self {
         Attribute {
             name,
             value: vec![value],
@@ -110,9 +111,7 @@ pub fn attr_ns<MSG>(
 
 /// merge the values of attributes with the same name
 #[doc(hidden)]
-pub fn merge_attributes_of_same_name<MSG>(
-    attributes: &[&Attribute<MSG>],
-) -> Vec<Attribute<MSG>> {
+pub fn merge_attributes_of_same_name<MSG>(attributes: &[&Attribute<MSG>]) -> Vec<Attribute<MSG>> {
     //let mut merged: Vec<Attribute> = vec![];
     let mut merged: IndexMap<&AttributeName, Attribute<MSG>> =
         IndexMap::with_capacity(attributes.len());

@@ -45,7 +45,7 @@ impl Leaf {
 
     /// returns true if the content on the leaf is just static str
     pub(crate) fn is_static_str(&self) -> bool {
-        match self{
+        match self {
             Self::Text(v) => matches!(v, Cow::Borrowed(_)),
             Self::SafeHtml(v) => matches!(v, Cow::Borrowed(_)),
             Self::Comment(v) => matches!(v, Cow::Borrowed(_)),
@@ -65,5 +65,3 @@ impl From<String> for Leaf {
         Self::Text(Cow::from(s))
     }
 }
-
-
