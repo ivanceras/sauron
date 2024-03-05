@@ -163,7 +163,7 @@ mod node;
 ///     pub fn view(&self) -> Node<()> {
 ///         node! {
 ///             <ul>
-///                 {for item in &self.items {
+///                 {for item in self.items.iter() {
 ///                     text(item)
 ///                 }}
 ///             </ul>

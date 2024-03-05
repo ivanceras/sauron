@@ -9,7 +9,7 @@ pub use style::Style;
 pub use value::Value;
 
 mod attribute_value;
-mod callback;
+pub mod callback;
 mod style;
 mod value;
 

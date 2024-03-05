@@ -10,6 +10,7 @@ pub use attribute::Attribute;
 pub use element::Element;
 pub use leaf::Leaf;
 pub use node_trait::NodeTrait;
+pub use attribute::callback;
 
 mod attribute;
 mod element;

@@ -97,7 +97,7 @@ fn declare_custom_element_function() -> js_sys::Function {
 
 impl<COMP, MSG> Application<MSG> for COMP
 where
-    COMP: Container<MSG, ()> + WebComponent<MSG> + Clone + 'static,
+    COMP: Container<MSG, ()> + WebComponent<MSG> + 'static,
     MSG: 'static,
 {
     fn init(&mut self) -> Cmd<Self, MSG> {
