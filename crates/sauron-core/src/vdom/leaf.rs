@@ -54,39 +54,16 @@ impl Leaf {
     }
 }
 
-/*
-impl fmt::Debug for Leaf {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Text(v) => write!(f, "Text({v})"),
-            Self::SafeHtml(v) => write!(f, "SafeHtml({v})"),
-            Self::Comment(v) => write!(f, "Comment({v})"),
-            Self::DocType(v) => write!(f, "DocType({v})"),
-        }
+impl From<&'static str> for Leaf {
+    fn from(s: &'static str) -> Self {
+        Self::Text(Cow::from(s))
     }
 }
 
-impl Clone for Leaf {
-    fn clone(&self) -> Self {
-        match self {
-            Self::Text(v) => Self::Text(v.clone()),
-            Self::SafeHtml(v) => Self::SafeHtml(v.clone()),
-            Self::Comment(v) => Self::Comment(v.clone()),
-            Self::DocType(v) => Self::DocType(v.clone()),
-        }
+impl From<String> for Leaf {
+    fn from(s: String) -> Self {
+        Self::Text(Cow::from(s))
     }
 }
 
-impl PartialEq for Leaf {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::Text(v), Self::Text(o)) => v == o,
-            (Self::SafeHtml(v), Self::SafeHtml(o)) => v == o,
-            (Self::Comment(v), Self::Comment(o)) => v == o,
-            (Self::DocType(v), Self::DocType(o)) => v == o,
-            _ => false,
-        }
-    }
-}
-*/
 
