@@ -1,4 +1,4 @@
-use crate::vdom::{Attribute, AttributeValue, Element, Callback, Node};
+use crate::vdom::{Attribute, AttributeValue, Element, EventCallback, Node};
 
 impl<MSG> Node<MSG> {
     /// map the msg of this node such that Node<MSG> becomes Node<MSG2>
@@ -26,7 +26,7 @@ impl<MSG> Node<MSG> {
         }
     }
 
-    pub(crate) fn get_callbacks(&self) -> Vec<&Callback<MSG>> {
+    pub(crate) fn get_callbacks(&self) -> Vec<&EventCallback<MSG>> {
         if let Some(attributes) = self.attributes() {
             let callbacks = attributes
                 .iter()
@@ -84,7 +84,7 @@ impl<MSG> Attribute<MSG> {
         }
     }
 
-    pub(crate) fn get_callback(&self) -> Vec<&Callback<MSG>> {
+    pub(crate) fn get_callback(&self) -> Vec<&EventCallback<MSG>> {
         self.value
             .iter()
             .filter_map(|v| v.as_event_listener())

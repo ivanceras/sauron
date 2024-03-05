@@ -4,7 +4,7 @@ use crate::{
     dom::{self, Application, Program},
     dom::{document, window},
     html,
-    html::attributes::{Callback, SegregatedAttributes},
+    html::attributes::{EventCallback, SegregatedAttributes},
     vdom,
     vdom::{Attribute, AttributeValue, Leaf, NodeTrait},
 };
@@ -369,7 +369,7 @@ where
         &self,
         event_target: &web_sys::EventTarget,
         event_name: &str,
-        listener: &Callback<MSG>,
+        listener: &EventCallback<MSG>,
     ) -> Result<Closure<dyn FnMut(web_sys::Event)>, JsValue> {
         let program = Program::downgrade(self);
         let listener = listener.clone();

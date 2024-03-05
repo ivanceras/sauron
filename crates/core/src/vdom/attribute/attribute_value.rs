@@ -1,4 +1,4 @@
-use crate::{html::attributes::Style, vdom::Callback, vdom::Value};
+use crate::{html::attributes::Style, vdom::EventCallback, vdom::Value};
 
 use derive_where::derive_where;
 
@@ -11,8 +11,8 @@ pub enum AttributeValue<MSG> {
     Simple(Value),
     /// style values
     Style(Vec<Style>),
-    /// Event Callback
-    EventListener(Callback<MSG>),
+    /// Event EventCallback
+    EventListener(EventCallback<MSG>),
     /// no value
     Empty,
 }
@@ -39,8 +39,8 @@ impl<MSG> PartialEq for AttributeValue<MSG> {
 
 impl<MSG> Eq for AttributeValue<MSG> {}
 
-impl<MSG> From<Callback<MSG>> for AttributeValue<MSG> {
-    fn from(listener: Callback<MSG>) -> Self {
+impl<MSG> From<EventCallback<MSG>> for AttributeValue<MSG> {
+    fn from(listener: EventCallback<MSG>) -> Self {
         Self::EventListener(listener)
     }
 }
@@ -105,7 +105,7 @@ impl<MSG> AttributeValue<MSG> {
     }
 
     /// return the styles if the attribute value is a style
-    pub fn as_event_listener(&self) -> Option<&Callback<MSG>> {
+    pub fn as_event_listener(&self) -> Option<&EventCallback<MSG>> {
         match self {
             Self::EventListener(cb) => Some(cb),
             _ => None,

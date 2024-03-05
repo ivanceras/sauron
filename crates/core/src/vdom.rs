@@ -10,7 +10,7 @@ pub use attribute::Attribute;
 pub use element::Element;
 pub use leaf::Leaf;
 pub use node_trait::NodeTrait;
-pub use attribute::callback;
+pub use attribute::Callback;
 
 mod attribute;
 mod element;
@@ -33,4 +33,4 @@ pub mod patch;
 
 /// Callback where Event type is supplied
 /// for Components
-pub type Callback<MSG> = attribute::Callback<Event, MSG>;
+pub type EventCallback<MSG> = Callback<Event, MSG>;

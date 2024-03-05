@@ -3,7 +3,7 @@
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
 use crate::dom::{document, window, Event};
 use crate::vdom;
-use crate::vdom::{Attribute, AttributeValue, Callback};
+use crate::vdom::{Attribute, AttributeValue, EventCallback};
 use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
@@ -85,7 +85,7 @@ where
     F: Fn(Event) -> MSG + 'static,
     MSG: 'static,
 {
-    vdom::attr(event_name, AttributeValue::EventListener(Callback::from(f)))
+    vdom::attr(event_name, AttributeValue::EventListener(EventCallback::from(f)))
 }
 
 /// on click event
