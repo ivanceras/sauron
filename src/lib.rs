@@ -26,12 +26,10 @@ pub mod prelude {
     pub use sauron_core::*;
     #[cfg(feature = "with-jss")]
     pub use sauron_macro::{jss, jss_with_media, style};
+    #[cfg(feature = "with-node-macro")]
+    pub use sauron_macro::node;
+    #[cfg(feature = "custom_element")]
+    pub use sauron_macro::custom_element;
 }
 
-#[cfg(feature = "custom_element")]
-pub use sauron_macro::custom_element;
-#[cfg(feature = "with-node-macro")]
-pub use sauron_macro::node;
 
-#[cfg(feature = "with-jss")]
-pub use sauron_macro::{jss, jss_with_media, style};

@@ -85,12 +85,11 @@ fn single_node(node: Node) -> TokenStream {
                 }) => {
                     quote! {
                         {
-                            let mut receiver = vec![];
-                            for #pat in #expr {
-                                #[allow(unused_braces)]
-                                receiver.push(#body)
-                            }
-                            sauron::html::node_list(receiver)
+                            sauron::html::node_list(
+                                (#expr).map(|#pat|{
+                                    #[allow(unused_braces)]
+                                    #body
+                                }))
                         }
                     }
                 }
