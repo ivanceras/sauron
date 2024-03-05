@@ -105,7 +105,6 @@ fn find_node_by_zipper(node: Node<()>, path: &[usize]) -> Option<Node<()>> {
 mod tests {
 
     use super::*;
-    use crate::*;
 
     fn sample_node() -> Node<()> {
         let node: Node<()> = element(
