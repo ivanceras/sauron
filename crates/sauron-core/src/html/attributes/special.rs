@@ -9,15 +9,17 @@ use crate::vdom::AttributeName;
 /// such as key and skip which both greatly affects the diffing algorithm
 
 impl<MSG> Node<MSG> {
+    /// get the first value of the attribute which has the name `att_name` of this node
     pub fn get_value(&self, att_name: &AttributeName) -> Option<&Value> {
-        self.attribute_value(&att_name)
+        self.attribute_value(att_name)
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
 }
 
 impl<MSG> Element<MSG> {
+    /// get the first value of the attribute which has the name `att_name` of this element
     pub fn get_value(&self, att_name: &AttributeName) -> Option<&Value> {
-        self.attribute_value(&att_name)
+        self.attribute_value(att_name)
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
 }

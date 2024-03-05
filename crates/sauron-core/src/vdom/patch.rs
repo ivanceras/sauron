@@ -2,8 +2,8 @@
 
 use super::Tag;
 use super::{Attribute, Node};
-use std::fmt::Debug;
-use std::fmt;
+
+
 use derive_where::derive_where;
 
 pub use tree_path::TreePath;

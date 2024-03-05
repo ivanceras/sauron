@@ -7,6 +7,7 @@ use crate::{
 
 impl<MSG> Node<MSG>
 {
+    /// map the msg of this node such that Node<MSG> becomes Node<MSG2>
     pub fn map_msg<F, MSG2>(self, cb: F) -> Node<MSG2>
     where
         F: Fn(MSG) -> MSG2 + Clone + 'static,
@@ -46,6 +47,7 @@ impl<MSG> Node<MSG>
 
 impl<MSG> Element<MSG>
 {
+    /// map the msg of this element such that `Element<MSG>` becomes `Element<MSG2>`
     pub fn map_msg<F, MSG2>(self, cb: F) -> Element<MSG2>
     where
         F: Fn(MSG) -> MSG2 + Clone + 'static,
@@ -72,6 +74,7 @@ impl<MSG> Element<MSG>
 
 impl<MSG> Attribute<MSG>
 {
+    /// map the msg of this attribute such that `Attribute<MSG>` becomes `Attribute<MSG2>`
     pub fn map_msg<F, MSG2>(self, cb: F) -> Attribute<MSG2>
     where
         F: Fn(MSG) -> MSG2 + Clone + 'static,

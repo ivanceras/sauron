@@ -273,8 +273,8 @@ impl InputEvent {
         } else if let Some(select) = target.dyn_ref::<HtmlSelectElement>() {
             select.value()
         } else if let Some(html_elm) = target.dyn_ref::<HtmlElement>() {
-            let content = html_elm.get_attribute("content").expect("get content");
-            content
+            
+            html_elm.get_attribute("content").expect("get content")
         } else {
             panic!("fail in mapping event into input event");
         }

@@ -61,7 +61,7 @@ where
     where
         F: FnMut(String) -> MSG + 'static,
     {
-        let program = Program::downgrade(&self);
+        let program = Program::downgrade(self);
         let closure: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_| {
             let hash = util::get_location_hash();
             let msg = cb(hash);

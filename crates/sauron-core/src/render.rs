@@ -179,7 +179,7 @@ impl<MSG> Render for Element<MSG> {
         }
 
         let children = self.children();
-        let first_child = children.get(0);
+        let first_child = children.first();
         let is_first_child_text_node = first_child.map(|node| node.is_text()).unwrap_or(false);
 
         let is_lone_child_text_node = children.len() == 1 && is_first_child_text_node;

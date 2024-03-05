@@ -160,9 +160,9 @@ fn traverse_node_by_path<'a, MSG>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::*;
+    
     use crate::vdom::*;
-    use crate::render::Render;
+    
 
     #[test]
     fn test_traverse() {

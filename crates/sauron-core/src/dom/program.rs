@@ -10,7 +10,7 @@ use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCa
 use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
-use crate::vdom::KEY;
+
 use app_context::AppContext;
 use crate::vdom::{diff_recursive, TreePath};
 use std::collections::hash_map::DefaultHasher;
@@ -609,8 +609,8 @@ where
                     log::debug!("new_node: {new_node:#?}");
                     log::debug!("old_node: {old_node:#?}");
                     diff_recursive(
-                        &old_node,
-                        &new_node,
+                        old_node,
+                        new_node,
                         &path,
                     )
                 })
@@ -618,7 +618,7 @@ where
             log::info!("patches: {patches:#?}");
             patches
         } else {
-            let patches = diff(&current_vdom, &new_vdom);
+            let patches = diff(&current_vdom, new_vdom);
             patches
         };
         #[cfg(all(feature = "with-debug", feature = "log-patches"))]
@@ -626,10 +626,10 @@ where
             log::debug!("There are {} patches", patches.len());
             log::debug!("patches: {patches:#?}");
         }
-        let dom_patches = self
+        
+        self
             .convert_patches(&patches)
-            .expect("must convert patches");
-        dom_patches
+            .expect("must convert patches")
     }
 
     #[cfg(feature = "with-raf")]
@@ -693,7 +693,7 @@ where
 
             #[cfg(not(feature = "with-raf"))]
             {
-                let program = Program::downgrade(&self);
+                let program = Program::downgrade(self);
                 wasm_bindgen_futures::spawn_local(async move {
                     if let Some(mut program) = program.upgrade() {
                         program.dispatch_inner(None);

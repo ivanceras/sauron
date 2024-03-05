@@ -16,7 +16,7 @@ impl Style {
     /// create a style with name and value
     pub fn new(name: impl Into<Cow<'static, str>>, value: impl Into<Value>) -> Self {
         Style {
-            name: Cow::from(name.into()),
+            name: name.into(),
             value: value.into(),
         }
     }

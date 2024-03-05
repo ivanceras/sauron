@@ -1,7 +1,7 @@
 use super::attribute::{AttributeName, Namespace, Tag};
 use super::{Attribute, Node};
-use std::fmt::Debug;
-use std::fmt;
+
+
 use crate::vdom::AttributeValue;
 use derive_where::derive_where;
 
@@ -70,7 +70,7 @@ impl<MSG> Element<MSG> {
 
     /// add children virtual node to this element
     pub fn add_children(&mut self, children: impl IntoIterator<Item = Node<MSG>>) {
-        self.children.extend(children.into_iter());
+        self.children.extend(children);
     }
 
     /// returns a refernce to the children of this node

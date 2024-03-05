@@ -1,7 +1,7 @@
 #![allow(clippy::type_complexity)]
-use std::fmt::Debug;
+
 use indexmap::IndexMap;
-use std::fmt;
+
 use crate::vdom::AttributeValue;
 use derive_where::derive_where;
 

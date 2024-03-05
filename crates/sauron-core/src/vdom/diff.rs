@@ -6,8 +6,8 @@ use super::{
     diff_lis,
 };
 use std::{cmp, mem};
-use crate::vdom::attributes::Value;
-use crate::vdom::AttributeValue;
+
+
 
 /// Return the patches needed for `old_node` to have the same DOM as `new_node`
 ///

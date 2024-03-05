@@ -2,7 +2,7 @@ use crate::{
     html::attributes::{Style, Value},
     vdom::Listener,
 };
-use std::fmt::{self, Debug};
+
 use derive_where::derive_where;
 
 /// Values of an attribute can be in these variants

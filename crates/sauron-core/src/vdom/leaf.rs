@@ -1,5 +1,5 @@
 //! Leaf node for html dom tree
-use std::fmt;
+
 use std::borrow::Cow;
 
 /// A leaf node value of html dom tree
