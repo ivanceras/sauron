@@ -45,6 +45,7 @@ fn nodes_with_event_should_not_recycle() {
 fn remove_event_from_replaced_node() {
     console_log::init_with_level(log::Level::Trace).ok();
 
+    // the old div will be replaced here since there is an added event listener
     let old: Node<()> = div(vec![on_click(|_| trace!("I'm a div"))], vec![]);
 
     let new: Node<()> = p(vec![], vec![]);

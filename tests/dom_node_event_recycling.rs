@@ -37,6 +37,8 @@ fn elements_with_different_event_should_not_be_recycle() {
     let cb2 = on_input(move |_event: InputEvent| {
         *text_clone2.borrow_mut() = "New value".to_string();
     });
+    log::info!("old: {:#?}", old);
+    log::info!("cb2: {:#?}", cb2);
     let new = input(vec![id(elem_id), cb2.clone()], vec![]);
 
     let patches: Vec<Patch<()>> = diff(&old, &new);

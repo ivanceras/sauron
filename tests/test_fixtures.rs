@@ -18,11 +18,12 @@ impl Application<()> for SimpleComponent {
     }
 
     fn view(&self) -> Node<()> {
-        div(vec![], vec![])
+        div(vec![sauron::on_click(|_|{}), sauron::on_click(|_|{})], vec![])
     }
 }
 
 /// creates a program from SimpleComponent
 pub fn simple_program() -> ManuallyDrop<Program<SimpleComponent, ()>> {
+    console_log::init_with_level(log::Level::Trace).ok();
     Program::mount_to_body(SimpleComponent)
 }
