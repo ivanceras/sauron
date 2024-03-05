@@ -1,4 +1,4 @@
-use crate::vdom::{Attribute, AttributeValue, Element, EventCallback, Node};
+use crate::vdom::{Attribute, AttributeValue, Element, EventCallback, Node, Leaf};
 
 impl<MSG> Node<MSG> {
     /// map the msg of this node such that Node<MSG> becomes Node<MSG2>
@@ -10,7 +10,7 @@ impl<MSG> Node<MSG> {
     {
         match self {
             Node::Element(element) => Node::Element(element.map_msg(cb)),
-            Node::Leaf(leaf) => Node::Leaf(leaf),
+            Node::Leaf(leaf) => Node::Leaf(leaf.map_msg(cb)),
             Node::Fragment(nodes) => Node::Fragment(
                 nodes
                     .into_iter()
@@ -112,5 +112,18 @@ impl<MSG> AttributeValue<MSG> {
             AttributeValue::EventListener(this) => AttributeValue::EventListener(this.map_msg(cb)),
             AttributeValue::Empty => AttributeValue::Empty,
         }
+    }
+}
+
+impl<MSG> Leaf<MSG>{
+
+    /// mape the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
+    pub fn map_msg<F, MSG2>(self, _cb: F) -> Leaf<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
+        MSG: 'static,
+    {
+        todo!()
     }
 }

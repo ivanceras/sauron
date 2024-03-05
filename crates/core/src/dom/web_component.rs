@@ -31,6 +31,7 @@ pub trait WebComponent<MSG> {
     fn adopted_callback(&mut self);
 }
 
+
 thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: js_sys::Function = declare_custom_element_function());
 
 /// register using custom element define

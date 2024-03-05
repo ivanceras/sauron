@@ -97,7 +97,7 @@ where
         doc_fragment.into()
     }
 
-    fn create_leaf_node(&self, leaf: &Leaf) -> Node {
+    fn create_leaf_node(&self, leaf: &Leaf<MSG>) -> Node {
         match leaf {
             Leaf::Text(txt) => Self::create_text_node(txt).into(),
             Leaf::Comment(comment) => document().create_comment(comment).into(),
@@ -110,6 +110,7 @@ where
                     doctype is only used in rendering"
                 );
             }
+            Leaf::Component(_comp) => todo!(),
         }
     }
 

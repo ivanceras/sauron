@@ -31,7 +31,7 @@ pub enum Node<MSG> {
     /// A document fragment node, will be created using fragment node and attached to the dom
     Fragment(Vec<Node<MSG>>),
     /// A Leaf node
-    Leaf(Leaf),
+    Leaf(Leaf<MSG>),
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -70,7 +70,7 @@ impl<MSG> Node<MSG> {
     }
 
     /// returns a reference to the Leaf if the node is a Leaf variant
-    pub fn leaf(&self) -> Option<&Leaf> {
+    pub fn leaf(&self) -> Option<&Leaf<MSG>> {
         match self {
             Node::Leaf(leaf) => Some(leaf),
             _ => None,
@@ -332,7 +332,7 @@ pub fn element_ns<MSG>(
 }
 
 /// create a leaf node
-pub fn leaf<MSG>(leaf: impl Into<Leaf>) -> Node<MSG> {
+pub fn leaf<MSG>(leaf: impl Into<Leaf<MSG>>) -> Node<MSG> {
     Node::Leaf(leaf.into())
 }
 

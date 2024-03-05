@@ -104,7 +104,7 @@ impl<MSG> Render for Node<MSG> {
     }
 }
 
-impl Render for Leaf {
+impl<MSG> Render for Leaf<MSG> {
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
@@ -125,6 +125,7 @@ impl Render for Leaf {
             Leaf::DocType(doctype) => {
                 write!(buffer, "<!doctype {doctype}>")
             }
+            Leaf::Component(_comp) => todo!(),
         }
     }
 }
