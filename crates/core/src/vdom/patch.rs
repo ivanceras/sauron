@@ -69,28 +69,6 @@ pub struct Patch<'a, MSG> {
     pub patch_type: PatchType<'a, MSG>,
 }
 
-/*
-impl<'a, MSG> Clone for Patch<'a, MSG>{
-    fn clone(&self) -> Self {
-        todo!()
-    }
-}
-
-impl<'a, MSG> fmt::Debug for Patch<'a, MSG>{
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        todo!()
-    }
-}
-
-impl<'a, MSG> PartialEq for Patch<'a, MSG>{
-    fn eq(&self, other: &Self) -> bool {
-        todo!()
-    }
-}
-
-impl<'a, MSG> Eq for Patch<'a, MSG>{ }
-*/
-
 /// the patch variant
 #[derive_where(Clone, Debug, PartialEq, Eq)]
 pub enum PatchType<'a, MSG> {

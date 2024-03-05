@@ -75,19 +75,6 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
 
         explicit_replace_attr || forbid_recycle
     };
-    /*
-    let replace = |_old, new: &Node<MSG>| {
-        if let Some(attributes) = new.attributes() {
-            attributes
-                .iter()
-                .filter(|a| a.name == "replace")
-                .flat_map(|a| a.value())
-                .any(|v| *v == "true")
-        } else {
-            false
-        }
-    };
-    */
     // handle explicit replace if the Rep fn evaluates to true
     if replace(old_node, new_node) {
         return true;
