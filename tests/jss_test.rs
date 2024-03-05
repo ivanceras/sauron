@@ -7,13 +7,13 @@ fn annotated_properties_will_not_be_inlcuded() {
             position: "absolute",
             top: 0,
             left: 0,
-            #[cfg(feature = "with-debug")]
+            #[cfg(feature = "debugging")]
             border: "1px solid red",
         },
 
         ".shape_buffer .bounds": {
             position: "absolute",
-            #[cfg(feature = "with-debug")]
+            #[cfg(feature = "debugging")]
             border: "1px solid blue",
         },
     };
