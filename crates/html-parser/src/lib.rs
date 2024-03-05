@@ -7,6 +7,7 @@ use sauron_core::{
     html::{attributes::*, lookup, *},
     vdom::Node,
     vdom::AttributeValue,
+    vdom::Value,
 };
 use std::fmt;
 use std::io;

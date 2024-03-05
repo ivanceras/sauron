@@ -21,7 +21,7 @@ pub use node::{
         Tag, KEY,  Namespace, AttributeName, 
     },
     element, element_ns, fragment, leaf, node_list, Attribute, Element, Node,
-    AttributeValue,
+    AttributeValue, Value,
 };
 pub use patch::{Patch, PatchType, TreePath};
 

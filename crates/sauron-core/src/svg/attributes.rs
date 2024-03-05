@@ -1,5 +1,5 @@
 //! provides functions and macros for building svg attributes
-use crate::html::attributes::Value;
+use crate::vdom::Value;
 use crate::vdom::AttributeValue;
 pub use commons::*;
 use crate::vdom::{attr, attr_ns};

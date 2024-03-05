@@ -7,9 +7,11 @@ use derive_where::derive_where;
 pub use attribute::Attribute;
 pub use element::Element;
 pub use attribute_value::AttributeValue;
+pub use value::Value;
 
 pub(crate) mod attribute;
 pub(crate) mod attribute_value;
+mod value;
 mod element;
 
 /// represents a node in a virtual dom

@@ -128,7 +128,7 @@ impl Property {
         let value = &self.value;
 
         let value_expanded = quote! {
-            sauron::html::attributes::Value::from(#value).to_string()
+            sauron::vdom::Value::from(#value).to_string()
         };
         if use_pretty {
             quote! {

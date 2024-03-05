@@ -4,6 +4,7 @@
 use std::borrow::Cow;
 use crate::vdom;
 use crate::vdom::AttributeValue;
+use crate::vdom::Value;
 
 pub use crate::{dom::Event, vdom::Attribute};
 pub use attribute_macros::commons::*;
@@ -11,14 +12,12 @@ pub use attribute_macros::*;
 pub use listener::Listener;
 pub use special::{key, replace, skip, skip_criteria};
 pub use style::Style;
-pub use value::Value;
 
 #[macro_use]
 mod attribute_macros;
 mod listener;
 mod special;
 mod style;
-mod value;
 
 /// A helper function which creates a style attribute by assembling the tuples into a string for the style value.
 /// # Example

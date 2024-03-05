@@ -37,7 +37,7 @@ pub mod prelude {
     pub use crate::svg::special::*;
     pub use crate::vdom::{
         diff,
-        Attribute, AttributeValue, Element, Listener, Node, NodeTrait, Patch,
+        Attribute, AttributeValue, Value, Element, Listener, Node, NodeTrait, Patch,
         TreePath,
     };
 

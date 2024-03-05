@@ -1,5 +1,6 @@
 use crate::{
-    html::attributes::{Style, Value},
+    html::attributes::Style,
+    vdom::Value,
     vdom::Listener,
 };
 
