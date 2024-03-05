@@ -1,4 +1,5 @@
 use std::fmt;
+use std::borrow::Cow;
 
 /// Wraps different primitive variants used as values in html
 /// This is needed since html attributes can have different value types
@@ -8,10 +9,8 @@ use std::fmt;
 pub enum Value {
     /// bool value
     Bool(bool),
-    /// &'static str value
-    Str(&'static str),
-    /// String value
-    String(String),
+    /// String value and &'static str
+    Cow(Cow<'static, str>),
     /// a vec of values
     Vec(Vec<Value>),
     /// u8 value
@@ -50,8 +49,7 @@ impl Value {
     /// Use the `to_string()` for that.
     pub fn as_str(&self) -> Option<&str> {
         match self {
-            Self::String(ref v) => Some(v),
-            Self::Str(v) => Some(v),
+            Self::Cow(ref v) => Some(v.as_ref()),
             _ => None,
         }
     }
@@ -68,8 +66,7 @@ impl Value {
     pub fn as_f64(&self) -> Option<f64> {
         match self {
             Self::Bool(_) => None,
-            Self::String(_v) => None,
-            Self::Str(_v) => None,
+            Self::Cow(_v) => None,
             Self::Vec(_v) => None,
             Self::U8(v) => Some(f64::from(*v)),
             Self::U16(v) => Some(f64::from(*v)),
@@ -92,8 +89,7 @@ impl Value {
     pub fn as_i32(&self) -> Option<i32> {
         match self {
             Self::Bool(_) => None,
-            Self::String(_v) => None,
-            Self::Str(_v) => None,
+            Self::Cow(_v) => None,
             Self::Vec(_v) => None,
             Self::U8(v) => Some(i32::from(*v)),
             Self::U16(v) => Some(i32::from(*v)),
@@ -128,7 +124,7 @@ impl Value {
 
     /// returns true if this value is a static str
     pub(crate) fn is_static_str(&self) -> bool {
-        matches!(self, Self::Str(_))
+        matches!(self, Self::Cow(Cow::Borrowed(_)))
     }
 }
 
@@ -136,16 +132,7 @@ impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::Bool(v), Self::Bool(o)) => v == o,
-            (Self::String(v), other) => match other {
-                Self::String(o) => v == o,
-                Self::Str(o) => v == o,
-                _ => false,
-            },
-            (Self::Str(v), other) => match other {
-                Self::String(o) => v == o,
-                Self::Str(o) => v == o,
-                _ => false,
-            },
+            (Self::Cow(v), Self::Cow(o)) => v == o,
             (Self::Vec(v), Self::Vec(o)) => v == o,
             (Self::U8(v), Self::U8(o)) => v == o,
             (Self::U16(v), Self::U16(o)) => v == o,
@@ -172,8 +159,7 @@ impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::Bool(v) => write!(f, "{}", v),
-            Self::String(v) => write!(f, "{}", v),
-            Self::Str(v) => write!(f, "{}", v),
+            Self::Cow(v) => write!(f, "{}", v),
             Self::Vec(v) => {
                 write!(
                     f,
@@ -204,19 +190,19 @@ impl fmt::Display for Value {
 
 impl From<&String> for Value {
     fn from(v: &String) -> Self {
-        Self::String(v.to_string())
+        Self::Cow(v.to_string().into())
     }
 }
 
 impl From<&'static str> for Value {
     fn from(v: &'static str) -> Self {
-        Self::Str(v)
+        Self::Cow(v.into())
     }
 }
 
 impl From<String> for Value {
     fn from(v: String) -> Self {
-        Self::String(v)
+        Self::Cow(v.into())
     }
 }
 
