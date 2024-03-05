@@ -1,4 +1,4 @@
-use crate::html::attributes::Value;
+use crate::vdom::Value;
 use std::fmt;
 use std::borrow::Cow;
 

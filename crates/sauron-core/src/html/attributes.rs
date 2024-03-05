@@ -9,15 +9,13 @@ use crate::vdom::Value;
 pub use crate::{dom::Event, vdom::Attribute};
 pub use attribute_macros::commons::*;
 pub use attribute_macros::*;
-pub use listener::Listener;
+pub use crate::vdom::Listener;
 pub use special::{key, replace, skip, skip_criteria};
-pub use style::Style;
+pub use crate::vdom::Style;
 
 #[macro_use]
 mod attribute_macros;
-mod listener;
 mod special;
-mod style;
 
 /// A helper function which creates a style attribute by assembling the tuples into a string for the style value.
 /// # Example
@@ -343,7 +341,7 @@ pub(crate) fn merge_styles_attributes_values<MSG>(
 /// The Attributes partition into 4 different types
 pub struct SegregatedAttributes<'a, MSG> {
     /// the listeners of the event listeners
-    pub listeners: Vec<&'a Listener<Event, MSG>>,
+    pub listeners: Vec<&'a Listener<MSG>>,
     /// plain attribute values
     pub plain_values: Vec<&'a AttributeValue<MSG>>,
     /// style attribute values

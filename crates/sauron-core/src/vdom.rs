@@ -5,7 +5,7 @@
 //! All the code in this module are run in purely rust environment, that is there is NO code here
 //! involves accessing the real DOM.
 //!
-use crate::{dom::Event, html::attributes};
+use crate::dom::Event;
 pub use leaf::Leaf;
 pub use node_trait::NodeTrait;
 
@@ -22,6 +22,7 @@ pub use node::{
     },
     element, element_ns, fragment, leaf, node_list, Attribute, Element, Node,
     AttributeValue, Value,
+    Style,
 };
 pub use patch::{Patch, PatchType, TreePath};
 
@@ -33,5 +34,5 @@ pub mod patch;
 
 /// Callback where Event type is supplied
 /// for Components
-pub type Listener<MSG> = attributes::Listener<Event, MSG>;
+pub type Listener<MSG> = node::Listener<Event, MSG>;
 

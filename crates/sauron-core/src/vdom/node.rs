@@ -8,11 +8,15 @@ pub use attribute::Attribute;
 pub use element::Element;
 pub use attribute_value::AttributeValue;
 pub use value::Value;
+pub use listener::Listener;
+pub use style::Style;
 
 pub(crate) mod attribute;
 pub(crate) mod attribute_value;
 mod value;
 mod element;
+mod listener;
+mod style;
 
 /// represents a node in a virtual dom
 /// A node could be an element which can contain one or more children of nodes.
