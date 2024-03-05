@@ -78,6 +78,11 @@ impl<MSG> Attribute<MSG> {
     pub fn namespace(&self) -> Option<&Namespace> {
         self.namespace.as_ref()
     }
+
+    /// returns true if this attribute is an event listener
+    pub fn is_event_listener(&self) -> bool {
+        self.value.first().map(|v|v.is_event_listener()).unwrap_or(false)
+    }
 }
 
 /// Create an attribute
@@ -146,3 +151,5 @@ pub fn group_attributes_per_name<MSG>(
     }
     grouped
 }
+
+

@@ -115,6 +115,10 @@ impl<IN, OUT> Clone for Callback<IN, OUT> {
 ///
 impl<IN, OUT> PartialEq for Callback<IN, OUT> {
     fn eq(&self, other: &Self) -> bool {
+        // NOTE: We are not comparing the func field since it will always
+        // be false when closures are generated from the view.
+        // We want the callback comparison to return true as much as possible
+        // so as to not keep adding the callback to the event listeners
         self.event_type_id == other.event_type_id
             && self.msg_type_id == other.msg_type_id
             && self.func_type_id == other.func_type_id

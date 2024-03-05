@@ -112,6 +112,11 @@ impl<MSG> AttributeValue<MSG> {
         }
     }
 
+    /// return true if this is an event listener
+    pub fn is_event_listener(&self) -> bool {
+        matches!(self, Self::EventListener(_))
+    }
+
     /// return the styles if the attribute value is a style
     pub fn as_style(&self) -> Option<&Vec<Style>> {
         match self {

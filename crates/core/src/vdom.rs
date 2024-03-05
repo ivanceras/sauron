@@ -19,7 +19,7 @@ mod map_msg;
 mod node_trait;
 
 pub use attribute::{
-    attr, attr_ns, group_attributes_per_name, merge_attributes_of_same_name, AttributeName,
+    attr, attr_ns, merge_attributes_of_same_name, AttributeName,
     AttributeValue, Namespace, Style, Tag, Value,
 };
 pub use diff::{diff, diff_recursive};

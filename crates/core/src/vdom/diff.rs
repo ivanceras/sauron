@@ -1,6 +1,7 @@
 //! provides diffing algorithm which returns patches
-use super::{diff_lis, group_attributes_per_name, Attribute, Element, Node, Patch, TreePath};
+use super::{diff_lis, Attribute, Element, Node, Patch, TreePath};
 use super::{Tag, KEY, REPLACE, SKIP, SKIP_CRITERIA};
+use crate::vdom::attribute::group_attributes_per_name;
 use std::{cmp, mem};
 
 /// Return the patches needed for `old_node` to have the same DOM as `new_node`
@@ -68,12 +69,20 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
             .and_then(|v| v.as_bool())
             .unwrap_or(false);
 
-        let old_node_has_event = !old_node.get_callbacks().is_empty();
-        let new_node_has_event = !new_node.get_callbacks().is_empty();
+        let old_callbacks = old_node.get_callbacks();
+        let new_callbacks = new_node.get_callbacks();
+        let old_node_has_event = !old_callbacks.is_empty();
+        let new_node_has_event = !new_callbacks.is_empty();
         // don't recycle when old node has event while new new doesn't have
         let forbid_recycle = old_node_has_event && !new_node_has_event;
 
-        explicit_replace_attr || forbid_recycle
+        // replace if an event is attached
+        let event_attached = !old_node_has_event && new_node_has_event;
+
+        // replace if the number of callbacks changed
+        let event_listeners_altered = old_callbacks.len() != new_callbacks.len();
+
+        explicit_replace_attr || forbid_recycle || event_attached || event_listeners_altered
     };
     // handle explicit replace if the Rep fn evaluates to true
     if replace(old_node, new_node) {
