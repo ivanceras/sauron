@@ -6,7 +6,7 @@ use crate::vdom::AttributeValue;
 use crate::vdom::Value;
 use std::borrow::Cow;
 
-pub use crate::vdom::Listener;
+pub use crate::vdom::Callback;
 pub use crate::vdom::Style;
 pub use crate::{dom::Event, vdom::Attribute};
 pub use attribute_macros::commons::*;
@@ -335,7 +335,7 @@ pub(crate) fn merge_styles_attributes_values<MSG>(
 /// The Attributes partition into 4 different types
 pub struct SegregatedAttributes<'a, MSG> {
     /// the listeners of the event listeners
-    pub listeners: Vec<&'a Listener<MSG>>,
+    pub listeners: Vec<&'a Callback<MSG>>,
     /// plain attribute values
     pub plain_values: Vec<&'a AttributeValue<MSG>>,
     /// style attribute values

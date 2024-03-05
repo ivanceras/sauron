@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::Listener;
+use sauron::Callback;
 
 #[test]
 fn test_type_ids() {
@@ -12,14 +12,14 @@ fn test_type_ids() {
         Other,
     }
 
-    let cb1 = Listener::from(|_e| Msg::Click(1));
-    let cb2 = Listener::from(|_e| Msg::Hover(2));
-    let cb3 = Listener::from(|_e| Msg::Hover(3));
-    let cb4 = Listener::from(|_e| Msg::Hover(3));
+    let cb1 = Callback::from(|_e| Msg::Click(1));
+    let cb2 = Callback::from(|_e| Msg::Hover(2));
+    let cb3 = Callback::from(|_e| Msg::Hover(3));
+    let cb4 = Callback::from(|_e| Msg::Hover(3));
 
     let f1 = |_e| Msg::Click(1);
-    let fcb1 = Listener::from(f1);
-    let fcb2 = Listener::from(f1);
+    let fcb1 = Callback::from(f1);
+    let fcb2 = Callback::from(f1);
 
     dbg!(&fcb1);
     dbg!(&fcb2);
@@ -30,7 +30,7 @@ fn test_type_ids() {
     dbg!(&cb3);
     dbg!(&cb4);
 
-    let other_cb = Listener::from(|_e| ParentMsg::Other);
+    let other_cb = Callback::from(|_e| ParentMsg::Other);
     dbg!(&other_cb);
 
     //assert_eq!(cb1, cb2);
