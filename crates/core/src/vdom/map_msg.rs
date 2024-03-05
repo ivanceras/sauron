@@ -1,4 +1,4 @@
-use crate::vdom::{Attribute, AttributeValue, Element, EventCallback, Node, Leaf};
+use crate::vdom::{Attribute, AttributeValue, Element, EventCallback, Leaf, Node};
 
 impl<MSG> Node<MSG> {
     /// map the msg of this node such that Node<MSG> becomes Node<MSG2>
@@ -115,8 +115,7 @@ impl<MSG> AttributeValue<MSG> {
     }
 }
 
-impl<MSG> Leaf<MSG>{
-
+impl<MSG> Leaf<MSG> {
     /// mape the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
     pub fn map_msg<F, MSG2>(self, _cb: F) -> Leaf<MSG2>
     where

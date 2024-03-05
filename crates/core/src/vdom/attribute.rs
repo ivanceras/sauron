@@ -10,9 +10,9 @@ pub use value::Value;
 
 mod attribute_value;
 pub mod callback;
+pub(crate) mod special;
 mod style;
 mod value;
-pub(crate) mod special;
 
 /// The type of the Namspace
 pub type Namespace = &'static str;
@@ -81,7 +81,10 @@ impl<MSG> Attribute<MSG> {
 
     /// returns true if this attribute is an event listener
     pub fn is_event_listener(&self) -> bool {
-        self.value.first().map(|v|v.is_event_listener()).unwrap_or(false)
+        self.value
+            .first()
+            .map(|v| v.is_event_listener())
+            .unwrap_or(false)
     }
 }
 
@@ -151,5 +154,3 @@ pub fn group_attributes_per_name<MSG>(
     }
     grouped
 }
-
-

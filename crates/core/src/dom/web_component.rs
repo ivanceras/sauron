@@ -5,7 +5,6 @@ use wasm_bindgen::JsCast;
 
 /// a trait for implementing WebComponent in the DOM with custom tag
 pub trait WebComponent<MSG> {
-
     /// returns the attributes that is observed by this component
     /// These are the names of the attributes the component is interested in
     fn observed_attributes() -> Vec<&'static str>;
@@ -30,7 +29,6 @@ pub trait WebComponent<MSG> {
     /// the component is moved or attached to the dom
     fn adopted_callback(&mut self);
 }
-
 
 thread_local!(static REGISTER_CUSTOM_ELEMENT_FUNCTION: js_sys::Function = declare_custom_element_function());
 

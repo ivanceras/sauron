@@ -7,10 +7,10 @@
 //!
 use crate::dom::Event;
 pub use attribute::Attribute;
+pub use attribute::Callback;
 pub use element::Element;
 pub use leaf::Leaf;
 pub use node_trait::NodeTrait;
-pub use attribute::Callback;
 
 mod attribute;
 mod element;
@@ -18,15 +18,15 @@ mod leaf;
 mod map_msg;
 mod node_trait;
 
+pub use attribute::special::{key, replace, skip, skip_criteria};
+pub(crate) use attribute::special::{KEY, REPLACE, SKIP, SKIP_CRITERIA};
 pub use attribute::{
-    attr, attr_ns, merge_attributes_of_same_name, AttributeName,
-    AttributeValue, Namespace, Style, Tag, Value,
+    attr, attr_ns, merge_attributes_of_same_name, AttributeName, AttributeValue, Namespace, Style,
+    Tag, Value,
 };
 pub use diff::{diff, diff_recursive};
 pub use node::{element, element_ns, fragment, leaf, node_list, Node};
 pub use patch::{Patch, PatchType, TreePath};
-pub(crate) use attribute::special::{KEY, REPLACE, SKIP, SKIP_CRITERIA};
-pub use attribute::special::{key, replace, skip, skip_criteria};
 
 pub mod diff;
 mod diff_lis;

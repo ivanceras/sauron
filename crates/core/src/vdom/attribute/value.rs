@@ -1,5 +1,5 @@
-use std::fmt;
 use std::borrow::Cow;
+use std::fmt;
 
 /// Wraps different primitive variants used as values in html
 /// This is needed since html attributes can have different value types

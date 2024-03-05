@@ -8,10 +8,10 @@ use std::borrow::Cow;
 
 pub use crate::vdom::EventCallback;
 pub use crate::vdom::Style;
+pub use crate::vdom::{key, replace, skip, skip_criteria};
 pub use crate::{dom::Event, vdom::Attribute};
 pub use attribute_macros::commons::*;
 pub use attribute_macros::*;
-pub use crate::vdom::{key, replace, skip, skip_criteria};
 
 #[macro_use]
 mod attribute_macros;
@@ -96,9 +96,9 @@ pub fn styles_flag<MSG>(
 pub fn classes_flag<MSG>(
     pair: impl IntoIterator<Item = (impl Into<Value>, bool)>,
 ) -> Attribute<MSG> {
-    let class_list =
-        pair.into_iter()
-            .filter_map(|(class, flag)| if flag { Some(class.into()) } else { None });
+    let class_list = pair
+        .into_iter()
+        .filter_map(|(class, flag)| if flag { Some(class.into()) } else { None });
 
     classes(class_list)
 }

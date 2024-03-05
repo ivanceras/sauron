@@ -85,7 +85,10 @@ where
     F: Fn(Event) -> MSG + 'static,
     MSG: 'static,
 {
-    vdom::attr(event_name, AttributeValue::EventListener(EventCallback::from(f)))
+    vdom::attr(
+        event_name,
+        AttributeValue::EventListener(EventCallback::from(f)),
+    )
 }
 
 /// on click event

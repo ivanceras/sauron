@@ -7,7 +7,6 @@ use crate::vdom::AttributeName;
 /// Special Node attributes that are treated differently
 /// such as key and skip which both greatly affects the diffing algorithm
 
-
 /// The key attribute
 pub static KEY: &AttributeName = &"key";
 
@@ -19,8 +18,6 @@ pub static SKIP: &AttributeName = &"skip";
 
 /// The skip criteria attribute
 pub static SKIP_CRITERIA: &AttributeName = &"skip_criteria";
-
-
 
 /// creates a key attribute using a formatter
 /// # Examples

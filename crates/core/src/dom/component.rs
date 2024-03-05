@@ -1,7 +1,7 @@
 use crate::html::attributes::{class, classes, Attribute};
-use crate::{dom::Effects, vdom::Node};
 use crate::vdom::AttributeName;
 use crate::vdom::AttributeValue;
+use crate::{dom::Effects, vdom::Node};
 
 /// A component has a view and can update itself.
 ///
@@ -26,7 +26,10 @@ where
     fn view(&self) -> Node<MSG>;
 
     /// component can have static styles
-    fn stylesheet() -> Vec<String>  where Self: Sized{
+    fn stylesheet() -> Vec<String>
+    where
+        Self: Sized,
+    {
         vec![]
     }
 
@@ -38,12 +41,18 @@ where
 
     /// return the component name
     /// defaults to the struct simplified name
-    fn component_name() -> String where Self: Sized {
+    fn component_name() -> String
+    where
+        Self: Sized,
+    {
         extract_simple_struct_name::<Self>()
     }
 
     /// prefix the class bane
-    fn prefix_class(class_name: &str) -> String where Self: Sized{
+    fn prefix_class(class_name: &str) -> String
+    where
+        Self: Sized,
+    {
         let component_name = Self::component_name();
         if class_name.is_empty() {
             component_name
@@ -53,12 +62,18 @@ where
     }
 
     /// create a classname prepended with this component name
-    fn class_ns(class_name: &str) -> Attribute<MSG> where Self: Sized {
+    fn class_ns(class_name: &str) -> Attribute<MSG>
+    where
+        Self: Sized,
+    {
         class(Self::prefix_class(class_name))
     }
 
     /// create namespaced class names to pair that evaluates to true
-    fn classes_ns_flag(pair: impl IntoIterator<Item = (impl ToString, bool)>) -> Attribute<MSG> where Self: Sized {
+    fn classes_ns_flag(pair: impl IntoIterator<Item = (impl ToString, bool)>) -> Attribute<MSG>
+    where
+        Self: Sized,
+    {
         let class_list = pair.into_iter().filter_map(|(class, flag)| {
             if flag {
                 Some(Self::prefix_class(&class.to_string()))
@@ -71,7 +86,10 @@ where
     }
 
     /// create a selector class prepended with this component name
-    fn selector_ns(class_name: &str) -> String  where Self: Sized{
+    fn selector_ns(class_name: &str) -> String
+    where
+        Self: Sized,
+    {
         let component_name = Self::component_name();
         if class_name.is_empty() {
             format!(".{component_name}")
@@ -81,7 +99,10 @@ where
     }
 
     /// create namesspaced selector from multiple classnames
-    fn selectors_ns(class_names: impl IntoIterator<Item = impl ToString>) -> String where Self: Sized {
+    fn selectors_ns(class_names: impl IntoIterator<Item = impl ToString>) -> String
+    where
+        Self: Sized,
+    {
         let selectors: Vec<String> = class_names
             .into_iter()
             .map(|class_name| Self::selector_ns(&class_name.to_string()))
@@ -195,17 +216,22 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
 }
 
 /// A component that can be used directly in the view without mapping
-pub trait StatefulComponent<MSG>: Component<MSG, MSG> where MSG: 'static{
-
+pub trait StatefulComponent<MSG>: Component<MSG, MSG>
+where
+    MSG: 'static,
+{
     /// returns the attributes that is observed by this component
     /// These are the names of the attributes the component is interested in
-    fn observed_attributes() -> Vec<AttributeName> where Self: Sized;
+    fn observed_attributes() -> Vec<AttributeName>
+    where
+        Self: Sized;
 
     /// This will be invoked when a component is used as a custom element
     /// and the attributes of the custom-element has been modified
     ///
     /// if the listed attributes in the observed attributes are modified
-    fn attribute_changed(&mut self,
+    fn attribute_changed(
+        &mut self,
         attr_name: AttributeName,
         old_value: AttributeValue<MSG>,
         new_value: AttributeValue<MSG>,

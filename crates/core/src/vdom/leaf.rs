@@ -1,6 +1,6 @@
 //! Leaf node for html dom tree
-use std::borrow::Cow;
 use crate::dom::StatefulComponent;
+use std::borrow::Cow;
 use std::fmt;
 
 /// A leaf node value of html dom tree
@@ -18,10 +18,9 @@ pub enum Leaf<MSG> {
     Component(Box<dyn StatefulComponent<MSG>>),
 }
 
-impl<MSG> Clone for Leaf<MSG>{
-
+impl<MSG> Clone for Leaf<MSG> {
     fn clone(&self) -> Self {
-        match self{
+        match self {
             Self::Text(v) => Self::Text(v.clone()),
             Self::SafeHtml(v) => Self::SafeHtml(v.clone()),
             Self::Comment(v) => Self::Comment(v.clone()),
@@ -31,24 +30,21 @@ impl<MSG> Clone for Leaf<MSG>{
     }
 }
 
-impl<MSG> fmt::Debug for Leaf<MSG>{
-
+impl<MSG> fmt::Debug for Leaf<MSG> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self{
-            Self::Text(v) =>  write!(f, "Text({v})"),
+        match self {
+            Self::Text(v) => write!(f, "Text({v})"),
             Self::SafeHtml(v) => write!(f, "SafeHtml({v})"),
             Self::Comment(v) => write!(f, "Comment({v})"),
             Self::DocType(v) => write!(f, "DocType({v}"),
             Self::Component(_v) => todo!(),
         }
     }
-
 }
 
-impl<MSG> PartialEq for Leaf<MSG>{
-
+impl<MSG> PartialEq for Leaf<MSG> {
     fn eq(&self, other: &Self) -> bool {
-        match (self, other){
+        match (self, other) {
             (Self::Text(v), Self::Text(o)) => v == o,
             (Self::SafeHtml(v), Self::SafeHtml(o)) => v == o,
             (Self::Comment(v), Self::Comment(o)) => v == o,
@@ -59,7 +55,7 @@ impl<MSG> PartialEq for Leaf<MSG>{
     }
 }
 
-impl<MSG> Eq for Leaf<MSG>{ }
+impl<MSG> Eq for Leaf<MSG> {}
 
 impl<MSG> Leaf<MSG> {
     /// returns true if this a text node
