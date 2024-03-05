@@ -1,6 +1,6 @@
-use sauron_core::html::lookup::match_tag;
-use sauron_core::prelude::Render;
-use sauron_core::vdom::Node;
+use sauron::html::lookup::match_tag;
+use sauron::prelude::Render;
+use sauron::vdom::Node;
 use sauron_html_parser::parse_html;
 
 #[test]

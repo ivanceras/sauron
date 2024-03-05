@@ -141,13 +141,6 @@ features = [
     "Performance",
 ]
 
-[dev-dependencies.criterion]
-version = "0.5.1"
-
-[[bench]]
-name = "nodes_benchmark"
-harness = false
-
 
 [package.metadata.docs.rs]
 all-features = true

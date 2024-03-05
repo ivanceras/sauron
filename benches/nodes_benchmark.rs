@@ -3,7 +3,7 @@ extern crate criterion;
 
 use criterion::Criterion;
 
-use sauron_core::{
+use sauron::{
     html::{attributes::*, *},
     vdom::diff,
     vdom::Node,

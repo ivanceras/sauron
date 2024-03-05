@@ -47,6 +47,7 @@ log = "0.4"
 wasm-bindgen-test = "0.3"
 wasm-bindgen-futures = "0.4.31"
 regex = "1"
+sauron-html-parser = { path = "crates/html-parser" }
 
 [dev-dependencies.web-sys]
 version = "0.3"
@@ -80,3 +81,15 @@ exclude = [
 #mt-dom = { path = "../mt-dom" }
 #jss = { git = "https://github.com/ivanceras/jss.git", branch = "master" }
 #jss = { path = "../jss" }
+
+[dev-dependencies.criterion]
+version = "0.5.1"
+
+[[bench]]
+name = "nodes_benchmark"
+harness = false
+
+[[bench]]
+name = "bench_view_performance"
+harness = false
+
