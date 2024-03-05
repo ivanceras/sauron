@@ -23,7 +23,7 @@ use std::{any::TypeId, fmt, rc::Rc};
 ///         - Attributes of the same name are merged therefore cloning the attributes, hence the
 ///         callback is necessary.
 ///
-pub struct Listener<IN, OUT> {
+pub struct Callback<IN, OUT> {
     /// the function to be executed
     func: Rc<dyn Fn(IN) -> OUT>,
     /// the type_id of the function
@@ -34,7 +34,7 @@ pub struct Listener<IN, OUT> {
     msg_type_id: TypeId,
 }
 
-impl<IN, F, OUT> From<F> for Listener<IN, OUT>
+impl<IN, F, OUT> From<F> for Callback<IN, OUT>
 where
     F: Fn(IN) -> OUT + 'static,
     OUT: 'static,
@@ -54,8 +54,8 @@ where
 /// using the #[derive(Debug)] needs IN and OUT to also be Debug
 ///
 /// The reason this is manually implemented is, so that IN and OUT
-/// doesn't need to be Debug as it is part of the Listener objects and are not shown.
-impl<IN, OUT> fmt::Debug for Listener<IN, OUT> {
+/// doesn't need to be Debug as it is part of the Callback objects and are not shown.
+impl<IN, OUT> fmt::Debug for Callback<IN, OUT> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
@@ -65,7 +65,7 @@ impl<IN, OUT> fmt::Debug for Listener<IN, OUT> {
     }
 }
 
-impl<IN, OUT> Listener<IN, OUT>
+impl<IN, OUT> Callback<IN, OUT>
 where
     IN: 'static,
     OUT: 'static,
@@ -75,8 +75,8 @@ where
         (self.func)(input)
     }
 
-    /// map this Listener msg such that `Listener<IN, OUT>` becomes `Listener<IN, MSG2>`
-    pub fn map_msg<F, MSG2>(self, cb2: F) -> Listener<IN, MSG2>
+    /// map this Callback msg such that `Callback<IN, OUT>` becomes `Callback<IN, MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb2: F) -> Callback<IN, MSG2>
     where
         F: Fn(OUT) -> MSG2 + Clone + 'static,
         MSG2: 'static,
@@ -85,7 +85,7 @@ where
             let out = self.emit(input);
             cb2(out)
         };
-        Listener::from(cb)
+        Callback::from(cb)
     }
 }
 
@@ -93,9 +93,9 @@ where
 /// using the #[derive(Clone)] needs IN and OUT to also be Clone
 ///
 /// The reason this is manually implemented is, so that IN and OUT
-/// doesn't need to be Clone as it is part of the Listener objects and cloning here
+/// doesn't need to be Clone as it is part of the Callback objects and cloning here
 /// is just cloning the pointer of the actual callback function
-impl<IN, OUT> Clone for Listener<IN, OUT> {
+impl<IN, OUT> Clone for Callback<IN, OUT> {
     fn clone(&self) -> Self {
         Self {
             func: Rc::clone(&self.func),
@@ -113,7 +113,7 @@ impl<IN, OUT> Clone for Listener<IN, OUT> {
 ///
 /// This is done by comparing the type_id of the input and type_id of the output.
 ///
-impl<IN, OUT> PartialEq for Listener<IN, OUT> {
+impl<IN, OUT> PartialEq for Callback<IN, OUT> {
     fn eq(&self, other: &Self) -> bool {
         self.event_type_id == other.event_type_id
             && self.msg_type_id == other.msg_type_id

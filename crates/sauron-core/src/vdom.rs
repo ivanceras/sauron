@@ -32,4 +32,4 @@ pub mod patch;
 
 /// Callback where Event type is supplied
 /// for Components
-pub type Listener<MSG> = attribute::Listener<Event, MSG>;
+pub type Listener<MSG> = attribute::Callback<Event, MSG>;
