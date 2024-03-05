@@ -12,6 +12,6 @@ keywords = ["html", "parser", "web"]
 
 [dependencies]
 rphtml = "0.5.9"
-sauron-core = { version = "0.60", path = "../sauron-core", default-features = false, features = ["with-lookup"] }
+sauron-core = { version = "0.60", path = "../core", default-features = false, features = ["with-lookup"] }
 log = "0.4"
 thiserror = "1.0.48"

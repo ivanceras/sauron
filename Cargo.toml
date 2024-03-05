@@ -14,8 +14,8 @@ edition = "2021"
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-sauron-core = { version = "0.60", path = "crates/sauron-core", default-features = false }
-sauron-macro = { version = "0.60", path = "crates/sauron-macro", optional = true }
+sauron-core = { version = "0.60", path = "crates/core", default-features = false }
+sauron-macro = { version = "0.60", path = "crates/macro", optional = true }
 sauron-html-parser = { version = "0.60", path = "crates/html-parser", optional = true }
 
 [features]
