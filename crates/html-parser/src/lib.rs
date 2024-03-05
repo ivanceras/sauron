@@ -6,6 +6,7 @@ use rphtml::types::BoxDynError;
 use sauron_core::{
     html::{attributes::*, lookup, *},
     vdom::Node,
+    vdom::AttributeValue,
 };
 use std::fmt;
 use std::io;

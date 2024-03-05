@@ -1,9 +1,9 @@
 #![allow(clippy::type_complexity)]
 
 use indexmap::IndexMap;
-
-use crate::vdom::AttributeValue;
 use derive_where::derive_where;
+use crate::vdom::AttributeValue;
+
 
 /// The type of the Namspace
 pub type Namespace = &'static str;

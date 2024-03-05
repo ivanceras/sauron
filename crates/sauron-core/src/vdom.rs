@@ -5,7 +5,6 @@
 //! All the code in this module are run in purely rust environment, that is there is NO code here
 //! involves accessing the real DOM.
 //!
-pub use crate::html::attributes::AttributeValue;
 use crate::{dom::Event, html::attributes};
 pub use leaf::Leaf;
 pub use node_trait::NodeTrait;
@@ -19,9 +18,10 @@ pub use diff::{diff, diff_recursive};
 pub use node::{
     attribute::{
         attr, attr_ns, group_attributes_per_name, merge_attributes_of_same_name,
-        Tag, KEY,  Namespace, AttributeName,
+        Tag, KEY,  Namespace, AttributeName, 
     },
     element, element_ns, fragment, leaf, node_list, Attribute, Element, Node,
+    AttributeValue,
 };
 pub use patch::{Patch, PatchType, TreePath};
 

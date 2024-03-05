@@ -3,8 +3,7 @@
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
 use crate::dom::{document, window, Event};
 use crate::{
-    html::attributes::AttributeValue,
-    vdom::{Attribute, Listener},
+    vdom::{Attribute, Listener, AttributeValue},
 };
 use wasm_bindgen::JsCast;
 use crate::vdom;

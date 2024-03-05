@@ -1,6 +1,5 @@
 use crate::{
-    html::attributes::AttributeValue,
-    vdom::{Attribute, Element, Listener, Node},
+    vdom::{Attribute, Element, Listener, Node, AttributeValue},
 };
 
 

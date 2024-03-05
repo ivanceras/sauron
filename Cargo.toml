@@ -84,6 +84,12 @@ exclude = [
 
 [dev-dependencies.criterion]
 version = "0.5.1"
+default-features = false
+
+[package.metadata.docs.rs]
+all-features = true
+default-target = "wasm32-unknown-unknown"
+
 
 [[bench]]
 name = "nodes_benchmark"

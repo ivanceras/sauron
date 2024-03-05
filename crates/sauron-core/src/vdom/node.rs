@@ -1,12 +1,15 @@
-use super::{AttributeName, Namespace, Tag, AttributeValue};
-pub use attribute::Attribute;
+use super::{AttributeName, Namespace, Tag};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
-pub use element::Element;
 use crate::vdom::Leaf;
 use derive_where::derive_where;
 
+pub use attribute::Attribute;
+pub use element::Element;
+pub use attribute_value::AttributeValue;
+
 pub(crate) mod attribute;
+pub(crate) mod attribute_value;
 mod element;
 
 /// represents a node in a virtual dom

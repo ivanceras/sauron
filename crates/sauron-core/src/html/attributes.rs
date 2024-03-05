@@ -3,11 +3,11 @@
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
 use std::borrow::Cow;
 use crate::vdom;
+use crate::vdom::AttributeValue;
 
 pub use crate::{dom::Event, vdom::Attribute};
 pub use attribute_macros::commons::*;
 pub use attribute_macros::*;
-pub use attribute_value::AttributeValue;
 pub use listener::Listener;
 pub use special::{key, replace, skip, skip_criteria};
 pub use style::Style;
@@ -15,7 +15,6 @@ pub use value::Value;
 
 #[macro_use]
 mod attribute_macros;
-mod attribute_value;
 mod listener;
 mod special;
 mod style;

@@ -3,9 +3,9 @@ use crate::{
     dom::{self, Application, Program},
     dom::{document, window},
     html,
-    html::attributes::{AttributeValue, Listener, SegregatedAttributes},
+    html::attributes::{Listener, SegregatedAttributes},
     vdom,
-    vdom::{Attribute, Leaf, NodeTrait},
+    vdom::{Attribute, Leaf, NodeTrait, AttributeValue, },
 };
 use js_sys::Function;
 use crate::vdom::TreePath;
