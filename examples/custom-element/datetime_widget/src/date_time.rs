@@ -1,6 +1,6 @@
 use sauron::wasm_bindgen::JsCast;
 use sauron::{
-    custom_element, dom::Callback, html::attributes::*, html::events::*, html::*, jss,
+    custom_element, vdom::Callback, html::attributes::*, html::events::*, html::*, jss,
     wasm_bindgen, web_sys, Attribute, Effects, JsValue, Node, WebComponent, *,
 };
 use std::fmt::Debug;
@@ -181,6 +181,7 @@ impl<XMSG> sauron::WebComponent<Msg> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
+
     fn observed_attributes() -> Vec<&'static str> {
         vec!["date", "time", "interval"]
     }

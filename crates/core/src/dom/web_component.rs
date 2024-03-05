@@ -5,6 +5,7 @@ use wasm_bindgen::JsCast;
 
 /// a trait for implementing WebComponent in the DOM with custom tag
 pub trait WebComponent<MSG> {
+
     /// returns the attributes that is observed by this component
     /// These are the names of the attributes the component is interested in
     fn observed_attributes() -> Vec<&'static str>;
