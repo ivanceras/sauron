@@ -2,6 +2,7 @@ use super::attribute::{AttributeName, Namespace, Tag};
 use super::{Attribute, Node};
 
 use crate::vdom::AttributeValue;
+use crate::vdom::Value;
 use derive_where::derive_where;
 
 /// Represents an element of the virtual node
@@ -177,5 +178,11 @@ impl<MSG> Element<MSG> {
         } else {
             Some(result)
         }
+    }
+
+    /// get the first value of the attribute which has the name `att_name` of this element
+    pub fn first_value(&self, att_name: &AttributeName) -> Option<&Value> {
+        self.attribute_value(att_name)
+            .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
 }

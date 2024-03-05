@@ -3,26 +3,24 @@
 //!
 use super::{attr, Attribute, Value};
 use crate::vdom::AttributeName;
-use crate::vdom::{Element, Node};
 
 /// Special Node attributes that are treated differently
 /// such as key and skip which both greatly affects the diffing algorithm
 
-impl<MSG> Node<MSG> {
-    /// get the first value of the attribute which has the name `att_name` of this node
-    pub fn get_value(&self, att_name: &AttributeName) -> Option<&Value> {
-        self.attribute_value(att_name)
-            .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
-    }
-}
 
-impl<MSG> Element<MSG> {
-    /// get the first value of the attribute which has the name `att_name` of this element
-    pub fn get_value(&self, att_name: &AttributeName) -> Option<&Value> {
-        self.attribute_value(att_name)
-            .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
-    }
-}
+/// The key attribute
+pub static KEY: &AttributeName = &"key";
+
+/// The replace attribute
+pub static REPLACE: &AttributeName = &"replace";
+
+/// The skip attribute
+pub static SKIP: &AttributeName = &"skip";
+
+/// The skip criteria attribute
+pub static SKIP_CRITERIA: &AttributeName = &"skip_criteria";
+
+
 
 /// creates a key attribute using a formatter
 /// # Examples
@@ -47,13 +45,13 @@ pub fn key<V, MSG>(v: V) -> Attribute<MSG>
 where
     V: Into<Value>,
 {
-    attr("key", v)
+    attr(KEY, v)
 }
 
 /// if the value is true, then the diffing of this element
 /// and its descendants are skip entirely
 pub fn skip<MSG>(v: bool) -> Attribute<MSG> {
-    attr("skip", v)
+    attr(SKIP, v)
 }
 
 /// if the value of this attribute of the old element and the new element is the same
@@ -62,11 +60,11 @@ pub fn skip_criteria<V, MSG>(v: V) -> Attribute<MSG>
 where
     V: Into<Value>,
 {
-    attr("skip_criteria", v.into())
+    attr(SKIP_CRITERIA, v.into())
 }
 
 /// if the value is true, then this node is made to replace the old
 /// node it matches
 pub fn replace<MSG>(v: bool) -> Attribute<MSG> {
-    attr("replace", v)
+    attr(REPLACE, v)
 }

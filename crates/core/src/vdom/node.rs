@@ -6,6 +6,7 @@ use crate::vdom::Leaf;
 use derive_where::derive_where;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
+use crate::vdom::Value;
 
 /// represents a node in a virtual dom
 /// A node could be an element which can contain one or more children of nodes.
@@ -278,6 +279,12 @@ impl<MSG> Node<MSG> {
         } else {
             None
         }
+    }
+
+    /// get the first value of the attribute which has the name `att_name` of this node
+    pub fn first_value(&self, att_name: &AttributeName) -> Option<&Value> {
+        self.attribute_value(att_name)
+            .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
 }
 

@@ -1,6 +1,6 @@
 //! provides diffing algorithm which returns patches
 use super::{diff_lis, group_attributes_per_name, Attribute, Element, Node, Patch, TreePath};
-use super::{Tag, KEY};
+use super::{Tag, KEY, REPLACE, SKIP, SKIP_CRITERIA};
 use std::{cmp, mem};
 
 /// Return the patches needed for `old_node` to have the same DOM as `new_node`
@@ -64,7 +64,7 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
     }
     let replace = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
         let explicit_replace_attr = new_node
-            .get_value(&"replace")
+            .first_value(&REPLACE)
             .and_then(|v| v.as_bool())
             .unwrap_or(false);
 
@@ -105,13 +105,13 @@ pub fn diff_recursive<'a, MSG>(
     path: &TreePath,
 ) -> Vec<Patch<'a, MSG>> {
     let skip = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
-        let new_skip_criteria = new_node.attribute_value(&"skip_criteria");
-        let old_skip_criteria = old_node.attribute_value(&"skip_criteria");
+        let new_skip_criteria = new_node.attribute_value(&SKIP_CRITERIA);
+        let old_skip_criteria = old_node.attribute_value(&SKIP_CRITERIA);
         // if old and new skip_criteria didn't change skip diffing this nodes
         match (new_skip_criteria, old_skip_criteria) {
             (Some(new), Some(old)) => new == old,
             _ => new_node
-                .get_value(&"skip")
+                .first_value(&SKIP)
                 .and_then(|v| v.as_bool())
                 .unwrap_or(false),
         }

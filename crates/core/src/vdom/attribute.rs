@@ -12,6 +12,7 @@ mod attribute_value;
 pub mod callback;
 mod style;
 mod value;
+pub(crate) mod special;
 
 /// The type of the Namspace
 pub type Namespace = &'static str;
@@ -21,9 +22,6 @@ pub type Tag = &'static str;
 
 /// The type of Attribute Name
 pub type AttributeName = &'static str;
-
-/// The key attribute
-pub static KEY: &AttributeName = &"key";
 
 /// These are the plain attributes of an element
 #[derive_where(Clone, Debug, PartialEq, Eq)]

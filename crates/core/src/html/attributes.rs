@@ -11,11 +11,10 @@ pub use crate::vdom::Style;
 pub use crate::{dom::Event, vdom::Attribute};
 pub use attribute_macros::commons::*;
 pub use attribute_macros::*;
-pub use special::{key, replace, skip, skip_criteria};
+pub use crate::vdom::{key, replace, skip, skip_criteria};
 
 #[macro_use]
 mod attribute_macros;
-mod special;
 
 /// A helper function which creates a style attribute by assembling the tuples into a string for the style value.
 /// # Example
