@@ -234,13 +234,13 @@
 - [ ] Bring back CreatedNode maybe with a different name: `DomNode` which wraps the `Node` or `Element` along with it's closures from event listener
     - These are then saved into the `Program` where when removed or dropped, it will also drop the associated closures with them, thereby simplifying the code.
     - Right now, we are attaching a `vdom-data` attribute for nodes that have listeners
-- [ ] Make use of `Arc<RwLock>` to check if can solve copying the `APP` via `transmute_copy`. ~~it didn't solve it~~
+- [X] Make use of `Arc<RwLock>` to check if can solve copying the `APP` via `transmute_copy`. ~~it didn't solve it~~
     - See if there are performance penalty
 - [ ] Make template node for when app view is first created
     - [ ] The template is then patched when the app is mounted.
 - [ ] Create a `view!` macro which generated the view function + template + prediff functions
 - [ ] Make a variant of `Node` leaf to be `Component`, component can contain attributes and optionally children components + elements
-    - [ ] This requires moving the mt-dom types into sauron-core so as to make a specific diff function for component
+    - [X] This requires moving the mt-dom types into sauron-core so as to make a specific diff function for component
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
@@ -311,7 +311,7 @@
 - [ ] Find a way to break up diffing the current vdom and the new vdom as they can also take a bit of long time as well.
 - [ ] Add benchmark function for using CACHE_ELEMENT and not
 - [ ] Make dispatch pending patches break when the animation frame timeouts, same way as dispatching pending msgs
-- [ ] Check the last time the dom is updated, if it is less than 17ms, delay the dom update until 17ms has elapsed since the last update.
+- [X] Check the last time the dom is updated, if it is less than 17ms, delay the dom update until 17ms has elapsed since the last update.
 - [ ] Make use of [talc](https://github.com/SFBdragon/talc) allocator for faster and leaner memory
 
 ## Maintenance
@@ -346,8 +346,8 @@
 - [X] Add more test for recycled nodes with keys
 - [X] When 2 text are next to each other, the second text will become a comment
 - [X] Runtime errors when using fragments
-- [ ] usage of `classes_flag` seems to be broken with complext trait requirement.
-    - This should work very simply `classes_flag([("todo", true), ("editor", is_editing)])`
+- [X] usage of `classes_flag` seems to be broken with complext trait requirement.
+    - [X] This should work very simply `classes_flag([("todo", true), ("editor", is_editing)])`
 
 ## Limitations
 - In rust, no two closures, even if identical, have the same type. Therefore closure can not be check for equality.
