@@ -59,18 +59,23 @@ impl Application<Msg> for App {
             Msg::Click => {
                 self.click_count += 1;
                 log::info!("click count: {}", self.click_count);
+                Cmd::none()
             }
             Msg::DoubleClick => {
                 self.double_clicks += 1;
+                Cmd::none()
             }
             Msg::Clock => {
                 self.date = Date::new_0();
+                Cmd::none()
             }
             Msg::ChangeName(name) => {
                 self.name = name;
+                Cmd::none()
             }
             Msg::ChangeBiography(bio) => {
                 self.biography = bio;
+                Cmd::none()
             }
             Msg::ChangeThought(thought) => {
                 if !thought.is_empty() {
@@ -78,12 +83,13 @@ impl Application<Msg> for App {
                 } else {
                     self.thought = None;
                 }
+                Cmd::none()
             }
             Msg::BtnMsg(bmsg) => {
-                self.btn.update(bmsg);
+                let cmd = self.btn.update(bmsg);
+                cmd.map_msg(Msg::BtnMsg)
             }
         }
-        Cmd::none()
     }
 
     fn view(&self) -> Node<Msg> {
