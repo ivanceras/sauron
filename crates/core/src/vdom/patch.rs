@@ -155,7 +155,7 @@ impl<'a, MSG> Patch<'a, MSG> {
             tag,
             patch_path,
             patch_type: PatchType::InsertBeforeNode {
-                nodes: nodes.into_iter().map(|n|Cow::Borrowed(n)).collect(),
+                nodes: nodes.into_iter().map(|n| Cow::Borrowed(n)).collect(),
             },
         }
     }
@@ -280,7 +280,7 @@ impl<'a, MSG> Patch<'a, MSG> {
         MSG2: 'static,
         MSG: 'static,
     {
-        Patch{
+        Patch {
             tag: self.tag,
             patch_path: self.patch_path,
             patch_type: self.patch_type.map_msg(cb),
@@ -298,10 +298,13 @@ impl<'a, MSG> PatchType<'a, MSG> {
     {
         match self {
             Self::InsertBeforeNode { nodes } => PatchType::InsertBeforeNode {
-                nodes: nodes.into_iter().map(|n| match n{
-                    Cow::Owned(n) => Cow::Owned(n.map_msg(cb.clone())),
-                    Cow::Borrowed(n) => Cow::Owned(n.clone().map_msg(cb.clone())),
-                }).collect(),
+                nodes: nodes
+                    .into_iter()
+                    .map(|n| match n {
+                        Cow::Owned(n) => Cow::Owned(n.map_msg(cb.clone())),
+                        Cow::Borrowed(n) => Cow::Owned(n.clone().map_msg(cb.clone())),
+                    })
+                    .collect(),
             },
             _ => todo!(),
         }

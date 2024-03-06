@@ -98,9 +98,7 @@ pub struct GroupedDomAttrValues {
     pub function_calls: Vec<Value>,
 }
 
-
-impl DomAttr{
-
+impl DomAttr {
     pub(crate) fn group_values(self) -> GroupedDomAttrValues {
         let mut listeners = vec![];
         let mut plain_values = vec![];
@@ -147,8 +145,6 @@ impl DomAttrValue {
         }
     }
 }
-
-
 
 impl<APP, MSG> Program<APP, MSG>
 where

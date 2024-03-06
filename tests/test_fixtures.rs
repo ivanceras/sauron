@@ -18,10 +18,7 @@ impl Application<()> for SimpleComponent {
     }
 
     fn view(&self) -> Node<()> {
-        div(
-            vec![],
-            vec![],
-        )
+        div(vec![], vec![])
     }
 }
 

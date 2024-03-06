@@ -282,4 +282,3 @@ pub fn attr<MSG>(att: &'static str, v: impl Into<Value>) -> Attribute<MSG> {
 pub fn empty_attr<MSG>() -> Attribute<MSG> {
     vdom::attr("", AttributeValue::Empty)
 }
-

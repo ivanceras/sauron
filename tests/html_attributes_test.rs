@@ -110,8 +110,7 @@ fn test_styles_and_styles_flag() {
     let mut actual_html = String::new();
     actual.render(&mut actual_html).unwrap();
 
-
-    let s:Attribute<&'static str> = style! {"font-family": "monospace"};
+    let s: Attribute<&'static str> = style! {"font-family": "monospace"};
     println!("a style generates: {:#?}", s);
 
     let expected: Node<&'static str> = div(
@@ -125,7 +124,7 @@ fn test_styles_and_styles_flag() {
 
     let mut expected_html = String::new();
     expected.render(&mut expected_html).unwrap();
-    
+
     println!("expected: {}", expected_html);
     println!("actual:   {}", actual_html);
 

@@ -115,12 +115,10 @@ where
     }
 }
 
-
 impl<APP, MSG> Cmd<APP, MSG>
 where
     MSG: 'static,
 {
-
     /// map the msg of this Cmd such that `Cmd<APP,MSG>` becomes `Cmd<APP,MSG2>`
     pub fn map_msg<F, MSG2>(self, _cb: F) -> Cmd<APP, MSG2>
     where

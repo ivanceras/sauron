@@ -1,13 +1,13 @@
 //! This contains a trait to be able to render
 //! virtual dom into a writable buffer
 //!
+use crate::vdom::Style;
+use crate::vdom::Value;
 use crate::{
+    vdom::GroupedAttributeValues,
     vdom::{Attribute, Element, Leaf, Node, NodeTrait},
-    vdom::GroupedAttributeValues
 };
 use std::fmt;
-use crate::vdom::Value;
-use crate::vdom::Style;
 
 const DEFAULT_INDENT_SIZE: usize = 2;
 
@@ -252,9 +252,7 @@ impl<MSG> Render for Attribute<MSG> {
         let should_skip_attribute = boolean_attributes.contains(self.name()) && !bool_value;
 
         if !should_skip_attribute {
-            if let Some(merged_plain_values) =
-                Value::merge_to_string(plain_values)
-            {
+            if let Some(merged_plain_values) = Value::merge_to_string(plain_values) {
                 println!("values: {}", merged_plain_values);
                 write!(buffer, "{}=\"{}\"", self.name(), merged_plain_values)?;
             }

@@ -1,12 +1,15 @@
+use crate::dom::dom_patch::DomAttr;
+use crate::dom::dom_patch::GroupedDomAttrValues;
+use crate::vdom::Style;
 use crate::vdom::TreePath;
+use crate::vdom::Value;
 use crate::{
     dom::events::MountEvent,
-    dom::{Application, Program},
     dom::{document, window},
+    dom::{Application, Program},
     vdom,
     vdom::{Attribute, Leaf, NodeTrait},
 };
-use crate::vdom::Value;
 use js_sys::Function;
 use std::collections::HashMap;
 use std::{cell::Cell, collections::BTreeMap};
@@ -17,9 +20,6 @@ use web_sys::{
     HtmlOptionElement, HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement,
     HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
-use crate::dom::dom_patch::DomAttr;
-use crate::dom::dom_patch::GroupedDomAttrValues;
-use crate::vdom::Style;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -175,7 +175,10 @@ where
         Self::set_element_dom_attrs(
             self,
             &element,
-            attrs.iter().map(|a|self.convert_attr(a)).collect::<Vec<_>>(),
+            attrs
+                .iter()
+                .map(|a| self.convert_attr(a))
+                .collect::<Vec<_>>(),
         );
 
         element.into()
@@ -217,7 +220,6 @@ where
 
     /// set the element with dom attr
     pub fn set_element_dom_attr(&self, element: &Element, attr: DomAttr) {
-
         let attr_name = intern(attr.name);
         let attr_namespace = attr.namespace;
 
@@ -229,20 +231,14 @@ where
         } = attr.group_values();
 
         // set simple values
-        if let Some(merged_plain_values) =
-            Value::merge_to_string(plain_values.iter())
-        {
+        if let Some(merged_plain_values) = Value::merge_to_string(plain_values.iter()) {
             if let Some(namespace) = attr_namespace {
                 // Warning NOTE: set_attribute_ns should only be called
                 // when you meant to use a namespace
                 // using this with None will error in the browser with:
                 // NamespaceError: An attempt was made to create or change an object in a way which is incorrect with regard to namespaces
                 element
-                    .set_attribute_ns(
-                        Some(namespace),
-                        attr_name,
-                        &merged_plain_values,
-                    )
+                    .set_attribute_ns(Some(namespace), attr_name, &merged_plain_values)
                     .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
             } else {
                 match attr_name {
@@ -303,9 +299,7 @@ where
                     }
                 }
             }
-        } else if let Some(merged_styles) =
-            Style::merge_to_string(&styles)
-        {
+        } else if let Some(merged_styles) = Style::merge_to_string(&styles) {
             // set the styles
             element
                 .set_attribute(attr_name, &merged_styles)
@@ -319,19 +313,16 @@ where
         }
 
         // do function calls such as set_inner_html
-        if let Some(merged_func_values) =
-            Value::merge_to_string(function_calls.iter())
-        {
+        if let Some(merged_func_values) = Value::merge_to_string(function_calls.iter()) {
             if attr_name == "inner_html" {
                 element.set_inner_html(&merged_func_values);
             }
         }
 
-        for listener in listeners.iter(){
+        for listener in listeners.iter() {
             self.add_event_listener(element, attr_name, &listener)
                 .expect("add listener");
         }
-
 
         if !listeners.is_empty() {
             let unique_id = create_unique_identifier();
@@ -341,8 +332,8 @@ where
                 .set_attribute(intern(DATA_VDOM_ID), &unique_id.to_string())
                 .expect("Could not set attribute on element");
 
-        let listener_closures: BTreeMap<&'static str, Closure<dyn FnMut(web_sys::Event)>> =
-            BTreeMap::from_iter(listeners.into_iter().map(|c|(attr_name, c)));
+            let listener_closures: BTreeMap<&'static str, Closure<dyn FnMut(web_sys::Event)>> =
+                BTreeMap::from_iter(listeners.into_iter().map(|c| (attr_name, c)));
 
             self.node_closures
                 .borrow_mut()
@@ -350,14 +341,16 @@ where
         }
     }
 
-
     /// attach and event listener to an event target
     pub fn add_event_listeners(
         &self,
         target: &web_sys::EventTarget,
         event_listeners: Vec<Attribute<MSG>>,
     ) -> Result<(), JsValue> {
-        let dom_attrs = event_listeners.into_iter().map(|a|self.convert_attr(&a)).collect();
+        let dom_attrs = event_listeners
+            .into_iter()
+            .map(|a| self.convert_attr(&a))
+            .collect();
         self.add_event_dom_listeners(target, dom_attrs)?;
         Ok(())
     }
@@ -370,7 +363,8 @@ where
     ) -> Result<(), JsValue> {
         for attr in event_listeners.into_iter() {
             for event_cb in attr.value.into_iter() {
-                let closure: Closure<dyn FnMut(web_sys::Event)> = event_cb.as_event_closure().expect("expecting a callback");
+                let closure: Closure<dyn FnMut(web_sys::Event)> =
+                    event_cb.as_event_closure().expect("expecting a callback");
                 self.add_event_listener(target, attr.name, &closure)?;
                 self.event_closures.borrow_mut().push(closure);
             }
@@ -495,13 +489,9 @@ where
 
     /// set the element attribute value with the first numerical value found in values
     fn set_numeric_values(element: &Element, values: &[Value]) {
-        let value_i32 = values
-            .first()
-            .and_then(|v|  v.as_i32());
+        let value_i32 = values.first().and_then(|v| v.as_i32());
 
-        let value_f64 = values
-            .first()
-            .and_then(|v|  v.as_f64());
+        let value_f64 = values.first().and_then(|v| v.as_f64());
 
         if let Some(value_i32) = value_i32 {
             Self::set_value_i32(element, value_i32);
@@ -539,10 +529,7 @@ where
     }
 
     /// remove the elemnt dom attr
-    pub fn remove_element_dom_attr(
-        element: &Element,
-        attr: &DomAttr,
-    ) -> Result<(), JsValue> {
+    pub fn remove_element_dom_attr(element: &Element, attr: &DomAttr) -> Result<(), JsValue> {
         match attr.name {
             "value" => {
                 Self::set_value_str(element, "");

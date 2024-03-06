@@ -26,11 +26,13 @@ impl Style {
         matches!(self.name, Cow::Borrowed(_)) && self.value.is_static_str()
     }
 
-    pub(crate) fn merge_to_string<'a>(styles: impl IntoIterator<Item = &'a Self>) -> Option<String> {
+    pub(crate) fn merge_to_string<'a>(
+        styles: impl IntoIterator<Item = &'a Self>,
+    ) -> Option<String> {
         let stringed = styles
-                .into_iter()
-                .map(|s|format!("{s};"))
-                .collect::<Vec<_>>();
+            .into_iter()
+            .map(|s| format!("{s};"))
+            .collect::<Vec<_>>();
         println!("stringed: {stringed:?}");
         if !stringed.is_empty() {
             let joined = stringed.join("");

@@ -220,7 +220,7 @@ where
         MSG2: 'static,
         MSG: 'static,
     {
-        Program{
+        Program {
             app_context: self.app_context.clone().map_msg(cb),
             root_node: self.root_node,
             mount_node: self.mount_node,
@@ -256,7 +256,6 @@ where
         }
     }
 }
-
 
 impl<APP, MSG> Program<APP, MSG>
 where

@@ -51,7 +51,6 @@ impl Parse for Style {
     }
 }
 
-
 impl Style {
     pub(crate) fn to_attr_tokens(&self) -> proc_macro2::TokenStream {
         let style_tokens = self.to_style_array_tokens();
@@ -79,7 +78,7 @@ impl Style {
 
     pub(crate) fn to_tokens_with_pretty(&self) -> proc_macro2::TokenStream {
         let style = self.to_style_array_tokens();
-        quote!{
+        quote! {
             #style.into_iter().map(|_style|format!("  {}: {};", _style.name, _style.value)).collect::<Vec<_>>().join("\n")
         }
     }
@@ -122,10 +121,8 @@ impl ToTokens for Property {
 }
 
 impl Property {
-
     /// returns vdom::Style
     fn to_tokens_with_pretty(&self) -> proc_macro2::TokenStream {
-
         let property = &self.property;
         let value = &self.value;
 

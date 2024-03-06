@@ -113,12 +113,25 @@ where
     {
         AppContext {
             app: Rc::new(RefCell::new(Rc::into_inner(self.app).unwrap().into_inner())),
-            current_vdom: Rc::new(RefCell::new(Rc::into_inner(self.current_vdom).unwrap().into_inner().map_msg(cb.clone()))),
+            current_vdom: Rc::new(RefCell::new(
+                Rc::into_inner(self.current_vdom)
+                    .unwrap()
+                    .into_inner()
+                    .map_msg(cb.clone()),
+            )),
             pending_msgs: Rc::new(RefCell::new(VecDeque::from_iter(
-                Rc::into_inner(self.pending_msgs).unwrap().into_inner().into_iter().map(|msg| cb(msg)),
+                Rc::into_inner(self.pending_msgs)
+                    .unwrap()
+                    .into_inner()
+                    .into_iter()
+                    .map(|msg| cb(msg)),
             ))),
             pending_cmds: Rc::new(RefCell::new(VecDeque::from_iter(
-                Rc::into_inner(self.pending_cmds).unwrap().into_inner().into_iter().map(|cmd| cmd.map_msg(cb.clone())),
+                Rc::into_inner(self.pending_cmds)
+                    .unwrap()
+                    .into_inner()
+                    .into_iter()
+                    .map(|cmd| cmd.map_msg(cb.clone())),
             ))),
         }
     }

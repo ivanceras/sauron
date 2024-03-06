@@ -127,15 +127,19 @@ impl Value {
         matches!(self, Self::Cow(Cow::Borrowed(_)))
     }
 
-    pub(crate) fn merge_to_string<'a>(values: impl IntoIterator<Item = &'a Value>) -> Option<String> {
-        let stringed = values.into_iter().map(|v| v.to_string()).collect::<Vec<_>>();
+    pub(crate) fn merge_to_string<'a>(
+        values: impl IntoIterator<Item = &'a Value>,
+    ) -> Option<String> {
+        let stringed = values
+            .into_iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<_>>();
         if !stringed.is_empty() {
             Some(stringed.join(" "))
         } else {
             None
         }
     }
-
 }
 
 impl PartialEq for Value {

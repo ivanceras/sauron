@@ -3,11 +3,11 @@
 use derive_where::derive_where;
 use indexmap::IndexMap;
 
+use crate::vdom::EventCallback;
 pub use attribute_value::AttributeValue;
 pub use callback::Callback;
 pub use style::Style;
 pub use value::Value;
-use crate::vdom::EventCallback;
 
 mod attribute_value;
 pub mod callback;
@@ -49,7 +49,6 @@ pub struct GroupedAttributeValues<'a, MSG> {
     /// function calls
     pub function_calls: Vec<&'a Value>,
 }
-
 
 impl<MSG> Attribute<MSG> {
     /// create a plain attribute with namespace
@@ -102,9 +101,7 @@ impl<MSG> Attribute<MSG> {
     }
 
     /// grouped values into plain, function calls, styles and event listeners
-    pub(crate) fn group_values(
-        attr: &Attribute<MSG>,
-    ) -> GroupedAttributeValues<MSG> {
+    pub(crate) fn group_values(attr: &Attribute<MSG>) -> GroupedAttributeValues<MSG> {
         let mut listeners = vec![];
         let mut plain_values = vec![];
         let mut styles = vec![];
@@ -136,7 +133,12 @@ impl<MSG> Attribute<MSG> {
 
     /// merge the values of attributes with the same name
     #[doc(hidden)]
-    pub fn merge_attributes_of_same_name<'a>(attributes: impl IntoIterator<Item = &'a Attribute<MSG>>) -> Vec<Attribute<MSG>> where MSG: 'a{
+    pub fn merge_attributes_of_same_name<'a>(
+        attributes: impl IntoIterator<Item = &'a Attribute<MSG>>,
+    ) -> Vec<Attribute<MSG>>
+    where
+        MSG: 'a,
+    {
         let mut merged: IndexMap<&AttributeName, Attribute<MSG>> = IndexMap::new();
         for att in attributes.into_iter() {
             if let Some(existing) = merged.get_mut(&att.name) {
@@ -199,4 +201,3 @@ pub fn attr_ns<MSG>(
 ) -> Attribute<MSG> {
     Attribute::new(namespace, name, value.into())
 }
-
