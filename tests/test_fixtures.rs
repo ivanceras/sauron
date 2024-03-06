@@ -19,7 +19,7 @@ impl Application<()> for SimpleComponent {
 
     fn view(&self) -> Node<()> {
         div(
-            vec![sauron::on_click(|_| {}), sauron::on_click(|_| {})],
+            vec![],
             vec![],
         )
     }

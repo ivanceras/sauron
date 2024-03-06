@@ -51,6 +51,9 @@ fn remove_event_from_replaced_node() {
     let new: Node<()> = p(vec![], vec![]);
 
     let mut simple_program = simple_program();
+
+    log::info!("There are existing closures:{}", simple_program.node_closures.borrow().len());
+
     let diff = diff(&old, &new);
     log::info!("{:#?}", diff);
     assert_eq!(

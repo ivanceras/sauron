@@ -133,6 +133,44 @@ impl<MSG> Attribute<MSG> {
             function_calls,
         }
     }
+
+    /// merge the values of attributes with the same name
+    #[doc(hidden)]
+    pub fn merge_attributes_of_same_name<'a>(attributes: impl IntoIterator<Item = &'a Attribute<MSG>>) -> Vec<Attribute<MSG>> where MSG: 'a{
+        let mut merged: IndexMap<&AttributeName, Attribute<MSG>> = IndexMap::new();
+        for att in attributes.into_iter() {
+            if let Some(existing) = merged.get_mut(&att.name) {
+                existing.value.extend(att.value.clone());
+            } else {
+                merged.insert(
+                    &att.name,
+                    Attribute {
+                        namespace: att.namespace,
+                        name: att.name,
+                        value: att.value.clone(),
+                    },
+                );
+            }
+        }
+        merged.into_values().collect()
+    }
+
+    /// group attributes of the same name
+    #[doc(hidden)]
+    pub fn group_attributes_per_name(
+        attributes: &[Attribute<MSG>],
+    ) -> IndexMap<&AttributeName, Vec<&Attribute<MSG>>> {
+        let mut grouped: IndexMap<&AttributeName, Vec<&Attribute<MSG>>> =
+            IndexMap::with_capacity(attributes.len());
+        for attr in attributes {
+            if let Some(existing) = grouped.get_mut(&attr.name) {
+                existing.push(attr);
+            } else {
+                grouped.insert(&attr.name, vec![attr]);
+            }
+        }
+        grouped
+    }
 }
 
 /// Create an attribute
@@ -162,42 +200,3 @@ pub fn attr_ns<MSG>(
     Attribute::new(namespace, name, value.into())
 }
 
-/// merge the values of attributes with the same name
-#[doc(hidden)]
-pub fn merge_attributes_of_same_name<MSG>(attributes: &[&Attribute<MSG>]) -> Vec<Attribute<MSG>> {
-    //let mut merged: Vec<Attribute> = vec![];
-    let mut merged: IndexMap<&AttributeName, Attribute<MSG>> =
-        IndexMap::with_capacity(attributes.len());
-    for att in attributes {
-        if let Some(existing) = merged.get_mut(&att.name) {
-            existing.value.extend(att.value.clone());
-        } else {
-            merged.insert(
-                &att.name,
-                Attribute {
-                    namespace: att.namespace,
-                    name: att.name,
-                    value: att.value.clone(),
-                },
-            );
-        }
-    }
-    merged.into_values().collect()
-}
-
-/// group attributes of the same name
-#[doc(hidden)]
-pub fn group_attributes_per_name<MSG>(
-    attributes: &[Attribute<MSG>],
-) -> IndexMap<&AttributeName, Vec<&Attribute<MSG>>> {
-    let mut grouped: IndexMap<&AttributeName, Vec<&Attribute<MSG>>> =
-        IndexMap::with_capacity(attributes.len());
-    for attr in attributes {
-        if let Some(existing) = grouped.get_mut(&attr.name) {
-            existing.push(attr);
-        } else {
-            grouped.insert(&attr.name, vec![attr]);
-        }
-    }
-    grouped
-}

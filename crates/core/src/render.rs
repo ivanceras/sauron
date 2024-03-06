@@ -1,7 +1,6 @@
 //! This contains a trait to be able to render
 //! virtual dom into a writable buffer
 //!
-use crate::vdom;
 use crate::{
     vdom::{Attribute, Element, Leaf, Node, NodeTrait},
     vdom::GroupedAttributeValues
@@ -163,9 +162,8 @@ impl<MSG> Render for Element<MSG> {
         write!(buffer, "<{}", self.tag())?;
 
         println!("original attributes: {:#?}", self.attributes());
-        let ref_attrs: Vec<&Attribute<MSG>> = self.attributes().iter().collect();
         let merged_attributes: Vec<Attribute<MSG>> =
-            vdom::merge_attributes_of_same_name(&ref_attrs);
+            Attribute::merge_attributes_of_same_name(self.attributes());
         println!("merged_attributes: {:#?}", merged_attributes);
 
         for attr in &merged_attributes {

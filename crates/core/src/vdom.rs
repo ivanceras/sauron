@@ -22,7 +22,7 @@ mod node_trait;
 pub use attribute::special::{key, replace, skip, skip_criteria};
 pub(crate) use attribute::special::{KEY, REPLACE, SKIP, SKIP_CRITERIA};
 pub use attribute::{
-    attr, attr_ns, merge_attributes_of_same_name, AttributeName, AttributeValue, Namespace, Style,
+    attr, attr_ns, AttributeName, AttributeValue, Namespace, Style,
     Tag, Value,
 };
 pub use diff::{diff, diff_recursive};

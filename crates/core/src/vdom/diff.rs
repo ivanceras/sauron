@@ -1,7 +1,6 @@
 //! provides diffing algorithm which returns patches
 use super::{diff_lis, Attribute, Element, Node, Patch, TreePath};
 use super::{Tag, KEY, REPLACE, SKIP, SKIP_CRITERIA};
-use crate::vdom::attribute::group_attributes_per_name;
 use std::{cmp, mem};
 
 /// Return the patches needed for `old_node` to have the same DOM as `new_node`
@@ -295,8 +294,8 @@ fn create_attribute_patches<'a, MSG>(
     let mut add_attributes: Vec<&Attribute<MSG>> = vec![];
     let mut remove_attributes: Vec<&Attribute<MSG>> = vec![];
 
-    let new_attributes_grouped = group_attributes_per_name(new_attributes);
-    let old_attributes_grouped = group_attributes_per_name(old_attributes);
+    let new_attributes_grouped = Attribute::group_attributes_per_name(new_attributes);
+    let old_attributes_grouped = Attribute::group_attributes_per_name(old_attributes);
 
     // for all new elements that doesn't exist in the old elements
     // or the values differ

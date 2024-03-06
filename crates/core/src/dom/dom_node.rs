@@ -170,10 +170,12 @@ where
             create_element(velem.tag())
         };
 
+        let attrs = Attribute::merge_attributes_of_same_name(velem.attributes());
+
         Self::set_element_dom_attrs(
             self,
             &element,
-            velem.attributes().iter().map(|a|self.convert_attr(a)).collect::<Vec<_>>(),
+            attrs.iter().map(|a|self.convert_attr(a)).collect::<Vec<_>>(),
         );
 
         element.into()
