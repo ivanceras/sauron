@@ -130,8 +130,8 @@ impl<MSG> AttributeValue<MSG> {
         matches!(self, Self::FunctionCall(_))
     }
 
-    /// returns true if this attribute value is empty
-    pub fn is_empty(&self) -> bool {
+    /// returns true if this attribute value is the filler empty attribute
+    pub fn is_just_empty(&self) -> bool {
         matches!(self, Self::Empty)
     }
 }

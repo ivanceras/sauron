@@ -167,12 +167,8 @@ impl<MSG> Render for Element<MSG> {
         println!("merged_attributes: {:#?}", merged_attributes);
 
         for attr in &merged_attributes {
-            // dont render empty attribute
-            // TODO: must check the attribute value for empty value
-            if !attr.name().is_empty() {
-                write!(buffer, " ")?;
-                attr.render_with_indent(buffer, indent, compressed)?;
-            }
+            write!(buffer, " ")?;
+            attr.render_with_indent(buffer, indent, compressed)?;
         }
 
         if self.self_closing {

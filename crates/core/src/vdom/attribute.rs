@@ -131,8 +131,15 @@ impl<MSG> Attribute<MSG> {
         }
     }
 
+    fn is_just_empty(&self) -> bool {
+        self.value
+            .first()
+            .map(|av| av.is_just_empty())
+            .unwrap_or(false)
+    }
+
     /// merge the values of attributes with the same name
-    #[doc(hidden)]
+    /// also exclude the empty attribute
     pub fn merge_attributes_of_same_name<'a>(
         attributes: impl IntoIterator<Item = &'a Attribute<MSG>>,
     ) -> Vec<Attribute<MSG>>
@@ -141,17 +148,19 @@ impl<MSG> Attribute<MSG> {
     {
         let mut merged: IndexMap<&AttributeName, Attribute<MSG>> = IndexMap::new();
         for att in attributes.into_iter() {
-            if let Some(existing) = merged.get_mut(&att.name) {
-                existing.value.extend(att.value.clone());
-            } else {
-                merged.insert(
-                    &att.name,
-                    Attribute {
-                        namespace: att.namespace,
-                        name: att.name,
-                        value: att.value.clone(),
-                    },
-                );
+            if !att.is_just_empty() {
+                if let Some(existing) = merged.get_mut(&att.name) {
+                    existing.value.extend(att.value.clone());
+                } else {
+                    merged.insert(
+                        &att.name,
+                        Attribute {
+                            namespace: att.namespace,
+                            name: att.name,
+                            value: att.value.clone(),
+                        },
+                    );
+                }
             }
         }
         merged.into_values().collect()
