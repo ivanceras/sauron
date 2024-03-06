@@ -97,7 +97,6 @@ fn test_styles_flag() {
 
 #[test]
 fn test_styles_and_styles_flag() {
-    /*
     let actual: Node<&'static str> = div(
         vec![
             styles_flag([
@@ -110,7 +109,6 @@ fn test_styles_and_styles_flag() {
     );
     let mut actual_html = String::new();
     actual.render(&mut actual_html).unwrap();
-    */
 
 
     let s:Attribute<&'static str> = style! {"font-family": "monospace"};
@@ -129,10 +127,9 @@ fn test_styles_and_styles_flag() {
     expected.render(&mut expected_html).unwrap();
     
     println!("expected: {}", expected_html);
-    //println!("actual:   {}", actual_html);
+    println!("actual:   {}", actual_html);
 
-    //assert_eq!(actual_html, expected_html);
-    panic!();
+    assert_eq!(actual_html, expected_html);
 }
 
 #[test]

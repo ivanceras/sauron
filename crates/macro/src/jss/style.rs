@@ -51,28 +51,22 @@ impl Parse for Style {
     }
 }
 
-impl ToTokens for Style {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let pretty_tokens = self.to_tokens_with_pretty();
-        tokens.extend(pretty_tokens);
-    }
-}
 
 impl Style {
     pub(crate) fn to_attr_tokens(&self) -> proc_macro2::TokenStream {
-        let style_tokens = self.to_token_stream();
+        let style_tokens = self.to_style_array_tokens();
         quote! {
             sauron::vdom::attr("style", sauron::vdom::AttributeValue::from_styles(#style_tokens))
         }
     }
 
-    pub(crate) fn to_tokens_with_pretty(&self) -> proc_macro2::TokenStream {
+    pub(crate) fn to_style_array_tokens(&self) -> proc_macro2::TokenStream {
         let expanded_properties: Vec<_> = self
             .properties
             .iter()
-            .map(|(_anotation, pair)| {
+            .map(|(anotation, pair)| {
                 let pair = pair.to_tokens_with_pretty();
-                quote! { #pair,}
+                quote! {#anotation #pair,}
             })
             .collect();
 
@@ -80,6 +74,13 @@ impl Style {
 
         quote! {
             [#properties_tokens]
+        }
+    }
+
+    pub(crate) fn to_tokens_with_pretty(&self) -> proc_macro2::TokenStream {
+        let style = self.to_style_array_tokens();
+        quote!{
+            #style.into_iter().map(|_style|format!("  {}: {};", _style.name, _style.value)).collect::<Vec<_>>().join("\n")
         }
     }
 }

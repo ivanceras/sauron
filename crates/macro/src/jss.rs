@@ -123,10 +123,7 @@ impl ToTokens for SelectorWithStyle {
         let selector = &self.selector;
         let style = &self.style.to_tokens_with_pretty();
         tokens.extend(quote! {
-            {
-            let format_style = #style.into_iter().map(|v1|v1.to_string()).collect::<Vec<_>>().join("");
-            format!("{} {{\n{:?}\n}}\n", #selector, format_style)
-            }
+            format!("{} {{\n{}\n}}\n", #selector, #style)
         });
     }
 }
