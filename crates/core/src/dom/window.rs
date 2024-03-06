@@ -34,6 +34,8 @@ impl Window {
             .expect("add event callback");
         //TODO: this needs to be managed in the Program
         // but components may not have access to the Program
+        // TODO: maybe put them in the Task
+        // which will get drop together when Task is dropped as well
         resize_callback.forget();
 
         Task::Recurring(RecurringTask { receiver: rx })
