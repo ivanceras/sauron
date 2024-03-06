@@ -53,7 +53,7 @@ impl Parse for Style {
 
 impl ToTokens for Style {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let pretty_tokens = self.to_tokens_with_pretty(false);
+        let pretty_tokens = self.to_tokens_with_pretty();
         tokens.extend(pretty_tokens);
     }
 }
@@ -62,26 +62,24 @@ impl Style {
     pub(crate) fn to_attr_tokens(&self) -> proc_macro2::TokenStream {
         let style_tokens = self.to_token_stream();
         quote! {
-            sauron::html::attributes::attr("style", #style_tokens)
+            sauron::vdom::attr("style", sauron::vdom::AttributeValue::from_styles(#style_tokens))
         }
     }
 
-    pub(crate) fn to_tokens_with_pretty(&self, use_pretty: bool) -> proc_macro2::TokenStream {
+    pub(crate) fn to_tokens_with_pretty(&self) -> proc_macro2::TokenStream {
         let expanded_properties: Vec<_> = self
             .properties
             .iter()
-            .map(|(anotation, pair)| {
-                let pair = pair.to_tokens_with_pretty(use_pretty);
-                quote! { #anotation #pair,}
+            .map(|(_anotation, pair)| {
+                let pair = pair.to_tokens_with_pretty();
+                quote! { #pair,}
             })
             .collect();
 
         let properties_tokens = proc_macro2::TokenStream::from_iter(expanded_properties);
 
-        let separator = if use_pretty { "\n" } else { "" };
-
         quote! {
-            [#properties_tokens].join(#separator)
+            [#properties_tokens]
         }
     }
 }
@@ -117,26 +115,23 @@ impl Parse for Property {
 
 impl ToTokens for Property {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let pretty_tokens = self.to_tokens_with_pretty(false);
+        let pretty_tokens = self.to_tokens_with_pretty();
         tokens.extend(pretty_tokens);
     }
 }
 
 impl Property {
-    fn to_tokens_with_pretty(&self, use_pretty: bool) -> proc_macro2::TokenStream {
+
+    /// returns vdom::Style
+    fn to_tokens_with_pretty(&self) -> proc_macro2::TokenStream {
+
         let property = &self.property;
         let value = &self.value;
 
-        let value_expanded = quote! {
-            sauron::vdom::Value::from(#value).to_string()
-        };
-        if use_pretty {
-            quote! {
-                format!("  {}: {};", #property, #value_expanded)
-            }
-        } else {
-            quote! {
-                format!("{}:{};", #property, #value_expanded)
+        quote! {
+            sauron::vdom::Style{
+                name: std::borrow::Cow::from(#property),
+                value: sauron::vdom::Value::from(#value),
             }
         }
     }

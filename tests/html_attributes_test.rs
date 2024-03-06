@@ -112,6 +112,10 @@ fn test_styles_and_styles_flag() {
     actual.render(&mut actual_html).unwrap();
     */
 
+
+    let s:Attribute<&'static str> = style! {"font-family": "monospace"};
+    println!("a style generates: {:#?}", s);
+
     let expected: Node<&'static str> = div(
         vec![
             style! {"font-family": "monospace"},

@@ -82,7 +82,7 @@ impl Application<Msg> for App {
     fn view(&self) -> Node<Msg> {
         let fruits = ["apple", "orange", "grapes"];
         node! {
-            <div class="some-class" id="some-id" {attr("data-id", 1)}>
+            <div class="some-class" id="some-id" {attr("data-id", 1)} {style!{"font-family": "monospace"}}>
                 <div id="current-time">{text!("Today is {}",self.date.to_locale_string("en-GB", &JsValue::undefined()))}</div>
                 <div>
                         "Your name is: "

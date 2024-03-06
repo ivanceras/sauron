@@ -121,9 +121,12 @@ impl Parse for SelectorWithStyle {
 impl ToTokens for SelectorWithStyle {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let selector = &self.selector;
-        let style = &self.style.to_tokens_with_pretty(true);
+        let style = &self.style.to_tokens_with_pretty();
         tokens.extend(quote! {
-            format!("{} {{\n{}\n}}\n", #selector, #style)
+            {
+            let format_style = #style.into_iter().map(|v1|v1.to_string()).collect::<Vec<_>>().join("");
+            format!("{} {{\n{:?}\n}}\n", #selector, format_style)
+            }
         });
     }
 }
