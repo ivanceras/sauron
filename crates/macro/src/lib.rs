@@ -264,16 +264,17 @@ pub fn jss_with_media(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 /// # Example:
 /// ```rust
 /// use sauron::style;
+/// use sauron::Render;
 /// use sauron::html::units::{px, percent};
 /// use sauron::html::attributes::{Attribute,attr};
 ///
-/// let s1 = style! {
+/// let s1: Attribute<()> = style! {
 ///     background_color: "red",
 ///     border: (px(1), "solid", "green"),
 ///     width: percent(100),
 /// };
 /// let expected: Attribute<()> = attr("style","background-color:red;border:1px solid green;width:100%;");
-/// assert_eq!(expected, s1);
+/// assert_eq!(expected.render_to_string(), s1.render_to_string());
 /// ```
 #[proc_macro]
 pub fn style(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
