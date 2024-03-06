@@ -8,23 +8,29 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 use web_sys::Node;
+use crate::vdom::Value;
+use crate::vdom::Style;
+use wasm_bindgen::closure::Closure;
+use crate::vdom::EventCallback;
+use crate::dom;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
 /// as opposed to Patch which contains reference to the vdom, which makes it hard
 /// to be included in a struct
 ///
-pub struct DomPatch<MSG> {
+pub struct DomPatch {
     /// The path to traverse to get to the target_element
     pub patch_path: TreePath,
     /// the target node
     pub target_element: Element,
     /// the patch variant
-    pub patch_variant: PatchVariant<MSG>,
+    pub patch_variant: PatchVariant,
 }
 
+
 /// patch variant
-pub enum PatchVariant<MSG> {
+pub enum PatchVariant {
     /// Insert nodes before the target node
     InsertBeforeNode {
         /// nodes to be inserted before the target node
@@ -43,12 +49,12 @@ pub enum PatchVariant<MSG> {
     /// Add attributes to the target node
     AddAttributes {
         /// the attributes to be added to the target node
-        attrs: Vec<Attribute<MSG>>,
+        attrs: Vec<DomAttr>,
     },
     /// Remove attributes from the target node
     RemoveAttributes {
         /// the attributes names to be removed
-        attrs: Vec<Attribute<MSG>>,
+        attrs: Vec<DomAttr>,
     },
     /// Replace the target node with the replacement node
     ReplaceNode {
@@ -69,16 +75,186 @@ pub enum PatchVariant<MSG> {
     },
 }
 
+pub struct DomAttr{
+    pub namespace: Option<&'static str>, 
+    pub name: &'static str,
+    pub value: Vec<DomAttrValue>,
+}
+
+
+pub enum DomAttrValue{
+    FunctionCall(Value),
+    Simple(Value),
+    Style(Vec<Style>),
+    EventListener(Closure<dyn FnMut(web_sys::Event)>),
+}
+
+
+impl DomAttrValue{
+    /// return the value if it is a Simple variant
+    pub fn get_simple(&self) -> Option<&Value> {
+        match self {
+            Self::Simple(v) => Some(v),
+            _ => None,
+        }
+    }
+
+    pub fn as_event_closure(self) -> Option<Closure<dyn FnMut(web_sys::Event)>> {
+        match self {
+            Self::EventListener(cb) => Some(cb),
+            _ => None,
+        }
+    }
+}
+
+pub(crate) fn merge_plain_attributes_values(
+    attr_values: &[DomAttrValue],
+) -> Option<String> {
+    let plain_values: Vec<String> = attr_values
+        .iter()
+        .flat_map(|att_value| match att_value {
+            DomAttrValue::Simple(simple) => Some(simple.to_string()),
+            _ => None,
+        })
+        .collect();
+    if !plain_values.is_empty() {
+        Some(plain_values.join(" "))
+    } else {
+        None
+    }
+}
+
+pub(crate) fn merge_func_attr_values(
+    attr_values: &[DomAttrValue],
+) -> Option<String> {
+    let plain_values: Vec<String> = attr_values
+        .iter()
+        .flat_map(|att_value| match att_value {
+            DomAttrValue::FunctionCall(call) => Some(call.to_string()),
+            _ => None,
+        })
+        .collect();
+    if !plain_values.is_empty() {
+        Some(plain_values.join(" "))
+    } else {
+        None
+    }
+}
+
+pub(crate) fn merge_styles_attributes_values(
+    attr_values: &[DomAttrValue],
+) -> Option<String> {
+    use std::fmt::Write;
+
+    let styles_values: Vec<String> = attr_values
+        .iter()
+        .flat_map(|att_value| match att_value {
+            DomAttrValue::Style(styles) => {
+                let mut style_str = String::new();
+                styles
+                    .iter()
+                    .for_each(|s| write!(style_str, "{s};").expect("must write"));
+                Some(style_str)
+            }
+            _ => None,
+        })
+        .collect();
+
+    if !styles_values.is_empty() {
+        Some(styles_values.join(" "))
+    } else {
+        None
+    }
+}
+
+pub struct PartitionedDomAttrValues {
+    /// the listeners of the event listeners
+    pub listeners: Vec<Closure<dyn FnMut(web_sys::Event)>>,
+    /// plain attribute values
+    pub plain_values: Vec<DomAttrValue>,
+    /// style attribute values
+    pub styles: Vec<DomAttrValue>,
+    /// function calls
+    pub function_calls: Vec<DomAttrValue>,
+}
+
+pub(crate) fn partition_dom_attrs(
+    attr: DomAttr,
+) -> PartitionedDomAttrValues {
+    let mut listeners = vec![];
+    let mut plain_values = vec![];
+    let mut styles = vec![];
+    let mut function_calls = vec![];
+    for av in attr.value {
+        match av {
+            DomAttrValue::Simple(_) => {
+                plain_values.push(av);
+            }
+            DomAttrValue::FunctionCall(_) => {
+                function_calls.push(av);
+            }
+            DomAttrValue::Style(_) => {
+                styles.push(av);
+            }
+            DomAttrValue::EventListener(cb) => {
+                listeners.push(cb);
+            }
+        }
+    }
+    PartitionedDomAttrValues {
+        listeners,
+        plain_values,
+        styles,
+        function_calls,
+    }
+}
+
+
+
+
 impl<APP, MSG> Program<APP, MSG>
 where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
+
+    pub(crate) fn convert_attr(&self, attr: &Attribute<MSG>) -> DomAttr
+    {
+        DomAttr{
+            namespace: attr.namespace,
+            name: attr.name,
+            value: attr.value.iter().filter_map(|v|self.convert_attr_value(v)).collect(),
+        }
+    }
+
+    fn convert_attr_value(&self, attr_value: &AttributeValue<MSG>) -> Option<DomAttrValue>
+    {
+        match attr_value{
+            AttributeValue::FunctionCall(v) => Some(DomAttrValue::FunctionCall(v.clone())),
+            AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
+            AttributeValue::Style(v) => Some(DomAttrValue::Style(v.clone())),
+            AttributeValue::EventListener(v) => Some(DomAttrValue::EventListener(self.convert_event_listener(v))),
+            AttributeValue::Empty => None,
+        }
+    }
+
+    fn convert_event_listener(&self, event_listener: &EventCallback<MSG>) -> Closure<dyn FnMut(web_sys::Event)> 
+    {
+        let program = self.downgrade();
+        let event_listener = event_listener.clone();
+        let closure: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let msg = event_listener.emit(dom::Event::from(event));
+                let mut program = program.upgrade().expect("must upgrade");
+                program.dispatch(msg);
+            });
+        closure
+    }
     /// get the real DOM target node and make a DomPatch object for each of the Patch
     pub(crate) fn convert_patches(
         &self,
         patches: &[Patch<MSG>],
-    ) -> Result<Vec<DomPatch<MSG>>, JsValue> {
+    ) -> Result<Vec<DomPatch>, JsValue> {
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
             .iter()
             .map(|patch| (patch.path(), patch.tag()))
@@ -98,7 +274,7 @@ where
             &nodes_to_find,
         );
 
-        let dom_patches:Vec<DomPatch<MSG>> = patches.iter().map(|patch|{
+        let dom_patches:Vec<DomPatch> = patches.iter().map(|patch|{
             let patch_path = patch.path();
             let patch_tag = patch.tag();
             if let Some(target_node) = nodes_lookup.get(patch_path) {
@@ -125,7 +301,7 @@ where
         nodes_lookup: &BTreeMap<TreePath, Node>,
         target_element: &Element,
         patch: &Patch<MSG>,
-    ) -> DomPatch<MSG> {
+    ) -> DomPatch {
         let target_element = target_element.clone();
         let Patch {
             patch_path,
@@ -163,14 +339,14 @@ where
                 patch_path,
                 target_element,
                 patch_variant: PatchVariant::AddAttributes {
-                    attrs: attrs.iter().map(|a| (*a).clone()).collect(),
+                    attrs: attrs.iter().map(|a| self.convert_attr(a)).collect(),
                 },
             },
             PatchType::RemoveAttributes { attrs } => DomPatch {
                 patch_path,
                 target_element,
                 patch_variant: PatchVariant::RemoveAttributes {
-                    attrs: attrs.iter().map(|a| (*a).clone()).collect(),
+                    attrs: attrs.iter().map(|a| self.convert_attr(a)).collect(),
                 },
             },
 
@@ -237,7 +413,7 @@ where
         }
     }
 
-    pub(crate) fn apply_dom_patch(&mut self, dom_patch: DomPatch<MSG>) -> Result<(), JsValue> {
+    pub(crate) fn apply_dom_patch(&mut self, dom_patch: DomPatch) -> Result<(), JsValue> {
         let DomPatch {
             patch_path,
             target_element,
@@ -281,23 +457,27 @@ where
             }
 
             PatchVariant::AddAttributes { attrs } => {
-                let attrs: Vec<&Attribute<MSG>> = attrs.iter().collect();
-                self.set_element_attributes(&target_element, &attrs);
+                self.set_element_dom_attrs(&target_element, attrs);
             }
             PatchVariant::RemoveAttributes { attrs } => {
                 for attr in attrs.iter() {
-                    for att_value in attr.value() {
+                    for att_value in attr.value.iter() {
                         match att_value {
-                            AttributeValue::Simple(_) => {
-                                Self::remove_element_attribute(&target_element, attr)?;
+                            DomAttrValue::Simple(_) => {
+                                Self::remove_element_dom_attr(&target_element, attr)?;
                             }
                             // it is an event listener
-                            AttributeValue::EventListener(_) => {
-                                self.remove_event_listener_with_name(attr.name(), &target_element)?;
+                            DomAttrValue::EventListener(_) => {
+                                self.remove_event_listener_with_name(attr.name, &target_element)?;
                             }
-                            AttributeValue::FunctionCall(_)
-                            | AttributeValue::Style(_)
-                            | AttributeValue::Empty => (),
+                            DomAttrValue::Style(_) => {
+                                Self::remove_element_dom_attr(&target_element, attr)?;
+                            }
+                            DomAttrValue::FunctionCall(_) => {
+                                if attr.name == "inner_html" {
+                                    target_element.set_inner_html("");
+                                }
+                            },
                         }
                     }
                 }

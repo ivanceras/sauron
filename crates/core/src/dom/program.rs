@@ -58,7 +58,7 @@ where
     /// for optimization purposes to avoid sluggishness of the app, when a patch
     /// can not be run in 1 execution due to limited remaining time deadline
     /// it will be put into the pending patches to be executed on the next run.
-    pending_patches: Rc<RefCell<VecDeque<DomPatch<MSG>>>>,
+    pending_patches: Rc<RefCell<VecDeque<DomPatch>>>,
 
     /// store the Closure used in request_idle_callback calls
     idle_callback_handles: Rc<RefCell<Vec<IdleCallbackHandle>>>,
@@ -81,7 +81,7 @@ where
     mount_node: Weak<RefCell<Node>>,
     pub node_closures: Weak<RefCell<ActiveClosure>>,
     mount_procedure: MountProcedure,
-    pending_patches: Weak<RefCell<VecDeque<DomPatch<MSG>>>>,
+    pending_patches: Weak<RefCell<VecDeque<DomPatch>>>,
     idle_callback_handles: Weak<RefCell<Vec<IdleCallbackHandle>>>,
     animation_frame_handles: Weak<RefCell<Vec<AnimationFrameHandle>>>,
     pub(crate) event_closures: Weak<RefCell<EventClosures>>,
@@ -212,6 +212,28 @@ where
             last_update: Rc::downgrade(&self.last_update),
         }
     }
+
+    /// map the msg of this Program such that `Program<APP,MSG>` becomes `Program<APP,MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb: F) -> Program<APP, MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
+        MSG: 'static,
+    {
+        Program{
+            app_context: self.app_context.clone().map_msg(cb),
+            root_node: self.root_node,
+            mount_node: self.mount_node,
+            node_closures: self.node_closures,
+            mount_procedure: self.mount_procedure,
+            pending_patches: self.pending_patches,
+            idle_callback_handles: self.idle_callback_handles,
+            animation_frame_handles: self.animation_frame_handles,
+            event_closures: self.event_closures,
+            closures: self.closures,
+            last_update: self.last_update,
+        }
+    }
 }
 
 impl<APP, MSG> Clone for Program<APP, MSG>
@@ -235,14 +257,6 @@ where
     }
 }
 
-impl<APP, MSG> Drop for Program<APP, MSG>
-where
-    MSG: 'static,
-{
-    fn drop(&mut self) {
-        // program is dropped
-    }
-}
 
 impl<APP, MSG> Program<APP, MSG>
 where
@@ -597,7 +611,7 @@ where
         &self,
         new_vdom: &vdom::Node<MSG>,
         treepath: Option<Vec<TreePath>>,
-    ) -> Vec<DomPatch<MSG>> {
+    ) -> Vec<DomPatch> {
         let current_vdom = self.app_context.current_vdom();
         let patches = if let Some(treepath) = treepath {
             log::debug!("using treepath from pre_eval: {treepath:?}");
@@ -644,7 +658,7 @@ where
         if self.pending_patches.borrow().is_empty() {
             return Ok(());
         }
-        let dom_patches: Vec<DomPatch<MSG>> = self.pending_patches.borrow_mut().drain(..).collect();
+        let dom_patches: Vec<DomPatch> = self.pending_patches.borrow_mut().drain(..).collect();
         for dom_patch in dom_patches {
             self.apply_dom_patch(dom_patch)
                 .expect("must apply dom patch");

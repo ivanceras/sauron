@@ -1,12 +1,10 @@
 use crate::vdom::TreePath;
 use crate::{
     dom::events::MountEvent,
-    dom::{self, Application, Program},
+    dom::{Application, Program},
     dom::{document, window},
-    html,
-    html::attributes::{EventCallback, SegregatedAttributes},
     vdom,
-    vdom::{Attribute, AttributeValue, Leaf, NodeTrait},
+    vdom::{Attribute, Leaf, NodeTrait},
 };
 use js_sys::Function;
 use std::collections::HashMap;
@@ -18,6 +16,10 @@ use web_sys::{
     HtmlOptionElement, HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement,
     HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
+use crate::dom::dom_patch::DomAttr;
+use crate::dom::dom_patch;
+use crate::dom::dom_patch::PartitionedDomAttrValues;
+use crate::dom::dom_patch::DomAttrValue;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -168,10 +170,10 @@ where
             create_element(velem.tag())
         };
 
-        Self::set_element_attributes(
+        Self::set_element_dom_attrs(
             self,
             &element,
-            &velem.attributes().iter().collect::<Vec<_>>(),
+            velem.attributes().iter().map(|a|self.convert_attr(a)).collect::<Vec<_>>(),
         );
 
         element.into()
@@ -204,6 +206,7 @@ where
         }
     }
 
+    /*
     /// set the element attribute
     pub fn set_element_attributes(&self, element: &Element, attrs: &[&Attribute<MSG>]) {
         let attrs = vdom::merge_attributes_of_same_name(attrs);
@@ -211,7 +214,152 @@ where
             self.set_element_attribute(element, &att);
         }
     }
+    */
 
+    /// set element with the dom attrs
+    pub fn set_element_dom_attrs(&self, element: &Element, attrs: Vec<DomAttr>) {
+        for att in attrs.into_iter() {
+            self.set_element_dom_attr(element, att);
+        }
+    }
+
+    /// set the element with dom attr
+    pub fn set_element_dom_attr(&self, element: &Element, attr: DomAttr) {
+
+        let attr_name = intern(attr.name);
+        let attr_namespace = attr.namespace;
+
+        let PartitionedDomAttrValues {
+            listeners,
+            plain_values,
+            styles,
+            function_calls,
+        } = dom_patch::partition_dom_attrs(attr);
+
+
+        // set simple values
+        if let Some(merged_plain_values) =
+            dom_patch::merge_plain_attributes_values(&plain_values)
+        {
+            if let Some(namespace) = attr_namespace {
+                // Warning NOTE: set_attribute_ns should only be called
+                // when you meant to use a namespace
+                // using this with None will error in the browser with:
+                // NamespaceError: An attempt was made to create or change an object in a way which is incorrect with regard to namespaces
+                element
+                    .set_attribute_ns(
+                        Some(namespace),
+                        attr_name,
+                        &merged_plain_values,
+                    )
+                    .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
+            } else {
+                match attr_name {
+                    "value" => {
+                        element
+                            .set_attribute(attr_name, &merged_plain_values)
+                            .unwrap_or_else(|_| {
+                                panic!("Error setting an attribute for {element:?}")
+                            });
+                        Self::set_value_str(element, &merged_plain_values);
+                        Self::set_numeric_values(element, &plain_values);
+                    }
+                    "open" => {
+                        let is_open: bool = plain_values
+                            .first()
+                            .and_then(|v| v.get_simple().and_then(|v| v.as_bool()))
+                            .unwrap_or(false);
+
+                        element
+                            .set_attribute(attr_name, &is_open.to_string())
+                            .unwrap_or_else(|_| {
+                                panic!("Error setting an attribute for {element:?}")
+                            });
+                        Self::set_open(element, is_open);
+                    }
+                    "checked" => {
+                        let is_checked: bool = plain_values
+                            .first()
+                            .and_then(|av| av.get_simple().and_then(|v| v.as_bool()))
+                            .unwrap_or(false);
+
+                        element
+                            .set_attribute(attr_name, &is_checked.to_string())
+                            .unwrap_or_else(|_| {
+                                panic!("Error setting an attribute for {element:?}")
+                            });
+                        Self::set_checked(element, is_checked)
+                    }
+                    "disabled" => {
+                        let is_disabled: bool = plain_values
+                            .first()
+                            .and_then(|av| av.get_simple().and_then(|v| v.as_bool()))
+                            .unwrap_or(false);
+
+                        element
+                            .set_attribute(attr_name, &is_disabled.to_string())
+                            .unwrap_or_else(|_| {
+                                panic!("Error setting an attribute for {element:?}")
+                            });
+                        Self::set_disabled(element, is_disabled);
+                    }
+                    _ => {
+                        element
+                            .set_attribute(attr_name, &merged_plain_values)
+                            .unwrap_or_else(|_| {
+                                panic!("Error setting an attribute for {element:?}")
+                            });
+                    }
+                }
+            }
+        } else if let Some(merged_styles) =
+            dom_patch::merge_styles_attributes_values(&styles)
+        {
+            // set the styles
+            element
+                .set_attribute(attr_name, &merged_styles)
+                .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
+        } else {
+            //if the merged attribute is blank of empty when string is trimmed
+            //remove the attribute
+            element
+                .remove_attribute(attr_name)
+                .expect("must remove attribute");
+        }
+
+        // do function calls such as set_inner_html
+        if let Some(merged_func_values) =
+            dom_patch::merge_func_attr_values(&function_calls)
+        {
+            if attr_name == "inner_html" {
+                element.set_inner_html(&merged_func_values);
+            }
+        }
+
+        for listener in listeners.iter(){
+            self.add_event_listener(element, attr_name, &listener)
+                .expect("add listener");
+        }
+
+
+        if !listeners.is_empty() {
+            let unique_id = create_unique_identifier();
+            // set the data-sauron_vdom-id this will be read later on
+            // when it's time to remove this element and its closures and event listeners
+            element
+                .set_attribute(intern(DATA_VDOM_ID), &unique_id.to_string())
+                .expect("Could not set attribute on element");
+
+        let listener_closures: BTreeMap<&'static str, Closure<dyn FnMut(web_sys::Event)>> =
+            BTreeMap::from_iter(listeners.into_iter().map(|c|(attr_name, c)));
+
+            self.node_closures
+                .borrow_mut()
+                .insert(unique_id, listener_closures);
+        }
+    }
+
+    /*
     /// set the element attribute
     ///
     /// Note: this is called in a loop, so setting the attributes, and style will not be on
@@ -348,6 +496,7 @@ where
                 .insert(unique_id, listener_closures);
         }
     }
+*/
 
     /// attach and event listener to an event target
     pub fn add_event_listeners(
@@ -355,10 +504,21 @@ where
         target: &web_sys::EventTarget,
         event_listeners: Vec<Attribute<MSG>>,
     ) -> Result<(), JsValue> {
-        for event_attr in event_listeners.into_iter() {
-            for event_cb in event_attr.value() {
-                let listener = event_cb.as_event_listener().expect("expecting a callback");
-                let closure = self.add_event_listener(target, event_attr.name(), listener)?;
+        let dom_attrs = event_listeners.into_iter().map(|a|self.convert_attr(&a)).collect();
+        self.add_event_dom_listeners(target, dom_attrs)?;
+        Ok(())
+    }
+
+    /// attach and event listener to an event target
+    pub fn add_event_dom_listeners(
+        &self,
+        target: &web_sys::EventTarget,
+        event_listeners: Vec<DomAttr>,
+    ) -> Result<(), JsValue> {
+        for attr in event_listeners.into_iter() {
+            for event_cb in attr.value.into_iter() {
+                let closure: Closure<dyn FnMut(web_sys::Event)> = event_cb.as_event_closure().expect("expecting a callback");
+                self.add_event_listener(target, attr.name, &closure)?;
                 self.event_closures.borrow_mut().push(closure);
             }
         }
@@ -370,23 +530,13 @@ where
         &self,
         event_target: &web_sys::EventTarget,
         event_name: &str,
-        listener: &EventCallback<MSG>,
-    ) -> Result<Closure<dyn FnMut(web_sys::Event)>, JsValue> {
-        let program = Program::downgrade(self);
-        let listener = listener.clone();
-
-        let closure: Closure<dyn FnMut(web_sys::Event)> =
-            Closure::new(move |event: web_sys::Event| {
-                let msg = listener.emit(dom::Event::from(event));
-                let mut program = program.upgrade().expect("must upgrade");
-                program.dispatch(msg);
-            });
-
+        listener: &Closure<dyn FnMut(web_sys::Event)>,
+    ) -> Result<(), JsValue> {
         event_target.add_event_listener_with_callback(
             intern(event_name),
-            closure.as_ref().unchecked_ref(),
+            listener.as_ref().unchecked_ref(),
         )?;
-        Ok(closure)
+        Ok(())
     }
 
     /// explicitly call `set_checked` function on the html element
@@ -491,7 +641,7 @@ where
     }
 
     /// set the element attribute value with the first numerical value found in values
-    fn set_numeric_values(element: &Element, values: &[&AttributeValue<MSG>]) {
+    fn set_numeric_values(element: &Element, values: &[DomAttrValue]) {
         let value_i32 = values
             .first()
             .and_then(|v| v.get_simple().and_then(|v| v.as_i32()));
@@ -531,6 +681,32 @@ where
         }
         //actually remove the element
         element.remove_attribute(intern(attr.name()))?;
+
+        Ok(())
+    }
+
+    /// remove the elemnt dom attr
+    pub fn remove_element_dom_attr(
+        element: &Element,
+        attr: &DomAttr,
+    ) -> Result<(), JsValue> {
+        match attr.name {
+            "value" => {
+                Self::set_value_str(element, "");
+            }
+            "open" => {
+                Self::set_open(element, false);
+            }
+            "checked" => {
+                Self::set_checked(element, false);
+            }
+            "disabled" => {
+                Self::set_disabled(element, false);
+            }
+            _ => (),
+        }
+        //actually remove the element
+        element.remove_attribute(intern(attr.name))?;
 
         Ok(())
     }

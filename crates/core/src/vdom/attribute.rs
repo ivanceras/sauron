@@ -128,7 +128,7 @@ pub fn merge_attributes_of_same_name<MSG>(attributes: &[&Attribute<MSG>]) -> Vec
             merged.insert(
                 &att.name,
                 Attribute {
-                    namespace: None,
+                    namespace: att.namespace,
                     name: att.name,
                     value: att.value.clone(),
                 },

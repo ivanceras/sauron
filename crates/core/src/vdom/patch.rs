@@ -2,6 +2,7 @@
 
 use super::Tag;
 use super::{Attribute, Node};
+use std::borrow::Cow;
 
 use derive_where::derive_where;
 
@@ -75,7 +76,7 @@ pub enum PatchType<'a, MSG> {
     /// insert the nodes before the node at patch_path
     InsertBeforeNode {
         /// the nodes to be inserted before patch_path
-        nodes: Vec<&'a Node<MSG>>,
+        nodes: Vec<Cow<'a, Node<MSG>>>,
     },
 
     /// insert the nodes after the node at patch_path
@@ -154,7 +155,7 @@ impl<'a, MSG> Patch<'a, MSG> {
             tag,
             patch_path,
             patch_type: PatchType::InsertBeforeNode {
-                nodes: nodes.into_iter().collect(),
+                nodes: nodes.into_iter().map(|n|Cow::Borrowed(n)).collect(),
             },
         }
     }
@@ -269,6 +270,40 @@ impl<'a, MSG> Patch<'a, MSG> {
             tag: Some(tag),
             patch_path,
             patch_type: PatchType::RemoveAttributes { attrs },
+        }
+    }
+
+    /// map the msg of this patch such that `Patch<MSG>` becomes `Patch<MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb: F) -> Patch<'a, MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
+        MSG: 'static,
+    {
+        Patch{
+            tag: self.tag,
+            patch_path: self.patch_path,
+            patch_type: self.patch_type.map_msg(cb),
+        }
+    }
+}
+
+impl<'a, MSG> PatchType<'a, MSG> {
+    /// map the msg of this patch_type such that `PatchType<MSG>` becomes `PatchType<MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb: F) -> PatchType<'a, MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
+        MSG: 'static,
+    {
+        match self {
+            Self::InsertBeforeNode { nodes } => PatchType::InsertBeforeNode {
+                nodes: nodes.into_iter().map(|n| match n{
+                    Cow::Owned(n) => Cow::Owned(n.map_msg(cb.clone())),
+                    Cow::Borrowed(n) => Cow::Owned(n.clone().map_msg(cb.clone())),
+                }).collect(),
+            },
+            _ => todo!(),
         }
     }
 }
