@@ -123,6 +123,12 @@ impl<MSG> Leaf<MSG> {
         MSG2: 'static,
         MSG: 'static,
     {
-        todo!()
+        match self{
+            Self::Text(v) => Leaf::Text(v),
+            Self::SafeHtml(v) => Leaf::SafeHtml(v),
+            Self::Comment(v) => Leaf::Comment(v),
+            Self::DocType(v) => Leaf::DocType(v),
+            Self::Component(_v) => todo!(),
+        }
     }
 }
