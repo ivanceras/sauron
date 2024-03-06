@@ -32,6 +32,8 @@ impl Window {
                 resize_callback.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
+        //TODO: this needs to be managed in the Program
+        // but components may not have access to the Program
         resize_callback.forget();
 
         Task::Recurring(RecurringTask { receiver: rx })
