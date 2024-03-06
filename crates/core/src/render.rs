@@ -3,7 +3,6 @@
 //!
 use crate::vdom;
 use crate::{
-    html::attributes,
     vdom::{Attribute, Element, Leaf, Node, NodeTrait},
     vdom::GroupedAttributeValues
 };
