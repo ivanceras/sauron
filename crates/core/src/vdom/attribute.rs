@@ -7,6 +7,7 @@ pub use attribute_value::AttributeValue;
 pub use callback::Callback;
 pub use style::Style;
 pub use value::Value;
+use crate::vdom::EventCallback;
 
 mod attribute_value;
 pub mod callback;
@@ -36,6 +37,19 @@ pub struct Attribute<MSG> {
     /// the attribute value, which could be a simple value, and event or a function call
     pub value: Vec<AttributeValue<MSG>>,
 }
+
+/// The Attributes partition into 4 different types
+pub struct GroupedAttributeValues<'a, MSG> {
+    /// the listeners of the event listeners
+    pub listeners: Vec<&'a EventCallback<MSG>>,
+    /// plain attribute values
+    pub plain_values: Vec<&'a Value>,
+    /// style attribute values
+    pub styles: Vec<&'a Style>,
+    /// function calls
+    pub function_calls: Vec<&'a Value>,
+}
+
 
 impl<MSG> Attribute<MSG> {
     /// create a plain attribute with namespace
@@ -85,6 +99,39 @@ impl<MSG> Attribute<MSG> {
             .first()
             .map(|v| v.is_event_listener())
             .unwrap_or(false)
+    }
+
+    /// grouped values into plain, function calls, styles and event listeners
+    pub(crate) fn group_values(
+        attr: &Attribute<MSG>,
+    ) -> GroupedAttributeValues<MSG> {
+        let mut listeners = vec![];
+        let mut plain_values = vec![];
+        let mut styles = vec![];
+        let mut function_calls = vec![];
+        for av in attr.value() {
+            match av {
+                AttributeValue::Simple(v) => {
+                    plain_values.push(v);
+                }
+                AttributeValue::FunctionCall(v) => {
+                    function_calls.push(v);
+                }
+                AttributeValue::Style(v) => {
+                    styles.extend(v);
+                }
+                AttributeValue::EventListener(cb) => {
+                    listeners.push(cb);
+                }
+                AttributeValue::Empty => (),
+            }
+        }
+        GroupedAttributeValues {
+            listeners,
+            plain_values,
+            styles,
+            function_calls,
+        }
     }
 }
 

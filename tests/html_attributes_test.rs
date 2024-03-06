@@ -1,4 +1,4 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 use sauron::html::attributes::styles;
 use sauron::*;
 
@@ -97,6 +97,7 @@ fn test_styles_flag() {
 
 #[test]
 fn test_styles_and_styles_flag() {
+    /*
     let actual: Node<&'static str> = div(
         vec![
             styles_flag([
@@ -109,6 +110,8 @@ fn test_styles_and_styles_flag() {
     );
     let mut actual_html = String::new();
     actual.render(&mut actual_html).unwrap();
+    */
+
     let expected: Node<&'static str> = div(
         vec![
             style! {"font-family": "monospace"},
@@ -116,10 +119,16 @@ fn test_styles_and_styles_flag() {
         ],
         vec![],
     );
+    println!("expected node: {:#?}", expected);
+
     let mut expected_html = String::new();
     expected.render(&mut expected_html).unwrap();
+    
+    println!("expected: {}", expected_html);
+    //println!("actual:   {}", actual_html);
 
-    assert_eq!(actual_html, expected_html);
+    //assert_eq!(actual_html, expected_html);
+    panic!();
 }
 
 #[test]

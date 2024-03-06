@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 use std::fmt;
+use std::ops::Deref;
 
 /// Wraps different primitive variants used as values in html
 /// This is needed since html attributes can have different value types
@@ -127,9 +128,10 @@ impl Value {
         matches!(self, Self::Cow(Cow::Borrowed(_)))
     }
 
-    pub(crate) fn merge_to_string(attr_values: &[Value]) -> Option<String> {
-        if !attr_values.is_empty() {
-            Some(attr_values.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" "))
+    pub(crate) fn merge_to_string<'a>(values: impl IntoIterator<Item = &'a Value>) -> Option<String> {
+        let stringed = values.into_iter().map(|v| v.to_string()).collect::<Vec<_>>();
+        if !stringed.is_empty() {
+            Some(stringed.join(" "))
         } else {
             None
         }

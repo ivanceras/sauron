@@ -236,10 +236,9 @@ where
             function_calls,
         } = attr.group_values();
 
-
         // set simple values
         if let Some(merged_plain_values) =
-            Value::merge_to_string(&plain_values)
+            Value::merge_to_string(plain_values.iter())
         {
             if let Some(namespace) = attr_namespace {
                 // Warning NOTE: set_attribute_ns should only be called
@@ -313,7 +312,7 @@ where
                 }
             }
         } else if let Some(merged_styles) =
-            Style::merged_to_string(&styles)
+            Style::merge_to_string(&styles)
         {
             // set the styles
             element
@@ -329,7 +328,7 @@ where
 
         // do function calls such as set_inner_html
         if let Some(merged_func_values) =
-            Value::merge_to_string(&function_calls)
+            Value::merge_to_string(function_calls.iter())
         {
             if attr_name == "inner_html" {
                 element.set_inner_html(&merged_func_values);

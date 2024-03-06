@@ -3,10 +3,13 @@
 //!
 use crate::vdom;
 use crate::{
-    html::{attributes, attributes::SegregatedAttributes},
+    html::attributes,
     vdom::{Attribute, Element, Leaf, Node, NodeTrait},
+    vdom::GroupedAttributeValues
 };
 use std::fmt;
+use crate::vdom::Value;
+use crate::vdom::Style;
 
 const DEFAULT_INDENT_SIZE: usize = 2;
 
@@ -134,15 +137,15 @@ fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
     merged_attributes
         .iter()
         .flat_map(|attr| {
-            let SegregatedAttributes {
+            let GroupedAttributeValues {
                 listeners: _,
                 plain_values: _,
                 styles: _,
                 function_calls,
-            } = attributes::partition_callbacks_from_plain_styles_and_func_calls(attr);
+            } = Attribute::group_values(attr);
 
-            if *attr.name() == "inner_html" {
-                attributes::merge_plain_attributes_values(&function_calls)
+            if attr.name == "inner_html" {
+                Value::merge_to_string(function_calls)
             } else {
                 None
             }
@@ -160,9 +163,11 @@ impl<MSG> Render for Element<MSG> {
     ) -> fmt::Result {
         write!(buffer, "<{}", self.tag())?;
 
+        println!("original attributes: {:#?}", self.attributes());
         let ref_attrs: Vec<&Attribute<MSG>> = self.attributes().iter().collect();
         let merged_attributes: Vec<Attribute<MSG>> =
             vdom::merge_attributes_of_same_name(&ref_attrs);
+        println!("merged_attributes: {:#?}", merged_attributes);
 
         for attr in &merged_attributes {
             // dont render empty attribute
@@ -222,12 +227,15 @@ impl<MSG> Render for Attribute<MSG> {
         _indent: usize,
         _compressed: bool,
     ) -> fmt::Result {
-        let SegregatedAttributes {
+        let GroupedAttributeValues {
             listeners: _,
             plain_values,
             styles,
             function_calls: _,
-        } = attributes::partition_callbacks_from_plain_styles_and_func_calls(self);
+        } = Attribute::group_values(self);
+
+        println!("plain values: {:#?}", plain_values);
+        println!("styles: {:#?}", styles);
 
         // These are attribute values which specifies the state of the element
         // regardless of it's value.
@@ -240,7 +248,7 @@ impl<MSG> Render for Attribute<MSG> {
 
         let bool_value: bool = plain_values
             .first()
-            .and_then(|v| v.get_simple().and_then(|v| v.as_bool()))
+            .and_then(|v| v.as_bool())
             .unwrap_or(false);
 
         // skip this attribute if the boolean attributes evaluates to false
@@ -248,11 +256,13 @@ impl<MSG> Render for Attribute<MSG> {
 
         if !should_skip_attribute {
             if let Some(merged_plain_values) =
-                attributes::merge_plain_attributes_values(&plain_values)
+                Value::merge_to_string(plain_values)
             {
+                println!("values: {}", merged_plain_values);
                 write!(buffer, "{}=\"{}\"", self.name(), merged_plain_values)?;
             }
-            if let Some(merged_styles) = attributes::merge_styles_attributes_values(&styles) {
+            if let Some(merged_styles) = Style::merge_to_string(styles) {
+                println!("merged styles: {}", merged_styles);
                 write!(buffer, "{}=\"{}\"", self.name(), merged_styles)?;
             }
         }
