@@ -6,6 +6,7 @@ use crate::{
     vdom,
     vdom::{Attribute, Leaf, NodeTrait},
 };
+use crate::vdom::Value;
 use js_sys::Function;
 use std::collections::HashMap;
 use std::{cell::Cell, collections::BTreeMap};
@@ -17,9 +18,8 @@ use web_sys::{
     HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
 use crate::dom::dom_patch::DomAttr;
-use crate::dom::dom_patch;
-use crate::dom::dom_patch::PartitionedDomAttrValues;
-use crate::dom::dom_patch::DomAttrValue;
+use crate::dom::dom_patch::GroupedDomAttrValues;
+use crate::vdom::Style;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -229,17 +229,17 @@ where
         let attr_name = intern(attr.name);
         let attr_namespace = attr.namespace;
 
-        let PartitionedDomAttrValues {
+        let GroupedDomAttrValues {
             listeners,
             plain_values,
             styles,
             function_calls,
-        } = dom_patch::partition_dom_attrs(attr);
+        } = attr.group_values();
 
 
         // set simple values
         if let Some(merged_plain_values) =
-            dom_patch::merge_plain_attributes_values(&plain_values)
+            Value::merge_to_string(&plain_values)
         {
             if let Some(namespace) = attr_namespace {
                 // Warning NOTE: set_attribute_ns should only be called
@@ -267,7 +267,7 @@ where
                     "open" => {
                         let is_open: bool = plain_values
                             .first()
-                            .and_then(|v| v.get_simple().and_then(|v| v.as_bool()))
+                            .and_then(|v| v.as_bool())
                             .unwrap_or(false);
 
                         element
@@ -280,7 +280,7 @@ where
                     "checked" => {
                         let is_checked: bool = plain_values
                             .first()
-                            .and_then(|av| av.get_simple().and_then(|v| v.as_bool()))
+                            .and_then(|v| v.as_bool())
                             .unwrap_or(false);
 
                         element
@@ -293,7 +293,7 @@ where
                     "disabled" => {
                         let is_disabled: bool = plain_values
                             .first()
-                            .and_then(|av| av.get_simple().and_then(|v| v.as_bool()))
+                            .and_then(|v| v.as_bool())
                             .unwrap_or(false);
 
                         element
@@ -313,7 +313,7 @@ where
                 }
             }
         } else if let Some(merged_styles) =
-            dom_patch::merge_styles_attributes_values(&styles)
+            Style::merged_to_string(&styles)
         {
             // set the styles
             element
@@ -329,7 +329,7 @@ where
 
         // do function calls such as set_inner_html
         if let Some(merged_func_values) =
-            dom_patch::merge_func_attr_values(&function_calls)
+            Value::merge_to_string(&function_calls)
         {
             if attr_name == "inner_html" {
                 element.set_inner_html(&merged_func_values);
@@ -641,14 +641,14 @@ where
     }
 
     /// set the element attribute value with the first numerical value found in values
-    fn set_numeric_values(element: &Element, values: &[DomAttrValue]) {
+    fn set_numeric_values(element: &Element, values: &[Value]) {
         let value_i32 = values
             .first()
-            .and_then(|v| v.get_simple().and_then(|v| v.as_i32()));
+            .and_then(|v|  v.as_i32());
 
         let value_f64 = values
             .first()
-            .and_then(|v| v.get_simple().and_then(|v| v.as_f64()));
+            .and_then(|v|  v.as_f64());
 
         if let Some(value_i32) = value_i32 {
             Self::set_value_i32(element, value_i32);

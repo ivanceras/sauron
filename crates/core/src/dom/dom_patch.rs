@@ -1,18 +1,18 @@
+use crate::dom;
 use crate::dom::dom_node::find_all_nodes;
 use crate::dom::dom_node::intern;
 use crate::dom::{Application, Program};
+use crate::vdom::EventCallback;
+use crate::vdom::Style;
 use crate::vdom::TreePath;
+use crate::vdom::Value;
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use std::collections::BTreeMap;
+use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 use web_sys::Node;
-use crate::vdom::Value;
-use crate::vdom::Style;
-use wasm_bindgen::closure::Closure;
-use crate::vdom::EventCallback;
-use crate::dom;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -27,7 +27,6 @@ pub struct DomPatch {
     /// the patch variant
     pub patch_variant: PatchVariant,
 }
-
 
 /// patch variant
 pub enum PatchVariant {
@@ -75,22 +74,64 @@ pub enum PatchVariant {
     },
 }
 
-pub struct DomAttr{
-    pub namespace: Option<&'static str>, 
+pub struct DomAttr {
+    pub namespace: Option<&'static str>,
     pub name: &'static str,
     pub value: Vec<DomAttrValue>,
 }
 
-
-pub enum DomAttrValue{
+pub enum DomAttrValue {
     FunctionCall(Value),
     Simple(Value),
     Style(Vec<Style>),
     EventListener(Closure<dyn FnMut(web_sys::Event)>),
 }
 
+pub struct GroupedDomAttrValues {
+    /// the listeners of the event listeners
+    pub listeners: Vec<Closure<dyn FnMut(web_sys::Event)>>,
+    /// plain attribute values
+    pub plain_values: Vec<Value>,
+    /// style attribute values
+    pub styles: Vec<Style>,
+    /// function calls
+    pub function_calls: Vec<Value>,
+}
 
-impl DomAttrValue{
+
+impl DomAttr{
+
+    pub(crate) fn group_values(self) -> GroupedDomAttrValues {
+        let mut listeners = vec![];
+        let mut plain_values = vec![];
+        let mut styles = vec![];
+        let mut function_calls = vec![];
+        for av in self.value {
+            match av {
+                DomAttrValue::Simple(v) => {
+                    plain_values.push(v);
+                }
+                DomAttrValue::FunctionCall(v) => {
+                    function_calls.push(v);
+                }
+                DomAttrValue::Style(s) => {
+                    styles.extend(s);
+                }
+                DomAttrValue::EventListener(cb) => {
+                    listeners.push(cb);
+                }
+            }
+        }
+        GroupedDomAttrValues {
+            listeners,
+            plain_values,
+            styles,
+            function_calls,
+        }
+    }
+}
+
+impl DomAttrValue {
     /// return the value if it is a Simple variant
     pub fn get_simple(&self) -> Option<&Value> {
         match self {
@@ -107,109 +148,6 @@ impl DomAttrValue{
     }
 }
 
-pub(crate) fn merge_plain_attributes_values(
-    attr_values: &[DomAttrValue],
-) -> Option<String> {
-    let plain_values: Vec<String> = attr_values
-        .iter()
-        .flat_map(|att_value| match att_value {
-            DomAttrValue::Simple(simple) => Some(simple.to_string()),
-            _ => None,
-        })
-        .collect();
-    if !plain_values.is_empty() {
-        Some(plain_values.join(" "))
-    } else {
-        None
-    }
-}
-
-pub(crate) fn merge_func_attr_values(
-    attr_values: &[DomAttrValue],
-) -> Option<String> {
-    let plain_values: Vec<String> = attr_values
-        .iter()
-        .flat_map(|att_value| match att_value {
-            DomAttrValue::FunctionCall(call) => Some(call.to_string()),
-            _ => None,
-        })
-        .collect();
-    if !plain_values.is_empty() {
-        Some(plain_values.join(" "))
-    } else {
-        None
-    }
-}
-
-pub(crate) fn merge_styles_attributes_values(
-    attr_values: &[DomAttrValue],
-) -> Option<String> {
-    use std::fmt::Write;
-
-    let styles_values: Vec<String> = attr_values
-        .iter()
-        .flat_map(|att_value| match att_value {
-            DomAttrValue::Style(styles) => {
-                let mut style_str = String::new();
-                styles
-                    .iter()
-                    .for_each(|s| write!(style_str, "{s};").expect("must write"));
-                Some(style_str)
-            }
-            _ => None,
-        })
-        .collect();
-
-    if !styles_values.is_empty() {
-        Some(styles_values.join(" "))
-    } else {
-        None
-    }
-}
-
-pub struct PartitionedDomAttrValues {
-    /// the listeners of the event listeners
-    pub listeners: Vec<Closure<dyn FnMut(web_sys::Event)>>,
-    /// plain attribute values
-    pub plain_values: Vec<DomAttrValue>,
-    /// style attribute values
-    pub styles: Vec<DomAttrValue>,
-    /// function calls
-    pub function_calls: Vec<DomAttrValue>,
-}
-
-pub(crate) fn partition_dom_attrs(
-    attr: DomAttr,
-) -> PartitionedDomAttrValues {
-    let mut listeners = vec![];
-    let mut plain_values = vec![];
-    let mut styles = vec![];
-    let mut function_calls = vec![];
-    for av in attr.value {
-        match av {
-            DomAttrValue::Simple(_) => {
-                plain_values.push(av);
-            }
-            DomAttrValue::FunctionCall(_) => {
-                function_calls.push(av);
-            }
-            DomAttrValue::Style(_) => {
-                styles.push(av);
-            }
-            DomAttrValue::EventListener(cb) => {
-                listeners.push(cb);
-            }
-        }
-    }
-    PartitionedDomAttrValues {
-        listeners,
-        plain_values,
-        styles,
-        function_calls,
-    }
-}
-
-
 
 
 impl<APP, MSG> Program<APP, MSG>
@@ -217,29 +155,34 @@ where
     MSG: 'static,
     APP: Application<MSG> + 'static,
 {
-
-    pub(crate) fn convert_attr(&self, attr: &Attribute<MSG>) -> DomAttr
-    {
-        DomAttr{
+    pub(crate) fn convert_attr(&self, attr: &Attribute<MSG>) -> DomAttr {
+        DomAttr {
             namespace: attr.namespace,
             name: attr.name,
-            value: attr.value.iter().filter_map(|v|self.convert_attr_value(v)).collect(),
+            value: attr
+                .value
+                .iter()
+                .filter_map(|v| self.convert_attr_value(v))
+                .collect(),
         }
     }
 
-    fn convert_attr_value(&self, attr_value: &AttributeValue<MSG>) -> Option<DomAttrValue>
-    {
-        match attr_value{
+    fn convert_attr_value(&self, attr_value: &AttributeValue<MSG>) -> Option<DomAttrValue> {
+        match attr_value {
             AttributeValue::FunctionCall(v) => Some(DomAttrValue::FunctionCall(v.clone())),
             AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
             AttributeValue::Style(v) => Some(DomAttrValue::Style(v.clone())),
-            AttributeValue::EventListener(v) => Some(DomAttrValue::EventListener(self.convert_event_listener(v))),
+            AttributeValue::EventListener(v) => {
+                Some(DomAttrValue::EventListener(self.convert_event_listener(v)))
+            }
             AttributeValue::Empty => None,
         }
     }
 
-    fn convert_event_listener(&self, event_listener: &EventCallback<MSG>) -> Closure<dyn FnMut(web_sys::Event)> 
-    {
+    fn convert_event_listener(
+        &self,
+        event_listener: &EventCallback<MSG>,
+    ) -> Closure<dyn FnMut(web_sys::Event)> {
         let program = self.downgrade();
         let event_listener = event_listener.clone();
         let closure: Closure<dyn FnMut(web_sys::Event)> =
@@ -251,10 +194,7 @@ where
         closure
     }
     /// get the real DOM target node and make a DomPatch object for each of the Patch
-    pub(crate) fn convert_patches(
-        &self,
-        patches: &[Patch<MSG>],
-    ) -> Result<Vec<DomPatch>, JsValue> {
+    pub(crate) fn convert_patches(&self, patches: &[Patch<MSG>]) -> Result<Vec<DomPatch>, JsValue> {
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
             .iter()
             .map(|patch| (patch.path(), patch.tag()))
@@ -477,7 +417,7 @@ where
                                 if attr.name == "inner_html" {
                                     target_element.set_inner_html("");
                                 }
-                            },
+                            }
                         }
                     }
                 }

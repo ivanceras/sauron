@@ -25,6 +25,17 @@ impl Style {
     pub(crate) fn is_static_str(&self) -> bool {
         matches!(self.name, Cow::Borrowed(_)) && self.value.is_static_str()
     }
+
+    pub(crate) fn merged_to_string(styles: &[Self]) -> Option<String> {
+        if !styles.is_empty() {
+            Some(styles
+                .iter()
+                .map(|s|format!("{s};"))
+                .collect::<Vec<_>>().join(" "))
+        } else {
+            None
+        }
+    }
 }
 
 impl fmt::Display for Style {

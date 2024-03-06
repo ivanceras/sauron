@@ -126,6 +126,15 @@ impl Value {
     pub(crate) fn is_static_str(&self) -> bool {
         matches!(self, Self::Cow(Cow::Borrowed(_)))
     }
+
+    pub(crate) fn merge_to_string(attr_values: &[Value]) -> Option<String> {
+        if !attr_values.is_empty() {
+            Some(attr_values.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" "))
+        } else {
+            None
+        }
+    }
+
 }
 
 impl PartialEq for Value {
