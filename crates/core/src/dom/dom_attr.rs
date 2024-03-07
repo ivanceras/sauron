@@ -318,6 +318,29 @@ impl DomAttr {
             Self::set_value_f64(element, value_f64);
         }
     }
+
+    /// remove the elemnt dom attr
+    pub fn remove_element_dom_attr(element: &Element, attr: &DomAttr) -> Result<(), JsValue> {
+        match attr.name {
+            "value" => {
+                DomAttr::set_value_str(element, "");
+            }
+            "open" => {
+                DomAttr::set_open(element, false);
+            }
+            "checked" => {
+                DomAttr::set_checked(element, false);
+            }
+            "disabled" => {
+                DomAttr::set_disabled(element, false);
+            }
+            _ => (),
+        }
+        //actually remove the element
+        element.remove_attribute(intern(attr.name))?;
+
+        Ok(())
+    }
 }
 
 impl DomAttrValue {

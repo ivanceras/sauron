@@ -330,14 +330,14 @@ where
                     for att_value in attr.value.iter() {
                         match att_value {
                             DomAttrValue::Simple(_) => {
-                                Self::remove_element_dom_attr(&target_element, attr)?;
+                                DomAttr::remove_element_dom_attr(&target_element, attr)?;
                             }
                             // it is an event listener
                             DomAttrValue::EventListener(_) => {
                                 self.remove_event_listener_with_name(attr.name, &target_element)?;
                             }
                             DomAttrValue::Style(_) => {
-                                Self::remove_element_dom_attr(&target_element, attr)?;
+                                DomAttr::remove_element_dom_attr(&target_element, attr)?;
                             }
                             DomAttrValue::FunctionCall(_) => {
                                 if attr.name == "inner_html" {

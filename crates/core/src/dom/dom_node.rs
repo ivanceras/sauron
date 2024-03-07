@@ -339,55 +339,6 @@ where
         Ok(())
     }
 
-    /// remove element attribute,
-    /// takes care of special case such as checked
-    pub fn remove_element_attribute(
-        element: &Element,
-        attr: &Attribute<MSG>,
-    ) -> Result<(), JsValue> {
-        match *attr.name() {
-            "value" => {
-                DomAttr::set_value_str(element, "");
-            }
-            "open" => {
-                DomAttr::set_open(element, false);
-            }
-            "checked" => {
-                DomAttr::set_checked(element, false);
-            }
-            "disabled" => {
-                DomAttr::set_disabled(element, false);
-            }
-            _ => (),
-        }
-        //actually remove the element
-        element.remove_attribute(intern(attr.name()))?;
-
-        Ok(())
-    }
-
-    /// remove the elemnt dom attr
-    pub fn remove_element_dom_attr(element: &Element, attr: &DomAttr) -> Result<(), JsValue> {
-        match attr.name {
-            "value" => {
-                DomAttr::set_value_str(element, "");
-            }
-            "open" => {
-                DomAttr::set_open(element, false);
-            }
-            "checked" => {
-                DomAttr::set_checked(element, false);
-            }
-            "disabled" => {
-                DomAttr::set_disabled(element, false);
-            }
-            _ => (),
-        }
-        //actually remove the element
-        element.remove_attribute(intern(attr.name))?;
-
-        Ok(())
-    }
 
     /// remove all the event listeners for this node
     pub(crate) fn remove_event_listeners(&self, node: &Element) -> Result<(), JsValue> {
