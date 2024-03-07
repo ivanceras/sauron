@@ -117,7 +117,7 @@ impl<MSG> AttributeValue<MSG> {
 
 impl<MSG> Leaf<MSG> {
     /// mape the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
-    pub fn map_msg<F, MSG2>(self, _cb: F) -> Leaf<MSG2>
+    pub fn map_msg<F, MSG2>(self, cb: F) -> Leaf<MSG2>
     where
         F: Fn(MSG) -> MSG2 + Clone + 'static,
         MSG2: 'static,
@@ -128,7 +128,14 @@ impl<MSG> Leaf<MSG> {
             Self::SafeHtml(v) => Leaf::SafeHtml(v),
             Self::Comment(v) => Leaf::Comment(v),
             Self::DocType(v) => Leaf::DocType(v),
-            Self::Component(_v) => todo!(),
+            Self::Component{
+                type_id, attrs, children
+            } => Leaf::Component{
+                type_id,
+                attrs: attrs.into_iter().map(|a|a.map_msg(cb.clone())).collect(),
+                children: children.into_iter().map(|c|c.map_msg(cb.clone())).collect(),
+            }
+
         }
     }
 }

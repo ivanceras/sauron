@@ -29,7 +29,10 @@ where
                     Leaf::SafeHtml(_) => Node::Leaf(Leaf::SafeHtml("".into())),
                     Leaf::Comment(_) => Node::Leaf(Leaf::Comment("".into())),
                     Leaf::DocType(_) => Node::Leaf(Leaf::DocType("".into())),
-                    Leaf::Component(_comp) => todo!(),
+                    Leaf::Component{..} => {
+                        //TODO: we save the template to a template registry
+                        todo!()
+                    }
                 }
             }
         }

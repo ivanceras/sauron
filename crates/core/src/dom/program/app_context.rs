@@ -47,21 +47,16 @@ where
     MSG: 'static,
 {
     pub(crate) fn upgrade(&self) -> Option<AppContext<APP, MSG>> {
-        if let Some(app) = self.app.upgrade() {
-            if let Some(current_vdom) = self.current_vdom.upgrade() {
-                if let Some(pending_msgs) = self.pending_msgs.upgrade() {
-                    if let Some(pending_cmds) = self.pending_cmds.upgrade() {
-                        return Some(AppContext {
-                            app,
-                            current_vdom,
-                            pending_msgs,
-                            pending_cmds,
-                        });
-                    }
-                }
-            }
-        }
-        None
+        let app = self.app.upgrade()?;
+        let current_vdom = self.current_vdom.upgrade()?;
+        let pending_msgs = self.pending_msgs.upgrade()?;
+        let pending_cmds = self.pending_cmds.upgrade()?;
+        Some(AppContext {
+            app,
+            current_vdom,
+            pending_msgs,
+            pending_cmds,
+        })
     }
 }
 
@@ -104,37 +99,6 @@ where
         w1
     }
 
-    /// map the msg of this app_context such that `AppContext<MSG>` becomes `AppContext<MSG2>`
-    pub fn map_msg<F, MSG2>(self, cb: F) -> AppContext<APP, MSG2>
-    where
-        F: Fn(MSG) -> MSG2 + Clone + 'static,
-        MSG2: 'static,
-        MSG: 'static,
-    {
-        AppContext {
-            app: Rc::new(RefCell::new(Rc::into_inner(self.app).unwrap().into_inner())),
-            current_vdom: Rc::new(RefCell::new(
-                Rc::into_inner(self.current_vdom)
-                    .unwrap()
-                    .into_inner()
-                    .map_msg(cb.clone()),
-            )),
-            pending_msgs: Rc::new(RefCell::new(VecDeque::from_iter(
-                Rc::into_inner(self.pending_msgs)
-                    .unwrap()
-                    .into_inner()
-                    .into_iter()
-                    .map(|msg| cb(msg)),
-            ))),
-            pending_cmds: Rc::new(RefCell::new(VecDeque::from_iter(
-                Rc::into_inner(self.pending_cmds)
-                    .unwrap()
-                    .into_inner()
-                    .into_iter()
-                    .map(|cmd| cmd.map_msg(cb.clone())),
-            ))),
-        }
-    }
 }
 
 impl<APP, MSG> Clone for AppContext<APP, MSG>
@@ -161,8 +125,8 @@ where
         use crate::render::Render;
         let view = app.view();
         //TODO: do something with the template here
-        let template = extract_template(&view);
-        log::info!("{}", template.render_to_string());
+        //let template = extract_template(&view);
+        //log::info!("{}", template.render_to_string());
         Self {
             app: Rc::new(RefCell::new(app)),
             current_vdom: Rc::new(RefCell::new(view)),

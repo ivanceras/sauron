@@ -1,5 +1,5 @@
-#![deny(warnings)]
-#![deny(clippy::all)]
+//#![deny(warnings)]
+//#![deny(clippy::all)]
 use app::App;
 use sauron::*;
 

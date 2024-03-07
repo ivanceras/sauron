@@ -1,7 +1,8 @@
 //! Leaf node for html dom tree
-use crate::dom::StatefulComponent;
 use std::borrow::Cow;
 use std::fmt;
+use std::any::TypeId;
+use crate::vdom::{Attribute,Node};
 
 /// A leaf node value of html dom tree
 pub enum Leaf<MSG> {
@@ -15,8 +16,19 @@ pub enum Leaf<MSG> {
     /// <https://www.w3.org/QA/2002/04/valid-dtd-list.html>
     DocType(Cow<'static, str>),
     /// Component leaf
-    Component(Box<dyn StatefulComponent<MSG>>),
+    /// Note: we can not use the Box<dyn Component> here
+    /// since it will not be possible to map_msg the Component
+    /// instead we just use the type_id for looking up it's instantiated Component in a v-table.
+    Component{
+        /// component type id
+        type_id: TypeId, 
+        /// component attributes
+        attrs: Vec<Attribute<MSG>>,
+        /// component children
+        children: Vec<Node<MSG>>,
+    },
 }
+
 
 impl<MSG> Clone for Leaf<MSG> {
     fn clone(&self) -> Self {
@@ -25,7 +37,11 @@ impl<MSG> Clone for Leaf<MSG> {
             Self::SafeHtml(v) => Self::SafeHtml(v.clone()),
             Self::Comment(v) => Self::Comment(v.clone()),
             Self::DocType(v) => Self::DocType(v.clone()),
-            Self::Component(_v) => todo!(),
+            Self::Component{type_id, attrs, children} => Self::Component{
+                type_id: type_id.clone(), 
+                attrs: attrs.clone(),
+                children: children.clone(),
+            }
         }
     }
 }
@@ -37,7 +53,7 @@ impl<MSG> fmt::Debug for Leaf<MSG> {
             Self::SafeHtml(v) => write!(f, "SafeHtml({v})"),
             Self::Comment(v) => write!(f, "Comment({v})"),
             Self::DocType(v) => write!(f, "DocType({v}"),
-            Self::Component(_v) => todo!(),
+            Self::Component{..} => write!(f, "Component(..)"),
         }
     }
 }
@@ -49,7 +65,7 @@ impl<MSG> PartialEq for Leaf<MSG> {
             (Self::SafeHtml(v), Self::SafeHtml(o)) => v == o,
             (Self::Comment(v), Self::Comment(o)) => v == o,
             (Self::DocType(v), Self::DocType(o)) => v == o,
-            (Self::Component(_v), Self::Component(_o)) => todo!(),
+            (Self::Component{type_id,..}, Self::Component{type_id: o_tid,..}) => type_id==o_tid,
             _ => false,
         }
     }
@@ -91,7 +107,7 @@ impl<MSG> Leaf<MSG> {
             Self::SafeHtml(v) => matches!(v, Cow::Borrowed(_)),
             Self::Comment(v) => matches!(v, Cow::Borrowed(_)),
             Self::DocType(v) => matches!(v, Cow::Borrowed(_)),
-            Self::Component(_comp) => false,
+            Self::Component{..} => false,
         }
     }
 }

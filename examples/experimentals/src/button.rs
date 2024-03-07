@@ -1,5 +1,6 @@
 
 use sauron::prelude::*;
+use sauron::dom::Component;
 
 
 pub enum Msg{
@@ -11,13 +12,13 @@ pub struct Button{
     cnt: i32,
 }
 
-impl Application<Msg> for Button {
+impl Component<Msg, ()> for Button {
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg{
             Msg::Click => self.cnt +=1,
         }
-        Cmd::none()
+        Effects::none()
     }
 
     fn view(&self) -> Node<Msg>{

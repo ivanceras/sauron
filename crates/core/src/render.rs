@@ -126,7 +126,11 @@ impl<MSG> Render for Leaf<MSG> {
             Leaf::DocType(doctype) => {
                 write!(buffer, "<!doctype {doctype}>")
             }
-            Leaf::Component(_comp) => todo!(),
+            Leaf::Component{..} => {
+                //TODO: The component will be rendered based
+                // on its attributes and children
+                todo!()
+            },
         }
     }
 }

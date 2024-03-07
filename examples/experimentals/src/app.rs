@@ -2,6 +2,7 @@
 use js_sys::Date;
 use sauron::prelude::*;
 use crate::button::{self,Button};
+use sauron::dom::component;
 
 pub enum Msg {
     Click,
@@ -86,8 +87,8 @@ impl Application<Msg> for App {
                 Cmd::none()
             }
             Msg::BtnMsg(bmsg) => {
-                let cmd = self.btn.update(bmsg);
-                cmd.map_msg(Msg::BtnMsg)
+                let effects = self.btn.update(bmsg);
+                effects.map_msg(Msg::BtnMsg).into()
             }
         }
     }
@@ -166,6 +167,7 @@ impl Application<Msg> for App {
                     }}
                 </ul>
                 {self.btn.view().map_msg(Msg::BtnMsg)}
+                {component::<Button, Msg>([], [])}
             </div>
         }
     }

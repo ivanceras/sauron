@@ -10,8 +10,9 @@ use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCa
 use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
-
 use crate::vdom::{diff_recursive, TreePath};
+use crate::vdom::Attribute;
+use crate::dom::StatefulComponent;
 use app_context::AppContext;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeMap;
@@ -27,6 +28,7 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
+use crate::dom::component::create_component_unique_identifier;
 
 mod app_context;
 pub(crate) mod template;
@@ -70,6 +72,7 @@ where
     /// generic closures that has no argument
     pub closures: Rc<RefCell<Closures>>,
     last_update: Rc<RefCell<Option<f64>>>,
+    pub components: Rc<RefCell<BTreeMap<usize, Box<dyn StatefulComponent<MSG>>>>>,
 }
 
 pub struct WeakProgram<APP, MSG>
@@ -87,6 +90,7 @@ where
     pub(crate) event_closures: Weak<RefCell<EventClosures>>,
     pub(crate) closures: Weak<RefCell<Closures>>,
     last_update: Weak<RefCell<Option<f64>>>,
+    pub components: Weak<RefCell<BTreeMap<usize, Box<dyn StatefulComponent<MSG>>>>>,
 }
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
@@ -130,44 +134,31 @@ where
 {
     ///
     pub fn upgrade(&self) -> Option<Program<APP, MSG>> {
-        if let Some(app_context) = self.app_context.upgrade() {
-            if let Some(root_node) = self.root_node.upgrade() {
-                if let Some(mount_node) = self.mount_node.upgrade() {
-                    if let Some(node_closures) = self.node_closures.upgrade() {
-                        if let Some(pending_patches) = self.pending_patches.upgrade() {
-                            if let Some(idle_callback_handles) =
-                                self.idle_callback_handles.upgrade()
-                            {
-                                if let Some(animation_frame_handles) =
-                                    self.animation_frame_handles.upgrade()
-                                {
-                                    if let Some(event_closures) = self.event_closures.upgrade() {
-                                        if let Some(closures) = self.closures.upgrade() {
-                                            if let Some(last_update) = self.last_update.upgrade() {
-                                                return Some(Program {
-                                                    app_context,
-                                                    root_node,
-                                                    mount_node,
-                                                    node_closures,
-                                                    mount_procedure: self.mount_procedure,
-                                                    pending_patches,
-                                                    idle_callback_handles,
-                                                    animation_frame_handles,
-                                                    event_closures,
-                                                    closures,
-                                                    last_update,
-                                                });
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        None
+        let app_context = self.app_context.upgrade()?;
+        let root_node = self.root_node.upgrade()?;
+        let mount_node = self.mount_node.upgrade()?;
+        let node_closures = self.node_closures.upgrade()?;
+        let pending_patches = self.pending_patches.upgrade()?;
+        let idle_callback_handles = self.idle_callback_handles.upgrade()?;
+        let animation_frame_handles = self.animation_frame_handles.upgrade()?;
+        let event_closures = self.event_closures.upgrade()?;
+        let closures = self.closures.upgrade()?;
+        let last_update = self.last_update.upgrade()?;
+        let components = self.components.upgrade()?;
+        Some(Program {
+            app_context,
+            root_node,
+            mount_node,
+            node_closures,
+            mount_procedure: self.mount_procedure,
+            pending_patches,
+            idle_callback_handles,
+            animation_frame_handles,
+            event_closures,
+            closures,
+            last_update,
+            components,
+        })
     }
 }
 
@@ -188,6 +179,7 @@ where
             event_closures: Weak::clone(&self.event_closures),
             closures: Weak::clone(&self.closures),
             last_update: Weak::clone(&self.last_update),
+            components: Weak::clone(&self.components),
         }
     }
 }
@@ -210,29 +202,21 @@ where
             event_closures: Rc::downgrade(&self.event_closures),
             closures: Rc::downgrade(&self.closures),
             last_update: Rc::downgrade(&self.last_update),
+            components: Rc::downgrade(&self.components),
         }
     }
 
-    /// map the msg of this Program such that `Program<APP,MSG>` becomes `Program<APP,MSG2>`
-    pub fn map_msg<F, MSG2>(self, cb: F) -> Program<APP, MSG2>
-    where
-        F: Fn(MSG) -> MSG2 + Clone + 'static,
-        MSG2: 'static,
-        MSG: 'static,
+
+    pub fn register_component<COMP>(
+        &mut self,
+        attrs: impl IntoIterator<Item = vdom::Attribute<MSG>>,
+        children: impl IntoIterator<Item = vdom::Node<MSG>>,
+    ) 
+    where COMP: StatefulComponent<MSG> + 'static,
     {
-        Program {
-            app_context: self.app_context.clone().map_msg(cb),
-            root_node: self.root_node,
-            mount_node: self.mount_node,
-            node_closures: self.node_closures,
-            mount_procedure: self.mount_procedure,
-            pending_patches: self.pending_patches,
-            idle_callback_handles: self.idle_callback_handles,
-            animation_frame_handles: self.animation_frame_handles,
-            event_closures: self.event_closures,
-            closures: self.closures,
-            last_update: self.last_update,
-        }
+        let comp = COMP::build(attrs, children);
+        let comp_id = create_component_unique_identifier();
+        self.components.borrow_mut().insert(comp_id, Box::new(comp));
     }
 }
 
@@ -253,6 +237,7 @@ where
             event_closures: Rc::clone(&self.event_closures),
             closures: Rc::clone(&self.closures),
             last_update: Rc::clone(&self.last_update),
+            components: Rc::clone(&self.components),
         }
     }
 }
@@ -297,6 +282,7 @@ where
             event_closures: Rc::new(RefCell::new(vec![])),
             closures: Rc::new(RefCell::new(vec![])),
             last_update: Rc::new(RefCell::new(None)),
+            components: Rc::new(RefCell::new(BTreeMap::new())),
         }
     }
 

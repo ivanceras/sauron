@@ -3,6 +3,10 @@ use crate::vdom::AttributeName;
 use crate::vdom::AttributeValue;
 use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
+use std::any::Any;
+use std::any::TypeId;
+use std::cell::Cell;
+use std::collections::BTreeMap;
 
 /// A component has a view and can update itself.
 ///
@@ -259,17 +263,36 @@ where
     fn adopted_callback(&mut self);
 }
 
+thread_local!(static COMPONENT_ID_COUNTER: Cell<usize> = Cell::new(1));
+
+pub fn create_component_unique_identifier() -> usize {
+    COMPONENT_ID_COUNTER.with(|x| {
+        let val = x.get();
+        x.set(val + 1);
+        val
+    })
+}
+
+
+
 /// create a stateful component node
 pub fn component<COMP, MSG>(
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG>
-where
-    COMP: StatefulComponent<MSG> + 'static,
-    MSG: 'static,
+where COMP: 'static,
 {
-    let comp = COMP::build(attrs, children);
-    Node::Leaf(Leaf::Component(Box::new(comp)))
+    // make a global registry here
+    // store the COMP in the global registry
+    // and when the program encounter the component with the type id
+    // it will be retrieved from the global registry
+    let type_id = TypeId::of::<COMP>();
+    log::info!("type_id: {type_id:?}, type_name: {}", std::any::type_name::<COMP>());
+    Node::Leaf(Leaf::Component{
+        type_id,
+        attrs: attrs.into_iter().collect(),
+        children: children.into_iter().collect(),
+    })
 }
 
 #[cfg(test)]

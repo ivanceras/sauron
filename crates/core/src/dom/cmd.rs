@@ -115,20 +115,6 @@ where
     }
 }
 
-impl<APP, MSG> Cmd<APP, MSG>
-where
-    MSG: 'static,
-{
-    /// map the msg of this Cmd such that `Cmd<APP,MSG>` becomes `Cmd<APP,MSG2>`
-    pub fn map_msg<F, MSG2>(self, _cb: F) -> Cmd<APP, MSG2>
-    where
-        F: Fn(MSG) -> MSG2 + Clone + 'static,
-        MSG2: 'static,
-        MSG: 'static,
-    {
-        todo!()
-    }
-}
 
 impl<APP, MSG> From<Effects<MSG, ()>> for Cmd<APP, MSG>
 where

@@ -72,9 +72,9 @@ fn create_element(tag: &'static str) -> web_sys::Element {
 /// Rc'd Closures for those events.
 fn create_unique_identifier() -> usize {
     NODE_ID_COUNTER.with(|x| {
-        let tmp = x.get();
-        x.set(tmp + 1);
-        tmp
+        let val = x.get();
+        x.set(val + 1);
+        val
     })
 }
 
@@ -112,7 +112,11 @@ where
                     doctype is only used in rendering"
                 );
             }
-            Leaf::Component(_comp) => todo!(),
+            Leaf::Component{..} => {
+                // The program needs to have a registry of Component
+                // indexed by their type_id
+                self.create_dom_node(&crate::html::div([], [crate::html::text("This is just a place holder")]))
+            }
         }
     }
 
