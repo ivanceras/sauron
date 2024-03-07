@@ -17,7 +17,7 @@ mod element;
 mod leaf;
 
 pub use attribute::special::{key, replace, skip, skip_criteria};
-pub(crate) use attribute::special::{KEY, REPLACE, SKIP, SKIP_CRITERIA};
+pub(crate) use attribute::special::{KEY, REPLACE, SKIP, SKIP_CRITERIA, VALUE, OPEN, CHECKED, DISABLED};
 pub use attribute::{attr, attr_ns, AttributeName, AttributeValue, Namespace, Style, Tag, Value};
 pub use diff::{diff, diff_recursive};
 pub use node::{element, element_ns, fragment, leaf, node_list, Node};

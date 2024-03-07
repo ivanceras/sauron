@@ -7,17 +7,35 @@ use crate::vdom::AttributeName;
 /// Special Node attributes that are treated differently
 /// such as key and skip which both greatly affects the diffing algorithm
 
+/// NOTE: this is specific to sauron framework
 /// The key attribute
 pub static KEY: &AttributeName = &"key";
 
+/// NOTE: this is specific to sauron framework
 /// The replace attribute
 pub static REPLACE: &AttributeName = &"replace";
 
+/// NOTE: this is specific to sauron framework
 /// The skip attribute
 pub static SKIP: &AttributeName = &"skip";
 
+/// NOTE: this is specific to sauron framework
 /// The skip criteria attribute
 pub static SKIP_CRITERIA: &AttributeName = &"skip_criteria";
+
+
+///
+/// NOTE: The following attributes have special behaviour in the dom, the framework
+/// need to call the specific methods to reflect the state of this attribute to the element
+///
+/// the value attribute
+pub static VALUE: &AttributeName = &"value";
+/// the open attribute
+pub static OPEN: &AttributeName = &"open";
+/// the checked attribute
+pub static CHECKED: &AttributeName = &"checked";
+/// the disabled attribute
+pub static DISABLED: &AttributeName = &"disabled";
 
 /// creates a key attribute using a formatter
 /// # Examples

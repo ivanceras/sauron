@@ -1,7 +1,10 @@
+use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
+use crate::vdom::AttributeValue;
 use crate::vdom::Namespace;
 use crate::vdom::Style;
 use crate::vdom::Value;
+use crate::vdom::{CHECKED, DISABLED, OPEN, VALUE};
 use wasm_bindgen::intern;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::Element;
@@ -11,9 +14,6 @@ use web_sys::{
     HtmlOptionElement, HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement,
     HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
-
-use crate::vdom::Attribute;
-use crate::vdom::AttributeValue;
 
 pub struct DomAttr {
     pub namespace: Option<&'static str>,
@@ -143,65 +143,66 @@ impl DomAttr {
                     .set_attribute_ns(Some(namespace), attr_name, &merged_plain_values)
                     .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
             } else {
-                match attr_name {
-                    "value" => {
-                        element
-                            .set_attribute(attr_name, &merged_plain_values)
-                            .unwrap_or_else(|_| {
-                                panic!("Error setting an attribute for {element:?}")
-                            });
-                        Self::set_value_str(element, &merged_plain_values);
-                        Self::set_numeric_values(element, &plain_values);
-                    }
-                    "open" => {
-                        let is_open: bool = plain_values
-                            .first()
-                            .and_then(|v| v.as_bool())
-                            .unwrap_or(false);
+                if *VALUE == attr_name {
+                    element
+                        .set_attribute(attr_name, &merged_plain_values)
+                        .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
+                    Self::set_value_str(element, &merged_plain_values);
+                    Self::set_numeric_values(element, &plain_values);
+                } else if *OPEN == attr_name {
+                    let is_open: bool = plain_values
+                        .first()
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false);
 
-                        element
-                            .set_attribute(attr_name, &is_open.to_string())
-                            .unwrap_or_else(|_| {
-                                panic!("Error setting an attribute for {element:?}")
-                            });
-                        Self::set_open(element, is_open);
-                    }
-                    "checked" => {
-                        let is_checked: bool = plain_values
-                            .first()
-                            .and_then(|v| v.as_bool())
-                            .unwrap_or(false);
+                    element
+                        .set_attribute(attr_name, &is_open.to_string())
+                        .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
+                    Self::set_open(element, is_open);
+                } else if *CHECKED == attr_name {
+                    let is_checked: bool = plain_values
+                        .first()
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false);
 
-                        element
-                            .set_attribute(attr_name, &is_checked.to_string())
-                            .unwrap_or_else(|_| {
-                                panic!("Error setting an attribute for {element:?}")
-                            });
-                        Self::set_checked(element, is_checked)
-                    }
-                    "disabled" => {
-                        let is_disabled: bool = plain_values
-                            .first()
-                            .and_then(|v| v.as_bool())
-                            .unwrap_or(false);
+                    element
+                        .set_attribute(attr_name, &is_checked.to_string())
+                        .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
+                    Self::set_checked(element, is_checked)
+                } else if *DISABLED == attr_name {
+                    let is_disabled: bool = plain_values
+                        .first()
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false);
 
-                        element
-                            .set_attribute(attr_name, &is_disabled.to_string())
-                            .unwrap_or_else(|_| {
-                                panic!("Error setting an attribute for {element:?}")
-                            });
-                        Self::set_disabled(element, is_disabled);
-                    }
-                    _ => {
-                        element
-                            .set_attribute(attr_name, &merged_plain_values)
-                            .unwrap_or_else(|_| {
-                                panic!("Error setting an attribute for {element:?}")
-                            });
-                    }
+                    element
+                        .set_attribute(attr_name, &is_disabled.to_string())
+                        .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
+                    Self::set_disabled(element, is_disabled);
+                } else {
+                    element
+                        .set_attribute(attr_name, &merged_plain_values)
+                        .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
                 }
             }
         }
+    }
+
+    /// remove the elemnt dom attr
+    pub fn remove_element_dom_attr(element: &Element, attr: &DomAttr) -> Result<(), JsValue> {
+        if *VALUE == attr.name {
+            DomAttr::set_value_str(element, "");
+        } else if *OPEN == attr.name {
+            DomAttr::set_open(element, false);
+        } else if *CHECKED == attr.name {
+            DomAttr::set_checked(element, false);
+        } else if *DISABLED == attr.name {
+            DomAttr::set_disabled(element, false);
+        }
+        //actually remove the element
+        element.remove_attribute(intern(attr.name))?;
+
+        Ok(())
     }
 
     /// explicitly call `set_checked` function on the html element
@@ -317,29 +318,6 @@ impl DomAttr {
         if let Some(value_f64) = value_f64 {
             Self::set_value_f64(element, value_f64);
         }
-    }
-
-    /// remove the elemnt dom attr
-    pub fn remove_element_dom_attr(element: &Element, attr: &DomAttr) -> Result<(), JsValue> {
-        match attr.name {
-            "value" => {
-                DomAttr::set_value_str(element, "");
-            }
-            "open" => {
-                DomAttr::set_open(element, false);
-            }
-            "checked" => {
-                DomAttr::set_checked(element, false);
-            }
-            "disabled" => {
-                DomAttr::set_disabled(element, false);
-            }
-            _ => (),
-        }
-        //actually remove the element
-        element.remove_attribute(intern(attr.name))?;
-
-        Ok(())
     }
 }
 
