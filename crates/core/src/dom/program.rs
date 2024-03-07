@@ -74,7 +74,6 @@ where
     /// generic closures that has no argument
     pub closures: Rc<RefCell<Closures>>,
     last_update: Rc<RefCell<Option<f64>>>,
-    pub components: Rc<RefCell<BTreeMap<usize, Box<dyn StatefulComponent>>>>,
 }
 
 pub struct WeakProgram<APP, MSG>
@@ -92,7 +91,6 @@ where
     pub(crate) event_closures: Weak<RefCell<EventClosures>>,
     pub(crate) closures: Weak<RefCell<Closures>>,
     last_update: Weak<RefCell<Option<f64>>>,
-    pub components: Weak<RefCell<BTreeMap<usize, Box<dyn StatefulComponent>>>>,
 }
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
@@ -146,7 +144,6 @@ where
         let event_closures = self.event_closures.upgrade()?;
         let closures = self.closures.upgrade()?;
         let last_update = self.last_update.upgrade()?;
-        let components = self.components.upgrade()?;
         Some(Program {
             app_context,
             root_node,
@@ -159,7 +156,6 @@ where
             event_closures,
             closures,
             last_update,
-            components,
         })
     }
 }
@@ -181,7 +177,6 @@ where
             event_closures: Weak::clone(&self.event_closures),
             closures: Weak::clone(&self.closures),
             last_update: Weak::clone(&self.last_update),
-            components: Weak::clone(&self.components),
         }
     }
 }
@@ -204,22 +199,9 @@ where
             event_closures: Rc::downgrade(&self.event_closures),
             closures: Rc::downgrade(&self.closures),
             last_update: Rc::downgrade(&self.last_update),
-            components: Rc::downgrade(&self.components),
         }
     }
 
-    pub fn register_component<COMP>(&mut self)
-    where
-        COMP: StatefulComponent + 'static,
-    {
-        let comp = COMP::build([], []);
-        let comp_id = create_component_unique_identifier();
-        let template = comp.template();
-        //let template = extract_template(&comp.view());
-        let comp_name = std::any::type_name::<COMP>();
-        //log::info!("template of component: {comp_name}:\n{}", template.render_to_string());
-        self.components.borrow_mut().insert(comp_id, Box::new(comp));
-    }
 }
 
 impl<APP, MSG> Clone for Program<APP, MSG>
@@ -239,7 +221,6 @@ where
             event_closures: Rc::clone(&self.event_closures),
             closures: Rc::clone(&self.closures),
             last_update: Rc::clone(&self.last_update),
-            components: Rc::clone(&self.components),
         }
     }
 }
@@ -284,7 +265,6 @@ where
             event_closures: Rc::new(RefCell::new(vec![])),
             closures: Rc::new(RefCell::new(vec![])),
             last_update: Rc::new(RefCell::new(None)),
-            components: Rc::new(RefCell::new(BTreeMap::new())),
         }
     }
 
