@@ -7,6 +7,8 @@ use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
 use std::collections::BTreeMap;
+use crate::dom::dom_patch::DomAttr;
+use crate::dom::dom_patch::DomAttrValue;
 
 /// A component has a view and can update itself.
 ///
@@ -221,14 +223,12 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
 }
 
 /// A component that can be used directly in the view without mapping
-pub trait StatefulComponent<MSG>: Component<MSG, MSG>
-where
-    MSG: 'static,
+pub trait StatefulComponent
 {
     /// create the stateful component with this attributes
     fn build(
-        atts: impl IntoIterator<Item = Attribute<MSG>>,
-        children: impl IntoIterator<Item = Node<MSG>>,
+        atts: impl IntoIterator<Item = DomAttr>,
+        children: impl IntoIterator<Item = web_sys::Node>,
     ) -> Self
     where
         Self: Sized;
@@ -240,8 +240,8 @@ where
     fn attribute_changed(
         &mut self,
         attr_name: AttributeName,
-        old_value: AttributeValue<MSG>,
-        new_value: AttributeValue<MSG>,
+        old_value: DomAttrValue,
+        new_value: DomAttrValue,
     ) where
         Self: Sized;
 
@@ -249,7 +249,7 @@ where
     fn remove_attribute(&mut self, attr_name: AttributeName);
 
     /// append a child into this component
-    fn append_child(&mut self, child: Node<MSG>);
+    fn append_child(&mut self, child: web_sys::Node);
 
     /// remove a child in this index
     fn remove_child(&mut self, index: usize);
@@ -261,6 +261,7 @@ where
 
     /// the component is moved or attached to the dom
     fn adopted_callback(&mut self);
+
 }
 
 thread_local!(static COMPONENT_ID_COUNTER: Cell<usize> = Cell::new(1));

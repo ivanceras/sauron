@@ -11,6 +11,7 @@ use std::fmt;
 
 const DEFAULT_INDENT_SIZE: usize = 2;
 
+/// TODO: remove this Render trait and put each render_to_string function to the Node
 /// render node, elements to a writable buffer
 pub trait Render {
     // ISSUE: sublte difference in `render` and `render_to_string`:

@@ -13,6 +13,7 @@ use crate::vdom::diff;
 use crate::vdom::{diff_recursive, TreePath};
 use crate::vdom::Attribute;
 use crate::dom::StatefulComponent;
+use crate::dom::Component;
 use app_context::AppContext;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeMap;
@@ -29,6 +30,9 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
 use crate::dom::component::create_component_unique_identifier;
+use crate::dom::program::template::extract_template;
+use crate::render::Render;
+use crate::dom::dom_patch::DomAttr;
 
 mod app_context;
 pub(crate) mod template;
@@ -72,7 +76,7 @@ where
     /// generic closures that has no argument
     pub closures: Rc<RefCell<Closures>>,
     last_update: Rc<RefCell<Option<f64>>>,
-    pub components: Rc<RefCell<BTreeMap<usize, Box<dyn StatefulComponent<MSG>>>>>,
+    pub components: Rc<RefCell<BTreeMap<usize, Box<dyn StatefulComponent>>>>,
 }
 
 pub struct WeakProgram<APP, MSG>
@@ -90,7 +94,7 @@ where
     pub(crate) event_closures: Weak<RefCell<EventClosures>>,
     pub(crate) closures: Weak<RefCell<Closures>>,
     last_update: Weak<RefCell<Option<f64>>>,
-    pub components: Weak<RefCell<BTreeMap<usize, Box<dyn StatefulComponent<MSG>>>>>,
+    pub components: Weak<RefCell<BTreeMap<usize, Box<dyn StatefulComponent>>>>,
 }
 
 /// Closures that we are holding on to to make sure that they don't get invalidated after a
@@ -209,13 +213,16 @@ where
 
     pub fn register_component<COMP>(
         &mut self,
-        attrs: impl IntoIterator<Item = vdom::Attribute<MSG>>,
-        children: impl IntoIterator<Item = vdom::Node<MSG>>,
+        attrs: impl IntoIterator<Item = DomAttr>,
+        children: impl IntoIterator<Item = Node>,
     ) 
-    where COMP: StatefulComponent<MSG> + 'static,
+    where COMP: StatefulComponent + 'static,
     {
         let comp = COMP::build(attrs, children);
         let comp_id = create_component_unique_identifier();
+        //let template = extract_template(&comp.view());
+        let comp_name = std::any::type_name::<COMP>();
+        //log::info!("template of component: {comp_name}:\n{}", template.render_to_string());
         self.components.borrow_mut().insert(comp_id, Box::new(comp));
     }
 }

@@ -1,8 +1,8 @@
 #![deny(warnings)]
+use crate::button::{self, Button};
 use js_sys::Date;
-use sauron::prelude::*;
-use crate::button::{self,Button};
 use sauron::dom::component;
+use sauron::prelude::*;
 
 pub enum Msg {
     Click,
@@ -41,6 +41,7 @@ impl App {
 impl Application<Msg> for App {
     fn init(&mut self) -> Cmd<Self, Msg> {
         Cmd::new(|mut program| {
+            program.register_component::<Button>([], []);
             let program2 = program.clone();
             let clock: Closure<dyn FnMut()> = Closure::new(move || {
                 program.dispatch(Msg::Clock);
