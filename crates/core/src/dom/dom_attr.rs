@@ -330,6 +330,12 @@ impl DomAttrValue {
         }
     }
 
+    /// make a string representation of this value if it is a simple value
+    pub fn get_string(&self) -> Option<String> {
+        let simple = self.get_simple()?;
+        Some(simple.to_string())
+    }
+
     pub fn as_event_closure(self) -> Option<Closure<dyn FnMut(web_sys::Event)>> {
         match self {
             Self::EventListener(cb) => Some(cb),

@@ -23,6 +23,7 @@ use web_sys::{
     HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
 use crate::vdom::LeafComponent;
+use std::rc::Rc;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -131,26 +132,27 @@ where
         }
     }
 
+    /// TODO: register the template if not yet
+    /// pass a program to leaf component and mount itself and its view to the program
+    /// There are 2 types of children components of Stateful Component
+    /// - Internal children
+    /// - External children
+    /// Internal children is managed by the Stateful Component
+    /// while external children are managed by the top level program.
+    /// The external children can be diffed, and send the patches to the StatefulComponent
+    ///   - The TreePath of the children starts at the external children location
+    /// The attributes affects the Stateful component state.
+    /// The attributes can be diff and send the patches to the StatefulComponent
+    ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
     fn create_leaf_component(&self, lc: &LeafComponent<MSG>) -> Node {
-        /*
-        let template = leaf_component.comp.template();
-        log::info!("template: {:?}", template.inner_html());
-        for child in lc.children.iter() {
-            let child_dom = self.create_dom_node(&child);
-            template
-                .append_child(&child_dom)
-                .expect("must append child node of component");
-        }
-        template
-        */
 
-        let template = lc.comp.template();
+        //let template = lc.comp.template();
         //let view = lc.comp.view();
-        log::info!("template: {:?}", template);
+        //log::info!("template: {:?}", template);
         // The program needs to have a registry of Component
         // indexed by their type_id
         let comp_node = self.create_dom_node(&crate::html::div(
-            [crate::html::attributes::class("component")],
+            lc.attrs.clone(),
             [],
         ));
         for child in lc.children.iter() {

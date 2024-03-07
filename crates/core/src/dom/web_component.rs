@@ -95,6 +95,7 @@ fn declare_custom_element_function() -> js_sys::Function {
     )
 }
 
+/*
 impl<COMP, MSG> Application<MSG> for COMP
 where
     COMP: Container<MSG, ()> + WebComponent<MSG> + 'static,
@@ -121,6 +122,7 @@ where
         <Self as Container<MSG, ()>>::style(self)
     }
 }
+*/
 
 /// A self contain web component
 /// This is needed to move some of the code from the #custom_element macro

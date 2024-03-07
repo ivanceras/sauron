@@ -28,7 +28,7 @@ pub struct LeafComponent<MSG>{
     /// Note: StatefulComponent should have no MSG generic
     /// otherwise it would be not possible to map_msg this.
     /// since calling map_msg on a dyn Trait with generics is not possible.
-    pub comp: Rc<dyn StatefulComponent>,
+    //pub comp: Rc<dyn StatefulComponent>,
     /// component attributes
     pub attrs: Vec<Attribute<MSG>>,
     /// component children
@@ -50,7 +50,7 @@ impl<MSG> Clone for Leaf<MSG> {
 impl<MSG> Clone for LeafComponent<MSG> {
     fn clone(&self) -> Self {
        Self {
-            comp: Rc::clone(&self.comp),
+            //comp: Rc::clone(&self.comp),
             type_id: self.type_id.clone(),
             attrs: self.attrs.clone(),
             children: self.children.clone(),
@@ -68,7 +68,7 @@ impl<MSG> LeafComponent<MSG>{
     {
            LeafComponent {
                 type_id: self.type_id,
-                comp: self.comp,
+                //comp: self.comp,
                 attrs: self.attrs.into_iter().map(|a| a.map_msg(cb.clone())).collect(),
                 children: self.children
                     .into_iter()

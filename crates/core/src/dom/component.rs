@@ -11,6 +11,11 @@ use std::cell::Cell;
 use std::collections::BTreeMap;
 use std::rc::Rc;
 use crate::vdom::LeafComponent;
+use crate::dom::Cmd;
+use crate::dom::Application;
+use crate::dom::Program;
+use crate::dom::MountTarget;
+use crate::dom::MountAction;
 
 /// A component has a view and can update itself.
 ///
@@ -228,7 +233,7 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
 pub trait StatefulComponent {
     /// create the stateful component with this attributes
     fn build(
-        atts: impl IntoIterator<Item = DomAttr>,
+        attrs: impl IntoIterator<Item = DomAttr>,
         children: impl IntoIterator<Item = web_sys::Node>,
     ) -> Self
     where
@@ -266,6 +271,33 @@ pub trait StatefulComponent {
     fn adopted_callback(&mut self);
 }
 
+impl<COMP, MSG> Application<MSG> for COMP
+where
+    COMP: Component<MSG, ()> + StatefulComponent + 'static,
+    MSG: 'static,
+{
+    fn init(&mut self) -> Cmd<Self, MSG> {
+        Cmd::from(<Self as Component<MSG, ()>>::init(self))
+    }
+
+    fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
+        let effects = <Self as Component<MSG, ()>>::update(self, msg);
+        Cmd::from(effects)
+    }
+
+    fn view(&self) -> Node<MSG> {
+        <Self as Component<MSG, ()>>::view(self)
+    }
+
+    fn stylesheet() -> Vec<String> {
+        <Self as Component<MSG, ()>>::stylesheet()
+    }
+
+    fn style(&self) -> Vec<String> {
+        <Self as Component<MSG, ()>>::style(self)
+    }
+}
+
 thread_local!(static COMPONENT_ID_COUNTER: Cell<usize> = Cell::new(1));
 
 pub fn create_component_unique_identifier() -> usize {
@@ -277,13 +309,16 @@ pub fn create_component_unique_identifier() -> usize {
 }
 
 /// create a stateful component node
-pub fn component<COMP, MSG>(
+pub fn component<COMP, MSG, MSG2>(
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG>
 where
-    COMP: StatefulComponent + 'static,
+    COMP: Component<MSG2, ()> + StatefulComponent + 'static,
+    MSG: 'static,
+    MSG2: 'static,
 {
+    use crate::dom::events::on_mount;
     // make a global registry here
     // store the COMP in the global registry
     // and when the program encounter the component with the type id
@@ -294,12 +329,25 @@ where
         std::any::type_name::<COMP>()
     );
     let comp = COMP::build([], []);
-    Node::Leaf(Leaf::Component(LeafComponent{
-        comp: Rc::new(comp),
+    // should we got this from mount event
+    let mount_node = crate::dom::document().body().unwrap(); 
+    let program = Program::new(comp, &mount_node, MountAction::Append, MountTarget::MountNode);
+    let mount_event = on_mount(move|mn|{
+        log::info!("Component is now mounted..");
+        let mut program = program.clone();
+        program.mount();
+        //TODO: maybe make events pass an optional MSG
+        //so we can pass None here.
+        todo!()
+    });
+    let node = Node::Leaf(Leaf::Component(LeafComponent{
+        //comp: Rc::clone(&program.app_context.app),
         type_id,
-        attrs: attrs.into_iter().collect(),
+        attrs: attrs.into_iter().chain([mount_event].into_iter()).collect(),
         children: children.into_iter().collect(),
-    }))
+    }));
+    //program.mount();
+    node
 }
 
 #[cfg(test)]
