@@ -8,6 +8,7 @@ extern crate log;
 
 mod app;
 mod button;
+mod date_time;
 
 #[wasm_bindgen(start)]
 pub fn start() {

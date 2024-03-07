@@ -11,6 +11,7 @@ pub use attribute::Callback;
 pub use attribute::GroupedAttributeValues;
 pub use element::Element;
 pub use leaf::Leaf;
+pub use leaf::LeafComponent;
 
 mod attribute;
 mod element;

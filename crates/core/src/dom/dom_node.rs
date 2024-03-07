@@ -22,6 +22,7 @@ use web_sys::{
     HtmlOptionElement, HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement,
     HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
+use crate::vdom::LeafComponent;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -126,23 +127,39 @@ where
                     doctype is only used in rendering"
                 );
             }
-            Leaf::Component {
-                type_id,
-                comp,
-                attrs,
-                children,
-            } => {
-                let template = comp.template();
-                log::info!("template: {:?}", template.inner_html());
-                for child in children.iter() {
-                    let child_dom = self.create_dom_node(&child);
-                    template
-                        .append_child(&child_dom)
-                        .expect("must append child node of component");
-                }
-                template
-            }
+            Leaf::Component(lc) => self.create_leaf_component(lc),
         }
+    }
+
+    fn create_leaf_component(&self, lc: &LeafComponent<MSG>) -> Node {
+        /*
+        let template = leaf_component.comp.template();
+        log::info!("template: {:?}", template.inner_html());
+        for child in lc.children.iter() {
+            let child_dom = self.create_dom_node(&child);
+            template
+                .append_child(&child_dom)
+                .expect("must append child node of component");
+        }
+        template
+        */
+
+        let template = lc.comp.template();
+        //let view = lc.comp.view();
+        log::info!("template: {:?}", template);
+        // The program needs to have a registry of Component
+        // indexed by their type_id
+        let comp_node = self.create_dom_node(&crate::html::div(
+            [crate::html::attributes::class("component")],
+            [],
+        ));
+        for child in lc.children.iter() {
+            let child_dom = self.create_dom_node(&child);
+            comp_node
+                .append_child(&child_dom)
+                .expect("must append child node of component");
+        }
+        comp_node
     }
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`

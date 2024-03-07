@@ -18,18 +18,21 @@ pub enum Leaf<MSG> {
     /// <https://www.w3.org/QA/2002/04/valid-dtd-list.html>
     DocType(Cow<'static, str>),
     /// Component leaf
-    /// Note: we can not use the Box<dyn Component> here
-    /// since it will not be possible to map_msg the Component
-    /// instead we just use the type_id for looking up it's instantiated Component in a v-table.
-    Component {
-        /// component type id
-        type_id: TypeId,
-        comp: Rc<dyn StatefulComponent>,
-        /// component attributes
-        attrs: Vec<Attribute<MSG>>,
-        /// component children
-        children: Vec<Node<MSG>>,
-    },
+    Component(LeafComponent<MSG>),
+}
+
+/// Wrapper for stateful component
+pub struct LeafComponent<MSG>{
+    /// component type id
+    pub type_id: TypeId,
+    /// Note: StatefulComponent should have no MSG generic
+    /// otherwise it would be not possible to map_msg this.
+    /// since calling map_msg on a dyn Trait with generics is not possible.
+    pub comp: Rc<dyn StatefulComponent>,
+    /// component attributes
+    pub attrs: Vec<Attribute<MSG>>,
+    /// component children
+    pub children: Vec<Node<MSG>>,
 }
 
 impl<MSG> Clone for Leaf<MSG> {
@@ -39,20 +42,42 @@ impl<MSG> Clone for Leaf<MSG> {
             Self::SafeHtml(v) => Self::SafeHtml(v.clone()),
             Self::Comment(v) => Self::Comment(v.clone()),
             Self::DocType(v) => Self::DocType(v.clone()),
-            Self::Component {
-                type_id,
-                comp,
-                attrs,
-                children,
-            } => Self::Component {
-                comp: Rc::clone(comp),
-                type_id: type_id.clone(),
-                attrs: attrs.clone(),
-                children: children.clone(),
-            },
+            Self::Component(v) => Self::Component(v.clone()),
         }
     }
 }
+
+impl<MSG> Clone for LeafComponent<MSG> {
+    fn clone(&self) -> Self {
+       Self {
+            comp: Rc::clone(&self.comp),
+            type_id: self.type_id.clone(),
+            attrs: self.attrs.clone(),
+            children: self.children.clone(),
+        }
+    }
+}
+
+impl<MSG> LeafComponent<MSG>{
+    /// mape the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb: F) -> LeafComponent<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
+        MSG: 'static,
+    {
+           LeafComponent {
+                type_id: self.type_id,
+                comp: self.comp,
+                attrs: self.attrs.into_iter().map(|a| a.map_msg(cb.clone())).collect(),
+                children: self.children
+                    .into_iter()
+                    .map(|c| c.map_msg(cb.clone()))
+                    .collect(),
+            }
+    }
+}
+
 
 impl<MSG> fmt::Debug for Leaf<MSG> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -61,7 +86,7 @@ impl<MSG> fmt::Debug for Leaf<MSG> {
             Self::SafeHtml(v) => write!(f, "SafeHtml({v})"),
             Self::Comment(v) => write!(f, "Comment({v})"),
             Self::DocType(v) => write!(f, "DocType({v}"),
-            Self::Component { .. } => write!(f, "Component(..)"),
+            Self::Component(v) => write!(f, "Component({:?})", v.type_id),
         }
     }
 }
@@ -73,9 +98,7 @@ impl<MSG> PartialEq for Leaf<MSG> {
             (Self::SafeHtml(v), Self::SafeHtml(o)) => v == o,
             (Self::Comment(v), Self::Comment(o)) => v == o,
             (Self::DocType(v), Self::DocType(o)) => v == o,
-            (Self::Component { type_id, .. }, Self::Component { type_id: o_tid, .. }) => {
-                type_id == o_tid
-            }
+            (Self::Component(v), Self::Component(o)) => v.type_id == o.type_id,
             _ => false,
         }
     }
@@ -117,7 +140,7 @@ impl<MSG> Leaf<MSG> {
             Self::SafeHtml(v) => matches!(v, Cow::Borrowed(_)),
             Self::Comment(v) => matches!(v, Cow::Borrowed(_)),
             Self::DocType(v) => matches!(v, Cow::Borrowed(_)),
-            Self::Component { .. } => false,
+            Self::Component(_) => false,
         }
     }
 
@@ -133,20 +156,7 @@ impl<MSG> Leaf<MSG> {
             Self::SafeHtml(v) => Leaf::SafeHtml(v),
             Self::Comment(v) => Leaf::Comment(v),
             Self::DocType(v) => Leaf::DocType(v),
-            Self::Component {
-                type_id,
-                comp,
-                attrs,
-                children,
-            } => Leaf::Component {
-                type_id,
-                comp,
-                attrs: attrs.into_iter().map(|a| a.map_msg(cb.clone())).collect(),
-                children: children
-                    .into_iter()
-                    .map(|c| c.map_msg(cb.clone()))
-                    .collect(),
-            },
+            Self::Component(v) => Leaf::Component(v.map_msg(cb)),
         }
     }
 }

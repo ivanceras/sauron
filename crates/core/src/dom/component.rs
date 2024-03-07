@@ -10,6 +10,7 @@ use std::any::TypeId;
 use std::cell::Cell;
 use std::collections::BTreeMap;
 use std::rc::Rc;
+use crate::vdom::LeafComponent;
 
 /// A component has a view and can update itself.
 ///
@@ -293,12 +294,12 @@ where
         std::any::type_name::<COMP>()
     );
     let comp = COMP::build([], []);
-    Node::Leaf(Leaf::Component {
+    Node::Leaf(Leaf::Component(LeafComponent{
         comp: Rc::new(comp),
         type_id,
         attrs: attrs.into_iter().collect(),
         children: children.into_iter().collect(),
-    })
+    }))
 }
 
 #[cfg(test)]

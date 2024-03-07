@@ -9,10 +9,8 @@ use wasm_bindgen::intern;
 use wasm_bindgen::JsCast;
 use web_sys::Element;
 
-/// extract the template from a node
-pub(crate) fn extract_template<MSG>(node: &Node<MSG>) -> vdom::Node<MSG>
-where
-    MSG: 'static,
+/// build a node but only include static attributes and leaf nodes
+pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG>
 {
     match node {
         Node::Element(elm) => vdom::element_ns(
@@ -22,11 +20,11 @@ where
                 .iter()
                 .filter(|att| att.is_static_str())
                 .cloned(),
-            elm.children().iter().map(extract_template),
+            elm.children().iter().map(extract_static_only),
             elm.self_closing,
         ),
         Node::Fragment(nodes) => {
-            Node::Fragment(nodes.iter().map(|node| extract_template(node)).collect())
+            Node::Fragment(nodes.iter().map(extract_static_only).collect())
         }
         Node::Leaf(leaf) => {
             if leaf.is_static_str() {
@@ -38,8 +36,7 @@ where
                     Leaf::Comment(_) => Node::Leaf(Leaf::Comment("".into())),
                     Leaf::DocType(_) => Node::Leaf(Leaf::DocType("".into())),
                     Leaf::Component { .. } => {
-                        //TODO: we save the template to a template registry
-                        todo!()
+                        Node::Leaf(Leaf::Comment(" ---nested template placeholder--- ".into()))
                     }
                 }
             }
@@ -49,7 +46,8 @@ where
 }
 
 pub fn build_template<MSG>(node: &vdom::Node<MSG>) -> web_sys::Node {
-    create_dom_node_without_listeners(node)
+    let static_nodes = extract_static_only(node);
+    create_dom_node_without_listeners(&static_nodes)
 }
 
 pub fn create_dom_node_without_listeners<MSG>(vnode: &vdom::Node<MSG>) -> web_sys::Node {
@@ -97,27 +95,8 @@ fn create_leaf_node_without_listeners<MSG>(leaf: &Leaf<MSG>) -> web_sys::Node {
                     doctype is only used in rendering"
             );
         }
-        Leaf::Component {
-            type_id,
-            comp,
-            attrs,
-            children,
-        } => {
-            let template = comp.template();
-            log::info!("template: {:?}", template);
-            // The program needs to have a registry of Component
-            // indexed by their type_id
-            let comp_node = create_dom_node_without_listeners::<MSG>(&crate::html::div(
-                [crate::html::attributes::class("component")],
-                [],
-            ));
-            for child in children.iter() {
-                let child_dom = create_dom_node_without_listeners(&child);
-                comp_node
-                    .append_child(&child_dom)
-                    .expect("must append child node of component");
-            }
-            comp_node
+        Leaf::Component(lc) => {
+            panic!("Component should not be created here")
         }
     }
 }
