@@ -30,12 +30,10 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
 use crate::dom::component::create_component_unique_identifier;
-use crate::dom::program::template::extract_template;
 use crate::render::Render;
-use crate::dom::dom_patch::DomAttr;
+use crate::dom::DomAttr;
 
 mod app_context;
-pub(crate) mod template;
 
 pub(crate) type EventClosures = Vec<Closure<dyn FnMut(web_sys::Event)>>;
 pub(crate) type Closures = Vec<Closure<dyn FnMut()>>;
@@ -213,13 +211,12 @@ where
 
     pub fn register_component<COMP>(
         &mut self,
-        attrs: impl IntoIterator<Item = DomAttr>,
-        children: impl IntoIterator<Item = Node>,
     ) 
     where COMP: StatefulComponent + 'static,
     {
-        let comp = COMP::build(attrs, children);
+        let comp = COMP::build([], []);
         let comp_id = create_component_unique_identifier();
+        let template = comp.template();
         //let template = extract_template(&comp.view());
         let comp_name = std::any::type_name::<COMP>();
         //log::info!("template of component: {comp_name}:\n{}", template.render_to_string());

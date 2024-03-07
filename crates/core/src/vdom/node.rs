@@ -93,6 +93,36 @@ impl<MSG> Node<MSG> {
         matches!(self, Node::Fragment(_))
     }
 
+    /// returns true if this is a text node
+    pub fn is_text(&self) -> bool {
+        match self {
+            Self::Leaf(leaf) => leaf.is_text(),
+            _ => false,
+        }
+    }
+
+    /// returns true if this is a safe html text node
+    pub fn is_safe_html(&self) -> bool {
+        match self {
+            Self::Leaf(leaf) => leaf.is_safe_html(),
+            _ => false,
+        }
+    }
+
+    pub fn as_text(&self) -> Option<&str> {
+        match self {
+            Self::Leaf(ref leaf) => leaf.as_text(),
+            _ => None,
+        }
+    }
+
+    pub fn as_safe_html(&self) -> Option<&str> {
+        match self {
+            Self::Leaf(ref leaf) => leaf.as_safe_html(),
+            _ => None,
+        }
+    }
+
     /// Get a mutable reference to the element, if this node is an element node
     pub fn element_mut(&mut self) -> Option<&mut Element<MSG>> {
         match *self {

@@ -7,8 +7,9 @@ use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
 use std::collections::BTreeMap;
-use crate::dom::dom_patch::DomAttr;
-use crate::dom::dom_patch::DomAttrValue;
+use crate::dom::DomAttr;
+use crate::dom::DomAttrValue;
+use std::rc::Rc;
 
 /// A component has a view and can update itself.
 ///
@@ -245,6 +246,8 @@ pub trait StatefulComponent
     ) where
         Self: Sized;
 
+    fn template(&self) -> web_sys::Node;
+
     /// remove the attribute with this name
     fn remove_attribute(&mut self, attr_name: AttributeName);
 
@@ -281,7 +284,7 @@ pub fn component<COMP, MSG>(
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG>
-where COMP: 'static,
+where COMP: StatefulComponent + 'static,
 {
     // make a global registry here
     // store the COMP in the global registry
@@ -289,7 +292,9 @@ where COMP: 'static,
     // it will be retrieved from the global registry
     let type_id = TypeId::of::<COMP>();
     log::info!("type_id: {type_id:?}, type_name: {}", std::any::type_name::<COMP>());
+    let comp = COMP::build([], []);
     Node::Leaf(Leaf::Component{
+        comp: Rc::new(comp),
         type_id,
         attrs: attrs.into_iter().collect(),
         children: children.into_iter().collect(),

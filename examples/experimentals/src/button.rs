@@ -4,6 +4,7 @@ use sauron::dom::Component;
 use sauron::dom::StatefulComponent;
 use sauron::prelude::*;
 use sauron::vdom::AttributeName;
+use crate::dom::template;
 
 pub enum Msg {
     Click,
@@ -48,6 +49,10 @@ impl StatefulComponent for Button {
     ) where
         Self: Sized,
     {
+    }
+
+    fn template(&self) -> web_sys::Node{
+        template::build_template(&self.view())
     }
 
     /// remove the attribute with this name

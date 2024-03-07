@@ -2,7 +2,7 @@
 use crate::vdom;
 use crate::vdom::Leaf;
 pub use crate::vdom::{element, element_ns};
-use crate::vdom::{Attribute, Node, NodeTrait};
+use crate::vdom::{Attribute, Node};
 use std::borrow::Cow;
 pub use tags::{commons::*, self_closing::*, *};
 

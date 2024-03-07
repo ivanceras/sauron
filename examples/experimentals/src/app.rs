@@ -41,7 +41,6 @@ impl App {
 impl Application<Msg> for App {
     fn init(&mut self) -> Cmd<Self, Msg> {
         Cmd::new(|mut program| {
-            program.register_component::<Button>([], []);
             let program2 = program.clone();
             let clock: Closure<dyn FnMut()> = Closure::new(move || {
                 program.dispatch(Msg::Clock);
@@ -168,7 +167,7 @@ impl Application<Msg> for App {
                     }}
                 </ul>
                 {self.btn.view().map_msg(Msg::BtnMsg)}
-                {component::<Button, Msg>([], [])}
+                {component::<Button, Msg>([], [text("External child of btn component")])}
             </div>
         }
     }

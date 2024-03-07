@@ -13,6 +13,8 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 use web_sys::Node;
+use crate::dom::DomAttr;
+use crate::dom::DomAttrValue;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -74,77 +76,6 @@ pub enum PatchVariant {
     },
 }
 
-pub struct DomAttr {
-    pub namespace: Option<&'static str>,
-    pub name: &'static str,
-    pub value: Vec<DomAttrValue>,
-}
-
-pub enum DomAttrValue {
-    FunctionCall(Value),
-    Simple(Value),
-    Style(Vec<Style>),
-    EventListener(Closure<dyn FnMut(web_sys::Event)>),
-}
-
-pub struct GroupedDomAttrValues {
-    /// the listeners of the event listeners
-    pub listeners: Vec<Closure<dyn FnMut(web_sys::Event)>>,
-    /// plain attribute values
-    pub plain_values: Vec<Value>,
-    /// style attribute values
-    pub styles: Vec<Style>,
-    /// function calls
-    pub function_calls: Vec<Value>,
-}
-
-impl DomAttr {
-    pub(crate) fn group_values(self) -> GroupedDomAttrValues {
-        let mut listeners = vec![];
-        let mut plain_values = vec![];
-        let mut styles = vec![];
-        let mut function_calls = vec![];
-        for av in self.value {
-            match av {
-                DomAttrValue::Simple(v) => {
-                    plain_values.push(v);
-                }
-                DomAttrValue::FunctionCall(v) => {
-                    function_calls.push(v);
-                }
-                DomAttrValue::Style(s) => {
-                    styles.extend(s);
-                }
-                DomAttrValue::EventListener(cb) => {
-                    listeners.push(cb);
-                }
-            }
-        }
-        GroupedDomAttrValues {
-            listeners,
-            plain_values,
-            styles,
-            function_calls,
-        }
-    }
-}
-
-impl DomAttrValue {
-    /// return the value if it is a Simple variant
-    pub fn get_simple(&self) -> Option<&Value> {
-        match self {
-            Self::Simple(v) => Some(v),
-            _ => None,
-        }
-    }
-
-    pub fn as_event_closure(self) -> Option<Closure<dyn FnMut(web_sys::Event)>> {
-        match self {
-            Self::EventListener(cb) => Some(cb),
-            _ => None,
-        }
-    }
-}
 
 impl<APP, MSG> Program<APP, MSG>
 where

@@ -11,12 +11,10 @@ pub use attribute::Callback;
 pub use attribute::GroupedAttributeValues;
 pub use element::Element;
 pub use leaf::Leaf;
-pub use node_trait::NodeTrait;
 
 mod attribute;
 mod element;
 mod leaf;
-mod node_trait;
 
 pub use attribute::special::{key, replace, skip, skip_criteria};
 pub(crate) use attribute::special::{KEY, REPLACE, SKIP, SKIP_CRITERIA};

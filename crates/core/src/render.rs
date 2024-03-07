@@ -5,7 +5,7 @@ use crate::vdom::Style;
 use crate::vdom::Value;
 use crate::{
     vdom::GroupedAttributeValues,
-    vdom::{Attribute, Element, Leaf, Node, NodeTrait},
+    vdom::{Attribute, Element, Leaf, Node},
 };
 use std::fmt;
 

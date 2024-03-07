@@ -18,7 +18,8 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     #[cfg(feature = "custom_element")]
     pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
     pub use component::{component, StatefulComponent};
-    pub use dom_patch::{DomPatch, PatchVariant, DomAttr, DomAttrValue};
+    pub use dom_patch::{DomPatch, PatchVariant};
+    pub use dom_attr::{DomAttr, DomAttrValue, GroupedDomAttrValues};
     pub use http::Http;
     pub use program::{MountAction, MountTarget, Program};
     pub use util::{
@@ -38,9 +39,11 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     #[cfg(feature = "custom_element")]
     mod web_component;
     mod dom_patch;
+    mod dom_attr;
     pub mod events;
     mod http;
     mod program;
+    pub mod template;
     pub mod util;
     mod raf;
     mod ric;

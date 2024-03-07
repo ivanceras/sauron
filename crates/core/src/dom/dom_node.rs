@@ -1,5 +1,7 @@
-use crate::dom::dom_patch::DomAttr;
-use crate::dom::dom_patch::GroupedDomAttrValues;
+use crate::dom::DomAttr;
+use crate::dom::GroupedDomAttrValues;
+use crate::vdom::AttributeName;
+use crate::vdom::Namespace;
 use crate::vdom::Style;
 use crate::vdom::TreePath;
 use crate::vdom::Value;
@@ -8,7 +10,7 @@ use crate::{
     dom::{document, window},
     dom::{Application, Program},
     vdom,
-    vdom::{Attribute, Leaf, NodeTrait},
+    vdom::{Attribute, Leaf},
 };
 use js_sys::Function;
 use std::collections::HashMap;
@@ -52,7 +54,7 @@ fn create_element_with_tag(tag: &'static str) -> (&'static str, web_sys::Element
 
 /// find the element from the most created element and clone it, else create it
 /// TODO: feature gate this with `use-cached-elements`
-fn create_element(tag: &'static str) -> web_sys::Element {
+pub fn create_element(tag: &'static str) -> web_sys::Element {
     CACHE_ELEMENTS.with(|map| {
         if let Some(elm) = map.get(tag) {
             elm.clone_node_with_deep(false)
@@ -64,6 +66,11 @@ fn create_element(tag: &'static str) -> web_sys::Element {
         }
     })
 }
+
+    /// create a text node
+    pub fn create_text_node(txt: &str) -> Text {
+        document().create_text_node(txt)
+    }
 
 /// This is the value of the data-sauron-vdom-id.
 /// Used to uniquely identify elements that contain closures so that the DomUpdater can
@@ -85,10 +92,6 @@ where
     MSG: 'static,
     APP: Application<MSG>,
 {
-    /// create a text node
-    pub fn create_text_node(txt: &str) -> Text {
-        document().create_text_node(txt)
-    }
 
     fn create_document_fragment(&self, nodes: &[vdom::Node<MSG>]) -> Node {
         let doc_fragment = document().create_document_fragment();
@@ -101,7 +104,7 @@ where
 
     fn create_leaf_node(&self, leaf: &Leaf<MSG>) -> Node {
         match leaf {
-            Leaf::Text(txt) => Self::create_text_node(txt).into(),
+            Leaf::Text(txt) => create_text_node(txt).into(),
             Leaf::Comment(comment) => document().create_comment(comment).into(),
             Leaf::SafeHtml(_safe_html) => {
                 panic!("safe html must have already been dealt in create_element node");
@@ -112,10 +115,27 @@ where
                     doctype is only used in rendering"
                 );
             }
-            Leaf::Component{..} => {
+            Leaf::Component {
+                type_id,
+                comp,
+                attrs,
+                children,
+            } => {
+                let template = comp.template();
+                log::info!("template: {:?}", template);
                 // The program needs to have a registry of Component
                 // indexed by their type_id
-                self.create_dom_node(&crate::html::div([], [crate::html::text("This is just a place holder")]))
+                let comp_node = self.create_dom_node(&crate::html::div(
+                    [crate::html::attributes::class("component")],
+                    [],
+                ));
+                for child in children.iter() {
+                    let child_dom = self.create_dom_node(&child);
+                    comp_node
+                        .append_child(&child_dom)
+                        .expect("must append child node of component");
+                }
+                comp_node
             }
         }
     }
@@ -130,6 +150,7 @@ where
                 for child in element_node.children().iter() {
                     if let Some(child_text) = child.as_safe_html() {
                         // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
+                        // TODO: html parse the SafeHtml -> maybe rename it to RawHtml
                         let created_element: &Element = created_node.unchecked_ref();
                         created_element
                             .insert_adjacent_html(intern("beforeend"), child_text)
@@ -234,95 +255,14 @@ where
             function_calls,
         } = attr.group_values();
 
-        // set simple values
-        if let Some(merged_plain_values) = Value::merge_to_string(plain_values.iter()) {
-            if let Some(namespace) = attr_namespace {
-                // Warning NOTE: set_attribute_ns should only be called
-                // when you meant to use a namespace
-                // using this with None will error in the browser with:
-                // NamespaceError: An attempt was made to create or change an object in a way which is incorrect with regard to namespaces
-                element
-                    .set_attribute_ns(Some(namespace), attr_name, &merged_plain_values)
-                    .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
-            } else {
-                match attr_name {
-                    "value" => {
-                        element
-                            .set_attribute(attr_name, &merged_plain_values)
-                            .unwrap_or_else(|_| {
-                                panic!("Error setting an attribute for {element:?}")
-                            });
-                        Self::set_value_str(element, &merged_plain_values);
-                        Self::set_numeric_values(element, &plain_values);
-                    }
-                    "open" => {
-                        let is_open: bool = plain_values
-                            .first()
-                            .and_then(|v| v.as_bool())
-                            .unwrap_or(false);
+        DomAttr::set_element_style(element, attr_name, styles);
+        DomAttr::set_element_function_call_values(element, attr_name, function_calls);
+        DomAttr::set_element_simple_values(element, attr_name, attr_namespace, plain_values);
+        self.set_element_listeners(element, attr_name, listeners);
+    }
 
-                        element
-                            .set_attribute(attr_name, &is_open.to_string())
-                            .unwrap_or_else(|_| {
-                                panic!("Error setting an attribute for {element:?}")
-                            });
-                        Self::set_open(element, is_open);
-                    }
-                    "checked" => {
-                        let is_checked: bool = plain_values
-                            .first()
-                            .and_then(|v| v.as_bool())
-                            .unwrap_or(false);
 
-                        element
-                            .set_attribute(attr_name, &is_checked.to_string())
-                            .unwrap_or_else(|_| {
-                                panic!("Error setting an attribute for {element:?}")
-                            });
-                        Self::set_checked(element, is_checked)
-                    }
-                    "disabled" => {
-                        let is_disabled: bool = plain_values
-                            .first()
-                            .and_then(|v| v.as_bool())
-                            .unwrap_or(false);
-
-                        element
-                            .set_attribute(attr_name, &is_disabled.to_string())
-                            .unwrap_or_else(|_| {
-                                panic!("Error setting an attribute for {element:?}")
-                            });
-                        Self::set_disabled(element, is_disabled);
-                    }
-                    _ => {
-                        element
-                            .set_attribute(attr_name, &merged_plain_values)
-                            .unwrap_or_else(|_| {
-                                panic!("Error setting an attribute for {element:?}")
-                            });
-                    }
-                }
-            }
-        } else if let Some(merged_styles) = Style::merge_to_string(&styles) {
-            // set the styles
-            element
-                .set_attribute(attr_name, &merged_styles)
-                .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
-        } else {
-            //if the merged attribute is blank of empty when string is trimmed
-            //remove the attribute
-            element
-                .remove_attribute(attr_name)
-                .expect("must remove attribute");
-        }
-
-        // do function calls such as set_inner_html
-        if let Some(merged_func_values) = Value::merge_to_string(function_calls.iter()) {
-            if attr_name == "inner_html" {
-                element.set_inner_html(&merged_func_values);
-            }
-        }
-
+    pub fn set_element_listeners(&self, element: &Element, attr_name: AttributeName, listeners: Vec<Closure<dyn FnMut(web_sys::Event)>>) {
         for listener in listeners.iter() {
             self.add_event_listener(element, attr_name, &listener)
                 .expect("add listener");
@@ -390,120 +330,6 @@ where
         Ok(())
     }
 
-    /// explicitly call `set_checked` function on the html element
-    /// since setting the attribute to false will not unchecked it.
-    ///
-    /// There are only 2 elements where set_checked is applicable:
-    /// - input
-    /// - menuitem
-    fn set_checked(element: &Element, is_checked: bool) {
-        if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
-            input.set_checked(is_checked);
-        }
-    }
-
-    /// explicitly call set_open for details
-    /// since setting the attribute `open` to false will not close it.
-    ///
-    /// TODO: HtmlDialogElement ( but it is not supported on firefox and in safari, only works on chrome)
-    ///
-    /// Applies to:
-    ///  - dialog
-    ///  - details
-    fn set_open(element: &Element, is_open: bool) {
-        if let Some(details) = element.dyn_ref::<HtmlDetailsElement>() {
-            details.set_open(is_open);
-        }
-    }
-
-    /// explicitly call on `set_disabled`
-    /// since setting the attribute `disabled` false will not enable it.
-    ///
-    /// These are 10 elements that we can call `set_disabled` function to.
-    /// - input
-    /// - button
-    /// - textarea
-    /// - style
-    /// - link
-    /// - select
-    /// - option
-    /// - optgroup
-    /// - fieldset
-    /// - menuitem
-    ///
-    /// TODO: use macro to simplify this code
-    fn set_disabled(element: &Element, is_disabled: bool) {
-        if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlButtonElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlTextAreaElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlStyleElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlLinkElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlSelectElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlOptionElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlOptGroupElement>() {
-            elm.set_disabled(is_disabled);
-        } else if let Some(elm) = element.dyn_ref::<HtmlFieldSetElement>() {
-            elm.set_disabled(is_disabled);
-        }
-    }
-
-    /// we explicitly call the `set_value` function in the html element
-    ///
-    /// TODO: use macro to simplify this code
-    fn set_value_str(element: &Element, value: &str) {
-        if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
-            elm.set_value(value);
-        } else if let Some(elm) = element.dyn_ref::<HtmlTextAreaElement>() {
-            elm.set_value(value);
-        } else if let Some(elm) = element.dyn_ref::<HtmlSelectElement>() {
-            elm.set_value(value);
-        } else if let Some(elm) = element.dyn_ref::<HtmlOptionElement>() {
-            elm.set_value(value);
-        } else if let Some(elm) = element.dyn_ref::<HtmlButtonElement>() {
-            elm.set_value(value);
-        } else if let Some(elm) = element.dyn_ref::<HtmlDataElement>() {
-            elm.set_value(value);
-        } else if let Some(elm) = element.dyn_ref::<HtmlOutputElement>() {
-            elm.set_value(value);
-        } else if let Some(elm) = element.dyn_ref::<HtmlParamElement>() {
-            elm.set_value(value);
-        }
-    }
-
-    fn set_value_i32(element: &Element, value: i32) {
-        if let Some(elm) = element.dyn_ref::<HtmlLiElement>() {
-            elm.set_value(value);
-        }
-    }
-
-    fn set_value_f64(element: &Element, value: f64) {
-        if let Some(elm) = element.dyn_ref::<HtmlMeterElement>() {
-            elm.set_value(value);
-        } else if let Some(elm) = element.dyn_ref::<HtmlProgressElement>() {
-            elm.set_value(value);
-        }
-    }
-
-    /// set the element attribute value with the first numerical value found in values
-    fn set_numeric_values(element: &Element, values: &[Value]) {
-        let value_i32 = values.first().and_then(|v| v.as_i32());
-
-        let value_f64 = values.first().and_then(|v| v.as_f64());
-
-        if let Some(value_i32) = value_i32 {
-            Self::set_value_i32(element, value_i32);
-        }
-        if let Some(value_f64) = value_f64 {
-            Self::set_value_f64(element, value_f64);
-        }
-    }
 
     /// remove element attribute,
     /// takes care of special case such as checked
@@ -513,16 +339,16 @@ where
     ) -> Result<(), JsValue> {
         match *attr.name() {
             "value" => {
-                Self::set_value_str(element, "");
+                DomAttr::set_value_str(element, "");
             }
             "open" => {
-                Self::set_open(element, false);
+                DomAttr::set_open(element, false);
             }
             "checked" => {
-                Self::set_checked(element, false);
+                DomAttr::set_checked(element, false);
             }
             "disabled" => {
-                Self::set_disabled(element, false);
+                DomAttr::set_disabled(element, false);
             }
             _ => (),
         }
@@ -536,16 +362,16 @@ where
     pub fn remove_element_dom_attr(element: &Element, attr: &DomAttr) -> Result<(), JsValue> {
         match attr.name {
             "value" => {
-                Self::set_value_str(element, "");
+                DomAttr::set_value_str(element, "");
             }
             "open" => {
-                Self::set_open(element, false);
+                DomAttr::set_open(element, false);
             }
             "checked" => {
-                Self::set_checked(element, false);
+                DomAttr::set_checked(element, false);
             }
             "disabled" => {
-                Self::set_disabled(element, false);
+                DomAttr::set_disabled(element, false);
             }
             _ => (),
         }

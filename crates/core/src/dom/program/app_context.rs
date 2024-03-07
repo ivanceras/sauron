@@ -1,4 +1,3 @@
-use super::template::extract_template;
 #[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
 use crate::dom::{Application, Cmd};
@@ -124,9 +123,6 @@ where
     pub fn new(app: APP) -> Self {
         use crate::render::Render;
         let view = app.view();
-        //TODO: do something with the template here
-        //let template = extract_template(&view);
-        //log::info!("{}", template.render_to_string());
         Self {
             app: Rc::new(RefCell::new(app)),
             current_vdom: Rc::new(RefCell::new(view)),
