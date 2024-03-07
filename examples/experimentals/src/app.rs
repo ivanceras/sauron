@@ -5,6 +5,7 @@ use js_sys::Date;
 use sauron::dom::component;
 use sauron::prelude::*;
 
+#[derive(Default)]
 pub enum Msg {
     Click,
     DoubleClick,
@@ -13,6 +14,8 @@ pub enum Msg {
     ChangeBiography(String),
     ChangeThought(String),
     BtnMsg(button::Msg),
+    #[default]
+    NoOp,
 }
 
 pub struct App {
@@ -90,6 +93,9 @@ impl Application<Msg> for App {
             Msg::BtnMsg(bmsg) => {
                 let effects = Component::update(&mut self.btn, bmsg);
                 effects.map_msg(Msg::BtnMsg).into()
+            }
+            Msg::NoOp => {
+                Cmd::none()
             }
         }
     }

@@ -315,7 +315,7 @@ pub fn component<COMP, MSG, MSG2>(
 ) -> Node<MSG>
 where
     COMP: Component<MSG2, ()> + StatefulComponent + 'static,
-    MSG: 'static,
+    MSG: Default + 'static,
     MSG2: 'static,
 {
     use crate::dom::events::on_mount;
@@ -336,17 +336,13 @@ where
         log::info!("Component is now mounted..");
         let mut program = program.clone();
         program.mount();
-        //TODO: maybe make events pass an optional MSG
-        //so we can pass None here.
-        todo!()
+        MSG::default()
     });
     let node = Node::Leaf(Leaf::Component(LeafComponent{
-        //comp: Rc::clone(&program.app_context.app),
         type_id,
         attrs: attrs.into_iter().chain([mount_event].into_iter()).collect(),
         children: children.into_iter().collect(),
     }));
-    //program.mount();
     node
 }
 
