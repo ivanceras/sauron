@@ -134,4 +134,21 @@ impl<MSG> AttributeValue<MSG> {
     pub fn is_just_empty(&self) -> bool {
         matches!(self, Self::Empty)
     }
+
+    /// map the msg of this AttributeValue such that `AttributeValue<MSG>` becomes
+    /// `AttributeValue<MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb: F) -> AttributeValue<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
+        MSG: 'static,
+    {
+        match self {
+            AttributeValue::FunctionCall(this) => AttributeValue::FunctionCall(this),
+            AttributeValue::Simple(this) => AttributeValue::Simple(this),
+            AttributeValue::Style(this) => AttributeValue::Style(this),
+            AttributeValue::EventListener(this) => AttributeValue::EventListener(this.map_msg(cb)),
+            AttributeValue::Empty => AttributeValue::Empty,
+        }
+    }
 }

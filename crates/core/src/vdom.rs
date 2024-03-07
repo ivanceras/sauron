@@ -16,7 +16,6 @@ pub use node_trait::NodeTrait;
 mod attribute;
 mod element;
 mod leaf;
-mod map_msg;
 mod node_trait;
 
 pub use attribute::special::{key, replace, skip, skip_criteria};

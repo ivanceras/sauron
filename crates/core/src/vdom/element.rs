@@ -185,4 +185,28 @@ impl<MSG> Element<MSG> {
         self.attribute_value(att_name)
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
+
+    /// map the msg of this element such that `Element<MSG>` becomes `Element<MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb: F) -> Element<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
+        MSG: 'static,
+    {
+        Element {
+            namespace: self.namespace,
+            tag: self.tag,
+            attrs: self
+                .attrs
+                .into_iter()
+                .map(|attr| attr.map_msg(cb.clone()))
+                .collect(),
+            children: self
+                .children
+                .into_iter()
+                .map(|child| child.map_msg(cb.clone()))
+                .collect(),
+            self_closing: self.self_closing,
+        }
+    }
 }

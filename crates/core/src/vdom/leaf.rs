@@ -110,6 +110,29 @@ impl<MSG> Leaf<MSG> {
             Self::Component{..} => false,
         }
     }
+
+    /// mape the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb: F) -> Leaf<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
+        MSG: 'static,
+    {
+        match self{
+            Self::Text(v) => Leaf::Text(v),
+            Self::SafeHtml(v) => Leaf::SafeHtml(v),
+            Self::Comment(v) => Leaf::Comment(v),
+            Self::DocType(v) => Leaf::DocType(v),
+            Self::Component{
+                type_id, attrs, children
+            } => Leaf::Component{
+                type_id,
+                attrs: attrs.into_iter().map(|a|a.map_msg(cb.clone())).collect(),
+                children: children.into_iter().map(|c|c.map_msg(cb.clone())).collect(),
+            }
+
+        }
+    }
 }
 
 impl<MSG> From<&'static str> for Leaf<MSG> {

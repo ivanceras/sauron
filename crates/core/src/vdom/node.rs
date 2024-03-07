@@ -7,6 +7,7 @@ use crate::vdom::Value;
 use derive_where::derive_where;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
+use crate::vdom::EventCallback;
 
 /// represents a node in a virtual dom
 /// A node could be an element which can contain one or more children of nodes.
@@ -285,6 +286,43 @@ impl<MSG> Node<MSG> {
     pub fn first_value(&self, att_name: &AttributeName) -> Option<&Value> {
         self.attribute_value(att_name)
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
+    }
+
+    /// map the msg of this node such that Node<MSG> becomes Node<MSG2>
+    pub fn map_msg<F, MSG2>(self, cb: F) -> Node<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
+        MSG: 'static,
+    {
+        match self {
+            Node::Element(element) => Node::Element(element.map_msg(cb)),
+            Node::Leaf(leaf) => Node::Leaf(leaf.map_msg(cb)),
+            Node::Fragment(nodes) => Node::Fragment(
+                nodes
+                    .into_iter()
+                    .map(|node| node.map_msg(cb.clone()))
+                    .collect(),
+            ),
+            Node::NodeList(node_list) => Node::NodeList(
+                node_list
+                    .into_iter()
+                    .map(|node| node.map_msg(cb.clone()))
+                    .collect(),
+            ),
+        }
+    }
+
+    pub(crate) fn get_callbacks(&self) -> Vec<&EventCallback<MSG>> {
+        if let Some(attributes) = self.attributes() {
+            let callbacks = attributes
+                .iter()
+                .flat_map(|att| att.get_callbacks())
+                .collect();
+            callbacks
+        } else {
+            vec![]
+        }
     }
 }
 
