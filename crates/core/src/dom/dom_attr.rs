@@ -1,19 +1,19 @@
-use crate::vdom::Value;
-use crate::vdom::Style;
-use wasm_bindgen::{closure::Closure, JsCast, JsValue};
-use web_sys::Element;
-use wasm_bindgen::intern;
 use crate::vdom::AttributeName;
 use crate::vdom::Namespace;
+use crate::vdom::Style;
+use crate::vdom::Value;
+use wasm_bindgen::intern;
+use wasm_bindgen::{closure::Closure, JsCast, JsValue};
+use web_sys::Element;
 use web_sys::{
     self, HtmlButtonElement, HtmlDataElement, HtmlDetailsElement, HtmlFieldSetElement,
     HtmlInputElement, HtmlLiElement, HtmlLinkElement, HtmlMeterElement, HtmlOptGroupElement,
     HtmlOptionElement, HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement,
     HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
- 
- use crate::vdom::AttributeValue;
+
 use crate::vdom::Attribute;
+use crate::vdom::AttributeValue;
 
 pub struct DomAttr {
     pub namespace: Option<&'static str>,
@@ -81,7 +81,6 @@ impl DomAttr {
         }
     }
 
-
     /// Note: Used only templates
     /// set the lement with dom attr except for the event listeners
     pub fn set_element_dom_attr_except_listeners(element: &Element, attr: DomAttr) {
@@ -115,7 +114,11 @@ impl DomAttr {
     }
 
     // do function calls such as set_inner_html
-    pub fn set_element_function_call_values(element: &Element, attr_name: AttributeName, function_calls: Vec<Value>) {
+    pub fn set_element_function_call_values(
+        element: &Element,
+        attr_name: AttributeName,
+        function_calls: Vec<Value>,
+    ) {
         if let Some(merged_func_values) = Value::merge_to_string(function_calls.iter()) {
             if attr_name == "inner_html" {
                 element.set_inner_html(&merged_func_values);
@@ -124,7 +127,8 @@ impl DomAttr {
     }
 
     // set simple values
-    pub fn set_element_simple_values(element: &Element, 
+    pub fn set_element_simple_values(
+        element: &Element,
         attr_name: AttributeName,
         attr_namespace: Option<Namespace>,
         plain_values: Vec<Value>,
@@ -332,7 +336,9 @@ impl DomAttrValue {
         }
     }
 
-    fn convert_attr_value_except_listener<MSG>(attr_value: &AttributeValue<MSG>) -> Option<DomAttrValue> {
+    fn convert_attr_value_except_listener<MSG>(
+        attr_value: &AttributeValue<MSG>,
+    ) -> Option<DomAttrValue> {
         match attr_value {
             AttributeValue::FunctionCall(v) => Some(DomAttrValue::FunctionCall(v.clone())),
             AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
@@ -341,6 +347,4 @@ impl DomAttrValue {
             AttributeValue::Empty => None,
         }
     }
-
 }
-

@@ -67,10 +67,10 @@ pub fn create_element(tag: &'static str) -> web_sys::Element {
     })
 }
 
-    /// create a text node
-    pub fn create_text_node(txt: &str) -> Text {
-        document().create_text_node(txt)
-    }
+/// create a text node
+pub fn create_text_node(txt: &str) -> Text {
+    document().create_text_node(txt)
+}
 
 /// This is the value of the data-sauron-vdom-id.
 /// Used to uniquely identify elements that contain closures so that the DomUpdater can
@@ -92,7 +92,6 @@ where
     MSG: 'static,
     APP: Application<MSG>,
 {
-
     fn create_document_fragment(&self, nodes: &[vdom::Node<MSG>]) -> Node {
         let doc_fragment = document().create_document_fragment();
         for vnode in nodes {
@@ -122,7 +121,7 @@ where
                 children,
             } => {
                 let template = comp.template();
-                log::info!("template: {:?}", template);
+                log::info!("template: {:?}", template.inner_html());
                 // The program needs to have a registry of Component
                 // indexed by their type_id
                 let comp_node = self.create_dom_node(&crate::html::div(
@@ -261,8 +260,12 @@ where
         self.set_element_listeners(element, attr_name, listeners);
     }
 
-
-    pub fn set_element_listeners(&self, element: &Element, attr_name: AttributeName, listeners: Vec<Closure<dyn FnMut(web_sys::Event)>>) {
+    pub fn set_element_listeners(
+        &self,
+        element: &Element,
+        attr_name: AttributeName,
+        listeners: Vec<Closure<dyn FnMut(web_sys::Event)>>,
+    ) {
         for listener in listeners.iter() {
             self.add_event_listener(element, attr_name, &listener)
                 .expect("add listener");
@@ -329,7 +332,6 @@ where
         )?;
         Ok(())
     }
-
 
     /// remove element attribute,
     /// takes care of special case such as checked

@@ -1,3 +1,5 @@
+use crate::dom::DomAttr;
+use crate::dom::DomAttrValue;
 use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::vdom::AttributeValue;
@@ -7,8 +9,6 @@ use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
 use std::collections::BTreeMap;
-use crate::dom::DomAttr;
-use crate::dom::DomAttrValue;
 use std::rc::Rc;
 
 /// A component has a view and can update itself.
@@ -224,8 +224,7 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
 }
 
 /// A component that can be used directly in the view without mapping
-pub trait StatefulComponent
-{
+pub trait StatefulComponent {
     /// create the stateful component with this attributes
     fn build(
         atts: impl IntoIterator<Item = DomAttr>,
@@ -264,7 +263,6 @@ pub trait StatefulComponent
 
     /// the component is moved or attached to the dom
     fn adopted_callback(&mut self);
-
 }
 
 thread_local!(static COMPONENT_ID_COUNTER: Cell<usize> = Cell::new(1));
@@ -277,23 +275,25 @@ pub fn create_component_unique_identifier() -> usize {
     })
 }
 
-
-
 /// create a stateful component node
 pub fn component<COMP, MSG>(
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG>
-where COMP: StatefulComponent + 'static,
+where
+    COMP: StatefulComponent + 'static,
 {
     // make a global registry here
     // store the COMP in the global registry
     // and when the program encounter the component with the type id
     // it will be retrieved from the global registry
     let type_id = TypeId::of::<COMP>();
-    log::info!("type_id: {type_id:?}, type_name: {}", std::any::type_name::<COMP>());
+    log::info!(
+        "type_id: {type_id:?}, type_name: {}",
+        std::any::type_name::<COMP>()
+    );
     let comp = COMP::build([], []);
-    Node::Leaf(Leaf::Component{
+    Node::Leaf(Leaf::Component {
         comp: Rc::new(comp),
         type_id,
         attrs: attrs.into_iter().collect(),

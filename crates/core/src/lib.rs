@@ -39,8 +39,7 @@ pub mod prelude {
     pub use crate::svg::commons::*;
     pub use crate::svg::special::*;
     pub use crate::vdom::{
-        diff, Attribute, AttributeValue, Element, EventCallback, Node, Patch, TreePath,
-        Value,
+        diff, Attribute, AttributeValue, Element, EventCallback, Node, Patch, TreePath, Value,
     };
 
     use cfg_if::cfg_if;

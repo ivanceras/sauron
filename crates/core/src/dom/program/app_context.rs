@@ -97,7 +97,6 @@ where
         assert_eq!(w1, w2);
         w1
     }
-
 }
 
 impl<APP, MSG> Clone for AppContext<APP, MSG>

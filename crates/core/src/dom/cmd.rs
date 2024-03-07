@@ -115,7 +115,6 @@ where
     }
 }
 
-
 impl<APP, MSG> From<Effects<MSG, ()>> for Cmd<APP, MSG>
 where
     MSG: 'static,

@@ -1,6 +1,8 @@
 use crate::dom;
 use crate::dom::dom_node::find_all_nodes;
 use crate::dom::dom_node::intern;
+use crate::dom::DomAttr;
+use crate::dom::DomAttrValue;
 use crate::dom::{Application, Program};
 use crate::vdom::EventCallback;
 use crate::vdom::Style;
@@ -13,8 +15,6 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 use web_sys::Node;
-use crate::dom::DomAttr;
-use crate::dom::DomAttrValue;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -75,7 +75,6 @@ pub enum PatchVariant {
         for_moving: Vec<Node>,
     },
 }
-
 
 impl<APP, MSG> Program<APP, MSG>
 where

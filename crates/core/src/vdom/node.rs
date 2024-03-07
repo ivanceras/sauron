@@ -2,12 +2,12 @@ use super::{AttributeName, Namespace, Tag};
 use crate::vdom::Attribute;
 use crate::vdom::AttributeValue;
 use crate::vdom::Element;
+use crate::vdom::EventCallback;
 use crate::vdom::Leaf;
 use crate::vdom::Value;
 use derive_where::derive_where;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
-use crate::vdom::EventCallback;
 
 /// represents a node in a virtual dom
 /// A node could be an element which can contain one or more children of nodes.
