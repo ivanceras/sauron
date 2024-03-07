@@ -35,6 +35,18 @@ thread_local! {
         HashMap::from_iter(["div", "span", "ol", "ul", "li"].map(create_element_with_tag));
 }
 
+pub trait DomNode{
+    fn inner_html(&self) -> Option<String>;
+}
+
+impl DomNode for web_sys::Node{
+
+    fn inner_html(&self) -> Option<String>{
+        let element: &Element = self.dyn_ref()?;
+        Some(element.inner_html())
+    }
+}
+
 #[cfg(feature = "with-interning")]
 #[inline(always)]
 pub fn intern(s: &str) -> &str {
@@ -122,19 +134,13 @@ where
             } => {
                 let template = comp.template();
                 log::info!("template: {:?}", template.inner_html());
-                // The program needs to have a registry of Component
-                // indexed by their type_id
-                let comp_node = self.create_dom_node(&crate::html::div(
-                    [crate::html::attributes::class("component")],
-                    [],
-                ));
                 for child in children.iter() {
                     let child_dom = self.create_dom_node(&child);
-                    comp_node
+                    template
                         .append_child(&child_dom)
                         .expect("must append child node of component");
                 }
-                comp_node
+                template
             }
         }
     }
