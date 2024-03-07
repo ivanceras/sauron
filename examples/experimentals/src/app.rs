@@ -88,7 +88,7 @@ impl Application<Msg> for App {
                 Cmd::none()
             }
             Msg::BtnMsg(bmsg) => {
-                let effects = self.btn.update(bmsg);
+                let effects = Component::update(&mut self.btn, bmsg);
                 effects.map_msg(Msg::BtnMsg).into()
             }
         }
@@ -167,8 +167,15 @@ impl Application<Msg> for App {
                         }
                     }}
                 </ul>
-                {self.btn.view().map_msg(Msg::BtnMsg)}
-                {component::<Button, Msg>([], [text("External child of btn component")])}
+                <div>
+                    {Component::view(&self.btn).map_msg(Msg::BtnMsg)}
+                </div>
+                <div>
+                    {component::<Button, Msg, button::Msg>([], [text("External child of btn component")])}
+                </div>
+                <div>
+                    {component::<DateTimeWidget, Msg, date_time::Msg>([],[])}
+                </div>
             </div>
         }
     }

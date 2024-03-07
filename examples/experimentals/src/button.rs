@@ -32,7 +32,7 @@ impl Component<Msg, ()> for Button {
 
 impl StatefulComponent for Button {
     fn build(
-        atts: impl IntoIterator<Item = DomAttr>,
+        attrs: impl IntoIterator<Item = DomAttr>,
         children: impl IntoIterator<Item = web_sys::Node>,
     ) -> Self
     where
@@ -52,7 +52,7 @@ impl StatefulComponent for Button {
     }
 
     fn template(&self) -> web_sys::Node {
-        template::build_template(&self.view())
+        template::build_template(&Component::view(self))
     }
 
     /// remove the attribute with this name

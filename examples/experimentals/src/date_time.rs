@@ -5,6 +5,12 @@ use sauron::{
     wasm_bindgen, web_sys, Attribute, Effects, JsValue, Node, WebComponent, *,
 };
 use std::fmt::Debug;
+use sauron::dom::DomAttrValue;
+use sauron::vdom::AttributeName;
+use sauron::dom::DomAttr;
+use sauron::dom::StatefulComponent;
+use sauron::dom::template;
+
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -17,30 +23,26 @@ pub enum Msg {
 }
 
 #[derive(Debug, Clone)]
-pub struct DateTimeWidget<XMSG> {
+pub struct DateTimeWidget {
     /// the host element the web editor is mounted to, when mounted as a custom web component
     host_element: Option<web_sys::Element>,
     date: String,
     time: String,
     cnt: i32,
-    time_change_listener: Vec<Callback<String, XMSG>>,
 }
 
-impl<XMSG> Default for DateTimeWidget<XMSG> {
+impl Default for DateTimeWidget {
     fn default() -> Self {
         Self {
             host_element: None,
             date: String::new(),
             time: String::new(),
             cnt: 0,
-            time_change_listener: vec![],
         }
     }
 }
 
-impl<XMSG> DateTimeWidget<XMSG>
-where
-    XMSG: 'static,
+impl DateTimeWidget
 {
     pub fn new(date: &str, time: &str) -> Self {
         DateTimeWidget {
@@ -48,7 +50,6 @@ where
             date: date.to_string(),
             time: time.to_string(),
             cnt: 0,
-            time_change_listener: vec![],
         }
     }
 
@@ -56,20 +57,10 @@ where
         format!("{} {}", self.date, self.time)
     }
 
-    pub fn on_date_time_change<F>(mut self, f: F) -> Self
-    where
-        F: Fn(String) -> XMSG + 'static,
-    {
-        self.time_change_listener.push(Callback::from(f));
-        self
-    }
 }
 
-impl<XMSG> sauron::Container<Msg, XMSG> for DateTimeWidget<XMSG>
-where
-    XMSG: 'static,
-{
-    fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
+impl Component<Msg, ()> for DateTimeWidget{
+    fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
@@ -84,10 +75,6 @@ where
             Msg::TimeOrDateModified(date_time) => {
                 log::trace!("time or date is changed: {}", date_time);
                 let mut parent_msg = vec![];
-                for listener in self.time_change_listener.iter() {
-                    let pmsg = listener.emit(self.date_time());
-                    parent_msg.push(pmsg);
-                }
                 if let Some(host_element) = self.host_element.as_ref() {
                     host_element
                         .set_attribute("date_time", &date_time)
@@ -124,9 +111,6 @@ where
         }
     }
 
-    fn append_child(&mut self, _child: Node<XMSG>) {
-        log::warn!("This doesn't support child nodes");
-    }
 
     fn stylesheet() -> Vec<String> {
         vec![jss! {
@@ -145,7 +129,7 @@ where
         }]
     }
 
-    fn view(&self, _content: impl IntoIterator<Item = Node<XMSG>>) -> Node<Msg> {
+    fn view(&self) -> Node<Msg> {
         div(
             [class("datetimebox"), on_mount(Msg::Mounted)],
             [
@@ -177,47 +161,53 @@ where
     }
 }
 
-#[custom_element("date-time")]
-impl<XMSG> sauron::WebComponent<Msg> for DateTimeWidget<XMSG>
-where
-    XMSG: 'static,
-{
+impl StatefulComponent for DateTimeWidget{
 
-    fn observed_attributes() -> Vec<&'static str> {
-        vec!["date", "time", "interval"]
+    fn build(
+        attrs: impl IntoIterator<Item = DomAttr>,
+        children: impl IntoIterator<Item = web_sys::Node>,
+    ) -> Self
+    where
+        Self: Sized,
+    {
+        DateTimeWidget::default()
+    }
+
+    fn template(&self) -> web_sys::Node {
+        template::build_template(&Component::view(self))
     }
 
     /// this is called when the attributes in the mount is changed
     fn attribute_changed(
-        mut program: Program<Self, Msg>,
-        attr_name: &str,
-        old_value: Option<String>,
-        new_value: Option<String>,
+        &mut self,
+        attr_name: AttributeName,
+        old_value: DomAttrValue,
+        new_value: DomAttrValue,
     ) where
-        Self: Sized + Application<Msg>,
+        Self: Sized,
     {
-        log::info!("old_value: {:?}", old_value);
-        log::info!("new_value: {new_value:?}");
         match &*attr_name {
             "time" => {
-                if let Some(new_value) = new_value {
-                    program.dispatch(Msg::TimeChange(new_value))
+                if let Some(new_value) = new_value.get_string(){
+                    Component::update(self, Msg::TimeChange(new_value));
                 }
             }
             "date" => {
-                if let Some(new_value) = new_value {
-                    program.dispatch(Msg::DateChange(new_value))
-                }
-            }
-            "interval" => {
-                if let Some(new_value) = new_value {
-                    let new_value: f64 = str::parse(&new_value).expect("must parse to f64");
-                    program.dispatch(Msg::IntervalChange(new_value))
+                if let Some(new_value) = new_value.get_string(){
+                    Component::update(self, Msg::DateChange(new_value));
                 }
             }
             _ => log::warn!("unknown attr_name: {attr_name:?}"),
         }
     }
+
+    fn append_child(&mut self, child: web_sys::Node) {
+        log::warn!("This doesn't support child nodes");
+    }
+
+    fn remove_attribute(&mut self, attr_name: AttributeName) {}
+
+    fn remove_child(&mut self, index: usize) {}
 
     fn connected_callback(&mut self) {}
 
@@ -226,18 +216,3 @@ where
     fn adopted_callback(&mut self) {}
 }
 
-pub fn date<MSG, V: Into<Value>>(v: V) -> Attribute<MSG> {
-    attr("date", v)
-}
-
-pub fn time<MSG, V: Into<Value>>(v: V) -> Attribute<MSG> {
-    attr("time", v)
-}
-
-pub fn date_time<MSG>(
-    attrs: impl IntoIterator<Item = Attribute<MSG>>,
-    children: impl IntoIterator<Item = Node<MSG>>,
-) -> Node<MSG> {
-    register();
-    html_element(None, "date-time", attrs, children, true)
-}
