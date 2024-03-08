@@ -238,8 +238,9 @@
     - See if there are performance penalty
 - [ ] Make template node for when app view is first created
     - [ ] The template is then patched when the app is mounted.
+    - [ ] Templates will have to be saved in the global context, so it can be used accross multiple programs
 - [ ] Create a `view!` macro which generated the view function + template + prediff functions
-- [ ] Make a variant of `Node` leaf to be `Component`, component can contain attributes and optionally children components + elements
+- [X] Make a variant of `Node` leaf to be `Component`, component can contain attributes and optionally children components + elements
     - [X] This requires moving the mt-dom types into sauron-core so as to make a specific diff function for component
 
 ## Features

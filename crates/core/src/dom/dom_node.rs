@@ -46,19 +46,25 @@ pub trait DomNode{
         (tag, elm)
     }
 
-    /// find the element from the most created element and clone it, else create it
-    /// TODO: feature gate this with `use-cached-elements`
+    /// create dom element from tag name
+    #[cfg(feature = "use-cached-elements")]
     fn create_element(tag: &'static str) -> web_sys::Element {
+        // find the element from the most created element and clone it, else create it
         CACHE_ELEMENTS.with(|map| {
             if let Some(elm) = map.get(tag) {
                 elm.clone_node_with_deep(false)
                     .expect("must clone node")
                     .unchecked_into()
             } else {
-                let elm = document().create_element(intern(tag)).unwrap();
-                elm
+                document().create_element(intern(tag)).expect("create element")
             }
         })
+    }
+
+    /// create dom element from tag name
+    #[cfg(not(feature = "use-cached-elements"))]
+    fn create_element(tag: &'static str) -> web_sys::Element {
+         document().create_element(intern(tag)).expect("create element")
     }
 }
 
