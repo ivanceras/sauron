@@ -18,6 +18,7 @@ use web_sys::{
 };
 use crate::vdom::LeafComponent;
 use std::fmt;
+use crate::html::lookup;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -107,7 +108,11 @@ impl DomNode for web_sys::Node{
                     let attr = attrs.item(i).expect("attr");
                     write!(buffer, " {}=\"{}\"", attr.local_name(), attr.value())?;
                 }
-                write!(buffer, ">")?;
+                if lookup::is_self_closing(&tag){
+                    write!(buffer,"/>")?;
+                }else{
+                    write!(buffer, ">")?;
+                }
 
                 let children =  elm.children();
                 let children_len = children.length();
@@ -115,7 +120,9 @@ impl DomNode for web_sys::Node{
                     let child = children.item(i).expect("element child");
                     child.render(buffer)?;
                 }
-                write!(buffer,"</{tag}>")?;
+                if !lookup::is_self_closing(&tag){
+                    write!(buffer,"</{tag}>")?;
+                }
                 Ok(())
             }
             _ => todo!("for other else"),

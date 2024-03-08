@@ -76,6 +76,8 @@ where
     }
 
     /// map this Callback msg such that `Callback<IN, OUT>` becomes `Callback<IN, MSG2>`
+    /// TODO: use the original type id of function, so as it will stay the same
+    /// even when mapped
     pub fn map_msg<F, MSG2>(self, cb2: F) -> Callback<IN, MSG2>
     where
         F: Fn(OUT) -> MSG2 + Clone + 'static,

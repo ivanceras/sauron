@@ -25,6 +25,7 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
+use crate::dom::component::register_template;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountProcedure, MountTarget, MountAction};
@@ -214,8 +215,9 @@ where
     pub fn new(
         app: APP,
     ) -> Self {
+        let (template, vdom_template) = register_template(&app);
         Program {
-            app_context: AppContext::new(app),
+            app_context: AppContext::new(app, template, vdom_template),
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(None)),
             node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
@@ -365,6 +367,12 @@ where
     pub fn mount(&mut self, mount_node: &web_sys::Node, mount_procedure: MountProcedure) {
         *self.mount_node.borrow_mut() = Some(mount_node.clone());
         self.pre_mount();
+
+        //TODO: use the template here and append to the mount_node
+        // NOTE: the template has no attached event
+        #[cfg(feature = "use-template")]
+        let created_node = self.app_context.template.clone();
+        #[cfg(not(feature = "use-template"))]
         let created_node = self.create_dom_node(&self.app_context.current_vdom());
 
         let mount_node: web_sys::Node = match mount_procedure.target {

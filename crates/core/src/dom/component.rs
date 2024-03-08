@@ -19,9 +19,36 @@ use std::collections::VecDeque;
 use wasm_bindgen::JsValue;
 use std::collections::HashMap;
 use crate::dom::dom_node::DomNode;
+use crate::dom::template;
+use crate::vdom;
 
 thread_local!{
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
+}
+
+pub fn register_template<APP, MSG>(app: &APP) -> (web_sys::Node, vdom::Node<MSG>) 
+    where APP: Application<MSG>,
+    MSG: 'static,
+{
+    let type_id = TypeId::of::<APP>();
+    let view = app.view();
+    let vdom_template = template::build_vdom_template(&view);
+    let template = TEMPLATE_LOOKUP.with_borrow_mut(|map|{
+        if let Some(existing) = map.get(&type_id){
+            log::info!("An existing template...");
+            existing.clone_node_with_deep(true).expect("deep clone")
+        }else{
+            log::warn!("Adding a new template for: {:?}", type_id);
+            let template = template::build_template(&view);
+            map.insert(type_id, template.clone());
+            template
+        }
+    });
+    if cfg!(feature = "use-template"){
+        (template, vdom_template)
+    } else {
+        (template, view)
+    }
 }
 
 /// A component has a view and can update itself.
@@ -231,7 +258,6 @@ where
     MSG2: 'static,
 {
 
-    use crate::dom::template;
 
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
@@ -243,26 +269,21 @@ where
     // The attribute(minus events) however can be used for configurations, for setting initial state 
     // of the stateful component.
     let app = COMP::build(attrs.clone().into_iter().map(|a|DomAttr::convert_attr_except_listener(&a)), []);
-    let view = app.view();
-    let template = template::build_template(&view);
-    let template = TEMPLATE_LOOKUP.with_borrow_mut(|map|{
-        if let Some(existing) = map.get(&type_id){
-            log::info!("An existing template...");
-            existing.clone_node_with_deep(true).expect("deep clone")
-        }else{
-            log::warn!("Adding a new template for: {:?}", type_id);
-            map.insert(type_id, template.clone());
-            template
-        }
-    });
-    log::info!("template: {}", template.render_to_string());
+
+    let (template, vdom_template) = register_template(&app);
+
+    log::info!("vdom template: {}", vdom_template.render_to_string());
+
+    log::info!("dom  template: {}", template.render_to_string());
 
     let app = Rc::new(RefCell::new(app));
 
     let program = Program{
         app_context: AppContext{
             app: Rc::clone(&app),
-            current_vdom: Rc::new(RefCell::new(view)),
+            #[cfg(feature = "use-template")]
+            template,
+            current_vdom: Rc::new(RefCell::new(vdom_template)),
             pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
             pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
         }, 
