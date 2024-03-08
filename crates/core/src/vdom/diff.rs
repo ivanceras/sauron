@@ -282,13 +282,6 @@ fn create_attribute_patches<'a, MSG>(
     let new_attributes = new_element.attributes();
     let old_attributes = old_element.attributes();
 
-    /*
-    // skip diffing if they the same attributes
-    if old_attributes == new_attributes {
-        return vec![];
-    }
-    */
-
     let mut patches = vec![];
 
     let mut add_attributes: Vec<&Attribute<MSG>> = vec![];

@@ -265,8 +265,7 @@ fn diff_keyed_middle<'a, MSG>(
         &mut starts,
     );
 
-    // the lis_seuqnce came out from high to low, so we just reverse it back to arrange from low to
-    // high
+    // the list_sequence came out from high to low, so we just reverse it back to arrange from low to high
     lis_sequence.reverse();
 
     // if a new node gets u32 max and is at the end, then it might be part of our LIS (because u32 max is a valid LIS)
@@ -360,8 +359,6 @@ fn diff_keyed_middle<'a, MSG>(
             }
         }
         if !node_paths.is_empty() {
-            // TODO: maybe we can also use after_node (left_offset - 1), or the last element of
-            // matched key
             let first = 0;
             let patch = Patch::move_before_node(
                 old_children[left_offset + first].tag(),
