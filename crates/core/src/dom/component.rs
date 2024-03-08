@@ -310,22 +310,22 @@ where
     use crate::dom::program::ActiveClosure;
     use std::collections::VecDeque;
 
-    // make a global registry here
-    // store the COMP in the global registry
-    // and when the program encounter the component with the type id
-    // it will be retrieved from the global registry
     let type_id = TypeId::of::<COMP>();
-    let attrs_copy = attrs.into_iter().collect::<Vec<_>>();
-    let comp = COMP::build(attrs_copy.clone().into_iter().map(|a|DomAttr::convert_attr_except_listener(&a)), []);
-    let rc_comp = Rc::new(RefCell::new(comp));
+    let attrs = attrs.into_iter().collect::<Vec<_>>();
 
-    let comp_copy = Rc::clone(&rc_comp);
-    //let view = crate::html::div([],[]);
-    let view = comp_copy.borrow().view();
-    // should we got this from mount event
+    // Note: we can not include the children in the build function
+    // as the children here contains the MSG generic
+    // and we can not discard the event listeners.
+    //
+    // The attribute(minus events) however can be used for configurations, for setting initial state 
+    // of the stateful component.
+    let app = COMP::build(attrs.clone().into_iter().map(|a|DomAttr::convert_attr_except_listener(&a)), []);
+    let view = app.view();
+    let app = Rc::new(RefCell::new(app));
+
     let program = Program{
         app_context: AppContext{
-            app: comp_copy,
+            app: Rc::clone(&app),
             current_vdom: Rc::new(RefCell::new(view)),
             pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
             pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
@@ -349,9 +349,9 @@ where
         MSG::default()
     });
     let node = Node::Leaf(Leaf::Component(LeafComponent{
-        comp: rc_comp,
+        comp: app,
         type_id,
-        attrs: attrs_copy.into_iter().chain([mount_event]).collect(),
+        attrs: attrs.into_iter().chain([mount_event]).collect(),
         children: children.into_iter().collect(),
     }));
     node

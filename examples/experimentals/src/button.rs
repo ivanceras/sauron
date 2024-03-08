@@ -27,7 +27,7 @@ impl Component<Msg, ()> for Button {
         match msg {
             Msg::Click => self.cnt += 1,
             Msg::ExternContMounted(target_node) => {
-                log::info!("extenal container mounted...");
+                log::info!("Button: extenal container mounted...");
                 for child in self.children.iter(){
                     target_node.append_child(child).expect("must append");
                 }
@@ -77,11 +77,12 @@ impl StatefulComponent for Button {
 
     /// append a child into this component
     fn append_child(&mut self, child: &web_sys::Node) {
-        log::info!("appending {:?}", child);
+        log::info!("Btn appending {:?}", child);
         if let Some(external_children_node) = self.external_children_node.as_ref(){
-            log::info!("ok appending..");
+            log::info!("Btn ok appending..");
             external_children_node.append_child(child).expect("must append");
         }else{
+            log::debug!("Button: Just pushing to children since the external holder is not yet mounted");
             self.children.push(child.clone());
         }
     }

@@ -105,7 +105,7 @@ impl Component<Msg, ()> for DateTimeWidget{
                 Effects::none()
             }
             Msg::ExternContMounted(target_node) => {
-                log::info!("extenal container mounted...");
+                log::info!("DateTime: extenal container mounted...");
                 for child in self.children.iter(){
                     target_node.append_child(child).expect("must append");
                 }
@@ -216,11 +216,12 @@ impl StatefulComponent for DateTimeWidget{
     }
 
     fn append_child(&mut self, child: &web_sys::Node) {
-        log::info!("appending child to date_time: {:?}", child.inner_html());
+        log::info!("DateTime: appending child{:?}", child.inner_html());
         if let Some(external_children_node) = self.external_children_node.as_ref(){
-            log::info!("ok appending..");
+            log::info!("DateTime: ok appending..");
             external_children_node.append_child(child).expect("must append");
         }else{
+            log::debug!("DateTime: Just pushing to children since the external holder is not yet mounted");
             self.children.push(child.clone());
         }
     }
