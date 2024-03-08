@@ -342,6 +342,7 @@ where
                                     target_element.set_inner_html("");
                                 }
                             }
+                            DomAttrValue::Empty => (),
                         }
                     }
                 }

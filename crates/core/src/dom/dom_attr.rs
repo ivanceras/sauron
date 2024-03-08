@@ -35,6 +35,8 @@ pub enum DomAttrValue {
     Style(Vec<Style>),
     /// event listeners
     EventListener(Closure<dyn FnMut(web_sys::Event)>),
+    /// an empty value, can also represents null values from JsValue
+    Empty,
 }
 
 /// a struct where the listeners, plain values, styles and function call values are grouped
@@ -72,6 +74,7 @@ impl DomAttr {
                 DomAttrValue::EventListener(cb) => {
                     listeners.push(cb);
                 }
+                DomAttrValue::Empty => (),
             }
         }
         GroupedDomAttrValues {

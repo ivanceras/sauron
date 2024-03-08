@@ -16,6 +16,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use crate::dom::program::ActiveClosure;
 use std::collections::VecDeque;
+use wasm_bindgen::JsValue;
 
 /// A component has a view and can update itself.
 ///
@@ -44,6 +45,11 @@ where
     where
         Self: Sized,
     {
+        vec![]
+    }
+
+    /// specify which attribute names are observed for this Component
+    fn observed_attributes() -> Vec<AttributeName>{
         vec![]
     }
 
@@ -154,7 +160,7 @@ pub trait StatefulComponent {
     /// if the listed attributes in the observed attributes are modified
     fn attribute_changed(
         &mut self,
-        attr_name: AttributeName,
+        attr_name: &str,
         old_value: DomAttrValue,
         new_value: DomAttrValue,
     ) where
@@ -263,6 +269,28 @@ where
         children: children.into_iter().collect(),
     }));
     node
+}
+
+impl Into<DomAttrValue> for JsValue{
+
+    fn into(self) -> DomAttrValue{
+        if let Some(v) = self.as_bool(){
+            DomAttrValue::Simple(v.into())
+        }
+        else if let Some(v) = self.as_f64(){
+            DomAttrValue::Simple(v.into())
+        }
+        else if let Some(v) = self.as_string(){
+            DomAttrValue::Simple(v.into())
+        }
+        else if self.is_null(){
+            log::info!("it is a null value");
+            DomAttrValue::Empty
+        }
+        else {
+            todo!("handle other conversion, other than bool, f64, strings, nulls ")
+        }
+    }
 }
 
 #[cfg(test)]
