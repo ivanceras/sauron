@@ -1,13 +1,12 @@
+//! utility functions for extracting templates from a view
+//!
 use crate::dom::document;
 use crate::dom::dom_node;
 use crate::dom::DomAttr;
-use crate::dom::GroupedDomAttrValues;
 use crate::vdom;
 use crate::vdom::Attribute;
 use crate::vdom::{Leaf, Node};
 use wasm_bindgen::intern;
-use wasm_bindgen::JsCast;
-use web_sys::Element;
 
 /// build a node but only include static attributes and leaf nodes
 pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG>
@@ -45,6 +44,7 @@ pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG>
     }
 }
 
+/// build a template for this node
 pub fn build_template<MSG>(node: &vdom::Node<MSG>) -> web_sys::Node {
     let static_nodes = extract_static_only(node);
     create_dom_node_without_listeners(&static_nodes)
@@ -95,7 +95,7 @@ fn create_leaf_node_without_listeners<MSG>(leaf: &Leaf<MSG>) -> web_sys::Node {
                     doctype is only used in rendering"
             );
         }
-        Leaf::Component(lc) => {
+        Leaf::Component(_lc) => {
             panic!("Component should not be created here")
         }
     }

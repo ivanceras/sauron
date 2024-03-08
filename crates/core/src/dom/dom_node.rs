@@ -1,10 +1,7 @@
 use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
 use crate::vdom::AttributeName;
-use crate::vdom::Namespace;
-use crate::vdom::Style;
 use crate::vdom::TreePath;
-use crate::vdom::Value;
 use crate::{
     dom::events::MountEvent,
     dom::{document, window},
@@ -17,13 +14,9 @@ use std::collections::HashMap;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{
-    self, Element, HtmlButtonElement, HtmlDataElement, HtmlDetailsElement, HtmlFieldSetElement,
-    HtmlInputElement, HtmlLiElement, HtmlLinkElement, HtmlMeterElement, HtmlOptGroupElement,
-    HtmlOptionElement, HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement,
-    HtmlStyleElement, HtmlTextAreaElement, Node, Text,
+    self, Element, Node, Text,
 };
 use crate::vdom::LeafComponent;
-use std::rc::Rc;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -68,7 +61,7 @@ fn create_element_with_tag(tag: &'static str) -> (&'static str, web_sys::Element
 
 /// find the element from the most created element and clone it, else create it
 /// TODO: feature gate this with `use-cached-elements`
-pub fn create_element(tag: &'static str) -> web_sys::Element {
+pub(crate) fn create_element(tag: &'static str) -> web_sys::Element {
     CACHE_ELEMENTS.with(|map| {
         if let Some(elm) = map.get(tag) {
             elm.clone_node_with_deep(false)
@@ -82,7 +75,7 @@ pub fn create_element(tag: &'static str) -> web_sys::Element {
 }
 
 /// create a text node
-pub fn create_text_node(txt: &str) -> Text {
+pub(crate) fn create_text_node(txt: &str) -> Text {
     document().create_text_node(txt)
 }
 
@@ -166,7 +159,7 @@ where
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
-    pub fn create_dom_node(&self, vnode: &vdom::Node<MSG>) -> Node {
+    pub(crate) fn create_dom_node(&self, vnode: &vdom::Node<MSG>) -> Node {
         match vnode {
             vdom::Node::Leaf(leaf_node) => self.create_leaf_node(leaf_node),
             vdom::Node::Element(element_node) => {
@@ -237,7 +230,7 @@ where
     /// call the listener since browser don't allow asynchronous execution of
     /// dispatching custom events (non-native browser events)
     ///
-    pub fn dispatch_mount_event(node: &Node) {
+    pub(crate) fn dispatch_mount_event(node: &Node) {
         let event_target: &web_sys::EventTarget = node.unchecked_ref();
         assert_eq!(
             Ok(true),
@@ -246,7 +239,7 @@ where
     }
 
     /// a helper method to append a node to its parent and trigger a mount event if there is any
-    pub fn append_child_and_dispatch_mount_event(parent: &Node, child_node: &Node) {
+    pub(crate) fn append_child_and_dispatch_mount_event(parent: &Node, child_node: &Node) {
         parent
             .append_child(child_node)
             .expect("must append child node");
@@ -261,14 +254,14 @@ where
     }
 
     /// set element with the dom attrs
-    pub fn set_element_dom_attrs(&self, element: &Element, attrs: Vec<DomAttr>) {
+    pub(crate) fn set_element_dom_attrs(&self, element: &Element, attrs: Vec<DomAttr>) {
         for att in attrs.into_iter() {
             self.set_element_dom_attr(element, att);
         }
     }
 
     /// set the element with dom attr
-    pub fn set_element_dom_attr(&self, element: &Element, attr: DomAttr) {
+    pub(crate) fn set_element_dom_attr(&self, element: &Element, attr: DomAttr) {
         let attr_name = intern(attr.name);
         let attr_namespace = attr.namespace;
 
@@ -285,7 +278,7 @@ where
         self.set_element_listeners(element, attr_name, listeners);
     }
 
-    pub fn set_element_listeners(
+    pub(crate) fn set_element_listeners(
         &self,
         element: &Element,
         attr_name: AttributeName,
@@ -314,7 +307,7 @@ where
     }
 
     /// attach and event listener to an event target
-    pub fn add_event_listeners(
+    pub(crate) fn add_event_listeners(
         &self,
         target: &web_sys::EventTarget,
         event_listeners: Vec<Attribute<MSG>>,
@@ -328,7 +321,7 @@ where
     }
 
     /// attach and event listener to an event target
-    pub fn add_event_dom_listeners(
+    pub(crate) fn add_event_dom_listeners(
         &self,
         target: &web_sys::EventTarget,
         event_listeners: Vec<DomAttr>,
@@ -345,7 +338,7 @@ where
     }
 
     /// add a event listener to a target element
-    pub fn add_event_listener(
+    pub(crate) fn add_event_listener(
         &self,
         event_target: &web_sys::EventTarget,
         event_name: &str,

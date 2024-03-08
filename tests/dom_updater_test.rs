@@ -29,7 +29,7 @@ fn patches_dom() {
         .update_dom_with_vdom(new_vdom, None)
         .expect("must not error");
 
-    assert_eq!(document.query_selector("#patched").unwrap().is_some(), true);
+    assert!(document.query_selector("#patched").unwrap().is_some());
 }
 
 // When you replace a DOM node with another DOM node we need to make sure that the closures
@@ -75,7 +75,7 @@ fn updates_active_closure_on_replace() {
 
     // After dispatching the on_input event our `text` should have a value of the input elements value.
     let input = sauron_core::dom::document()
-        .get_element_by_id(&elem_id)
+        .get_element_by_id(elem_id)
         .unwrap();
     web_sys::EventTarget::from(input)
         .dispatch_event(&input_event)

@@ -509,7 +509,6 @@ fn build_100_child_nodes() {
     let _view: Node<()> = div(
         vec![class("some-class")],
         (0..100)
-            .into_iter()
             .map(|n| div(vec![class("child-div")], vec![text(format!("node: {}", n))]))
             .collect::<Vec<Node<()>>>(),
     );
@@ -519,7 +518,6 @@ fn diff_100() {
     let view1: Node<()> = div(
         vec![class("some-class")],
         (0..100)
-            .into_iter()
             .map(|n| {
                 div(
                     vec![class(format!("child-div_{}", n))],
@@ -532,7 +530,6 @@ fn diff_100() {
     let view2: Node<()> = div(
         vec![class("some-class")],
         (0..100)
-            .into_iter()
             .map(|n| {
                 div(
                     vec![class(format!("child-div_{}", n + 1))],
@@ -549,12 +546,10 @@ fn build_100_nodes_with_100_child_nodes() {
     let _view: Node<()> = div(
         vec![class("some-class")],
         (0..100)
-            .into_iter()
             .map(|n| {
                 div(
                     vec![class("parent"), class(n)],
                     (0..100)
-                        .into_iter()
                         .map(|n2| {
                             div(
                                 vec![class("child-div")],
@@ -570,11 +565,11 @@ fn build_100_nodes_with_100_child_nodes() {
 
 fn bench1(c: &mut Criterion) {
     c.bench_function("100x100", |b| {
-        b.iter(|| build_100_nodes_with_100_child_nodes())
+        b.iter(build_100_nodes_with_100_child_nodes)
     });
-    c.bench_function("100", |b| b.iter(|| build_100_child_nodes()));
-    c.bench_function("diff_100", |b| b.iter(|| diff_100()));
-    c.bench_function("build_editor", |b| b.iter(|| build_editor()));
+    c.bench_function("100", |b| b.iter(build_100_child_nodes));
+    c.bench_function("diff_100", |b| b.iter(diff_100));
+    c.bench_function("build_editor", |b| b.iter(build_editor));
 }
 
 criterion_group!(benches, bench1);

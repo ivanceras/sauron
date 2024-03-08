@@ -120,7 +120,6 @@ where
 {
     /// Creates a new app, the view is created
     pub fn new(app: APP) -> Self {
-        use crate::render::Render;
         let view = app.view();
         Self {
             app: Rc::new(RefCell::new(app)),

@@ -5,7 +5,6 @@ use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
 use std::any::TypeId;
-use std::cell::Cell;
 use crate::vdom::LeafComponent;
 use crate::dom::Cmd;
 use crate::dom::Application;
@@ -247,6 +246,7 @@ pub trait StatefulComponent {
     ) where
         Self: Sized;
 
+    /// build the template of this Component
     fn template(&self) -> web_sys::Node;
 
     /// remove the attribute with this name

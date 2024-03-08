@@ -83,7 +83,7 @@ fn builder_with_event() {
         println!("hello! {:?}", x);
     };
     let mut div: Element<()> = Element::new(None, "div", vec![], vec![], false);
-    div.add_attributes(vec![on("click", cb.clone())]);
+    div.add_attributes(vec![on("click", cb)]);
     let expected: Element<()> = Element::new(None, "div", vec![on("click", cb)], vec![], false);
 
     assert_eq!(

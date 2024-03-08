@@ -1,10 +1,8 @@
 //! Leaf node for html dom tree
-use crate::dom::StatefulComponent;
 use crate::vdom::{Attribute, Node};
 use std::any::TypeId;
 use std::borrow::Cow;
 use std::fmt;
-use std::rc::Rc;
 
 /// A leaf node value of html dom tree
 pub enum Leaf<MSG> {
@@ -25,10 +23,6 @@ pub enum Leaf<MSG> {
 pub struct LeafComponent<MSG>{
     /// component type id
     pub type_id: TypeId,
-    /// Note: StatefulComponent should have no MSG generic
-    /// otherwise it would be not possible to map_msg this.
-    /// since calling map_msg on a dyn Trait with generics is not possible.
-    //pub comp: Rc<dyn StatefulComponent>,
     /// component attributes
     pub attrs: Vec<Attribute<MSG>>,
     /// component children

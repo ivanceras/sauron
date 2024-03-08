@@ -1,21 +1,15 @@
-use crate::dom::component::create_component_unique_identifier;
 use crate::dom::program::app_context::WeakContext;
 #[cfg(feature = "with-raf")]
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
-use crate::dom::Component;
-use crate::dom::DomAttr;
 #[cfg(feature = "prediff")]
 use crate::dom::PreDiff;
-use crate::dom::StatefulComponent;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
 use crate::html::{self, attributes::class, text};
-use crate::render::Render;
 use crate::vdom;
 use crate::vdom::diff;
-use crate::vdom::Attribute;
 use crate::vdom::{diff_recursive, TreePath};
 use app_context::AppContext;
 use std::collections::hash_map::DefaultHasher;

@@ -1,5 +1,4 @@
-use crate::dom::{Application, Cmd, Container, Modifier, MountAction, MountTarget, Program};
-use crate::vdom::Node;
+use crate::dom::{Application,  Modifier, MountAction, MountTarget, Program};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -135,6 +134,7 @@ where
 {
     /// the underlying program running this web component
     pub program: Program<APP, MSG>,
+    /// the mount node for the program
     pub mount_node: web_sys::Node,
 }
 

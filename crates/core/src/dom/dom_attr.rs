@@ -12,21 +12,28 @@ use web_sys::{
     self, HtmlButtonElement, HtmlDataElement, HtmlDetailsElement, HtmlFieldSetElement,
     HtmlInputElement, HtmlLiElement, HtmlLinkElement, HtmlMeterElement, HtmlOptGroupElement,
     HtmlOptionElement, HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement,
-    HtmlStyleElement, HtmlTextAreaElement, Node, Text,
+    HtmlStyleElement, HtmlTextAreaElement, 
 };
 
 /// a dom version of the Attribute, thereby removing the MSG generic
 pub struct DomAttr {
+    /// namespace of the attribute
     pub namespace: Option<&'static str>,
+    /// the name of the attribute
     pub name: &'static str,
+    /// the value of the attribute
     pub value: Vec<DomAttrValue>,
 }
 
 /// a dom version of the Attribute value, thereby removing the MSG generic
 pub enum DomAttrValue {
+    /// function calls
     FunctionCall(Value),
+    /// simple value
     Simple(Value),
+    /// a style
     Style(Vec<Style>),
+    /// event listeners
     EventListener(Closure<dyn FnMut(web_sys::Event)>),
 }
 
@@ -332,7 +339,7 @@ impl DomAttr {
 
 impl DomAttrValue {
     /// return the value if it is a Simple variant
-    pub(crate) fn get_simple(&self) -> Option<&Value> {
+    pub fn get_simple(&self) -> Option<&Value> {
         match self {
             Self::Simple(v) => Some(v),
             _ => None,
@@ -340,7 +347,7 @@ impl DomAttrValue {
     }
 
     /// make a string representation of this value if it is a simple value
-    pub(crate) fn get_string(&self) -> Option<String> {
+    pub fn get_string(&self) -> Option<String> {
         let simple = self.get_simple()?;
         Some(simple.to_string())
     }

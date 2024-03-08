@@ -141,7 +141,7 @@ fn classes_test() {
 
     let classes: &Attribute<()> = elm
         .attributes()
-        .into_iter()
+        .iter()
         .find(|att| att.name() == &"class")
         .unwrap();
 
@@ -171,7 +171,7 @@ fn should_merge_classes_flag() {
 
     let classes: &Attribute<()> = elm
         .attributes()
-        .into_iter()
+        .iter()
         .find(|att| att.name() == &"class")
         .unwrap();
 

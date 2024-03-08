@@ -37,7 +37,7 @@ fn on_input_test() {
         .expect("must not error");
 
     let input_element = sauron_core::dom::document()
-        .get_element_by_id(&elem_id)
+        .get_element_by_id(elem_id)
         .unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
@@ -92,7 +92,7 @@ fn added_event() {
         .expect("must not error");
 
     let input_element = sauron_core::dom::document()
-        .get_element_by_id(&elem_id)
+        .get_element_by_id(elem_id)
         .unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
@@ -149,7 +149,7 @@ fn remove_event() {
         .expect("must not error");
 
     let input_element = sauron_core::dom::document()
-        .get_element_by_id(&elem_id)
+        .get_element_by_id(elem_id)
         .unwrap();
 
     assert_eq!(&*text.borrow(), "Start Text");
