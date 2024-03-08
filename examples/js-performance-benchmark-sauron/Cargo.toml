@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 rand = { version = "0.8.5", features = ["small_rng"] }
 getrandom = { version = "0.2.7", features = ["js"] }
 #sauron = { version = "0.60.7", features = ["with-debug", "with-measure"] }
-sauron = { path = "../../../sauron", features = ["with-debug", "with-measure"] }
+sauron = { path = "../../../sauron", features = ["with-debug", "with-measure", "use-template"] }
 console_log = "0.2"
 
 [profile.release]
