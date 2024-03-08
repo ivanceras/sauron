@@ -146,6 +146,9 @@ where
             lc.attrs.clone(),
             [],
         ));
+        // the component children is manually appended to the StatefulComponent
+        // here to allow the conversion of dom nodes with its event
+        // listener and removing the generics msg
         for child in lc.children.iter() {
             let child_dom = self.create_dom_node(&child);
             Self::dispatch_mount_event(&child_dom);
