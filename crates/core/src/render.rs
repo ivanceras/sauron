@@ -11,9 +11,24 @@ use std::fmt;
 
 const DEFAULT_INDENT_SIZE: usize = 2;
 
-/// TODO: remove this Render trait and put each render_to_string function to the Node
-/// render node, elements to a writable buffer
-pub trait Render {
+
+/// add an indent if applicable
+fn maybe_indent(
+    buffer: &mut dyn fmt::Write,
+    indent: usize,
+    compressed: bool,
+) -> fmt::Result {
+    if !compressed {
+        write!(
+            buffer,
+            "\n{}",
+            " ".repeat(DEFAULT_INDENT_SIZE).repeat(indent)
+        )?;
+    }
+    Ok(())
+}
+
+impl<MSG> Node<MSG> {
     // ISSUE: sublte difference in `render` and `render_to_string`:
     //  - flow content element such as span will treat the whitespace in between them as html text
     //  node
@@ -32,56 +47,7 @@ pub trait Render {
     //  will result to a desirable output: "hello world"
     //
     /// render the node to a writable buffer
-    fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
-        self.render_with_indent(buffer, 0, false)
-    }
-
-    /// no new_lines, no indents
-    fn render_compressed(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
-        self.render_with_indent(buffer, 0, true)
-    }
-    /// render instance to a writable buffer with indention
-    fn render_with_indent(
-        &self,
-        buffer: &mut dyn fmt::Write,
-        indent: usize,
-        compressed: bool,
-    ) -> fmt::Result;
-
-    /// render compressed html to string
-    fn render_to_string(&self) -> String {
-        let mut buffer = String::new();
-        self.render_compressed(&mut buffer).expect("must render");
-        buffer
-    }
-
-    /// render to string with nice indention
-    fn render_to_string_pretty(&self) -> String {
-        let mut buffer = String::new();
-        self.render(&mut buffer).expect("must render");
-        buffer
-    }
-
-    /// add an indent if applicable
-    fn maybe_indent(
-        &self,
-        buffer: &mut dyn fmt::Write,
-        indent: usize,
-        compressed: bool,
-    ) -> fmt::Result {
-        if !compressed {
-            write!(
-                buffer,
-                "\n{}",
-                " ".repeat(DEFAULT_INDENT_SIZE).repeat(indent)
-            )?;
-        }
-        Ok(())
-    }
-}
-
-impl<MSG> Render for Node<MSG> {
-    fn render_with_indent(
+    pub fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
         indent: usize,
@@ -104,10 +70,37 @@ impl<MSG> Render for Node<MSG> {
             }
         }
     }
+
+    /// render the node to a writable buffer
+    fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
+        self.render_with_indent(buffer, 0, false)
+    }
+
+    /// no new_lines, no indents
+    fn render_compressed(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
+        self.render_with_indent(buffer, 0, true)
+    }
+
+    /// render compressed html to string
+    pub fn render_to_string(&self) -> String {
+        let mut buffer = String::new();
+        self.render_compressed(&mut buffer).expect("must render");
+        buffer
+    }
+
+    /// render to string with nice indention
+    pub fn render_to_string_pretty(&self) -> String {
+        let mut buffer = String::new();
+        self.render(&mut buffer).expect("must render");
+        buffer
+    }
+
 }
 
-impl<MSG> Render for Leaf<MSG> {
-    fn render_with_indent(
+impl<MSG> Leaf<MSG> {
+
+    /// render leaf nodes
+    pub fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
         _indent: usize,
@@ -157,8 +150,9 @@ fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
         .join(" ")
 }
 
-impl<MSG> Render for Element<MSG> {
-    fn render_with_indent(
+impl<MSG> Element<MSG> {
+    /// render element nodes
+    pub fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,
         indent: usize,
@@ -196,14 +190,14 @@ impl<MSG> Render for Element<MSG> {
         } else {
             // otherwise print all child nodes with each line and indented
             for child in self.children() {
-                self.maybe_indent(buffer, indent + 1, compressed)?;
+                maybe_indent(buffer, indent + 1, compressed)?;
                 child.render_with_indent(buffer, indent + 1, compressed)?;
             }
         }
 
         // do not make a new line it if is only a text child node or it has no child nodes
         if !is_lone_child_text_node && !children.is_empty() {
-            self.maybe_indent(buffer, indent, compressed)?;
+            maybe_indent(buffer, indent, compressed)?;
         }
 
         let inner_html = extract_inner_html(&merged_attributes);
@@ -218,7 +212,9 @@ impl<MSG> Render for Element<MSG> {
     }
 }
 
-impl<MSG> Render for Attribute<MSG> {
+impl<MSG> Attribute<MSG> {
+
+    /// render attributes
     fn render_with_indent(
         &self,
         buffer: &mut dyn fmt::Write,

@@ -66,6 +66,8 @@ pub trait DomNode{
     fn create_element(tag: &'static str) -> web_sys::Element {
          document().create_element(intern(tag)).expect("create element")
     }
+
+    //fn render_to_string() -> String;
 }
 
 impl DomNode for web_sys::Node{

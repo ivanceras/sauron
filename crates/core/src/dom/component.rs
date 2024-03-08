@@ -17,6 +17,11 @@ use std::cell::RefCell;
 use crate::dom::program::ActiveClosure;
 use std::collections::VecDeque;
 use wasm_bindgen::JsValue;
+use std::collections::HashMap;
+
+thread_local!{
+    static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
+}
 
 /// A component has a view and can update itself.
 ///
@@ -225,6 +230,8 @@ where
     MSG2: 'static,
 {
 
+    use crate::dom::template;
+
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
 
@@ -236,6 +243,17 @@ where
     // of the stateful component.
     let app = COMP::build(attrs.clone().into_iter().map(|a|DomAttr::convert_attr_except_listener(&a)), []);
     let view = app.view();
+    let template = template::build_template(&view);
+    let template = TEMPLATE_LOOKUP.with_borrow_mut(|map|{
+        if let Some(existing) = map.get(&type_id){
+            existing.clone_node_with_deep(true).expect("deep clone")
+        }else{
+            map.insert(type_id, template.clone());
+            template
+        }
+    });
+    log::info!("template: {:?}", template.to_string());
+
     let app = Rc::new(RefCell::new(app));
 
     let program = Program{

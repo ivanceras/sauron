@@ -32,7 +32,6 @@ pub mod prelude {
         view_if,
     };
 
-    pub use crate::render::Render;
     pub use crate::svg;
     pub use crate::svg::attributes::commons::*;
     pub use crate::svg::attributes::special::*;
