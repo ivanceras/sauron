@@ -160,7 +160,7 @@ where
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
-    pub(crate) fn create_dom_node(&self, vnode: &vdom::Node<MSG>) -> Node {
+    pub fn create_dom_node(&self, vnode: &vdom::Node<MSG>) -> Node {
         match vnode {
             vdom::Node::Leaf(leaf_node) => self.create_leaf_node(leaf_node),
             vdom::Node::Element(element_node) => {
