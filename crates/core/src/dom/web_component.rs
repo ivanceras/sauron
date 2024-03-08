@@ -1,4 +1,5 @@
-use crate::dom::{Application,  Modifier, MountAction, MountTarget, Program};
+use crate::dom::program::MountProcedure;
+use crate::dom::{Application, Modifier, Program};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -146,11 +147,7 @@ where
     /// create a new web component, with the node as the target element to be mounted into
     pub fn new(node: JsValue) -> Self {
         let mount_node: web_sys::Node = node.unchecked_into();
-        let program = Program::new(
-                APP::default(),
-                MountAction::Append,
-                MountTarget::ShadowRoot,
-            );
+        let program = Program::new(APP::default());
         Self {
             program,
             mount_node,
@@ -166,7 +163,8 @@ where
 
     /// called when the web component is mounted
     pub fn connected_callback(&mut self) {
-        self.program.mount(&self.mount_node);
+        self.program
+            .mount(&self.mount_node, MountProcedure::append_to_shadow());
         let static_style = <APP as Application<MSG>>::stylesheet().join("");
         self.program.inject_style_to_mount(&static_style);
         let dynamic_style =

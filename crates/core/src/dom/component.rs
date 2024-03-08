@@ -309,6 +309,8 @@ where
     use std::cell::RefCell;
     use crate::dom::program::ActiveClosure;
     use std::collections::VecDeque;
+    use crate::dom::MountTarget;
+    use crate::dom::MountAction;
 
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
@@ -330,7 +332,6 @@ where
             pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
             pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
         }, 
-        mount_procedure: MountProcedure::default(),
         root_node: Rc::new(RefCell::new(None)),
         mount_node: Rc::new(RefCell::new(None)),
         node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
@@ -345,7 +346,7 @@ where
     let mount_event = on_mount(move|me|{
         log::info!("Component is now mounted..");
         let mut program = program.clone();
-        program.mount(&me.target_node);
+        program.mount(&me.target_node, MountProcedure::new(MountAction::Append, MountTarget::MountNode));
         MSG::default()
     });
     let node = Node::Leaf(Leaf::Component(LeafComponent{

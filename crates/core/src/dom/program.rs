@@ -27,8 +27,10 @@ use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
 
 pub(crate) use app_context::AppContext;
+pub use mount_procedure::{MountProcedure, MountTarget, MountAction};
 
 mod app_context;
+mod mount_procedure;
 
 pub(crate) type EventClosures = Vec<Closure<dyn FnMut(web_sys::Event)>>;
 pub(crate) type Closures = Vec<Closure<dyn FnMut()>>;
@@ -50,8 +52,6 @@ where
     /// We keep these around so that they don't get dropped (and thus stop working);
     pub node_closures: Rc<RefCell<ActiveClosure>>,
 
-    /// specify how the root node is mounted into the mount node
-    pub(crate) mount_procedure: MountProcedure,
 
     /// Pending patches that hasn't been applied to the DOM yet
     /// for optimization purposes to avoid sluggishness of the app, when a patch
@@ -79,7 +79,6 @@ where
     pub(crate) root_node: Weak<RefCell<Option<Node>>>,
     mount_node: Weak<RefCell<Option<Node>>>,
     pub node_closures: Weak<RefCell<ActiveClosure>>,
-    mount_procedure: MountProcedure,
     pending_patches: Weak<RefCell<VecDeque<DomPatch>>>,
     idle_callback_handles: Weak<RefCell<Vec<IdleCallbackHandle>>>,
     animation_frame_handles: Weak<RefCell<Vec<AnimationFrameHandle>>>,
@@ -95,43 +94,6 @@ where
 /// attached to.
 pub type ActiveClosure =
     BTreeMap<usize, BTreeMap<&'static str, Closure<dyn FnMut(web_sys::Event)>>>;
-
-/// specify how the App is mounted to the DOM
-#[derive(Clone, Copy)]
-pub enum MountAction {
-    /// append the APP's root node to the target mount node
-    Append,
-    /// clear any children of the target mount node then append the APP's root node
-    ClearAppend,
-    /// replace the target mount node with the APP's root node
-    Replace,
-}
-
-/// specify whether to attach the Node in shadow_root
-#[derive(Clone, Copy)]
-pub enum MountTarget {
-    /// attached in the mount node
-    MountNode,
-    /// attached to the shadow root
-    ShadowRoot,
-}
-
-/// specify how the root node will be mounted to the mount node
-#[derive(Clone, Copy)]
-pub struct MountProcedure {
-    action: MountAction,
-    target: MountTarget,
-}
-
-impl Default for MountProcedure{
-
-    fn default() -> Self {
-        Self{
-            action: MountAction::Append, 
-            target: MountTarget::MountNode,
-        }
-    }
-}
 
 impl<APP, MSG> WeakProgram<APP, MSG>
 where
@@ -154,7 +116,6 @@ where
             root_node,
             mount_node,
             node_closures,
-            mount_procedure: self.mount_procedure,
             pending_patches,
             idle_callback_handles,
             animation_frame_handles,
@@ -175,7 +136,6 @@ where
             root_node: Weak::clone(&self.root_node),
             mount_node: Weak::clone(&self.mount_node),
             node_closures: Weak::clone(&self.node_closures),
-            mount_procedure: self.mount_procedure,
             pending_patches: Weak::clone(&self.pending_patches),
             idle_callback_handles: Weak::clone(&self.idle_callback_handles),
             animation_frame_handles: Weak::clone(&self.animation_frame_handles),
@@ -197,7 +157,6 @@ where
             root_node: Rc::downgrade(&self.root_node),
             mount_node: Rc::downgrade(&self.mount_node),
             node_closures: Rc::downgrade(&self.node_closures),
-            mount_procedure: self.mount_procedure,
             pending_patches: Rc::downgrade(&self.pending_patches),
             idle_callback_handles: Rc::downgrade(&self.idle_callback_handles),
             animation_frame_handles: Rc::downgrade(&self.animation_frame_handles),
@@ -219,7 +178,6 @@ where
             root_node: Rc::clone(&self.root_node),
             mount_node: Rc::clone(&self.mount_node),
             node_closures: Rc::clone(&self.node_closures),
-            mount_procedure: self.mount_procedure,
             pending_patches: Rc::clone(&self.pending_patches),
             idle_callback_handles: Rc::clone(&self.idle_callback_handles),
             animation_frame_handles: Rc::clone(&self.animation_frame_handles),
@@ -255,15 +213,12 @@ where
     /// and root node, but doesn't mount it yet.
     pub fn new(
         app: APP,
-        action: MountAction,
-        target: MountTarget,
     ) -> Self {
         Program {
             app_context: AppContext::new(app),
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(None)),
             node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
-            mount_procedure: MountProcedure { action, target },
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
             idle_callback_handles: Rc::new(RefCell::new(vec![])),
             animation_frame_handles: Rc::new(RefCell::new(vec![])),
@@ -333,8 +288,8 @@ where
     /// Program::append_to_mount(App{}, &mount);
     /// ```
     pub fn append_to_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
-        let mut program = Self::new(app, MountAction::Append, MountTarget::MountNode);
-        program.mount(mount_node);
+        let mut program = Self::new(app, );
+        program.mount(mount_node, MountProcedure::append());
         ManuallyDrop::new(program)
     }
 
@@ -358,21 +313,15 @@ where
     pub fn replace_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
         let mut program = Self::new(
             app,
-            MountAction::Replace,
-            MountTarget::MountNode,
         );
-        program.mount(mount_node);
+        program.mount(mount_node, MountProcedure::replace());
         ManuallyDrop::new(program)
     }
 
     /// clear the existing children of the mount before mounting the app
     pub fn clear_append_to_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
-        let mut program = Self::new(
-            app,
-            MountAction::ClearAppend,
-            MountTarget::MountNode,
-        );
-        program.mount(mount_node);
+        let mut program = Self::new(app);
+        program.mount(mount_node, MountProcedure::clear_append());
         ManuallyDrop::new(program)
     }
 
@@ -413,12 +362,12 @@ where
 
     /// each element and it's descendant in the vdom is created into
     /// an actual DOM node.
-    pub fn mount(&mut self, mount_node: &web_sys::Node) {
+    pub fn mount(&mut self, mount_node: &web_sys::Node, mount_procedure: MountProcedure) {
         *self.mount_node.borrow_mut() = Some(mount_node.clone());
         self.pre_mount();
         let created_node = self.create_dom_node(&self.app_context.current_vdom());
 
-        let mount_node: web_sys::Node = match self.mount_procedure.target {
+        let mount_node: web_sys::Node = match mount_procedure.target {
             MountTarget::MountNode => self.mount_node.borrow().as_ref().expect("mount node").clone(),
             MountTarget::ShadowRoot => {
                 let mount_element: web_sys::Element =
@@ -433,7 +382,7 @@ where
             }
         };
 
-        match self.mount_procedure.action {
+        match mount_procedure.action {
             MountAction::Append => {
                 Self::append_child_and_dispatch_mount_event(&mount_node, &created_node);
             }
