@@ -330,12 +330,11 @@ where
     );
     let comp = COMP::build([], []);
     // should we got this from mount event
-    let mount_node = crate::dom::document().body().unwrap(); 
-    let program = Program::new(comp, &mount_node, MountAction::Append, MountTarget::MountNode);
-    let mount_event = on_mount(move|mn|{
+    let program = Program::new(comp, MountAction::Append, MountTarget::MountNode);
+    let mount_event = on_mount(move|me|{
         log::info!("Component is now mounted..");
         let mut program = program.clone();
-        program.mount();
+        program.mount(&me.target_node);
         MSG::default()
     });
     let node = Node::Leaf(Leaf::Component(LeafComponent{

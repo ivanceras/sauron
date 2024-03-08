@@ -358,7 +358,7 @@ where
                     // if we are patching a fragment mode in the top-level document
                     // it has no access to it's parent other than accessing the mount-node itself
                     if patch_path.is_empty() {
-                        let mount_node = self.mount_node();
+                        let mount_node = self.mount_node().expect("mount node");
                         Self::clear_children(&mount_node);
                         mount_node
                             .append_child(&first_node)

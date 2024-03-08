@@ -135,6 +135,7 @@ where
 {
     /// the underlying program running this web component
     pub program: Program<APP, MSG>,
+    pub mount_node: web_sys::Node,
 }
 
 impl<APP, MSG> WebComponentWrapper<APP, MSG>
@@ -144,14 +145,15 @@ where
 {
     /// create a new web component, with the node as the target element to be mounted into
     pub fn new(node: JsValue) -> Self {
-        let mount_node: &web_sys::Node = node.unchecked_ref();
-        Self {
-            program: Program::new(
+        let mount_node: web_sys::Node = node.unchecked_into();
+        let program = Program::new(
                 APP::default(),
-                mount_node,
                 MountAction::Append,
                 MountTarget::ShadowRoot,
-            ),
+            );
+        Self {
+            program,
+            mount_node,
         }
     }
 
@@ -164,7 +166,7 @@ where
 
     /// called when the web component is mounted
     pub fn connected_callback(&mut self) {
-        self.program.mount();
+        self.program.mount(&self.mount_node);
         let static_style = <APP as Application<MSG>>::stylesheet().join("");
         self.program.inject_style_to_mount(&static_style);
         let dynamic_style =

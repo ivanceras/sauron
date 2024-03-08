@@ -49,7 +49,7 @@ where
     pub(crate) root_node: Rc<RefCell<Option<Node>>>,
 
     /// the actual DOM element where the APP is mounted to.
-    mount_node: Rc<RefCell<Node>>,
+    mount_node: Rc<RefCell<Option<Node>>>,
 
     /// The closures that are currently attached to all the nodes used in the Application
     /// We keep these around so that they don't get dropped (and thus stop working);
@@ -82,7 +82,7 @@ where
 {
     pub(crate) app_context: WeakContext<APP, MSG>,
     pub(crate) root_node: Weak<RefCell<Option<Node>>>,
-    mount_node: Weak<RefCell<Node>>,
+    mount_node: Weak<RefCell<Option<Node>>>,
     pub node_closures: Weak<RefCell<ActiveClosure>>,
     mount_procedure: MountProcedure,
     pending_patches: Weak<RefCell<VecDeque<DomPatch>>>,
@@ -249,14 +249,13 @@ where
     /// and root node, but doesn't mount it yet.
     pub fn new(
         app: APP,
-        mount_node: &web_sys::Node,
         action: MountAction,
         target: MountTarget,
     ) -> Self {
         Program {
             app_context: AppContext::new(app),
             root_node: Rc::new(RefCell::new(None)),
-            mount_node: Rc::new(RefCell::new(mount_node.clone())),
+            mount_node: Rc::new(RefCell::new(None)),
             node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
             mount_procedure: MountProcedure { action, target },
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
@@ -302,8 +301,12 @@ where
     }
 
     /// return the node where the app is mounted into
-    pub fn mount_node(&self) -> web_sys::Node {
-        self.mount_node.borrow().clone()
+    pub fn mount_node(&self) -> Option<web_sys::Node> {
+        if let Some(mount_node) = self.mount_node.borrow().as_ref(){
+            Some(mount_node.clone())
+        }else{
+            None
+        }
     }
 
     ///  Instantiage an app and append the view to the root_node
@@ -324,8 +327,8 @@ where
     /// Program::append_to_mount(App{}, &mount);
     /// ```
     pub fn append_to_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
-        let mut program = Self::new(app, mount_node, MountAction::Append, MountTarget::MountNode);
-        program.mount();
+        let mut program = Self::new(app, MountAction::Append, MountTarget::MountNode);
+        program.mount(mount_node);
         ManuallyDrop::new(program)
     }
 
@@ -349,11 +352,10 @@ where
     pub fn replace_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
         let mut program = Self::new(
             app,
-            mount_node,
             MountAction::Replace,
             MountTarget::MountNode,
         );
-        program.mount();
+        program.mount(mount_node);
         ManuallyDrop::new(program)
     }
 
@@ -361,11 +363,10 @@ where
     pub fn clear_append_to_mount(app: APP, mount_node: &web_sys::Node) -> ManuallyDrop<Self> {
         let mut program = Self::new(
             app,
-            mount_node,
             MountAction::ClearAppend,
             MountTarget::MountNode,
         );
-        program.mount();
+        program.mount(mount_node);
         ManuallyDrop::new(program)
     }
 
@@ -406,22 +407,23 @@ where
 
     /// each element and it's descendant in the vdom is created into
     /// an actual DOM node.
-    pub fn mount(&mut self) {
+    pub fn mount(&mut self, mount_node: &web_sys::Node) {
+        *self.mount_node.borrow_mut() = Some(mount_node.clone());
         self.pre_mount();
         let created_node = self.create_dom_node(&self.app_context.current_vdom());
 
         let mount_node: web_sys::Node = match self.mount_procedure.target {
-            MountTarget::MountNode => self.mount_node.borrow().clone(),
+            MountTarget::MountNode => self.mount_node.borrow().as_ref().expect("mount node").clone(),
             MountTarget::ShadowRoot => {
                 let mount_element: web_sys::Element =
-                    self.mount_node.borrow().clone().unchecked_into();
+                    self.mount_node.borrow().as_ref().expect("mount node").clone().unchecked_into();
                 mount_element
                     .attach_shadow(&web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open))
                     .expect("unable to attached shadow");
                 let mount_shadow = mount_element.shadow_root().expect("must have a shadow");
 
-                *self.mount_node.borrow_mut() = mount_shadow.unchecked_into();
-                self.mount_node.borrow().clone()
+                *self.mount_node.borrow_mut() = Some(mount_shadow.unchecked_into());
+                self.mount_node.borrow().as_ref().expect("mount_node").clone()
             }
         };
 
@@ -439,7 +441,7 @@ where
                     .replace_with_with_node_1(&created_node)
                     .expect("Could not append child to mount");
                 Self::dispatch_mount_event(&created_node);
-                *self.mount_node.borrow_mut() = created_node.clone()
+                *self.mount_node.borrow_mut() = Some(created_node.clone())
             }
         }
         *self.root_node.borrow_mut() = Some(created_node);
@@ -781,6 +783,8 @@ where
 
         self.mount_node
             .borrow_mut()
+            .as_mut()
+            .expect("mount node")
             .append_child(&created_node)
             .expect("could not append child to mount shadow");
     }
