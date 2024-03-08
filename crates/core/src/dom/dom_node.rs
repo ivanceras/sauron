@@ -30,7 +30,9 @@ thread_local! {
         HashMap::from_iter(["div", "span", "ol", "ul", "li"].map(create_element_with_tag));
 }
 
+/// Provides helper traits for web_sys::Node
 pub trait DomNode{
+    /// return the inner html if it is an element
     fn inner_html(&self) -> Option<String>;
 }
 
@@ -139,20 +141,16 @@ where
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
     fn create_leaf_component(&self, lc: &LeafComponent<MSG>) -> Node {
 
-        //let template = lc.comp.template();
-        //let view = lc.comp.view();
-        //log::info!("template: {:?}", template);
-        // The program needs to have a registry of Component
-        // indexed by their type_id
+        log::info!("Creating a node for a Leaf component...");
         let comp_node = self.create_dom_node(&crate::html::div(
             lc.attrs.clone(),
             [],
         ));
         for child in lc.children.iter() {
             let child_dom = self.create_dom_node(&child);
-            comp_node
-                .append_child(&child_dom)
-                .expect("must append child node of component");
+            Self::dispatch_mount_event(&child_dom);
+            lc.comp.borrow_mut()
+                .append_child(&child_dom);
         }
         comp_node
     }

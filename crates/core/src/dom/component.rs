@@ -9,8 +9,8 @@ use crate::vdom::LeafComponent;
 use crate::dom::Cmd;
 use crate::dom::Application;
 use crate::dom::Program;
-use crate::dom::MountTarget;
-use crate::dom::MountAction;
+use crate::dom::program::MountProcedure;
+use crate::dom::program::AppContext;
 
 /// A component has a view and can update itself.
 ///
@@ -253,7 +253,7 @@ pub trait StatefulComponent {
     fn remove_attribute(&mut self, attr_name: AttributeName);
 
     /// append a child into this component
-    fn append_child(&mut self, child: web_sys::Node);
+    fn append_child(&mut self, child: &web_sys::Node);
 
     /// remove a child in this index
     fn remove_child(&mut self, index: usize);
@@ -305,18 +305,43 @@ where
     MSG2: 'static,
 {
     use crate::dom::events::on_mount;
+    use std::rc::Rc;
+    use std::cell::RefCell;
+    use crate::dom::program::ActiveClosure;
+    use std::collections::VecDeque;
+
     // make a global registry here
     // store the COMP in the global registry
     // and when the program encounter the component with the type id
     // it will be retrieved from the global registry
     let type_id = TypeId::of::<COMP>();
-    log::info!(
-        "type_id: {type_id:?}, type_name: {}",
-        std::any::type_name::<COMP>()
-    );
-    let comp = COMP::build([], []);
+    let attrs_copy = attrs.into_iter().collect::<Vec<_>>();
+    let comp = COMP::build(attrs_copy.clone().into_iter().map(|a|DomAttr::convert_attr_except_listener(&a)), []);
+    let rc_comp = Rc::new(RefCell::new(comp));
+
+    let comp_copy = Rc::clone(&rc_comp);
+    //let view = crate::html::div([],[]);
+    let view = comp_copy.borrow().view();
     // should we got this from mount event
-    let program = Program::new(comp, MountAction::Append, MountTarget::MountNode);
+    let program = Program{
+        app_context: AppContext{
+            app: comp_copy,
+            current_vdom: Rc::new(RefCell::new(view)),
+            pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
+            pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
+        }, 
+        mount_procedure: MountProcedure::default(),
+        root_node: Rc::new(RefCell::new(None)),
+        mount_node: Rc::new(RefCell::new(None)),
+        node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
+        pending_patches: Rc::new(RefCell::new(VecDeque::new())),
+        idle_callback_handles: Rc::new(RefCell::new(vec![])),
+        animation_frame_handles: Rc::new(RefCell::new(vec![])),
+        event_closures: Rc::new(RefCell::new(vec![])),
+        closures: Rc::new(RefCell::new(vec![])),
+        last_update: Rc::new(RefCell::new(None)),
+    };
+    let children:Vec<Node<MSG>> = children.into_iter().collect();
     let mount_event = on_mount(move|me|{
         log::info!("Component is now mounted..");
         let mut program = program.clone();
@@ -324,8 +349,9 @@ where
         MSG::default()
     });
     let node = Node::Leaf(Leaf::Component(LeafComponent{
+        comp: rc_comp,
         type_id,
-        attrs: attrs.into_iter().chain([mount_event].into_iter()).collect(),
+        attrs: attrs_copy.into_iter().chain([mount_event]).collect(),
         children: children.into_iter().collect(),
     }));
     node

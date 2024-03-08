@@ -10,7 +10,8 @@ use sauron::vdom::AttributeName;
 use sauron::dom::DomAttr;
 use sauron::dom::StatefulComponent;
 use sauron::dom::template;
-
+use sauron::dom::DomNode;
+use std::default::Default;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -19,6 +20,7 @@ pub enum Msg {
     TimeOrDateModified(String),
     IntervalChange(f64),
     Mounted(MountEvent),
+    ExternContMounted(web_sys::Node),
     BtnClick,
 }
 
@@ -26,6 +28,8 @@ pub enum Msg {
 pub struct DateTimeWidget {
     /// the host element the web editor is mounted to, when mounted as a custom web component
     host_element: Option<web_sys::Element>,
+    children: Vec<web_sys::Node>,
+    external_children_node: Option<web_sys::Node>,
     date: String,
     time: String,
     cnt: i32,
@@ -38,6 +42,8 @@ impl Default for DateTimeWidget {
             date: String::new(),
             time: String::new(),
             cnt: 0,
+            children: vec![],
+            external_children_node: None,
         }
     }
 }
@@ -46,10 +52,9 @@ impl DateTimeWidget
 {
     pub fn new(date: &str, time: &str) -> Self {
         DateTimeWidget {
-            host_element: None,
             date: date.to_string(),
             time: time.to_string(),
-            cnt: 0,
+            ..Default::default()
         }
     }
 
@@ -97,6 +102,14 @@ impl Component<Msg, ()> for DateTimeWidget{
                 } else {
                     log::warn!("There is no shadow root");
                 }
+                Effects::none()
+            }
+            Msg::ExternContMounted(target_node) => {
+                log::info!("extenal container mounted...");
+                for child in self.children.iter(){
+                    target_node.append_child(child).expect("must append");
+                }
+                self.external_children_node = Some(target_node);
                 Effects::none()
             }
             Msg::BtnClick => {
@@ -156,6 +169,7 @@ impl Component<Msg, ()> for DateTimeWidget{
                 ),
                 input([r#type("text"), value(self.cnt)], []),
                 button([on_click(move |_| Msg::BtnClick)], [text("Do something")]),
+                div([class("external_children"), on_mount(|me|Msg::ExternContMounted(me.target_node))], [])
             ],
         )
     }
@@ -201,8 +215,14 @@ impl StatefulComponent for DateTimeWidget{
         }
     }
 
-    fn append_child(&mut self, child: web_sys::Node) {
-        log::warn!("This doesn't support child nodes");
+    fn append_child(&mut self, child: &web_sys::Node) {
+        log::info!("appending child to date_time: {:?}", child.inner_html());
+        if let Some(external_children_node) = self.external_children_node.as_ref(){
+            log::info!("ok appending..");
+            external_children_node.append_child(child).expect("must append");
+        }else{
+            self.children.push(child.clone());
+        }
     }
 
     fn remove_attribute(&mut self, attr_name: AttributeName) {}

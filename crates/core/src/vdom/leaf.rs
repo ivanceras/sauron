@@ -3,6 +3,9 @@ use crate::vdom::{Attribute, Node};
 use std::any::TypeId;
 use std::borrow::Cow;
 use std::fmt;
+use std::rc::Rc;
+use std::cell::RefCell;
+use crate::dom::StatefulComponent;
 
 /// A leaf node value of html dom tree
 pub enum Leaf<MSG> {
@@ -21,6 +24,8 @@ pub enum Leaf<MSG> {
 
 /// Wrapper for stateful component
 pub struct LeafComponent<MSG>{
+    /// 
+    pub comp: Rc<RefCell<dyn StatefulComponent>>,
     /// component type id
     pub type_id: TypeId,
     /// component attributes
@@ -44,7 +49,7 @@ impl<MSG> Clone for Leaf<MSG> {
 impl<MSG> Clone for LeafComponent<MSG> {
     fn clone(&self) -> Self {
        Self {
-            //comp: Rc::clone(&self.comp),
+            comp: Rc::clone(&self.comp),
             type_id: self.type_id.clone(),
             attrs: self.attrs.clone(),
             children: self.children.clone(),
@@ -62,7 +67,7 @@ impl<MSG> LeafComponent<MSG>{
     {
            LeafComponent {
                 type_id: self.type_id,
-                //comp: self.comp,
+                comp: self.comp,
                 attrs: self.attrs.into_iter().map(|a| a.map_msg(cb.clone())).collect(),
                 children: self.children
                     .into_iter()

@@ -32,6 +32,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use cmd::Cmd;
     use crate::dom::events::MountEvent;
     pub use window::Window;
+    pub use dom_node::DomNode;
 
     mod application;
     pub mod cmd;

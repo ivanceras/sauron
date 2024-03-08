@@ -180,7 +180,7 @@ impl Application<Msg> for App {
                     {component::<Button, Msg, button::Msg>([], [text("External child of btn component")])}
                 </div>
                 <div>
-                    {component::<DateTimeWidget, Msg, date_time::Msg>([],[])}
+                    {component::<DateTimeWidget, Msg, date_time::Msg>([],[text("External child of date widget")])}
                 </div>
             </div>
         }

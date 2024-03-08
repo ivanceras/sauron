@@ -11,7 +11,6 @@ use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
 use crate::vdom::{diff_recursive, TreePath};
-use app_context::AppContext;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeMap;
 use std::collections::VecDeque;
@@ -26,6 +25,8 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
+
+pub(crate) use app_context::AppContext;
 
 mod app_context;
 
@@ -43,31 +44,31 @@ where
     pub(crate) root_node: Rc<RefCell<Option<Node>>>,
 
     /// the actual DOM element where the APP is mounted to.
-    mount_node: Rc<RefCell<Option<Node>>>,
+    pub(crate) mount_node: Rc<RefCell<Option<Node>>>,
 
     /// The closures that are currently attached to all the nodes used in the Application
     /// We keep these around so that they don't get dropped (and thus stop working);
     pub node_closures: Rc<RefCell<ActiveClosure>>,
 
     /// specify how the root node is mounted into the mount node
-    mount_procedure: MountProcedure,
+    pub(crate) mount_procedure: MountProcedure,
 
     /// Pending patches that hasn't been applied to the DOM yet
     /// for optimization purposes to avoid sluggishness of the app, when a patch
     /// can not be run in 1 execution due to limited remaining time deadline
     /// it will be put into the pending patches to be executed on the next run.
-    pending_patches: Rc<RefCell<VecDeque<DomPatch>>>,
+    pub(crate) pending_patches: Rc<RefCell<VecDeque<DomPatch>>>,
 
     /// store the Closure used in request_idle_callback calls
-    idle_callback_handles: Rc<RefCell<Vec<IdleCallbackHandle>>>,
+    pub(crate) idle_callback_handles: Rc<RefCell<Vec<IdleCallbackHandle>>>,
     /// store the Closure used in request_animation_frame calls
-    animation_frame_handles: Rc<RefCell<Vec<AnimationFrameHandle>>>,
+    pub(crate) animation_frame_handles: Rc<RefCell<Vec<AnimationFrameHandle>>>,
 
     /// event listener closures
     pub(crate) event_closures: Rc<RefCell<EventClosures>>,
     /// generic closures that has no argument
     pub closures: Rc<RefCell<Closures>>,
-    last_update: Rc<RefCell<Option<f64>>>,
+    pub(crate) last_update: Rc<RefCell<Option<f64>>>,
 }
 
 pub struct WeakProgram<APP, MSG>
@@ -117,9 +118,19 @@ pub enum MountTarget {
 
 /// specify how the root node will be mounted to the mount node
 #[derive(Clone, Copy)]
-struct MountProcedure {
+pub struct MountProcedure {
     action: MountAction,
     target: MountTarget,
+}
+
+impl Default for MountProcedure{
+
+    fn default() -> Self {
+        Self{
+            action: MountAction::Append, 
+            target: MountTarget::MountNode,
+        }
+    }
 }
 
 impl<APP, MSG> WeakProgram<APP, MSG>
@@ -218,6 +229,7 @@ where
         }
     }
 }
+
 
 impl<APP, MSG> Program<APP, MSG>
 where
