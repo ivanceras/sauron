@@ -17,6 +17,7 @@ use web_sys::{
     self, Element, Node, Text,
 };
 use crate::vdom::LeafComponent;
+use std::fmt;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -67,7 +68,11 @@ pub trait DomNode{
          document().create_element(intern(tag)).expect("create element")
     }
 
-    //fn render_to_string() -> String;
+    ///
+    fn render_to_string(&self) -> String;
+
+    ///
+    fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result;
 }
 
 impl DomNode for web_sys::Node{
@@ -75,6 +80,47 @@ impl DomNode for web_sys::Node{
     fn inner_html(&self) -> Option<String>{
         let element: &Element = self.dyn_ref()?;
         Some(element.inner_html())
+    }
+
+    fn render_to_string(&self) -> String{
+        let mut buffer = String::new();
+        self.render(&mut buffer).expect("must render");
+        buffer
+    }
+    
+    fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result{
+        match self.node_type(){
+            Node::TEXT_NODE => {
+                let text_node = self.unchecked_ref::<Text>();
+                let text = text_node.whole_text().expect("whole text");
+                write!(buffer, "{text}")?;
+                Ok(())
+            }
+            Node::ELEMENT_NODE => {
+                let elm = self.unchecked_ref::<Element>();
+                let tag = elm.tag_name().to_lowercase();
+
+                write!(buffer, "<{tag}")?;
+                let attrs = elm.attributes();
+                let attrs_len = attrs.length();
+                for i in 0..attrs_len{
+                    let attr = attrs.item(i).expect("attr");
+                    write!(buffer, " {}=\"{}\"", attr.local_name(), attr.value())?;
+                }
+                write!(buffer, ">")?;
+
+                let children =  elm.children();
+                let children_len = children.length();
+                for i in 0..children_len{
+                    let child = children.item(i).expect("element child");
+                    child.render(buffer)?;
+                }
+                write!(buffer,"</{tag}>")?;
+                Ok(())
+            }
+            _ => todo!("for other else"),
+
+        }
     }
 }
 

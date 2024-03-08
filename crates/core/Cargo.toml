@@ -41,6 +41,7 @@ version = "0.3"
 optional = true
 features = [
     "AnimationEvent",
+    "Attr",
     "Comment",
     "ClipboardEvent",
     "console",
@@ -87,6 +88,7 @@ features = [
     "ShadowRootInit",
     "ShadowRootMode",
     "MouseEvent",
+    "NamedNodeMap",
     "Node",
     "NodeList",
     "Text",

@@ -242,6 +242,8 @@
 - [ ] Create a `view!` macro which generated the view function + template + prediff functions
 - [X] Make a variant of `Node` leaf to be `Component`, component can contain attributes and optionally children components + elements
     - [X] This requires moving the mt-dom types into sauron-core so as to make a specific diff function for component
+- [ ] put back map_msg module where it contains map_msg functions for Node, Element, Attributes
+    - this way, it will be easier to see the flow of map_msg method
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)

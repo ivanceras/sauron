@@ -18,6 +18,7 @@ use crate::dom::program::ActiveClosure;
 use std::collections::VecDeque;
 use wasm_bindgen::JsValue;
 use std::collections::HashMap;
+use crate::dom::dom_node::DomNode;
 
 thread_local!{
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
@@ -246,13 +247,15 @@ where
     let template = template::build_template(&view);
     let template = TEMPLATE_LOOKUP.with_borrow_mut(|map|{
         if let Some(existing) = map.get(&type_id){
+            log::info!("An existing template...");
             existing.clone_node_with_deep(true).expect("deep clone")
         }else{
+            log::warn!("Adding a new template for: {:?}", type_id);
             map.insert(type_id, template.clone());
             template
         }
     });
-    log::info!("template: {:?}", template.to_string());
+    log::info!("template: {}", template.render_to_string());
 
     let app = Rc::new(RefCell::new(app));
 
