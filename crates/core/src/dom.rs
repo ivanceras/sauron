@@ -21,7 +21,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use dom_patch::{DomPatch, PatchVariant};
     pub use dom_attr::{DomAttr, DomAttrValue, GroupedDomAttrValues};
     pub use http::Http;
-    pub use program::{MountAction, MountTarget, Program};
+    pub use program::{MountAction, MountTarget, Program, MountProcedure};
     pub use util::{
         document, history, now, performance,
         spawn_local, window, inject_style,

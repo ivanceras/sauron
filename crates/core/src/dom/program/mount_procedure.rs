@@ -21,7 +21,9 @@ pub enum MountTarget {
 /// specify how the root node will be mounted to the mount node
 #[derive(Clone, Copy)]
 pub struct MountProcedure {
+    /// instruction for mounting the app to the mount node
     pub action: MountAction,
+    /// specify which part of the mount_node to attached to
     pub target: MountTarget,
 }
 
