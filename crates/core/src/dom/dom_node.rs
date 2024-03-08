@@ -4,7 +4,7 @@ use crate::vdom::AttributeName;
 use crate::vdom::TreePath;
 use crate::{
     dom::events::MountEvent,
-    dom::{document, window},
+    dom::document,
     dom::{Application, Program},
     vdom,
     vdom::{Attribute, Leaf},
@@ -27,13 +27,39 @@ thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
 // cloning is much faster then creating the element
 thread_local! {
     static CACHE_ELEMENTS: HashMap<&'static str, web_sys::Element> =
-        HashMap::from_iter(["div", "span", "ol", "ul", "li"].map(create_element_with_tag));
+        HashMap::from_iter(["div", "span", "ol", "ul", "li"].map(web_sys::Node::create_element_with_tag));
 }
 
 /// Provides helper traits for web_sys::Node
 pub trait DomNode{
     /// return the inner html if it is an element
     fn inner_html(&self) -> Option<String>;
+
+    /// create a text node
+    fn create_text_node(txt: &str) -> Text {
+        document().create_text_node(txt)
+    }
+
+    /// create a web_sys::Element with the specified tag
+    fn create_element_with_tag(tag: &'static str) -> (&'static str, web_sys::Element) {
+        let elm = document().create_element(intern(tag)).unwrap();
+        (tag, elm)
+    }
+
+    /// find the element from the most created element and clone it, else create it
+    /// TODO: feature gate this with `use-cached-elements`
+    fn create_element(tag: &'static str) -> web_sys::Element {
+        CACHE_ELEMENTS.with(|map| {
+            if let Some(elm) = map.get(tag) {
+                elm.clone_node_with_deep(false)
+                    .expect("must clone node")
+                    .unchecked_into()
+            } else {
+                let elm = document().create_element(intern(tag)).unwrap();
+                elm
+            }
+        })
+    }
 }
 
 impl DomNode for web_sys::Node{
@@ -56,30 +82,7 @@ pub fn intern(s: &str) -> &str {
     s
 }
 
-fn create_element_with_tag(tag: &'static str) -> (&'static str, web_sys::Element) {
-    let elm = document().create_element(intern(tag)).unwrap();
-    (tag, elm)
-}
 
-/// find the element from the most created element and clone it, else create it
-/// TODO: feature gate this with `use-cached-elements`
-pub(crate) fn create_element(tag: &'static str) -> web_sys::Element {
-    CACHE_ELEMENTS.with(|map| {
-        if let Some(elm) = map.get(tag) {
-            elm.clone_node_with_deep(false)
-                .expect("must clone node")
-                .unchecked_into()
-        } else {
-            let elm = document().create_element(intern(tag)).unwrap();
-            elm
-        }
-    })
-}
-
-/// create a text node
-pub(crate) fn create_text_node(txt: &str) -> Text {
-    document().create_text_node(txt)
-}
 
 /// This is the value of the data-sauron-vdom-id.
 /// Used to uniquely identify elements that contain closures so that the DomUpdater can
@@ -112,7 +115,7 @@ where
 
     fn create_leaf_node(&self, leaf: &Leaf<MSG>) -> Node {
         match leaf {
-            Leaf::Text(txt) => create_text_node(txt).into(),
+            Leaf::Text(txt) => web_sys::Node::create_text_node(txt).into(),
             Leaf::Comment(comment) => document().create_comment(comment).into(),
             Leaf::SafeHtml(_safe_html) => {
                 panic!("safe html must have already been dealt in create_element node");
@@ -189,28 +192,17 @@ where
         }
     }
 
-    fn is_custom_element(tag: &str) -> bool {
-        let custom_element = window().custom_elements();
-        let existing = custom_element.get(intern(tag));
-        // define the custom element only when it is not yet defined
-        !existing.is_undefined()
-    }
-
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
     fn create_element_node(&self, velem: &vdom::Element<MSG>) -> Node {
         let document = document();
-
-        if Self::is_custom_element(velem.tag()) {
-            //log::info!("This is a custom element: {}", velem.tag());
-        }
 
         let element = if let Some(namespace) = velem.namespace() {
             document
                 .create_element_ns(Some(intern(namespace)), intern(velem.tag()))
                 .expect("Unable to create element")
         } else {
-            create_element(velem.tag())
+            Node::create_element(velem.tag())
         };
 
         let attrs = Attribute::merge_attributes_of_same_name(velem.attributes());

@@ -1,12 +1,12 @@
 //! utility functions for extracting templates from a view
 //!
 use crate::dom::document;
-use crate::dom::dom_node;
 use crate::dom::DomAttr;
 use crate::vdom;
 use crate::vdom::Attribute;
 use crate::vdom::{Leaf, Node};
 use wasm_bindgen::intern;
+use crate::dom::DomNode;
 
 /// build a node but only include static attributes and leaf nodes
 pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG>
@@ -84,7 +84,7 @@ fn create_document_fragment<MSG>(nodes: &[vdom::Node<MSG>]) -> web_sys::Node {
 
 fn create_leaf_node_without_listeners<MSG>(leaf: &Leaf<MSG>) -> web_sys::Node {
     match leaf {
-        Leaf::Text(txt) => dom_node::create_text_node(txt).into(),
+        Leaf::Text(txt) => web_sys::Node::create_text_node(txt).into(),
         Leaf::Comment(comment) => document().create_comment(comment).into(),
         Leaf::SafeHtml(_safe_html) => {
             panic!("safe html must have already been dealt in create_element node");
@@ -109,7 +109,7 @@ fn create_element_node_without_listeners<MSG>(velem: &vdom::Element<MSG>) -> web
             .create_element_ns(Some(intern(namespace)), intern(velem.tag()))
             .expect("Unable to create element")
     } else {
-        dom_node::create_element(velem.tag())
+        web_sys::Node::create_element(velem.tag())
     };
 
     let attrs = Attribute::merge_attributes_of_same_name(velem.attributes());
