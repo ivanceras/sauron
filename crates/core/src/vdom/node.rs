@@ -109,6 +109,7 @@ impl<MSG> Node<MSG> {
         }
     }
 
+    /// return the text if this is text node leaf
     pub fn as_text(&self) -> Option<&str> {
         match self {
             Self::Leaf(ref leaf) => leaf.as_text(),
@@ -116,6 +117,7 @@ impl<MSG> Node<MSG> {
         }
     }
 
+    /// return the text if this is safe html leaf
     pub fn as_safe_html(&self) -> Option<&str> {
         match self {
             Self::Leaf(ref leaf) => leaf.as_safe_html(),

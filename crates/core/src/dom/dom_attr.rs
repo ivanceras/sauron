@@ -15,12 +15,14 @@ use web_sys::{
     HtmlStyleElement, HtmlTextAreaElement, Node, Text,
 };
 
+/// a dom version of the Attribute, thereby removing the MSG generic
 pub struct DomAttr {
     pub namespace: Option<&'static str>,
     pub name: &'static str,
     pub value: Vec<DomAttrValue>,
 }
 
+/// a dom version of the Attribute value, thereby removing the MSG generic
 pub enum DomAttrValue {
     FunctionCall(Value),
     Simple(Value),
@@ -28,6 +30,8 @@ pub enum DomAttrValue {
     EventListener(Closure<dyn FnMut(web_sys::Event)>),
 }
 
+/// a struct where the listeners, plain values, styles and function call values are grouped
+/// separately
 pub struct GroupedDomAttrValues {
     /// the listeners of the event listeners
     pub listeners: Vec<Closure<dyn FnMut(web_sys::Event)>>,
@@ -40,6 +44,8 @@ pub struct GroupedDomAttrValues {
 }
 
 impl DomAttr {
+
+    /// return the values grouped into listeners, plain, styles and function calls
     pub(crate) fn group_values(self) -> GroupedDomAttrValues {
         let mut listeners = vec![];
         let mut plain_values = vec![];
@@ -83,12 +89,12 @@ impl DomAttr {
 
     /// Note: Used only templates
     /// set the lement with dom attr except for the event listeners
-    pub fn set_element_dom_attr_except_listeners(element: &Element, attr: DomAttr) {
+    pub(crate) fn set_element_dom_attr_except_listeners(element: &Element, attr: DomAttr) {
         let attr_name = intern(attr.name);
         let attr_namespace = attr.namespace;
 
         let GroupedDomAttrValues {
-            listeners,
+            listeners: _,
             plain_values,
             styles,
             function_calls,
@@ -98,7 +104,8 @@ impl DomAttr {
         Self::set_element_simple_values(element, attr_name, attr_namespace, plain_values);
     }
 
-    pub fn set_element_style(element: &Element, attr_name: AttributeName, styles: Vec<Style>) {
+    /// set the style of this element
+    pub(crate) fn set_element_style(element: &Element, attr_name: AttributeName, styles: Vec<Style>) {
         if let Some(merged_styles) = Style::merge_to_string(&styles) {
             // set the styles
             element
@@ -113,8 +120,8 @@ impl DomAttr {
         }
     }
 
-    // do function calls such as set_inner_html
-    pub fn set_element_function_call_values(
+    /// do function calls such as set_inner_html
+    pub(crate) fn set_element_function_call_values(
         element: &Element,
         attr_name: AttributeName,
         function_calls: Vec<Value>,
@@ -126,8 +133,8 @@ impl DomAttr {
         }
     }
 
-    // set simple values
-    pub fn set_element_simple_values(
+    /// set simple values
+    pub(crate) fn set_element_simple_values(
         element: &Element,
         attr_name: AttributeName,
         attr_namespace: Option<Namespace>,
@@ -189,7 +196,7 @@ impl DomAttr {
     }
 
     /// remove the elemnt dom attr
-    pub fn remove_element_dom_attr(element: &Element, attr: &DomAttr) -> Result<(), JsValue> {
+    pub(crate) fn remove_element_dom_attr(element: &Element, attr: &DomAttr) -> Result<(), JsValue> {
         if *VALUE == attr.name {
             DomAttr::set_value_str(element, "");
         } else if *OPEN == attr.name {
@@ -211,7 +218,7 @@ impl DomAttr {
     /// There are only 2 elements where set_checked is applicable:
     /// - input
     /// - menuitem
-    pub fn set_checked(element: &Element, is_checked: bool) {
+    pub(crate) fn set_checked(element: &Element, is_checked: bool) {
         if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
             input.set_checked(is_checked);
         }
@@ -225,7 +232,7 @@ impl DomAttr {
     /// Applies to:
     ///  - dialog
     ///  - details
-    pub fn set_open(element: &Element, is_open: bool) {
+    pub(crate) fn set_open(element: &Element, is_open: bool) {
         if let Some(details) = element.dyn_ref::<HtmlDetailsElement>() {
             details.set_open(is_open);
         }
@@ -247,7 +254,7 @@ impl DomAttr {
     /// - menuitem
     ///
     /// TODO: use macro to simplify this code
-    pub fn set_disabled(element: &Element, is_disabled: bool) {
+    pub(crate) fn set_disabled(element: &Element, is_disabled: bool) {
         if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
             elm.set_disabled(is_disabled);
         } else if let Some(elm) = element.dyn_ref::<HtmlButtonElement>() {
@@ -272,7 +279,7 @@ impl DomAttr {
     /// we explicitly call the `set_value` function in the html element
     ///
     /// TODO: use macro to simplify this code
-    pub fn set_value_str(element: &Element, value: &str) {
+    pub(crate) fn set_value_str(element: &Element, value: &str) {
         if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
             elm.set_value(value);
         } else if let Some(elm) = element.dyn_ref::<HtmlTextAreaElement>() {
@@ -292,13 +299,15 @@ impl DomAttr {
         }
     }
 
-    pub fn set_value_i32(element: &Element, value: i32) {
+    /// set the value of this element with an i32 value
+    pub(crate) fn set_value_i32(element: &Element, value: i32) {
         if let Some(elm) = element.dyn_ref::<HtmlLiElement>() {
             elm.set_value(value);
         }
     }
 
-    pub fn set_value_f64(element: &Element, value: f64) {
+    /// set the value of this element with an f64 value
+    pub(crate) fn set_value_f64(element: &Element, value: f64) {
         if let Some(elm) = element.dyn_ref::<HtmlMeterElement>() {
             elm.set_value(value);
         } else if let Some(elm) = element.dyn_ref::<HtmlProgressElement>() {
@@ -307,7 +316,7 @@ impl DomAttr {
     }
 
     /// set the element attribute value with the first numerical value found in values
-    pub fn set_numeric_values(element: &Element, values: &[Value]) {
+    pub(crate) fn set_numeric_values(element: &Element, values: &[Value]) {
         let value_i32 = values.first().and_then(|v| v.as_i32());
 
         let value_f64 = values.first().and_then(|v| v.as_f64());
@@ -323,7 +332,7 @@ impl DomAttr {
 
 impl DomAttrValue {
     /// return the value if it is a Simple variant
-    pub fn get_simple(&self) -> Option<&Value> {
+    pub(crate) fn get_simple(&self) -> Option<&Value> {
         match self {
             Self::Simple(v) => Some(v),
             _ => None,
@@ -331,12 +340,13 @@ impl DomAttrValue {
     }
 
     /// make a string representation of this value if it is a simple value
-    pub fn get_string(&self) -> Option<String> {
+    pub(crate) fn get_string(&self) -> Option<String> {
         let simple = self.get_simple()?;
         Some(simple.to_string())
     }
 
-    pub fn as_event_closure(self) -> Option<Closure<dyn FnMut(web_sys::Event)>> {
+    /// return event clousre if it an event listener variant
+    pub(crate) fn as_event_closure(self) -> Option<Closure<dyn FnMut(web_sys::Event)>> {
         match self {
             Self::EventListener(cb) => Some(cb),
             _ => None,

@@ -2,14 +2,10 @@ use crate::dom::DomAttr;
 use crate::dom::DomAttrValue;
 use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
-use crate::vdom::AttributeValue;
 use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
-use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::collections::BTreeMap;
-use std::rc::Rc;
 use crate::vdom::LeafComponent;
 use crate::dom::Cmd;
 use crate::dom::Application;
@@ -296,16 +292,6 @@ where
     fn style(&self) -> Vec<String> {
         <Self as Component<MSG, ()>>::style(self)
     }
-}
-
-thread_local!(static COMPONENT_ID_COUNTER: Cell<usize> = Cell::new(1));
-
-pub fn create_component_unique_identifier() -> usize {
-    COMPONENT_ID_COUNTER.with(|x| {
-        let val = x.get();
-        x.set(val + 1);
-        val
-    })
 }
 
 /// create a stateful component node

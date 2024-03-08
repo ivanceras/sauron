@@ -50,7 +50,7 @@ pub fn build_template<MSG>(node: &vdom::Node<MSG>) -> web_sys::Node {
     create_dom_node_without_listeners(&static_nodes)
 }
 
-pub fn create_dom_node_without_listeners<MSG>(vnode: &vdom::Node<MSG>) -> web_sys::Node {
+fn create_dom_node_without_listeners<MSG>(vnode: &vdom::Node<MSG>) -> web_sys::Node {
     match vnode {
         vdom::Node::Leaf(leaf_node) => create_leaf_node_without_listeners(leaf_node),
         vdom::Node::Element(element_node) => {
