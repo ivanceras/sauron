@@ -122,9 +122,18 @@ impl Value {
         }
     }
 
+    /// returns true if it is a vec of values that is static
+    pub(crate) fn is_all_static_vec(&self) -> bool {
+        match self{
+            Self::Vec(values) => values.iter().all(Self::is_static_str),
+            _ => false,
+        }
+    }
+
     /// returns true if this value is a static str
     pub(crate) fn is_static_str(&self) -> bool {
         matches!(self, Self::Cow(Cow::Borrowed(_)))
+            || self.is_all_static_vec()
     }
 
     pub(crate) fn merge_to_string<'a>(
