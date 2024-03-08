@@ -11,6 +11,11 @@ use crate::dom::Application;
 use crate::dom::Program;
 use crate::dom::program::MountProcedure;
 use crate::dom::program::AppContext;
+use crate::dom::events::on_mount;
+use std::rc::Rc;
+use std::cell::RefCell;
+use crate::dom::program::ActiveClosure;
+use std::collections::VecDeque;
 
 /// A component has a view and can update itself.
 ///
@@ -120,97 +125,6 @@ where
     }
 }
 
-/// A Container have children that is set from the parent component
-///
-/// It can update its Mode and returns follow ups and/or effects on the next
-/// update loop.
-///
-/// The view in the container is set by the parent component. The container itself
-/// can not listen to events on its view
-pub trait Container<MSG, XMSG>
-where
-    MSG: 'static,
-{
-    /// init the container
-    fn init(&mut self) -> Effects<MSG, XMSG> {
-        Effects::none()
-    }
-    /// update the model of this component and return follow ups and/or effects
-    /// that will be executed on the next update loop.
-    fn update(&mut self, msg: MSG) -> Effects<MSG, XMSG>;
-
-    /// The container presents the children passed to it from the parent.
-    /// The container can decide how to display the children components here, but
-    /// the children nodes here can not trigger Msg that can update this component
-    fn view(&self, content: impl IntoIterator<Item = Node<XMSG>>) -> Node<MSG>;
-
-    /// optionally a Container can specify its own css style
-    fn stylesheet() -> Vec<String> {
-        vec![]
-    }
-
-    /// dynamic style
-    fn style(&self) -> Vec<String> {
-        vec![]
-    }
-
-    /// containers can append children
-    fn append_child(&mut self, child: Node<XMSG>);
-
-    /// return the component name
-    /// defaults to the struct simplified name
-    fn component_name() -> String {
-        extract_simple_struct_name::<Self>()
-    }
-
-    /// prefix the class bane
-    fn prefix_class(class_name: &str) -> String {
-        let component_name = Self::component_name();
-        if class_name.is_empty() {
-            component_name
-        } else {
-            format!("{component_name}__{class_name}")
-        }
-    }
-
-    /// create a classname prepended with this component name
-    fn class_ns(class_name: &str) -> Attribute<MSG> {
-        class(Self::prefix_class(class_name))
-    }
-
-    /// create namespaced class names to pair that evaluates to true
-    fn classes_ns_flag(pair: impl IntoIterator<Item = (impl ToString, bool)>) -> Attribute<MSG> {
-        let class_list = pair.into_iter().filter_map(|(class, flag)| {
-            if flag {
-                Some(Self::prefix_class(&class.to_string()))
-            } else {
-                None
-            }
-        });
-
-        classes(class_list)
-    }
-
-    /// create a selector class prepended with this component name
-    fn selector_ns(class_name: &str) -> String {
-        let component_name = Self::component_name();
-        if class_name.is_empty() {
-            format!(".{component_name}")
-        } else {
-            format!(".{component_name}__{class_name}")
-        }
-    }
-
-    /// create namesspaced selector from multiple classnames
-    fn selectors_ns(class_names: impl IntoIterator<Item = impl ToString>) -> String {
-        let selectors: Vec<String> = class_names
-            .into_iter()
-            .map(|class_name| Self::selector_ns(&class_name.to_string()))
-            .collect();
-        selectors.join(" ")
-    }
-}
-
 pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
     let type_name = std::any::type_name::<T>();
     let name = if let Some(first) = type_name.split(['<', '>']).next() {
@@ -304,13 +218,6 @@ where
     MSG: Default + 'static,
     MSG2: 'static,
 {
-    use crate::dom::events::on_mount;
-    use std::rc::Rc;
-    use std::cell::RefCell;
-    use crate::dom::program::ActiveClosure;
-    use std::collections::VecDeque;
-    use crate::dom::MountTarget;
-    use crate::dom::MountAction;
 
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
@@ -346,7 +253,7 @@ where
     let mount_event = on_mount(move|me|{
         log::info!("Component is now mounted..");
         let mut program = program.clone();
-        program.mount(&me.target_node, MountProcedure::new(MountAction::Append, MountTarget::MountNode));
+        program.mount(&me.target_node, MountProcedure::append());
         MSG::default()
     });
     let node = Node::Leaf(Leaf::Component(LeafComponent{

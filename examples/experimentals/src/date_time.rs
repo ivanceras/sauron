@@ -125,23 +125,6 @@ impl Component<Msg, ()> for DateTimeWidget{
     }
 
 
-    fn stylesheet() -> Vec<String> {
-        vec![jss! {
-            ".datetimebox":{
-                border: "1px solid green",
-            },
-            "button": {
-              background: "#1E88E5",
-              color: "white",
-              padding: "10px 10px",
-              margin: "10px 10px",
-              border: 0,
-              font_size: "1.5rem",
-              border_radius: "5px",
-            }
-        }]
-    }
-
     fn view(&self) -> Node<Msg> {
         div(
             [class("datetimebox"), on_mount(Msg::Mounted)],

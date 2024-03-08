@@ -53,7 +53,7 @@ pub mod prelude {
         pub use serde_wasm_bindgen;
         pub use crate::html::events::*;
         pub use crate::dom::{Application, PreDiff, diff_if, events, Program, document, now, window, Window, Cmd,
-            AnimationFrameHandle, Component, Container, Effects, Measurements, MountAction,
+            AnimationFrameHandle, Component, Effects, Measurements, MountAction,
             MountTarget, Task, TimeoutCallbackHandle,
         };
         #[cfg(feature = "custom_element")]
