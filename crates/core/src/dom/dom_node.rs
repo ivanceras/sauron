@@ -223,6 +223,8 @@ where
         #[cfg(feature = "use-template")]
         {
             let template = lookup_template(comp.type_id).expect("must have a template");
+            //Note: we don't want the patches to be stored in the StatelessModel
+            //since it has a lifetime, which will infect the Node, Element, Attribute, etc
             let patches = diff(&comp.vdom_template, &comp.view);
             log::info!("patching template: {:#?}", patches);
             let dom_patches = self

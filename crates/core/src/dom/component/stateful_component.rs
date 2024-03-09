@@ -31,17 +31,19 @@ pub fn register_template<MSG>(
 where
     MSG: 'static,
 {
-    let (dom_template, vdom_template) = template::build_template(&view);
+    let (dom_template, vdom_template) = template::build_template(view);
     let template = TEMPLATE_LOOKUP.with_borrow_mut(|map| {
         if let Some(existing) = map.get(&type_id) {
             existing.clone_node_with_deep(true).expect("deep clone")
         } else {
+            log::info!("---->> Adding to template...");
             map.insert(type_id, dom_template.clone());
             dom_template
         }
     });
     (template, vdom_template)
 }
+
 
 /// lookup for the template
 pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node> {
