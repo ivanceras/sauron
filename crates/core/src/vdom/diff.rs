@@ -74,14 +74,17 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
         let new_node_has_event = !new_callbacks.is_empty();
         // don't recycle when old node has event while new new doesn't have
         let forbid_recycle = old_node_has_event && !new_node_has_event;
+        log::debug!("forbit_recycle: {forbid_recycle}");
 
-        // replace if an event is attached
-        let event_attached = !old_node_has_event && new_node_has_event;
+        // event is added in the new when the old node has no events yet
+        let events_added = !old_node_has_event && new_node_has_event;
+        log::debug!("events added: {events_added}");
 
-        // replace if the number of callbacks changed
-        let event_listeners_altered = old_callbacks.len() != new_callbacks.len();
+        // replace if the number of callbacks changed as it is not just adding event
+        let event_listeners_altered = !events_added && old_callbacks.len() != new_callbacks.len();
+        log::debug!("event_listeners_altered: {event_listeners_altered}");
 
-        explicit_replace_attr || forbid_recycle || event_attached || event_listeners_altered
+        explicit_replace_attr || forbid_recycle || event_listeners_altered
     };
     // handle explicit replace if the Rep fn evaluates to true
     if replace(old_node, new_node) {
