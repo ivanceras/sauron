@@ -213,8 +213,7 @@ where
     pub fn new(app: APP) -> Self {
         let type_id = TypeId::of::<APP>();
         let app_view = app.view();
-        let template = register_template(type_id, &app_view);
-        let vdom_template = template::build_vdom_template(&app_view);
+        let (template, vdom_template) = register_template(type_id, &app_view);
         let program = Program {
             app_context: AppContext {
                 app: Rc::new(RefCell::new(app)),

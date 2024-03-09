@@ -25,20 +25,21 @@ thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
 }
 
-pub fn register_template<MSG>(type_id: TypeId, view: &vdom::Node<MSG>) -> web_sys::Node
+pub fn register_template<MSG>(type_id: TypeId, view: &vdom::Node<MSG>) -> (web_sys::Node, vdom::Node<MSG>)
 where
     MSG: 'static,
 {
+
+    let (dom_template, vdom_template) = template::build_template(&view);
     let template = TEMPLATE_LOOKUP.with_borrow_mut(|map| {
         if let Some(existing) = map.get(&type_id) {
             existing.clone_node_with_deep(true).expect("deep clone")
         } else {
-            let template = template::build_template(view);
-            map.insert(type_id, template.clone());
-            template
+            map.insert(type_id, dom_template.clone());
+            dom_template
         }
     });
-    template
+    (template, vdom_template)
 }
 
 /// A component that can be used directly in the view without mapping
@@ -122,9 +123,8 @@ where
     // of the stateful component.
 
     let app_view = app.view();
-    let vdom_template = template::build_vdom_template(&app_view);
     #[cfg(feature = "use-template")]
-    let template = register_template(type_id, &app_view);
+    let (template, vdom_template) = register_template(type_id, &app_view);
 
     let app = Rc::new(RefCell::new(app));
 

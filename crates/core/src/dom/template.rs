@@ -45,10 +45,11 @@ pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> {
 pub fn build_vdom_template<MSG>(node: &vdom::Node<MSG>) -> vdom::Node<MSG> {
     extract_static_only(node)
 }
-/// build a template for this node
-pub fn build_template<MSG>(node: &vdom::Node<MSG>) -> web_sys::Node {
+/// build a dom template and the vdom template
+pub fn build_template<MSG>(node: &vdom::Node<MSG>) -> (web_sys::Node, vdom::Node<MSG>) {
     let vdom_template = build_vdom_template(node);
-    create_dom_node_without_listeners(&vdom_template)
+    let template = create_dom_node_without_listeners(&vdom_template);
+    (template, vdom_template)
 }
 
 fn create_dom_node_without_listeners<MSG>(vnode: &vdom::Node<MSG>) -> web_sys::Node {
