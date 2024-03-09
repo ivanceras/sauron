@@ -21,6 +21,7 @@ use std::fmt;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
+use crate::dom::now;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -222,21 +223,35 @@ where
     fn create_stateless_component(&self, comp: &StatelessModel<MSG>) -> Node {
         #[cfg(feature = "use-template")]
         {
+            let t1 = now();
             let template = lookup_template(comp.type_id).expect("must have a template");
+            let t2 = now();
             //Note: we don't want the patches to be stored in the StatelessModel
             //since it has a lifetime, which will infect the Node, Element, Attribute, etc
             let patches = diff(&comp.vdom_template, &comp.view);
-            log::info!("patching template: {:#?}", patches);
+            let t3 = now();
             let dom_patches = self
                 .convert_patches(&template, &patches)
                 .expect("convert patches");
+            let t4 = now();
             self.apply_dom_patches(&template, dom_patches)
                 .expect("patch template");
+            let t5 = now();
+
+            log::info!("looking up template took: {}ms", t2 - t1);
+            log::info!("diffing took: {}ms", t3 - t2);
+            log::info!("converting patches took: {}ms", t4 -t3);
+            log::info!("applying patches took: {}ms", t5-t4);
+            log::info!("creating stateless component took: {}ms", t5 - t1);
             template
         }
         #[cfg(not(feature = "use-template"))]
         {
-            self.create_dom_node(&comp.view)
+            let t6 = now();
+            let created_node = self.create_dom_node(&comp.view);
+            let t7 = now();
+            log::info!("creating node took: {}ms", t7-t6);
+            created_node
         }
     }
 
