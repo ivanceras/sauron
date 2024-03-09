@@ -6,14 +6,16 @@ use sauron::*;
 fn nodes_with_event_must_be_replaced() {
     let elem_id = "input-remove-event-test";
 
+    let event1 = on_input(move |_event: InputEvent| {
+        println!("input event is triggered");
+    });
+
     let old: Node<()> = input(
         vec![
             // On input we'll set our Rc<RefCell<String>> value to the input elements value
             id(elem_id),
             value("End Text"),
-            on_input(move |_event: InputEvent| {
-                println!("input event is triggered");
-            }),
+            event1.clone(),
         ],
         vec![],
     );
@@ -31,10 +33,10 @@ fn nodes_with_event_must_be_replaced() {
 
     assert_eq!(
         patch,
-        vec![Patch::replace_node(
-            Some(&"input"),
+        vec![Patch::remove_attributes(
+            &"input",
             TreePath::new(vec![]),
-            vec![&input(vec![id(elem_id), value("End Text"),], vec![])],
+            vec![&event1]
         )]
     );
 }
@@ -328,14 +330,15 @@ fn remove_style_attributes() {
 
 #[test]
 fn remove_events_will_become_replace_node() {
-    let old: Node<()> = div(vec![on_click(|_| println!("hi"))], vec![]);
+    let event1 = on_click(|_| println!("hi"));
+    let old: Node<()> = div(vec![event1.clone()], vec![]);
     let new = div(vec![], vec![]);
     assert_eq!(
         diff(&old, &new),
-        vec![Patch::replace_node(
-            Some(&"div"),
+        vec![Patch::remove_attributes(
+            &"div",
             TreePath::new(vec![]),
-            vec![&div(vec![], vec![])]
+            vec![&event1]
         )],
         "Remove events",
     );
