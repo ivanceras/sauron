@@ -5,7 +5,7 @@ use std::any::TypeId;
 use std::rc::Rc;
 use crate::vdom::Leaf;
 
-pub use stateful_component::{register_template, stateful_component, StatefulComponent, StatefulModel};
+pub use stateful_component::{lookup_template, register_template, stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
 
@@ -142,6 +142,9 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
 pub struct StatelessModel<MSG>{
     /// the view of this stateless model
     pub view: Box<Node<MSG>>,
+    /// the vdom template of this component
+            #[cfg(feature = "use-template")]
+    pub vdom_template: Box<Node<MSG>>,
     /// component type id
     pub type_id: TypeId,
     /// attributes of this model
@@ -161,6 +164,8 @@ impl<MSG> StatelessModel<MSG> {
         StatelessModel {
             type_id: self.type_id,
             view: Box::new(self.view.map_msg(cb.clone())),
+            #[cfg(feature = "use-template")]
+            vdom_template: Box::new(self.vdom_template.map_msg(cb.clone())),
             attrs: self
                 .attrs
                 .into_iter()
@@ -179,6 +184,8 @@ impl<MSG> Clone for StatelessModel<MSG> {
     fn clone(&self) -> Self {
         Self {
             view: self.view.clone(),
+            #[cfg(feature = "use-template")]
+            vdom_template: self.vdom_template.clone(),
             type_id: self.type_id.clone(),
             attrs: self.attrs.clone(),
             children: self.children.clone(),
@@ -198,9 +205,13 @@ where
 {
     let type_id = TypeId::of::<COMP>();
     let view = app.view();
+
+    #[cfg(feature = "use-template")]
     let (_template, vdom_template) = register_template(type_id, &view);
     Node::Leaf(Leaf::StatelessComponent(StatelessModel {
         view: Box::new(view),
+        #[cfg(feature = "use-template")]
+        vdom_template: Box::new(vdom_template),
         type_id,
         attrs: attrs.into_iter().collect(),
         children: children.into_iter().collect(),

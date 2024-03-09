@@ -41,6 +41,17 @@ where
     (template, vdom_template)
 }
 
+/// lookup for the template
+pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node>{
+    TEMPLATE_LOOKUP.with_borrow_mut(|map| {
+        if let Some(existing) = map.get(&type_id) {
+            Some(existing.clone_node_with_deep(true).expect("deep clone"))
+        } else {
+            None
+        }
+    })
+}
+
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
     /// This will be invoked when a component is used as a custom element

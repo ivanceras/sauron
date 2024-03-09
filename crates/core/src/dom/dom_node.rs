@@ -20,6 +20,7 @@ use web_sys::{self, Element, Node, Text};
 use crate::vdom::diff;
 use crate::dom::component::register_template;
 use crate::dom::component::StatelessModel;
+use crate::dom::component::lookup_template;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -219,14 +220,19 @@ where
     }
 
     fn create_stateless_component(&self, comp: &StatelessModel<MSG>) -> Node {
-        // the template must have been an existing one
-        // since the call of 
-        let (template, vdom_template) = register_template(comp.type_id, &comp.view);
-        let patches = diff(&vdom_template, &comp.view);
-        log::info!("patching template: {:#?}", patches);
-        let dom_patches = self.convert_patches(&template, &patches).expect("convert patches");
-        self.apply_dom_patches(&template, dom_patches).expect("patch template");
-        template
+        #[cfg(feature = "use-template")]
+        {
+            let template = lookup_template(comp.type_id).expect("must have a template");
+            let patches = diff(&comp.vdom_template, &comp.view);
+            log::info!("patching template: {:#?}", patches);
+            let dom_patches = self.convert_patches(&template, &patches).expect("convert patches");
+            self.apply_dom_patches(&template, dom_patches).expect("patch template");
+            template
+        }
+        #[cfg(not(feature = "use-template"))]
+        {
+            self.create_dom_node(&comp.view)
+        }
     }
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
