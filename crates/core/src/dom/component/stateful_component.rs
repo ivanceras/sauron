@@ -76,8 +76,6 @@ pub trait StatefulComponent {
     ) where
         Self: Sized;
 
-    /// build the template of this Component
-    fn template(&self) -> web_sys::Node;
 
     /// remove the attribute with this name
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
