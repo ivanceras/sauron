@@ -46,15 +46,6 @@ impl Component<Msg, ()> for Button {
 }
 
 impl StatefulComponent for Button {
-    fn build(
-        attrs: impl IntoIterator<Item = DomAttr>,
-        children: impl IntoIterator<Item = web_sys::Node>,
-    ) -> Self
-    where
-        Self: Sized,
-    {
-        Button::default()
-    }
 
     fn attribute_changed(
         &mut self,

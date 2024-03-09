@@ -203,15 +203,6 @@ where
 }
 
 impl StatefulComponent for DateTimeWidget<()> {
-    fn build(
-        attrs: impl IntoIterator<Item = DomAttr>,
-        children: impl IntoIterator<Item = web_sys::Node>,
-    ) -> Self
-    where
-        Self: Sized,
-    {
-        DateTimeWidget::default()
-    }
 
 
     /// this is called when the attributes in the mount is changed
