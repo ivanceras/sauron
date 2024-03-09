@@ -52,7 +52,7 @@ impl Application<Msg> for App {
             window()
                 .set_interval_with_callback_and_timeout_and_arguments_0(
                     clock.as_ref().unchecked_ref(),
-                    1000,
+                    5000,
                 )
                 .expect("Unable to start interval");
             program2.closures.borrow_mut().push(clock);
@@ -175,10 +175,10 @@ impl Application<Msg> for App {
                     {Component::view(&self.btn).map_msg(Msg::BtnMsg)}
                 </div>
                 <div>
-                    {stateful_component(Button::default(), [], [text("External child of btn stateful_component")])}
+                    //{stateful_component(Button::default(), [], [text("External child of btn stateful_component")])}
                 </div>
                 <div>
-                    {stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
+                    //{stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
                 </div>
             </div>
         }

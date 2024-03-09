@@ -18,11 +18,18 @@ where
     /// holds the user application
     pub(crate) app: Rc<RefCell<APP>>,
 
-    /// the template for this App
+    /// the dom template for this App
+    /// This also doesn't change throughout the app lifecycle
     #[cfg(feature = "use-template")]
     pub(crate) template: web_sys::Node,
 
+    /// The vdom template generated from the APP
+    /// This doesn't change throughout the app lifecycle
+    #[cfg(feature = "use-template")]
+    pub(crate) vdom_template: Rc<vdom::Node<MSG>>,
+
     /// the current vdom representation
+    /// if the dom is sync with the app state the current_vdom corresponds to the app.view
     pub(crate) current_vdom: Rc<RefCell<vdom::Node<MSG>>>,
 
     /// The MSG that hasn't been applied to the APP yet
@@ -42,6 +49,8 @@ where
     pub(crate) app: Weak<RefCell<APP>>,
     #[cfg(feature = "use-template")]
     pub(crate) template: web_sys::Node,
+    #[cfg(feature = "use-template")]
+    pub(crate) vdom_template: Weak<vdom::Node<MSG>>,
     pub(crate) current_vdom: Weak<RefCell<vdom::Node<MSG>>>,
     pub(crate) pending_msgs: Weak<RefCell<VecDeque<MSG>>>,
     pub(crate) pending_cmds: Weak<RefCell<VecDeque<Cmd<APP, MSG>>>>,
@@ -60,6 +69,8 @@ where
             app,
             #[cfg(feature = "use-template")]
             template: self.template.clone(),
+            #[cfg(feature = "use-template")]
+            vdom_template: self.vdom_template.upgrade()?,
             current_vdom,
             pending_msgs,
             pending_cmds,
@@ -76,6 +87,8 @@ where
             app: Weak::clone(&self.app),
             #[cfg(feature = "use-template")]
             template: self.template.clone(),
+            #[cfg(feature = "use-template")]
+            vdom_template: Weak::clone(&self.vdom_template),
             current_vdom: Weak::clone(&self.current_vdom),
             pending_msgs: Weak::clone(&self.pending_msgs),
             pending_cmds: Weak::clone(&self.pending_cmds),
@@ -92,6 +105,8 @@ where
             app: Rc::downgrade(&this.app),
             #[cfg(feature = "use-template")]
             template: this.template.clone(),
+            #[cfg(feature = "use-template")]
+            vdom_template: Rc::downgrade(&this.vdom_template),
             current_vdom: Rc::downgrade(&this.current_vdom),
             pending_msgs: Rc::downgrade(&this.pending_msgs),
             pending_cmds: Rc::downgrade(&this.pending_cmds),
@@ -114,6 +129,8 @@ where
             app: Rc::clone(&self.app),
             #[cfg(feature = "use-template")]
             template: self.template.clone(),
+            #[cfg(feature = "use-template")]
+            vdom_template: self.vdom_template.clone(),
             current_vdom: Rc::clone(&self.current_vdom),
             pending_msgs: Rc::clone(&self.pending_msgs),
             pending_cmds: Rc::clone(&self.pending_cmds),
@@ -126,17 +143,6 @@ where
     MSG: 'static,
     APP: Application<MSG>,
 {
-    /// Creates a new app, the view is created
-    pub fn new(app: APP, _template: web_sys::Node, vdom_template: vdom::Node<MSG>) -> Self {
-        Self {
-            app: Rc::new(RefCell::new(app)),
-            #[cfg(feature = "use-template")]
-            template: _template,
-            current_vdom: Rc::new(RefCell::new(vdom_template)),
-            pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
-            pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
-        }
-    }
 
     pub fn init_app(&self) -> Cmd<APP, MSG> {
         self.app.borrow_mut().init()

@@ -1,4 +1,5 @@
 use crate::dom::component::register_template;
+use crate::dom::template;
 use crate::dom::program::app_context::WeakContext;
 #[cfg(feature = "with-raf")]
 use crate::dom::request_animation_frame;
@@ -210,9 +211,20 @@ where
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
     pub fn new(app: APP) -> Self {
-        let (template, vdom_template) = register_template(&app);
-        Program {
-            app_context: AppContext::new(app, template, vdom_template),
+        let template = register_template(&app);
+        let app_view = app.view();
+        let vdom_template = template::build_vdom_template(&app_view);
+        let program = Program {
+            app_context: AppContext {
+                app: Rc::new(RefCell::new(app)),
+                #[cfg(feature = "use-template")]
+                template: template,
+                #[cfg(feature = "use-template")]
+                vdom_template: Rc::new(vdom_template),
+                current_vdom: Rc::new(RefCell::new(app_view)),
+                pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
+                pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
+            },
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(None)),
             node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
@@ -222,7 +234,8 @@ where
             event_closures: Rc::new(RefCell::new(vec![])),
             closures: Rc::new(RefCell::new(vec![])),
             last_update: Rc::new(RefCell::new(None)),
-        }
+        };
+        program
     }
 
     /// executed after the program has been mounted
@@ -241,7 +254,7 @@ where
 
         // first dispatch call to ensure the template is patched with the
         // new app real view
-        self.dispatch_multiple([]);
+        //self.dispatch_multiple([]);
     }
 
     fn app_hash() -> u64 {
@@ -372,10 +385,24 @@ where
 
         //TODO: use the template here and append to the mount_node
         // NOTE: the template has no attached event
+        // create a dom patch to the template and apply it first
         #[cfg(feature = "use-template")]
         let created_node = self.app_context.template.clone();
         #[cfg(not(feature = "use-template"))]
         let created_node = self.create_dom_node(&self.app_context.current_vdom());
+
+        #[cfg(feature = "use-template")]
+        {
+            let app_view = self.app_context.app.borrow().view();
+            let template = self.app_context.template.clone();
+            let vdom_template = &self.app_context.vdom_template;
+            let patches = diff(vdom_template, &app_view);
+            let dom_patches = self.convert_patches(&template, &patches).expect("convert patches");
+            log::info!("first time patches {}: {patches:#?}", patches.len());
+            let new_template_node = self.apply_dom_patches(&created_node, dom_patches).expect("template patching");
+            log::info!("new template node: {:?}", new_template_node);
+        }
+
 
         let mount_node: web_sys::Node = match mount_procedure.target {
             MountTarget::MountNode => self
@@ -588,7 +615,12 @@ where
             log::debug!("patches: {patches:#?}");
         }
 
-        self.convert_patches(&patches)
+        self.convert_patches(
+            self.root_node
+                .borrow()
+                .as_ref()
+                .expect("must have a root node"),
+            &patches)
             .expect("must convert patches")
     }
 
@@ -610,9 +642,8 @@ where
             return Ok(());
         }
         let dom_patches: Vec<DomPatch> = self.pending_patches.borrow_mut().drain(..).collect();
-        for dom_patch in dom_patches {
-            self.apply_dom_patch(dom_patch)
-                .expect("must apply dom patch");
+        if let Some(new_root_node) = self.apply_dom_patches(self.root_node.borrow().as_ref().expect("must have a root node"), dom_patches)?{
+             *self.root_node.borrow_mut() = Some(new_root_node);
         }
         Ok(())
     }

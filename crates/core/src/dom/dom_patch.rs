@@ -118,7 +118,7 @@ where
         closure
     }
     /// get the real DOM target node and make a DomPatch object for each of the Patch
-    pub(crate) fn convert_patches(&self, patches: &[Patch<MSG>]) -> Result<Vec<DomPatch>, JsValue> {
+    pub(crate) fn convert_patches(&self, root_node: &web_sys::Node, patches: &[Patch<MSG>]) -> Result<Vec<DomPatch>, JsValue> {
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
             .iter()
             .map(|patch| (patch.path(), patch.tag()))
@@ -130,11 +130,7 @@ where
             )
             .collect();
 
-        let nodes_lookup = find_all_nodes(
-            self.root_node
-                .borrow()
-                .as_ref()
-                .expect("must have a root node"),
+        let nodes_lookup = find_all_nodes(root_node,
             &nodes_to_find,
         );
 
@@ -277,7 +273,23 @@ where
         }
     }
 
-    pub(crate) fn apply_dom_patch(&mut self, dom_patch: DomPatch) -> Result<(), JsValue> {
+
+    /// TODO: this should not have access to root_node, so it can generically
+    /// apply patch to any dom node
+    pub(crate) fn apply_dom_patches(&self, root_node: &web_sys::Node, dom_patches: impl IntoIterator<Item = DomPatch>) -> Result<Option<Node>, JsValue> {
+        let mut new_root_node = None;
+        for dom_patch in dom_patches {
+            if let Some(replacement_node) = self.apply_dom_patch(root_node, dom_patch)? {
+                 new_root_node = Some(replacement_node);
+            }
+        }
+        Ok(new_root_node)
+    }
+
+    /// apply a dom patch to this root node,
+    /// return a new root_node if it would replace the original root_node
+    /// TODO: this should have no access to root_node, so it can be used in general sense
+    pub(crate) fn apply_dom_patch(&self, root_node: &web_sys::Node, dom_patch: DomPatch) -> Result<Option<Node>, JsValue> {
         let DomPatch {
             patch_path,
             target_element,
@@ -297,6 +309,7 @@ where
                 } else {
                     panic!("unable to get parent node of the target element: {target_element:?} for patching: {nodes:#?}");
                 }
+                Ok(None)
             }
 
             PatchVariant::InsertAfterNode { nodes } => {
@@ -310,6 +323,7 @@ where
                         .expect("must insert after the target element");
                     Self::dispatch_mount_event(&for_insert);
                 }
+                Ok(None)
             }
             PatchVariant::AppendChildren { children } => {
                 for child in children.into_iter() {
@@ -318,10 +332,12 @@ where
                         &child,
                     );
                 }
+                Ok(None)
             }
 
             PatchVariant::AddAttributes { attrs } => {
                 self.set_element_dom_attrs(&target_element, attrs);
+                Ok(None)
             }
             PatchVariant::RemoveAttributes { attrs } => {
                 for attr in attrs.iter() {
@@ -346,6 +362,7 @@ where
                         }
                     }
                 }
+                Ok(None)
             }
 
             // This also removes the associated closures and event listeners to the node being replaced
@@ -402,9 +419,12 @@ where
                 // we replace the root node here, so that's reference is updated
                 // to the newly created node
                 if patch_path.path.is_empty() {
-                    *self.root_node.borrow_mut() = Some(first_node);
+                    //*self.root_node.borrow_mut() = Some(first_node);
                     #[cfg(feature = "with-debug")]
                     log::info!("the root_node is replaced with {:?}", &self.root_node);
+                    Ok(Some(first_node))
+                }else{
+                    Ok(None)
                 }
             }
             PatchVariant::RemoveNode => {
@@ -417,6 +437,7 @@ where
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     self.remove_event_listeners_recursive(&target_element)?;
                 }
+                Ok(None)
             }
             PatchVariant::MoveBeforeNode { for_moving } => {
                 if let Some(target_parent) = target_element.parent_node() {
@@ -434,6 +455,7 @@ where
                 } else {
                     panic!("unable to get the parent node of the target element");
                 }
+                Ok(None)
             }
 
             PatchVariant::MoveAfterNode { for_moving } => {
@@ -451,8 +473,8 @@ where
                         .insert_adjacent_element(intern("afterend"), to_move_element)
                         .expect("must insert before this node");
                 }
+                Ok(None)
             }
         }
-        Ok(())
     }
 }

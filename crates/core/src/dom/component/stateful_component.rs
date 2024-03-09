@@ -25,14 +25,14 @@ thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
 }
 
-pub fn register_template<APP, MSG>(app: &APP) -> (web_sys::Node, vdom::Node<MSG>)
+pub fn register_template<APP, MSG>(app: &APP) -> web_sys::Node
 where
     APP: Application<MSG>,
     MSG: 'static,
 {
     let type_id = TypeId::of::<APP>();
     let view = app.view();
-    let vdom_template = template::build_vdom_template(&view);
+    //let vdom_template = template::build_vdom_template(&view);
     let template = TEMPLATE_LOOKUP.with_borrow_mut(|map| {
         if let Some(existing) = map.get(&type_id) {
             existing.clone_node_with_deep(true).expect("deep clone")
@@ -42,11 +42,7 @@ where
             template
         }
     });
-    if cfg!(feature = "use-template") {
-        (template, vdom_template)
-    } else {
-        (template, view)
-    }
+    template
 }
 
 /// A component that can be used directly in the view without mapping
@@ -131,7 +127,10 @@ where
     // The attribute(minus events) however can be used for configurations, for setting initial state
     // of the stateful component.
 
-    let (_template, vdom_template) = register_template(&app);
+    let app_view = app.view();
+    let vdom_template = template::build_vdom_template(&app_view);
+    #[cfg(feature = "use-template")]
+    let template = register_template(&app);
 
     let app = Rc::new(RefCell::new(app));
 
@@ -139,8 +138,10 @@ where
         app_context: AppContext {
             app: Rc::clone(&app),
             #[cfg(feature = "use-template")]
-            template: _template,
-            current_vdom: Rc::new(RefCell::new(vdom_template)),
+            template: template,
+            #[cfg(feature = "use-template")]
+            vdom_template: Rc::new(vdom_template),
+            current_vdom: Rc::new(RefCell::new(app_view)),
             pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
             pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
         },
