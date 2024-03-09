@@ -213,9 +213,6 @@ impl StatefulComponent for DateTimeWidget<()> {
         DateTimeWidget::default()
     }
 
-    fn template(&self) -> web_sys::Node {
-        template::build_template(&Component::view(self))
-    }
 
     /// this is called when the attributes in the mount is changed
     fn attribute_changed(
@@ -262,15 +259,6 @@ impl StatefulComponent for DateTimeWidget<()> {
         }
     }
 
-    fn remove_attribute(&mut self, attr_name: AttributeName) {}
-
-    fn remove_child(&mut self, index: usize) {}
-
-    fn connected_callback(&mut self) {}
-
-    fn disconnected_callback(&mut self) {}
-
-    fn adopted_callback(&mut self) {}
 }
 
 #[wasm_bindgen]

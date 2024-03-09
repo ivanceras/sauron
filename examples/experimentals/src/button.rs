@@ -66,12 +66,6 @@ impl StatefulComponent for Button {
     {
     }
 
-    fn template(&self) -> web_sys::Node {
-        template::build_template(&Component::view(self))
-    }
-
-    /// remove the attribute with this name
-    fn remove_attribute(&mut self, attr_name: AttributeName) {}
 
     /// append a child into this component
     fn append_child(&mut self, child: &web_sys::Node) {
@@ -89,14 +83,4 @@ impl StatefulComponent for Button {
         }
     }
 
-    /// remove a child in this index
-    fn remove_child(&mut self, index: usize) {}
-
-    /// the component is attached to the dom
-    fn connected_callback(&mut self) {}
-    /// the component is removed from the DOM
-    fn disconnected_callback(&mut self) {}
-
-    /// the component is moved or attached to the dom
-    fn adopted_callback(&mut self) {}
 }

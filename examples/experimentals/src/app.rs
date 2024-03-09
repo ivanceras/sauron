@@ -175,10 +175,10 @@ impl Application<Msg> for App {
                     {Component::view(&self.btn).map_msg(Msg::BtnMsg)}
                 </div>
                 <div>
-                    {component::<Button, Msg, button::Msg>([], [text("External child of btn component")])}
+                    {component(Button::default(), [], [text("External child of btn component")])}
                 </div>
                 <div>
-                    {component::<DateTimeWidget<()>, Msg, date_time::Msg>([],[text("External child of date widget")])}
+                    {component(DateTimeWidget::default(), [],[text("External child of date widget")])}
                 </div>
             </div>
         }
