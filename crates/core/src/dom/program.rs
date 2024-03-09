@@ -230,8 +230,6 @@ where
         // call the init of the component
         let init_cmd = self.app_context.init_app();
 
-        let init_cmd_is_empty = init_cmd.is_empty();
-
         // this call may or may not trigger dispatch
         // as the initi app of Application
         // may just return Cmd::none which doesn't trigger
@@ -241,12 +239,9 @@ where
         // inject the app's dynamic style after the emitting the init function and it's effects
         self.inject_dynamic_style();
 
-        // if the first cmd is empty, we trigger a dispatch
-        if init_cmd_is_empty {
-            // first dispatch call to ensure the template is patched with the
-            // new app real view
-            self.dispatch_multiple([]);
-        }
+        // first dispatch call to ensure the template is patched with the
+        // new app real view
+        self.dispatch_multiple([]);
     }
 
     fn app_hash() -> u64 {
@@ -518,8 +513,6 @@ where
 
         let strong_count = self.app_context.strong_count();
         let weak_count = self.app_context.weak_count();
-        let root_node_count = Rc::strong_count(&self.root_node);
-        assert_eq!(strong_count, root_node_count);
         let measurements = Measurements {
             name: modifier.measurement_name.to_string(),
             node_count,
