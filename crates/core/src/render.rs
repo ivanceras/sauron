@@ -50,7 +50,7 @@ impl<MSG> Node<MSG> {
     ) -> fmt::Result {
         match self {
             Node::Element(element) => element.render_with_indent(buffer, indent, compressed),
-            Node::Leaf(leaf) => leaf.render_with_indent(buffer, indent, compressed),
+            Node::Leaf(leaf) => leaf.render(buffer),
             Node::Fragment(nodes) => {
                 for node in nodes {
                     node.render_with_indent(buffer, indent, compressed)?;
@@ -93,11 +93,9 @@ impl<MSG> Node<MSG> {
 
 impl<MSG> Leaf<MSG> {
     /// render leaf nodes
-    pub fn render_with_indent(
+    pub fn render(
         &self,
         buffer: &mut dyn fmt::Write,
-        _indent: usize,
-        _compressed: bool,
     ) -> fmt::Result {
         match self {
             Leaf::Text(text) => {
@@ -120,6 +118,7 @@ impl<MSG> Leaf<MSG> {
             }
         }
     }
+
 }
 
 fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
@@ -160,7 +159,7 @@ impl<MSG> Element<MSG> {
 
         for attr in &merged_attributes {
             write!(buffer, " ")?;
-            attr.render_with_indent(buffer, indent, compressed)?;
+            attr.render(buffer)?;
         }
 
         if self.self_closing {
@@ -207,11 +206,9 @@ impl<MSG> Element<MSG> {
 
 impl<MSG> Attribute<MSG> {
     /// render attributes
-    fn render_with_indent(
+    fn render(
         &self,
         buffer: &mut dyn fmt::Write,
-        _indent: usize,
-        _compressed: bool,
     ) -> fmt::Result {
         let GroupedAttributeValues {
             listeners: _,
@@ -251,6 +248,13 @@ impl<MSG> Attribute<MSG> {
             }
         }
         Ok(())
+    }
+
+    /// render compressed html to string
+    pub fn render_to_string(&self) -> String {
+        let mut buffer = String::new();
+        self.render(&mut buffer).expect("must render");
+        buffer
     }
 }
 
