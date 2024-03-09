@@ -379,8 +379,7 @@ where
 
     /// create initial dom node generated
     /// from template and patched by the difference of vdom_template and current app view.
-    fn create_initial_view(&self) -> web_sys::Node{
-
+    fn create_initial_view(&self) -> web_sys::Node {
         #[cfg(feature = "use-template")]
         {
             let app_view = self.app_context.app.borrow().view();
@@ -396,7 +395,9 @@ where
                 .expect("template patching");
             log::info!("new template node: {:?}", new_template_node);
             dom_template
-        } #[cfg(not(feature = "use-template"))] {
+        }
+        #[cfg(not(feature = "use-template"))]
+        {
             self.create_dom_node(&self.app_context.current_vdom())
         }
     }
@@ -406,7 +407,7 @@ where
     pub fn mount(&mut self, mount_node: &web_sys::Node, mount_procedure: MountProcedure) {
         *self.mount_node.borrow_mut() = Some(mount_node.clone());
         self.pre_mount();
-        
+
         let created_node = self.create_initial_view();
 
         let mount_node: web_sys::Node = match mount_procedure.target {
