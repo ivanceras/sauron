@@ -202,7 +202,6 @@ where
     /// The attributes can be diff and send the patches to the StatefulComponent
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
     fn create_leaf_component(&self, lc: &LeafComponent<MSG>) -> Node {
-        log::info!("Creating a node for a Leaf component...");
         let comp_node = self.create_dom_node(&crate::html::div(lc.attrs.clone(), []));
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event

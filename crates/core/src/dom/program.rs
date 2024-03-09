@@ -377,8 +377,6 @@ where
         #[cfg(not(feature = "use-template"))]
         let created_node = self.create_dom_node(&self.app_context.current_vdom());
 
-        log::info!("Template / created_node is about to be mounted...");
-
         let mount_node: web_sys::Node = match mount_procedure.target {
             MountTarget::MountNode => self
                 .mount_node
@@ -501,15 +499,7 @@ where
             .update_dom_with_vdom(view, treepath)
             .expect("must not error");
         let t3 = now();
-        if let Some(last_update) = self.last_update.borrow().as_ref() {
-            let frame_time = (1000_f64 / 60_f64).floor(); // 1s in 60 frames
-            let time_delta = t3 - last_update;
-            let remaining = frame_time - time_delta;
-            if time_delta < frame_time {
-                log::warn!("update is {remaining} too soon!... time_delta: {time_delta}, frame_time: {frame_time}");
-            }
-        }
-        *self.last_update.borrow_mut() = Some(t3);
+
 
         let strong_count = self.app_context.strong_count();
         let weak_count = self.app_context.weak_count();
@@ -530,6 +520,19 @@ where
                 log::warn!("dispatch took {}ms", measurements.total_time.round());
             }
         }
+
+        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
+        if let Some(last_update) = self.last_update.borrow().as_ref() {
+            let frame_time = (1000_f64 / 60_f64).floor(); // 1s in 60 frames
+            let time_delta = t3 - last_update;
+            let _remaining = frame_time - time_delta;
+            if time_delta < frame_time {
+                //log::warn!("update is {remaining} too soon!... time_delta: {time_delta}, frame_time: {frame_time}");
+                // return early here
+                return Ok(measurements);
+            }
+        }
+        *self.last_update.borrow_mut() = Some(t3);
         Ok(measurements)
     }
 

@@ -1,4 +1,3 @@
-use crate::dom::dom_node::DomNode;
 use crate::dom::events::on_mount;
 use crate::dom::program::ActiveClosure;
 use crate::dom::program::AppContext;
@@ -7,7 +6,6 @@ use crate::dom::template;
 use crate::dom::Application;
 use crate::dom::Cmd;
 use crate::dom::Component;
-use crate::dom::DomAttr;
 use crate::dom::DomAttrValue;
 use crate::dom::Program;
 use crate::vdom;
@@ -37,12 +35,9 @@ where
     let vdom_template = template::build_vdom_template(&view);
     let template = TEMPLATE_LOOKUP.with_borrow_mut(|map| {
         if let Some(existing) = map.get(&type_id) {
-            log::info!("An existing template...");
             existing.clone_node_with_deep(true).expect("deep clone")
         } else {
-            log::warn!("Adding a new template for: {:?}", type_id);
             let template = template::build_template(&view);
-            log::warn!("{}", template.render_to_string());
             map.insert(type_id, template.clone());
             template
         }
@@ -56,13 +51,6 @@ where
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
-    /// create the stateful component with this attributes
-    fn build(
-        attrs: impl IntoIterator<Item = DomAttr>,
-        children: impl IntoIterator<Item = web_sys::Node>,
-    ) -> Self
-    where
-        Self: Sized;
 
     /// This will be invoked when a component is used as a custom element
     /// and the attributes of the custom-element has been modified
@@ -143,21 +131,7 @@ where
     // The attribute(minus events) however can be used for configurations, for setting initial state
     // of the stateful component.
 
-    /*
-    let app = COMP::build(
-        attrs
-            .clone()
-            .into_iter()
-            .map(|a| DomAttr::convert_attr_except_listener(&a)),
-        [],
-    );
-    */
-
-    let (template, vdom_template) = register_template(&app);
-
-    log::info!("vdom template: {}", vdom_template.render_to_string());
-
-    log::info!("dom  template: {}", template.render_to_string());
+    let (_template, vdom_template) = register_template(&app);
 
     let app = Rc::new(RefCell::new(app));
 
@@ -165,7 +139,7 @@ where
         app_context: AppContext {
             app: Rc::clone(&app),
             #[cfg(feature = "use-template")]
-            template,
+            template: _template,
             current_vdom: Rc::new(RefCell::new(vdom_template)),
             pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
             pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
@@ -182,7 +156,6 @@ where
     };
     let children: Vec<Node<MSG>> = children.into_iter().collect();
     let mount_event = on_mount(move |me| {
-        log::info!("Component is now mounted..");
         let mut program = program.clone();
         program.mount(&me.target_node, MountProcedure::append());
         MSG::default()
