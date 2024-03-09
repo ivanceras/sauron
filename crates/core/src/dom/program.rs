@@ -211,8 +211,9 @@ where
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
     pub fn new(app: APP) -> Self {
-        let template = register_template(&app);
+        let type_id = TypeId::of::<APP>();
         let app_view = app.view();
+        let template = register_template(type_id, &app_view);
         let vdom_template = template::build_vdom_template(&app_view);
         let program = Program {
             app_context: AppContext {
