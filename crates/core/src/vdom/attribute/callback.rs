@@ -76,18 +76,23 @@ where
     }
 
     /// map this Callback msg such that `Callback<IN, OUT>` becomes `Callback<IN, MSG2>`
-    /// TODO: use the original type id of function, so as it will stay the same
-    /// even when mapped
+    /// Note: the original func_type_id is preserved here
     pub fn map_msg<F, MSG2>(self, cb2: F) -> Callback<IN, MSG2>
     where
         F: Fn(OUT) -> MSG2 + Clone + 'static,
         MSG2: 'static,
     {
+        let source_func_type_id = self.func_type_id;
         let cb = move |input| {
             let out = self.emit(input);
             cb2(out)
         };
-        Callback::from(cb)
+        Callback {
+            func: Rc::new(cb),
+            func_type_id: source_func_type_id,
+            event_type_id: TypeId::of::<IN>(),
+            msg_type_id: TypeId::of::<OUT>(),
+        }
     }
 }
 
