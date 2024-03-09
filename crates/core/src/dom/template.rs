@@ -2,15 +2,14 @@
 //!
 use crate::dom::document;
 use crate::dom::DomAttr;
+use crate::dom::DomNode;
 use crate::vdom;
 use crate::vdom::Attribute;
 use crate::vdom::{Leaf, Node};
 use wasm_bindgen::intern;
-use crate::dom::DomNode;
 
 /// build a node but only include static attributes and leaf nodes
-pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG>
-{
+pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> {
     match node {
         Node::Element(elm) => vdom::element_ns(
             elm.namespace,
@@ -22,9 +21,7 @@ pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG>
             elm.children().iter().map(extract_static_only),
             elm.self_closing,
         ),
-        Node::Fragment(nodes) => {
-            Node::Fragment(nodes.iter().map(extract_static_only).collect())
-        }
+        Node::Fragment(nodes) => Node::Fragment(nodes.iter().map(extract_static_only).collect()),
         Node::Leaf(leaf) => {
             if leaf.is_static_str() {
                 Node::Leaf(leaf.clone())
@@ -45,7 +42,7 @@ pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG>
 }
 
 /// build a vdom template
-pub fn build_vdom_template<MSG>(node: &vdom::Node<MSG>) -> vdom::Node<MSG>{
+pub fn build_vdom_template<MSG>(node: &vdom::Node<MSG>) -> vdom::Node<MSG> {
     extract_static_only(node)
 }
 /// build a template for this node

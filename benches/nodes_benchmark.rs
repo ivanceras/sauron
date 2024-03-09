@@ -564,9 +564,7 @@ fn build_100_nodes_with_100_child_nodes() {
 }
 
 fn bench1(c: &mut Criterion) {
-    c.bench_function("100x100", |b| {
-        b.iter(build_100_nodes_with_100_child_nodes)
-    });
+    c.bench_function("100x100", |b| b.iter(build_100_nodes_with_100_child_nodes));
     c.bench_function("100", |b| b.iter(build_100_child_nodes));
     c.bench_function("diff_100", |b| b.iter(diff_100));
     c.bench_function("build_editor", |b| b.iter(build_editor));

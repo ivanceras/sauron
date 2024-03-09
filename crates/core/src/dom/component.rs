@@ -1,43 +1,44 @@
+use crate::dom::dom_node::DomNode;
+use crate::dom::events::on_mount;
+use crate::dom::program::ActiveClosure;
+use crate::dom::program::AppContext;
+use crate::dom::program::MountProcedure;
+use crate::dom::template;
+use crate::dom::Application;
+use crate::dom::Cmd;
 use crate::dom::DomAttr;
 use crate::dom::DomAttrValue;
+use crate::dom::Program;
 use crate::html::attributes::{class, classes, Attribute};
+use crate::vdom;
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
+use crate::vdom::LeafComponent;
 use crate::{dom::Effects, vdom::Node};
 use std::any::TypeId;
-use crate::vdom::LeafComponent;
-use crate::dom::Cmd;
-use crate::dom::Application;
-use crate::dom::Program;
-use crate::dom::program::MountProcedure;
-use crate::dom::program::AppContext;
-use crate::dom::events::on_mount;
-use std::rc::Rc;
 use std::cell::RefCell;
-use crate::dom::program::ActiveClosure;
-use std::collections::VecDeque;
-use wasm_bindgen::JsValue;
 use std::collections::HashMap;
-use crate::dom::dom_node::DomNode;
-use crate::dom::template;
-use crate::vdom;
+use std::collections::VecDeque;
+use std::rc::Rc;
+use wasm_bindgen::JsValue;
 
-thread_local!{
+thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
 }
 
-pub fn register_template<APP, MSG>(app: &APP) -> (web_sys::Node, vdom::Node<MSG>) 
-    where APP: Application<MSG>,
+pub fn register_template<APP, MSG>(app: &APP) -> (web_sys::Node, vdom::Node<MSG>)
+where
+    APP: Application<MSG>,
     MSG: 'static,
 {
     let type_id = TypeId::of::<APP>();
     let view = app.view();
     let vdom_template = template::build_vdom_template(&view);
-    let template = TEMPLATE_LOOKUP.with_borrow_mut(|map|{
-        if let Some(existing) = map.get(&type_id){
+    let template = TEMPLATE_LOOKUP.with_borrow_mut(|map| {
+        if let Some(existing) = map.get(&type_id) {
             log::info!("An existing template...");
             existing.clone_node_with_deep(true).expect("deep clone")
-        }else{
+        } else {
             log::warn!("Adding a new template for: {:?}", type_id);
             let template = template::build_template(&view);
             log::warn!("{}", template.render_to_string());
@@ -45,7 +46,7 @@ pub fn register_template<APP, MSG>(app: &APP) -> (web_sys::Node, vdom::Node<MSG>
             template
         }
     });
-    if cfg!(feature = "use-template"){
+    if cfg!(feature = "use-template") {
         (template, vdom_template)
     } else {
         (template, view)
@@ -83,7 +84,7 @@ where
     }
 
     /// specify which attribute names are observed for this Component
-    fn observed_attributes() -> Vec<AttributeName>{
+    fn observed_attributes() -> Vec<AttributeName> {
         vec![]
     }
 
@@ -258,8 +259,6 @@ where
     MSG: Default + 'static,
     MSG2: 'static,
 {
-
-
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
 
@@ -267,9 +266,15 @@ where
     // as the children here contains the MSG generic
     // and we can not discard the event listeners.
     //
-    // The attribute(minus events) however can be used for configurations, for setting initial state 
+    // The attribute(minus events) however can be used for configurations, for setting initial state
     // of the stateful component.
-    let app = COMP::build(attrs.clone().into_iter().map(|a|DomAttr::convert_attr_except_listener(&a)), []);
+    let app = COMP::build(
+        attrs
+            .clone()
+            .into_iter()
+            .map(|a| DomAttr::convert_attr_except_listener(&a)),
+        [],
+    );
 
     let (template, vdom_template) = register_template(&app);
 
@@ -279,15 +284,15 @@ where
 
     let app = Rc::new(RefCell::new(app));
 
-    let program = Program{
-        app_context: AppContext{
+    let program = Program {
+        app_context: AppContext {
             app: Rc::clone(&app),
             #[cfg(feature = "use-template")]
             template,
             current_vdom: Rc::new(RefCell::new(vdom_template)),
             pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
             pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
-        }, 
+        },
         root_node: Rc::new(RefCell::new(None)),
         mount_node: Rc::new(RefCell::new(None)),
         node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
@@ -298,14 +303,14 @@ where
         closures: Rc::new(RefCell::new(vec![])),
         last_update: Rc::new(RefCell::new(None)),
     };
-    let children:Vec<Node<MSG>> = children.into_iter().collect();
-    let mount_event = on_mount(move|me|{
+    let children: Vec<Node<MSG>> = children.into_iter().collect();
+    let mount_event = on_mount(move |me| {
         log::info!("Component is now mounted..");
         let mut program = program.clone();
         program.mount(&me.target_node, MountProcedure::append());
         MSG::default()
     });
-    let node = Node::Leaf(Leaf::Component(LeafComponent{
+    let node = Node::Leaf(Leaf::Component(LeafComponent {
         comp: app,
         type_id,
         attrs: attrs.into_iter().chain([mount_event]).collect(),
@@ -314,23 +319,18 @@ where
     node
 }
 
-impl Into<DomAttrValue> for JsValue{
-
-    fn into(self) -> DomAttrValue{
-        if let Some(v) = self.as_bool(){
+impl Into<DomAttrValue> for JsValue {
+    fn into(self) -> DomAttrValue {
+        if let Some(v) = self.as_bool() {
             DomAttrValue::Simple(v.into())
-        }
-        else if let Some(v) = self.as_f64(){
+        } else if let Some(v) = self.as_f64() {
             DomAttrValue::Simple(v.into())
-        }
-        else if let Some(v) = self.as_string(){
+        } else if let Some(v) = self.as_string() {
             DomAttrValue::Simple(v.into())
-        }
-        else if self.is_null(){
+        } else if self.is_null() {
             log::info!("it is a null value");
             DomAttrValue::Empty
-        }
-        else {
+        } else {
             todo!("handle other conversion, other than bool, f64, strings, nulls ")
         }
     }

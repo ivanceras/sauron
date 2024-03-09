@@ -94,9 +94,7 @@ impl Application<Msg> for App {
                 let effects = Component::update(&mut self.btn, bmsg);
                 effects.map_msg(Msg::BtnMsg).into()
             }
-            Msg::NoOp => {
-                Cmd::none()
-            }
+            Msg::NoOp => Cmd::none(),
         }
     }
 

@@ -12,7 +12,7 @@ use web_sys::{
     self, HtmlButtonElement, HtmlDataElement, HtmlDetailsElement, HtmlFieldSetElement,
     HtmlInputElement, HtmlLiElement, HtmlLinkElement, HtmlMeterElement, HtmlOptGroupElement,
     HtmlOptionElement, HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement,
-    HtmlStyleElement, HtmlTextAreaElement, 
+    HtmlStyleElement, HtmlTextAreaElement,
 };
 
 /// a dom version of the Attribute, thereby removing the MSG generic
@@ -53,7 +53,6 @@ pub struct GroupedDomAttrValues {
 }
 
 impl DomAttr {
-
     /// return the values grouped into listeners, plain, styles and function calls
     pub(crate) fn group_values(self) -> GroupedDomAttrValues {
         let mut listeners = vec![];
@@ -115,7 +114,11 @@ impl DomAttr {
     }
 
     /// set the style of this element
-    pub(crate) fn set_element_style(element: &Element, attr_name: AttributeName, styles: Vec<Style>) {
+    pub(crate) fn set_element_style(
+        element: &Element,
+        attr_name: AttributeName,
+        styles: Vec<Style>,
+    ) {
         if let Some(merged_styles) = Style::merge_to_string(&styles) {
             // set the styles
             element
@@ -206,7 +209,10 @@ impl DomAttr {
     }
 
     /// remove the elemnt dom attr
-    pub(crate) fn remove_element_dom_attr(element: &Element, attr: &DomAttr) -> Result<(), JsValue> {
+    pub(crate) fn remove_element_dom_attr(
+        element: &Element,
+        attr: &DomAttr,
+    ) -> Result<(), JsValue> {
         if *VALUE == attr.name {
             DomAttr::set_value_str(element, "");
         } else if *OPEN == attr.name {

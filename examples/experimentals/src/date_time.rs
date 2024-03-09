@@ -1,17 +1,16 @@
-
+use sauron::dom::template;
+use sauron::dom::DomAttr;
+use sauron::dom::DomAttrValue;
+use sauron::dom::DomNode;
 use sauron::dom::MountProcedure;
+use sauron::dom::StatefulComponent;
+use sauron::vdom::AttributeName;
 use sauron::wasm_bindgen::JsCast;
 use sauron::{
     custom_element, html::attributes::*, html::events::*, html::*, jss, vdom::Callback,
     wasm_bindgen, web_sys, Attribute, Effects, JsValue, Node, WebComponent, *,
 };
 use std::fmt::Debug;
-use sauron::dom::StatefulComponent;
-use sauron::dom::DomAttr;
-use sauron::dom::template;
-use sauron::dom::DomAttrValue;
-use sauron::vdom::AttributeName;
-use sauron::dom::DomNode;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -125,7 +124,7 @@ where
             }
             Msg::ExternContMounted(target_node) => {
                 log::info!("DateTime: extenal container mounted...");
-                for child in self.children.iter(){
+                for child in self.children.iter() {
                     target_node.append_child(child).expect("must append");
                 }
                 self.external_children_node = Some(target_node);
@@ -164,7 +163,6 @@ where
         vec!["date", "time", "interval"]
     }
 
-
     fn view(&self) -> Node<Msg> {
         div(
             [class("datetimebox"), on_mount(Msg::Mounted)],
@@ -192,14 +190,19 @@ where
                 ),
                 input([r#type("text"), value(self.cnt)], []),
                 button([on_click(move |_| Msg::BtnClick)], [text("Do something")]),
-                div([class("external_children"), on_mount(|me|Msg::ExternContMounted(me.target_node))], [])
+                div(
+                    [
+                        class("external_children"),
+                        on_mount(|me| Msg::ExternContMounted(me.target_node)),
+                    ],
+                    [],
+                ),
             ],
         )
     }
 }
 
-impl StatefulComponent for DateTimeWidget<()>{
-
+impl StatefulComponent for DateTimeWidget<()> {
     fn build(
         attrs: impl IntoIterator<Item = DomAttr>,
         children: impl IntoIterator<Item = web_sys::Node>,
@@ -225,12 +228,12 @@ impl StatefulComponent for DateTimeWidget<()>{
     {
         match &*attr_name {
             "time" => {
-                if let Some(new_value) = new_value.get_string(){
+                if let Some(new_value) = new_value.get_string() {
                     Component::update(self, Msg::TimeChange(new_value));
                 }
             }
             "date" => {
-                if let Some(new_value) = new_value.get_string(){
+                if let Some(new_value) = new_value.get_string() {
                     Component::update(self, Msg::DateChange(new_value));
                 }
             }
@@ -246,11 +249,15 @@ impl StatefulComponent for DateTimeWidget<()>{
 
     fn append_child(&mut self, child: &web_sys::Node) {
         log::info!("DateTime: appending child{:?}", child.inner_html());
-        if let Some(external_children_node) = self.external_children_node.as_ref(){
+        if let Some(external_children_node) = self.external_children_node.as_ref() {
             log::info!("DateTime: ok appending..");
-            external_children_node.append_child(child).expect("must append");
-        }else{
-            log::debug!("DateTime: Just pushing to children since the external holder is not yet mounted");
+            external_children_node
+                .append_child(child)
+                .expect("must append");
+        } else {
+            log::debug!(
+                "DateTime: Just pushing to children since the external holder is not yet mounted"
+            );
             self.children.push(child.clone());
         }
     }
@@ -265,9 +272,6 @@ impl StatefulComponent for DateTimeWidget<()>{
 
     fn adopted_callback(&mut self) {}
 }
-
-
-
 
 #[wasm_bindgen]
 pub struct DateTimeCustomElement {
@@ -300,12 +304,9 @@ impl DateTimeCustomElement {
         old_value: JsValue,
         new_value: JsValue,
     ) {
-
-         self.program.app_mut().attribute_changed(
-            attr_name,
-            old_value.into(),
-            new_value.into(),
-        );
+        self.program
+            .app_mut()
+            .attribute_changed(attr_name, old_value.into(), new_value.into());
     }
 
     #[wasm_bindgen(method, js_name = connectedCallback)]

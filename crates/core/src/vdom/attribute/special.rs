@@ -23,7 +23,6 @@ pub static SKIP: &AttributeName = &"skip";
 /// The skip criteria attribute
 pub static SKIP_CRITERIA: &AttributeName = &"skip_criteria";
 
-
 ///
 /// NOTE: The following attributes have special behaviour in the dom, the framework
 /// need to call the specific methods to reflect the state of this attribute to the element

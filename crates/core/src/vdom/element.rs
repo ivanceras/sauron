@@ -213,6 +213,6 @@ impl<MSG> Element<MSG> {
     #[allow(unused)]
     /// returns true if all attributes of this element is using static str
     pub(crate) fn is_attrs_all_static_str(&self) -> bool {
-        self.attrs.iter().all(|att|att.is_static_str())
+        self.attrs.iter().all(|att| att.is_static_str())
     }
 }

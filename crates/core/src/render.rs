@@ -11,13 +11,8 @@ use std::fmt;
 
 const DEFAULT_INDENT_SIZE: usize = 2;
 
-
 /// add an indent if applicable
-fn maybe_indent(
-    buffer: &mut dyn fmt::Write,
-    indent: usize,
-    compressed: bool,
-) -> fmt::Result {
+fn maybe_indent(buffer: &mut dyn fmt::Write, indent: usize, compressed: bool) -> fmt::Result {
     if !compressed {
         write!(
             buffer,
@@ -94,11 +89,9 @@ impl<MSG> Node<MSG> {
         self.render(&mut buffer).expect("must render");
         buffer
     }
-
 }
 
 impl<MSG> Leaf<MSG> {
-
     /// render leaf nodes
     pub fn render_with_indent(
         &self,
@@ -213,7 +206,6 @@ impl<MSG> Element<MSG> {
 }
 
 impl<MSG> Attribute<MSG> {
-
     /// render attributes
     fn render_with_indent(
         &self,

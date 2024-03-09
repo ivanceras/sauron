@@ -1,24 +1,22 @@
 use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
+use crate::html::lookup;
 use crate::vdom::AttributeName;
+use crate::vdom::LeafComponent;
 use crate::vdom::TreePath;
 use crate::{
-    dom::events::MountEvent,
     dom::document,
+    dom::events::MountEvent,
     dom::{Application, Program},
     vdom,
     vdom::{Attribute, Leaf},
 };
 use js_sys::Function;
 use std::collections::HashMap;
+use std::fmt;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
-use web_sys::{
-    self, Element, Node, Text,
-};
-use crate::vdom::LeafComponent;
-use std::fmt;
-use crate::html::lookup;
+use web_sys::{self, Element, Node, Text};
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -33,7 +31,7 @@ thread_local! {
 }
 
 /// Provides helper traits for web_sys::Node
-pub trait DomNode{
+pub trait DomNode {
     /// return the inner html if it is an element
     fn inner_html(&self) -> Option<String>;
 
@@ -58,7 +56,9 @@ pub trait DomNode{
                     .expect("must clone node")
                     .unchecked_into()
             } else {
-                document().create_element(intern(tag)).expect("create element")
+                document()
+                    .create_element(intern(tag))
+                    .expect("create element")
             }
         })
     }
@@ -66,7 +66,9 @@ pub trait DomNode{
     /// create dom element from tag name
     #[cfg(not(feature = "use-cached-elements"))]
     fn create_element(tag: &'static str) -> web_sys::Element {
-         document().create_element(intern(tag)).expect("create element")
+        document()
+            .create_element(intern(tag))
+            .expect("create element")
     }
 
     ///
@@ -76,21 +78,20 @@ pub trait DomNode{
     fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result;
 }
 
-impl DomNode for web_sys::Node{
-
-    fn inner_html(&self) -> Option<String>{
+impl DomNode for web_sys::Node {
+    fn inner_html(&self) -> Option<String> {
         let element: &Element = self.dyn_ref()?;
         Some(element.inner_html())
     }
 
-    fn render_to_string(&self) -> String{
+    fn render_to_string(&self) -> String {
         let mut buffer = String::new();
         self.render(&mut buffer).expect("must render");
         buffer
     }
-    
-    fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result{
-        match self.node_type(){
+
+    fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
+        match self.node_type() {
             Node::TEXT_NODE => {
                 let text_node = self.unchecked_ref::<Text>();
                 let text = text_node.whole_text().expect("whole text");
@@ -104,29 +105,28 @@ impl DomNode for web_sys::Node{
                 write!(buffer, "<{tag}")?;
                 let attrs = elm.attributes();
                 let attrs_len = attrs.length();
-                for i in 0..attrs_len{
+                for i in 0..attrs_len {
                     let attr = attrs.item(i).expect("attr");
                     write!(buffer, " {}=\"{}\"", attr.local_name(), attr.value())?;
                 }
-                if lookup::is_self_closing(&tag){
-                    write!(buffer,"/>")?;
-                }else{
+                if lookup::is_self_closing(&tag) {
+                    write!(buffer, "/>")?;
+                } else {
                     write!(buffer, ">")?;
                 }
 
-                let children =  elm.children();
+                let children = elm.children();
                 let children_len = children.length();
-                for i in 0..children_len{
+                for i in 0..children_len {
                     let child = children.item(i).expect("element child");
                     child.render(buffer)?;
                 }
-                if !lookup::is_self_closing(&tag){
-                    write!(buffer,"</{tag}>")?;
+                if !lookup::is_self_closing(&tag) {
+                    write!(buffer, "</{tag}>")?;
                 }
                 Ok(())
             }
             _ => todo!("for other else"),
-
         }
     }
 }
@@ -142,8 +142,6 @@ pub fn intern(s: &str) -> &str {
 pub fn intern(s: &str) -> &str {
     s
 }
-
-
 
 /// This is the value of the data-sauron-vdom-id.
 /// Used to uniquely identify elements that contain closures so that the DomUpdater can
@@ -204,20 +202,15 @@ where
     /// The attributes can be diff and send the patches to the StatefulComponent
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
     fn create_leaf_component(&self, lc: &LeafComponent<MSG>) -> Node {
-
         log::info!("Creating a node for a Leaf component...");
-        let comp_node = self.create_dom_node(&crate::html::div(
-            lc.attrs.clone(),
-            [],
-        ));
+        let comp_node = self.create_dom_node(&crate::html::div(lc.attrs.clone(), []));
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
         // listener and removing the generics msg
         for child in lc.children.iter() {
             let child_dom = self.create_dom_node(&child);
             Self::dispatch_mount_event(&child_dom);
-            lc.comp.borrow_mut()
-                .append_child(&child_dom);
+            lc.comp.borrow_mut().append_child(&child_dom);
         }
         comp_node
     }
@@ -404,7 +397,6 @@ where
         )?;
         Ok(())
     }
-
 
     /// remove all the event listeners for this node
     pub(crate) fn remove_event_listeners(&self, node: &Element) -> Result<(), JsValue> {

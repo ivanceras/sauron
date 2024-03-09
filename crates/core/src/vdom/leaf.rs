@@ -1,11 +1,11 @@
 //! Leaf node for html dom tree
+use crate::dom::StatefulComponent;
 use crate::vdom::{Attribute, Node};
 use std::any::TypeId;
 use std::borrow::Cow;
+use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
-use std::cell::RefCell;
-use crate::dom::StatefulComponent;
 
 /// A leaf node value of html dom tree
 pub enum Leaf<MSG> {
@@ -23,8 +23,8 @@ pub enum Leaf<MSG> {
 }
 
 /// Wrapper for stateful component
-pub struct LeafComponent<MSG>{
-    /// 
+pub struct LeafComponent<MSG> {
+    ///
     pub comp: Rc<RefCell<dyn StatefulComponent>>,
     /// component type id
     pub type_id: TypeId,
@@ -48,7 +48,7 @@ impl<MSG> Clone for Leaf<MSG> {
 
 impl<MSG> Clone for LeafComponent<MSG> {
     fn clone(&self) -> Self {
-       Self {
+        Self {
             comp: Rc::clone(&self.comp),
             type_id: self.type_id.clone(),
             attrs: self.attrs.clone(),
@@ -57,7 +57,7 @@ impl<MSG> Clone for LeafComponent<MSG> {
     }
 }
 
-impl<MSG> LeafComponent<MSG>{
+impl<MSG> LeafComponent<MSG> {
     /// mape the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
     pub fn map_msg<F, MSG2>(self, cb: F) -> LeafComponent<MSG2>
     where
@@ -65,18 +65,22 @@ impl<MSG> LeafComponent<MSG>{
         MSG2: 'static,
         MSG: 'static,
     {
-           LeafComponent {
-                type_id: self.type_id,
-                comp: self.comp,
-                attrs: self.attrs.into_iter().map(|a| a.map_msg(cb.clone())).collect(),
-                children: self.children
-                    .into_iter()
-                    .map(|c| c.map_msg(cb.clone()))
-                    .collect(),
-            }
+        LeafComponent {
+            type_id: self.type_id,
+            comp: self.comp,
+            attrs: self
+                .attrs
+                .into_iter()
+                .map(|a| a.map_msg(cb.clone()))
+                .collect(),
+            children: self
+                .children
+                .into_iter()
+                .map(|c| c.map_msg(cb.clone()))
+                .collect(),
+        }
     }
 }
-
 
 impl<MSG> fmt::Debug for Leaf<MSG> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
