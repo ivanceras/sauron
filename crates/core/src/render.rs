@@ -67,7 +67,7 @@ impl<MSG> Node<MSG> {
     }
 
     /// render the node to a writable buffer
-    fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
+    pub fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
         self.render_with_indent(buffer, 0, false)
     }
 
