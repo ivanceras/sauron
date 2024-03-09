@@ -12,7 +12,7 @@ use crate::vdom;
 use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
-use crate::vdom::LeafComponent;
+use crate::vdom::StatefulModel;
 use crate::vdom::Node;
 use std::any::TypeId;
 use std::cell::RefCell;
@@ -111,7 +111,7 @@ where
 }
 
 /// create a stateful component node
-pub fn component<COMP, MSG, MSG2>(
+pub fn stateful_component<COMP, MSG, MSG2>(
     app: COMP,
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
@@ -160,7 +160,7 @@ where
         program.mount(&me.target_node, MountProcedure::append());
         MSG::default()
     });
-    let node = Node::Leaf(Leaf::Component(LeafComponent {
+    let node = Node::Leaf(Leaf::StatefulComponent(StatefulModel {
         comp: app,
         type_id,
         attrs: attrs.into_iter().chain([mount_event]).collect(),

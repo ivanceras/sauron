@@ -2,7 +2,7 @@ use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::{dom::Effects, vdom::Node};
 
-pub use stateful_component::{component, register_template, StatefulComponent};
+pub use stateful_component::{stateful_component, register_template, StatefulComponent};
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
 

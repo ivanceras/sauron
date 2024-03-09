@@ -2,7 +2,7 @@
 use crate::button::{self, Button};
 use crate::date_time::{self, DateTimeWidget};
 use js_sys::Date;
-use sauron::dom::component;
+use sauron::dom::stateful_component;
 use sauron::prelude::*;
 
 #[derive(Default)]
@@ -175,10 +175,10 @@ impl Application<Msg> for App {
                     {Component::view(&self.btn).map_msg(Msg::BtnMsg)}
                 </div>
                 <div>
-                    {component(Button::default(), [], [text("External child of btn component")])}
+                    {stateful_component(Button::default(), [], [text("External child of btn stateful_component")])}
                 </div>
                 <div>
-                    {component(DateTimeWidget::default(), [],[text("External child of date widget")])}
+                    {stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
                 </div>
             </div>
         }

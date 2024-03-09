@@ -2,7 +2,7 @@ use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
 use crate::html::lookup;
 use crate::vdom::AttributeName;
-use crate::vdom::LeafComponent;
+use crate::vdom::StatefulModel;
 use crate::vdom::TreePath;
 use crate::{
     dom::document,
@@ -185,7 +185,7 @@ where
                     doctype is only used in rendering"
                 );
             }
-            Leaf::Component(lc) => self.create_leaf_component(lc),
+            Leaf::StatefulComponent(lc) => self.create_leaf_component(lc),
         }
     }
 
@@ -201,7 +201,7 @@ where
     /// The attributes affects the Stateful component state.
     /// The attributes can be diff and send the patches to the StatefulComponent
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
-    fn create_leaf_component(&self, lc: &LeafComponent<MSG>) -> Node {
+    fn create_leaf_component(&self, lc: &StatefulModel<MSG>) -> Node {
         let comp_node = self.create_dom_node(&crate::html::div(lc.attrs.clone(), []));
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event

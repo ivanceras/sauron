@@ -31,7 +31,7 @@ pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> {
                     Leaf::SafeHtml(_) => Node::Leaf(Leaf::SafeHtml("".into())),
                     Leaf::Comment(_) => Node::Leaf(Leaf::Comment("".into())),
                     Leaf::DocType(_) => Node::Leaf(Leaf::DocType("".into())),
-                    Leaf::Component { .. } => {
+                    Leaf::StatefulComponent { .. } => {
                         Node::Leaf(Leaf::Comment(" ---nested template placeholder--- ".into()))
                     }
                 }
@@ -96,7 +96,7 @@ fn create_leaf_node_without_listeners<MSG>(leaf: &Leaf<MSG>) -> web_sys::Node {
                     doctype is only used in rendering"
             );
         }
-        Leaf::Component(_lc) => {
+        Leaf::StatefulComponent(_lc) => {
             panic!("Component should not be created here")
         }
     }
