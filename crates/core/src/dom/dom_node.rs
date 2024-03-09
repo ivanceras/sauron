@@ -295,7 +295,9 @@ where
     /// clear all children of the element
     pub(crate) fn clear_children(target_node: &Node) {
         while let Some(first_child) = target_node.first_child() {
-            target_node.remove_child(&first_child).expect("must remove child");
+            target_node
+                .remove_child(&first_child)
+                .expect("must remove child");
         }
     }
 
@@ -398,7 +400,10 @@ where
     }
 
     /// remove all the event listeners for this node
-    pub(crate) fn remove_event_listeners_recursive(&self, target_element: &Element) -> Result<(), JsValue> {
+    pub(crate) fn remove_event_listeners_recursive(
+        &self,
+        target_element: &Element,
+    ) -> Result<(), JsValue> {
         let all_descendant_vdom_id = get_node_descendant_data_vdom_id(target_element);
         let mut node_closures = self.node_closures.borrow_mut();
         for vdom_id in all_descendant_vdom_id {
@@ -428,7 +433,7 @@ where
         target_element: &Element,
     ) -> Result<(), JsValue> {
         let mut node_closures = self.node_closures.borrow_mut();
-        if let Some(vdom_id) = get_node_data_vdom_id(target_element){
+        if let Some(vdom_id) = get_node_data_vdom_id(target_element) {
             if let Some(old_closure) = node_closures.get_mut(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
                     if *event == event_name {
@@ -477,20 +482,25 @@ pub(crate) fn find_all_nodes(
         if let Some(found) = find_node(target_node, &mut traverse_path) {
             nodes_to_patch.insert((*path).clone(), found);
         } else {
-            log::warn!("can not find: {:?} {:?} target_node: {:?}", path, tag, target_node);
+            log::warn!(
+                "can not find: {:?} {:?} target_node: {:?}",
+                path,
+                tag,
+                target_node
+            );
         }
     }
     nodes_to_patch
 }
 
 /// return the "data-vdom-id" value of this node
-fn get_node_data_vdom_id(target_element: &Element) -> Option<usize>{
+fn get_node_data_vdom_id(target_element: &Element) -> Option<usize> {
     if let Some(vdom_id_str) = target_element.get_attribute(intern(DATA_VDOM_ID)) {
         let vdom_id = vdom_id_str
             .parse::<usize>()
             .expect("unable to parse sauron_vdom-id");
         Some(vdom_id)
-    }else{
+    } else {
         None
     }
 }
@@ -500,7 +510,7 @@ fn get_node_data_vdom_id(target_element: &Element) -> Option<usize>{
 fn get_node_descendant_data_vdom_id(target_element: &Element) -> Vec<usize> {
     let mut data_vdom_id = vec![];
 
-    if let Some(vdom_id) = get_node_data_vdom_id(target_element){
+    if let Some(vdom_id) = get_node_data_vdom_id(target_element) {
         data_vdom_id.push(vdom_id);
     }
 

@@ -12,8 +12,8 @@ use crate::vdom;
 use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
-use crate::vdom::StatefulModel;
 use crate::vdom::Node;
+use crate::vdom::StatefulModel;
 use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -47,7 +47,6 @@ where
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
-
     /// This will be invoked when a component is used as a custom element
     /// and the attributes of the custom-element has been modified
     ///
@@ -59,7 +58,6 @@ pub trait StatefulComponent {
         new_value: DomAttrValue,
     ) where
         Self: Sized;
-
 
     /// remove the attribute with this name
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}

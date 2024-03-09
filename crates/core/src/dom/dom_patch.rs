@@ -118,7 +118,11 @@ where
         closure
     }
     /// get the real DOM target node and make a DomPatch object for each of the Patch
-    pub(crate) fn convert_patches(&self, target_node: &web_sys::Node, patches: &[Patch<MSG>]) -> Result<Vec<DomPatch>, JsValue> {
+    pub(crate) fn convert_patches(
+        &self,
+        target_node: &web_sys::Node,
+        patches: &[Patch<MSG>],
+    ) -> Result<Vec<DomPatch>, JsValue> {
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
             .iter()
             .map(|patch| (patch.path(), patch.tag()))
@@ -130,9 +134,7 @@ where
             )
             .collect();
 
-        let nodes_lookup = find_all_nodes(target_node,
-            &nodes_to_find,
-        );
+        let nodes_lookup = find_all_nodes(target_node, &nodes_to_find);
 
         let dom_patches:Vec<DomPatch> = patches.iter().map(|patch|{
             let patch_path = patch.path();
@@ -273,14 +275,17 @@ where
         }
     }
 
-
     /// TODO: this should not have access to root_node, so it can generically
     /// apply patch to any dom node
-    pub(crate) fn apply_dom_patches(&self, target_node: &web_sys::Node, dom_patches: impl IntoIterator<Item = DomPatch>) -> Result<Option<Node>, JsValue> {
+    pub(crate) fn apply_dom_patches(
+        &self,
+        target_node: &web_sys::Node,
+        dom_patches: impl IntoIterator<Item = DomPatch>,
+    ) -> Result<Option<Node>, JsValue> {
         let mut new_root_node = None;
         for dom_patch in dom_patches {
             if let Some(replacement_node) = self.apply_dom_patch(target_node, dom_patch)? {
-                 new_root_node = Some(replacement_node);
+                new_root_node = Some(replacement_node);
             }
         }
         Ok(new_root_node)
@@ -289,7 +294,11 @@ where
     /// apply a dom patch to this root node,
     /// return a new target_node if it would replace the original target_node
     /// TODO: this should have no access to root_node, so it can be used in general sense
-    pub(crate) fn apply_dom_patch(&self, target_node: &web_sys::Node, dom_patch: DomPatch) -> Result<Option<Node>, JsValue> {
+    pub(crate) fn apply_dom_patch(
+        &self,
+        target_node: &web_sys::Node,
+        dom_patch: DomPatch,
+    ) -> Result<Option<Node>, JsValue> {
         let DomPatch {
             patch_path,
             target_element,
@@ -415,7 +424,7 @@ where
 
                 if patch_path.path.is_empty() {
                     Ok(Some(first_node))
-                }else{
+                } else {
                     Ok(None)
                 }
             }

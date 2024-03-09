@@ -46,7 +46,6 @@ impl Component<Msg, ()> for Button {
 }
 
 impl StatefulComponent for Button {
-
     fn attribute_changed(
         &mut self,
         attr_name: &str,
@@ -56,7 +55,6 @@ impl StatefulComponent for Button {
         Self: Sized,
     {
     }
-
 
     /// append a child into this component
     fn append_child(&mut self, child: &web_sys::Node) {
@@ -73,5 +71,4 @@ impl StatefulComponent for Button {
             self.children.push(child.clone());
         }
     }
-
 }

@@ -1,10 +1,10 @@
 use crate::dom::component::register_template;
-use crate::dom::template;
 use crate::dom::program::app_context::WeakContext;
 #[cfg(feature = "with-raf")]
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
+use crate::dom::template;
 #[cfg(feature = "prediff")]
 use crate::dom::PreDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
@@ -397,12 +397,15 @@ where
             let template = self.app_context.template.clone();
             let vdom_template = &self.app_context.vdom_template;
             let patches = diff(vdom_template, &app_view);
-            let dom_patches = self.convert_patches(&template, &patches).expect("convert patches");
+            let dom_patches = self
+                .convert_patches(&template, &patches)
+                .expect("convert patches");
             log::info!("first time patches {}: {patches:#?}", patches.len());
-            let new_template_node = self.apply_dom_patches(&created_node, dom_patches).expect("template patching");
+            let new_template_node = self
+                .apply_dom_patches(&created_node, dom_patches)
+                .expect("template patching");
             log::info!("new template node: {:?}", new_template_node);
         }
-
 
         let mount_node: web_sys::Node = match mount_procedure.target {
             MountTarget::MountNode => self
@@ -527,7 +530,6 @@ where
             .expect("must not error");
         let t3 = now();
 
-
         let strong_count = self.app_context.strong_count();
         let weak_count = self.app_context.weak_count();
         let measurements = Measurements {
@@ -620,8 +622,9 @@ where
                 .borrow()
                 .as_ref()
                 .expect("must have a root node"),
-            &patches)
-            .expect("must convert patches")
+            &patches,
+        )
+        .expect("must convert patches")
     }
 
     #[cfg(feature = "with-raf")]
@@ -642,17 +645,23 @@ where
             return Ok(());
         }
         let dom_patches: Vec<DomPatch> = self.pending_patches.borrow_mut().drain(..).collect();
-        let new_root_node = self.apply_dom_patches(self.root_node.borrow().as_ref().expect("must have a root node"), dom_patches)?;
+        let new_root_node = self.apply_dom_patches(
+            self.root_node
+                .borrow()
+                .as_ref()
+                .expect("must have a root node"),
+            dom_patches,
+        )?;
 
         //Note: it is important that root_node points to the original mutable reference here
         // since it can be replaced with a new root Node(the top-level node of the view) when patching
         // if what we are replacing is a root node:
         // we replace the root node here, so that's reference is updated
         // to the newly created node
-        if let Some(new_root_node) = new_root_node{
-                #[cfg(feature = "with-debug")]
-                log::info!("the root_node is replaced with {:?}", &self.root_node);
-             *self.root_node.borrow_mut() = Some(new_root_node);
+        if let Some(new_root_node) = new_root_node {
+            #[cfg(feature = "with-debug")]
+            log::info!("the root_node is replaced with {:?}", &self.root_node);
+            *self.root_node.borrow_mut() = Some(new_root_node);
         }
         Ok(())
     }

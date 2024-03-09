@@ -143,7 +143,6 @@ where
     MSG: 'static,
     APP: Application<MSG>,
 {
-
     pub fn init_app(&self) -> Cmd<APP, MSG> {
         self.app.borrow_mut().init()
     }

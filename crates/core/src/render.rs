@@ -93,10 +93,7 @@ impl<MSG> Node<MSG> {
 
 impl<MSG> Leaf<MSG> {
     /// render leaf nodes
-    pub fn render(
-        &self,
-        buffer: &mut dyn fmt::Write,
-    ) -> fmt::Result {
+    pub fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
         match self {
             Leaf::Text(text) => {
                 write!(buffer, "{text}")
@@ -119,7 +116,6 @@ impl<MSG> Leaf<MSG> {
             }
         }
     }
-
 }
 
 fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
@@ -207,10 +203,7 @@ impl<MSG> Element<MSG> {
 
 impl<MSG> Attribute<MSG> {
     /// render attributes
-    fn render(
-        &self,
-        buffer: &mut dyn fmt::Write,
-    ) -> fmt::Result {
+    fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
         let GroupedAttributeValues {
             listeners: _,
             plain_values,

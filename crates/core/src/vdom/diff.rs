@@ -87,7 +87,7 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
 
         explicit_replace_attr || forbid_recycle || event_listeners_altered
         */
-        explicit_replace_attr 
+        explicit_replace_attr
     };
     // handle explicit replace if the Rep fn evaluates to true
     if replace(old_node, new_node) {

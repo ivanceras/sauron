@@ -203,8 +203,6 @@ where
 }
 
 impl StatefulComponent for DateTimeWidget<()> {
-
-
     /// this is called when the attributes in the mount is changed
     fn attribute_changed(
         &mut self,
@@ -249,7 +247,6 @@ impl StatefulComponent for DateTimeWidget<()> {
             self.children.push(child.clone());
         }
     }
-
 }
 
 #[wasm_bindgen]
