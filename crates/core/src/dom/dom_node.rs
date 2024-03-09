@@ -1,8 +1,12 @@
+use crate::dom::component::lookup_template;
+use crate::dom::component::register_template;
+use crate::dom::component::StatelessModel;
 use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
-use crate::html::lookup;
-use crate::vdom::AttributeName;
 use crate::dom::StatefulModel;
+use crate::html::lookup;
+use crate::vdom::diff;
+use crate::vdom::AttributeName;
 use crate::vdom::TreePath;
 use crate::{
     dom::document,
@@ -17,10 +21,6 @@ use std::fmt;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
-use crate::vdom::diff;
-use crate::dom::component::register_template;
-use crate::dom::component::StatelessModel;
-use crate::dom::component::lookup_template;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -225,8 +225,11 @@ where
             let template = lookup_template(comp.type_id).expect("must have a template");
             let patches = diff(&comp.vdom_template, &comp.view);
             log::info!("patching template: {:#?}", patches);
-            let dom_patches = self.convert_patches(&template, &patches).expect("convert patches");
-            self.apply_dom_patches(&template, dom_patches).expect("patch template");
+            let dom_patches = self
+                .convert_patches(&template, &patches)
+                .expect("convert patches");
+            self.apply_dom_patches(&template, dom_patches)
+                .expect("patch template");
             template
         }
         #[cfg(not(feature = "use-template"))]

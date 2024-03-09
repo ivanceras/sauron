@@ -1,11 +1,13 @@
 use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
+use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
 use std::any::TypeId;
 use std::rc::Rc;
-use crate::vdom::Leaf;
 
-pub use stateful_component::{lookup_template, register_template, stateful_component, StatefulComponent, StatefulModel};
+pub use stateful_component::{
+    lookup_template, register_template, stateful_component, StatefulComponent, StatefulModel,
+};
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
 
@@ -139,11 +141,11 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
         .expect("must have a name")
 }
 
-pub struct StatelessModel<MSG>{
+pub struct StatelessModel<MSG> {
     /// the view of this stateless model
     pub view: Box<Node<MSG>>,
     /// the vdom template of this component
-            #[cfg(feature = "use-template")]
+    #[cfg(feature = "use-template")]
     pub vdom_template: Box<Node<MSG>>,
     /// component type id
     pub type_id: TypeId,

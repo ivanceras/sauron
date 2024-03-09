@@ -31,12 +31,12 @@ pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> {
                     Leaf::SafeHtml(_) => Node::Leaf(Leaf::SafeHtml("".into())),
                     Leaf::Comment(_) => Node::Leaf(Leaf::Comment("".into())),
                     Leaf::DocType(_) => Node::Leaf(Leaf::DocType("".into())),
-                    Leaf::StatefulComponent { .. } => {
-                        Node::Leaf(Leaf::Comment(" ---stateful template placeholder--- ".into()))
-                    }
-                    Leaf::StatelessComponent {..} =>  {
-                        Node::Leaf(Leaf::Comment(" ---stateless template placeholder--- ".into()))
-                    }
+                    Leaf::StatefulComponent { .. } => Node::Leaf(Leaf::Comment(
+                        " ---stateful template placeholder--- ".into(),
+                    )),
+                    Leaf::StatelessComponent { .. } => Node::Leaf(Leaf::Comment(
+                        " ---stateless template placeholder--- ".into(),
+                    )),
                 }
             }
         }

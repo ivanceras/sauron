@@ -24,11 +24,13 @@ thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
 }
 
-pub fn register_template<MSG>(type_id: TypeId, view: &vdom::Node<MSG>) -> (web_sys::Node, vdom::Node<MSG>)
+pub fn register_template<MSG>(
+    type_id: TypeId,
+    view: &vdom::Node<MSG>,
+) -> (web_sys::Node, vdom::Node<MSG>)
 where
     MSG: 'static,
 {
-
     let (dom_template, vdom_template) = template::build_template(&view);
     let template = TEMPLATE_LOOKUP.with_borrow_mut(|map| {
         if let Some(existing) = map.get(&type_id) {
@@ -42,7 +44,7 @@ where
 }
 
 /// lookup for the template
-pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node>{
+pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node> {
     TEMPLATE_LOOKUP.with_borrow_mut(|map| {
         if let Some(existing) = map.get(&type_id) {
             Some(existing.clone_node_with_deep(true).expect("deep clone"))

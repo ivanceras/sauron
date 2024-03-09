@@ -1,7 +1,7 @@
 use rand::prelude::*;
+use sauron::dom::component;
 use sauron::*;
 use std::cmp::min;
-use sauron::dom::component;
 
 static ADJECTIVES: &[&str] = &[
     "pretty",
@@ -59,19 +59,17 @@ impl RowData {
     }
 }
 
-enum RowMsg{
+enum RowMsg {
     Remove(usize),
     Select(usize),
 }
 
-struct Row{
+struct Row {
     data: RowData,
     selected: bool,
 }
 
-
-
-impl Component<RowMsg, Msg> for Row{
+impl Component<RowMsg, Msg> for Row {
     fn update(&mut self, msg: RowMsg) -> Effects<RowMsg, Msg> {
         Effects::none()
     }
