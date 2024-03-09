@@ -642,7 +642,9 @@ where
             return Ok(());
         }
         let dom_patches: Vec<DomPatch> = self.pending_patches.borrow_mut().drain(..).collect();
-        if let Some(new_root_node) = self.apply_dom_patches(self.root_node.borrow().as_ref().expect("must have a root node"), dom_patches)?{
+        let new_root_node = self.apply_dom_patches(self.root_node.borrow().as_ref().expect("must have a root node"), dom_patches)?;
+
+        if let Some(new_root_node) = new_root_node{
              *self.root_node.borrow_mut() = Some(new_root_node);
         }
         Ok(())
