@@ -1,5 +1,4 @@
 use sauron::html::lookup::match_tag;
-use sauron::prelude::Render;
 use sauron::vdom::Node;
 use sauron_html_parser::parse_html;
 
