@@ -62,12 +62,13 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
     if mem::discriminant(old_node) != mem::discriminant(new_node) {
         return true;
     }
-    let replace = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
+    let replace = |_old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
         let explicit_replace_attr = new_node
             .first_value(&REPLACE)
             .and_then(|v| v.as_bool())
             .unwrap_or(false);
 
+        /*
         let old_callbacks = old_node.get_callbacks();
         let new_callbacks = new_node.get_callbacks();
         let old_node_has_event = !old_callbacks.is_empty();
@@ -85,6 +86,8 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
         log::debug!("event_listeners_altered: {event_listeners_altered}");
 
         explicit_replace_attr || forbid_recycle || event_listeners_altered
+        */
+        explicit_replace_attr 
     };
     // handle explicit replace if the Rep fn evaluates to true
     if replace(old_node, new_node) {

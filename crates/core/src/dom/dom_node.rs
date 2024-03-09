@@ -398,7 +398,7 @@ where
     }
 
     /// remove all the event listeners for this node
-    pub(crate) fn remove_event_listeners(&self, node: &Element) -> Result<(), JsValue> {
+    pub(crate) fn remove_event_listeners_recursive(&self, node: &Element) -> Result<(), JsValue> {
         let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
         let mut node_closures = self.node_closures.borrow_mut();
         for vdom_id in all_descendant_vdom_id {
@@ -427,9 +427,8 @@ where
         event_name: &'static str,
         node: &Element,
     ) -> Result<(), JsValue> {
-        let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
         let mut node_closures = self.node_closures.borrow_mut();
-        for vdom_id in all_descendant_vdom_id {
+        if let Some(vdom_id) = get_node_data_vdom_id(node){
             if let Some(old_closure) = node_closures.get_mut(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
                     if *event == event_name {
@@ -484,15 +483,24 @@ pub(crate) fn find_all_nodes(
     nodes_to_patch
 }
 
+/// return the "data-vdom-id" value of this node
+fn get_node_data_vdom_id(element: &Element) -> Option<usize>{
+    if let Some(vdom_id_str) = element.get_attribute(intern(DATA_VDOM_ID)) {
+        let vdom_id = vdom_id_str
+            .parse::<usize>()
+            .expect("unable to parse sauron_vdom-id");
+        Some(vdom_id)
+    }else{
+        None
+    }
+}
+
 /// Get the "data-vdom-id" of all the desendent of this node including itself
 /// This is needed to free-up the closure that was attached ActiveClosure manually
 fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<usize> {
     let mut data_vdom_id = vec![];
 
-    if let Some(vdom_id_str) = root_element.get_attribute(intern(DATA_VDOM_ID)) {
-        let vdom_id = vdom_id_str
-            .parse::<usize>()
-            .expect("unable to parse sauron_vdom-id");
+    if let Some(vdom_id) = get_node_data_vdom_id(root_element){
         data_vdom_id.push(vdom_id);
     }
 

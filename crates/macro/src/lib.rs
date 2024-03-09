@@ -264,7 +264,6 @@ pub fn jss_with_media(input: proc_macro::TokenStream) -> proc_macro::TokenStream
 /// # Example:
 /// ```rust
 /// use sauron::style;
-/// use sauron::Render;
 /// use sauron::html::units::{px, percent};
 /// use sauron::html::attributes::{Attribute,attr};
 ///

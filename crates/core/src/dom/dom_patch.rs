@@ -375,9 +375,8 @@ where
                     }
                 } else {
                     if target_element.node_type() == Node::ELEMENT_NODE {
-                        self.remove_event_listeners(&target_element)?;
+                        self.remove_event_listeners_recursive(&target_element)?;
                     }
-                    //let first_node = replacement.pop().expect("must have a first node");
                     target_element
                         .replace_with_with_node_1(&first_node)
                         .unwrap_or_else(|e| {
@@ -416,7 +415,7 @@ where
                     .remove_child(&target_element)
                     .expect("must remove target node");
                 if target_element.node_type() == Node::ELEMENT_NODE {
-                    self.remove_event_listeners(&target_element)?;
+                    self.remove_event_listeners_recursive(&target_element)?;
                 }
             }
             PatchVariant::MoveBeforeNode { for_moving } => {
