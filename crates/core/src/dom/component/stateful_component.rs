@@ -6,6 +6,7 @@ use crate::dom::program::MountProcedure;
 use crate::dom::template;
 use crate::dom::Application;
 use crate::dom::Cmd;
+use crate::dom::Component;
 use crate::dom::DomAttr;
 use crate::dom::DomAttrValue;
 use crate::dom::Program;
@@ -21,7 +22,6 @@ use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
-use crate::dom::Component;
 
 thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
@@ -80,27 +80,21 @@ pub trait StatefulComponent {
     fn template(&self) -> web_sys::Node;
 
     /// remove the attribute with this name
-    fn remove_attribute(&mut self, _attr_name: AttributeName){
-    }
+    fn remove_attribute(&mut self, _attr_name: AttributeName) {}
 
     /// append a child into this component
-    fn append_child(&mut self, _child: &web_sys::Node){
-    }
+    fn append_child(&mut self, _child: &web_sys::Node) {}
 
     /// remove a child in this index
-    fn remove_child(&mut self, _index: usize){
-    }
+    fn remove_child(&mut self, _index: usize) {}
 
     /// the component is attached to the dom
-    fn connected_callback(&mut self){
-    }
+    fn connected_callback(&mut self) {}
     /// the component is removed from the DOM
-    fn disconnected_callback(&mut self){
-    }
+    fn disconnected_callback(&mut self) {}
 
     /// the component is moved or attached to the dom
-    fn adopted_callback(&mut self){
-    }
+    fn adopted_callback(&mut self) {}
 }
 
 impl<COMP, MSG> Application<MSG> for COMP
@@ -150,7 +144,7 @@ where
     //
     // The attribute(minus events) however can be used for configurations, for setting initial state
     // of the stateful component.
-    
+
     /*
     let app = COMP::build(
         attrs

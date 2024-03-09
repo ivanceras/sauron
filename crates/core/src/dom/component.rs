@@ -2,14 +2,13 @@ use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::{dom::Effects, vdom::Node};
 
-pub use stateful_component::{StatefulComponent, component, register_template};
+pub use stateful_component::{component, register_template, StatefulComponent};
 #[cfg(feature = "custom_element")]
-pub use web_component::{WebComponent, register_web_component, WebComponentWrapper};
+pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
 
 mod stateful_component;
 #[cfg(feature = "custom_element")]
 mod web_component;
-
 
 /// A component has a view and can update itself.
 ///
@@ -136,7 +135,6 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
         .map(|s| s.to_string())
         .expect("must have a name")
 }
-
 
 #[cfg(test)]
 mod test {
