@@ -233,11 +233,25 @@ where
     /// executed after the program has been mounted
     fn after_mounted(&mut self) {
         // call the init of the component
-        let cmd = self.app_context.init_app();
-        cmd.emit(self.clone());
+        let init_cmd = self.app_context.init_app();
+
+        let init_cmd_is_empty = init_cmd.is_empty();
+
+        // this call may or may not trigger dispatch
+        // as the initi app of Application
+        // may just return Cmd::none which doesn't trigger
+        // dispatching / redraw
+        init_cmd.emit(self.clone());
 
         // inject the app's dynamic style after the emitting the init function and it's effects
         self.inject_dynamic_style();
+
+        // if the first cmd is empty, we trigger a dispatch
+        if init_cmd_is_empty{
+            // first dispatch call to ensure the template is patched with the 
+            // new app real view
+            self.dispatch_multiple([]);
+        }
     }
 
     fn app_hash() -> u64 {
@@ -374,6 +388,8 @@ where
         let created_node = self.app_context.template.clone();
         #[cfg(not(feature = "use-template"))]
         let created_node = self.create_dom_node(&self.app_context.current_vdom());
+
+        log::info!("Template / created_node is about to be mounted...");
 
         let mount_node: web_sys::Node = match mount_procedure.target {
             MountTarget::MountNode => self.mount_node.borrow().as_ref().expect("mount node").clone(),

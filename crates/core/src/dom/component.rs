@@ -40,6 +40,7 @@ pub fn register_template<APP, MSG>(app: &APP) -> (web_sys::Node, vdom::Node<MSG>
         }else{
             log::warn!("Adding a new template for: {:?}", type_id);
             let template = template::build_template(&view);
+            log::warn!("{}", template.render_to_string());
             map.insert(type_id, template.clone());
             template
         }

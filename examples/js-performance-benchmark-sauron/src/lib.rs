@@ -190,7 +190,10 @@ impl App {
                                 <button
                                     type="button"
                                     class="btn btn-primary btn-block"
-                                    on_click={|_| Msg::Run(10_000)}
+                                    on_click={|_| {
+                                        log::info!("Creating 10_000 rows...");
+                                        Msg::Run(10_000)
+                                    }}
                                     id="runlots">
                                     Create 10,000 rows
                                 </button>

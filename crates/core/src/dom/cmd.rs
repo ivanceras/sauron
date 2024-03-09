@@ -70,6 +70,11 @@ where
         }
     }
 
+    /// returns true if commands is empty
+    pub fn is_empty(&self) -> bool {
+        self.commands.is_empty()
+    }
+
     /// Modify the Cmd such that whether or not it will update the view set by `should_update_view`
     /// when the cmd is executed in the program
     pub fn should_update_view(mut self, should_update_view: bool) -> Self {

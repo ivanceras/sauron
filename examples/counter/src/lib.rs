@@ -72,5 +72,7 @@ impl Application<Msg> for App {
 
 #[wasm_bindgen(start)]
 pub fn start() {
+    console_log::init_with_level(log::Level::Trace).unwrap();
+    console_error_panic_hook::set_once();
     Program::mount_to_body(App::new());
 }
