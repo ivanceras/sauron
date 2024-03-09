@@ -236,9 +236,10 @@
     - Right now, we are attaching a `vdom-data` attribute for nodes that have listeners
 - [X] Make use of `Arc<RwLock>` to check if can solve copying the `APP` via `transmute_copy`. ~~it didn't solve it~~
     - See if there are performance penalty
-- [ ] Make template node for when app view is first created
-    - [ ] The template is then patched when the app is mounted.
-    - [ ] Templates will have to be saved in the global context, so it can be used accross multiple programs
+- [X] Make template node for when app view is first created
+    - [X] The template is then patched when the app is mounted.
+    - [X] Templates will have to be saved in the global context, so it can be used accross multiple programs
+    - [ ] Using the template was slow, Find out which part is the program spending much time. check the time in the diffing
 - [ ] Create a `view!` macro which generated the view function + template + prediff functions
 - [X] Make a variant of `Node` leaf to be `Component`, component can contain attributes and optionally children components + elements
     - [X] This requires moving the mt-dom types into sauron-core so as to make a specific diff function for component
