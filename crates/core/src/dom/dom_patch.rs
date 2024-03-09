@@ -118,7 +118,7 @@ where
         closure
     }
     /// get the real DOM target node and make a DomPatch object for each of the Patch
-    pub(crate) fn convert_patches(&self, root_node: &web_sys::Node, patches: &[Patch<MSG>]) -> Result<Vec<DomPatch>, JsValue> {
+    pub(crate) fn convert_patches(&self, target_node: &web_sys::Node, patches: &[Patch<MSG>]) -> Result<Vec<DomPatch>, JsValue> {
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
             .iter()
             .map(|patch| (patch.path(), patch.tag()))
@@ -130,7 +130,7 @@ where
             )
             .collect();
 
-        let nodes_lookup = find_all_nodes(root_node,
+        let nodes_lookup = find_all_nodes(target_node,
             &nodes_to_find,
         );
 
@@ -276,10 +276,10 @@ where
 
     /// TODO: this should not have access to root_node, so it can generically
     /// apply patch to any dom node
-    pub(crate) fn apply_dom_patches(&self, root_node: &web_sys::Node, dom_patches: impl IntoIterator<Item = DomPatch>) -> Result<Option<Node>, JsValue> {
+    pub(crate) fn apply_dom_patches(&self, target_node: &web_sys::Node, dom_patches: impl IntoIterator<Item = DomPatch>) -> Result<Option<Node>, JsValue> {
         let mut new_root_node = None;
         for dom_patch in dom_patches {
-            if let Some(replacement_node) = self.apply_dom_patch(root_node, dom_patch)? {
+            if let Some(replacement_node) = self.apply_dom_patch(target_node, dom_patch)? {
                  new_root_node = Some(replacement_node);
             }
         }
@@ -287,9 +287,9 @@ where
     }
 
     /// apply a dom patch to this root node,
-    /// return a new root_node if it would replace the original root_node
+    /// return a new target_node if it would replace the original target_node
     /// TODO: this should have no access to root_node, so it can be used in general sense
-    pub(crate) fn apply_dom_patch(&self, root_node: &web_sys::Node, dom_patch: DomPatch) -> Result<Option<Node>, JsValue> {
+    pub(crate) fn apply_dom_patch(&self, target_node: &web_sys::Node, dom_patch: DomPatch) -> Result<Option<Node>, JsValue> {
         let DomPatch {
             patch_path,
             target_element,
@@ -388,7 +388,7 @@ where
                         }
                     } else {
                         // the diffing algorithmn doesn't concern with fragment, instead it test the nodes contain in the fragment as if it where a list of nodes
-                        unreachable!("patching a document fragment other than the root_node should not happen");
+                        unreachable!("patching a document fragment other than the target_node should not happen");
                     }
                 } else {
                     if target_element.node_type() == Node::ELEMENT_NODE {
@@ -413,15 +413,7 @@ where
                     }
                 }
 
-                //Note: it is important that root_node points to the original mutable reference here
-                // since it can be replaced with a new root Node(the top-level node of the view) when patching
-                // if what we are replacing is a root node:
-                // we replace the root node here, so that's reference is updated
-                // to the newly created node
                 if patch_path.path.is_empty() {
-                    //*self.root_node.borrow_mut() = Some(first_node);
-                    #[cfg(feature = "with-debug")]
-                    log::info!("the root_node is replaced with {:?}", &self.root_node);
                     Ok(Some(first_node))
                 }else{
                     Ok(None)

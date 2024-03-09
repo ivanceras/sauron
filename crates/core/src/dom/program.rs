@@ -644,7 +644,14 @@ where
         let dom_patches: Vec<DomPatch> = self.pending_patches.borrow_mut().drain(..).collect();
         let new_root_node = self.apply_dom_patches(self.root_node.borrow().as_ref().expect("must have a root node"), dom_patches)?;
 
+        //Note: it is important that root_node points to the original mutable reference here
+        // since it can be replaced with a new root Node(the top-level node of the view) when patching
+        // if what we are replacing is a root node:
+        // we replace the root node here, so that's reference is updated
+        // to the newly created node
         if let Some(new_root_node) = new_root_node{
+                #[cfg(feature = "with-debug")]
+                log::info!("the root_node is replaced with {:?}", &self.root_node);
              *self.root_node.borrow_mut() = Some(new_root_node);
         }
         Ok(())
