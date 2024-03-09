@@ -44,7 +44,6 @@ where
     (template, vdom_template)
 }
 
-
 /// lookup for the template
 pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node> {
     TEMPLATE_LOOKUP.with_borrow_mut(|map| {
