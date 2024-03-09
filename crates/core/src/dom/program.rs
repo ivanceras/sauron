@@ -377,35 +377,37 @@ where
         self.inject_stylesheet();
     }
 
+    /// create initial dom node generated
+    /// from template and patched by the difference of vdom_template and current app view.
+    fn create_initial_view(&self) -> web_sys::Node{
+
+        #[cfg(feature = "use-template")]
+        {
+            let app_view = self.app_context.app.borrow().view();
+            let dom_template = self.app_context.template.clone();
+            let vdom_template = &self.app_context.vdom_template;
+            let patches = diff(vdom_template, &app_view);
+            let dom_patches = self
+                .convert_patches(&dom_template, &patches)
+                .expect("convert patches");
+            log::info!("first time patches {}: {patches:#?}", patches.len());
+            let new_template_node = self
+                .apply_dom_patches(&dom_template, dom_patches)
+                .expect("template patching");
+            log::info!("new template node: {:?}", new_template_node);
+            dom_template
+        } #[cfg(not(feature = "use-template"))] {
+            self.create_dom_node(&self.app_context.current_vdom())
+        }
+    }
+
     /// each element and it's descendant in the vdom is created into
     /// an actual DOM node.
     pub fn mount(&mut self, mount_node: &web_sys::Node, mount_procedure: MountProcedure) {
         *self.mount_node.borrow_mut() = Some(mount_node.clone());
         self.pre_mount();
-
-        //TODO: use the template here and append to the mount_node
-        // NOTE: the template has no attached event
-        // create a dom patch to the template and apply it first
-        #[cfg(feature = "use-template")]
-        let created_node = self.app_context.template.clone();
-        #[cfg(not(feature = "use-template"))]
-        let created_node = self.create_dom_node(&self.app_context.current_vdom());
-
-        #[cfg(feature = "use-template")]
-        {
-            let app_view = self.app_context.app.borrow().view();
-            let template = self.app_context.template.clone();
-            let vdom_template = &self.app_context.vdom_template;
-            let patches = diff(vdom_template, &app_view);
-            let dom_patches = self
-                .convert_patches(&template, &patches)
-                .expect("convert patches");
-            log::info!("first time patches {}: {patches:#?}", patches.len());
-            let new_template_node = self
-                .apply_dom_patches(&created_node, dom_patches)
-                .expect("template patching");
-            log::info!("new template node: {:?}", new_template_node);
-        }
+        
+        let created_node = self.create_initial_view();
 
         let mount_node: web_sys::Node = match mount_procedure.target {
             MountTarget::MountNode => self
