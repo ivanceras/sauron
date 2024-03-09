@@ -276,8 +276,8 @@ where
     /// call the listener since browser don't allow asynchronous execution of
     /// dispatching custom events (non-native browser events)
     ///
-    pub(crate) fn dispatch_mount_event(node: &Node) {
-        let event_target: &web_sys::EventTarget = node.unchecked_ref();
+    pub(crate) fn dispatch_mount_event(target_node: &Node) {
+        let event_target: &web_sys::EventTarget = target_node.unchecked_ref();
         assert_eq!(
             Ok(true),
             event_target.dispatch_event(&MountEvent::create_web_event())
@@ -293,9 +293,9 @@ where
     }
 
     /// clear all children of the element
-    pub(crate) fn clear_children(node: &Node) {
-        while let Some(first_child) = node.first_child() {
-            node.remove_child(&first_child).expect("must remove child");
+    pub(crate) fn clear_children(target_node: &Node) {
+        while let Some(first_child) = target_node.first_child() {
+            target_node.remove_child(&first_child).expect("must remove child");
         }
     }
 
@@ -398,14 +398,14 @@ where
     }
 
     /// remove all the event listeners for this node
-    pub(crate) fn remove_event_listeners_recursive(&self, node: &Element) -> Result<(), JsValue> {
-        let all_descendant_vdom_id = get_node_descendant_data_vdom_id(node);
+    pub(crate) fn remove_event_listeners_recursive(&self, target_element: &Element) -> Result<(), JsValue> {
+        let all_descendant_vdom_id = get_node_descendant_data_vdom_id(target_element);
         let mut node_closures = self.node_closures.borrow_mut();
         for vdom_id in all_descendant_vdom_id {
             if let Some(old_closure) = node_closures.get(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
                     let func: &Function = oc.as_ref().unchecked_ref();
-                    node.remove_event_listener_with_callback(intern(event), func)?;
+                    target_element.remove_event_listener_with_callback(intern(event), func)?;
                 }
                 // remove closure active_closure in dom_updater to free up memory
                 node_closures
@@ -425,15 +425,15 @@ where
     pub(crate) fn remove_event_listener_with_name(
         &self,
         event_name: &'static str,
-        node: &Element,
+        target_element: &Element,
     ) -> Result<(), JsValue> {
         let mut node_closures = self.node_closures.borrow_mut();
-        if let Some(vdom_id) = get_node_data_vdom_id(node){
+        if let Some(vdom_id) = get_node_data_vdom_id(target_element){
             if let Some(old_closure) = node_closures.get_mut(&vdom_id) {
                 for (event, oc) in old_closure.iter() {
                     if *event == event_name {
                         let func: &Function = oc.as_ref().unchecked_ref();
-                        node.remove_event_listener_with_callback(intern(event), func)?;
+                        target_element.remove_event_listener_with_callback(intern(event), func)?;
                     }
                 }
 
@@ -453,12 +453,12 @@ where
     }
 }
 
-pub(crate) fn find_node(node: &Node, path: &mut TreePath) -> Option<Node> {
+pub(crate) fn find_node(target_node: &Node, path: &mut TreePath) -> Option<Node> {
     if path.is_empty() {
-        Some(node.clone())
+        Some(target_node.clone())
     } else {
         let idx = path.remove_first();
-        let children = node.child_nodes();
+        let children = target_node.child_nodes();
         if let Some(child) = children.item(idx as u32) {
             find_node(&child, path)
         } else {
@@ -468,24 +468,24 @@ pub(crate) fn find_node(node: &Node, path: &mut TreePath) -> Option<Node> {
 }
 
 pub(crate) fn find_all_nodes(
-    node: &Node,
+    target_node: &Node,
     nodes_to_find: &[(&TreePath, Option<&&'static str>)],
 ) -> BTreeMap<TreePath, Node> {
     let mut nodes_to_patch: BTreeMap<TreePath, Node> = BTreeMap::new();
     for (path, tag) in nodes_to_find {
         let mut traverse_path: TreePath = (*path).clone();
-        if let Some(found) = find_node(node, &mut traverse_path) {
+        if let Some(found) = find_node(target_node, &mut traverse_path) {
             nodes_to_patch.insert((*path).clone(), found);
         } else {
-            log::warn!("can not find: {:?} {:?} root_node: {:?}", path, tag, node);
+            log::warn!("can not find: {:?} {:?} target_node: {:?}", path, tag, target_node);
         }
     }
     nodes_to_patch
 }
 
 /// return the "data-vdom-id" value of this node
-fn get_node_data_vdom_id(element: &Element) -> Option<usize>{
-    if let Some(vdom_id_str) = element.get_attribute(intern(DATA_VDOM_ID)) {
+fn get_node_data_vdom_id(target_element: &Element) -> Option<usize>{
+    if let Some(vdom_id_str) = target_element.get_attribute(intern(DATA_VDOM_ID)) {
         let vdom_id = vdom_id_str
             .parse::<usize>()
             .expect("unable to parse sauron_vdom-id");
@@ -497,14 +497,14 @@ fn get_node_data_vdom_id(element: &Element) -> Option<usize>{
 
 /// Get the "data-vdom-id" of all the desendent of this node including itself
 /// This is needed to free-up the closure that was attached ActiveClosure manually
-fn get_node_descendant_data_vdom_id(root_element: &Element) -> Vec<usize> {
+fn get_node_descendant_data_vdom_id(target_element: &Element) -> Vec<usize> {
     let mut data_vdom_id = vec![];
 
-    if let Some(vdom_id) = get_node_data_vdom_id(root_element){
+    if let Some(vdom_id) = get_node_data_vdom_id(target_element){
         data_vdom_id.push(vdom_id);
     }
 
-    let children = root_element.child_nodes();
+    let children = target_element.child_nodes();
     let child_node_count = children.length();
     for i in 0..child_node_count {
         let child_node = children.item(i).expect("Expecting a child node");
