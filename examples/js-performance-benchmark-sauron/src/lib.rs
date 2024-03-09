@@ -1,6 +1,7 @@
 use rand::prelude::*;
 use sauron::*;
 use std::cmp::min;
+use sauron::dom::component;
 
 static ADJECTIVES: &[&str] = &[
     "pretty",
@@ -56,16 +57,34 @@ impl RowData {
 
         Self { id, label }
     }
-    fn view(&self, selected: bool) -> Node<Msg> {
-        let id = self.id;
+}
+
+enum RowMsg{
+    Remove(usize),
+    Select(usize),
+}
+
+struct Row{
+    data: RowData,
+    selected: bool,
+}
+
+
+
+impl Component<RowMsg, Msg> for Row{
+    fn update(&mut self, msg: RowMsg) -> Effects<RowMsg, Msg> {
+        Effects::none()
+    }
+    fn view(&self) -> Node<RowMsg> {
+        let id = self.data.id;
         node! {
-            <tr class={if selected { "danger" } else  { "" }} key=id >
-                <td class="col-md-1">{ text(id) }</td>
-                <td class="col-md-4" on_click={move |_| Msg::Select(id)}>
-                     <a class="lbl">{ text(&self.label) }</a>
+            <tr class={if self.selected { "danger" } else  { "" }} key=id >
+                <td class="col-md-1">{ text(self.data.id) }</td>
+                <td class="col-md-4" on_click={move |_| RowMsg::Select(id)}>
+                     <a class="lbl">{ text(&self.data.label) }</a>
                 </td>
                 <td class="col-md-1">
-                     <a class="remove" on_click={move |_| Msg::Remove(id) }>
+                     <a class="remove" on_click={move |_| RowMsg::Remove(id) }>
                          <span class="glyphicon glyphicon-remove remove" aria-hidden="true"></span>
                      </a>
                 </td>
@@ -98,6 +117,7 @@ enum Msg {
     Update(usize),
     Clear,
     Swap,
+    RowMsg(RowMsg),
     Remove(usize),
     Select(usize),
 }
@@ -137,6 +157,7 @@ impl Application<Msg> for App {
                     self.rows.swap(1, 998);
                 }
             }
+            Msg::RowMsg(_rmsg) => todo!(),
             Msg::Remove(id) => {
                 if let Some(index) = self.rows.iter().position(|row| row.id == id) {
                     self.rows.remove(index);
@@ -157,7 +178,8 @@ impl Application<Msg> for App {
                     <tbody id="tbody">
                         {for row in self.rows.iter() {
                             let selected = self.selected_id == Some(row.id);
-                            row.view(selected)
+                            component(Row{data: row.clone(), selected}, [], [])
+                                .map_msg(Msg::RowMsg)
                         }}
                     </tbody>
                 </table>
@@ -243,6 +265,8 @@ impl App {
 #[wasm_bindgen(start)]
 pub fn start() {
     console_log::init().unwrap();
+    console_error_panic_hook::set_once();
+
     let mount_el = sauron::document().query_selector("#main").unwrap().unwrap();
     Program::append_to_mount(App::new(), &mount_el);
 }

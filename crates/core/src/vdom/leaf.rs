@@ -1,11 +1,13 @@
 //! Leaf node for html dom tree
 use crate::dom::StatefulComponent;
+use crate::dom::StatelessModel;
 use crate::vdom::{Attribute, Node};
 use std::any::TypeId;
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
+use crate::dom::StatefulModel;
 
 /// A leaf node value of html dom tree
 pub enum Leaf<MSG> {
@@ -18,20 +20,10 @@ pub enum Leaf<MSG> {
     /// doctype: html, math, svg
     /// <https://www.w3.org/QA/2002/04/valid-dtd-list.html>
     DocType(Cow<'static, str>),
-    /// Stateful StatefulComponent leaf
+    /// Stateful Component leaf
     StatefulComponent(StatefulModel<MSG>),
-}
-
-/// Wrapper for stateful component
-pub struct StatefulModel<MSG> {
-    ///
-    pub comp: Rc<RefCell<dyn StatefulComponent>>,
-    /// component type id
-    pub type_id: TypeId,
-    /// component attributes
-    pub attrs: Vec<Attribute<MSG>>,
-    /// component children
-    pub children: Vec<Node<MSG>>,
+    /// Stateless Component leaf
+    StatelessComponent(StatelessModel<MSG>),
 }
 
 impl<MSG> Clone for Leaf<MSG> {
@@ -42,45 +34,12 @@ impl<MSG> Clone for Leaf<MSG> {
             Self::Comment(v) => Self::Comment(v.clone()),
             Self::DocType(v) => Self::DocType(v.clone()),
             Self::StatefulComponent(v) => Self::StatefulComponent(v.clone()),
+            Self::StatelessComponent(v) => Self::StatelessComponent(v.clone()),
         }
     }
 }
 
-impl<MSG> Clone for StatefulModel<MSG> {
-    fn clone(&self) -> Self {
-        Self {
-            comp: Rc::clone(&self.comp),
-            type_id: self.type_id.clone(),
-            attrs: self.attrs.clone(),
-            children: self.children.clone(),
-        }
-    }
-}
 
-impl<MSG> StatefulModel<MSG> {
-    /// mape the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
-    pub fn map_msg<F, MSG2>(self, cb: F) -> StatefulModel<MSG2>
-    where
-        F: Fn(MSG) -> MSG2 + Clone + 'static,
-        MSG2: 'static,
-        MSG: 'static,
-    {
-        StatefulModel {
-            type_id: self.type_id,
-            comp: self.comp,
-            attrs: self
-                .attrs
-                .into_iter()
-                .map(|a| a.map_msg(cb.clone()))
-                .collect(),
-            children: self
-                .children
-                .into_iter()
-                .map(|c| c.map_msg(cb.clone()))
-                .collect(),
-        }
-    }
-}
 
 impl<MSG> fmt::Debug for Leaf<MSG> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -90,6 +49,7 @@ impl<MSG> fmt::Debug for Leaf<MSG> {
             Self::Comment(v) => write!(f, "Comment({v})"),
             Self::DocType(v) => write!(f, "DocType({v}"),
             Self::StatefulComponent(v) => write!(f, "StatefulComponent({:?})", v.type_id),
+            Self::StatelessComponent(v) => write!(f, "StatelessComponent({:?})", v.type_id),
         }
     }
 }
@@ -102,6 +62,7 @@ impl<MSG> PartialEq for Leaf<MSG> {
             (Self::Comment(v), Self::Comment(o)) => v == o,
             (Self::DocType(v), Self::DocType(o)) => v == o,
             (Self::StatefulComponent(v), Self::StatefulComponent(o)) => v.type_id == o.type_id,
+            (Self::StatelessComponent(v), Self::StatelessComponent(o)) => v.type_id == o.type_id,
             _ => false,
         }
     }
@@ -144,6 +105,7 @@ impl<MSG> Leaf<MSG> {
             Self::Comment(v) => matches!(v, Cow::Borrowed(_)),
             Self::DocType(v) => matches!(v, Cow::Borrowed(_)),
             Self::StatefulComponent(_) => false,
+            Self::StatelessComponent(_) => false,
         }
     }
 
@@ -160,6 +122,7 @@ impl<MSG> Leaf<MSG> {
             Self::Comment(v) => Leaf::Comment(v),
             Self::DocType(v) => Leaf::DocType(v),
             Self::StatefulComponent(v) => Leaf::StatefulComponent(v.map_msg(cb)),
+            Self::StatelessComponent(v) => Leaf::StatelessComponent(v.map_msg(cb)),
         }
     }
 }

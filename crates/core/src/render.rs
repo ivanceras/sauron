@@ -108,11 +108,14 @@ impl<MSG> Leaf<MSG> {
             Leaf::DocType(doctype) => {
                 write!(buffer, "<!doctype {doctype}>")
             }
-            Leaf::StatefulComponent { .. } => {
+            Leaf::StatefulComponent ( _comp ) => {
                 //TODO: The component will be rendered based
                 // on its attributes and children
                 // maybe just call it's view directly
                 todo!()
+            }
+            Leaf::StatelessComponent(comp) => {
+                comp.view.render(buffer)
             }
         }
     }

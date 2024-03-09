@@ -2,7 +2,7 @@ use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
 use crate::html::lookup;
 use crate::vdom::AttributeName;
-use crate::vdom::StatefulModel;
+use crate::dom::StatefulModel;
 use crate::vdom::TreePath;
 use crate::{
     dom::document,
@@ -17,6 +17,9 @@ use std::fmt;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
+use crate::vdom::diff;
+use crate::dom::component::register_template;
+use crate::dom::component::StatelessModel;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -185,7 +188,8 @@ where
                     doctype is only used in rendering"
                 );
             }
-            Leaf::StatefulComponent(lc) => self.create_leaf_component(lc),
+            Leaf::StatefulComponent(comp) => self.create_stateful_component(comp),
+            Leaf::StatelessComponent(comp) => self.create_stateless_component(comp),
         }
     }
 
@@ -201,17 +205,28 @@ where
     /// The attributes affects the Stateful component state.
     /// The attributes can be diff and send the patches to the StatefulComponent
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
-    fn create_leaf_component(&self, lc: &StatefulModel<MSG>) -> Node {
-        let comp_node = self.create_dom_node(&crate::html::div(lc.attrs.clone(), []));
+    fn create_stateful_component(&self, comp: &StatefulModel<MSG>) -> Node {
+        let comp_node = self.create_dom_node(&crate::html::div(comp.attrs.clone(), []));
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
         // listener and removing the generics msg
-        for child in lc.children.iter() {
+        for child in comp.children.iter() {
             let child_dom = self.create_dom_node(&child);
             Self::dispatch_mount_event(&child_dom);
-            lc.comp.borrow_mut().append_child(&child_dom);
+            comp.comp.borrow_mut().append_child(&child_dom);
         }
         comp_node
+    }
+
+    fn create_stateless_component(&self, comp: &StatelessModel<MSG>) -> Node {
+        // the template must have been an existing one
+        // since the call of 
+        let (template, vdom_template) = register_template(comp.type_id, &comp.view);
+        let patches = diff(&vdom_template, &comp.view);
+        log::info!("patching template: {:#?}", patches);
+        let dom_patches = self.convert_patches(&template, &patches).expect("convert patches");
+        self.apply_dom_patches(&template, dom_patches).expect("patch template");
+        template
     }
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`

@@ -1,8 +1,11 @@
 use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::{dom::Effects, vdom::Node};
+use std::any::TypeId;
+use std::rc::Rc;
+use crate::vdom::Leaf;
 
-pub use stateful_component::{register_template, stateful_component, StatefulComponent};
+pub use stateful_component::{register_template, stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
 
@@ -134,6 +137,74 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
         .next()
         .map(|s| s.to_string())
         .expect("must have a name")
+}
+
+pub struct StatelessModel<MSG>{
+    /// the view of this stateless model
+    pub view: Box<Node<MSG>>,
+    /// component type id
+    pub type_id: TypeId,
+    /// attributes of this model
+    pub attrs: Vec<Attribute<MSG>>,
+    /// external children component
+    pub children: Vec<Node<MSG>>,
+}
+
+impl<MSG> StatelessModel<MSG> {
+    /// mape the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb: F) -> StatelessModel<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
+        MSG: 'static,
+    {
+        StatelessModel {
+            type_id: self.type_id,
+            view: Box::new(self.view.map_msg(cb.clone())),
+            attrs: self
+                .attrs
+                .into_iter()
+                .map(|a| a.map_msg(cb.clone()))
+                .collect(),
+            children: self
+                .children
+                .into_iter()
+                .map(|c| c.map_msg(cb.clone()))
+                .collect(),
+        }
+    }
+}
+
+impl<MSG> Clone for StatelessModel<MSG> {
+    fn clone(&self) -> Self {
+        Self {
+            view: self.view.clone(),
+            type_id: self.type_id.clone(),
+            attrs: self.attrs.clone(),
+            children: self.children.clone(),
+        }
+    }
+}
+
+/// create a stateless component node
+pub fn component<COMP, MSG, MSG2>(
+    app: COMP,
+    attrs: impl IntoIterator<Item = Attribute<MSG>>,
+    children: impl IntoIterator<Item = Node<MSG>>,
+) -> Node<MSG>
+where
+    COMP: Component<MSG, MSG2> + 'static,
+    MSG: 'static,
+{
+    let type_id = TypeId::of::<COMP>();
+    let view = app.view();
+    let (_template, vdom_template) = register_template(type_id, &view);
+    Node::Leaf(Leaf::StatelessComponent(StatelessModel {
+        view: Box::new(view),
+        type_id,
+        attrs: attrs.into_iter().collect(),
+        children: children.into_iter().collect(),
+    }))
 }
 
 #[cfg(test)]

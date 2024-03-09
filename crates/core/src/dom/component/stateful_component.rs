@@ -13,7 +13,6 @@ use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
 use crate::vdom::Node;
-use crate::vdom::StatefulModel;
 use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -72,6 +71,54 @@ pub trait StatefulComponent {
 
     /// the component is moved or attached to the dom
     fn adopted_callback(&mut self) {}
+}
+
+/// Wrapper for stateful component
+pub struct StatefulModel<MSG> {
+    ///
+    pub comp: Rc<RefCell<dyn StatefulComponent>>,
+    /// component type id
+    pub type_id: TypeId,
+    /// component attributes
+    pub attrs: Vec<Attribute<MSG>>,
+    /// external children component
+    pub children: Vec<Node<MSG>>,
+}
+
+impl<MSG> StatefulModel<MSG> {
+    /// mape the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
+    pub fn map_msg<F, MSG2>(self, cb: F) -> StatefulModel<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + Clone + 'static,
+        MSG2: 'static,
+        MSG: 'static,
+    {
+        StatefulModel {
+            type_id: self.type_id,
+            comp: self.comp,
+            attrs: self
+                .attrs
+                .into_iter()
+                .map(|a| a.map_msg(cb.clone()))
+                .collect(),
+            children: self
+                .children
+                .into_iter()
+                .map(|c| c.map_msg(cb.clone()))
+                .collect(),
+        }
+    }
+}
+
+impl<MSG> Clone for StatefulModel<MSG> {
+    fn clone(&self) -> Self {
+        Self {
+            comp: Rc::clone(&self.comp),
+            type_id: self.type_id.clone(),
+            attrs: self.attrs.clone(),
+            children: self.children.clone(),
+        }
+    }
 }
 
 impl<COMP, MSG> Application<MSG> for COMP
@@ -155,13 +202,12 @@ where
         program.mount(&me.target_node, MountProcedure::append());
         MSG::default()
     });
-    let node = Node::Leaf(Leaf::StatefulComponent(StatefulModel {
+    Node::Leaf(Leaf::StatefulComponent(StatefulModel {
         comp: app,
         type_id,
         attrs: attrs.into_iter().chain([mount_event]).collect(),
         children: children.into_iter().collect(),
-    }));
-    node
+    }))
 }
 
 impl Into<DomAttrValue> for JsValue {

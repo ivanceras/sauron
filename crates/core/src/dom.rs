@@ -17,7 +17,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use application::{Application, Measurements, PreDiff, diff_if};
     #[cfg(feature = "custom_element")]
     pub use component::{register_web_component, WebComponent, WebComponentWrapper};
-    pub use component::{stateful_component, StatefulComponent};
+    pub use component::{component, stateful_component, StatefulComponent, StatefulModel, StatelessModel};
     pub use dom_patch::{DomPatch, PatchVariant};
     pub use dom_attr::{DomAttr, DomAttrValue, GroupedDomAttrValues};
     pub use http::Http;

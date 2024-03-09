@@ -32,7 +32,10 @@ pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> {
                     Leaf::Comment(_) => Node::Leaf(Leaf::Comment("".into())),
                     Leaf::DocType(_) => Node::Leaf(Leaf::DocType("".into())),
                     Leaf::StatefulComponent { .. } => {
-                        Node::Leaf(Leaf::Comment(" ---nested template placeholder--- ".into()))
+                        Node::Leaf(Leaf::Comment(" ---stateful template placeholder--- ".into()))
+                    }
+                    Leaf::StatelessComponent {..} =>  {
+                        Node::Leaf(Leaf::Comment(" ---stateless template placeholder--- ".into()))
                     }
                 }
             }
@@ -98,7 +101,10 @@ fn create_leaf_node_without_listeners<MSG>(leaf: &Leaf<MSG>) -> web_sys::Node {
             );
         }
         Leaf::StatefulComponent(_lc) => {
-            panic!("Component should not be created here")
+            unreachable!("Component should not be created here")
+        }
+        Leaf::StatelessComponent(_comp) => {
+            unreachable!("stateless component should not be here")
         }
     }
 }

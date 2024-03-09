@@ -14,6 +14,7 @@ getrandom = { version = "0.2.7", features = ["js"] }
 sauron = { path = "../../../sauron", features = ["with-debug", "with-measure", "use-template"] }
 log = "0.4"
 console_log = "0.2"
+console_error_panic_hook = "0.1"
 
 [profile.release]
 lto = true
