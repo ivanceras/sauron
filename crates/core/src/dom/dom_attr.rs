@@ -163,7 +163,7 @@ impl DomAttr {
                     .set_attribute_ns(Some(namespace), attr_name, &merged_plain_values)
                     .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
             } else {
-                #[cfg(feature = "ensure-check")]
+                #[cfg(feature = "ensure-attr-set")]
                 if *VALUE == attr_name {
                     element
                         .set_attribute(attr_name, &merged_plain_values)
@@ -206,7 +206,7 @@ impl DomAttr {
                         .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
                 }
 
-                #[cfg(not(feature = "ensure-check"))]
+                #[cfg(not(feature = "ensure-attr-set"))]
                 element
                     .set_attribute(attr_name, &merged_plain_values)
                     .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
@@ -219,6 +219,7 @@ impl DomAttr {
         element: &Element,
         attr: &DomAttr,
     ) -> Result<(), JsValue> {
+        #[cfg(feature = "ensure-attr-set")]
         if *VALUE == attr.name {
             DomAttr::set_value_str(element, "");
         } else if *OPEN == attr.name {
@@ -240,6 +241,7 @@ impl DomAttr {
     /// There are only 2 elements where set_checked is applicable:
     /// - input
     /// - menuitem
+    #[cfg(feature = "ensure-attr-set")]
     pub(crate) fn set_checked(element: &Element, is_checked: bool) {
         if let Some(input) = element.dyn_ref::<HtmlInputElement>() {
             input.set_checked(is_checked);
@@ -254,6 +256,7 @@ impl DomAttr {
     /// Applies to:
     ///  - dialog
     ///  - details
+    #[cfg(feature = "ensure-attr-set")]
     pub(crate) fn set_open(element: &Element, is_open: bool) {
         if let Some(details) = element.dyn_ref::<HtmlDetailsElement>() {
             details.set_open(is_open);
@@ -276,6 +279,7 @@ impl DomAttr {
     /// - menuitem
     ///
     /// TODO: use macro to simplify this code
+    #[cfg(feature = "ensure-attr-set")]
     pub(crate) fn set_disabled(element: &Element, is_disabled: bool) {
         if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
             elm.set_disabled(is_disabled);
@@ -301,6 +305,7 @@ impl DomAttr {
     /// we explicitly call the `set_value` function in the html element
     ///
     /// TODO: use macro to simplify this code
+    #[cfg(feature = "ensure-attr-set")]
     pub(crate) fn set_value_str(element: &Element, value: &str) {
         if let Some(elm) = element.dyn_ref::<HtmlInputElement>() {
             elm.set_value(value);
@@ -322,6 +327,7 @@ impl DomAttr {
     }
 
     /// set the value of this element with an i32 value
+    #[cfg(feature = "ensure-attr-set")]
     pub(crate) fn set_value_i32(element: &Element, value: i32) {
         if let Some(elm) = element.dyn_ref::<HtmlLiElement>() {
             elm.set_value(value);
@@ -329,6 +335,7 @@ impl DomAttr {
     }
 
     /// set the value of this element with an f64 value
+    #[cfg(feature = "ensure-attr-set")]
     pub(crate) fn set_value_f64(element: &Element, value: f64) {
         if let Some(elm) = element.dyn_ref::<HtmlMeterElement>() {
             elm.set_value(value);
@@ -338,6 +345,7 @@ impl DomAttr {
     }
 
     /// set the element attribute value with the first numerical value found in values
+    #[cfg(feature = "ensure-attr-set")]
     pub(crate) fn set_numeric_values(element: &Element, values: &[Value]) {
         let value_i32 = values.first().and_then(|v| v.as_i32());
 
