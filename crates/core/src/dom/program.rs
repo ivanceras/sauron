@@ -5,6 +5,7 @@ use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
 use crate::dom::template;
+use crate::dom::dom_node;
 #[cfg(feature = "prediff")]
 use crate::dom::PreDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
@@ -505,6 +506,12 @@ where
         let measurements = self
             .update_dom(modifier, treepath)
             .expect("must update dom");
+
+        let total = dom_node::total_time_spent();
+        log::info!("     total: {:#?}", total);
+        log::info!("   average: {:#?}", total.average());
+
+        log::info!("percentile: {:#?}", total.percentile());
 
         #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied

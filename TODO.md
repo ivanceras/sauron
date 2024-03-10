@@ -240,6 +240,8 @@
     - [X] The template is then patched when the app is mounted.
     - [X] Templates will have to be saved in the global context, so it can be used accross multiple programs
     - [ ] Using the template was slow, Find out which part is the program spending much time. check the time in the diffing
+        - Most of the time is spent on applying the patches
+    - [ ] Make use of prediff to shorten diffing on nodes that are full static
 - [ ] Create a `view!` macro which generated the view function + template + prediff functions
 - [X] Make a variant of `Node` leaf to be `Component`, component can contain attributes and optionally children components + elements
     - [X] This requires moving the mt-dom types into sauron-core so as to make a specific diff function for component

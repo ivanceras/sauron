@@ -1,6 +1,7 @@
 use crate::dom::component::lookup_template;
 use crate::dom::component::register_template;
 use crate::dom::component::StatelessModel;
+use crate::dom::now;
 use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
 use crate::dom::StatefulModel;
@@ -16,17 +17,84 @@ use crate::{
     vdom::{Attribute, Leaf},
 };
 use js_sys::Function;
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
 use std::{cell::Cell, collections::BTreeMap};
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
-use crate::dom::now;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
+
+#[derive(Clone, Copy, Default, Debug)]
+pub struct Section {
+    lookup: f64,
+    diffing: f64,
+    convert_patch: f64,
+    apply_patch: f64,
+    total: f64,
+    len: usize,
+}
+
+impl Section {
+    pub fn average(&self) -> Section {
+        let div = self.len as f64;
+        Section {
+            lookup: self.lookup / div,
+            diffing: self.diffing / div,
+            convert_patch: self.convert_patch / div,
+            apply_patch: self.apply_patch / div,
+            total: self.total / div,
+            len: self.len,
+        }
+    }
+
+    pub fn percentile(&self) -> Section {
+        let div =  100.0 / self.total ;
+        Section{
+            lookup: self.lookup * div,
+            diffing: self.diffing * div,
+            convert_patch: self.convert_patch * div,
+            apply_patch: self.apply_patch * div,
+            total: self.total * div,
+            len: self.len,
+        }
+    }
+}
+
+thread_local!(pub static TIME_SPENT: RefCell<Vec<Section>> = RefCell::new(vec![]));
+
+#[cfg(feature = "with-debug")]
+pub fn add_time_trace(section: Section) {
+    TIME_SPENT.with_borrow_mut(|v| {
+        v.push(section);
+    })
+}
+
+fn total(values: &[Section]) -> Section{
+        let len = values.len();
+        let mut sum = Section::default();
+        for v in values.iter() {
+            sum.lookup += v.lookup;
+            sum.diffing += v.diffing;
+            sum.convert_patch += v.convert_patch;
+            sum.apply_patch += v.apply_patch;
+            sum.total += v.total;
+            sum.len = len;
+        }
+        sum
+}
+
+
+pub fn total_time_spent() -> Section {
+    TIME_SPENT.with_borrow(|values| {
+        total(values)
+    })
+}
+
 
 // a cache of commonly used elements, so we can clone them.
 // cloning is much faster then creating the element
@@ -238,11 +306,19 @@ where
                 .expect("patch template");
             let t5 = now();
 
-            log::info!("looking up template took: {}ms", t2 - t1);
-            log::info!("diffing took: {}ms", t3 - t2);
-            log::info!("converting patches took: {}ms", t4 -t3);
-            log::info!("applying patches took: {}ms", t5-t4);
-            log::info!("creating stateless component took: {}ms", t5 - t1);
+            //log::info!("looking up template took: {}ms", t2 - t1);
+            //log::info!("diffing took: {}ms", t3 - t2);
+            //log::info!("converting patches took: {}ms", t4 - t3);
+            //log::info!("applying patches took: {}ms", t5 - t4);
+            //log::info!("creating stateless component took: {}ms", t5 - t1);
+            add_time_trace(Section {
+                lookup: t2 - t1,
+                diffing: t3 - t2,
+                convert_patch: t4 - t3,
+                apply_patch: t5 - t4,
+                total: t5 - t1,
+                ..Default::default()
+            });
             template
         }
         #[cfg(not(feature = "use-template"))]
@@ -250,7 +326,7 @@ where
             let t6 = now();
             let created_node = self.create_dom_node(&comp.view);
             let t7 = now();
-            log::info!("creating node took: {}ms", t7-t6);
+            //log::info!("creating node took: {}ms", t7 - t6);
             created_node
         }
     }
