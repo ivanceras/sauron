@@ -7,12 +7,12 @@ use crate::dom::{Application, Program};
 use crate::vdom::EventCallback;
 use crate::vdom::TreePath;
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
-use std::collections::BTreeMap;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 use web_sys::Node;
+use indexmap::IndexMap;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -160,7 +160,7 @@ where
     /// convert a virtual DOM Patch into a created DOM node Patch
     pub fn convert_patch(
         &self,
-        nodes_lookup: &BTreeMap<TreePath, Node>,
+        nodes_lookup: &IndexMap<TreePath, Node>,
         target_element: &Element,
         patch: &Patch<MSG>,
     ) -> DomPatch {
@@ -279,12 +279,11 @@ where
     /// apply patch to any dom node
     pub(crate) fn apply_dom_patches(
         &self,
-        target_node: &web_sys::Node,
         dom_patches: impl IntoIterator<Item = DomPatch>,
     ) -> Result<Option<Node>, JsValue> {
         let mut new_root_node = None;
         for dom_patch in dom_patches {
-            if let Some(replacement_node) = self.apply_dom_patch(target_node, dom_patch)? {
+            if let Some(replacement_node) = self.apply_dom_patch(dom_patch)? {
                 new_root_node = Some(replacement_node);
             }
         }
@@ -292,11 +291,10 @@ where
     }
 
     /// apply a dom patch to this root node,
-    /// return a new target_node if it would replace the original target_node
+    /// return a new root_node if it would replace the original root_node
     /// TODO: this should have no access to root_node, so it can be used in general sense
     pub(crate) fn apply_dom_patch(
         &self,
-        target_node: &web_sys::Node,
         dom_patch: DomPatch,
     ) -> Result<Option<Node>, JsValue> {
         let DomPatch {

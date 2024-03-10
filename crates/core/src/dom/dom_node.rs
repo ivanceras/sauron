@@ -1,12 +1,12 @@
+
+#[cfg(feature = "use-template")]
 use crate::dom::component::lookup_template;
-use crate::dom::component::register_template;
 use crate::dom::component::StatelessModel;
 use crate::dom::now;
 use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
 use crate::dom::StatefulModel;
 use crate::html::lookup;
-use crate::vdom::diff;
 use crate::vdom::AttributeName;
 use crate::vdom::TreePath;
 use crate::{
@@ -20,9 +20,10 @@ use js_sys::Function;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
-use std::{cell::Cell, collections::BTreeMap};
+use std::cell::Cell;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
+use indexmap::IndexMap;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -292,13 +293,13 @@ where
             let t2 = now();
             //Note: we don't want the patches to be stored in the StatelessModel
             //since it has a lifetime, which will infect the Node, Element, Attribute, etc
-            let patches = diff(&comp.vdom_template, &comp.view);
+            let patches = vdom::diff(&comp.vdom_template, &comp.view);
             let t3 = now();
             let dom_patches = self
                 .convert_patches(&template, &patches)
                 .expect("convert patches");
             let t4 = now();
-            self.apply_dom_patches(&template, dom_patches)
+            self.apply_dom_patches(dom_patches)
                 .expect("patch template");
             let t5 = now();
 
@@ -315,6 +316,7 @@ where
                 total: t5 - t1,
                 ..Default::default()
             });
+            //log::info!("creating stateless patches: {:#?}", patches);
             template
         }
         #[cfg(not(feature = "use-template"))]
@@ -458,8 +460,8 @@ where
                 .set_attribute(intern(DATA_VDOM_ID), &unique_id.to_string())
                 .expect("Could not set attribute on element");
 
-            let listener_closures: BTreeMap<&'static str, Closure<dyn FnMut(web_sys::Event)>> =
-                BTreeMap::from_iter(listeners.into_iter().map(|c| (attr_name, c)));
+            let listener_closures: micromap::Map<&'static str, Closure<dyn FnMut(web_sys::Event)>, 5> =
+                micromap::Map::from_iter(listeners.into_iter().map(|c| (attr_name, c)));
 
             self.node_closures
                 .borrow_mut()
@@ -527,7 +529,7 @@ where
                 }
                 // remove closure active_closure in dom_updater to free up memory
                 node_closures
-                    .remove(&vdom_id)
+                    .swap_remove(&vdom_id)
                     .expect("Unable to remove old closure");
             } else {
                 log::warn!("There is no closure marked with that vdom_id: {}", vdom_id);
@@ -560,7 +562,7 @@ where
                 // remove closure active_closure in dom_updater to free up memory
                 if old_closure.is_empty() {
                     node_closures
-                        .remove(&vdom_id)
+                        .swap_remove(&vdom_id)
                         .expect("Unable to remove old closure");
                 }
             } else {
@@ -588,8 +590,8 @@ pub(crate) fn find_node(target_node: &Node, path: &mut TreePath) -> Option<Node>
 pub(crate) fn find_all_nodes(
     target_node: &Node,
     nodes_to_find: &[(&TreePath, Option<&&'static str>)],
-) -> BTreeMap<TreePath, Node> {
-    let mut nodes_to_patch: BTreeMap<TreePath, Node> = BTreeMap::new();
+) -> IndexMap<TreePath, Node> {
+    let mut nodes_to_patch: IndexMap<TreePath, Node> = IndexMap::with_capacity(nodes_to_find.len());
     for (path, tag) in nodes_to_find {
         let mut traverse_path: TreePath = (*path).clone();
         if let Some(found) = find_node(target_node, &mut traverse_path) {

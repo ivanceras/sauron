@@ -3,7 +3,7 @@
 use super::diff::diff_recursive;
 use super::{AttributeValue, Tag, KEY};
 use super::{Node, Patch, TreePath};
-use std::collections::BTreeMap;
+use indexmap::IndexMap;
 
 pub fn diff_keyed_nodes<'a, MSG>(
     old_tag: Option<&'a Tag>,
@@ -184,8 +184,8 @@ fn diff_keyed_middle<'a, MSG>(
     debug_assert_ne!(new_children_keys.last(), old_children_keys.last());
 
     // make a map of old_index -> old_key
-    let old_key_to_old_index: BTreeMap<usize, &Vec<&AttributeValue<MSG>>> =
-        BTreeMap::from_iter(old_children_keys.iter().enumerate().filter_map(
+    let old_key_to_old_index: IndexMap<usize, &Vec<&AttributeValue<MSG>>> =
+        IndexMap::from_iter(old_children_keys.iter().enumerate().filter_map(
             |(old_index, old_key)| old_key.as_ref().map(|old_key| (old_index, old_key)),
         ));
 

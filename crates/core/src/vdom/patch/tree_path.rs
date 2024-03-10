@@ -57,7 +57,7 @@ use std::fmt::Debug;
 ///    6 = [1,1]
 ///    7 = [1,2]
 /// ```
-#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub struct TreePath {
     /// An array of child index at each level of the dom tree.
     /// The children of the nodes at each child index is traverse

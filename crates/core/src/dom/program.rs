@@ -1,3 +1,4 @@
+#[cfg(feature = "use-template")]
 use crate::dom::component::register_template;
 use crate::dom::dom_node;
 use crate::dom::program::app_context::WeakContext;
@@ -5,7 +6,6 @@ use crate::dom::program::app_context::WeakContext;
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
-use crate::dom::template;
 #[cfg(feature = "prediff")]
 use crate::dom::PreDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
@@ -15,7 +15,6 @@ use crate::vdom;
 use crate::vdom::diff;
 use crate::vdom::{diff_recursive, TreePath};
 use std::collections::hash_map::DefaultHasher;
-use std::collections::BTreeMap;
 use std::collections::VecDeque;
 use std::hash::{Hash, Hasher};
 use std::mem::ManuallyDrop;
@@ -28,6 +27,7 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
+use indexmap::IndexMap;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
@@ -95,7 +95,7 @@ where
 /// The usize is a unique identifier that is associated with the DOM element that this closure is
 /// attached to.
 pub type ActiveClosure =
-    BTreeMap<usize, BTreeMap<&'static str, Closure<dyn FnMut(web_sys::Event)>>>;
+    IndexMap<usize, micromap::Map<&'static str, Closure<dyn FnMut(web_sys::Event)>, 5>>;
 
 impl<APP, MSG> WeakProgram<APP, MSG>
 where
@@ -212,9 +212,9 @@ where
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
     pub fn new(app: APP) -> Self {
-        let type_id = TypeId::of::<APP>();
         let app_view = app.view();
-        let (template, vdom_template) = register_template(type_id, &app_view);
+        #[cfg(feature = "use-template")]
+        let (template, vdom_template) = register_template(TypeId::of::<APP>(), &app_view);
         let program = Program {
             app_context: AppContext {
                 app: Rc::new(RefCell::new(app)),
@@ -392,7 +392,7 @@ where
                 .expect("convert patches");
             log::info!("first time patches {}: {patches:#?}", patches.len());
             let new_template_node = self
-                .apply_dom_patches(&dom_template, dom_patches)
+                .apply_dom_patches(dom_patches)
                 .expect("template patching");
             log::info!("new template node: {:?}", new_template_node);
             dom_template
@@ -656,10 +656,6 @@ where
         }
         let dom_patches: Vec<DomPatch> = self.pending_patches.borrow_mut().drain(..).collect();
         let new_root_node = self.apply_dom_patches(
-            self.root_node
-                .borrow()
-                .as_ref()
-                .expect("must have a root node"),
             dom_patches,
         )?;
 
@@ -754,6 +750,7 @@ where
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
+        #[cfg(feature = "ensure-check")]
         if self.app_context.has_pending_msgs() {
             log::info!(
                 "There are still: {} pending msgs",
@@ -762,6 +759,7 @@ where
             self.dispatch_pending_msgs(None)
                 .expect("must dispatch all pending msgs");
         }
+        #[cfg(feature = "ensure-check")]
         if self.app_context.has_pending_msgs() {
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
@@ -789,11 +787,13 @@ where
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update
+        #[cfg(feature = "ensure-check")]
         if !self.pending_patches.borrow().is_empty() {
             self.apply_pending_patches()
                 .expect("applying pending patches..");
         }
 
+        #[cfg(feature = "ensure-check")]
         if !self.pending_patches.borrow().is_empty() {
             log::error!(
                 "Remaining pending patches: {}",

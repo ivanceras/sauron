@@ -2,32 +2,38 @@ use crate::dom::events::on_mount;
 use crate::dom::program::ActiveClosure;
 use crate::dom::program::AppContext;
 use crate::dom::program::MountProcedure;
+#[cfg(feature = "use-template")]
 use crate::dom::template;
 use crate::dom::Application;
 use crate::dom::Cmd;
 use crate::dom::Component;
 use crate::dom::DomAttrValue;
 use crate::dom::Program;
-use crate::vdom;
 use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
 use crate::vdom::Node;
 use std::any::TypeId;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::collections::VecDeque;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
 
+#[cfg(feature = "use-template")]
 thread_local! {
-    static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
+
+    // 10% spent time on lookup
+    //static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
+    
+    /// 8% spent time on lookup
+    static TEMPLATE_LOOKUP: RefCell<micromap::Map<TypeId, web_sys::Node, 10>> = RefCell::new(micromap::Map::new());
 }
 
+#[cfg(feature = "use-template")]
 pub fn register_template<MSG>(
     type_id: TypeId,
-    view: &vdom::Node<MSG>,
-) -> (web_sys::Node, vdom::Node<MSG>)
+    view: &Node<MSG>,
+) -> (web_sys::Node, Node<MSG>)
 where
     MSG: 'static,
 {
@@ -45,6 +51,7 @@ where
 }
 
 /// lookup for the template
+#[cfg(feature = "use-template")]
 pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node> {
     TEMPLATE_LOOKUP.with_borrow_mut(|map| {
         if let Some(existing) = map.get(&type_id) {

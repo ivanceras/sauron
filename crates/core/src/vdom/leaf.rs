@@ -1,13 +1,8 @@
 //! Leaf node for html dom tree
-use crate::dom::StatefulComponent;
 use crate::dom::StatefulModel;
 use crate::dom::StatelessModel;
-use crate::vdom::{Attribute, Node};
-use std::any::TypeId;
 use std::borrow::Cow;
-use std::cell::RefCell;
 use std::fmt;
-use std::rc::Rc;
 
 /// A leaf node value of html dom tree
 pub enum Leaf<MSG> {

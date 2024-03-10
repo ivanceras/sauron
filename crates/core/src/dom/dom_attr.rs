@@ -163,6 +163,7 @@ impl DomAttr {
                     .set_attribute_ns(Some(namespace), attr_name, &merged_plain_values)
                     .unwrap_or_else(|_| panic!("Error setting an attribute_ns for {element:?}"));
             } else {
+                #[cfg(feature = "ensure-check")]
                 if *VALUE == attr_name {
                     element
                         .set_attribute(attr_name, &merged_plain_values)
@@ -204,6 +205,11 @@ impl DomAttr {
                         .set_attribute(attr_name, &merged_plain_values)
                         .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
                 }
+
+                #[cfg(not(feature = "ensure-check"))]
+                element
+                    .set_attribute(attr_name, &merged_plain_values)
+                    .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
             }
         }
     }

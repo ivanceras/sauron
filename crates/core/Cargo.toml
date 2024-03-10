@@ -13,6 +13,21 @@ edition = "2021"
 [badges]
 maintenance = { status = "actively-developed" }
 
+[features]
+default = ["with-dom", "use-cached-elements"]
+with-dom = ["wasm-bindgen", "js-sys", "web-sys", "wasm-bindgen-futures"] # for client-side usage
+with-lookup = [] #enumerates html tags and attributes
+with-measure = [] # log traces for measurements in various parts of the system where performance matters.
+with-debug = [] # use in combination to with-measure to log the timings
+log-patches = [] # use in combination to with-debug to log the debug patches
+with-ric = [] # use of request_idle_callback in javascript
+with-raf = [] # use of request_animation_frame in javascript
+with-interning = [] # use caching of strings when crossing rust to js, for faster transfer
+use-cached-elements = [] # use caching of common elements
+use-template = [] # enable the use of template lookup
+custom_element = [] # use of register_custom_element, adding this will add the js snippets
+prediff = [] # diffing optimization
+
 [dependencies]
 js-sys = { version = "0.3", optional = true }
 wasm-bindgen-futures = { version = "0.4.31", optional = true}
@@ -27,6 +42,7 @@ futures = "=0.3.30"
 indexmap = "2.2.5"
 longest-increasing-subsequence = "0.1.0"
 derive-where = "1.2.7"
+micromap = "0.0.15"
 
 
 [dependencies.wasm-bindgen]
@@ -109,20 +125,6 @@ features = [
 ]
 
 
-[features]
-default = ["with-dom", "use-cached-elements"]
-with-dom = ["wasm-bindgen", "js-sys", "web-sys", "wasm-bindgen-futures"] # for client-side usage
-with-lookup = [] #enumerates html tags and attributes
-with-measure = [] # log traces for measurements in various parts of the system where performance matters.
-with-debug = [] # use in combination to with-measure to log the timings
-log-patches = [] # use in combination to with-debug to log the debug patches
-with-ric = [] # use of request_idle_callback in javascript
-with-raf = [] # use of request_animation_frame in javascript
-with-interning = [] # use caching of strings when crossing rust to js, for faster transfer
-use-cached-elements = [] # use caching of common elements
-use-template = [] # enable the use of template lookup
-custom_element = [] # use of register_custom_element, adding this will add the js snippets
-prediff = [] # diffing optimization
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
