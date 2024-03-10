@@ -120,7 +120,7 @@ fn create_element_node_without_listeners<MSG>(velem: &vdom::Element<MSG>) -> web
         web_sys::Node::create_element(velem.tag())
     };
 
-    let attrs = Attribute::merge_attributes_of_same_name(velem.attributes());
+    let attrs = Attribute::merge_attributes_of_same_name(velem.attributes().iter());
 
     let attrs = attrs
         .iter()

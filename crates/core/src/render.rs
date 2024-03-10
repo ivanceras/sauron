@@ -152,7 +152,7 @@ impl<MSG> Element<MSG> {
 
         println!("original attributes: {:#?}", self.attributes());
         let merged_attributes: Vec<Attribute<MSG>> =
-            Attribute::merge_attributes_of_same_name(self.attributes());
+            Attribute::merge_attributes_of_same_name(self.attributes().iter());
         println!("merged_attributes: {:#?}", merged_attributes);
 
         for attr in &merged_attributes {

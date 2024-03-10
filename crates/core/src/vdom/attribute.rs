@@ -141,12 +141,13 @@ impl<MSG> Attribute<MSG> {
     /// merge the values of attributes with the same name
     /// also exclude the empty attribute
     pub fn merge_attributes_of_same_name<'a>(
-        attributes: impl IntoIterator<Item = &'a Attribute<MSG>>,
+        attributes: impl IntoIterator<Item = &'a Attribute<MSG>> + Iterator,
     ) -> Vec<Attribute<MSG>>
     where
         MSG: 'a,
     {
-        let mut merged: IndexMap<&AttributeName, Attribute<MSG>> = IndexMap::new();
+        let mut merged: IndexMap<&AttributeName, Attribute<MSG>> =
+            IndexMap::with_capacity(attributes.size_hint().0);
         for att in attributes.into_iter() {
             if !att.is_just_empty() {
                 if let Some(existing) = merged.get_mut(&att.name) {
@@ -168,11 +169,11 @@ impl<MSG> Attribute<MSG> {
 
     /// group attributes of the same name
     #[doc(hidden)]
-    pub fn group_attributes_per_name(
-        attributes: &[Attribute<MSG>],
-    ) -> IndexMap<&AttributeName, Vec<&Attribute<MSG>>> {
-        let mut grouped: IndexMap<&AttributeName, Vec<&Attribute<MSG>>> =
-            IndexMap::with_capacity(attributes.len());
+    pub fn group_attributes_per_name<'a>(
+        attributes: impl IntoIterator<Item = &'a Attribute<MSG>> + Iterator,
+    ) -> IndexMap<&'a AttributeName, Vec<&'a Attribute<MSG>>> {
+        let mut grouped: IndexMap<&'a AttributeName, Vec<&'a Attribute<MSG>>> =
+            IndexMap::with_capacity(attributes.size_hint().0);
         for attr in attributes {
             if let Some(existing) = grouped.get_mut(&attr.name) {
                 existing.push(attr);
@@ -210,6 +211,10 @@ impl<MSG> Attribute<MSG> {
 
     pub(crate) fn is_static_str(&self) -> bool {
         self.value.iter().all(|v| v.is_static_str())
+    }
+
+    pub(crate) fn has_non_static_value(&self) -> bool {
+        self.value.iter().any(|v| !v.is_static_str())
     }
 }
 

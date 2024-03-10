@@ -53,8 +53,8 @@ impl Section {
     }
 
     pub fn percentile(&self) -> Section {
-        let div =  100.0 / self.total ;
-        Section{
+        let div = 100.0 / self.total;
+        Section {
             lookup: self.lookup * div,
             diffing: self.diffing * div,
             convert_patch: self.convert_patch * div,
@@ -74,27 +74,23 @@ pub fn add_time_trace(section: Section) {
     })
 }
 
-fn total(values: &[Section]) -> Section{
-        let len = values.len();
-        let mut sum = Section::default();
-        for v in values.iter() {
-            sum.lookup += v.lookup;
-            sum.diffing += v.diffing;
-            sum.convert_patch += v.convert_patch;
-            sum.apply_patch += v.apply_patch;
-            sum.total += v.total;
-            sum.len = len;
-        }
-        sum
+fn total(values: &[Section]) -> Section {
+    let len = values.len();
+    let mut sum = Section::default();
+    for v in values.iter() {
+        sum.lookup += v.lookup;
+        sum.diffing += v.diffing;
+        sum.convert_patch += v.convert_patch;
+        sum.apply_patch += v.apply_patch;
+        sum.total += v.total;
+        sum.len = len;
+    }
+    sum
 }
-
 
 pub fn total_time_spent() -> Section {
-    TIME_SPENT.with_borrow(|values| {
-        total(values)
-    })
+    TIME_SPENT.with_borrow(|values| total(values))
 }
-
 
 // a cache of commonly used elements, so we can clone them.
 // cloning is much faster then creating the element
@@ -375,7 +371,7 @@ where
             Node::create_element(velem.tag())
         };
 
-        let attrs = Attribute::merge_attributes_of_same_name(velem.attributes());
+        let attrs = Attribute::merge_attributes_of_same_name(velem.attributes().iter());
 
         Self::set_element_dom_attrs(
             self,

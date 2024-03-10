@@ -1,11 +1,11 @@
 use crate::dom::component::register_template;
+use crate::dom::dom_node;
 use crate::dom::program::app_context::WeakContext;
 #[cfg(feature = "with-raf")]
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
 use crate::dom::template;
-use crate::dom::dom_node;
 #[cfg(feature = "prediff")]
 use crate::dom::PreDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};

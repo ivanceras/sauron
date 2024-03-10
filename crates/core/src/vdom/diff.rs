@@ -285,16 +285,24 @@ fn create_attribute_patches<'a, MSG>(
     new_element: &'a Element<MSG>,
     path: &TreePath,
 ) -> Vec<Patch<'a, MSG>> {
+    //let new_attributes = new_element.attributes().into_iter().filter(|a|a.has_non_static_value()).collect::<Vec<_>>();
+    //let old_attributes = old_element.attributes().into_iter().filter(|a|a.has_non_static_value()).collect::<Vec<_>>();
+
     let new_attributes = new_element.attributes();
     let old_attributes = old_element.attributes();
 
     let mut patches = vec![];
 
+    // return early if both attributes are empty
+    if old_attributes.is_empty() && new_attributes.is_empty() {
+        return vec![];
+    }
+
     let mut add_attributes: Vec<&Attribute<MSG>> = vec![];
     let mut remove_attributes: Vec<&Attribute<MSG>> = vec![];
 
-    let new_attributes_grouped = Attribute::group_attributes_per_name(new_attributes);
-    let old_attributes_grouped = Attribute::group_attributes_per_name(old_attributes);
+    let new_attributes_grouped = Attribute::group_attributes_per_name(new_attributes.iter());
+    let old_attributes_grouped = Attribute::group_attributes_per_name(old_attributes.iter());
 
     // for all new elements that doesn't exist in the old elements
     // or the values differ
