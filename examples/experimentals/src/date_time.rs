@@ -297,7 +297,7 @@ impl DateTimeCustomElement {
         self.program.inject_style_to_mount(&dynamic_style);
 
         self.program
-            .update_dom(&sauron::dom::Modifier::default())
+            .update_dom(&sauron::dom::Modifier::default(), None)
             .expect("must update dom");
     }
 
