@@ -23,14 +23,6 @@ where
     /// Called each time an action is triggered from the view
     fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>;
 
-    /// an optimization solution.
-    /// pre evaluate the expression to determine
-    /// whether to diff the nodes
-    #[cfg(feature = "prediff")]
-    fn prediff(&self, _other: &Self) -> Option<Vec<SkipDiff>> {
-        None
-    }
-
     /// Returns a node on how the component is presented.
     fn view(&self) -> Node<MSG>;
 

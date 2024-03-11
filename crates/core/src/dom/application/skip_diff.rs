@@ -11,11 +11,8 @@ pub struct SkipDiff {
 impl fmt::Debug for SkipDiff {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({}", (self.expr)())?;
-        write!(f, ",[")?;
-        for child in &self.children {
-            child.fmt(f)?;
-        }
-        write!(f, "])")?;
+        f.debug_list().entries(self.children.iter()).finish();
+        write!(f, ")")?;
         Ok(())
     }
 }
@@ -61,7 +58,14 @@ impl SkipDiff {
         paths.extend(more_paths);
         paths
     }
+
+    /// return true if this skip diff and its children can be skipped
+    fn is_skippable_recursive(&self) -> bool {
+        (self.expr)() && self.children.iter().all(Self::is_skippable_recursive)
+    }
+
 }
+
 
 /// skip diffing the node is the val is true
 pub fn skip_if(val: bool, children: impl IntoIterator<Item = SkipDiff>) -> SkipDiff {

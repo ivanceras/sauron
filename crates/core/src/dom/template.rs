@@ -7,6 +7,8 @@ use crate::vdom;
 use crate::vdom::Attribute;
 use crate::vdom::{Leaf, Node};
 use wasm_bindgen::intern;
+use crate::dom::SkipDiff;
+use crate::dom::skip_if;
 
 /// build a node but only include static attributes and leaf nodes
 pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> {
@@ -40,6 +42,29 @@ pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> {
                 }
             }
         }
+        Node::NodeList(_node_list) => unreachable!("This has been unrolled"),
+    }
+}
+
+/// derive a skip_diff for this vdom
+pub(crate) fn extract_skip_if<MSG>(node: &Node<MSG>) -> SkipDiff {
+    match node {
+        Node::Element(elm) => {
+            if elm.is_static_recursive(){
+                skip_if(true, [])
+            }else{
+                skip_if(false, elm.children().iter().map(extract_skip_if))
+            }
+        }
+        Node::Fragment(nodes) => {
+            let are_all_static = nodes.iter().all(|n|n.is_static_recursive());
+            if are_all_static{
+                skip_if(true, [])
+            }else{
+                skip_if(false, nodes.iter().map(extract_skip_if))
+            }
+        }
+        Node::Leaf(leaf) => skip_if(leaf.is_static_str(), []),
         Node::NodeList(_node_list) => unreachable!("This has been unrolled"),
     }
 }

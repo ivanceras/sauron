@@ -28,6 +28,7 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
 use indexmap::IndexMap;
+use crate::dom::template;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
@@ -390,11 +391,11 @@ where
             let dom_patches = self
                 .convert_patches(&dom_template, &patches)
                 .expect("convert patches");
-            log::info!("first time patches {}: {patches:#?}", patches.len());
+            //log::info!("first time patches {}: {patches:#?}", patches.len());
             let new_template_node = self
                 .apply_dom_patches(dom_patches)
                 .expect("template patching");
-            log::info!("new template node: {:?}", new_template_node);
+            //log::info!("new template node: {:?}", new_template_node);
             dom_template
         }
         #[cfg(not(feature = "use-template"))]
@@ -508,10 +509,9 @@ where
             .expect("must update dom");
 
         let total = dom_node::total_time_spent();
-        log::info!("     total: {:#?}", total);
-        log::info!("   average: {:#?}", total.average());
-
-        log::info!("percentile: {:#?}", total.percentile());
+        //log::info!("total: {:#?}", total);
+        //log::info!("average: {:#?}", total.average());
+        //log::info!("percentile: {:#?}", total.percentile());
 
         #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied
@@ -604,18 +604,14 @@ where
     ) -> Vec<DomPatch> {
         let current_vdom = self.app_context.current_vdom();
         let patches = if let Some(treepath) = treepath {
-            log::debug!("using treepath from pre_eval: {treepath:?}");
             let patches = treepath
                 .into_iter()
                 .flat_map(|path| {
                     let new_node = path.find_node_by_path(new_vdom).expect("new_node");
                     let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
-                    log::debug!("new_node: {new_node:#?}");
-                    log::debug!("old_node: {old_node:#?}");
                     diff_recursive(old_node, new_node, &path)
                 })
                 .collect::<Vec<_>>();
-            log::info!("patches: {patches:#?}");
             patches
         } else {
             let patches = diff(&current_vdom, new_vdom);
@@ -764,11 +760,11 @@ where
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
+        let skip_diff = template::extract_skip_if(&self.app_context.current_vdom());
+        log::debug!("skip_diff: {skip_diff:#?}");
+
         #[cfg(feature = "prediff")]
-        let treepath = self.app().prediff(&old_app).map(|eval| {
-            log::debug!("eval: {eval:#?}");
-            SkipDiff::traverse(&eval)
-        });
+        let treepath = Some(SkipDiff::traverse(&[skip_diff]));
 
         #[cfg(not(feature = "prediff"))]
         let treepath = None;

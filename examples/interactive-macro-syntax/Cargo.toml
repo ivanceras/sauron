@@ -11,6 +11,6 @@ crate-type = ["cdylib"]
 [dependencies]
 console_error_panic_hook = "0.1"
 js-sys = "0.3"
-sauron = { path = "../../", features = ["prediff", "log-patches"] }
+sauron = { path = "../../", features = ["prediff"] }
 log = "0.4"
 console_log = "0.2"

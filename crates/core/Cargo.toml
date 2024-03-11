@@ -14,7 +14,7 @@ edition = "2021"
 maintenance = { status = "actively-developed" }
 
 [features]
-default = ["with-dom", "use-cached-elements", "ensure-attr-set"]
+default = ["with-dom", "use-cached-elements","ensure-check", "ensure-attr-set"]
 with-dom = ["wasm-bindgen", "js-sys", "web-sys", "wasm-bindgen-futures"] # for client-side usage
 with-lookup = [] #enumerates html tags and attributes
 with-measure = [] # log traces for measurements in various parts of the system where performance matters.

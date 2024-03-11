@@ -79,8 +79,8 @@ impl Application<Msg> for App {
         Cmd::none()
     }
 
+
     fn view(&self) -> Node<Msg> {
-        let fruits = ["apple", "orange", "grapes"];
         node! {
             <div class="some-class" id="some-id" {attr("data-id", 1)} {style!{"font-family": "monospace"}}>
                 <div id="current-time">{text!("Today is {}",self.date.to_locale_string("en-GB", &JsValue::undefined()))}</div>
@@ -138,23 +138,10 @@ impl Application<Msg> for App {
                             node!{<span></span>}
                         }}
                 </div>
-                <ul class="some-list">
-                    {for i in 0..10{
-                        node!{
-                            <li key=i>{text!("i: {}", i)}</li>
-                        }
-                    }}
-                </ul>
-                <ul class="fruits">
-                    {for i in fruits{
-                        node!{
-                            <li key=i>{text!("i: {}", i)}</li>
-                        }
-                    }}
-                </ul>
             </div>
         }
     }
+
 
     fn stylesheet() -> Vec<String> {
         vec![jss! {
