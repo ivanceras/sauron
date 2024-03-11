@@ -588,38 +588,41 @@ where
     #[cfg(feature = "skip_diff")]
     fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<MSG>, old_app: Option<ManuallyDrop<APP>>) -> Vec<DomPatch>{
         let old_app = old_app.expect("old_app");
-        let skip_diff = self.app().skip_diff(&old_app).expect("skip diff");
-        log::info!("skip_diff: {skip_diff:#?}");
-        let treepath = skip_diff.traverse();
-        log::info!("treepath: {:#?}", treepath);
+        if let Some(skip_diff) = self.app().skip_diff(&old_app){
+            log::info!("skip_diff: {skip_diff:#?}");
+            let treepath = skip_diff.traverse();
+            log::info!("treepath: {:#?}", treepath);
 
-        let current_vdom = self.app_context.current_vdom();
-        let patches = treepath
-            .into_iter()
-            .flat_map(|path| {
-                let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
-                let new_node = path.find_node_by_path(&new_vdom).expect("new_node");
-                log::info!("old_node: {}",old_node.render_to_string());
-                log::info!("new_node: {}",new_node.render_to_string());
-                // only diff at level 1
-                diff_recursive(
-                    &old_node,
-                    &new_node,
-                    &path,
-                    Some(1),
-                )
-            })
-            .collect::<Vec<_>>();
-        log::info!("got {} patches: {patches:#?}", patches.len());
-        let dom_patches = self.convert_patches(
-            self.root_node
-                .borrow()
-                .as_ref()
-                .expect("must have a root node"),
-            &patches,
-        )
-        .expect("must convert patches");
-        dom_patches
+            let current_vdom = self.app_context.current_vdom();
+            let patches = treepath
+                .into_iter()
+                .flat_map(|path| {
+                    let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
+                    let new_node = path.find_node_by_path(&new_vdom).expect("new_node");
+                    log::info!("old_node: {}",old_node.render_to_string());
+                    log::info!("new_node: {}",new_node.render_to_string());
+                    // only diff at level 1
+                    diff_recursive(
+                        &old_node,
+                        &new_node,
+                        &path,
+                        Some(1),
+                    )
+                })
+                .collect::<Vec<_>>();
+            log::info!("got {} patches: {patches:#?}", patches.len());
+            self.convert_patches(
+                self.root_node
+                    .borrow()
+                    .as_ref()
+                    .expect("must have a root node"),
+                &patches,
+            )
+            .expect("must convert patches")
+        }else{
+            // fallback to the classic way of creating dom patch
+            self.create_dom_patch(new_vdom)
+        }
     }
 
     fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch> {
