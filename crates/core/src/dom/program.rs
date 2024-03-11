@@ -546,8 +546,7 @@ where
             let _remaining = frame_time - time_delta;
             if time_delta < frame_time {
                 //log::warn!("update is {remaining} too soon!... time_delta: {time_delta}, frame_time: {frame_time}");
-                // return early here
-                return Ok(measurements);
+                // TODO: maybe return early here, but do a dispatch_multiple([])
             }
         }
 
