@@ -21,15 +21,15 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn skip_diff(&self, old: &Self) -> Option<Vec<SkipDiff>> {
-        Some(vec![skip_if(
+    fn skip_diff(&self, old: &Self) -> Option<SkipDiff> {
+        Some(skip_if(
             true,
             [
                 skip_if(true, []),
                 skip_if(true, [skip_if(self.count == old.count, [])]),
                 skip_if(true, []),
             ],
-        )])
+        ))
     }
     fn view(&self) -> Node<Msg> {
         node! {
