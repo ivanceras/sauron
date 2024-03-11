@@ -185,21 +185,21 @@ pub fn node(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Generate a skip diff list based on the node used in the view
 /// ```rust
-/// use sauron_macro::skip_diff;
+/// use sauron_macro::extract_skip_diff;
 ///
-/// let skip = skip_diff!{<ul class="some-list"></ul>};
+/// let skip = extract_skip_diff!{<ul class="some-list"></ul>};
 /// assert_eq!(skip, sauron::skip_if(true,[]), "skip if all attribute values are static");
 /// ```
 ///
 /// ```rust
-/// use sauron_macro::skip_diff;
+/// use sauron_macro::extract_skip_diff;
 ///
-/// let skip = skip_diff!{"item 1"};
+/// let skip = extract_skip_diff!{"item 1"};
 /// assert_eq!(skip, sauron::skip_if(true,[]), "skip raw text");
 /// ```
 ///
 #[proc_macro]
-pub fn skip_diff(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+pub fn extract_skip_diff(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     skip_diff::to_token_stream(input).into()
 }
 

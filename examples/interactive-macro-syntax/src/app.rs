@@ -144,7 +144,7 @@ impl Application<Msg> for App {
 
     fn skip_diff(&self, _old: &Self) -> Option<SkipDiff> {
         Some(
-        skip_diff! {
+        extract_skip_diff! {
             <div class="some-class" id="some-id" {attr("data-id", 1)} {style!{"font-family": "monospace"}}>
                 <div id="current-time">{text!("Today is {}",self.date.to_locale_string("en-GB", &JsValue::undefined()))}</div>
                 <div>
