@@ -1,6 +1,6 @@
 use sauron::{
-    skip_if, html::text, html::units::px, jss, node, wasm_bindgen, Application, Cmd, Node, SkipDiff,
-    Program,
+    html::text, html::units::px, jss, node, skip_if, wasm_bindgen, Application, Cmd, Node, Program,
+    SkipDiff,
 };
 
 enum Msg {

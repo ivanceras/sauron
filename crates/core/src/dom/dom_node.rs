@@ -1,4 +1,3 @@
-
 #[cfg(feature = "use-template")]
 use crate::dom::component::lookup_template;
 use crate::dom::component::StatelessModel;
@@ -16,14 +15,14 @@ use crate::{
     vdom,
     vdom::{Attribute, Leaf},
 };
+use indexmap::IndexMap;
 use js_sys::Function;
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
-use std::cell::Cell;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
-use indexmap::IndexMap;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -299,8 +298,7 @@ where
                 .convert_patches(&template, &patches)
                 .expect("convert patches");
             let t4 = now();
-            self.apply_dom_patches(dom_patches)
-                .expect("patch template");
+            self.apply_dom_patches(dom_patches).expect("patch template");
             let t5 = now();
 
             //log::info!("looking up template took: {}ms", t2 - t1);
@@ -460,8 +458,11 @@ where
                 .set_attribute(intern(DATA_VDOM_ID), &unique_id.to_string())
                 .expect("Could not set attribute on element");
 
-            let listener_closures: micromap::Map<&'static str, Closure<dyn FnMut(web_sys::Event)>, 5> =
-                micromap::Map::from_iter(listeners.into_iter().map(|c| (attr_name, c)));
+            let listener_closures: micromap::Map<
+                &'static str,
+                Closure<dyn FnMut(web_sys::Event)>,
+                5,
+            > = micromap::Map::from_iter(listeners.into_iter().map(|c| (attr_name, c)));
 
             self.node_closures
                 .borrow_mut()

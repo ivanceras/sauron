@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use rstml::node::{KeyedAttributeValue, Node, NodeAttribute, NodeBlock};
 use sauron_core::html::lookup;
-use syn::{Expr, ExprForLoop, Stmt, ExprIf};
+use syn::{Expr, ExprForLoop, ExprIf, Stmt};
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match rstml::parse(input) {
@@ -38,10 +38,10 @@ fn single_node(node: Node) -> TokenStream {
             let namespace = lookup::tag_namespace(&tag);
             let attributes = node_attributes(open_tag.attributes);
             let children = nodes_to_tokens(elm.children);
-            let ns = if let Some(namespace) = namespace{
-                quote!{ Some(#namespace) }
-            }else{
-                quote!{ None }
+            let ns = if let Some(namespace) = namespace {
+                quote! { Some(#namespace) }
+            } else {
+                quote! { None }
             };
             quote! {
                 sauron::html::element_ns(#ns, #tag, [#attributes], [#children], #self_closing)
@@ -79,7 +79,10 @@ fn single_node(node: Node) -> TokenStream {
                 }
             }
             NodeBlock::ValidBlock(block) => {
-                if let Some(ExprForLoop { pat, expr, body, .. }) = braced_for_loop(&block) {
+                if let Some(ExprForLoop {
+                    pat, expr, body, ..
+                }) = braced_for_loop(&block)
+                {
                     quote! {
                         sauron::html::node_list(
                             (#expr).map(|#pat|{
@@ -87,18 +90,16 @@ fn single_node(node: Node) -> TokenStream {
                                 #body
                             }))
                     }
-                } 
-                else if let Some(ExprIf{..}) = braced_if_expr(&block) {
-                    quote!{
+                } else if let Some(ExprIf { .. }) = braced_if_expr(&block) {
+                    quote! {
                         #block
                     }
-                }
-                else {
+                } else {
                     quote! {
                         #block
                     }
                 }
-            },
+            }
         },
     }
 }

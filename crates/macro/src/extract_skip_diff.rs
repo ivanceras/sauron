@@ -1,13 +1,13 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 use rstml::node::{Node, NodeAttribute, NodeBlock};
-use syn::{Expr, ExprForLoop, Stmt, ExprIf};
+use syn::{Expr, ExprForLoop, ExprIf, Stmt};
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match rstml::parse(input) {
-        Ok(nodes) =>  {
+        Ok(nodes) => {
             let skip_tree = from_multiple_nodes(&nodes);
-            quote!{
+            quote! {
                 #skip_tree.collapse_children()
             }
         }
@@ -36,13 +36,12 @@ fn from_single_node(node: &Node) -> TokenStream {
             //also returns true if there is no attributes
             let is_attrs_literal = is_all_literal_attributes(&elm.open_tag.attributes);
             let children = nodes_to_tokens(&elm.children);
-            quote!{::sauron::skip_if(#is_attrs_literal, [#children])}
+            quote! {::sauron::skip_if(#is_attrs_literal, [#children])}
         }
         Node::Fragment(fragment) => from_multiple_nodes(&fragment.children),
-        Node::Text(_) |
-        Node::RawText(_) |
-        Node::Comment(_) |
-        Node::Doctype(_) => quote!{::sauron::skip_if(true, [])},
+        Node::Text(_) | Node::RawText(_) | Node::Comment(_) | Node::Doctype(_) => {
+            quote! {::sauron::skip_if(true, [])}
+        }
         Node::Block(block) => match block {
             NodeBlock::Invalid { .. } => {
                 quote! {
@@ -50,16 +49,14 @@ fn from_single_node(node: &Node) -> TokenStream {
                 }
             }
             NodeBlock::ValidBlock(block) => {
-                if let Some(ExprForLoop {..}) = braced_for_loop(&block) {
-                    quote!{skip_if(false, [])}
-                } 
-                else if let Some(ExprIf{..}) = braced_if_expr(&block) {
-                    quote!{skip_if(false, [])}
+                if let Some(ExprForLoop { .. }) = braced_for_loop(&block) {
+                    quote! {skip_if(false, [])}
+                } else if let Some(ExprIf { .. }) = braced_if_expr(&block) {
+                    quote! {skip_if(false, [])}
+                } else {
+                    quote! {skip_if(false, [])}
                 }
-                else {
-                    quote!{skip_if(false, [])}
-                }
-            },
+            }
         },
     }
 }

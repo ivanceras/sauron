@@ -7,12 +7,12 @@ use crate::dom::{Application, Program};
 use crate::vdom::EventCallback;
 use crate::vdom::TreePath;
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
+use indexmap::IndexMap;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 use web_sys::Node;
-use indexmap::IndexMap;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -293,10 +293,7 @@ where
     /// apply a dom patch to this root node,
     /// return a new root_node if it would replace the original root_node
     /// TODO: this should have no access to root_node, so it can be used in general sense
-    pub(crate) fn apply_dom_patch(
-        &self,
-        dom_patch: DomPatch,
-    ) -> Result<Option<Node>, JsValue> {
+    pub(crate) fn apply_dom_patch(&self, dom_patch: DomPatch) -> Result<Option<Node>, JsValue> {
         let DomPatch {
             patch_path,
             target_element,

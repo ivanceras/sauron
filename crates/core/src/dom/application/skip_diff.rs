@@ -8,11 +8,9 @@ pub struct SkipDiff {
     children: Vec<SkipDiff>,
 }
 
-impl PartialEq for SkipDiff{
-
+impl PartialEq for SkipDiff {
     fn eq(&self, other: &Self) -> bool {
-        (self.expr)() == (other.expr)()
-            && self.children == other.children
+        (self.expr)() == (other.expr)() && self.children == other.children
     }
 }
 
@@ -33,7 +31,6 @@ impl SkipDiff {
             children: children.into_iter().collect(),
         }
     }
-
 
     ///
     pub fn traverse(evals: &[SkipDiff]) -> Vec<TreePath> {
@@ -74,20 +71,18 @@ impl SkipDiff {
 
     /// collapse into 1 skip_if if all the children is skippable
     pub fn collapse_children(self) -> Self {
-       let Self{expr, children } = self;
-       let can_skip_children =  children.iter().all(Self::is_skippable_recursive);
-        Self{
+        let Self { expr, children } = self;
+        let can_skip_children = children.iter().all(Self::is_skippable_recursive);
+        Self {
             expr,
-            children: if can_skip_children{
-               vec![]
-            }else{
-               children.into_iter().map(Self::collapse_children).collect()
-            }
+            children: if can_skip_children {
+                vec![]
+            } else {
+                children.into_iter().map(Self::collapse_children).collect()
+            },
         }
     }
-
 }
-
 
 /// skip diffing the node is the val is true
 pub fn skip_if(val: bool, children: impl IntoIterator<Item = SkipDiff>) -> SkipDiff {

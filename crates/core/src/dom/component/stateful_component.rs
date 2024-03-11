@@ -24,16 +24,13 @@ thread_local! {
 
     // 10% spent time on lookup
     //static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
-    
+
     /// 8% spent time on lookup
     static TEMPLATE_LOOKUP: RefCell<micromap::Map<TypeId, web_sys::Node, 10>> = RefCell::new(micromap::Map::new());
 }
 
 #[cfg(feature = "use-template")]
-pub fn register_template<MSG>(
-    type_id: TypeId,
-    view: &Node<MSG>,
-) -> (web_sys::Node, Node<MSG>)
+pub fn register_template<MSG>(type_id: TypeId, view: &Node<MSG>) -> (web_sys::Node, Node<MSG>)
 where
     MSG: 'static,
 {

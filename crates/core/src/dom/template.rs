@@ -1,14 +1,14 @@
 //! utility functions for extracting templates from a view
 //!
 use crate::dom::document;
+use crate::dom::skip_if;
 use crate::dom::DomAttr;
 use crate::dom::DomNode;
+use crate::dom::SkipDiff;
 use crate::vdom;
 use crate::vdom::Attribute;
 use crate::vdom::{Leaf, Node};
 use wasm_bindgen::intern;
-use crate::dom::SkipDiff;
-use crate::dom::skip_if;
 
 /// build a node but only include static attributes and leaf nodes
 pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> {
@@ -48,12 +48,14 @@ pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> {
 
 pub(crate) fn extract_skip_if<MSG>(node: &Node<MSG>) -> SkipDiff {
     match node {
-        Node::Element(elm) => {
-           skip_if(elm.is_attrs_all_static_str(), elm.children().iter().map(extract_skip_if))
-        }
-        Node::Fragment(nodes) => {
-           skip_if(nodes.iter().all(|n|n.is_static()), nodes.iter().map(extract_skip_if))
-        }
+        Node::Element(elm) => skip_if(
+            elm.is_attrs_all_static_str(),
+            elm.children().iter().map(extract_skip_if),
+        ),
+        Node::Fragment(nodes) => skip_if(
+            nodes.iter().all(|n| n.is_static()),
+            nodes.iter().map(extract_skip_if),
+        ),
         Node::Leaf(leaf) => skip_if(leaf.is_static_str(), []),
         Node::NodeList(_node_list) => unreachable!("This has been unrolled"),
     }

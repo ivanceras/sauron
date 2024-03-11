@@ -2,12 +2,10 @@ use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
-use std::any::TypeId;
 #[cfg(feature = "use-template")]
-pub use stateful_component::{lookup_template,register_template};
-pub use stateful_component::{
-    stateful_component, StatefulComponent, StatefulModel,
-};
+pub use stateful_component::{lookup_template, register_template};
+pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
+use std::any::TypeId;
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
 
@@ -141,7 +139,7 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
         .expect("must have a name")
 }
 
-/// Contains necessary information for creating template 
+/// Contains necessary information for creating template
 /// of the Component of this type_id
 pub struct StatelessModel<MSG> {
     /// the view of this stateless model

@@ -6,6 +6,7 @@ use crate::dom::program::app_context::WeakContext;
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
+use crate::dom::template;
 #[cfg(feature = "skip_diff")]
 use crate::dom::SkipDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
@@ -14,6 +15,7 @@ use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
 use crate::vdom::{diff_recursive, TreePath};
+use indexmap::IndexMap;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
 use std::hash::{Hash, Hasher};
@@ -27,8 +29,6 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
-use indexmap::IndexMap;
-use crate::dom::template;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
@@ -504,9 +504,7 @@ where
     /// execute DOM changes in order to reflect the APP's view into the browser representation
     fn dispatch_dom_changes(&mut self, modifier: &Modifier) {
         #[allow(unused_variables)]
-        let measurements = self
-            .update_dom(modifier)
-            .expect("must update dom");
+        let measurements = self.update_dom(modifier).expect("must update dom");
 
         let total = dom_node::total_time_spent();
         //log::info!("total: {:#?}", total);
@@ -522,10 +520,7 @@ where
     }
 
     /// update the browser DOM to reflect the APP's  view
-    pub fn update_dom(
-        &mut self,
-        modifier: &Modifier,
-    ) -> Result<Measurements, JsValue> {
+    pub fn update_dom(&mut self, modifier: &Modifier) -> Result<Measurements, JsValue> {
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app_context.view();
@@ -534,9 +529,7 @@ where
         let node_count = view.node_count();
 
         // update the last DOM node tree with this new view
-        let total_patches = self
-            .update_dom_with_vdom(view)
-            .expect("must not error");
+        let total_patches = self.update_dom_with_vdom(view).expect("must not error");
         let t3 = now();
 
         let strong_count = self.app_context.strong_count();
@@ -577,10 +570,7 @@ where
     /// patch the DOM to reflect the App's view
     ///
     /// Note: This is in another function so as to allow tests to use this shared code
-    pub fn update_dom_with_vdom(
-        &mut self,
-        new_vdom: vdom::Node<MSG>,
-    ) -> Result<usize, JsValue> {
+    pub fn update_dom_with_vdom(&mut self, new_vdom: vdom::Node<MSG>) -> Result<usize, JsValue> {
         let dom_patches = self.create_dom_patch(&new_vdom);
         let total_patches = dom_patches.len();
         self.pending_patches.borrow_mut().extend(dom_patches);
@@ -595,11 +585,7 @@ where
         Ok(total_patches)
     }
 
-    fn create_dom_patch(
-        &self,
-        new_vdom: &vdom::Node<MSG>,
-    ) -> Vec<DomPatch> {
-
+    fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch> {
         let current_vdom = self.app_context.current_vdom();
         let patches = diff(&current_vdom, new_vdom);
 
@@ -637,9 +623,7 @@ where
             return Ok(());
         }
         let dom_patches: Vec<DomPatch> = self.pending_patches.borrow_mut().drain(..).collect();
-        let new_root_node = self.apply_dom_patches(
-            dom_patches,
-        )?;
+        let new_root_node = self.apply_dom_patches(dom_patches)?;
 
         //Note: it is important that root_node points to the original mutable reference here
         // since it can be replaced with a new root Node(the top-level node of the view) when patching
@@ -751,7 +735,6 @@ where
             let skip_diff = self.app().skip_diff(&old_app);
             log::info!("skip_diff: {skip_diff:#?}");
         }
-
 
         let cmd = self.app_context.batch_pending_cmds();
 

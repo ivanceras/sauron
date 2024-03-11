@@ -79,7 +79,6 @@ impl Application<Msg> for App {
         Cmd::none()
     }
 
-
     fn view(&self) -> Node<Msg> {
         node! {
             <div class="some-class" id="some-id" {attr("data-id", 1)} {style!{"font-family": "monospace"}}>
@@ -143,8 +142,7 @@ impl Application<Msg> for App {
     }
 
     fn skip_diff(&self, _old: &Self) -> Option<SkipDiff> {
-        Some(
-        extract_skip_diff! {
+        Some(extract_skip_diff! {
             <div class="some-class" id="some-id" {attr("data-id", 1)} {style!{"font-family": "monospace"}}>
                 <div id="current-time">{text!("Today is {}",self.date.to_locale_string("en-GB", &JsValue::undefined()))}</div>
                 <div>
@@ -204,7 +202,6 @@ impl Application<Msg> for App {
             </div>
         })
     }
-
 
     fn stylesheet() -> Vec<String> {
         vec![jss! {

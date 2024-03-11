@@ -359,7 +359,7 @@ impl<MSG> Node<MSG> {
 
     /// returns true of this node is static
     pub(crate) fn is_static(&self) -> bool {
-        match self{
+        match self {
             Self::Element(v) => v.is_attrs_all_static_str(),
             Self::Leaf(v) => v.is_static_str(),
             Self::Fragment(nodes) => nodes.iter().all(Self::is_static),
@@ -369,15 +369,14 @@ impl<MSG> Node<MSG> {
 
     /// returns true if this node and its descendant is static
     pub(crate) fn is_static_recursive(&self) -> bool {
-        self.is_static() &&
-            match self{
+        self.is_static()
+            && match self {
                 Self::Element(elm) => elm.is_static_recursive(),
                 Self::Leaf(v) => v.is_static_str(),
                 Self::Fragment(nodes) => nodes.iter().all(Self::is_static_recursive),
                 Self::NodeList(_) => unreachable!(),
             }
     }
-
 }
 
 /// create a virtual node with tag, attrs and children
