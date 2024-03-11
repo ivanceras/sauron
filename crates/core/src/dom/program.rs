@@ -503,7 +503,7 @@ where
     }
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    pub fn update_dom(&mut self, modifier: &Modifier) -> Result<(), JsValue> {
+    pub fn update_dom(&mut self, modifier: &Modifier, old_app: Option<ManuallyDrop<APP>>) -> Result<(), JsValue> {
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app_context.view();
@@ -513,6 +513,33 @@ where
 
         let dom_patches = self.create_dom_patch(&view);
         let total_patches = dom_patches.len();
+
+        #[cfg(feature = "skip_diff")]
+        {
+            if let Some(old_app) = old_app{
+                let skip_diff = self.app().skip_diff(&old_app);
+                log::info!("skip_diff: {skip_diff:#?}");
+                if let Some(skip_diff) = skip_diff{
+                    let treepath = skip_diff.traverse();
+                    log::info!("treepath: {:#?}", treepath);
+
+                let current_vdom = self.app_context.current_vdom();
+                let patches = treepath
+                    .into_iter()
+                    .flat_map(|path| {
+                        let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
+                        let new_node = path.find_node_by_path(&view).expect("new_node");
+                        diff(
+                            &old_node,
+                            &new_node,
+                        )
+                    })
+                    .collect::<Vec<_>>();
+                log::info!("patches: {patches:#?}");
+                }
+            }
+        }
+
         // update the last DOM node tree with this new view
         self.queue_dom_patches(dom_patches).expect("must not error");
         /// set the current dom
@@ -708,7 +735,10 @@ where
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&mut self, deadline: Option<IdleDeadline>) {
         #[cfg(feature = "skip_diff")]
-        let old_app = self.app_clone();
+        let old_app = Some(self.app_clone());
+        #[cfg(not(feature = "skip_diff"))]
+        let old_app = None;
+
 
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
@@ -726,11 +756,6 @@ where
         if self.app_context.has_pending_msgs() {
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
-        #[cfg(feature = "skip_diff")]
-        {
-            let skip_diff = self.app().skip_diff(&old_app);
-            log::info!("skip_diff: {skip_diff:#?}");
-        }
 
         let cmd = self.app_context.batch_pending_cmds();
 
@@ -742,7 +767,7 @@ where
         }
 
         if cmd.modifier.should_update_view {
-            self.update_dom(&cmd.modifier).expect("must update dom");
+            self.update_dom(&cmd.modifier, old_app).expect("must update dom");
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update

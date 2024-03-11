@@ -33,13 +33,8 @@ impl SkipDiff {
     }
 
     ///
-    pub fn traverse(evals: &[SkipDiff]) -> Vec<TreePath> {
-        let root = TreePath::root();
-        if evals.len() == 1 {
-            Self::traverse_recursive(&evals[0], root)
-        } else {
-            Self::traverse_list(evals, root)
-        }
+    pub fn traverse(&self) -> Vec<TreePath> {
+        self.traverse_recursive(TreePath::root())
     }
 
     /// traverse the skip diff and return a list of TreePath that will be evaluated
@@ -55,7 +50,7 @@ impl SkipDiff {
 
     fn traverse_recursive(&self, current: TreePath) -> Vec<TreePath> {
         let mut paths = vec![];
-        // if this SkipDiff evaluates to true, include it in the treepath to be diff
+        // if this SkipDiff evaluates to false, include it in the treepath to be diff
         if !(self.expr)() {
             paths.push(current.clone());
         }
