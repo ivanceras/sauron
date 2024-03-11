@@ -4,7 +4,7 @@
 //! use for doing component tests
 //!
 use log::*;
-use sauron::{html::div, Application, Cmd, Node, Program};
+use sauron::*;
 use std::mem::ManuallyDrop;
 
 /// This is a simple component for the puprpose of testing
@@ -27,3 +27,4 @@ pub fn simple_program() -> ManuallyDrop<Program<SimpleComponent, ()>> {
     console_log::init_with_level(log::Level::Trace).ok();
     Program::mount_to_body(SimpleComponent)
 }
+

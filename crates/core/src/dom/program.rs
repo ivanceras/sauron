@@ -503,25 +503,7 @@ where
     }
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    fn dispatch_dom_changes(&mut self, modifier: &Modifier) {
-        #[allow(unused_variables)]
-        let measurements = self.update_dom(modifier).expect("must update dom");
-
-        let total = dom_node::total_time_spent();
-        //log::info!("total: {:#?}", total);
-        //log::info!("average: {:#?}", total.average());
-        //log::info!("percentile: {:#?}", total.percentile());
-
-        #[cfg(feature = "with-measure")]
-        // tell the app about the performance measurement and only if there was patches applied
-        if modifier.log_measurements && measurements.total_patches > 0 {
-            let cmd_measurement = self.app_context.measurements(measurements);
-            cmd_measurement.emit(self.clone());
-        }
-    }
-
-    /// update the browser DOM to reflect the APP's  view
-    pub fn update_dom(&mut self, modifier: &Modifier) -> Result<Measurements, JsValue> {
+    pub fn update_dom(&mut self, modifier: &Modifier) -> Result<(), JsValue> {
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app_context.view();
@@ -568,8 +550,21 @@ where
                 return Ok(measurements);
             }
         }
+
+        let total = dom_node::total_time_spent();
+        //log::info!("total: {:#?}", total);
+        //log::info!("average: {:#?}", total.average());
+        //log::info!("percentile: {:#?}", total.percentile());
+
+        #[cfg(feature = "with-measure")]
+        // tell the app about the performance measurement and only if there was patches applied
+        if modifier.log_measurements && measurements.total_patches > 0 {
+            let cmd_measurement = self.app_context.measurements(measurements);
+            cmd_measurement.emit(self.clone());
+        }
+
         *self.last_update.borrow_mut() = Some(t3);
-        Ok(measurements)
+        Ok(())
     }
 
     /// patch the DOM to reflect the App's view
@@ -748,7 +743,7 @@ where
         }
 
         if cmd.modifier.should_update_view {
-            self.dispatch_dom_changes(&cmd.modifier);
+            self.update_dom(&cmd.modifier).expect("must update dom");
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update
@@ -806,3 +801,33 @@ where
         self.dispatch_multiple([msg])
     }
 }
+
+
+impl<APP, MSG> Program<APP, MSG>
+where
+    MSG: 'static,
+    APP: Application<MSG>,
+{
+    /// patch the DOM to reflect the App's view
+    ///
+    /// Note: This is in another function so as to allow tests to use this shared code
+    #[cfg(feature = "test-fixtures")]
+    pub fn update_dom_with_vdom(
+        &mut self,
+        new_vdom: vdom::Node<MSG>,
+    ) -> Result<usize, JsValue> {
+        let dom_patches = self.create_dom_patch(&new_vdom);
+        let total_patches = dom_patches.len();
+        self.pending_patches.borrow_mut().extend(dom_patches);
+
+        #[cfg(feature = "with-raf")]
+        self.apply_pending_patches_with_raf().expect("raf");
+
+        #[cfg(not(feature = "with-raf"))]
+        self.apply_pending_patches().expect("raf");
+
+        self.app_context.set_current_dom(new_vdom);
+        Ok(total_patches)
+    }
+}
+
