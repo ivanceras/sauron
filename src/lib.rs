@@ -30,4 +30,6 @@ pub mod prelude {
     pub use sauron_macro::node;
     #[cfg(feature = "with-jss")]
     pub use sauron_macro::{jss, jss_with_media, style};
+    #[cfg(feature = "skip_diff")]
+    pub use sauron_macro::skip_diff;
 }

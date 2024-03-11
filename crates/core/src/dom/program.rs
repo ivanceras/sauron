@@ -727,6 +727,9 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&mut self, deadline: Option<IdleDeadline>) {
+        #[cfg(feature = "skip_diff")]
+        let old_app = self.app_clone();
+
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
@@ -742,6 +745,11 @@ where
         #[cfg(feature = "ensure-check")]
         if self.app_context.has_pending_msgs() {
             panic!("Can not proceed until previous pending msgs are dispatched..");
+        }
+        #[cfg(feature = "skip_diff")]
+        {
+            let skip_diff = self.app().skip_diff(&old_app);
+            log::info!("skip_diff: {skip_diff:#?}");
         }
 
 
