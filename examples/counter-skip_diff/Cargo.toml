@@ -1,5 +1,5 @@
 [package]
-name = "counter-prediff"
+name = "counter-skip_diff"
 version = "0.1.0"
 authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
 edition = "2021"
@@ -8,7 +8,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = { path = "../../", features = ["log-patches", "prediff"] }
+sauron = { path = "../../", features = ["log-patches", "skip_diff"] }
 console_error_panic_hook = "0.1"
 log = "0.4"
 console_log = { version = "0.2", features = ["color"] }

@@ -6,7 +6,7 @@ use crate::dom::program::app_context::WeakContext;
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
-#[cfg(feature = "prediff")]
+#[cfg(feature = "skip_diff")]
 use crate::dom::SkipDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
@@ -705,7 +705,7 @@ where
     }
 
     /// clone the app
-    #[cfg(feature = "prediff")]
+    #[cfg(feature = "skip_diff")]
     #[allow(unsafe_code)]
     pub fn app_clone(&self) -> ManuallyDrop<APP> {
         unsafe {
