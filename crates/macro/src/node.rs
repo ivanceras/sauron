@@ -38,14 +38,13 @@ fn single_node(node: Node) -> TokenStream {
             let namespace = lookup::tag_namespace(&tag);
             let attributes = node_attributes(open_tag.attributes);
             let children = nodes_to_tokens(elm.children);
-            if let Some(namespace) = namespace {
-                quote! {
-                    sauron::html::element_ns(Some(#namespace), #tag, [#attributes], [#children], #self_closing)
-                }
-            } else {
-                quote! {
-                    sauron::html::element_ns(None, #tag, [#attributes], [#children], #self_closing)
-                }
+            let ns = if let Some(namespace) = namespace{
+                quote!{ Some(#namespace) }
+            }else{
+                quote!{ None }
+            };
+            quote! {
+                sauron::html::element_ns(#ns, #tag, [#attributes], [#children], #self_closing)
             }
         }
         Node::Fragment(fragment) => multiple_nodes(fragment.children),
