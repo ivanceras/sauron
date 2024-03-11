@@ -43,7 +43,7 @@ impl Application<Msg> for App {
             window()
                 .set_interval_with_callback_and_timeout_and_arguments_0(
                     clock.as_ref().unchecked_ref(),
-                    1000,
+                    10_000,
                 )
                 .expect("Unable to start interval");
             program2.closures.borrow_mut().push(clock);

@@ -502,10 +502,10 @@ where
     }
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    fn dispatch_dom_changes(&mut self, modifier: &Modifier, treepath: Option<Vec<TreePath>>) {
+    fn dispatch_dom_changes(&mut self, modifier: &Modifier) {
         #[allow(unused_variables)]
         let measurements = self
-            .update_dom(modifier, treepath)
+            .update_dom(modifier)
             .expect("must update dom");
 
         let total = dom_node::total_time_spent();
@@ -525,7 +525,6 @@ where
     pub fn update_dom(
         &mut self,
         modifier: &Modifier,
-        treepath: Option<Vec<TreePath>>,
     ) -> Result<Measurements, JsValue> {
         let t1 = now();
         // a new view is created due to the app update
@@ -536,7 +535,7 @@ where
 
         // update the last DOM node tree with this new view
         let total_patches = self
-            .update_dom_with_vdom(view, treepath)
+            .update_dom_with_vdom(view)
             .expect("must not error");
         let t3 = now();
 
@@ -581,9 +580,8 @@ where
     pub fn update_dom_with_vdom(
         &mut self,
         new_vdom: vdom::Node<MSG>,
-        treepath: Option<Vec<TreePath>>,
     ) -> Result<usize, JsValue> {
-        let dom_patches = self.create_dom_patch(&new_vdom, treepath);
+        let dom_patches = self.create_dom_patch(&new_vdom);
         let total_patches = dom_patches.len();
         self.pending_patches.borrow_mut().extend(dom_patches);
 
@@ -600,23 +598,11 @@ where
     fn create_dom_patch(
         &self,
         new_vdom: &vdom::Node<MSG>,
-        treepath: Option<Vec<TreePath>>,
     ) -> Vec<DomPatch> {
+
         let current_vdom = self.app_context.current_vdom();
-        let patches = if let Some(treepath) = treepath {
-            let patches = treepath
-                .into_iter()
-                .flat_map(|path| {
-                    let new_node = path.find_node_by_path(new_vdom).expect("new_node");
-                    let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
-                    diff_recursive(old_node, new_node, &path)
-                })
-                .collect::<Vec<_>>();
-            patches
-        } else {
-            let patches = diff(&current_vdom, new_vdom);
-            patches
-        };
+        let patches = diff(&current_vdom, new_vdom);
+
         #[cfg(all(feature = "with-debug", feature = "log-patches"))]
         {
             log::debug!("There are {} patches", patches.len());
@@ -760,14 +746,6 @@ where
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
-        let skip_diff = template::extract_skip_if(&self.app_context.current_vdom());
-        log::debug!("skip_diff: {skip_diff:#?}");
-
-        #[cfg(feature = "prediff")]
-        let treepath = Some(SkipDiff::traverse(&[skip_diff]));
-
-        #[cfg(not(feature = "prediff"))]
-        let treepath = None;
 
         let cmd = self.app_context.batch_pending_cmds();
 
@@ -779,7 +757,7 @@ where
         }
 
         if cmd.modifier.should_update_view {
-            self.dispatch_dom_changes(&cmd.modifier, treepath);
+            self.dispatch_dom_changes(&cmd.modifier);
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update
