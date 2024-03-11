@@ -72,6 +72,20 @@ impl SkipDiff {
         (self.expr)() && self.children.iter().all(Self::is_skippable_recursive)
     }
 
+    /// collapse into 1 skip_if if all the children is skippable
+    pub fn collapse_children(self) -> Self {
+       let Self{expr, children } = self;
+       let can_skip_children =  children.iter().all(Self::is_skippable_recursive);
+        Self{
+            expr,
+            children: if can_skip_children{
+               vec![]
+            }else{
+               children.into_iter().map(Self::collapse_children).collect()
+            }
+        }
+    }
+
 }
 
 

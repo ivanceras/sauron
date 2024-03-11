@@ -49,3 +49,99 @@ fn nested_test_multiple_nodes(){
             skip_if(true, []),
     ]), "no attributes");
 }
+
+#[test]
+fn test_collapsed(){
+    let skip = skip_diff!{
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    };
+    let skip = skip.collapse_children();
+
+    assert_eq!(skip, sauron::skip_if(true,[]), "can be collapsed");
+}
+
+#[test]
+fn deep_collapsed(){
+    let skip = skip_diff!{
+        <ul>
+            <li></li>
+            <li>
+                <tr></tr>
+                <tr></tr>
+                <tr></tr>
+            </li>
+            <li></li>
+        </ul>
+    };
+    let skip = skip.collapse_children();
+
+    assert_eq!(skip, sauron::skip_if(true,[]), "can be collapsed");
+}
+
+#[test]
+fn can_not_collapsed(){
+    let skip = skip_diff!{
+        <ul>
+            <li></li>
+            <li id=format!("id:{}", 1)></li>
+            <li></li>
+        </ul>
+    };
+    let skip = skip.collapse_children();
+
+    assert_eq!(skip, sauron::skip_if(true,[
+            skip_if(true, []),
+            skip_if(false, []),
+            skip_if(true, [])
+    ]), "can be collapsed");
+}
+
+#[test]
+fn partial_collapsed(){
+    let skip = skip_diff!{
+        <ul>
+            <li></li>
+            <li>
+                <tr></tr>
+                <tr></tr>
+                <tr></tr>
+            </li>
+            <li id=format!("id:{}", 1)></li>
+            <li></li>
+        </ul>
+    };
+    let skip = skip.collapse_children();
+
+    assert_eq!(skip, sauron::skip_if(true,[
+            skip_if(true, []),
+            skip_if(true, []),
+            skip_if(false, []),
+            skip_if(true, [])
+    ]), "can be collapsed");
+}
+
+#[test]
+fn collapsed_inside_of_false(){
+    let skip = skip_diff!{
+        <ul>
+            <li></li>
+            <li id=format!("id:{}", 1)>
+                <tr></tr>
+                <tr></tr>
+                <tr></tr>
+            </li>
+            <li></li>
+        </ul>
+    };
+    let skip = skip.collapse_children();
+
+    assert_eq!(skip, sauron::skip_if(true,[
+            skip_if(true, []),
+            skip_if(false, []),
+            skip_if(true, [])
+    ]), "can be collapsed");
+}
