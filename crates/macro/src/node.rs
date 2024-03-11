@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use rstml::node::{KeyedAttributeValue, Node, NodeAttribute, NodeBlock};
 use sauron_core::html::lookup;
-use syn::{Expr, ExprForLoop, Stmt};
+use syn::{Expr, ExprForLoop, Stmt, ExprIf};
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match rstml::parse(input) {
@@ -78,21 +78,22 @@ fn single_node(node: Node) -> TokenStream {
                     compile_error!("invalid block: {:?}", #block);
                 }
             }
-            NodeBlock::ValidBlock(block) => match braced_for_loop(&block) {
-                Some(ExprForLoop {
-                    pat, expr, body, ..
-                }) => {
+            NodeBlock::ValidBlock(block) => {
+                if let Some(ExprForLoop { pat, expr, body, .. }) = braced_for_loop(&block) {
                     quote! {
-                        {
-                            sauron::html::node_list(
-                                (#expr).map(|#pat|{
-                                    #[allow(unused_braces)]
-                                    #body
-                                }))
-                        }
+                        sauron::html::node_list(
+                            (#expr).map(|#pat|{
+                                #[allow(unused_braces)]
+                                #body
+                            }))
+                    }
+                } 
+                else if let Some(ExprIf{..}) = braced_if_expr(&block) {
+                    quote!{
+                        #block
                     }
                 }
-                _ => {
+                else {
                     quote! {
                         #block
                     }
@@ -176,6 +177,19 @@ fn braced_for_loop(block: &syn::Block) -> Option<&ExprForLoop> {
         let stmt = &block.stmts[0];
         match stmt {
             Stmt::Expr(Expr::ForLoop(expr), _semi) => Some(expr),
+            _ => None,
+        }
+    }
+}
+
+fn braced_if_expr(block: &syn::Block) -> Option<&ExprIf> {
+    let len = block.stmts.len();
+    if len != 1 {
+        None
+    } else {
+        let stmt = &block.stmts[0];
+        match stmt {
+            Stmt::Expr(Expr::If(expr), _semi) => Some(expr),
             _ => None,
         }
     }
