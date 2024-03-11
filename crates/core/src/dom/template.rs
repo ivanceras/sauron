@@ -46,23 +46,13 @@ pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> {
     }
 }
 
-/// derive a skip_diff for this vdom
 pub(crate) fn extract_skip_if<MSG>(node: &Node<MSG>) -> SkipDiff {
     match node {
         Node::Element(elm) => {
-            if elm.is_static_recursive(){
-                skip_if(true, [])
-            }else{
-                skip_if(false, elm.children().iter().map(extract_skip_if))
-            }
+           skip_if(elm.is_attrs_all_static_str(), elm.children().iter().map(extract_skip_if))
         }
         Node::Fragment(nodes) => {
-            let are_all_static = nodes.iter().all(|n|n.is_static_recursive());
-            if are_all_static{
-                skip_if(true, [])
-            }else{
-                skip_if(false, nodes.iter().map(extract_skip_if))
-            }
+           skip_if(nodes.iter().all(|n|n.is_static()), nodes.iter().map(extract_skip_if))
         }
         Node::Leaf(leaf) => skip_if(leaf.is_static_str(), []),
         Node::NodeList(_node_list) => unreachable!("This has been unrolled"),
