@@ -141,6 +141,7 @@ where
     }
 }
 
+
 impl<APP, MSG, IN> From<IN> for Cmd<APP, MSG>
 where
     MSG: 'static,

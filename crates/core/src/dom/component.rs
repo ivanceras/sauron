@@ -197,7 +197,7 @@ impl<MSG> Clone for StatelessModel<MSG> {
 
 /// create a stateless component node
 pub fn component<COMP, MSG, MSG2>(
-    app: COMP,
+    app: &COMP,
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG>

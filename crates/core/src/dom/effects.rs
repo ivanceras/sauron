@@ -186,6 +186,7 @@ where
         }
     }
 
+
     /// Append this msgs to the local effects
     pub fn append_local(mut self, local: impl IntoIterator<Item = MSG>) -> Self {
         self.local
@@ -251,6 +252,27 @@ impl<MSG, XMSG> From<Task<MSG>> for Effects<MSG, XMSG> {
             local: vec![task],
             external: vec![],
             modifier: Modifier::default(),
+        }
+    }
+}
+
+
+impl<MSG> Effects<MSG, MSG>
+where
+    MSG: 'static,
+{
+    /// merge external msg into local msg, if they are of the same type
+    pub fn merge(self) -> Effects<MSG, ()> {
+        let Effects {
+            local,
+            external,
+            modifier,
+        } = self;
+
+        Effects {
+            local: local.into_iter().chain(external.into_iter()).collect(),
+            external: vec![],
+            modifier,
         }
     }
 }
