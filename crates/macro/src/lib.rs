@@ -14,7 +14,7 @@
 use quote::ToTokens;
 
 mod custom_element;
-mod skip_diff;
+mod extract_skip_diff;
 mod jss;
 mod node;
 
@@ -200,7 +200,7 @@ pub fn node(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 #[proc_macro]
 pub fn extract_skip_diff(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    skip_diff::to_token_stream(input).into()
+    extract_skip_diff::to_token_stream(input).into()
 }
 
 /// derive code for a certain CustomElement implementation to have the necessary types and glue
