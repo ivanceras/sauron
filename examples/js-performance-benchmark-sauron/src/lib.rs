@@ -45,6 +45,7 @@ static NOUNS: &[&str] = &[
 struct RowData {
     id: usize,
     label: String,
+    selected: bool,
 }
 
 impl RowData {
@@ -55,34 +56,25 @@ impl RowData {
 
         let label = [adjective, colour, noun].join(" ");
 
-        Self { id, label }
+        Self { id, label, selected: false }
     }
 }
 
-enum RowMsg {
-    Remove(usize),
-    Select(usize),
-}
 
-struct Row {
-    data: RowData,
-    selected: bool,
-}
-
-impl Component<RowMsg, Msg> for Row {
-    fn update(&mut self, msg: RowMsg) -> Effects<RowMsg, Msg> {
+impl Component<Msg, ()> for RowData {
+    fn update(&mut self, _msg: Msg) -> Effects<Msg, ()> {
         Effects::none()
     }
-    fn view(&self) -> Node<RowMsg> {
-        let id = self.data.id;
+    fn view(&self) -> Node<Msg> {
+        let id = self.id;
         node! {
             <tr class={if self.selected { "danger" } else  { "" }} key=id >
-                <td class="col-md-1">{ text(self.data.id) }</td>
-                <td class="col-md-4" on_click={move |_| RowMsg::Select(id)}>
-                     <a class="lbl">{ text(&self.data.label) }</a>
+                <td class="col-md-1">{ text(id) }</td>
+                <td class="col-md-4" on_click={move |_| Msg::Select(id)}>
+                     <a class="lbl">{ text(&self.label) }</a>
                 </td>
                 <td class="col-md-1">
-                     <a class="remove" on_click={move |_| RowMsg::Remove(id) }>
+                     <a class="remove" on_click={move |_| Msg::Remove(id) }>
                          <span class="glyphicon glyphicon-remove remove" aria-hidden="true"></span>
                      </a>
                 </td>
@@ -115,7 +107,6 @@ enum Msg {
     Update(usize),
     Clear,
     Swap,
-    RowMsg(RowMsg),
     Remove(usize),
     Select(usize),
 }
@@ -155,7 +146,6 @@ impl Application<Msg> for App {
                     self.rows.swap(1, 998);
                 }
             }
-            Msg::RowMsg(_rmsg) => todo!(),
             Msg::Remove(id) => {
                 if let Some(index) = self.rows.iter().position(|row| row.id == id) {
                     self.rows.remove(index);
@@ -163,6 +153,9 @@ impl Application<Msg> for App {
             }
             Msg::Select(id) => {
                 self.selected_id = Some(id);
+                for row in &mut self.rows{
+                     row.selected = self.selected_id == Some(row.id)
+                }
             }
         }
         Cmd::none()
@@ -175,9 +168,8 @@ impl Application<Msg> for App {
                 <table class="table table-hover table-striped test-data">
                     <tbody id="tbody">
                         {for row in self.rows.iter() {
-                            let selected = self.selected_id == Some(row.id);
-                            component(Row{data: row.clone(), selected}, [], [])
-                                .map_msg(Msg::RowMsg)
+                            let is_selected = self.selected_id == Some(row.id);
+                            component(row, [selected(is_selected)], [])
                         }}
                     </tbody>
                 </table>
