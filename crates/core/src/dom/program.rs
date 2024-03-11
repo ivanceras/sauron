@@ -7,7 +7,7 @@ use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
 #[cfg(feature = "prediff")]
-use crate::dom::PreDiff;
+use crate::dom::SkipDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
 use crate::html::{self, attributes::class, text};
@@ -767,7 +767,7 @@ where
         #[cfg(feature = "prediff")]
         let treepath = self.app().prediff(&old_app).map(|eval| {
             log::debug!("eval: {eval:#?}");
-            PreDiff::traverse(&eval)
+            SkipDiff::traverse(&eval)
         });
 
         #[cfg(not(feature = "prediff"))]

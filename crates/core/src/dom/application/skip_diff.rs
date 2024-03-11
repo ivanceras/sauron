@@ -1,13 +1,14 @@
 use crate::vdom::TreePath;
 use std::fmt;
 
-///
-pub struct PreDiff {
+/// if the expression evaluates to true,
+/// diffing at this node will be skipped entirely
+pub struct SkipDiff {
     expr: Box<dyn Fn() -> bool>,
-    children: Vec<PreDiff>,
+    children: Vec<SkipDiff>,
 }
 
-impl fmt::Debug for PreDiff {
+impl fmt::Debug for SkipDiff {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({}", (self.expr)())?;
         write!(f, ",[")?;
@@ -19,7 +20,7 @@ impl fmt::Debug for PreDiff {
     }
 }
 
-impl PreDiff {
+impl SkipDiff {
     /// new
     pub fn new(val: bool, children: impl IntoIterator<Item = Self>) -> Self {
         Self {
@@ -28,16 +29,9 @@ impl PreDiff {
         }
     }
 
-    ///
-    pub fn none() -> Self {
-        PreDiff {
-            expr: Box::new(|| false),
-            children: vec![],
-        }
-    }
 
     ///
-    pub fn traverse(evals: &[PreDiff]) -> Vec<TreePath> {
+    pub fn traverse(evals: &[SkipDiff]) -> Vec<TreePath> {
         let root = TreePath::root();
         if evals.len() == 1 {
             Self::traverse_recursive(&evals[0], root)
@@ -46,8 +40,9 @@ impl PreDiff {
         }
     }
 
-    ///
-    fn traverse_list(evals: &[PreDiff], current: TreePath) -> Vec<TreePath> {
+    /// traverse the skip diff and return a list of TreePath that will be evaluated
+    /// by the program
+    fn traverse_list(evals: &[SkipDiff], current: TreePath) -> Vec<TreePath> {
         let mut paths = vec![];
         for (i, eval) in evals.iter().enumerate() {
             let more_paths = eval.traverse_recursive(current.traverse(i));
@@ -58,7 +53,8 @@ impl PreDiff {
 
     fn traverse_recursive(&self, current: TreePath) -> Vec<TreePath> {
         let mut paths = vec![];
-        if (self.expr)() {
+        // if this SkipDiff evaluates to true, include it in the treepath to be diff
+        if !(self.expr)() {
             paths.push(current.clone());
         }
         let more_paths = Self::traverse_list(&self.children, current);
@@ -67,7 +63,7 @@ impl PreDiff {
     }
 }
 
-/// evaluate check
-pub fn diff_if(val: bool, children: impl IntoIterator<Item = PreDiff>) -> PreDiff {
-    PreDiff::new(val, children)
+/// skip diffing the node is the val is true
+pub fn skip_if(val: bool, children: impl IntoIterator<Item = SkipDiff>) -> SkipDiff {
+    SkipDiff::new(val, children)
 }

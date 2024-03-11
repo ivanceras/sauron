@@ -1,8 +1,8 @@
 use crate::dom::Cmd;
 use crate::vdom::Node;
-pub use prediff::{diff_if, PreDiff};
+pub use skip_diff::{skip_if, SkipDiff};
 
-mod prediff;
+mod skip_diff;
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
@@ -27,7 +27,7 @@ where
     /// pre evaluate the expression to determine
     /// whether to diff the nodes
     #[cfg(feature = "prediff")]
-    fn prediff(&self, _other: &Self) -> Option<Vec<PreDiff>> {
+    fn prediff(&self, _other: &Self) -> Option<Vec<SkipDiff>> {
         None
     }
 
