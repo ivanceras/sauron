@@ -17,6 +17,13 @@ where
         Cmd::none()
     }
 
+    /// optional logical code when to skip diffing some particular node
+    /// by comparing field values of app and its old values
+    #[cfg(feature = "prediff")]
+    fn skip_diff(&self, old: &Self) -> Option<Vec<SkipDiff>> {
+        None
+    }
+
     /// Update the component with a message.
     /// The update function returns a Cmd, which can be executed by the runtime.
     ///

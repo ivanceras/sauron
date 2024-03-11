@@ -21,12 +21,12 @@ fn patches_dom() {
     let vdom: Node<()> = div(vec![], vec![]);
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(vdom, None)
+        .update_dom_with_vdom(vdom)
         .expect("must not error");
 
     let new_vdom = div(vec![id("patched")], vec![]); //html! { <div id="patched"></div> };
     simple_program
-        .update_dom_with_vdom(new_vdom, None)
+        .update_dom_with_vdom(new_vdom)
         .expect("must not error");
 
     assert!(document.query_selector("#patched").unwrap().is_some());
@@ -43,7 +43,7 @@ fn updates_active_closure_on_replace() {
     let old = div(vec![], vec![]);
 
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
@@ -66,7 +66,7 @@ fn updates_active_closure_on_replace() {
     // We are testing that we've stored this new node's closures even though `new` will be dropped
     // at the end of this block.
     simple_program
-        .update_dom_with_vdom(replace_node, None)
+        .update_dom_with_vdom(replace_node)
         .expect("must not error");
 
     let input_event = InputEvent::new("input").unwrap();
@@ -94,7 +94,7 @@ async fn updates_active_closures_on_append() {
     let old = div(vec![], vec![]);
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     let text = Rc::new(RefCell::new("Start Text".to_string()));
@@ -121,7 +121,7 @@ async fn updates_active_closures_on_append() {
         // We are testing that we've stored this new node's closures even though `new` will be dropped
         // at the end of this block.
         simple_program
-            .update_dom_with_vdom(append_node, None)
+            .update_dom_with_vdom(append_node)
             .expect("must not error");
     }
 

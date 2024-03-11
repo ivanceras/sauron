@@ -85,7 +85,7 @@ fn click_event() {
     let mut simple_program = simple_program();
 
     simple_program
-        .update_dom_with_vdom(vdiv, None)
+        .update_dom_with_vdom(vdiv)
         .expect("must not error");
 
     let click_event = web_sys::MouseEvent::new("click").unwrap();

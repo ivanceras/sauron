@@ -50,7 +50,7 @@ fn test_patch_insert_node() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     let container = document
@@ -63,7 +63,7 @@ fn test_patch_insert_node() {
     assert_eq!(expected, container.outer_html());
 
     simple_program
-        .update_dom_with_vdom(update1, None)
+        .update_dom_with_vdom(update1)
         .expect("must not error");
 
     let container = document
@@ -118,7 +118,7 @@ fn test_patch_insert_node_in_the_middle() {
     let mut simple_program = simple_program();
 
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     let container = document
@@ -131,7 +131,7 @@ fn test_patch_insert_node_in_the_middle() {
     assert_eq!(expected, container.outer_html());
 
     simple_program
-        .update_dom_with_vdom(update1, None)
+        .update_dom_with_vdom(update1)
         .expect("must not error");
 
     let container = document
@@ -188,7 +188,7 @@ fn multiple_insert_should_work() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     let container = document
@@ -201,7 +201,7 @@ fn multiple_insert_should_work() {
     assert_eq!(expected, container.outer_html());
 
     simple_program
-        .update_dom_with_vdom(update1, None)
+        .update_dom_with_vdom(update1)
         .expect("must not error");
 
     let container = document

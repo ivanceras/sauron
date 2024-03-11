@@ -33,7 +33,7 @@ fn on_input_test() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(input, None)
+        .update_dom_with_vdom(input)
         .expect("must not error");
 
     let input_element = sauron_core::dom::document()
@@ -84,11 +84,11 @@ fn added_event() {
     let mut simple_program = simple_program();
 
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
     // update to new dom with no event attached
     simple_program
-        .update_dom_with_vdom(new, None)
+        .update_dom_with_vdom(new)
         .expect("must not error");
 
     let input_element = sauron_core::dom::document()
@@ -141,11 +141,11 @@ fn remove_event() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
     // update to new dom with no event attached
     simple_program
-        .update_dom_with_vdom(new, None)
+        .update_dom_with_vdom(new)
         .expect("must not error");
 
     let input_element = sauron_core::dom::document()
@@ -195,7 +195,7 @@ fn remove_event_from_truncated_children() {
     );
 
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
     assert_eq!(
         simple_program.node_closures.borrow().len(),
@@ -203,7 +203,7 @@ fn remove_event_from_truncated_children() {
         "There should be 5 events attached to the DomUpdater"
     );
     simple_program
-        .update_dom_with_vdom(new, None)
+        .update_dom_with_vdom(new)
         .expect("must not error");
 
     assert_eq!(
@@ -245,7 +245,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
     );
 
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     assert_eq!(
@@ -254,7 +254,7 @@ fn remove_event_from_truncated_children_some_with_no_events() {
         "There should be 3 events attached to the DomUpdater"
     );
     simple_program
-        .update_dom_with_vdom(new, None)
+        .update_dom_with_vdom(new)
         .expect("must not error");
 
     assert_eq!(
@@ -284,7 +284,7 @@ fn remove_event_from_replaced_node() {
         )],
     );
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
     assert_eq!(
         simple_program.node_closures.borrow().len(),
@@ -292,7 +292,7 @@ fn remove_event_from_replaced_node() {
         "There should be 1 event attached to the DomUpdater"
     );
     simple_program
-        .update_dom_with_vdom(new, None)
+        .update_dom_with_vdom(new)
         .expect("must not error");
 
     assert_eq!(

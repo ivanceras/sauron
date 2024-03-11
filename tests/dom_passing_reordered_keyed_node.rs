@@ -43,12 +43,12 @@ fn reordered_keys2() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     let update1_html = update1.render_to_string();
     simple_program
-        .update_dom_with_vdom(update1, None)
+        .update_dom_with_vdom(update1)
         .expect("must not error");
 
     let container = document
@@ -101,12 +101,12 @@ fn reordered_keys3() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     let update1_html = update1.render_to_string();
     simple_program
-        .update_dom_with_vdom(update1, None)
+        .update_dom_with_vdom(update1)
         .expect("must not error");
 
     let container = document

@@ -109,13 +109,13 @@ fn test1() {
     let mut simple_program = simple_program();
 
     simple_program
-        .update_dom_with_vdom(current_dom.clone(), None)
+        .update_dom_with_vdom(current_dom.clone())
         .expect("must not error");
 
     let target_dom_html = target_dom.render_to_string();
 
     simple_program
-        .update_dom_with_vdom(target_dom, None)
+        .update_dom_with_vdom(target_dom)
         .expect("must not error");
 
     let app_node = crate::document()

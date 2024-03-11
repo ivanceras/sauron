@@ -21,7 +21,7 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn prediff(&self, old: &Self) -> Option<Vec<SkipDiff>> {
+    fn skip_diff(&self, old: &Self) -> Option<Vec<SkipDiff>> {
         Some(vec![skip_if(
             true,
             [

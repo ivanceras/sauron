@@ -176,7 +176,7 @@ where
             .borrow_mut()
             .connected_callback();
         self.program
-            .update_dom(&Modifier::default(), None)
+            .update_dom(&Modifier::default())
             .expect("must update dom");
     }
 

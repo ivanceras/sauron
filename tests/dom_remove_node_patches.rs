@@ -48,7 +48,7 @@ fn test_remove_nodes() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     let container = document
@@ -61,7 +61,7 @@ fn test_remove_nodes() {
     assert_eq!(expected, container.outer_html());
 
     simple_program
-        .update_dom_with_vdom(update1, None)
+        .update_dom_with_vdom(update1)
         .expect("must not error");
 
     let container = document

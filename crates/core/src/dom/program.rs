@@ -727,8 +727,6 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&mut self, deadline: Option<IdleDeadline>) {
-        #[cfg(feature = "prediff")]
-        let old_app = self.app_clone();
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already

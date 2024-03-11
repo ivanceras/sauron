@@ -56,13 +56,13 @@ fn swap_rows_non_keyed() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     let expected1 = update1.render_to_string();
 
     simple_program
-        .update_dom_with_vdom(update1, None)
+        .update_dom_with_vdom(update1)
         .expect("must not error");
 
     let container = document
@@ -117,13 +117,13 @@ fn swap_rows_keyed() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     let expected1 = update1.render_to_string();
 
     simple_program
-        .update_dom_with_vdom(update1, None)
+        .update_dom_with_vdom(update1)
         .expect("must not error");
 
     let container = document
@@ -188,13 +188,13 @@ fn swap_1_and_8() {
 
     let mut simple_program = simple_program();
     simple_program
-        .update_dom_with_vdom(old, None)
+        .update_dom_with_vdom(old)
         .expect("must update dom");
 
     let expected1 = update1.render_to_string();
 
     simple_program
-        .update_dom_with_vdom(update1, None)
+        .update_dom_with_vdom(update1)
         .expect("must not error");
 
     let container = document
