@@ -41,7 +41,7 @@ use std::{cmp, mem};
 /// );
 /// ```
 pub fn diff<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> Vec<Patch<'a, MSG>> {
-    diff_recursive(old_node, new_node, &TreePath::root())
+    diff_recursive(old_node, new_node, &TreePath::root(), None)
 }
 
 fn is_any_keyed<MSG>(nodes: &[Node<MSG>]) -> bool {
@@ -117,7 +117,15 @@ pub fn diff_recursive<'a, MSG>(
     old_node: &'a Node<MSG>,
     new_node: &'a Node<MSG>,
     path: &TreePath,
+    depth_limit: Option<usize>,
 ) -> Vec<Patch<'a, MSG>> {
+
+    // return if it has reach depth limit
+    if let Some(depth_limit) = depth_limit{
+        if path.path.len() == depth_limit{
+            return vec![]
+        }
+    }
     let skip = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
         let new_skip_criteria = new_node.attribute_value(&SKIP_CRITERIA);
         let old_skip_criteria = old_node.attribute_value(&SKIP_CRITERIA);
@@ -163,13 +171,13 @@ pub fn diff_recursive<'a, MSG>(
         }
         // We're comparing two element nodes
         (Node::Element(old_element), Node::Element(new_element)) => {
-            let patch = diff_element(old_element, new_element, path);
+            let patch = diff_element(old_element, new_element, path, depth_limit);
             patches.extend(patch);
         }
         (Node::Fragment(old_nodes), Node::Fragment(new_nodes)) => {
             // we back track since Fragment is not a real node, but it would still
             // be traversed from the prior call
-            let patch = diff_nodes(None, old_nodes, new_nodes, &path.backtrack());
+            let patch = diff_nodes(None, old_nodes, new_nodes, &path.backtrack(), depth_limit);
             patches.extend(patch);
         }
         (Node::NodeList(_old_elements), Node::NodeList(_new_elements)) => {
@@ -187,6 +195,7 @@ fn diff_element<'a, MSG>(
     old_element: &'a Element<MSG>,
     new_element: &'a Element<MSG>,
     path: &TreePath,
+    depth_limit: Option<usize>,
 ) -> Vec<Patch<'a, MSG>> {
     let mut patches = create_attribute_patches(old_element, new_element, path);
 
@@ -195,6 +204,7 @@ fn diff_element<'a, MSG>(
         &old_element.children,
         &new_element.children,
         path,
+        depth_limit
     );
 
     patches.extend(more_patches);
@@ -206,14 +216,15 @@ fn diff_nodes<'a, MSG>(
     old_children: &'a [Node<MSG>],
     new_children: &'a [Node<MSG>],
     path: &TreePath,
+    depth_limit: Option<usize>,
 ) -> Vec<Patch<'a, MSG>> {
     let diff_as_keyed = is_any_keyed(old_children) || is_any_keyed(new_children);
 
     if diff_as_keyed {
-        let keyed_patches = diff_lis::diff_keyed_nodes(old_tag, old_children, new_children, path);
+        let keyed_patches = diff_lis::diff_keyed_nodes(old_tag, old_children, new_children, path, depth_limit);
         keyed_patches
     } else {
-        let non_keyed_patches = diff_non_keyed_nodes(old_tag, old_children, new_children, path);
+        let non_keyed_patches = diff_non_keyed_nodes(old_tag, old_children, new_children, path, depth_limit);
         non_keyed_patches
     }
 }
@@ -233,6 +244,7 @@ fn diff_non_keyed_nodes<'a, MSG>(
     old_children: &'a [Node<MSG>],
     new_children: &'a [Node<MSG>],
     path: &TreePath,
+    depth_limit: Option<usize>,
 ) -> Vec<Patch<'a, MSG>> {
     let mut patches = vec![];
     let old_child_count = old_children.len();
@@ -246,7 +258,7 @@ fn diff_non_keyed_nodes<'a, MSG>(
         let old_child = &old_children.get(index).expect("No old_node child node");
         let new_child = &new_children.get(index).expect("No new child node");
 
-        let more_patches = diff_recursive(old_child, new_child, &child_path);
+        let more_patches = diff_recursive(old_child, new_child, &child_path, depth_limit);
         patches.extend(more_patches);
     }
 
