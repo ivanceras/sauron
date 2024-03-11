@@ -14,6 +14,7 @@
 use quote::ToTokens;
 
 mod custom_element;
+mod skip_diff;
 mod jss;
 mod node;
 
@@ -180,6 +181,26 @@ mod node;
 #[proc_macro]
 pub fn node(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     node::to_token_stream(input).into()
+}
+
+/// Generate a skip diff list based on the node used in the view
+/// ```rust
+/// use sauron_macro::skip_diff;
+///
+/// let skip = skip_diff!{<ul class="some-list"></ul>};
+/// assert_eq!(skip, sauron::skip_if(true,[]), "skip if all attribute values are static");
+/// ```
+///
+/// ```rust
+/// use sauron_macro::skip_diff;
+///
+/// let skip = skip_diff!{"item 1"};
+/// assert_eq!(skip, sauron::skip_if(true,[]), "skip raw text");
+/// ```
+///
+#[proc_macro]
+pub fn skip_diff(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    skip_diff::to_token_stream(input).into()
 }
 
 /// derive code for a certain CustomElement implementation to have the necessary types and glue

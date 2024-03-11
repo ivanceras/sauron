@@ -8,6 +8,14 @@ pub struct SkipDiff {
     children: Vec<SkipDiff>,
 }
 
+impl PartialEq for SkipDiff{
+
+    fn eq(&self, other: &Self) -> bool {
+        (self.expr)() == (other.expr)()
+            && self.children == other.children
+    }
+}
+
 impl fmt::Debug for SkipDiff {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({},", (self.expr)())?;
