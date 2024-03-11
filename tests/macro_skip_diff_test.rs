@@ -33,3 +33,19 @@ fn test_multiple_nodes(){
             skip_if(true, []),
     ]), "no attributes");
 }
+
+#[test]
+fn nested_test_multiple_nodes(){
+    let skip = skip_diff!{
+        <ul>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    };
+    assert_eq!(skip, sauron::skip_if(true,[
+            skip_if(true, []),
+            skip_if(true, []),
+            skip_if(true, []),
+    ]), "no attributes");
+}
