@@ -494,6 +494,7 @@ where
             }
         }
         if !did_complete {
+            log::info!("did not complete pending msgs in time.. dispatching the rest");
             #[cfg(feature = "with-ric")]
             self.dispatch_pending_msgs_with_ric()
                 .expect("must complete");
@@ -528,8 +529,12 @@ where
 
         let node_count = view.node_count();
 
+        let dom_patches = self.create_dom_patch(&view);
+        let total_patches = dom_patches.len();
         // update the last DOM node tree with this new view
-        let total_patches = self.update_dom_with_vdom(view).expect("must not error");
+        self.queue_dom_patches(dom_patches).expect("must not error");
+        /// set the current dom
+        self.app_context.set_current_dom(view);
         let t3 = now();
 
         let strong_count = self.app_context.strong_count();
@@ -570,9 +575,7 @@ where
     /// patch the DOM to reflect the App's view
     ///
     /// Note: This is in another function so as to allow tests to use this shared code
-    pub fn update_dom_with_vdom(&mut self, new_vdom: vdom::Node<MSG>) -> Result<usize, JsValue> {
-        let dom_patches = self.create_dom_patch(&new_vdom);
-        let total_patches = dom_patches.len();
+    pub fn queue_dom_patches(&mut self, dom_patches: Vec<DomPatch>) -> Result<(), JsValue> {
         self.pending_patches.borrow_mut().extend(dom_patches);
 
         #[cfg(feature = "with-raf")]
@@ -581,8 +584,7 @@ where
         #[cfg(not(feature = "with-raf"))]
         self.apply_pending_patches().expect("raf");
 
-        self.app_context.set_current_dom(new_vdom);
-        Ok(total_patches)
+        Ok(())
     }
 
     fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch> {
