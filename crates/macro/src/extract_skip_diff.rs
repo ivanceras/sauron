@@ -77,7 +77,7 @@ fn is_all_literal_attributes(attributes: &[NodeAttribute]) -> bool {
     attributes.iter().all(is_literal_attribute)
 }
 
-fn is_literal_attribute(attribute: &NodeAttribute) -> bool {
+pub(crate) fn is_literal_attribute(attribute: &NodeAttribute) -> bool {
     match attribute {
         NodeAttribute::Block(_block) => false,
         NodeAttribute::Attribute(attribute) => attribute.value_literal_string().is_some(),
