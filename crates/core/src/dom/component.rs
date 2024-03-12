@@ -2,10 +2,12 @@ use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
+use std::any::TypeId;
+use crate::dom::SkipDiff;
+
 #[cfg(feature = "use-template")]
 pub use stateful_component::{lookup_template, register_template};
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
-use std::any::TypeId;
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
 
@@ -34,6 +36,13 @@ where
 
     /// the view of the component
     fn view(&self) -> Node<MSG>;
+
+    /// optional logical code when to skip diffing some particular node
+    /// by comparing field values of app and its old values
+    #[cfg(feature = "skip_diff")]
+    fn skip_diff(&self, old: &Self) -> Option<SkipDiff> {
+        None
+    }
 
     /// component can have static styles
     fn stylesheet() -> Vec<String>

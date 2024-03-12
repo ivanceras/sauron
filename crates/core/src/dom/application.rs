@@ -17,12 +17,6 @@ where
         Cmd::none()
     }
 
-    /// optional logical code when to skip diffing some particular node
-    /// by comparing field values of app and its old values
-    #[cfg(feature = "skip_diff")]
-    fn skip_diff(&self, old: &Self) -> Option<SkipDiff> {
-        None
-    }
 
     /// Update the component with a message.
     /// The update function returns a Cmd, which can be executed by the runtime.
@@ -32,6 +26,13 @@ where
 
     /// Returns a node on how the component is presented.
     fn view(&self) -> Node<MSG>;
+
+    /// optional logical code when to skip diffing some particular node
+    /// by comparing field values of app and its old values
+    #[cfg(feature = "skip_diff")]
+    fn skip_diff(&self, old: &Self) -> Option<SkipDiff> {
+        None
+    }
 
     /// The css style for the application, will be mounted automatically by the program
     fn stylesheet() -> Vec<String> {
