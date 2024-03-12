@@ -26,9 +26,9 @@ pub struct Element<MSG> {
     /// the element tag, such as div, a, button
     pub tag: Tag,
     /// attributes for this element
-    pub attrs: Vec<Attribute<MSG>>,
+    attrs: Vec<Attribute<MSG>>,
     /// children elements of this element
-    pub children: Vec<Node<MSG>>,
+    children: Vec<Node<MSG>>,
     /// is the element has a self closing tag
     pub self_closing: bool,
 }

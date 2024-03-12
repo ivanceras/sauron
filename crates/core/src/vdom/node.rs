@@ -212,10 +212,11 @@ impl<MSG> Node<MSG> {
     /// return the children of this node if it is an element
     /// returns None if it is a text node
     pub fn children(&self) -> &[Node<MSG>] {
-        if let Some(element) = self.element_ref() {
-            element.children()
-        } else {
-            &[]
+        match self{
+            Self::Element(elm) => elm.children(),
+            Self::Leaf(Leaf::StatelessComponent(comp)) => &comp.children,
+            _ => &[]
+
         }
     }
 
@@ -274,7 +275,7 @@ impl<MSG> Node<MSG> {
     pub fn descendant_node_count(&self) -> usize {
         let mut cnt = 0;
         if let Node::Element(element) = self {
-            for child in element.children.iter() {
+            for child in element.children().iter() {
                 cnt += child.node_count();
             }
         }

@@ -201,8 +201,8 @@ fn diff_element<'a, MSG>(
 
     let more_patches = diff_nodes(
         Some(old_element.tag()),
-        &old_element.children,
-        &new_element.children,
+        &old_element.children(),
+        &new_element.children(),
         path,
         depth_limit
     );
