@@ -110,7 +110,7 @@ impl Application<Msg> for App {
                                 placeholder="John Smith"
                                 data-attr=format!("Hello{}", &self.name)
                         />
-                        <button on_click=|event: MouseEvent| {
+                        <button on:click=|event: MouseEvent| {
                                 trace!("Clicked at ({},{})", event.x(), event.y());
                                 Msg::Click}>
                             Click me!
