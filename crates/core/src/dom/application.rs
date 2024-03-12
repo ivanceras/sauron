@@ -34,6 +34,11 @@ where
         None
     }
 
+    #[cfg(feature = "use-template")]
+    fn template(&self) -> Option<Node<MSG>> {
+        None
+    }
+
     /// The css style for the application, will be mounted automatically by the program
     fn stylesheet() -> Vec<String> {
         vec![]

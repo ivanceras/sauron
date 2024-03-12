@@ -44,6 +44,11 @@ where
         None
     }
 
+    #[cfg(feature = "use-template")]
+    fn template(&self) -> Option<Node<MSG>> {
+        None
+    }
+
     /// component can have static styles
     fn stylesheet() -> Vec<String>
     where
