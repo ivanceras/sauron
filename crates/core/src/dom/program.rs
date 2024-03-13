@@ -503,7 +503,7 @@ where
     }
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    pub fn update_dom(&mut self, modifier: &Modifier, old_app: Option<ManuallyDrop<APP>>) -> Result<(), JsValue> {
+    pub fn update_dom(&mut self, modifier: &Modifier) -> Result<(), JsValue> {
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app_context.view();
@@ -511,7 +511,7 @@ where
 
         let node_count = view.node_count();
         #[cfg(feature = "skip_diff")]
-        let dom_patches = self.create_dom_patches_with_skip_diff(&view, old_app);
+        let dom_patches = self.create_dom_patches_with_skip_diff(&view);
         #[cfg(not(feature = "skip_diff"))]
         let dom_patches = self.create_dom_patch(&view);
         let total_patches = dom_patches.len();
@@ -586,9 +586,8 @@ where
     }
 
     #[cfg(feature = "skip_diff")]
-    fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<MSG>, old_app: Option<ManuallyDrop<APP>>) -> Vec<DomPatch>{
-        let old_app = old_app.expect("old_app");
-        if let Some(skip_diff) = self.app().skip_diff(&old_app){
+    fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch>{
+        if let Some(skip_diff) = self.app().skip_diff(){
             log::info!("skip_diff: {skip_diff:#?}");
             let treepath = skip_diff.traverse();
             log::info!("treepath: {:#?}", treepath);
@@ -751,11 +750,6 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&mut self, deadline: Option<IdleDeadline>) {
-        #[cfg(feature = "skip_diff")]
-        let old_app = Some(self.app_clone());
-        #[cfg(not(feature = "skip_diff"))]
-        let old_app = None;
-
 
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
@@ -784,7 +778,7 @@ where
         }
 
         if cmd.modifier.should_update_view {
-            self.update_dom(&cmd.modifier, old_app).expect("must update dom");
+            self.update_dom(&cmd.modifier).expect("must update dom");
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update

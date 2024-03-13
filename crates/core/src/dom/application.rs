@@ -30,7 +30,7 @@ where
     /// optional logical code when to skip diffing some particular node
     /// by comparing field values of app and its old values
     #[cfg(feature = "skip_diff")]
-    fn skip_diff(&self, old: &Self) -> Option<SkipDiff> {
+    fn skip_diff(&self) -> Option<SkipDiff> {
         None
     }
 

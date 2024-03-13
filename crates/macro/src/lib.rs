@@ -184,6 +184,7 @@ pub fn node(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     node::to_token_stream(input).into()
 }
 
+
 /// Generate a skip diff list based on the node used in the view
 /// ```rust
 /// use sauron_macro::extract_skip_diff;
