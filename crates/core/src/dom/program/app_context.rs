@@ -8,6 +8,7 @@ use std::{
     rc::Rc,
     rc::Weak,
 };
+use crate::dom::SkipDiff;
 
 /// AppContext module pertains only to application state and manages objects that affects it.
 /// It has no access to the dom, threads or any of the processing details that Program has to do.
@@ -22,6 +23,9 @@ where
     /// This also doesn't change throughout the app lifecycle
     #[cfg(feature = "use-template")]
     pub(crate) template: web_sys::Node,
+    /// skip diff
+    #[cfg(feature = "skip_diff")]
+    pub(crate) skip_diff: Rc<Option<SkipDiff>>,
 
     /// The vdom template generated from the APP
     /// This doesn't change throughout the app lifecycle
@@ -49,6 +53,8 @@ where
     pub(crate) app: Weak<RefCell<APP>>,
     #[cfg(feature = "use-template")]
     pub(crate) template: web_sys::Node,
+    #[cfg(feature = "skip_diff")]
+    pub(crate) skip_diff: Rc<Option<SkipDiff>>,
     #[cfg(feature = "use-template")]
     pub(crate) vdom_template: Weak<vdom::Node<MSG>>,
     pub(crate) current_vdom: Weak<RefCell<vdom::Node<MSG>>>,
@@ -69,6 +75,8 @@ where
             app,
             #[cfg(feature = "use-template")]
             template: self.template.clone(),
+            #[cfg(feature = "skip_diff")]
+            skip_diff: self.skip_diff.clone(),
             #[cfg(feature = "use-template")]
             vdom_template: self.vdom_template.upgrade()?,
             current_vdom,
@@ -87,6 +95,8 @@ where
             app: Weak::clone(&self.app),
             #[cfg(feature = "use-template")]
             template: self.template.clone(),
+            #[cfg(feature = "skip_diff")]
+            skip_diff: self.skip_diff.clone(),
             #[cfg(feature = "use-template")]
             vdom_template: Weak::clone(&self.vdom_template),
             current_vdom: Weak::clone(&self.current_vdom),
@@ -105,6 +115,8 @@ where
             app: Rc::downgrade(&this.app),
             #[cfg(feature = "use-template")]
             template: this.template.clone(),
+            #[cfg(feature = "skip_diff")]
+            skip_diff: this.skip_diff.clone(),
             #[cfg(feature = "use-template")]
             vdom_template: Rc::downgrade(&this.vdom_template),
             current_vdom: Rc::downgrade(&this.current_vdom),
@@ -129,6 +141,8 @@ where
             app: Rc::clone(&self.app),
             #[cfg(feature = "use-template")]
             template: self.template.clone(),
+            #[cfg(feature = "skip_diff")]
+            skip_diff: self.skip_diff.clone(),
             #[cfg(feature = "use-template")]
             vdom_template: self.vdom_template.clone(),
             current_vdom: Rc::clone(&self.current_vdom),

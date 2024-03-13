@@ -4,6 +4,7 @@ use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
 use std::any::TypeId;
 use crate::dom::SkipDiff;
+use std::rc::Rc;
 
 #[cfg(feature = "use-template")]
 pub use stateful_component::{lookup_template, register_template};
@@ -40,10 +41,11 @@ where
     /// optional logical code when to skip diffing some particular node
     /// by comparing field values of app and its old values
     #[cfg(feature = "skip_diff")]
-    fn skip_diff(&self, old: &Self) -> Option<SkipDiff> {
+    fn skip_diff(&self) -> Option<SkipDiff> {
         None
     }
 
+    ///
     #[cfg(feature = "use-template")]
     fn template(&self) -> Option<Node<MSG>> {
         None
@@ -158,6 +160,9 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
 pub struct StatelessModel<MSG> {
     /// the view of this stateless model
     pub view: Box<Node<MSG>>,
+    #[cfg(feature = "skip_diff")]
+    /// skip_diff
+    pub skip_diff: Rc<Option<SkipDiff>>,
     /// the vdom template of this component
     #[cfg(feature = "use-template")]
     pub vdom_template: Box<Node<MSG>>,
@@ -180,6 +185,8 @@ impl<MSG> StatelessModel<MSG> {
         StatelessModel {
             type_id: self.type_id,
             view: Box::new(self.view.map_msg(cb.clone())),
+            #[cfg(feature = "skip_diff")]
+            skip_diff: self.skip_diff.clone(),
             #[cfg(feature = "use-template")]
             vdom_template: Box::new(self.vdom_template.map_msg(cb.clone())),
             attrs: self
@@ -200,6 +207,8 @@ impl<MSG> Clone for StatelessModel<MSG> {
     fn clone(&self) -> Self {
         Self {
             view: self.view.clone(),
+            #[cfg(feature = "skip_diff")]
+            skip_diff: self.skip_diff.clone(),
             #[cfg(feature = "use-template")]
             vdom_template: self.vdom_template.clone(),
             type_id: self.type_id.clone(),
@@ -221,11 +230,17 @@ where
 {
     let type_id = TypeId::of::<COMP>();
     let view = app.view();
+    #[cfg(feature = "skip_diff")]
+    let skip_diff = app.skip_diff();
 
     #[cfg(feature = "use-template")]
-    let (_template, vdom_template) = register_template(type_id, &view);
+    let vdom_template = app.template().expect("must have a template");
+    #[cfg(feature = "use-template")]
+    let _template = register_template(type_id, &vdom_template);
     Node::Leaf(Leaf::StatelessComponent(StatelessModel {
         view: Box::new(view),
+        #[cfg(feature = "skip_diff")]
+        skip_diff: Rc::new(skip_diff),
         #[cfg(feature = "use-template")]
         vdom_template: Box::new(vdom_template),
         type_id,

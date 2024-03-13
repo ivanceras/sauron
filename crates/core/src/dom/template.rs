@@ -72,7 +72,7 @@ pub fn build_template<MSG>(node: &vdom::Node<MSG>) -> (web_sys::Node, vdom::Node
     (template, vdom_template)
 }
 
-fn create_dom_node_without_listeners<MSG>(vnode: &vdom::Node<MSG>) -> web_sys::Node {
+pub(crate) fn create_dom_node_without_listeners<MSG>(vnode: &vdom::Node<MSG>) -> web_sys::Node {
     match vnode {
         vdom::Node::Leaf(leaf_node) => create_leaf_node_without_listeners(leaf_node),
         vdom::Node::Element(element_node) => {

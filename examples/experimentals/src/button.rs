@@ -43,6 +43,24 @@ impl Component<Msg, ()> for Button {
             </button>
         }
     }
+
+    fn template(&self) -> Option<Node<Msg>> {
+        Some(extract_template! {
+            <button on_click=|_|Msg::Click >
+                Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}
+                <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
+            </button>
+        })
+    }
+
+    fn skip_diff(&self) -> Option<SkipDiff> {
+        Some(extract_skip_diff! {
+            <button on_click=|_|Msg::Click >
+                Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}
+                <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
+            </button>
+        })
+    }
 }
 
 impl StatefulComponent for Button {

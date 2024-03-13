@@ -82,6 +82,42 @@ impl Component<Msg, ()> for RowData {
             </tr>
         }
     }
+
+    fn template(&self) -> Option<Node<Msg>> {
+        let id = self.id;
+        Some(extract_template! {
+            <tr class={if self.selected { "danger" } else  { "" }} key=id >
+                <td class="col-md-1">{ text(id) }</td>
+                <td class="col-md-4" on_click={move |_| Msg::Select(id)}>
+                     <a class="lbl">{ text(&self.label) }</a>
+                </td>
+                <td class="col-md-1">
+                     <a class="remove" on_click={move |_| Msg::Remove(id) }>
+                         <span class="glyphicon glyphicon-remove remove" aria-hidden="true"></span>
+                     </a>
+                </td>
+                <td class="col-md-6"></td>
+            </tr>
+        })
+    }
+
+    fn skip_diff(&self) -> Option<SkipDiff> {
+        let id = self.id;
+        Some(extract_skip_diff! {
+            <tr class={if self.selected { "danger" } else  { "" }} key=id >
+                <td class="col-md-1">{ text(id) }</td>
+                <td class="col-md-4" on_click={move |_| Msg::Select(id)}>
+                     <a class="lbl">{ text(&self.label) }</a>
+                </td>
+                <td class="col-md-1">
+                     <a class="remove" on_click={move |_| Msg::Remove(id) }>
+                         <span class="glyphicon glyphicon-remove remove" aria-hidden="true"></span>
+                     </a>
+                </td>
+                <td class="col-md-6"></td>
+            </tr>
+        })
+    }
 }
 struct App {
     rows: Vec<RowData>,
@@ -177,6 +213,42 @@ impl Application<Msg> for App {
                 <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
             </div>
         }
+    }
+
+    fn skip_diff(&self) -> Option<SkipDiff> {
+       Some(extract_skip_diff! {
+            <div class="container">
+                { self.view_jumbotron() }
+                <table class="table table-hover table-striped test-data">
+                    <tbody id="tbody">
+                        {for row in self.rows.iter() {
+                            let is_selected = self.selected_id == Some(row.id);
+                            //component(row, [selected(is_selected)], [])
+                            row.view()
+                        }}
+                    </tbody>
+                </table>
+                <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
+            </div>
+        })
+    }
+
+    fn template(&self) -> Option<Node<Msg>> {
+        Some(extract_template! {
+            <div class="container">
+                { self.view_jumbotron() }
+                <table class="table table-hover table-striped test-data">
+                    <tbody id="tbody">
+                        {for row in self.rows.iter() {
+                            let is_selected = self.selected_id == Some(row.id);
+                            //component(row, [selected(is_selected)], [])
+                            row.view()
+                        }}
+                    </tbody>
+                </table>
+                <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
+            </div>
+        })
     }
 }
 

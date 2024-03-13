@@ -29,6 +29,7 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
+use crate::vdom::Patch;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
@@ -214,13 +215,19 @@ where
     /// and root node, but doesn't mount it yet.
     pub fn new(app: APP) -> Self {
         let app_view = app.view();
+        #[cfg(feature = "skip_diff")]
+        let skip_diff = app.skip_diff();
         #[cfg(feature = "use-template")]
-        let (template, vdom_template) = register_template(TypeId::of::<APP>(), &app_view);
+        let vdom_template = app.template().expect("must have a template");
+        #[cfg(feature = "use-template")]
+        let template = register_template(TypeId::of::<APP>(), &vdom_template);
         let program = Program {
             app_context: AppContext {
                 app: Rc::new(RefCell::new(app)),
                 #[cfg(feature = "use-template")]
                 template: template,
+                #[cfg(feature = "skip_diff")]
+                skip_diff: Rc::new(skip_diff),
                 #[cfg(feature = "use-template")]
                 vdom_template: Rc::new(vdom_template),
                 current_vdom: Rc::new(RefCell::new(app_view)),
@@ -382,21 +389,52 @@ where
     /// create initial dom node generated
     /// from template and patched by the difference of vdom_template and current app view.
     fn create_initial_view(&self) -> web_sys::Node {
-        #[cfg(feature = "use-template")]
+        #[cfg(all(feature = "use-template", feature = "skip_diff"))]
         {
             let app_view = self.app_context.app.borrow().view();
             let dom_template = self.app_context.template.clone();
             let vdom_template = &self.app_context.vdom_template;
-            let patches = diff(vdom_template, &app_view);
-            let dom_patches = self
-                .convert_patches(&dom_template, &patches)
-                .expect("convert patches");
-            //log::info!("first time patches {}: {patches:#?}", patches.len());
-            let new_template_node = self
-                .apply_dom_patches(dom_patches)
-                .expect("template patching");
-            //log::info!("new template node: {:?}", new_template_node);
-            dom_template
+            log::info!("vdom_template: {}", vdom_template.render_to_string());
+            log::info!("app_view: {}", app_view.render_to_string());
+            if let Some(skip_diff) = self.app_context.skip_diff.as_ref(){
+                log::info!("skip_diff: {:#?}", skip_diff);
+                let treepath = skip_diff.traverse();
+                log::info!("treeepath: {:#?}", treepath);
+                //let patches = diff(vdom_template, &app_view);
+                
+                let patches = treepath
+                    .into_iter()
+                    .flat_map(|path| {
+                        log::info!("path: {:?}", path);
+                        let old_node = path.find_node_by_path(&vdom_template).expect("old_node");
+                        if let Some(new_node) = path.find_node_by_path(&app_view){
+                            // only diff at level 0
+                            diff_recursive(
+                                &old_node,
+                                &new_node,
+                                &path,
+                                Some(0),
+                            )
+                        }else{
+                            // if the new node doesn't exist, put a placeholder child, that is the
+                            // an inserted node from the template
+                            vec![Patch::append_children(None, path.backtrack(), vec![old_node])]
+                        }
+                    })
+                    .collect::<Vec<_>>();
+                
+                let dom_patches = self
+                    .convert_patches(&dom_template, &patches)
+                    .expect("convert patches");
+                log::info!("first time patches {}: {patches:#?}", patches.len());
+                let new_template_node = self
+                    .apply_dom_patches(dom_patches)
+                    .expect("template patching");
+                //log::info!("new template node: {:?}", new_template_node);
+                dom_template
+            }else{
+                unreachable!("must have a skip_diff");
+            }
         }
         #[cfg(not(feature = "use-template"))]
         {
@@ -511,7 +549,9 @@ where
 
         let node_count = view.node_count();
         #[cfg(feature = "skip_diff")]
-        let dom_patches = self.create_dom_patches_with_skip_diff(&view);
+        let skip_diff = self.app_context.skip_diff.as_ref();
+        #[cfg(feature = "skip_diff")]
+        let dom_patches = self.create_dom_patches_with_skip_diff(&view, skip_diff);
         #[cfg(not(feature = "skip_diff"))]
         let dom_patches = self.create_dom_patch(&view);
         let total_patches = dom_patches.len();
@@ -586,27 +626,32 @@ where
     }
 
     #[cfg(feature = "skip_diff")]
-    fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch>{
-        if let Some(skip_diff) = self.app().skip_diff(){
+    fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<MSG>, skip_diff: &Option<SkipDiff>) -> Vec<DomPatch>{
+        use crate::html::comment;
+        if let Some(skip_diff) = skip_diff{
             log::info!("skip_diff: {skip_diff:#?}");
             let treepath = skip_diff.traverse();
             log::info!("treepath: {:#?}", treepath);
 
             let current_vdom = self.app_context.current_vdom();
+            let vdom_template = &self.app_context.vdom_template;
+            log::info!("current_vdom: {}", current_vdom.render_to_string());
             let patches = treepath
                 .into_iter()
                 .flat_map(|path| {
-                    let old_node = path.find_node_by_path(&current_vdom).expect("old_node");
+                    log::info!("looking for path: {:?}", path);
                     let new_node = path.find_node_by_path(&new_vdom).expect("new_node");
-                    log::info!("old_node: {}",old_node.render_to_string());
-                    log::info!("new_node: {}",new_node.render_to_string());
-                    // only diff at level 1
-                    diff_recursive(
-                        &old_node,
-                        &new_node,
-                        &path,
-                        Some(1),
-                    )
+                    if let Some(old_node) = path.find_node_by_path(&current_vdom){
+                        // only diff at level 0
+                        diff_recursive(
+                            &old_node,
+                            &new_node,
+                            &path,
+                            Some(0),
+                        )
+                    }else{
+                        vec![Patch::append_children(None, path.backtrack(), vec![new_node])]
+                    }
                 })
                 .collect::<Vec<_>>();
             log::info!("got {} patches: {patches:#?}", patches.len());

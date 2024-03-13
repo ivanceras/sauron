@@ -18,6 +18,8 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
+#[cfg(feature = "skip_diff")]
+use crate::dom::SkipDiff;
 
 #[cfg(feature = "use-template")]
 thread_local! {
@@ -30,11 +32,11 @@ thread_local! {
 }
 
 #[cfg(feature = "use-template")]
-pub fn register_template<MSG>(type_id: TypeId, view: &Node<MSG>) -> (web_sys::Node, Node<MSG>)
+pub fn register_template<MSG>(type_id: TypeId, view: &Node<MSG>) -> web_sys::Node
 where
     MSG: 'static,
 {
-    let (dom_template, vdom_template) = template::build_template(view);
+    let dom_template = template::create_dom_node_without_listeners(view);
     let template = TEMPLATE_LOOKUP.with_borrow_mut(|map| {
         if let Some(existing) = map.get(&type_id) {
             existing.clone_node_with_deep(true).expect("deep clone")
@@ -44,7 +46,7 @@ where
             dom_template
         }
     });
-    (template, vdom_template)
+    template
 }
 
 /// lookup for the template
@@ -157,6 +159,11 @@ where
         <Self as Component<MSG, ()>>::view(self)
     }
 
+    #[cfg(feature = "skip_diff")]
+    fn skip_diff(&self) -> Option<SkipDiff>{
+        <Self as Component<MSG, ()>>::skip_diff(self)
+    }
+
     fn stylesheet() -> Vec<String> {
         <Self as Component<MSG, ()>>::stylesheet()
     }
@@ -189,7 +196,11 @@ where
 
     let app_view = app.view();
     #[cfg(feature = "use-template")]
-    let (template, vdom_template) = register_template(type_id, &app_view);
+    let vdom_template = app.template().expect("must have a template");
+    #[cfg(feature = "skip_diff")]
+    let skip_diff = app.skip_diff();
+    #[cfg(feature = "use-template")]
+    let template = register_template(type_id, &vdom_template);
 
     let app = Rc::new(RefCell::new(app));
 
@@ -198,6 +209,8 @@ where
             app: Rc::clone(&app),
             #[cfg(feature = "use-template")]
             template: template,
+            #[cfg(feature = "skip_diff")]
+            skip_diff: Rc::new(skip_diff),
             #[cfg(feature = "use-template")]
             vdom_template: Rc::new(vdom_template),
             current_vdom: Rc::new(RefCell::new(app_view)),
