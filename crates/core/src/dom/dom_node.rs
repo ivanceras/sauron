@@ -6,7 +6,6 @@ use crate::dom::StatefulModel;
 use crate::html::lookup;
 use crate::vdom::diff_recursive;
 use crate::vdom::AttributeName;
-use crate::vdom::Patch;
 use crate::vdom::TreePath;
 use crate::{
     dom::document,
@@ -304,21 +303,25 @@ where
                 let patches = treepath
                     .into_iter()
                     .flat_map(|path| {
-                        let old_node = path
-                            .find_node_by_path(&comp.vdom_template)
-                            .expect("old_node");
-                        if let Some(new_node) = path.find_node_by_path(&comp.view) {
-                            // only diff at level 0
-                            diff_recursive(&old_node, &new_node, &path, Some(0))
-                        } else {
-                            // NOTE: this branch would execute if there is loop in the view
-                            // if the new node doesn't exist, put a placeholder child, that is the
-                            // an inserted node from the template
-                            vec![Patch::append_children(
-                                None,
-                                path.backtrack(),
-                                vec![old_node],
-                            )]
+                        let new_node = path.find_node_by_path(&comp.view);
+                        let old_node = path.find_node_by_path(&comp.vdom_template);
+                        match (old_node, new_node){
+                            (Some(old_node), Some(new_node)) => {
+                                // only diff at level 0
+                                diff_recursive(
+                                    &old_node,
+                                    &new_node,
+                                    &path,
+                                    Some(0),
+                                )
+                            }
+                            _ => {
+                                // backtrack old and new
+                                let parent_path = path.backtrack();
+                                let new_node = parent_path.find_node_by_path(&comp.view).expect("backtracked new_node");
+                                let old_node = parent_path.find_node_by_path(&comp.vdom_template).expect("backtracked old node");
+                                diff_recursive(&old_node, &new_node, &parent_path, Some(0))
+                            }
                         }
                     })
                     .collect::<Vec<_>>();

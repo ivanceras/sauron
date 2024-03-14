@@ -24,7 +24,6 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
-use crate::vdom::Patch;
 use crate::dom::component::register_template;
 
 pub(crate) use app_context::AppContext;
@@ -391,19 +390,25 @@ where
                 let patches = treepath
                     .into_iter()
                     .flat_map(|path| {
-                        let old_node = path.find_node_by_path(&vdom_template).expect("old_node");
-                        if let Some(new_node) = path.find_node_by_path(&app_view){
-                            // only diff at level 0
-                            diff_recursive(
-                                &old_node,
-                                &new_node,
-                                &path,
-                                Some(0),
-                            )
-                        }else{
-                            // if the new node doesn't exist, put a placeholder child, that is the
-                            // an inserted node from the template
-                            vec![Patch::append_children(None, path.backtrack(), vec![old_node])]
+                        let new_node = path.find_node_by_path(&app_view);
+                        let old_node = path.find_node_by_path(&vdom_template);
+                        match (old_node, new_node){
+                            (Some(old_node), Some(new_node)) => {
+                                // only diff at level 0
+                                diff_recursive(
+                                    &old_node,
+                                    &new_node,
+                                    &path,
+                                    Some(0),
+                                )
+                            }
+                            _ => {
+                                // backtrack old and new
+                                let parent_path = path.backtrack();
+                                let new_node = parent_path.find_node_by_path(&app_view).expect("backtracked new_node");
+                                let old_node = parent_path.find_node_by_path(&vdom_template).expect("backtracked old node");
+                                diff_recursive(&old_node, &new_node, &parent_path, Some(0))
+                            }
                         }
                     })
                     .collect::<Vec<_>>();
