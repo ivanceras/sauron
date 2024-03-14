@@ -66,5 +66,4 @@ pub mod html;
 #[macro_use]
 pub mod svg;
 pub mod dom;
-mod render;
 pub mod vdom;
