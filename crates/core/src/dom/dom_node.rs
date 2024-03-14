@@ -315,6 +315,7 @@ where
                                 Some(0),
                             )
                         }else{
+                            // NOTE: this branch would execute if there is loop in the view
                             // if the new node doesn't exist, put a placeholder child, that is the
                             // an inserted node from the template
                             vec![Patch::append_children(None, path.backtrack(), vec![old_node])]
