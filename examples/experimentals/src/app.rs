@@ -176,10 +176,10 @@ impl Application for App {
                 //{Component::view(&self.btn).map_msg(Msg::BtnMsg)}
             </div>
             <div>
-                //{stateful_component(Button::default(), [], [text("External child of btn stateful_component")])}
+                {stateful_component(Button::default(), [], [text("External child of btn stateful_component")])}
             </div>
             <div>
-                //{stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
+                {stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
             </div>
         </div>
     }

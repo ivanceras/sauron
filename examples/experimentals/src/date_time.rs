@@ -165,43 +165,24 @@ where XMSG: 'static
         vec!["date", "time", "interval"]
     }
 
-    fn view(&self) -> Node<Msg> {
-        div(
-            [class("datetimebox"), on_mount(Msg::Mounted)],
-            [
-                input(
-                    [
-                        r#type("date"),
-                        class("datetimebox__date"),
-                        on_change(|input| {
+    view!{
+        <div class="datetimebox" on_mount=Msg::Mounted>
+            <input type="date" class="datetimebox__date"
+                        on_change=|input| {
                             log::trace!("input: {:?}", input);
                             Msg::DateChange(input.value())
-                        }),
-                        value(&self.date),
-                    ],
-                    [],
-                ),
-                input(
-                    [
-                        r#type("time"),
-                        class("datetimebox__time"),
-                        on_change(|input| Msg::TimeChange(input.value())),
-                        value(&self.time),
-                    ],
-                    [],
-                ),
-                input([r#type("text"), value(self.cnt)], []),
-                button([on_click(move |_| Msg::BtnClick)], [text("Do something")]),
-                div(
-                    [
-                        class("external_children"),
-                        on_mount(|me| Msg::ExternContMounted(me.target_node)),
-                    ],
-                    [],
-                ),
-            ],
-        )
+                        }
+                        value=&self.date/>
+            <input type="time"
+                    class="datetimebox__time"
+                    on_change=|input|Msg::TimeChange(input.value())
+                    value=&self.time/>
+            <input type="text" value=self.cnt/>
+            <button on_click=move |_| Msg::BtnClick>Do something</button>
+            <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
+        </div>
     }
+
 }
 
 impl StatefulComponent for DateTimeWidget<()> {

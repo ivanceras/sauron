@@ -142,15 +142,17 @@ where
     }
 }
 
+
 /// create a stateful component node
-pub fn stateful_component<COMP>(
+pub fn stateful_component<COMP, MSG, MSG2>(
     app: COMP,
-    attrs: impl IntoIterator<Item = Attribute<COMP::MSG>>,
-    children: impl IntoIterator<Item = Node<COMP::MSG>>,
-) -> Node<COMP::MSG>
+    attrs: impl IntoIterator<Item = Attribute<MSG>>,
+    children: impl IntoIterator<Item = Node<MSG>>,
+) -> Node<MSG>
 where
-    COMP: Component<XMSG=()> + StatefulComponent + 'static,
-    COMP::MSG: Default,
+    COMP: Component<MSG= MSG2, XMSG=()> + StatefulComponent + 'static,
+    MSG: Default + 'static,
+    MSG2: 'static,
 {
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
@@ -173,11 +175,12 @@ where
     let app = Rc::new(RefCell::new(app));
 
     let program = Program::from_rc_app(Rc::clone(&app));
-    let children: Vec<Node<COMP::MSG>> = children.into_iter().collect();
+    let children: Vec<Node<MSG>> = children.into_iter().collect();
     let mount_event = on_mount(move |me| {
         let mut program = program.clone();
+        log::info!("stateful component is now mounted...");
         program.mount(&me.target_node, MountProcedure::append());
-        COMP::MSG::default()
+        MSG::default()
     });
     Node::Leaf(Leaf::StatefulComponent(StatefulModel {
         comp: app,

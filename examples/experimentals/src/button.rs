@@ -7,9 +7,12 @@ use sauron::dom::StatefulComponent;
 use sauron::prelude::*;
 use sauron::vdom::AttributeName;
 
+#[derive(Default)]
 pub enum Msg {
     Click,
     ExternContMounted(web_sys::Node),
+    #[default]
+    NoOp,
 }
 
 #[derive(Default)]
@@ -34,36 +37,18 @@ impl Component for Button {
                 }
                 self.external_children_node = Some(target_node);
             }
+            Msg::NoOp => (),
         }
         Effects::none()
     }
 
-    fn view(&self) -> Node<Msg> {
-        node! {
-            <button on_click=|_|Msg::Click >
-                Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}
-                <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
-            </button>
-        }
+    view! {
+        <button on_click=|_|Msg::Click >
+            Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}
+            <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
+        </button>
     }
 
-    fn template(&self) -> Option<Node<Msg>> {
-        Some(extract_template! {
-            <button on_click=|_|Msg::Click >
-                Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}
-                <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
-            </button>
-        })
-    }
-
-    fn skip_diff(&self) -> Option<SkipDiff> {
-        Some(extract_skip_diff! {
-            <button on_click=|_|Msg::Click >
-                Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}
-                <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
-            </button>
-        })
-    }
 }
 
 impl StatefulComponent for Button {
