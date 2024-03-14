@@ -167,29 +167,7 @@ where
 
     let app = Rc::new(RefCell::new(app));
 
-    let program = Program {
-        app_context: AppContext {
-            app: Rc::clone(&app),
-            #[cfg(feature = "use-template")]
-            template: template,
-            #[cfg(feature = "skip_diff")]
-            skip_diff: Rc::new(skip_diff),
-            #[cfg(feature = "use-template")]
-            vdom_template: Rc::new(vdom_template),
-            current_vdom: Rc::new(RefCell::new(app_view)),
-            pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
-            pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
-        },
-        root_node: Rc::new(RefCell::new(None)),
-        mount_node: Rc::new(RefCell::new(None)),
-        node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
-        pending_patches: Rc::new(RefCell::new(VecDeque::new())),
-        idle_callback_handles: Rc::new(RefCell::new(vec![])),
-        animation_frame_handles: Rc::new(RefCell::new(vec![])),
-        event_closures: Rc::new(RefCell::new(vec![])),
-        closures: Rc::new(RefCell::new(vec![])),
-        last_update: Rc::new(RefCell::new(None)),
-    };
+    let program = Program::from_rc_app(Rc::clone(&app));
     let children: Vec<Node<MSG>> = children.into_iter().collect();
     let mount_event = on_mount(move |me| {
         let mut program = program.clone();

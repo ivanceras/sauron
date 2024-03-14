@@ -216,17 +216,22 @@ where
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
     pub fn new(app: APP) -> Self {
+        Self::from_rc_app(Rc::new(RefCell::new(app)))
+    }
+
+    /// create a program from Rc<RefCell<APP>>
+    pub fn from_rc_app(app: Rc<RefCell<APP>>) -> Self {
         let type_id = TypeId::of::<APP>();
-        let app_view = app.view();
+        let app_view = app.borrow().view();
         #[cfg(feature = "skip_diff")]
-        let skip_diff = app.skip_diff();
+        let skip_diff = app.borrow().skip_diff();
         #[cfg(feature = "use-template")]
-        let vdom_template = app.template().expect("must have a template");
+        let vdom_template = app.borrow().template().expect("must have a template");
         #[cfg(feature = "use-template")]
         let template = register_template(type_id, &vdom_template);
-        let program = Program {
+        Program {
             app_context: AppContext {
-                app: Rc::new(RefCell::new(app)),
+                app,
                 #[cfg(feature = "use-template")]
                 template: template,
                 #[cfg(feature = "skip_diff")]
@@ -246,8 +251,7 @@ where
             event_closures: Rc::new(RefCell::new(vec![])),
             closures: Rc::new(RefCell::new(vec![])),
             last_update: Rc::new(RefCell::new(None)),
-        };
-        program
+        }
     }
 
     /// executed after the program has been mounted
