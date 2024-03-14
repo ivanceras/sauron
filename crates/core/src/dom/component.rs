@@ -293,7 +293,11 @@ mod test {
         enum Msg {}
         struct AwesomeEditor {}
 
-        impl Component<Msg, ()> for AwesomeEditor {
+        impl Component for AwesomeEditor {
+
+            type MSG = Msg;
+            type XMSG = ();
+
             fn update(&mut self, _msg: Msg) -> Effects<Msg, ()> {
                 Effects::none()
             }
