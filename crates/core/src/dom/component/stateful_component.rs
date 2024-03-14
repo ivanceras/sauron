@@ -127,6 +127,11 @@ where
         <Self as Component<MSG, ()>>::skip_diff(self)
     }
 
+    #[cfg(feature = "use-template")]
+    fn template(&self) -> Option<Node<MSG>>{
+        <Self as Component<MSG, ()>>::template(self)
+    }
+
     fn stylesheet() -> Vec<String> {
         <Self as Component<MSG, ()>>::stylesheet()
     }
