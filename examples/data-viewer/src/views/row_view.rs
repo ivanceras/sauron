@@ -35,7 +35,11 @@ impl RowView {
     }
 }
 
-impl Component<Msg, ()> for RowView {
+impl Component for RowView {
+
+    type MSG = Msg;
+    type XMSG = ();
+
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::FieldMsg(field_index, field_msg) => {

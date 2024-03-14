@@ -58,7 +58,11 @@ pub struct DataView {
     start_x: i32,
 }
 
-impl Component<Msg, ()> for DataView {
+impl Component for DataView {
+
+    type MSG = Msg;
+    type XMSG = ();
+
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::PageMsg(page_index, page_msg) => {

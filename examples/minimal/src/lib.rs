@@ -16,7 +16,10 @@ pub struct App {
     click_count: u32,
 }
 
-impl Application<Msg> for App {
+impl Application for App {
+
+    type MSG = Msg;
+
     fn view(&self) -> Node<Msg> {
         sauron::html::main(
             [],
@@ -52,7 +55,7 @@ impl Application<Msg> for App {
         )
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::Click => self.click_count += 1,
             Msg::NoOp => (),

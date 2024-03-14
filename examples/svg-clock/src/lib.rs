@@ -23,10 +23,13 @@ impl Default for Clock {
     }
 }
 
-impl Application<Msg> for Clock {
+impl Application for Clock {
+
+    type MSG = Msg;
+
     // we wire the window set_interval api to trigger an Msg::Tick
     // by dispatching it from the program, through the Cmd interface
-    fn init(&mut self) -> Cmd<Self, Msg> {
+    fn init(&mut self) -> Cmd<Self> {
         Cmd::new(move |mut program| {
             let clock: Closure<dyn FnMut()> = Closure::new(move || {
                 program.dispatch(Msg::Tick);
@@ -43,7 +46,7 @@ impl Application<Msg> for Clock {
         })
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::Tick => {
                 self.date = Date::new_0();

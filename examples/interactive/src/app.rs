@@ -33,8 +33,11 @@ impl App {
     }
 }
 
-impl Application<Msg> for App {
-    fn init(&mut self) -> Cmd<Self, Msg> {
+impl Application for App {
+
+    type MSG = Msg; 
+
+    fn init(&mut self) -> Cmd<Self> {
         Cmd::new(|mut program| {
             let clock: Closure<dyn FnMut()> = Closure::new(move || {
                 program.dispatch(Msg::Clock);
@@ -49,7 +52,7 @@ impl Application<Msg> for App {
         })
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::Click => {
                 self.click_count += 1;

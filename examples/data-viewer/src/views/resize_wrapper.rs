@@ -42,7 +42,10 @@ impl ResizeWrapper {
     }
 }
 
-impl Application<Msg> for ResizeWrapper {
+impl Application for ResizeWrapper {
+
+    type MSG = Msg;
+
     /// Setup the resize wrapper to listen to the mouseup
     /// and mousemove event of the Window
     /// to have a continuity and ensure that the mousemouve
@@ -50,7 +53,7 @@ impl Application<Msg> for ResizeWrapper {
     /// Unliked when listen by the this view container, which the mouse
     /// can be outside of this view, which causes the mousmove event
     /// not being triggered
-    fn init(&mut self) -> Cmd<Self, Msg> {
+    fn init(&mut self) -> Cmd<Self> {
         Cmd::batch([
             Cmd::new(|program| {
                 program.add_window_event_listeners(vec![
@@ -62,7 +65,7 @@ impl Application<Msg> for ResizeWrapper {
         ])
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::DataViewMsg(data_view_msg) => {
                 let effects = self.data_view.update(data_view_msg);

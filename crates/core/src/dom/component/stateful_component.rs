@@ -2,7 +2,6 @@ use crate::dom::events::on_mount;
 use crate::dom::program::ActiveClosure;
 use crate::dom::program::AppContext;
 use crate::dom::program::MountProcedure;
-#[cfg(feature = "use-template")]
 use crate::dom::template;
 use crate::dom::Application;
 use crate::dom::Cmd;
@@ -18,9 +17,7 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
-#[cfg(feature = "skip_diff")]
 use crate::dom::SkipDiff;
-#[cfg(feature = "use-template")]
 use crate::dom::component::{lookup_template, add_template, register_template};
 
 
@@ -123,12 +120,10 @@ where
         <Self as Component>::view(self)
     }
 
-    #[cfg(feature = "skip_diff")]
     fn skip_diff(&self) -> Option<SkipDiff>{
         <Self as Component>::skip_diff(self)
     }
 
-    #[cfg(feature = "use-template")]
     fn template(&self) -> Option<Node<COMP::MSG>>{
         <Self as Component>::template(self)
     }
@@ -165,11 +160,8 @@ where
     // of the stateful component.
 
     let app_view = app.view();
-    #[cfg(feature = "use-template")]
     let vdom_template = app.template().expect("must have a template");
-    #[cfg(feature = "skip_diff")]
     let skip_diff = app.skip_diff();
-    #[cfg(feature = "use-template")]
     let template = register_template(type_id, &vdom_template);
 
     let app = Rc::new(RefCell::new(app));

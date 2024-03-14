@@ -61,7 +61,11 @@ impl Fetcher {
     }
 }
 
-impl Component<Msg, ()> for Fetcher {
+impl Component for Fetcher {
+
+    type MSG = Msg;
+    type XMSG = ();
+
     fn init(&mut self) -> Effects<Msg, ()> {
         self.fetch_page()
     }

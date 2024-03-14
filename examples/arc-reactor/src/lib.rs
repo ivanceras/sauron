@@ -12,8 +12,10 @@ pub enum Msg {
 #[derive(Default)]
 pub struct App;
 
-impl Application<Msg> for App {
-    fn update(&mut self, _msg: Msg) -> Cmd<Self, Msg> {
+impl Application for App {
+    type MSG = Msg;
+
+    fn update(&mut self, _msg: Msg) -> Cmd<Self> {
         Cmd::none()
     }
 

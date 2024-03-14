@@ -26,8 +26,6 @@ with-ric = ["sauron-core/with-ric"]
 with-raf = ["sauron-core/with-raf"]
 with-interning = ["sauron-core/with-interning"]
 with-jss = ["sauron-macro", "with-lookup"] #enable use of jss (css style in json format)
-skip_diff = ["sauron-core/skip_diff"]
-use-template = ["sauron-core/use-template"] # enable the use of template lookup
 
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]

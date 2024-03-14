@@ -28,13 +28,8 @@ pub mod prelude {
     #[cfg(feature = "custom_element")]
     pub use sauron_macro::custom_element;
 
-    #[cfg(feature = "skip_diff")]
     pub use sauron_macro::extract_skip_diff;
-
-    #[cfg(feature = "use-template")]
     pub use sauron_macro::extract_template;
-
-    #[cfg(all(feature = "use-template", feature = "skip_diff"))]
     pub use sauron_macro::view;
 
     #[cfg(feature = "with-node-macro")]

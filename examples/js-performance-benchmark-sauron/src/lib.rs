@@ -71,61 +71,30 @@ impl Component for RowData {
     fn update(&mut self, _msg: Msg) -> Effects<Msg, ()> {
         Effects::none()
     }
-    fn view(&self) -> Node<Msg> {
-        let id = self.id;
-        node! {
-            <tr class={if self.selected { "danger" } else  { "" }} key=id >
-                <td class="col-md-1">{ text(id) }</td>
-                <td class="col-md-4" on_click={move |_| Msg::Select(id)}>
-                     <a class="lbl">{ text(&self.label) }</a>
-                </td>
-                <td class="col-md-1">
-                     <a class="remove" on_click={move |_| Msg::Remove(id) }>
-                         <span class="glyphicon glyphicon-remove remove" aria-hidden="true"></span>
-                     </a>
-                </td>
-                <td class="col-md-6"></td>
-            </tr>
-        }
+
+    view! {
+        <tr class={if self.selected { "danger" } else  { "" }} key=self.id >
+            <td class="col-md-1">{ text(self.id) }</td>
+            <td class="col-md-4" 
+            on_click={
+                let id = self.id;
+                move |_| Msg::Select(id)
+            }>
+                 <a class="lbl">{ text(&self.label) }</a>
+            </td>
+            <td class="col-md-1">
+                 <a class="remove" 
+                 on_click={
+                     let id = self.id;
+                     move |_| Msg::Remove(id) 
+                 }>
+                     <span class="glyphicon glyphicon-remove remove" aria-hidden="true"></span>
+                 </a>
+            </td>
+            <td class="col-md-6"></td>
+        </tr>
     }
 
-    #[cfg(feature = "use-template")]
-    fn template(&self) -> Option<Node<Msg>> {
-        let id = self.id;
-        Some(extract_template! {
-            <tr class={if self.selected { "danger" } else  { "" }} key=id >
-                <td class="col-md-1">{ text(id) }</td>
-                <td class="col-md-4" on_click={move |_| Msg::Select(id)}>
-                     <a class="lbl">{ text(&self.label) }</a>
-                </td>
-                <td class="col-md-1">
-                     <a class="remove" on_click={move |_| Msg::Remove(id) }>
-                         <span class="glyphicon glyphicon-remove remove" aria-hidden="true"></span>
-                     </a>
-                </td>
-                <td class="col-md-6"></td>
-            </tr>
-        })
-    }
-
-    #[cfg(feature = "skip_diff")]
-    fn skip_diff(&self) -> Option<SkipDiff> {
-        let id = self.id;
-        Some(extract_skip_diff! {
-            <tr class={if self.selected { "danger" } else  { "" }} key=id >
-                <td class="col-md-1">{ text(id) }</td>
-                <td class="col-md-4" on_click={move |_| Msg::Select(id)}>
-                     <a class="lbl">{ text(&self.label) }</a>
-                </td>
-                <td class="col-md-1">
-                     <a class="remove" on_click={move |_| Msg::Remove(id) }>
-                         <span class="glyphicon glyphicon-remove remove" aria-hidden="true"></span>
-                     </a>
-                </td>
-                <td class="col-md-6"></td>
-            </tr>
-        })
-    }
 }
 
 impl StatefulComponent for RowData {
@@ -231,62 +200,23 @@ impl Application for App {
         Cmd::none()
     }
 
-    fn view(&self) -> Node<Msg> {
-        node! {
-            <div class="container">
-                { self.view_jumbotron() }
-                <table class="table table-hover table-striped test-data">
-                    <tbody id="tbody">
-                        {for row in self.rows.iter() {
-                            let is_selected = self.selected_id == Some(row.id);
-                            //row.view()
-                            component(row, [selected(is_selected)], [])
-                            //stateful_component(RowData{id: row.id, label: row.label.clone(), selected: is_selected}, [selected(is_selected)], [])
-                        }}
-                    </tbody>
-                </table>
-                <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
-            </div>
-        }
+    view! {
+        <div class="container">
+            { self.view_jumbotron() }
+            <table class="table table-hover table-striped test-data">
+                <tbody id="tbody">
+                    {for row in self.rows.iter() {
+                        let is_selected = self.selected_id == Some(row.id);
+                        //row.view()
+                        component(row, [selected(is_selected)], [])
+                        //stateful_component(RowData{id: row.id, label: row.label.clone(), selected: is_selected}, [selected(is_selected)], [])
+                    }}
+                </tbody>
+            </table>
+            <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </div>
     }
 
-    #[cfg(feature = "skip_diff")]
-    fn skip_diff(&self) -> Option<SkipDiff> {
-       Some(extract_skip_diff! {
-            <div class="container">
-                { self.view_jumbotron() }
-                <table class="table table-hover table-striped test-data">
-                    <tbody id="tbody">
-                        {for row in self.rows.iter() {
-                            let is_selected = self.selected_id == Some(row.id);
-                            component(row, [selected(is_selected)], [])
-                            //row.view()
-                        }}
-                    </tbody>
-                </table>
-                <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
-            </div>
-        })
-    }
-
-    #[cfg(feature = "use-template")]
-    fn template(&self) -> Option<Node<Msg>> {
-        Some(extract_template! {
-            <div class="container">
-                { self.view_jumbotron() }
-                <table class="table table-hover table-striped test-data">
-                    <tbody id="tbody">
-                        {for row in self.rows.iter() {
-                            let is_selected = self.selected_id == Some(row.id);
-                            component(row, [selected(is_selected)], [])
-                            //row.view()
-                        }}
-                    </tbody>
-                </table>
-                <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
-            </div>
-        })
-    }
 }
 
 impl App {

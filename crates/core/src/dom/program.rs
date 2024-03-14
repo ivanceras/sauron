@@ -534,12 +534,14 @@ where
         let t2 = now();
 
         let node_count = view.node_count();
-        #[cfg(feature = "skip_diff")]
         let skip_diff = self.app_context.skip_diff.as_ref();
-        #[cfg(feature = "skip_diff")]
-        let dom_patches = self.create_dom_patches_with_skip_diff(&view, skip_diff);
-        #[cfg(not(feature = "skip_diff"))]
-        let dom_patches = self.create_dom_patch(&view);
+
+        let dom_patches = if let Some(skip_diff) = skip_diff{
+            self.create_dom_patches_with_skip_diff(&view, skip_diff)
+        }else{
+            self.create_dom_patch(&view)
+        };
+
         let total_patches = dom_patches.len();
 
 
@@ -613,56 +615,49 @@ where
 
     /// This is called after the subsequenct updates,
     /// therefore vdom_template is not useful anymore, but skip_diff is still useful
-    #[cfg(feature = "skip_diff")]
-    fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<APP::MSG>, skip_diff: &Option<SkipDiff>) -> Vec<DomPatch>{
-        use crate::html::comment;
-        if let Some(skip_diff) = skip_diff{
-            let treepath = skip_diff.traverse();
+    fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<APP::MSG>, skip_diff: &SkipDiff) -> Vec<DomPatch>{
+        let treepath = skip_diff.traverse();
 
-            let current_vdom = self.app_context.current_vdom();
-            //let vdom_template = &self.app_context.vdom_template;
-            //log::info!("current_vdom: {}", current_vdom.render_to_string());
-            //TODO: traversing the treepath here is not enough
-            //as rows may be inserted in some loop.
-            //There has to be a full diff in the old node and new node when 
-            //old node can not be found
-            let patches = treepath
-                .into_iter()
-                .flat_map(|path| {
-                    let new_node = path.find_node_by_path(&new_vdom);
-                    let old_node = path.find_node_by_path(&current_vdom);
-                    match (old_node, new_node){
-                        (Some(old_node), Some(new_node)) => {
-                            // only diff at level 0
-                            diff_recursive(
-                                &old_node,
-                                &new_node,
-                                &path,
-                                Some(0),
-                            )
-                        }
-                        _ => {
-                            // backtrack old and new
-                            let parent_path = path.backtrack();
-                            let new_node = parent_path.find_node_by_path(&new_vdom).expect("backtracked new_node");
-                            let old_node = parent_path.find_node_by_path(&current_vdom).expect("backtracked old node");
-                            diff_recursive(&old_node, &new_node, &parent_path, Some(0))
-                        }
+        let current_vdom = self.app_context.current_vdom();
+        //let vdom_template = &self.app_context.vdom_template;
+        //log::info!("current_vdom: {}", current_vdom.render_to_string());
+        //TODO: traversing the treepath here is not enough
+        //as rows may be inserted in some loop.
+        //There has to be a full diff in the old node and new node when 
+        //old node can not be found
+        let patches = treepath
+            .into_iter()
+            .flat_map(|path| {
+                let new_node = path.find_node_by_path(&new_vdom);
+                let old_node = path.find_node_by_path(&current_vdom);
+                match (old_node, new_node){
+                    (Some(old_node), Some(new_node)) => {
+                        // only diff at level 0
+                        diff_recursive(
+                            &old_node,
+                            &new_node,
+                            &path,
+                            Some(0),
+                        )
                     }
-                })
-                .collect::<Vec<_>>();
-            self.convert_patches(
-                self.root_node
-                    .borrow()
-                    .as_ref()
-                    .expect("must have a root node"),
-                &patches,
-            )
-            .expect("must convert patches")
-        }else{
-            // fallback to the classic way of creating dom patch
-            self.create_dom_patch(new_vdom)
-        }
+                    _ => {
+                        // backtrack old and new
+                        let parent_path = path.backtrack();
+                        let new_node = parent_path.find_node_by_path(&new_vdom).expect("backtracked new_node");
+                        let old_node = parent_path.find_node_by_path(&current_vdom).expect("backtracked old node");
+                        diff_recursive(&old_node, &new_node, &parent_path, Some(0))
+                    }
+                }
+            })
+            .collect::<Vec<_>>();
+        self.convert_patches(
+            self.root_node
+                .borrow()
+                .as_ref()
+                .expect("must have a root node"),
+            &patches,
+        )
+        .expect("must convert patches")
     }
 
     fn create_dom_patch(&self, new_vdom: &vdom::Node<APP::MSG>) -> Vec<DomPatch> {
@@ -769,7 +764,6 @@ where
     }
 
     /// clone the app
-    #[cfg(feature = "skip_diff")]
     #[allow(unsafe_code)]
     pub fn app_clone(&self) -> ManuallyDrop<APP> {
         unsafe {

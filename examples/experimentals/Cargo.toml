@@ -11,6 +11,6 @@ crate-type = ["cdylib"]
 [dependencies]
 console_error_panic_hook = "0.1"
 js-sys = "0.3"
-sauron = { path = "../../", features = ["with-debug", "with-measure", "log-patches", "use-template", "skip_diff"] }
+sauron = { path = "../../", features = ["with-debug", "with-measure", "log-patches"] }
 log = "0.4"
 console_log = "0.2"
