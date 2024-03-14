@@ -4,7 +4,6 @@ use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
 use crate::dom::StatefulModel;
 use crate::html::lookup;
-use crate::vdom::diff_recursive;
 use crate::vdom::AttributeName;
 use crate::vdom::TreePath;
 use crate::{
@@ -299,33 +298,7 @@ where
         let skip_diff = self.app_context.skip_diff.as_ref();
         match (template, skip_diff) {
             (Some(template), Some(skip_diff)) => {
-                let treepath = skip_diff.traverse();
-                let patches = treepath
-                    .into_iter()
-                    .flat_map(|path| {
-                        let new_node = path.find_node_by_path(&comp.view);
-                        let old_node = path.find_node_by_path(&comp.vdom_template);
-                        match (old_node, new_node){
-                            (Some(old_node), Some(new_node)) => {
-                                // only diff at level 0
-                                diff_recursive(
-                                    &old_node,
-                                    &new_node,
-                                    &path,
-                                    Some(0),
-                                )
-                            }
-                            _ => {
-                                // backtrack old and new
-                                let parent_path = path.backtrack();
-                                let new_node = parent_path.find_node_by_path(&comp.view).expect("backtracked new_node");
-                                let old_node = parent_path.find_node_by_path(&comp.vdom_template).expect("backtracked old node");
-                                diff_recursive(&old_node, &new_node, &parent_path, Some(0))
-                            }
-                        }
-                    })
-                    .collect::<Vec<_>>();
-
+                let patches = self.create_patches_with_skip_diff(&comp.vdom_template, &comp.view, skip_diff);
                 #[cfg(feature = "with-debug")]
                 let t3 = now();
                 let dom_patches = self

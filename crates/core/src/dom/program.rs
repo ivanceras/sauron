@@ -25,6 +25,7 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
 use crate::dom::component::register_template;
+use crate::vdom::Patch;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
@@ -386,33 +387,7 @@ where
         let skip_diff = self.app_context.skip_diff.as_ref();
         match (vdom_template, skip_diff) {
             (Some(vdom_template), Some(skip_diff)) => {
-                let treepath = skip_diff.traverse();
-                let patches = treepath
-                    .into_iter()
-                    .flat_map(|path| {
-                        let new_node = path.find_node_by_path(&app_view);
-                        let old_node = path.find_node_by_path(&vdom_template);
-                        match (old_node, new_node){
-                            (Some(old_node), Some(new_node)) => {
-                                // only diff at level 0
-                                diff_recursive(
-                                    &old_node,
-                                    &new_node,
-                                    &path,
-                                    Some(0),
-                                )
-                            }
-                            _ => {
-                                // backtrack old and new
-                                let parent_path = path.backtrack();
-                                let new_node = parent_path.find_node_by_path(&app_view).expect("backtracked new_node");
-                                let old_node = parent_path.find_node_by_path(&vdom_template).expect("backtracked old node");
-                                diff_recursive(&old_node, &new_node, &parent_path, Some(0))
-                            }
-                        }
-                    })
-                    .collect::<Vec<_>>();
-                
+                let patches = self.create_patches_with_skip_diff(&vdom_template, &app_view, skip_diff);
                 if let Some(dom_template) = dom_template{
                     let dom_patches = self
                         .convert_patches(&dom_template, &patches)
@@ -618,23 +593,17 @@ where
         Ok(())
     }
 
-    /// This is called after the subsequenct updates,
-    /// therefore vdom_template is not useful anymore, but skip_diff is still useful
-    fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<APP::MSG>, skip_diff: &SkipDiff) -> Vec<DomPatch>{
-        let treepath = skip_diff.traverse();
+    pub(crate) fn create_patches_with_skip_diff<'a>(&self, 
+        old_vdom: &'a vdom::Node<APP::MSG>, 
+        new_vdom: &'a vdom::Node<APP::MSG>,
+        skip_diff: &SkipDiff) -> Vec<Patch<'a, APP::MSG>> {
 
-        let current_vdom = self.app_context.current_vdom();
-        //let vdom_template = &self.app_context.vdom_template;
-        //log::info!("current_vdom: {}", current_vdom.render_to_string());
-        //TODO: traversing the treepath here is not enough
-        //as rows may be inserted in some loop.
-        //There has to be a full diff in the old node and new node when 
-        //old node can not be found
-        let patches = treepath
+        let treepath = skip_diff.traverse();
+        treepath
             .into_iter()
             .flat_map(|path| {
                 let new_node = path.find_node_by_path(&new_vdom);
-                let old_node = path.find_node_by_path(&current_vdom);
+                let old_node = path.find_node_by_path(&old_vdom);
                 match (old_node, new_node){
                     (Some(old_node), Some(new_node)) => {
                         // only diff at level 0
@@ -649,12 +618,19 @@ where
                         // backtrack old and new
                         let parent_path = path.backtrack();
                         let new_node = parent_path.find_node_by_path(&new_vdom).expect("backtracked new_node");
-                        let old_node = parent_path.find_node_by_path(&current_vdom).expect("backtracked old node");
+                        let old_node = parent_path.find_node_by_path(&old_vdom).expect("backtracked old node");
                         diff_recursive(&old_node, &new_node, &parent_path, Some(0))
                     }
                 }
             })
-            .collect::<Vec<_>>();
+            .collect()
+    }
+
+    /// This is called after the subsequenct updates,
+    /// therefore vdom_template is not useful anymore, but skip_diff is still useful
+    fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<APP::MSG>, skip_diff: &SkipDiff) -> Vec<DomPatch>{
+        let current_vdom = self.app_context.current_vdom();
+        let patches = self.create_patches_with_skip_diff(&current_vdom, new_vdom, skip_diff);
         self.convert_patches(
             self.root_node
                 .borrow()
