@@ -184,24 +184,6 @@ impl<MSG> Attribute<MSG> {
         grouped
     }
 
-    /// map the msg of this attribute such that `Attribute<MSG>` becomes `Attribute<MSG2>`
-    pub fn map_msg<F, MSG2>(self, cb: F) -> Attribute<MSG2>
-    where
-        F: Fn(MSG) -> MSG2 + Clone + 'static,
-        MSG2: 'static,
-        MSG: 'static,
-    {
-        Attribute {
-            name: self.name,
-            value: self
-                .value
-                .into_iter()
-                .map(|v| v.map_msg(cb.clone()))
-                .collect(),
-            namespace: self.namespace,
-        }
-    }
-
     pub(crate) fn get_callbacks(&self) -> Vec<&EventCallback<MSG>> {
         self.value
             .iter()

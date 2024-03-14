@@ -26,9 +26,9 @@ pub struct Element<MSG> {
     /// the element tag, such as div, a, button
     pub tag: Tag,
     /// attributes for this element
-    attrs: Vec<Attribute<MSG>>,
+    pub(crate) attrs: Vec<Attribute<MSG>>,
     /// children elements of this element
-    children: Vec<Node<MSG>>,
+    pub(crate) children: Vec<Node<MSG>>,
     /// is the element has a self closing tag
     pub self_closing: bool,
 }
@@ -186,29 +186,6 @@ impl<MSG> Element<MSG> {
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
 
-    /// map the msg of this element such that `Element<MSG>` becomes `Element<MSG2>`
-    pub fn map_msg<F, MSG2>(self, cb: F) -> Element<MSG2>
-    where
-        F: Fn(MSG) -> MSG2 + Clone + 'static,
-        MSG2: 'static,
-        MSG: 'static,
-    {
-        Element {
-            namespace: self.namespace,
-            tag: self.tag,
-            attrs: self
-                .attrs
-                .into_iter()
-                .map(|attr| attr.map_msg(cb.clone()))
-                .collect(),
-            children: self
-                .children
-                .into_iter()
-                .map(|child| child.map_msg(cb.clone()))
-                .collect(),
-            self_closing: self.self_closing,
-        }
-    }
 
     /// returns true if all attributes of this element is using static str
     pub(crate) fn is_attrs_all_static_str(&self) -> bool {

@@ -15,6 +15,7 @@ pub use leaf::Leaf;
 mod attribute;
 mod element;
 mod leaf;
+mod map_msg;
 
 pub use attribute::special::{key, replace, skip, skip_criteria};
 pub(crate) use attribute::special::{
