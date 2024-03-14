@@ -242,13 +242,14 @@
     - [ ] Using the template was slow, Find out which part is the program spending much time. check the time in the diffing
         - Most of the time is spent on applying the patches
     - [X] Make use of prediff to shorten diffing on nodes that are full static
-    - [ ] unify the code where template is patched and converted
+    - [X] unify the code where template is patched and converted
 - [X] Create a `view!` macro which generated the view function + template + prediff functions
 - [X] Make a variant of `Node` leaf to be `Component`, component can contain attributes and optionally children components + elements
     - [X] This requires moving the mt-dom types into sauron-core so as to make a specific diff function for component
 - [X] put back map_msg module where it contains map_msg functions for Node, Element, Attributes
     - this way, it will be easier to see the flow of map_msg method
-- [ ] remove `is_static` methods as they are not useful to template patches anymore
+- [X] remove `is_static` methods as they are not useful to template patches anymore
+- [ ] process the patches in the component when attributes and children are removed or added.
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
