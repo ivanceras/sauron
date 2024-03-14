@@ -4,19 +4,19 @@ use std::fmt;
 /// if the expression evaluates to true,
 /// diffing at this node will be skipped entirely
 pub struct SkipDiff {
-    expr: Box<dyn Fn() -> bool>,
+    shall: bool,
     children: Vec<SkipDiff>,
 }
 
 impl PartialEq for SkipDiff {
     fn eq(&self, other: &Self) -> bool {
-        (self.expr)() == (other.expr)() && self.children == other.children
+        self.shall == other.shall && self.children == other.children
     }
 }
 
 impl fmt::Debug for SkipDiff {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({},", (self.expr)())?;
+        write!(f, "({},", self.shall)?;
         f.debug_list().entries(self.children.iter()).finish();
         write!(f, ")")?;
         Ok(())
@@ -25,9 +25,9 @@ impl fmt::Debug for SkipDiff {
 
 impl SkipDiff {
     /// new
-    pub fn new(val: bool, children: impl IntoIterator<Item = Self>) -> Self {
+    pub fn new(shall: bool, children: impl IntoIterator<Item = Self>) -> Self {
         Self {
-            expr: Box::new(move || val),
+            shall,
             children: children.into_iter().collect(),
         }
     }
@@ -37,39 +37,34 @@ impl SkipDiff {
         self.traverse_recursive(TreePath::root())
     }
 
+
     /// traverse the skip diff and return a list of TreePath that will be evaluated
     /// by the program
-    fn traverse_list(evals: &[SkipDiff], current: TreePath) -> Vec<TreePath> {
+    fn traverse_recursive(&self, current: TreePath) -> Vec<TreePath> {
         let mut paths = vec![];
-        for (i, eval) in evals.iter().enumerate() {
+        // if this SkipDiff evaluates to false, include it in the treepath to be diff
+        if !self.shall {
+            paths.push(current.clone());
+        }
+
+        for (i, eval) in self.children.iter().enumerate() {
             let more_paths = eval.traverse_recursive(current.traverse(i));
             paths.extend(more_paths);
         }
         paths
     }
 
-    fn traverse_recursive(&self, current: TreePath) -> Vec<TreePath> {
-        let mut paths = vec![];
-        // if this SkipDiff evaluates to false, include it in the treepath to be diff
-        if !(self.expr)() {
-            paths.push(current.clone());
-        }
-        let more_paths = Self::traverse_list(&self.children, current);
-        paths.extend(more_paths);
-        paths
-    }
-
     /// return true if this skip diff and its children can be skipped
     fn is_skippable_recursive(&self) -> bool {
-        (self.expr)() && self.children.iter().all(Self::is_skippable_recursive)
+        self.shall && self.children.iter().all(Self::is_skippable_recursive)
     }
 
     /// collapse into 1 skip_if if all the children is skippable
     pub fn collapse_children(self) -> Self {
-        let Self { expr, children } = self;
+        let Self { shall, children } = self;
         let can_skip_children = children.iter().all(Self::is_skippable_recursive);
         Self {
-            expr,
+            shall,
             children: if can_skip_children {
                 vec![]
             } else {
