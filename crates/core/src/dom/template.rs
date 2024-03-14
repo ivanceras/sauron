@@ -10,67 +10,6 @@ use crate::vdom::Attribute;
 use crate::vdom::{Leaf, Node};
 use wasm_bindgen::intern;
 
-/// build a node but only include static attributes and leaf nodes
-pub(crate) fn extract_static_only<MSG>(node: &Node<MSG>) -> vdom::Node<MSG> {
-    match node {
-        Node::Element(elm) => vdom::element_ns(
-            elm.namespace,
-            elm.tag,
-            elm.attributes()
-                .iter()
-                .filter(|att| att.is_static_str())
-                .cloned(),
-            elm.children().iter().map(extract_static_only),
-            elm.self_closing,
-        ),
-        Node::Fragment(nodes) => Node::Fragment(nodes.iter().map(extract_static_only).collect()),
-        Node::Leaf(leaf) => {
-            if leaf.is_static_str() {
-                Node::Leaf(leaf.clone())
-            } else {
-                match leaf {
-                    Leaf::Text(_) => Node::Leaf(Leaf::Text("".into())),
-                    Leaf::SafeHtml(_) => Node::Leaf(Leaf::SafeHtml("".into())),
-                    Leaf::Comment(_) => Node::Leaf(Leaf::Comment("".into())),
-                    Leaf::DocType(_) => Node::Leaf(Leaf::DocType("".into())),
-                    Leaf::StatefulComponent { .. } => Node::Leaf(Leaf::Comment(
-                        " ---stateful template placeholder--- ".into(),
-                    )),
-                    Leaf::StatelessComponent { .. } => Node::Leaf(Leaf::Comment(
-                        " ---stateless template placeholder--- ".into(),
-                    )),
-                }
-            }
-        }
-        Node::NodeList(_node_list) => unreachable!("This has been unrolled"),
-    }
-}
-
-pub(crate) fn extract_skip_if<MSG>(node: &Node<MSG>) -> SkipDiff {
-    match node {
-        Node::Element(elm) => skip_if(
-            elm.is_attrs_all_static_str(),
-            elm.children().iter().map(extract_skip_if),
-        ),
-        Node::Fragment(nodes) => skip_if(
-            nodes.iter().all(|n| n.is_static()),
-            nodes.iter().map(extract_skip_if),
-        ),
-        Node::Leaf(leaf) => skip_if(leaf.is_static_str(), []),
-        Node::NodeList(_node_list) => unreachable!("This has been unrolled"),
-    }
-}
-
-/// build a vdom template
-pub fn build_vdom_template<MSG>(node: &vdom::Node<MSG>) -> vdom::Node<MSG> {
-    extract_static_only(node)
-}
-/// build a dom template and the vdom template
-pub fn build_template<MSG>(node: &vdom::Node<MSG>) -> (web_sys::Node, vdom::Node<MSG>) {
-    let vdom_template = build_vdom_template(node);
-    let template = create_dom_node_without_listeners(&vdom_template);
-    (template, vdom_template)
-}
 
 pub(crate) fn create_dom_node_without_listeners<MSG>(vnode: &vdom::Node<MSG>) -> web_sys::Node {
     match vnode {
