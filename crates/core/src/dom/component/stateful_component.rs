@@ -36,9 +36,8 @@ thread_local! {
 pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
     TEMPLATE_LOOKUP.with_borrow_mut(|map| {
         if map.contains_key(&type_id) {
-            log::info!("Already added!");
+            //
         } else {
-            log::info!("---->> Adding to template...");
             map.insert(type_id, template.clone());
         }
     })

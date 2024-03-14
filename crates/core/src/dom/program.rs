@@ -396,18 +396,13 @@ where
             let app_view = self.app_context.app.borrow().view();
             let dom_template = self.app_context.template.clone();
             let vdom_template = &self.app_context.vdom_template;
-            log::info!("vdom_template: {}", vdom_template.render_to_string());
-            log::info!("app_view: {}", app_view.render_to_string());
             if let Some(skip_diff) = self.app_context.skip_diff.as_ref(){
-                log::info!("skip_diff: {:#?}", skip_diff);
                 let treepath = skip_diff.traverse();
-                log::info!("treeepath: {:#?}", treepath);
                 //let patches = diff(vdom_template, &app_view);
                 
                 let patches = treepath
                     .into_iter()
                     .flat_map(|path| {
-                        log::info!("path: {:?}", path);
                         let old_node = path.find_node_by_path(&vdom_template).expect("old_node");
                         if let Some(new_node) = path.find_node_by_path(&app_view){
                             // only diff at level 0
@@ -631,9 +626,7 @@ where
     fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<MSG>, skip_diff: &Option<SkipDiff>) -> Vec<DomPatch>{
         use crate::html::comment;
         if let Some(skip_diff) = skip_diff{
-            log::info!("skip_diff: {skip_diff:#?}");
             let treepath = skip_diff.traverse();
-            log::info!("treepath: {:#?}", treepath);
 
             let current_vdom = self.app_context.current_vdom();
             //let vdom_template = &self.app_context.vdom_template;
@@ -645,7 +638,6 @@ where
             let patches = treepath
                 .into_iter()
                 .flat_map(|path| {
-                    log::info!("looking for path: {:?}", path);
                     let new_node = path.find_node_by_path(&new_vdom);
                     let old_node = path.find_node_by_path(&current_vdom);
                     match (old_node, new_node){
@@ -668,7 +660,6 @@ where
                     }
                 })
                 .collect::<Vec<_>>();
-            log::info!("got {} patches: {patches:#?}", patches.len());
             self.convert_patches(
                 self.root_node
                     .borrow()

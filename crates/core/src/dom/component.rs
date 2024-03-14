@@ -239,10 +239,8 @@ where
 
     #[cfg(feature = "use-template")]
     let template = if let Some(template) = lookup_template(type_id){
-        log::info!("existing template..");
         template
     }else{
-        log::info!("first time creating the template node..");
         let template = template::create_dom_node_without_listeners(&vdom_template);
         template
     };

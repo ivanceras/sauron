@@ -292,19 +292,12 @@ where
             let t1 = now();
             let template = lookup_template(comp.type_id).expect("must have a template");
             let t2 = now();
-            //Note: we don't want the patches to be stored in the StatelessModel
-            //since it has a lifetime, which will infect the Node, Element, Attribute, etc
-            //let patches = vdom::diff(&comp.vdom_template, &comp.view);
             if let Some(skip_diff) = self.app_context.skip_diff.as_ref(){
-                log::info!("skip_diff: {:#?}", skip_diff);
                 let treepath = skip_diff.traverse();
-                log::info!("treeepath: {:#?}", treepath);
-                //let patches = diff(vdom_template, &app_view);
                 
                 let patches = treepath
                     .into_iter()
                     .flat_map(|path| {
-                        log::info!("path: {:?}", path);
                         let old_node = path.find_node_by_path(&comp.vdom_template).expect("old_node");
                         if let Some(new_node) = path.find_node_by_path(&comp.view){
                             // only diff at level 0
