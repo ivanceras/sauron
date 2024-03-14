@@ -5,13 +5,15 @@ use syn::{Expr, ExprForLoop, ExprIf, Stmt};
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match rstml::parse(input) {
-        Ok(nodes) => {
-            let skip_tree = from_multiple_nodes(&nodes);
-            quote! {
-                #skip_tree.collapse_children()
-            }
-        }
+        Ok(nodes) => do_extract(&nodes),
         Err(error) => error.to_compile_error(),
+    }
+}
+
+fn do_extract(nodes: &[Node]) -> TokenStream{
+    let skip_tree = from_multiple_nodes(&nodes);
+    quote! {
+        #skip_tree.collapse_children()
     }
 }
 

@@ -18,6 +18,7 @@ mod extract_skip_diff;
 mod extract_template;
 mod jss;
 mod node;
+mod view;
 
 /// Quasi-quoting macro for building sauron [Node]s.
 ///
@@ -182,6 +183,12 @@ mod node;
 #[proc_macro]
 pub fn node(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     node::to_token_stream(input).into()
+}
+
+/// 
+#[proc_macro]
+pub fn view(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    view::to_token_stream(input).into()
 }
 
 

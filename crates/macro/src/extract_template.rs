@@ -6,15 +6,15 @@ use crate::extract_skip_diff::is_literal_attribute;
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match rstml::parse(input) {
-        Ok(nodes) => multiple_nodes(nodes),
+        Ok(nodes) => from_multiple_nodes(nodes),
         Err(error) => error.to_compile_error(),
     }
 }
 
-fn multiple_nodes(mut nodes: Vec<Node>) -> TokenStream {
+fn from_multiple_nodes(mut nodes: Vec<Node>) -> TokenStream {
     let only_one_node = nodes.len() == 1;
     if only_one_node {
-        let node_tokens = single_node(nodes.remove(0));
+        let node_tokens = from_single_node(nodes.remove(0));
         quote! {
             #node_tokens
         }
@@ -28,7 +28,7 @@ fn multiple_nodes(mut nodes: Vec<Node>) -> TokenStream {
     }
 }
 
-fn single_node(node: Node) -> TokenStream {
+fn from_single_node(node: Node) -> TokenStream {
     match node {
         Node::Element(elm) => {
             let open_tag = elm.open_tag;
@@ -49,7 +49,7 @@ fn single_node(node: Node) -> TokenStream {
                 sauron::html::element_ns(#ns, #tag, [#attributes], [#children], #self_closing)
             }
         }
-        Node::Fragment(fragment) => multiple_nodes(fragment.children),
+        Node::Fragment(fragment) => from_multiple_nodes(fragment.children),
         Node::Text(node_text) => {
             let text = node_text.value_string();
             quote! {
@@ -92,7 +92,7 @@ fn single_node(node: Node) -> TokenStream {
 fn nodes_to_tokens(nodes: Vec<Node>) -> TokenStream {
     let mut tokens = TokenStream::new();
     for node in nodes {
-        let node_token = single_node(node);
+        let node_token = from_single_node(node);
         tokens.extend(quote! {
             #node_token,
         });
