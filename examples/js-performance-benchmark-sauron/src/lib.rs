@@ -1,10 +1,8 @@
+#![deny(warnings)]
 use rand::prelude::*;
 use sauron::dom::component;
-use sauron::dom::stateful_component;
 use sauron::*;
 use std::cmp::min;
-use sauron::dom::StatefulComponent;
-use sauron::dom::DomAttrValue;
 
 static ADJECTIVES: &[&str] = &[
     "pretty",
@@ -97,21 +95,6 @@ impl Component for RowData {
 
 }
 
-impl StatefulComponent for RowData {
-    fn attribute_changed(
-        &mut self,
-        attr_name: &str,
-        old_value: DomAttrValue,
-        new_value: DomAttrValue,
-    ) where
-        Self: Sized,
-    {
-    }
-
-    /// append a child into this component
-    fn append_child(&mut self, child: &web_sys::Node) {
-    }
-}
 
 struct App {
     rows: Vec<RowData>,
@@ -207,9 +190,7 @@ impl Application for App {
                 <tbody id="tbody">
                     {for row in self.rows.iter() {
                         let is_selected = self.selected_id == Some(row.id);
-                        //row.view()
                         component(row, [selected(is_selected)], [])
-                        //stateful_component(RowData{id: row.id, label: row.label.clone(), selected: is_selected}, [selected(is_selected)], [])
                     }}
                 </tbody>
             </table>
