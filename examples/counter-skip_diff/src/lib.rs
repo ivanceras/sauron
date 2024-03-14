@@ -21,12 +21,12 @@ impl App {
 }
 
 impl Application<Msg> for App {
-    fn skip_diff(&self, old: &Self) -> Option<SkipDiff> {
+    fn skip_diff(&self) -> Option<SkipDiff> {
         Some(skip_if(
             true,
             [
                 skip_if(true, []),
-                skip_if(true, [skip_if(self.count == old.count, [])]),
+                skip_if(true, [skip_if(false, [])]),
                 skip_if(true, []),
             ],
         ))
