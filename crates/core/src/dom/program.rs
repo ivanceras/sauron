@@ -1,18 +1,15 @@
-use crate::dom::component::add_template;
-use crate::dom::dom_node;
 use crate::dom::program::app_context::WeakContext;
 #[cfg(feature = "with-raf")]
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
-use crate::dom::template;
 use crate::dom::SkipDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
 use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
-use crate::vdom::{diff_recursive, TreePath};
+use crate::vdom::diff_recursive;
 use indexmap::IndexMap;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
@@ -416,7 +413,7 @@ where
                         .convert_patches(&dom_template, &patches)
                         .expect("convert patches");
                     log::info!("first time patches {}: {patches:#?}", patches.len());
-                    let new_template_node = self
+                    let _new_template_node = self
                         .apply_dom_patches(dom_patches)
                         .expect("template patching");
                     dom_template
@@ -547,7 +544,7 @@ where
 
         // update the last DOM node tree with this new view
         self.queue_dom_patches(dom_patches).expect("must not error");
-        /// set the current dom
+        // set the current dom
         self.app_context.set_current_dom(view);
         let t3 = now();
 
@@ -582,13 +579,16 @@ where
             }
         }
 
-        let total = dom_node::total_time_spent();
-        //log::info!("total: {:#?}", total);
-        //log::info!("average: {:#?}", total.average());
-        //log::info!("percentile: {:#?}", total.percentile());
+        #[cfg(feature = "with-debug")]
+        {
+            let total = crate::dom::dom_node::total_time_spent();
+            log::info!("total: {:#?}", total);
+            log::info!("average: {:#?}", total.average());
+            log::info!("percentile: {:#?}", total.percentile());
+        }
 
-        #[cfg(feature = "with-measure")]
         // tell the app about the performance measurement and only if there was patches applied
+        #[cfg(feature = "with-measure")]
         if modifier.log_measurements && measurements.total_patches > 0 {
             let cmd_measurement = self.app_context.measurements(measurements);
             cmd_measurement.emit(self.clone());

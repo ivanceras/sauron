@@ -21,10 +21,6 @@ impl Style {
         }
     }
 
-    /// returns true if both the name and value is static str
-    pub(crate) fn is_static_str(&self) -> bool {
-        matches!(self.name, Cow::Borrowed(_)) && self.value.is_static_str()
-    }
 
     pub(crate) fn merge_to_string<'a>(
         styles: impl IntoIterator<Item = &'a Self>,

@@ -175,6 +175,7 @@ where
     }
 
     /// return the current number of pending msgs
+    #[cfg(feature = "ensure-check")]
     pub fn pending_msgs_count(&self) -> usize {
         self.pending_msgs.borrow().len()
     }

@@ -108,7 +108,7 @@ impl<MSG> Leaf<MSG> {
             Leaf::DocType(doctype) => {
                 write!(buffer, "<!doctype {doctype}>")
             }
-            Leaf::StatefulComponent(comp) => {
+            Leaf::StatefulComponent(_comp) => {
                 write!(buffer, "<!-- stateful component -->")
             }
             Leaf::StatelessComponent(comp) => comp.view.render(buffer),

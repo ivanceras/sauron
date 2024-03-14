@@ -1,11 +1,12 @@
 use crate::dom::component::lookup_template;
 use crate::dom::component::StatelessModel;
-use crate::dom::now;
 use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
 use crate::dom::StatefulModel;
 use crate::html::lookup;
+use crate::vdom::diff_recursive;
 use crate::vdom::AttributeName;
+use crate::vdom::Patch;
 use crate::vdom::TreePath;
 use crate::{
     dom::document,
@@ -16,20 +17,22 @@ use crate::{
 };
 use indexmap::IndexMap;
 use js_sys::Function;
-use std::cell::Cell;
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
-use crate::vdom::diff_recursive;
-use crate::vdom::Patch;
+use std::cell::Cell;
+#[cfg(feature = "with-debug")]
+use crate::dom::now;
+#[cfg(feature = "with-debug")]
+use std::cell::RefCell;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
 
+#[cfg(feature = "with-debug")]
 #[derive(Clone, Copy, Default, Debug)]
 pub struct Section {
     lookup: f64,
@@ -40,6 +43,7 @@ pub struct Section {
     len: usize,
 }
 
+#[cfg(feature = "with-debug")]
 impl Section {
     pub fn average(&self) -> Section {
         let div = self.len as f64;
@@ -66,6 +70,7 @@ impl Section {
     }
 }
 
+#[cfg(feature = "with-debug")]
 thread_local!(pub static TIME_SPENT: RefCell<Vec<Section>> = RefCell::new(vec![]));
 
 #[cfg(feature = "with-debug")]
@@ -75,6 +80,7 @@ pub fn add_time_trace(section: Section) {
     })
 }
 
+#[cfg(feature = "with-debug")]
 fn total(values: &[Section]) -> Section {
     let len = values.len();
     let mut sum = Section::default();
@@ -89,6 +95,7 @@ fn total(values: &[Section]) -> Section {
     sum
 }
 
+#[cfg(feature = "with-debug")]
 pub fn total_time_spent() -> Section {
     TIME_SPENT.with_borrow(|values| total(values))
 }
@@ -285,63 +292,68 @@ where
     }
 
     fn create_stateless_component(&self, comp: &StatelessModel<APP::MSG>) -> Node {
+        #[cfg(feature = "with-debug")]
         let t1 = now();
         let template = lookup_template(comp.type_id);
+        #[cfg(feature = "with-debug")]
         let t2 = now();
         let skip_diff = self.app_context.skip_diff.as_ref();
-        match (template, skip_diff){
+        match (template, skip_diff) {
             (Some(template), Some(skip_diff)) => {
                 let treepath = skip_diff.traverse();
                 let patches = treepath
                     .into_iter()
                     .flat_map(|path| {
-                        let old_node = path.find_node_by_path(&comp.vdom_template).expect("old_node");
-                        if let Some(new_node) = path.find_node_by_path(&comp.view){
+                        let old_node = path
+                            .find_node_by_path(&comp.vdom_template)
+                            .expect("old_node");
+                        if let Some(new_node) = path.find_node_by_path(&comp.view) {
                             // only diff at level 0
-                            diff_recursive(
-                                &old_node,
-                                &new_node,
-                                &path,
-                                Some(0),
-                            )
-                        }else{
+                            diff_recursive(&old_node, &new_node, &path, Some(0))
+                        } else {
                             // NOTE: this branch would execute if there is loop in the view
                             // if the new node doesn't exist, put a placeholder child, that is the
                             // an inserted node from the template
-                            vec![Patch::append_children(None, path.backtrack(), vec![old_node])]
+                            vec![Patch::append_children(
+                                None,
+                                path.backtrack(),
+                                vec![old_node],
+                            )]
                         }
                     })
                     .collect::<Vec<_>>();
 
-                    let t3 = now();
-                    let dom_patches = self
-                        .convert_patches(&template, &patches)
-                        .expect("convert patches");
-                    let t4 = now();
-                    self.apply_dom_patches(dom_patches).expect("patch template");
-                    let t5 = now();
+                #[cfg(feature = "with-debug")]
+                let t3 = now();
+                let dom_patches = self
+                    .convert_patches(&template, &patches)
+                    .expect("convert patches");
+                #[cfg(feature = "with-debug")]
+                let t4 = now();
+                self.apply_dom_patches(dom_patches).expect("patch template");
+                #[cfg(feature = "with-debug")]
+                let t5 = now();
 
-                    //log::info!("looking up template took: {}ms", t2 - t1);
-                    //log::info!("diffing took: {}ms", t3 - t2);
-                    //log::info!("converting patches took: {}ms", t4 - t3);
-                    //log::info!("applying patches took: {}ms", t5 - t4);
-                    //log::info!("creating stateless component took: {}ms", t5 - t1);
-                    #[cfg(feature = "with-debug")]
-                    add_time_trace(Section {
-                        lookup: t2 - t1,
-                        diffing: t3 - t2,
-                        convert_patch: t4 - t3,
-                        apply_patch: t5 - t4,
-                        total: t5 - t1,
-                        ..Default::default()
-                    });
-                    //log::info!("creating stateless patches: {:#?}", patches);
-                    template
-                }
-                _ => {
-                    // create dom node without skip diff
-                    self.create_dom_node(&comp.view)
-                }
+                //log::info!("looking up template took: {}ms", t2 - t1);
+                //log::info!("diffing took: {}ms", t3 - t2);
+                //log::info!("converting patches took: {}ms", t4 - t3);
+                //log::info!("applying patches took: {}ms", t5 - t4);
+                //log::info!("creating stateless component took: {}ms", t5 - t1);
+                #[cfg(feature = "with-debug")]
+                add_time_trace(Section {
+                    lookup: t2 - t1,
+                    diffing: t3 - t2,
+                    convert_patch: t4 - t3,
+                    apply_patch: t5 - t4,
+                    total: t5 - t1,
+                    ..Default::default()
+                });
+                template
+            }
+            _ => {
+                // create dom node without skip diff
+                self.create_dom_node(&comp.view)
+            }
         }
     }
 

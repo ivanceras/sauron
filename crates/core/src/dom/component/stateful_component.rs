@@ -1,8 +1,5 @@
 use crate::dom::events::on_mount;
-use crate::dom::program::ActiveClosure;
-use crate::dom::program::AppContext;
 use crate::dom::program::MountProcedure;
-use crate::dom::template;
 use crate::dom::Application;
 use crate::dom::Cmd;
 use crate::dom::Component;
@@ -14,11 +11,10 @@ use crate::vdom::Leaf;
 use crate::vdom::Node;
 use std::any::TypeId;
 use std::cell::RefCell;
-use std::collections::VecDeque;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
 use crate::dom::SkipDiff;
-use crate::dom::component::{lookup_template, add_template, register_template};
+use crate::dom::component::register_template;
 
 
 /// A component that can be used directly in the view without mapping
@@ -159,10 +155,8 @@ where
     // The attribute(minus events) however can be used for configurations, for setting initial state
     // of the stateful component.
 
-    let app_view = app.view();
     let vdom_template = app.template().expect("must have a template");
-    let skip_diff = app.skip_diff();
-    let template = register_template(type_id, &vdom_template);
+    let _template = register_template(type_id, &vdom_template);
 
     let app = Rc::new(RefCell::new(app));
 

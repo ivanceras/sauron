@@ -187,13 +187,4 @@ impl<MSG> Element<MSG> {
     }
 
 
-    /// returns true if all attributes of this element is using static str
-    pub(crate) fn is_attrs_all_static_str(&self) -> bool {
-        self.attrs.iter().all(|att| att.is_static_str())
-    }
-
-    /// returns true if this element and its children are all static
-    pub(crate) fn is_static_recursive(&self) -> bool {
-        self.is_attrs_all_static_str() && self.children.iter().all(Node::is_static_recursive)
-    }
 }

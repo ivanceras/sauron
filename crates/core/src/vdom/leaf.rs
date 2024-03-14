@@ -90,18 +90,6 @@ impl<MSG> Leaf<MSG> {
         }
     }
 
-    /// returns true if the content on the leaf is just static str
-    pub(crate) fn is_static_str(&self) -> bool {
-        match self {
-            Self::Text(v) => matches!(v, Cow::Borrowed(_)),
-            Self::SafeHtml(v) => matches!(v, Cow::Borrowed(_)),
-            Self::Comment(v) => matches!(v, Cow::Borrowed(_)),
-            Self::DocType(v) => matches!(v, Cow::Borrowed(_)),
-            Self::StatefulComponent(_) => false,
-            Self::StatelessComponent(_) => false,
-        }
-    }
-
     /// mape the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
     pub fn map_msg<F, MSG2>(self, cb: F) -> Leaf<MSG2>
     where

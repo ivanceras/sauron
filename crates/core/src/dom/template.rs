@@ -1,13 +1,11 @@
 //! utility functions for extracting templates from a view
 //!
 use crate::dom::document;
-use crate::dom::skip_if;
 use crate::dom::DomAttr;
 use crate::dom::DomNode;
-use crate::dom::SkipDiff;
 use crate::vdom;
 use crate::vdom::Attribute;
-use crate::vdom::{Leaf, Node};
+use crate::vdom::Leaf;
 use wasm_bindgen::intern;
 
 

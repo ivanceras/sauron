@@ -271,7 +271,7 @@ where
 
     let vdom_template = app.template().expect("must have a template");
 
-    let template = register_template(type_id, &vdom_template);
+    let _template = register_template(type_id, &vdom_template);
     Node::Leaf(Leaf::StatelessComponent(StatelessModel {
         view: Box::new(view),
         skip_diff: Rc::new(skip_diff),

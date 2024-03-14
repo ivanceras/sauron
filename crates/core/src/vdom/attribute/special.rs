@@ -28,12 +28,16 @@ pub static SKIP_CRITERIA: &AttributeName = &"skip_criteria";
 /// need to call the specific methods to reflect the state of this attribute to the element
 ///
 /// the value attribute
+#[cfg(feature = "ensure-attr-set")]
 pub static VALUE: &AttributeName = &"value";
 /// the open attribute
+#[cfg(feature = "ensure-attr-set")]
 pub static OPEN: &AttributeName = &"open";
 /// the checked attribute
+#[cfg(feature = "ensure-attr-set")]
 pub static CHECKED: &AttributeName = &"checked";
 /// the disabled attribute
+#[cfg(feature = "ensure-attr-set")]
 pub static DISABLED: &AttributeName = &"disabled";
 
 /// creates a key attribute using a formatter

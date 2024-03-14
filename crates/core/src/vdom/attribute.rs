@@ -184,20 +184,6 @@ impl<MSG> Attribute<MSG> {
         grouped
     }
 
-    pub(crate) fn get_callbacks(&self) -> Vec<&EventCallback<MSG>> {
-        self.value
-            .iter()
-            .filter_map(|v| v.as_event_listener())
-            .collect()
-    }
-
-    pub(crate) fn is_static_str(&self) -> bool {
-        self.value.iter().all(|v| v.is_static_str())
-    }
-
-    pub(crate) fn has_non_static_value(&self) -> bool {
-        self.value.iter().any(|v| !v.is_static_str())
-    }
 }
 
 /// Create an attribute

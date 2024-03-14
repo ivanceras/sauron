@@ -7,7 +7,6 @@
     unstable_features,
     unused_import_braces
 )]
-#![allow(unused)]
 #![deny(unsafe_code)]
 #![deny(clippy::all)]
 

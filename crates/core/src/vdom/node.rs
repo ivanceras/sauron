@@ -2,7 +2,6 @@ use super::{AttributeName, Namespace, Tag};
 use crate::vdom::Attribute;
 use crate::vdom::AttributeValue;
 use crate::vdom::Element;
-use crate::vdom::EventCallback;
 use crate::vdom::Leaf;
 use crate::vdom::Value;
 use derive_where::derive_where;
@@ -321,39 +320,6 @@ impl<MSG> Node<MSG> {
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
 
-
-    pub(crate) fn get_callbacks(&self) -> Vec<&EventCallback<MSG>> {
-        if let Some(attributes) = self.attributes() {
-            let callbacks = attributes
-                .iter()
-                .flat_map(|att| att.get_callbacks())
-                .collect();
-            callbacks
-        } else {
-            vec![]
-        }
-    }
-
-    /// returns true of this node is static
-    pub(crate) fn is_static(&self) -> bool {
-        match self {
-            Self::Element(v) => v.is_attrs_all_static_str(),
-            Self::Leaf(v) => v.is_static_str(),
-            Self::Fragment(nodes) => nodes.iter().all(Self::is_static),
-            Self::NodeList(_) => unreachable!("already unrolled into element"),
-        }
-    }
-
-    /// returns true if this node and its descendant is static
-    pub(crate) fn is_static_recursive(&self) -> bool {
-        self.is_static()
-            && match self {
-                Self::Element(elm) => elm.is_static_recursive(),
-                Self::Leaf(v) => v.is_static_str(),
-                Self::Fragment(nodes) => nodes.iter().all(Self::is_static_recursive),
-                Self::NodeList(_) => unreachable!(),
-            }
-    }
 }
 
 /// create a virtual node with tag, attrs and children

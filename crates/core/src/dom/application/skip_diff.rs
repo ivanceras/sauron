@@ -17,7 +17,7 @@ impl PartialEq for SkipDiff {
 impl fmt::Debug for SkipDiff {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({},", self.shall)?;
-        f.debug_list().entries(self.children.iter()).finish();
+        f.debug_list().entries(self.children.iter()).finish()?;
         write!(f, ")")?;
         Ok(())
     }
