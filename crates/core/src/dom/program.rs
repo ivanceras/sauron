@@ -1,5 +1,5 @@
 #[cfg(feature = "use-template")]
-use crate::dom::component::register_template;
+use crate::dom::component::add_template;
 use crate::dom::dom_node;
 use crate::dom::program::app_context::WeakContext;
 #[cfg(feature = "with-raf")]
@@ -220,7 +220,9 @@ where
         #[cfg(feature = "use-template")]
         let vdom_template = app.template().expect("must have a template");
         #[cfg(feature = "use-template")]
-        let template = register_template(TypeId::of::<APP>(), &vdom_template);
+        let template = template::create_dom_node_without_listeners(&vdom_template);
+        #[cfg(feature = "use-template")]
+        add_template(TypeId::of::<APP>(), &template);
         let program = Program {
             app_context: AppContext {
                 app: Rc::new(RefCell::new(app)),

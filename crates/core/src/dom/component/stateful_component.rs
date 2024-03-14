@@ -31,22 +31,17 @@ thread_local! {
     static TEMPLATE_LOOKUP: RefCell<micromap::Map<TypeId, web_sys::Node, 10>> = RefCell::new(micromap::Map::new());
 }
 
+
 #[cfg(feature = "use-template")]
-pub fn register_template<MSG>(type_id: TypeId, view: &Node<MSG>) -> web_sys::Node
-where
-    MSG: 'static,
-{
-    let dom_template = template::create_dom_node_without_listeners(view);
-    let template = TEMPLATE_LOOKUP.with_borrow_mut(|map| {
-        if let Some(existing) = map.get(&type_id) {
-            existing.clone_node_with_deep(true).expect("deep clone")
+pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
+    TEMPLATE_LOOKUP.with_borrow_mut(|map| {
+        if map.contains_key(&type_id) {
+            log::info!("Already added!");
         } else {
             log::info!("---->> Adding to template...");
-            map.insert(type_id, dom_template.clone());
-            dom_template
+            map.insert(type_id, template.clone());
         }
-    });
-    template
+    })
 }
 
 /// lookup for the template
@@ -200,7 +195,9 @@ where
     #[cfg(feature = "skip_diff")]
     let skip_diff = app.skip_diff();
     #[cfg(feature = "use-template")]
-    let template = register_template(type_id, &vdom_template);
+    let template = template::create_dom_node_without_listeners(&vdom_template);
+    #[cfg(feature = "use-template")]
+     add_template(type_id, &template);
 
     let app = Rc::new(RefCell::new(app));
 

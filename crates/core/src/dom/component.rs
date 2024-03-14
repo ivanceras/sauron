@@ -7,10 +7,11 @@ use crate::dom::SkipDiff;
 use std::rc::Rc;
 
 #[cfg(feature = "use-template")]
-pub use stateful_component::{lookup_template, register_template};
+pub use stateful_component::{lookup_template, add_template};
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
+use crate::dom::template;
 
 mod stateful_component;
 #[cfg(feature = "custom_element")]
@@ -236,7 +237,9 @@ where
     #[cfg(feature = "use-template")]
     let vdom_template = app.template().expect("must have a template");
     #[cfg(feature = "use-template")]
-    let _template = register_template(type_id, &vdom_template);
+    let template = template::create_dom_node_without_listeners(&vdom_template);
+    #[cfg(feature = "use-template")]
+    add_template(type_id, &template);
     Node::Leaf(Leaf::StatelessComponent(StatelessModel {
         view: Box::new(view),
         #[cfg(feature = "skip_diff")]
