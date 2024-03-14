@@ -83,6 +83,7 @@ impl Component<Msg, ()> for RowData {
         }
     }
 
+    #[cfg(feature = "use-template")]
     fn template(&self) -> Option<Node<Msg>> {
         let id = self.id;
         Some(extract_template! {
@@ -101,6 +102,7 @@ impl Component<Msg, ()> for RowData {
         })
     }
 
+    #[cfg(feature = "skip_diff")]
     fn skip_diff(&self) -> Option<SkipDiff> {
         let id = self.id;
         Some(extract_skip_diff! {
@@ -215,6 +217,7 @@ impl Application<Msg> for App {
         }
     }
 
+    #[cfg(feature = "skip_diff")]
     fn skip_diff(&self) -> Option<SkipDiff> {
        Some(extract_skip_diff! {
             <div class="container">
@@ -233,6 +236,7 @@ impl Application<Msg> for App {
         })
     }
 
+    #[cfg(feature = "use-template")]
     fn template(&self) -> Option<Node<Msg>> {
         Some(extract_template! {
             <div class="container">

@@ -634,8 +634,8 @@ where
             log::info!("treepath: {:#?}", treepath);
 
             let current_vdom = self.app_context.current_vdom();
-            let vdom_template = &self.app_context.vdom_template;
-            log::info!("current_vdom: {}", current_vdom.render_to_string());
+            //let vdom_template = &self.app_context.vdom_template;
+            //log::info!("current_vdom: {}", current_vdom.render_to_string());
             //TODO: traversing the treepath here is not enough
             //as rows may be inserted in some loop.
             //There has to be a full diff in the old node and new node when 
@@ -644,21 +644,25 @@ where
                 .into_iter()
                 .flat_map(|path| {
                     log::info!("looking for path: {:?}", path);
-                    let new_node = path.find_node_by_path(&new_vdom).expect("new_node");
-                    if let Some(old_node) = path.find_node_by_path(&current_vdom){
-                        // only diff at level 0
-                        diff_recursive(
-                            &old_node,
-                            &new_node,
-                            &path,
-                            Some(0),
-                        )
-                    }else{
-                        // backtrack old and new
-                        let parent_path = path.backtrack();
-                        let new_node = parent_path.find_node_by_path(&new_vdom).expect("backtracked new_node");
-                        let old_node = parent_path.find_node_by_path(&current_vdom).expect("backtracked old node");
-                        diff_recursive(&old_node, &new_node, &parent_path, Some(0))
+                    let new_node = path.find_node_by_path(&new_vdom);
+                    let old_node = path.find_node_by_path(&current_vdom);
+                    match (old_node, new_node){
+                        (Some(old_node), Some(new_node)) => {
+                            // only diff at level 0
+                            diff_recursive(
+                                &old_node,
+                                &new_node,
+                                &path,
+                                Some(0),
+                            )
+                        }
+                        _ => {
+                            // backtrack old and new
+                            let parent_path = path.backtrack();
+                            let new_node = parent_path.find_node_by_path(&new_vdom).expect("backtracked new_node");
+                            let old_node = parent_path.find_node_by_path(&current_vdom).expect("backtracked old node");
+                            diff_recursive(&old_node, &new_node, &parent_path, Some(0))
+                        }
                     }
                 })
                 .collect::<Vec<_>>();
