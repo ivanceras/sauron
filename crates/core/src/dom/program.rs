@@ -30,6 +30,8 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
 use crate::vdom::Patch;
+#[cfg(feature = "use-template")]
+use crate::dom::component::register_template;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
@@ -214,15 +216,14 @@ where
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
     pub fn new(app: APP) -> Self {
+        let type_id = TypeId::of::<APP>();
         let app_view = app.view();
         #[cfg(feature = "skip_diff")]
         let skip_diff = app.skip_diff();
         #[cfg(feature = "use-template")]
         let vdom_template = app.template().expect("must have a template");
         #[cfg(feature = "use-template")]
-        let template = template::create_dom_node_without_listeners(&vdom_template);
-        #[cfg(feature = "use-template")]
-        add_template(TypeId::of::<APP>(), &template);
+        let template = register_template(type_id, &vdom_template);
         let program = Program {
             app_context: AppContext {
                 app: Rc::new(RefCell::new(app)),
@@ -622,6 +623,8 @@ where
         Ok(())
     }
 
+    /// This is called after the subsequenct updates,
+    /// therefore vdom_template is not useful anymore, but skip_diff is still useful
     #[cfg(feature = "skip_diff")]
     fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<MSG>, skip_diff: &Option<SkipDiff>) -> Vec<DomPatch>{
         use crate::html::comment;

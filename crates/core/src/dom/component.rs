@@ -26,6 +26,19 @@ thread_local! {
     static TEMPLATE_LOOKUP: RefCell<micromap::Map<TypeId, web_sys::Node, 10>> = RefCell::new(micromap::Map::new());
 }
 
+/// if the template is already registered, return the dom template
+/// if not, create the dom template and add it
+#[cfg(feature = "use-template")]
+pub fn register_template<MSG>(type_id: TypeId, vdom_template: &Node<MSG>) -> web_sys::Node{
+    if let Some(template) = lookup_template(type_id){
+        template
+    }else{
+        let template = template::create_dom_node_without_listeners(&vdom_template);
+        add_template(type_id, &template);
+        template
+    }
+}
+
 
 #[cfg(feature = "use-template")]
 pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
@@ -271,15 +284,7 @@ where
     let vdom_template = app.template().expect("must have a template");
 
     #[cfg(feature = "use-template")]
-    let template = if let Some(template) = lookup_template(type_id){
-        template
-    }else{
-        let template = template::create_dom_node_without_listeners(&vdom_template);
-        template
-    };
-
-    #[cfg(feature = "use-template")]
-    add_template(type_id, &template);
+    let template = register_template(type_id, &vdom_template);
     Node::Leaf(Leaf::StatelessComponent(StatelessModel {
         view: Box::new(view),
         #[cfg(feature = "skip_diff")]

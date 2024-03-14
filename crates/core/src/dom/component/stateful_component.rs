@@ -21,7 +21,7 @@ use wasm_bindgen::JsValue;
 #[cfg(feature = "skip_diff")]
 use crate::dom::SkipDiff;
 #[cfg(feature = "use-template")]
-use crate::dom::component::{lookup_template, add_template};
+use crate::dom::component::{lookup_template, add_template, register_template};
 
 
 /// A component that can be used directly in the view without mapping
@@ -163,9 +163,7 @@ where
     #[cfg(feature = "skip_diff")]
     let skip_diff = app.skip_diff();
     #[cfg(feature = "use-template")]
-    let template = template::create_dom_node_without_listeners(&vdom_template);
-    #[cfg(feature = "use-template")]
-     add_template(type_id, &template);
+    let template = register_template(type_id, &vdom_template);
 
     let app = Rc::new(RefCell::new(app));
 
