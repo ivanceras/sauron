@@ -1,7 +1,10 @@
 use rand::prelude::*;
 use sauron::dom::component;
+use sauron::dom::stateful_component;
 use sauron::*;
 use std::cmp::min;
+use sauron::dom::StatefulComponent;
+use sauron::dom::DomAttrValue;
 
 static ADJECTIVES: &[&str] = &[
     "pretty",
@@ -121,6 +124,23 @@ impl Component<Msg, ()> for RowData {
         })
     }
 }
+
+impl StatefulComponent for RowData {
+    fn attribute_changed(
+        &mut self,
+        attr_name: &str,
+        old_value: DomAttrValue,
+        new_value: DomAttrValue,
+    ) where
+        Self: Sized,
+    {
+    }
+
+    /// append a child into this component
+    fn append_child(&mut self, child: &web_sys::Node) {
+    }
+}
+
 struct App {
     rows: Vec<RowData>,
     next_id: usize,
@@ -139,6 +159,7 @@ impl App {
     }
 }
 
+#[derive(Default)]
 enum Msg {
     Run(usize),
     Add(usize),
@@ -147,6 +168,8 @@ enum Msg {
     Swap,
     Remove(usize),
     Select(usize),
+    #[default]
+    NoOp
 }
 
 impl Application<Msg> for App {
@@ -195,6 +218,10 @@ impl Application<Msg> for App {
                      row.selected = self.selected_id == Some(row.id)
                 }
             }
+            Msg::NoOp => {
+                log::info!("mounted!");
+                return Cmd::none().no_render();
+            }
         }
         Cmd::none()
     }
@@ -207,8 +234,9 @@ impl Application<Msg> for App {
                     <tbody id="tbody">
                         {for row in self.rows.iter() {
                             let is_selected = self.selected_id == Some(row.id);
-                            component(row, [selected(is_selected)], [])
                             //row.view()
+                            component(row, [selected(is_selected)], [])
+                            //stateful_component(RowData{id: row.id, label: row.label.clone(), selected: is_selected}, [selected(is_selected)], [])
                         }}
                     </tbody>
                 </table>
