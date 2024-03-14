@@ -20,16 +20,13 @@ pub(crate) struct AppContext<APP>
 
     /// the dom template for this App
     /// This also doesn't change throughout the app lifecycle
-    #[cfg(feature = "use-template")]
-    pub(crate) template: web_sys::Node,
+    pub(crate) template: Option<web_sys::Node>,
     /// skip diff
-    #[cfg(feature = "skip_diff")]
     pub(crate) skip_diff: Rc<Option<SkipDiff>>,
 
     /// The vdom template generated from the APP
     /// This doesn't change throughout the app lifecycle
-    #[cfg(feature = "use-template")]
-    pub(crate) vdom_template: Rc<vdom::Node<APP::MSG>>,
+    pub(crate) vdom_template: Rc<Option<vdom::Node<APP::MSG>>>,
 
     /// the current vdom representation
     /// if the dom is sync with the app state the current_vdom corresponds to the app.view
@@ -50,12 +47,9 @@ where
     APP: Application,
 {
     pub(crate) app: Weak<RefCell<APP>>,
-    #[cfg(feature = "use-template")]
-    pub(crate) template: web_sys::Node,
-    #[cfg(feature = "skip_diff")]
+    pub(crate) template: Option<web_sys::Node>,
     pub(crate) skip_diff: Rc<Option<SkipDiff>>,
-    #[cfg(feature = "use-template")]
-    pub(crate) vdom_template: Weak<vdom::Node<APP::MSG>>,
+    pub(crate) vdom_template: Weak<Option<vdom::Node<APP::MSG>>>,
     pub(crate) current_vdom: Weak<RefCell<vdom::Node<APP::MSG>>>,
     pub(crate) pending_msgs: Weak<RefCell<VecDeque<APP::MSG>>>,
     pub(crate) pending_cmds: Weak<RefCell<VecDeque<Cmd<APP>>>>,
@@ -71,11 +65,8 @@ impl<APP> WeakContext<APP>
         let pending_cmds = self.pending_cmds.upgrade()?;
         Some(AppContext {
             app,
-            #[cfg(feature = "use-template")]
             template: self.template.clone(),
-            #[cfg(feature = "skip_diff")]
             skip_diff: self.skip_diff.clone(),
-            #[cfg(feature = "use-template")]
             vdom_template: self.vdom_template.upgrade()?,
             current_vdom,
             pending_msgs,
@@ -90,11 +81,8 @@ impl<APP> Clone for WeakContext<APP>
     fn clone(&self) -> Self {
         Self {
             app: Weak::clone(&self.app),
-            #[cfg(feature = "use-template")]
             template: self.template.clone(),
-            #[cfg(feature = "skip_diff")]
             skip_diff: self.skip_diff.clone(),
-            #[cfg(feature = "use-template")]
             vdom_template: Weak::clone(&self.vdom_template),
             current_vdom: Weak::clone(&self.current_vdom),
             pending_msgs: Weak::clone(&self.pending_msgs),
@@ -109,11 +97,8 @@ impl<APP> AppContext<APP>
     pub(crate) fn downgrade(this: &Self) -> WeakContext<APP> {
         WeakContext {
             app: Rc::downgrade(&this.app),
-            #[cfg(feature = "use-template")]
             template: this.template.clone(),
-            #[cfg(feature = "skip_diff")]
             skip_diff: this.skip_diff.clone(),
-            #[cfg(feature = "use-template")]
             vdom_template: Rc::downgrade(&this.vdom_template),
             current_vdom: Rc::downgrade(&this.current_vdom),
             pending_msgs: Rc::downgrade(&this.pending_msgs),
@@ -134,11 +119,8 @@ impl<APP> Clone for AppContext<APP>
     fn clone(&self) -> Self {
         Self {
             app: Rc::clone(&self.app),
-            #[cfg(feature = "use-template")]
             template: self.template.clone(),
-            #[cfg(feature = "skip_diff")]
             skip_diff: self.skip_diff.clone(),
-            #[cfg(feature = "use-template")]
             vdom_template: self.vdom_template.clone(),
             current_vdom: Rc::clone(&self.current_vdom),
             pending_msgs: Rc::clone(&self.pending_msgs),

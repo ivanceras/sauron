@@ -18,7 +18,9 @@ impl App {
     }
 }
 
-impl Application<Msg> for App {
+impl Application for App {
+    type MSG = Msg;
+
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
@@ -39,7 +41,7 @@ impl Application<Msg> for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,

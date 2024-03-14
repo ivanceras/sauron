@@ -1,4 +1,3 @@
-#[cfg(feature = "use-template")]
 use crate::dom::component::add_template;
 use crate::dom::dom_node;
 use crate::dom::program::app_context::WeakContext;
@@ -7,7 +6,6 @@ use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
 use crate::dom::template;
-#[cfg(feature = "skip_diff")]
 use crate::dom::SkipDiff;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
@@ -30,7 +28,6 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
 use crate::vdom::Patch;
-#[cfg(feature = "use-template")]
 use crate::dom::component::register_template;
 
 pub(crate) use app_context::AppContext;
@@ -215,20 +212,19 @@ where
     pub fn from_rc_app(app: Rc<RefCell<APP>>) -> Self {
         let type_id = TypeId::of::<APP>();
         let app_view = app.borrow().view();
-        #[cfg(feature = "skip_diff")]
         let skip_diff = app.borrow().skip_diff();
-        #[cfg(feature = "use-template")]
-        let vdom_template = app.borrow().template().expect("must have a template");
-        #[cfg(feature = "use-template")]
-        let template = register_template(type_id, &vdom_template);
+        let vdom_template = app.borrow().template();
+        let template = if let Some(vdom_template) = vdom_template.as_ref(){
+            Some(register_template(type_id, vdom_template))
+        }else{
+            None
+        };
+
         Program {
             app_context: AppContext {
                 app,
-                #[cfg(feature = "use-template")]
                 template: template,
-                #[cfg(feature = "skip_diff")]
                 skip_diff: Rc::new(skip_diff),
-                #[cfg(feature = "use-template")]
                 vdom_template: Rc::new(vdom_template),
                 current_vdom: Rc::new(RefCell::new(app_view)),
                 pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
@@ -388,15 +384,13 @@ where
     /// create initial dom node generated
     /// from template and patched by the difference of vdom_template and current app view.
     fn create_initial_view(&self) -> web_sys::Node {
-        #[cfg(all(feature = "use-template", feature = "skip_diff"))]
-        {
-            let app_view = self.app_context.app.borrow().view();
-            let dom_template = self.app_context.template.clone();
-            let vdom_template = &self.app_context.vdom_template;
-            if let Some(skip_diff) = self.app_context.skip_diff.as_ref(){
+        let app_view = self.app_context.app.borrow().view();
+        let dom_template = self.app_context.template.clone();
+        let vdom_template = self.app_context.vdom_template.as_ref();
+        let skip_diff = self.app_context.skip_diff.as_ref();
+        match (vdom_template, skip_diff) {
+            (Some(vdom_template), Some(skip_diff)) => {
                 let treepath = skip_diff.traverse();
-                //let patches = diff(vdom_template, &app_view);
-                
                 let patches = treepath
                     .into_iter()
                     .flat_map(|path| {
@@ -417,22 +411,20 @@ where
                     })
                     .collect::<Vec<_>>();
                 
-                let dom_patches = self
-                    .convert_patches(&dom_template, &patches)
-                    .expect("convert patches");
-                log::info!("first time patches {}: {patches:#?}", patches.len());
-                let new_template_node = self
-                    .apply_dom_patches(dom_patches)
-                    .expect("template patching");
-                //log::info!("new template node: {:?}", new_template_node);
-                dom_template
-            }else{
-                unreachable!("must have a skip_diff");
+                if let Some(dom_template) = dom_template{
+                    let dom_patches = self
+                        .convert_patches(&dom_template, &patches)
+                        .expect("convert patches");
+                    log::info!("first time patches {}: {patches:#?}", patches.len());
+                    let new_template_node = self
+                        .apply_dom_patches(dom_patches)
+                        .expect("template patching");
+                    dom_template
+                }else{
+                    self.create_dom_node(&self.app_context.current_vdom())
+                }
             }
-        }
-        #[cfg(not(feature = "use-template"))]
-        {
-            self.create_dom_node(&self.app_context.current_vdom())
+            _ => self.create_dom_node(&self.app_context.current_vdom())
         }
     }
 

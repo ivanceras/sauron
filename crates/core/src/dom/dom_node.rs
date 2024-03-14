@@ -1,4 +1,3 @@
-#[cfg(feature = "use-template")]
 use crate::dom::component::lookup_template;
 use crate::dom::component::StatelessModel;
 use crate::dom::now;
@@ -286,14 +285,13 @@ where
     }
 
     fn create_stateless_component(&self, comp: &StatelessModel<APP::MSG>) -> Node {
-        #[cfg(feature = "use-template")]
-        {
-            let t1 = now();
-            let template = lookup_template(comp.type_id).expect("must have a template");
-            let t2 = now();
-            if let Some(skip_diff) = self.app_context.skip_diff.as_ref(){
+        let t1 = now();
+        let template = lookup_template(comp.type_id);
+        let t2 = now();
+        let skip_diff = self.app_context.skip_diff.as_ref();
+        match (template, skip_diff){
+            (Some(template), Some(skip_diff)) => {
                 let treepath = skip_diff.traverse();
-                
                 let patches = treepath
                     .into_iter()
                     .flat_map(|path| {
@@ -328,6 +326,7 @@ where
                     //log::info!("converting patches took: {}ms", t4 - t3);
                     //log::info!("applying patches took: {}ms", t5 - t4);
                     //log::info!("creating stateless component took: {}ms", t5 - t1);
+                    #[cfg(feature = "with-debug")]
                     add_time_trace(Section {
                         lookup: t2 - t1,
                         diffing: t3 - t2,
@@ -338,17 +337,11 @@ where
                     });
                     //log::info!("creating stateless patches: {:#?}", patches);
                     template
-             }else{
-                 unreachable!("must have a skip diff");
-             }
-        }
-        #[cfg(not(feature = "use-template"))]
-        {
-            let t6 = now();
-            let created_node = self.create_dom_node(&comp.view);
-            let t7 = now();
-            //log::info!("creating node took: {}ms", t7 - t6);
-            created_node
+                }
+                _ => {
+                    // create dom node without skip diff
+                    self.create_dom_node(&comp.view)
+                }
         }
     }
 
