@@ -236,8 +236,17 @@ where
 
     #[cfg(feature = "use-template")]
     let vdom_template = app.template().expect("must have a template");
+
     #[cfg(feature = "use-template")]
-    let template = template::create_dom_node_without_listeners(&vdom_template);
+    let template = if let Some(template) = lookup_template(type_id){
+        log::info!("existing template..");
+        template
+    }else{
+        log::info!("first time creating the template node..");
+        let template = template::create_dom_node_without_listeners(&vdom_template);
+        template
+    };
+
     #[cfg(feature = "use-template")]
     add_template(type_id, &template);
     Node::Leaf(Leaf::StatelessComponent(StatelessModel {
