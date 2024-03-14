@@ -98,265 +98,89 @@ impl Application<Msg> for App {
         }
     }
 
-    fn view(&self) -> Node<Msg> {
-        let fruits = ["apple", "orange", "grapes"];
-        node! {
-            <div class="some-class" id="some-id" {attr("data-id", 1)} {style!{"font-family": "monospace"}}>
-                <div id="current-time">{text!("Today is {}",self.date.to_locale_string("en-GB", &JsValue::undefined()))}</div>
-                <div>
-                        "Your name is: "
-                        <input type="text"
-                                on_input=|event: InputEvent| Msg::ChangeName(event.value())
-                                placeholder="John Smith"
-                                data-attr=format!("Hello{}", &self.name)
-                        />
-                        <button on:click=|event: MouseEvent| {
-                                trace!("Clicked at ({},{})", event.x(), event.y());
-                                Msg::Click}>
-                            Click me!
-                        </button>
-                        <button on_dblclick=|event: MouseEvent| {
-                                trace!("Double clicked at ({},{})", event.x(), event.y());
-                                Msg::DoubleClick}>
-                            {text!("DoubleClicks {}", self.double_clicks)}
-                        </button>
-                </div>
-                <p>
-                    {text!("Hello {}!", self.name)}
-                    {if self.click_count > 0 {
-                        text!(
-                            ", You've clicked on that button for {} time{}",
-                            self.click_count,
-                            if self.click_count > 1 { "s" } else { "" }
-                        )
-                    } else {
-                        text("here..")
-                    }}
-                </p>
-                <div>
-                        <p>Tell us something about yourself</p>
-                        <div>
-                            <textarea rows=10 cols=80
-                                    on_input=|event: InputEvent| {
-                                        Msg::ChangeBiography(event.value())
-                                    }
-                                    placeholder="I'm a..."
-                            />
-                        </div>
-                        <p>{text!("{}", self.biography)}</p>
-                </div>
-                <div>
-                        "What are you thinking right now?"
-                        <input type="text"
-                                on_change=|event: InputEvent| Msg::ChangeThought(event.value())
-                                placeholder="Elephants..."
-                        />
-                        {if let Some(thought) = &self.thought {
-                            text(format!("Hmmn {}... Interesting.", thought))
-                        } else {
-                            node!{<span></span>}
-                        }}
-                </div>
-                <ul class="some-list">
-                    {for i in 0..10{
-                        node!{
-                            <li key=i>{text!("i: {}", i)}</li>
-                        }
-                    }}
-                </ul>
-                <ul class="fruits">
-                    {for i in fruits{
-                        node!{
-                            <li key=i>{text!("i: {}", i)}</li>
-                        }
-                    }}
-                </ul>
-                <div>
-                    //{Component::view(&self.btn).map_msg(Msg::BtnMsg)}
-                </div>
-                <div>
-                    {stateful_component(Button::default(), [], [text("External child of btn stateful_component")])}
-                </div>
-                <div>
-                    //{stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
-                </div>
+    view!{
+        <div class="some-class" id="some-id" {attr("data-id", 1)} {style!{"font-family": "monospace"}}>
+            <div id="current-time">{text!("Today is {}",self.date.to_locale_string("en-GB", &JsValue::undefined()))}</div>
+            <div>
+                    "Your name is: "
+                    <input type="text"
+                            on_input=|event: InputEvent| Msg::ChangeName(event.value())
+                            placeholder="John Smith"
+                            data-attr=format!("Hello{}", &self.name)
+                    />
+                    <button on:click=|event: MouseEvent| {
+                            trace!("Clicked at ({},{})", event.x(), event.y());
+                            Msg::Click}>
+                        Click me!
+                    </button>
+                    <button on_dblclick=|event: MouseEvent| {
+                            trace!("Double clicked at ({},{})", event.x(), event.y());
+                            Msg::DoubleClick}>
+                        {text!("DoubleClicks {}", self.double_clicks)}
+                    </button>
             </div>
-        }
-    }
-
-    fn template(&self) -> Option<Node<Msg>> {
-        let fruits = ["apple", "orange", "grapes"];
-        Some(extract_template! {
-            <div class="some-class" id="some-id" {attr("data-id", 1)} {style!{"font-family": "monospace"}}>
-                <div id="current-time">{text!("Today is {}",self.date.to_locale_string("en-GB", &JsValue::undefined()))}</div>
-                <div>
-                        "Your name is: "
-                        <input type="text"
-                                on_input=|event: InputEvent| Msg::ChangeName(event.value())
-                                placeholder="John Smith"
-                                data-attr=format!("Hello{}", &self.name)
+            <p>
+                {text!("Hello {}!", self.name)}
+                {if self.click_count > 0 {
+                    text!(
+                        ", You've clicked on that button for {} time{}",
+                        self.click_count,
+                        if self.click_count > 1 { "s" } else { "" }
+                    )
+                } else {
+                    text("here..")
+                }}
+            </p>
+            <div>
+                    <p>Tell us something about yourself</p>
+                    <div>
+                        <textarea rows=10 cols=80
+                                on_input=|event: InputEvent| {
+                                    Msg::ChangeBiography(event.value())
+                                }
+                                placeholder="I'm a..."
                         />
-                        <button on:click=|event: MouseEvent| {
-                                trace!("Clicked at ({},{})", event.x(), event.y());
-                                Msg::Click}>
-                            Click me!
-                        </button>
-                        <button on_dblclick=|event: MouseEvent| {
-                                trace!("Double clicked at ({},{})", event.x(), event.y());
-                                Msg::DoubleClick}>
-                            {text!("DoubleClicks {}", self.double_clicks)}
-                        </button>
-                </div>
-                <p>
-                    {text!("Hello {}!", self.name)}
-                    {if self.click_count > 0 {
-                        text!(
-                            ", You've clicked on that button for {} time{}",
-                            self.click_count,
-                            if self.click_count > 1 { "s" } else { "" }
-                        )
-                    } else {
-                        text("here..")
-                    }}
-                </p>
-                <div>
-                        <p>Tell us something about yourself</p>
-                        <div>
-                            <textarea rows=10 cols=80
-                                    on_input=|event: InputEvent| {
-                                        Msg::ChangeBiography(event.value())
-                                    }
-                                    placeholder="I'm a..."
-                            />
-                        </div>
-                        <p>{text!("{}", self.biography)}</p>
-                </div>
-                <div>
-                        "What are you thinking right now?"
-                        <input type="text"
-                                on_change=|event: InputEvent| Msg::ChangeThought(event.value())
-                                placeholder="Elephants..."
-                        />
-                        {if let Some(thought) = &self.thought {
-                            text(format!("Hmmn {}... Interesting.", thought))
-                        } else {
-                            node!{<span></span>}
-                        }}
-                </div>
-                <ul class="some-list">
-                    {for i in 0..10{
-                        node!{
-                            <li key=i>{text!("i: {}", i)}</li>
-                        }
-                    }}
-                </ul>
-                <ul class="fruits">
-                    {for i in fruits{
-                        node!{
-                            <li key=i>{text!("i: {}", i)}</li>
-                        }
-                    }}
-                </ul>
-                <div>
-                    //{Component::view(&self.btn).map_msg(Msg::BtnMsg)}
-                </div>
-                <div>
-                    //{stateful_component(Button::default(), [], [text("External child of btn stateful_component")])}
-                </div>
-                <div>
-                    //{stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
-                </div>
+                    </div>
+                    <p>{text!("{}", self.biography)}</p>
             </div>
-        })
-    }
-
-    fn skip_diff(&self) -> Option<SkipDiff> {
-        let fruits = ["apple", "orange", "grapes"];
-        Some(
-        extract_skip_diff! {
-            <div class="some-class" id="some-id" {attr("data-id", 1)} {style!{"font-family": "monospace"}}>
-                <div id="current-time">{text!("Today is {}",self.date.to_locale_string("en-GB", &JsValue::undefined()))}</div>
-                <div>
-                        "Your name is: "
-                        <input type="text"
-                                on_input=|event: InputEvent| Msg::ChangeName(event.value())
-                                placeholder="John Smith"
-                                data-attr=format!("Hello{}", &self.name)
-                        />
-                        <button on:click=|event: MouseEvent| {
-                                trace!("Clicked at ({},{})", event.x(), event.y());
-                                Msg::Click}>
-                            Click me!
-                        </button>
-                        <button on_dblclick=|event: MouseEvent| {
-                                trace!("Double clicked at ({},{})", event.x(), event.y());
-                                Msg::DoubleClick}>
-                            {text!("DoubleClicks {}", self.double_clicks)}
-                        </button>
-                </div>
-                <p>
-                    {text!("Hello {}!", self.name)}
-                    {if self.click_count > 0 {
-                        text!(
-                            ", You've clicked on that button for {} time{}",
-                            self.click_count,
-                            if self.click_count > 1 { "s" } else { "" }
-                        )
+            <div>
+                    "What are you thinking right now?"
+                    <input type="text"
+                            on_change=|event: InputEvent| Msg::ChangeThought(event.value())
+                            placeholder="Elephants..."
+                    />
+                    {if let Some(thought) = &self.thought {
+                        text(format!("Hmmn {}... Interesting.", thought))
                     } else {
-                        text("here..")
+                        node!{<span></span>}
                     }}
-                </p>
-                <div>
-                        <p>Tell us something about yourself</p>
-                        <div>
-                            <textarea rows=10 cols=80
-                                    on_input=|event: InputEvent| {
-                                        Msg::ChangeBiography(event.value())
-                                    }
-                                    placeholder="I'm a..."
-                            />
-                        </div>
-                        <p>{text!("{}", self.biography)}</p>
-                </div>
-                <div>
-                        "What are you thinking right now?"
-                        <input type="text"
-                                on_change=|event: InputEvent| Msg::ChangeThought(event.value())
-                                placeholder="Elephants..."
-                        />
-                        {if let Some(thought) = &self.thought {
-                            text(format!("Hmmn {}... Interesting.", thought))
-                        } else {
-                            node!{<span></span>}
-                        }}
-                </div>
-                <ul class="some-list">
-                    {for i in 0..10{
-                        node!{
-                            <li key=i>{text!("i: {}", i)}</li>
-                        }
-                    }}
-                </ul>
-                <ul class="fruits">
-                    {for i in fruits{
-                        node!{
-                            <li key=i>{text!("i: {}", i)}</li>
-                        }
-                    }}
-                </ul>
-                <div>
-                    //{Component::view(&self.btn).map_msg(Msg::BtnMsg)}
-                </div>
-                <div>
-                    //{stateful_component(Button::default(), [], [text("External child of btn stateful_component")])}
-                </div>
-                <div>
-                    //{stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
-                </div>
             </div>
-        })
+            <ul class="some-list">
+                {for i in 0..10{
+                    node!{
+                        <li key=i>{text!("i: {}", i)}</li>
+                    }
+                }}
+            </ul>
+            <ul class="fruits">
+                {
+                    for i in ["apple", "orange", "grapes"]{
+                    node!{
+                        <li key=i>{text!("i: {}", i)}</li>
+                    }
+                }}
+            </ul>
+            <div>
+                //{Component::view(&self.btn).map_msg(Msg::BtnMsg)}
+            </div>
+            <div>
+                //{stateful_component(Button::default(), [], [text("External child of btn stateful_component")])}
+            </div>
+            <div>
+                //{stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
+            </div>
+        </div>
     }
-
 
     fn stylesheet() -> Vec<String> {
         vec![jss! {
