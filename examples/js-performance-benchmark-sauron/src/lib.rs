@@ -205,8 +205,8 @@ impl Application<Msg> for App {
                     <tbody id="tbody">
                         {for row in self.rows.iter() {
                             let is_selected = self.selected_id == Some(row.id);
-                            //component(row, [selected(is_selected)], [])
-                            row.view()
+                            component(row, [selected(is_selected)], [])
+                            //row.view()
                         }}
                     </tbody>
                 </table>
@@ -223,8 +223,8 @@ impl Application<Msg> for App {
                     <tbody id="tbody">
                         {for row in self.rows.iter() {
                             let is_selected = self.selected_id == Some(row.id);
-                            //component(row, [selected(is_selected)], [])
-                            row.view()
+                            component(row, [selected(is_selected)], [])
+                            //row.view()
                         }}
                     </tbody>
                 </table>
@@ -241,8 +241,8 @@ impl Application<Msg> for App {
                     <tbody id="tbody">
                         {for row in self.rows.iter() {
                             let is_selected = self.selected_id == Some(row.id);
-                            //component(row, [selected(is_selected)], [])
-                            row.view()
+                            component(row, [selected(is_selected)], [])
+                            //row.view()
                         }}
                     </tbody>
                 </table>

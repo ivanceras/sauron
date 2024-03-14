@@ -23,6 +23,8 @@ use std::collections::HashMap;
 use std::fmt;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
+use crate::vdom::diff_recursive;
+use crate::vdom::Patch;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -292,30 +294,60 @@ where
             let t2 = now();
             //Note: we don't want the patches to be stored in the StatelessModel
             //since it has a lifetime, which will infect the Node, Element, Attribute, etc
-            let patches = vdom::diff(&comp.vdom_template, &comp.view);
-            let t3 = now();
-            let dom_patches = self
-                .convert_patches(&template, &patches)
-                .expect("convert patches");
-            let t4 = now();
-            self.apply_dom_patches(dom_patches).expect("patch template");
-            let t5 = now();
+            //let patches = vdom::diff(&comp.vdom_template, &comp.view);
+            if let Some(skip_diff) = self.app_context.skip_diff.as_ref(){
+                log::info!("skip_diff: {:#?}", skip_diff);
+                let treepath = skip_diff.traverse();
+                log::info!("treeepath: {:#?}", treepath);
+                //let patches = diff(vdom_template, &app_view);
+                
+                let patches = treepath
+                    .into_iter()
+                    .flat_map(|path| {
+                        log::info!("path: {:?}", path);
+                        let old_node = path.find_node_by_path(&comp.vdom_template).expect("old_node");
+                        if let Some(new_node) = path.find_node_by_path(&comp.view){
+                            // only diff at level 0
+                            diff_recursive(
+                                &old_node,
+                                &new_node,
+                                &path,
+                                Some(0),
+                            )
+                        }else{
+                            // if the new node doesn't exist, put a placeholder child, that is the
+                            // an inserted node from the template
+                            vec![Patch::append_children(None, path.backtrack(), vec![old_node])]
+                        }
+                    })
+                    .collect::<Vec<_>>();
 
-            //log::info!("looking up template took: {}ms", t2 - t1);
-            //log::info!("diffing took: {}ms", t3 - t2);
-            //log::info!("converting patches took: {}ms", t4 - t3);
-            //log::info!("applying patches took: {}ms", t5 - t4);
-            //log::info!("creating stateless component took: {}ms", t5 - t1);
-            add_time_trace(Section {
-                lookup: t2 - t1,
-                diffing: t3 - t2,
-                convert_patch: t4 - t3,
-                apply_patch: t5 - t4,
-                total: t5 - t1,
-                ..Default::default()
-            });
-            //log::info!("creating stateless patches: {:#?}", patches);
-            template
+                    let t3 = now();
+                    let dom_patches = self
+                        .convert_patches(&template, &patches)
+                        .expect("convert patches");
+                    let t4 = now();
+                    self.apply_dom_patches(dom_patches).expect("patch template");
+                    let t5 = now();
+
+                    //log::info!("looking up template took: {}ms", t2 - t1);
+                    //log::info!("diffing took: {}ms", t3 - t2);
+                    //log::info!("converting patches took: {}ms", t4 - t3);
+                    //log::info!("applying patches took: {}ms", t5 - t4);
+                    //log::info!("creating stateless component took: {}ms", t5 - t1);
+                    add_time_trace(Section {
+                        lookup: t2 - t1,
+                        diffing: t3 - t2,
+                        convert_patch: t4 - t3,
+                        apply_patch: t5 - t4,
+                        total: t5 - t1,
+                        ..Default::default()
+                    });
+                    //log::info!("creating stateless patches: {:#?}", patches);
+                    template
+             }else{
+                 unreachable!("must have a skip diff");
+             }
         }
         #[cfg(not(feature = "use-template"))]
         {

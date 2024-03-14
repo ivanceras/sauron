@@ -636,6 +636,10 @@ where
             let current_vdom = self.app_context.current_vdom();
             let vdom_template = &self.app_context.vdom_template;
             log::info!("current_vdom: {}", current_vdom.render_to_string());
+            //TODO: traversing the treepath here is not enough
+            //as rows may be inserted in some loop.
+            //There has to be a full diff in the old node and new node when 
+            //old node can not be found
             let patches = treepath
                 .into_iter()
                 .flat_map(|path| {
@@ -650,7 +654,11 @@ where
                             Some(0),
                         )
                     }else{
-                        vec![Patch::append_children(None, path.backtrack(), vec![new_node])]
+                        // backtrack old and new
+                        let parent_path = path.backtrack();
+                        let new_node = parent_path.find_node_by_path(&new_vdom).expect("backtracked new_node");
+                        let old_node = parent_path.find_node_by_path(&current_vdom).expect("backtracked old node");
+                        diff_recursive(&old_node, &new_node, &parent_path, Some(0))
                     }
                 })
                 .collect::<Vec<_>>();
