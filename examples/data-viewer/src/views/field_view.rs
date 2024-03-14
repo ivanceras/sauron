@@ -33,7 +33,6 @@ pub struct FieldView {
 }
 
 impl Component for FieldView {
-
     type MSG = Msg;
     type XMSG = ();
 

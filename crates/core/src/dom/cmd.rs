@@ -12,7 +12,8 @@ use wasm_bindgen_futures::spawn_local;
 /// The emit function is called with the program argument.
 /// The callback is supplied with the program an is then executed/emitted.
 pub struct Cmd<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     /// the functions that would be executed when this Cmd is emited
     #[allow(clippy::type_complexity)]
@@ -117,7 +118,6 @@ where
         })
     }
 }
-
 
 impl<APP> From<Effects<APP::MSG, ()>> for Cmd<APP>
 where

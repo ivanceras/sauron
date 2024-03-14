@@ -27,7 +27,6 @@ impl Default for Clock {
 }
 
 impl Application for Clock {
-
     type MSG = Msg;
 
     // we wire the window set_interval api to trigger an Msg::Tick

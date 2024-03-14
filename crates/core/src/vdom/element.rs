@@ -185,6 +185,4 @@ impl<MSG> Element<MSG> {
         self.attribute_value(att_name)
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
-
-
 }

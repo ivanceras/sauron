@@ -1,3 +1,4 @@
+use crate::dom::component::register_template;
 use crate::dom::program::app_context::WeakContext;
 #[cfg(feature = "with-raf")]
 use crate::dom::request_animation_frame;
@@ -10,6 +11,7 @@ use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
 use crate::vdom::diff_recursive;
+use crate::vdom::Patch;
 use indexmap::IndexMap;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
@@ -24,8 +26,6 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
-use crate::dom::component::register_template;
-use crate::vdom::Patch;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
@@ -38,7 +38,8 @@ pub(crate) type Closures = Vec<Closure<dyn FnMut()>>;
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     pub(crate) app_context: AppContext<APP>,
 
@@ -71,7 +72,8 @@ pub struct Program<APP>
 }
 
 pub struct WeakProgram<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     pub(crate) app_context: WeakContext<APP>,
     pub(crate) root_node: Weak<RefCell<Option<Node>>>,
@@ -94,7 +96,8 @@ pub type ActiveClosure =
     IndexMap<usize, micromap::Map<&'static str, Closure<dyn FnMut(web_sys::Event)>, 5>>;
 
 impl<APP> WeakProgram<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     ///
     pub fn upgrade(&self) -> Option<Program<APP>> {
@@ -124,7 +127,8 @@ impl<APP> WeakProgram<APP>
 }
 
 impl<APP> Clone for WeakProgram<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     fn clone(&self) -> Self {
         WeakProgram {
@@ -143,7 +147,8 @@ impl<APP> Clone for WeakProgram<APP>
 }
 
 impl<APP> Program<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     ///
     pub fn downgrade(&self) -> WeakProgram<APP> {
@@ -163,7 +168,8 @@ impl<APP> Program<APP>
 }
 
 impl<APP> Clone for Program<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     fn clone(&self) -> Self {
         Program {
@@ -182,7 +188,8 @@ impl<APP> Clone for Program<APP>
 }
 
 impl<APP> Program<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     /// get a reference to the APP
     pub fn app(&self) -> Ref<'_, APP> {
@@ -211,9 +218,9 @@ where
         let app_view = app.borrow().view();
         let skip_diff = app.borrow().skip_diff();
         let vdom_template = app.borrow().template();
-        let template = if let Some(vdom_template) = vdom_template.as_ref(){
+        let template = if let Some(vdom_template) = vdom_template.as_ref() {
             Some(register_template(type_id, vdom_template))
-        }else{
+        } else {
             None
         };
 
@@ -387,8 +394,9 @@ where
         let skip_diff = self.app_context.skip_diff.as_ref();
         match (vdom_template, skip_diff) {
             (Some(vdom_template), Some(skip_diff)) => {
-                let patches = self.create_patches_with_skip_diff(&vdom_template, &app_view, skip_diff);
-                if let Some(dom_template) = dom_template{
+                let patches =
+                    self.create_patches_with_skip_diff(&vdom_template, &app_view, skip_diff);
+                if let Some(dom_template) = dom_template {
                     let dom_patches = self
                         .convert_patches(&dom_template, &patches)
                         .expect("convert patches");
@@ -397,11 +405,11 @@ where
                         .apply_dom_patches(dom_patches)
                         .expect("template patching");
                     dom_template
-                }else{
+                } else {
                     self.create_dom_node(&self.app_context.current_vdom())
                 }
             }
-            _ => self.create_dom_node(&self.app_context.current_vdom())
+            _ => self.create_dom_node(&self.app_context.current_vdom()),
         }
     }
 
@@ -513,14 +521,13 @@ where
         let node_count = view.node_count();
         let skip_diff = self.app_context.skip_diff.as_ref();
 
-        let dom_patches = if let Some(skip_diff) = skip_diff{
+        let dom_patches = if let Some(skip_diff) = skip_diff {
             self.create_dom_patches_with_skip_diff(&view, skip_diff)
-        }else{
+        } else {
             self.create_dom_patch(&view)
         };
 
         let total_patches = dom_patches.len();
-
 
         // update the last DOM node tree with this new view
         self.queue_dom_patches(dom_patches).expect("must not error");
@@ -593,32 +600,32 @@ where
         Ok(())
     }
 
-    pub(crate) fn create_patches_with_skip_diff<'a>(&self, 
-        old_vdom: &'a vdom::Node<APP::MSG>, 
+    pub(crate) fn create_patches_with_skip_diff<'a>(
+        &self,
+        old_vdom: &'a vdom::Node<APP::MSG>,
         new_vdom: &'a vdom::Node<APP::MSG>,
-        skip_diff: &SkipDiff) -> Vec<Patch<'a, APP::MSG>> {
-
+        skip_diff: &SkipDiff,
+    ) -> Vec<Patch<'a, APP::MSG>> {
         let treepath = skip_diff.traverse();
         treepath
             .into_iter()
             .flat_map(|path| {
                 let new_node = path.find_node_by_path(&new_vdom);
                 let old_node = path.find_node_by_path(&old_vdom);
-                match (old_node, new_node){
+                match (old_node, new_node) {
                     (Some(old_node), Some(new_node)) => {
                         // only diff at level 0
-                        diff_recursive(
-                            &old_node,
-                            &new_node,
-                            &path,
-                            Some(0),
-                        )
+                        diff_recursive(&old_node, &new_node, &path, Some(0))
                     }
                     _ => {
                         // backtrack old and new
                         let parent_path = path.backtrack();
-                        let new_node = parent_path.find_node_by_path(&new_vdom).expect("backtracked new_node");
-                        let old_node = parent_path.find_node_by_path(&old_vdom).expect("backtracked old node");
+                        let new_node = parent_path
+                            .find_node_by_path(&new_vdom)
+                            .expect("backtracked new_node");
+                        let old_node = parent_path
+                            .find_node_by_path(&old_vdom)
+                            .expect("backtracked old node");
                         diff_recursive(&old_node, &new_node, &parent_path, Some(0))
                     }
                 }
@@ -628,7 +635,11 @@ where
 
     /// This is called after the subsequenct updates,
     /// therefore vdom_template is not useful anymore, but skip_diff is still useful
-    fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<APP::MSG>, skip_diff: &SkipDiff) -> Vec<DomPatch>{
+    fn create_dom_patches_with_skip_diff(
+        &self,
+        new_vdom: &vdom::Node<APP::MSG>,
+        skip_diff: &SkipDiff,
+    ) -> Vec<DomPatch> {
         let current_vdom = self.app_context.current_vdom();
         let patches = self.create_patches_with_skip_diff(&current_vdom, new_vdom, skip_diff);
         self.convert_patches(
@@ -766,7 +777,6 @@ where
     /// - The view is reconstructed with the new state of the app.
     /// - The dom is updated with the newly reconstructed view.
     fn dispatch_inner(&mut self, deadline: Option<IdleDeadline>) {
-
         self.dispatch_pending_msgs(deadline)
             .expect("must dispatch msgs");
         // ensure that all pending msgs are all dispatched already
@@ -853,7 +863,6 @@ where
     }
 }
 
-
 impl<APP> Program<APP>
 where
     APP: Application,
@@ -880,4 +889,3 @@ where
         Ok(total_patches)
     }
 }
-

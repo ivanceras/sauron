@@ -183,7 +183,6 @@ impl<MSG> Attribute<MSG> {
         }
         grouped
     }
-
 }
 
 /// Create an attribute

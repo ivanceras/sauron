@@ -12,7 +12,8 @@ pub fn diff_keyed_nodes<'a, MSG>(
     path: &TreePath,
     depth_limit: Option<usize>,
 ) -> Vec<Patch<'a, MSG>> {
-    let (patches, offsets) = diff_keyed_ends(old_tag, old_children, new_children, path, depth_limit);
+    let (patches, offsets) =
+        diff_keyed_ends(old_tag, old_children, new_children, path, depth_limit);
 
     let (left_offset, right_offset) = match offsets {
         Some(offsets) => offsets,

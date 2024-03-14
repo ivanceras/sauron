@@ -8,7 +8,7 @@ pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     let view_node = crate::node::to_token_stream(input.clone());
     let skip_diff = crate::extract_skip_diff::to_token_stream(input.clone());
     let template = crate::extract_template::to_token_stream(input);
-    quote!{
+    quote! {
         fn view(&self) -> Node<Self::MSG> {
             #view_node
         }

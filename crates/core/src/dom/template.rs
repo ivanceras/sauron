@@ -8,7 +8,6 @@ use crate::vdom::Attribute;
 use crate::vdom::Leaf;
 use wasm_bindgen::intern;
 
-
 pub(crate) fn create_dom_node_without_listeners<MSG>(vnode: &vdom::Node<MSG>) -> web_sys::Node {
     match vnode {
         vdom::Node::Leaf(leaf_node) => create_leaf_node_without_listeners(leaf_node),

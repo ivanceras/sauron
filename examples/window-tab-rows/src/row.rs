@@ -36,7 +36,6 @@ impl Row {
 }
 
 impl Component for Row {
-
     type MSG = Msg;
     type XMSG = ();
 

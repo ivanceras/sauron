@@ -185,12 +185,11 @@ pub fn node(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     node::to_token_stream(input).into()
 }
 
-/// 
+///
 #[proc_macro]
 pub fn view(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     view::to_token_stream(input).into()
 }
-
 
 /// Generate a skip diff list based on the node used in the view
 /// ```rust

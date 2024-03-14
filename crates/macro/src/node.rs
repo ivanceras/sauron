@@ -148,7 +148,7 @@ fn attribute_to_tokens(attribute: NodeAttribute) -> TokenStream {
                     let value = value.value;
                     let is_event = attr.starts_with("on_");
 
-                    let splinters:Vec<&str> = attr.split(":").collect();
+                    let splinters: Vec<&str> = attr.split(":").collect();
                     let is_event_colon = splinters.len() == 2 && splinters[0] == "on";
 
                     if is_event {
@@ -157,7 +157,7 @@ fn attribute_to_tokens(attribute: NodeAttribute) -> TokenStream {
                             #[allow(unused_braces)]
                             sauron::html::events::#event(#value)
                         }
-                    } else if is_event_colon{
+                    } else if is_event_colon {
                         let event = quote::format_ident!("{}_{}", &splinters[0], &splinters[1]);
                         quote! {
                             #[allow(unused_braces)]

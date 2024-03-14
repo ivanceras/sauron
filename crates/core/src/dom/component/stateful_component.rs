@@ -1,3 +1,4 @@
+use crate::dom::component::register_template;
 use crate::dom::events::on_mount;
 use crate::dom::program::MountProcedure;
 use crate::dom::Application;
@@ -5,6 +6,7 @@ use crate::dom::Cmd;
 use crate::dom::Component;
 use crate::dom::DomAttrValue;
 use crate::dom::Program;
+use crate::dom::SkipDiff;
 use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
@@ -13,9 +15,6 @@ use std::any::TypeId;
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
-use crate::dom::SkipDiff;
-use crate::dom::component::register_template;
-
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
@@ -99,7 +98,7 @@ impl<MSG> Clone for StatefulModel<MSG> {
 
 impl<COMP> Application for COMP
 where
-    COMP: Component<XMSG=()> + StatefulComponent + 'static,
+    COMP: Component<XMSG = ()> + StatefulComponent + 'static,
 {
     type MSG = COMP::MSG;
 
@@ -116,11 +115,11 @@ where
         <Self as Component>::view(self)
     }
 
-    fn skip_diff(&self) -> Option<SkipDiff>{
+    fn skip_diff(&self) -> Option<SkipDiff> {
         <Self as Component>::skip_diff(self)
     }
 
-    fn template(&self) -> Option<Node<COMP::MSG>>{
+    fn template(&self) -> Option<Node<COMP::MSG>> {
         <Self as Component>::template(self)
     }
 
@@ -133,7 +132,6 @@ where
     }
 }
 
-
 /// create a stateful component node
 pub fn stateful_component<COMP, MSG, MSG2>(
     app: COMP,
@@ -141,7 +139,7 @@ pub fn stateful_component<COMP, MSG, MSG2>(
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG>
 where
-    COMP: Component<MSG= MSG2, XMSG=()> + StatefulComponent + 'static,
+    COMP: Component<MSG = MSG2, XMSG = ()> + StatefulComponent + 'static,
     MSG: Default + 'static,
     MSG2: 'static,
 {

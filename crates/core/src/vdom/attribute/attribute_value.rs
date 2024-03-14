@@ -95,7 +95,6 @@ impl<MSG> AttributeValue<MSG> {
         matches!(self, Self::Style(_))
     }
 
-
     /// return the styles if the attribute value is a style
     pub fn as_event_listener(&self) -> Option<&EventCallback<MSG>> {
         match self {
@@ -126,5 +125,4 @@ impl<MSG> AttributeValue<MSG> {
     pub fn is_just_empty(&self) -> bool {
         matches!(self, Self::Empty)
     }
-
 }

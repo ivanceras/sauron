@@ -54,7 +54,6 @@ impl PageView {
 }
 
 impl Component for PageView {
-
     type MSG = Msg;
     type XMSG = ();
 

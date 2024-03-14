@@ -48,7 +48,6 @@ impl Component for Button {
             <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
         </button>
     }
-
 }
 
 impl StatefulComponent for Button {

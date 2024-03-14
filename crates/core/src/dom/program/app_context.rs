@@ -1,5 +1,6 @@
 #[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
+use crate::dom::SkipDiff;
 use crate::dom::{Application, Cmd};
 use crate::vdom;
 use std::{
@@ -8,12 +9,12 @@ use std::{
     rc::Rc,
     rc::Weak,
 };
-use crate::dom::SkipDiff;
 
 /// AppContext module pertains only to application state and manages objects that affects it.
 /// It has no access to the dom, threads or any of the processing details that Program has to do.
 pub(crate) struct AppContext<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     /// holds the user application
     pub(crate) app: Rc<RefCell<APP>>,
@@ -56,7 +57,8 @@ where
 }
 
 impl<APP> WeakContext<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     pub(crate) fn upgrade(&self) -> Option<AppContext<APP>> {
         let app = self.app.upgrade()?;
@@ -76,7 +78,8 @@ impl<APP> WeakContext<APP>
 }
 
 impl<APP> Clone for WeakContext<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     fn clone(&self) -> Self {
         Self {
@@ -92,7 +95,8 @@ impl<APP> Clone for WeakContext<APP>
 }
 
 impl<APP> AppContext<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     pub(crate) fn downgrade(this: &Self) -> WeakContext<APP> {
         WeakContext {
@@ -114,7 +118,8 @@ impl<APP> AppContext<APP>
 }
 
 impl<APP> Clone for AppContext<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     fn clone(&self) -> Self {
         Self {

@@ -43,7 +43,6 @@ impl Tab {
 }
 
 impl Component for Tab {
-
     type MSG = Msg;
     type XMSG = ();
 

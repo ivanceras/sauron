@@ -43,7 +43,6 @@ impl ResizeWrapper {
 }
 
 impl Application for ResizeWrapper {
-
     type MSG = Msg;
 
     /// Setup the resize wrapper to listen to the mouseup

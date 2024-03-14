@@ -34,8 +34,7 @@ impl App {
 }
 
 impl Application for App {
-
-    type MSG = Msg; 
+    type MSG = Msg;
 
     fn init(&mut self) -> Cmd<Self> {
         Cmd::new(|mut program| {

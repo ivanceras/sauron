@@ -51,4 +51,3 @@ impl Application for App {
         }
     }
 }
-

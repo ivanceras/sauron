@@ -141,7 +141,6 @@ impl Application for App {
         </div>
     }
 
-
     fn stylesheet() -> Vec<String> {
         vec![jss! {
             "body": {

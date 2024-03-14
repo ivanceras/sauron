@@ -100,7 +100,7 @@ impl Application for App {
         }
     }
 
-    view!{
+    view! {
         <div class="some-class" id="some-id" {attr("data-id", 1)} {style!{"font-family": "monospace"}}>
             <div id="current-time">{text!("Today is {}",self.date.to_locale_string("en-GB", &JsValue::undefined()))}</div>
             <div>

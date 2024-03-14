@@ -7,16 +7,14 @@ mod skip_diff;
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
 ///
-pub trait Application: Sized + 'static
-{
-    /// 
+pub trait Application: Sized + 'static {
+    ///
     type MSG;
     ///  The application can implement this method where it can modify its initial state.
     ///  This method is called right after the program is mounted into the DOM.
     fn init(&mut self) -> Cmd<Self> {
         Cmd::none()
     }
-
 
     /// Update the component with a message.
     /// The update function returns a Cmd, which can be executed by the runtime.
@@ -33,7 +31,7 @@ pub trait Application: Sized + 'static
         None
     }
 
-    /// 
+    ///
     fn template(&self) -> Option<Node<Self::MSG>> {
         None
     }

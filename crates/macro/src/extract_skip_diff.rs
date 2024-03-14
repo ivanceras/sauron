@@ -10,7 +10,7 @@ pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     }
 }
 
-fn do_extract(nodes: &[Node]) -> TokenStream{
+fn do_extract(nodes: &[Node]) -> TokenStream {
     let skip_tree = from_multiple_nodes(&nodes);
     quote! {
         #skip_tree.collapse_children()

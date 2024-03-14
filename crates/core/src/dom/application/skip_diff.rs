@@ -37,7 +37,6 @@ impl SkipDiff {
         self.traverse_recursive(TreePath::root())
     }
 
-
     /// traverse the skip diff and return a list of TreePath that will be evaluated
     /// by the program
     fn traverse_recursive(&self, current: TreePath) -> Vec<TreePath> {

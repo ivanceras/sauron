@@ -21,7 +21,6 @@ impl Style {
         }
     }
 
-
     pub(crate) fn merge_to_string<'a>(
         styles: impl IntoIterator<Item = &'a Self>,
     ) -> Option<String> {

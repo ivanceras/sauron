@@ -60,7 +60,6 @@ impl Window {
 }
 
 impl Application for Window {
-
     type MSG = Msg;
 
     fn update(&mut self, msg: Msg) -> Cmd<Self> {

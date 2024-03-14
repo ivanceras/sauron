@@ -122,7 +122,6 @@ impl Value {
         }
     }
 
-
     pub(crate) fn merge_to_string<'a>(
         values: impl IntoIterator<Item = &'a Value>,
     ) -> Option<String> {

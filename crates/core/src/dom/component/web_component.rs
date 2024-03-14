@@ -5,8 +5,7 @@ use wasm_bindgen::JsCast;
 
 /// a trait for implementing WebComponent in the DOM with custom tag
 pub trait WebComponent {
-
-    /// 
+    ///
     type MSG;
     /// returns the attributes that is observed by this component
     /// These are the names of the attributes the component is interested in
@@ -133,7 +132,8 @@ where
 /// generics, we use generics here to simplify the code and do the type checks for us, rather than
 /// in the code derived from the #[web_component] macro
 pub struct WebComponentWrapper<APP>
-    where APP: Application
+where
+    APP: Application,
 {
     /// the underlying program running this web component
     pub program: Program<APP>,

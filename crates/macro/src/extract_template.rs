@@ -1,8 +1,8 @@
+use crate::extract_skip_diff::is_literal_attribute;
 use proc_macro2::TokenStream;
 use quote::quote;
 use rstml::node::{KeyedAttributeValue, Node, NodeAttribute, NodeBlock};
 use sauron_core::html::lookup;
-use crate::extract_skip_diff::is_literal_attribute;
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match rstml::parse(input) {
@@ -34,10 +34,13 @@ fn from_single_node(node: Node) -> TokenStream {
             let open_tag = elm.open_tag;
             let tag = open_tag.name.to_string();
 
-
             let self_closing = lookup::is_self_closing(&tag);
             let namespace = lookup::tag_namespace(&tag);
-            let static_attrs:Vec<&NodeAttribute> = open_tag.attributes.iter().filter(|a|is_literal_attribute(a)).collect();
+            let static_attrs: Vec<&NodeAttribute> = open_tag
+                .attributes
+                .iter()
+                .filter(|a| is_literal_attribute(a))
+                .collect();
             let attributes = node_attributes(&static_attrs);
             let children = nodes_to_tokens(elm.children);
             let ns = if let Some(namespace) = namespace {
@@ -145,4 +148,3 @@ fn attribute_to_tokens(attribute: &NodeAttribute) -> TokenStream {
         }
     }
 }
-

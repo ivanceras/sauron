@@ -62,7 +62,6 @@ impl Fetcher {
 }
 
 impl Component for Fetcher {
-
     type MSG = Msg;
     type XMSG = ();
 

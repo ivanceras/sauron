@@ -1,16 +1,16 @@
+use crate::dom::SkipDiff;
 use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
 use std::any::TypeId;
-use crate::dom::SkipDiff;
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
+use crate::dom::template;
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
-use crate::dom::template;
 
 mod stateful_component;
 #[cfg(feature = "custom_element")]
@@ -27,16 +27,15 @@ thread_local! {
 
 /// if the template is already registered, return the dom template
 /// if not, create the dom template and add it
-pub fn register_template<MSG>(type_id: TypeId, vdom_template: &Node<MSG>) -> web_sys::Node{
-    if let Some(template) = lookup_template(type_id){
+pub fn register_template<MSG>(type_id: TypeId, vdom_template: &Node<MSG>) -> web_sys::Node {
+    if let Some(template) = lookup_template(type_id) {
         template
-    }else{
+    } else {
         let template = template::create_dom_node_without_listeners(&vdom_template);
         add_template(type_id, &template);
         template
     }
 }
-
 
 pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
     TEMPLATE_LOOKUP.with_borrow_mut(|map| {
@@ -65,9 +64,8 @@ pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node> {
 /// follow ups and effects. Follow ups are executed on the next
 /// update loop of this component, while the effects are executed
 /// on the parent component that mounts it.
-pub trait Component
-{
-    /// 
+pub trait Component {
+    ///
     type MSG: 'static;
     ///
     type XMSG: 'static;
@@ -145,7 +143,9 @@ pub trait Component
     }
 
     /// create namespaced class names to pair that evaluates to true
-    fn classes_ns_flag(pair: impl IntoIterator<Item = (impl ToString, bool)>) -> Attribute<Self::MSG>
+    fn classes_ns_flag(
+        pair: impl IntoIterator<Item = (impl ToString, bool)>,
+    ) -> Attribute<Self::MSG>
     where
         Self: Sized,
     {
@@ -294,7 +294,6 @@ mod test {
         struct AwesomeEditor {}
 
         impl Component for AwesomeEditor {
-
             type MSG = Msg;
             type XMSG = ();
 

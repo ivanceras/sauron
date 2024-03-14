@@ -4,21 +4,21 @@ use crate::vdom::AttributeValue;
 use crate::vdom::Namespace;
 use crate::vdom::Style;
 use crate::vdom::Value;
-use wasm_bindgen::intern;
-use wasm_bindgen::{closure::Closure, JsValue};
-use web_sys::Element;
-use web_sys;
 #[cfg(feature = "ensure-attr-set")]
 use crate::vdom::{CHECKED, DISABLED, OPEN, VALUE};
-#[cfg(feature = "ensure-attr-set")]
-use web_sys::{
-    HtmlButtonElement, HtmlDataElement, HtmlDetailsElement, HtmlFieldSetElement,
-    HtmlInputElement, HtmlLiElement, HtmlLinkElement, HtmlMeterElement, HtmlOptGroupElement,
-    HtmlOptionElement, HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement,
-    HtmlStyleElement, HtmlTextAreaElement,
-};
+use wasm_bindgen::intern;
 #[cfg(feature = "ensure-attr-set")]
 use wasm_bindgen::JsCast;
+use wasm_bindgen::{closure::Closure, JsValue};
+use web_sys;
+use web_sys::Element;
+#[cfg(feature = "ensure-attr-set")]
+use web_sys::{
+    HtmlButtonElement, HtmlDataElement, HtmlDetailsElement, HtmlFieldSetElement, HtmlInputElement,
+    HtmlLiElement, HtmlLinkElement, HtmlMeterElement, HtmlOptGroupElement, HtmlOptionElement,
+    HtmlOutputElement, HtmlParamElement, HtmlProgressElement, HtmlSelectElement, HtmlStyleElement,
+    HtmlTextAreaElement,
+};
 
 /// a dom version of the Attribute, thereby removing the MSG generic
 pub struct DomAttr {

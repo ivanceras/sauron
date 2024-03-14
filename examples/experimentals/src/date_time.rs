@@ -76,7 +76,8 @@ where
 }
 
 impl<XMSG> sauron::Component for DateTimeWidget<XMSG>
-where XMSG: 'static
+where
+    XMSG: 'static,
 {
     type MSG = Msg;
     type XMSG = XMSG;
@@ -165,7 +166,7 @@ where XMSG: 'static
         vec!["date", "time", "interval"]
     }
 
-    view!{
+    view! {
         <div class="datetimebox" on_mount=Msg::Mounted>
             <input type="date" class="datetimebox__date"
                         on_change=|input| {
@@ -182,7 +183,6 @@ where XMSG: 'static
             <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
         </div>
     }
-
 }
 
 impl StatefulComponent for DateTimeWidget<()> {

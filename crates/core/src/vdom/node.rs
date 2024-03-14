@@ -211,11 +211,10 @@ impl<MSG> Node<MSG> {
     /// return the children of this node if it is an element
     /// returns None if it is a text node
     pub fn children(&self) -> &[Node<MSG>] {
-        match self{
+        match self {
             Self::Element(elm) => elm.children(),
             Self::Leaf(Leaf::StatelessComponent(comp)) => &comp.children,
-            _ => &[]
-
+            _ => &[],
         }
     }
 
@@ -319,7 +318,6 @@ impl<MSG> Node<MSG> {
         self.attribute_value(att_name)
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
-
 }
 
 /// create a virtual node with tag, attrs and children

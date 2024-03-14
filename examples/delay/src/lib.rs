@@ -54,7 +54,6 @@ impl App {
 }
 
 impl Application for App {
-
     type MSG = Msg;
 
     fn view(&self) -> Node<Msg> {

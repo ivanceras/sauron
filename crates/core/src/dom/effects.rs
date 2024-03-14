@@ -186,7 +186,6 @@ where
         }
     }
 
-
     /// Append this msgs to the local effects
     pub fn append_local(mut self, local: impl IntoIterator<Item = MSG>) -> Self {
         self.local
@@ -255,7 +254,6 @@ impl<MSG, XMSG> From<Task<MSG>> for Effects<MSG, XMSG> {
         }
     }
 }
-
 
 impl<MSG> Effects<MSG, MSG>
 where

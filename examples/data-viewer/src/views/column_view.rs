@@ -28,7 +28,6 @@ impl ColumnView {
 }
 
 impl Component for ColumnView {
-
     type MSG = Msg;
     type XMSG = ();
 

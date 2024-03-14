@@ -12,7 +12,6 @@ use std::mem::ManuallyDrop;
 pub struct SimpleComponent;
 
 impl Application for SimpleComponent {
-
     type MSG = ();
 
     fn update(&mut self, _msg: ()) -> Cmd<Self> {
@@ -30,4 +29,3 @@ pub fn simple_program() -> ManuallyDrop<Program<SimpleComponent>> {
     console_log::init_with_level(log::Level::Trace).ok();
     Program::mount_to_body(SimpleComponent)
 }
-

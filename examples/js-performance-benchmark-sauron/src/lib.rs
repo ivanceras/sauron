@@ -57,10 +57,13 @@ impl RowData {
 
         let label = [adjective, colour, noun].join(" ");
 
-        Self { id, label, selected: false }
+        Self {
+            id,
+            label,
+            selected: false,
+        }
     }
 }
-
 
 impl Component for RowData {
     type MSG = Msg;
@@ -73,7 +76,7 @@ impl Component for RowData {
     view! {
         <tr class={if self.selected { "danger" } else  { "" }} key=self.id >
             <td class="col-md-1">{ text(self.id) }</td>
-            <td class="col-md-4" 
+            <td class="col-md-4"
             on_click={
                 let id = self.id;
                 move |_| Msg::Select(id)
@@ -81,10 +84,10 @@ impl Component for RowData {
                  <a class="lbl">{ text(&self.label) }</a>
             </td>
             <td class="col-md-1">
-                 <a class="remove" 
+                 <a class="remove"
                  on_click={
                      let id = self.id;
-                     move |_| Msg::Remove(id) 
+                     move |_| Msg::Remove(id)
                  }>
                      <span class="glyphicon glyphicon-remove remove" aria-hidden="true"></span>
                  </a>
@@ -92,9 +95,7 @@ impl Component for RowData {
             <td class="col-md-6"></td>
         </tr>
     }
-
 }
-
 
 struct App {
     rows: Vec<RowData>,
@@ -124,7 +125,7 @@ enum Msg {
     Remove(usize),
     Select(usize),
     #[default]
-    NoOp
+    NoOp,
 }
 
 impl Application for App {
@@ -171,8 +172,8 @@ impl Application for App {
             }
             Msg::Select(id) => {
                 self.selected_id = Some(id);
-                for row in &mut self.rows{
-                     row.selected = self.selected_id == Some(row.id)
+                for row in &mut self.rows {
+                    row.selected = self.selected_id == Some(row.id)
                 }
             }
             Msg::NoOp => {
@@ -197,7 +198,6 @@ impl Application for App {
             <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
         </div>
     }
-
 }
 
 impl App {

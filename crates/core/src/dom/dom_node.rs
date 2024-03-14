@@ -1,5 +1,7 @@
 use crate::dom::component::lookup_template;
 use crate::dom::component::StatelessModel;
+#[cfg(feature = "with-debug")]
+use crate::dom::now;
 use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
 use crate::dom::StatefulModel;
@@ -15,15 +17,13 @@ use crate::{
 };
 use indexmap::IndexMap;
 use js_sys::Function;
+use std::cell::Cell;
+#[cfg(feature = "with-debug")]
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
-use std::cell::Cell;
-#[cfg(feature = "with-debug")]
-use crate::dom::now;
-#[cfg(feature = "with-debug")]
-use std::cell::RefCell;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -298,7 +298,8 @@ where
         let skip_diff = self.app_context.skip_diff.as_ref();
         match (template, skip_diff) {
             (Some(template), Some(skip_diff)) => {
-                let patches = self.create_patches_with_skip_diff(&comp.vdom_template, &comp.view, skip_diff);
+                let patches =
+                    self.create_patches_with_skip_diff(&comp.vdom_template, &comp.view, skip_diff);
                 #[cfg(feature = "with-debug")]
                 let t3 = now();
                 let dom_patches = self

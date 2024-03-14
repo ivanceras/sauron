@@ -18,11 +18,11 @@ mod leaf;
 mod map_msg;
 mod render;
 
-pub use attribute::special::{key, KEY, SKIP, SKIP_CRITERIA, REPLACE, replace, skip, skip_criteria};
-#[cfg(feature = "ensure-attr-set")]
-pub(crate) use attribute::special::{
-    CHECKED, DISABLED, OPEN, VALUE,
+pub use attribute::special::{
+    key, replace, skip, skip_criteria, KEY, REPLACE, SKIP, SKIP_CRITERIA,
 };
+#[cfg(feature = "ensure-attr-set")]
+pub(crate) use attribute::special::{CHECKED, DISABLED, OPEN, VALUE};
 pub use attribute::{attr, attr_ns, AttributeName, AttributeValue, Namespace, Style, Tag, Value};
 pub use diff::{diff, diff_recursive};
 pub use node::{element, element_ns, fragment, leaf, node_list, Node};

@@ -59,7 +59,6 @@ pub struct DataView {
 }
 
 impl Component for DataView {
-
     type MSG = Msg;
     type XMSG = ();
 

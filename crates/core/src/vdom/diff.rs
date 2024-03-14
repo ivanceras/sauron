@@ -119,11 +119,10 @@ pub fn diff_recursive<'a, MSG>(
     path: &TreePath,
     depth_limit: Option<usize>,
 ) -> Vec<Patch<'a, MSG>> {
-
     // return if it has reach depth limit
-    if let Some(depth_limit) = depth_limit{
-        if path.path.len() == depth_limit{
-            return vec![]
+    if let Some(depth_limit) = depth_limit {
+        if path.path.len() == depth_limit {
+            return vec![];
         }
     }
     let skip = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
@@ -204,7 +203,7 @@ fn diff_element<'a, MSG>(
         &old_element.children(),
         &new_element.children(),
         path,
-        depth_limit
+        depth_limit,
     );
 
     patches.extend(more_patches);
@@ -221,10 +220,12 @@ fn diff_nodes<'a, MSG>(
     let diff_as_keyed = is_any_keyed(old_children) || is_any_keyed(new_children);
 
     if diff_as_keyed {
-        let keyed_patches = diff_lis::diff_keyed_nodes(old_tag, old_children, new_children, path, depth_limit);
+        let keyed_patches =
+            diff_lis::diff_keyed_nodes(old_tag, old_children, new_children, path, depth_limit);
         keyed_patches
     } else {
-        let non_keyed_patches = diff_non_keyed_nodes(old_tag, old_children, new_children, path, depth_limit);
+        let non_keyed_patches =
+            diff_non_keyed_nodes(old_tag, old_children, new_children, path, depth_limit);
         non_keyed_patches
     }
 }

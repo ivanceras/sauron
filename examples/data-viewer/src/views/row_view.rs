@@ -36,7 +36,6 @@ impl RowView {
 }
 
 impl Component for RowView {
-
     type MSG = Msg;
     type XMSG = ();
 

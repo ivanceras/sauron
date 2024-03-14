@@ -39,7 +39,6 @@ pub enum Msg {
 }
 
 impl Application for Model {
-    
     type MSG = Msg;
 
     fn update(&mut self, msg: Msg) -> Cmd<Self> {
