@@ -4,7 +4,10 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 /// a trait for implementing WebComponent in the DOM with custom tag
-pub trait WebComponent<MSG> {
+pub trait WebComponent {
+
+    /// 
+    type MSG;
     /// returns the attributes that is observed by this component
     /// These are the names of the attributes the component is interested in
     fn observed_attributes() -> Vec<&'static str>;
@@ -14,12 +17,12 @@ pub trait WebComponent<MSG> {
     ///
     /// if the listed attributes in the observed attributes are modified
     fn attribute_changed(
-        program: Program<Self, MSG>,
+        program: Program<Self>,
         attr_name: &str,
         old_value: Option<String>,
         new_value: Option<String>,
     ) where
-        Self: Sized + Application<MSG>;
+        Self: Sized + Application;
 
     /// the component is attached to the dom
     fn connected_callback(&mut self);
@@ -129,20 +132,18 @@ where
 /// This is also necessary, since #[wasm_bindgen] macro can not process impl types which uses
 /// generics, we use generics here to simplify the code and do the type checks for us, rather than
 /// in the code derived from the #[web_component] macro
-pub struct WebComponentWrapper<APP, MSG>
-where
-    MSG: 'static,
+pub struct WebComponentWrapper<APP>
+    where APP: Application
 {
     /// the underlying program running this web component
-    pub program: Program<APP, MSG>,
+    pub program: Program<APP>,
     /// the mount node for the program
     pub mount_node: web_sys::Node,
 }
 
-impl<APP, MSG> WebComponentWrapper<APP, MSG>
+impl<APP> WebComponentWrapper<APP>
 where
-    APP: Application<MSG> + WebComponent<MSG> + Default + 'static,
-    MSG: 'static,
+    APP: Application + WebComponent + Default + 'static,
 {
     /// create a new web component, with the node as the target element to be mounted into
     pub fn new(node: JsValue) -> Self {
@@ -165,10 +166,10 @@ where
     pub fn connected_callback(&mut self) {
         self.program
             .mount(&self.mount_node, MountProcedure::append_to_shadow());
-        let static_style = <APP as Application<MSG>>::stylesheet().join("");
+        let static_style = <APP as Application>::stylesheet().join("");
         self.program.inject_style_to_mount(&static_style);
         let dynamic_style =
-            <APP as Application<MSG>>::style(&self.program.app_context.app.borrow()).join("");
+            <APP as Application>::style(&self.program.app_context.app.borrow()).join("");
         self.program.inject_style_to_mount(&dynamic_style);
         self.program
             .app_context

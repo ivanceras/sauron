@@ -20,7 +20,10 @@ pub struct Button {
     cnt: i32,
 }
 
-impl Component<Msg, ()> for Button {
+impl Component for Button {
+    type MSG = Msg;
+    type XMSG = ();
+
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::Click => self.cnt += 1,

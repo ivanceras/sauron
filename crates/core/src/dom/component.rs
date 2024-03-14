@@ -69,21 +69,24 @@ pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node> {
 /// follow ups and effects. Follow ups are executed on the next
 /// update loop of this component, while the effects are executed
 /// on the parent component that mounts it.
-pub trait Component<MSG, XMSG>
-where
-    MSG: 'static,
+pub trait Component
 {
+    /// 
+    type MSG: 'static;
+    ///
+    type XMSG: 'static;
+
     /// init the component
-    fn init(&mut self) -> Effects<MSG, XMSG> {
+    fn init(&mut self) -> Effects<Self::MSG, Self::XMSG> {
         Effects::none()
     }
 
     /// Update the model of this component and return
     /// follow up and/or effects that will be executed on the next update loop
-    fn update(&mut self, msg: MSG) -> Effects<MSG, XMSG>;
+    fn update(&mut self, msg: Self::MSG) -> Effects<Self::MSG, Self::XMSG>;
 
     /// the view of the component
-    fn view(&self) -> Node<MSG>;
+    fn view(&self) -> Node<Self::MSG>;
 
     /// optional logical code when to skip diffing some particular node
     /// by comparing field values of app and its old values
@@ -94,7 +97,7 @@ where
 
     ///
     #[cfg(feature = "use-template")]
-    fn template(&self) -> Option<Node<MSG>> {
+    fn template(&self) -> Option<Node<Self::MSG>> {
         None
     }
 
@@ -140,7 +143,7 @@ where
     }
 
     /// create a classname prepended with this component name
-    fn class_ns(class_name: &str) -> Attribute<MSG>
+    fn class_ns(class_name: &str) -> Attribute<Self::MSG>
     where
         Self: Sized,
     {
@@ -148,7 +151,7 @@ where
     }
 
     /// create namespaced class names to pair that evaluates to true
-    fn classes_ns_flag(pair: impl IntoIterator<Item = (impl ToString, bool)>) -> Attribute<MSG>
+    fn classes_ns_flag(pair: impl IntoIterator<Item = (impl ToString, bool)>) -> Attribute<Self::MSG>
     where
         Self: Sized,
     {
@@ -266,14 +269,13 @@ impl<MSG> Clone for StatelessModel<MSG> {
 }
 
 /// create a stateless component node
-pub fn component<COMP, MSG, MSG2>(
+pub fn component<COMP>(
     app: &COMP,
-    attrs: impl IntoIterator<Item = Attribute<MSG>>,
-    children: impl IntoIterator<Item = Node<MSG>>,
-) -> Node<MSG>
+    attrs: impl IntoIterator<Item = Attribute<COMP::MSG>>,
+    children: impl IntoIterator<Item = Node<COMP::MSG>>,
+) -> Node<COMP::MSG>
 where
-    COMP: Component<MSG, MSG2> + 'static,
-    MSG: 'static,
+    COMP: Component + 'static,
 {
     let type_id = TypeId::of::<COMP>();
     let view = app.view();

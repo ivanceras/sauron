@@ -64,7 +64,10 @@ impl RowData {
 }
 
 
-impl Component<Msg, ()> for RowData {
+impl Component for RowData {
+    type MSG = Msg;
+    type XMSG = ();
+
     fn update(&mut self, _msg: Msg) -> Effects<Msg, ()> {
         Effects::none()
     }
@@ -172,8 +175,10 @@ enum Msg {
     NoOp
 }
 
-impl Application<Msg> for App {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+impl Application for App {
+    type MSG = Msg;
+
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::Run(amount) => {
                 let rng = &mut self.rng;

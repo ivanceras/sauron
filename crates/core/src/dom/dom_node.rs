@@ -229,12 +229,11 @@ fn create_unique_identifier() -> usize {
 
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
-impl<APP, MSG> Program<APP, MSG>
+impl<APP> Program<APP>
 where
-    MSG: 'static,
-    APP: Application<MSG>,
+    APP: Application,
 {
-    fn create_document_fragment(&self, nodes: &[vdom::Node<MSG>]) -> Node {
+    fn create_document_fragment(&self, nodes: &[vdom::Node<APP::MSG>]) -> Node {
         let doc_fragment = document().create_document_fragment();
         for vnode in nodes {
             let created_node = self.create_dom_node(vnode);
@@ -243,7 +242,7 @@ where
         doc_fragment.into()
     }
 
-    fn create_leaf_node(&self, leaf: &Leaf<MSG>) -> Node {
+    fn create_leaf_node(&self, leaf: &Leaf<APP::MSG>) -> Node {
         match leaf {
             Leaf::Text(txt) => web_sys::Node::create_text_node(txt).into(),
             Leaf::Comment(comment) => document().create_comment(comment).into(),
@@ -273,7 +272,7 @@ where
     /// The attributes affects the Stateful component state.
     /// The attributes can be diff and send the patches to the StatefulComponent
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
-    fn create_stateful_component(&self, comp: &StatefulModel<MSG>) -> Node {
+    fn create_stateful_component(&self, comp: &StatefulModel<APP::MSG>) -> Node {
         let comp_node = self.create_dom_node(&crate::html::div(comp.attrs.clone(), []));
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
@@ -286,7 +285,7 @@ where
         comp_node
     }
 
-    fn create_stateless_component(&self, comp: &StatelessModel<MSG>) -> Node {
+    fn create_stateless_component(&self, comp: &StatelessModel<APP::MSG>) -> Node {
         #[cfg(feature = "use-template")]
         {
             let t1 = now();
@@ -355,7 +354,7 @@ where
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.
-    pub fn create_dom_node(&self, vnode: &vdom::Node<MSG>) -> Node {
+    pub fn create_dom_node(&self, vnode: &vdom::Node<APP::MSG>) -> Node {
         match vnode {
             vdom::Node::Leaf(leaf_node) => self.create_leaf_node(leaf_node),
             vdom::Node::Element(element_node) => {
@@ -386,7 +385,7 @@ where
 
     /// Build a DOM element by recursively creating DOM nodes for this element and it's
     /// children, it's children's children, etc.
-    fn create_element_node(&self, velem: &vdom::Element<MSG>) -> Node {
+    fn create_element_node(&self, velem: &vdom::Element<APP::MSG>) -> Node {
         let document = document();
 
         let element = if let Some(namespace) = velem.namespace() {
@@ -500,7 +499,7 @@ where
     pub(crate) fn add_event_listeners(
         &self,
         target: &web_sys::EventTarget,
-        event_listeners: Vec<Attribute<MSG>>,
+        event_listeners: Vec<Attribute<APP::MSG>>,
     ) -> Result<(), JsValue> {
         let dom_attrs = event_listeners
             .into_iter()

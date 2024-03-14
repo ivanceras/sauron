@@ -12,9 +12,8 @@ use crate::dom::SkipDiff;
 
 /// AppContext module pertains only to application state and manages objects that affects it.
 /// It has no access to the dom, threads or any of the processing details that Program has to do.
-pub(crate) struct AppContext<APP, MSG>
-where
-    MSG: 'static,
+pub(crate) struct AppContext<APP>
+    where APP: Application
 {
     /// holds the user application
     pub(crate) app: Rc<RefCell<APP>>,
@@ -30,25 +29,25 @@ where
     /// The vdom template generated from the APP
     /// This doesn't change throughout the app lifecycle
     #[cfg(feature = "use-template")]
-    pub(crate) vdom_template: Rc<vdom::Node<MSG>>,
+    pub(crate) vdom_template: Rc<vdom::Node<APP::MSG>>,
 
     /// the current vdom representation
     /// if the dom is sync with the app state the current_vdom corresponds to the app.view
-    pub(crate) current_vdom: Rc<RefCell<vdom::Node<MSG>>>,
+    pub(crate) current_vdom: Rc<RefCell<vdom::Node<APP::MSG>>>,
 
     /// The MSG that hasn't been applied to the APP yet
     ///
     /// Note: MSG has to be executed in the same succession one by one
     /// since the APP's state may be affected by the previous MSG
-    pub(crate) pending_msgs: Rc<RefCell<VecDeque<MSG>>>,
+    pub(crate) pending_msgs: Rc<RefCell<VecDeque<APP::MSG>>>,
 
     /// pending cmds that hasn't been emited yet
-    pub(crate) pending_cmds: Rc<RefCell<VecDeque<Cmd<APP, MSG>>>>,
+    pub(crate) pending_cmds: Rc<RefCell<VecDeque<Cmd<APP>>>>,
 }
 
-pub(crate) struct WeakContext<APP, MSG>
+pub(crate) struct WeakContext<APP>
 where
-    MSG: 'static,
+    APP: Application,
 {
     pub(crate) app: Weak<RefCell<APP>>,
     #[cfg(feature = "use-template")]
@@ -56,17 +55,16 @@ where
     #[cfg(feature = "skip_diff")]
     pub(crate) skip_diff: Rc<Option<SkipDiff>>,
     #[cfg(feature = "use-template")]
-    pub(crate) vdom_template: Weak<vdom::Node<MSG>>,
-    pub(crate) current_vdom: Weak<RefCell<vdom::Node<MSG>>>,
-    pub(crate) pending_msgs: Weak<RefCell<VecDeque<MSG>>>,
-    pub(crate) pending_cmds: Weak<RefCell<VecDeque<Cmd<APP, MSG>>>>,
+    pub(crate) vdom_template: Weak<vdom::Node<APP::MSG>>,
+    pub(crate) current_vdom: Weak<RefCell<vdom::Node<APP::MSG>>>,
+    pub(crate) pending_msgs: Weak<RefCell<VecDeque<APP::MSG>>>,
+    pub(crate) pending_cmds: Weak<RefCell<VecDeque<Cmd<APP>>>>,
 }
 
-impl<APP, MSG> WeakContext<APP, MSG>
-where
-    MSG: 'static,
+impl<APP> WeakContext<APP>
+    where APP: Application
 {
-    pub(crate) fn upgrade(&self) -> Option<AppContext<APP, MSG>> {
+    pub(crate) fn upgrade(&self) -> Option<AppContext<APP>> {
         let app = self.app.upgrade()?;
         let current_vdom = self.current_vdom.upgrade()?;
         let pending_msgs = self.pending_msgs.upgrade()?;
@@ -86,9 +84,8 @@ where
     }
 }
 
-impl<APP, MSG> Clone for WeakContext<APP, MSG>
-where
-    MSG: 'static,
+impl<APP> Clone for WeakContext<APP>
+    where APP: Application
 {
     fn clone(&self) -> Self {
         Self {
@@ -106,11 +103,10 @@ where
     }
 }
 
-impl<APP, MSG> AppContext<APP, MSG>
-where
-    MSG: 'static,
+impl<APP> AppContext<APP>
+    where APP: Application
 {
-    pub(crate) fn downgrade(this: &Self) -> WeakContext<APP, MSG> {
+    pub(crate) fn downgrade(this: &Self) -> WeakContext<APP> {
         WeakContext {
             app: Rc::downgrade(&this.app),
             #[cfg(feature = "use-template")]
@@ -132,9 +128,8 @@ where
     }
 }
 
-impl<APP, MSG> Clone for AppContext<APP, MSG>
-where
-    MSG: 'static,
+impl<APP> Clone for AppContext<APP>
+    where APP: Application
 {
     fn clone(&self) -> Self {
         Self {
@@ -152,16 +147,15 @@ where
     }
 }
 
-impl<APP, MSG> AppContext<APP, MSG>
+impl<APP> AppContext<APP>
 where
-    MSG: 'static,
-    APP: Application<MSG>,
+    APP: Application,
 {
-    pub fn init_app(&self) -> Cmd<APP, MSG> {
+    pub fn init_app(&self) -> Cmd<APP> {
         self.app.borrow_mut().init()
     }
 
-    pub fn view(&self) -> vdom::Node<MSG> {
+    pub fn view(&self) -> vdom::Node<APP::MSG> {
         self.app.borrow().view()
     }
     pub fn dynamic_style(&self) -> String {
@@ -172,24 +166,24 @@ where
         APP::stylesheet().join("")
     }
 
-    pub fn set_current_dom(&mut self, new_vdom: vdom::Node<MSG>) {
+    pub fn set_current_dom(&mut self, new_vdom: vdom::Node<APP::MSG>) {
         *self.current_vdom.borrow_mut() = new_vdom;
     }
 
-    pub fn current_vdom(&self) -> Ref<'_, vdom::Node<MSG>> {
+    pub fn current_vdom(&self) -> Ref<'_, vdom::Node<APP::MSG>> {
         self.current_vdom.borrow()
     }
 
     #[cfg(feature = "with-measure")]
-    pub fn measurements(&self, measurements: Measurements) -> Cmd<APP, MSG> {
+    pub fn measurements(&self, measurements: Measurements) -> Cmd<APP> {
         self.app.borrow().measurements(measurements).no_render()
     }
 
-    pub fn push_msgs(&mut self, msgs: impl IntoIterator<Item = MSG>) {
+    pub fn push_msgs(&mut self, msgs: impl IntoIterator<Item = APP::MSG>) {
         self.pending_msgs.borrow_mut().extend(msgs);
     }
 
-    pub fn update_app(&mut self, msg: MSG) -> Cmd<APP, MSG> {
+    pub fn update_app(&mut self, msg: APP::MSG) -> Cmd<APP> {
         self.app.borrow_mut().update(msg)
     }
 
@@ -225,7 +219,7 @@ where
         }
     }
 
-    pub fn batch_pending_cmds(&mut self) -> Cmd<APP, MSG> {
+    pub fn batch_pending_cmds(&mut self) -> Cmd<APP> {
         Cmd::batch(self.pending_cmds.borrow_mut().drain(..))
     }
 }

@@ -75,11 +75,13 @@ where
     }
 }
 
-impl<XMSG> sauron::Component<Msg, XMSG> for DateTimeWidget<XMSG>
-where
-    XMSG: 'static,
+impl<XMSG> sauron::Component for DateTimeWidget<XMSG>
+where XMSG: 'static
 {
-    fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
+    type MSG = Msg;
+    type XMSG = XMSG;
+
+    fn update(&mut self, msg: Msg) -> Effects<Msg, Self::XMSG> {
         match msg {
             Msg::DateChange(date) => {
                 log::trace!("date is changed to: {}", date);
@@ -251,7 +253,7 @@ impl StatefulComponent for DateTimeWidget<()> {
 
 #[wasm_bindgen]
 pub struct DateTimeCustomElement {
-    program: Program<DateTimeWidget<()>, Msg>,
+    program: Program<DateTimeWidget<()>>,
     mount_node: web_sys::Node,
 }
 
@@ -290,10 +292,10 @@ impl DateTimeCustomElement {
         self.program
             .mount(&self.mount_node, MountProcedure::append_to_shadow());
 
-        let static_style = <DateTimeWidget<()> as Application<Msg>>::stylesheet().join("");
+        let static_style = <DateTimeWidget<()> as Application>::stylesheet().join("");
         self.program.inject_style_to_mount(&static_style);
         let dynamic_style =
-            <DateTimeWidget<()> as Application<Msg>>::style(&self.program.app()).join("");
+            <DateTimeWidget<()> as Application>::style(&self.program.app()).join("");
         self.program.inject_style_to_mount(&dynamic_style);
 
         self.program

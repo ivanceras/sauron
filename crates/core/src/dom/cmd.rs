@@ -11,25 +11,23 @@ use wasm_bindgen_futures::spawn_local;
 /// Cmd required a DSP object which is the Program as an argument
 /// The emit function is called with the program argument.
 /// The callback is supplied with the program an is then executed/emitted.
-pub struct Cmd<APP, MSG>
-where
-    MSG: 'static,
+pub struct Cmd<APP>
+    where APP: Application
 {
     /// the functions that would be executed when this Cmd is emited
     #[allow(clippy::type_complexity)]
-    pub(crate) commands: Vec<Box<dyn FnOnce(Program<APP, MSG>)>>,
+    pub(crate) commands: Vec<Box<dyn FnOnce(Program<APP>)>>,
     pub(crate) modifier: Modifier,
 }
 
-impl<APP, MSG> Cmd<APP, MSG>
+impl<APP> Cmd<APP>
 where
-    MSG: 'static,
-    APP: Application<MSG>,
+    APP: Application,
 {
     /// creates a new Cmd from a function
     pub fn new<F>(f: F) -> Self
     where
-        F: FnOnce(Program<APP, MSG>) + 'static,
+        F: FnOnce(Program<APP>) + 'static,
     {
         Self {
             commands: vec![Box::new(f)],
@@ -102,7 +100,7 @@ where
     }
 
     /// Executes the Cmd
-    pub(crate) fn emit(self, program: Program<APP, MSG>) {
+    pub(crate) fn emit(self, program: Program<APP>) {
         for cb in self.commands {
             let program_clone = program.clone();
             cb(program_clone);
@@ -112,21 +110,21 @@ where
     /// Tell the runtime to execute subsequent update of the App with the message list.
     /// A single call to update the view is then executed thereafter.
     ///
-    pub fn batch_msg(msg_list: impl IntoIterator<Item = MSG>) -> Self {
-        let msg_list: Vec<MSG> = msg_list.into_iter().collect();
+    pub fn batch_msg(msg_list: impl IntoIterator<Item = APP::MSG>) -> Self {
+        let msg_list: Vec<APP::MSG> = msg_list.into_iter().collect();
         Cmd::new(move |mut program| {
             program.dispatch_multiple(msg_list);
         })
     }
 }
 
-impl<APP, MSG> From<Effects<MSG, ()>> for Cmd<APP, MSG>
+
+impl<APP> From<Effects<APP::MSG, ()>> for Cmd<APP>
 where
-    MSG: 'static,
-    APP: Application<MSG>,
+    APP: Application,
 {
     /// Convert Effects that has only follow ups
-    fn from(effects: Effects<MSG, ()>) -> Self {
+    fn from(effects: Effects<APP::MSG, ()>) -> Self {
         // we can safely ignore the effects here
         // as there is no content on it.
         let Effects {
@@ -141,24 +139,21 @@ where
     }
 }
 
-
-impl<APP, MSG, IN> From<IN> for Cmd<APP, MSG>
+impl<APP, IN> From<IN> for Cmd<APP>
 where
-    MSG: 'static,
-    APP: Application<MSG>,
-    IN: IntoIterator<Item = Effects<MSG, ()>>,
+    APP: Application,
+    IN: IntoIterator<Item = Effects<APP::MSG, ()>>,
 {
     fn from(effects: IN) -> Self {
         Cmd::batch(effects.into_iter().map(Cmd::from))
     }
 }
 
-impl<APP, MSG> From<Task<MSG>> for Cmd<APP, MSG>
+impl<APP> From<Task<APP::MSG>> for Cmd<APP>
 where
-    MSG: 'static,
-    APP: Application<MSG>,
+    APP: Application,
 {
-    fn from(mut task: Task<MSG>) -> Self {
+    fn from(mut task: Task<APP::MSG>) -> Self {
         Cmd::new(move |mut program| {
             spawn_local(async move {
                 while let Some(msg) = task.next().await {

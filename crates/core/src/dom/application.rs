@@ -7,13 +7,13 @@ mod skip_diff;
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.
 ///
-pub trait Application<MSG>: Sized + 'static
-where
-    MSG: 'static,
+pub trait Application: Sized + 'static
 {
+    /// 
+    type MSG;
     ///  The application can implement this method where it can modify its initial state.
     ///  This method is called right after the program is mounted into the DOM.
-    fn init(&mut self) -> Cmd<Self, MSG> {
+    fn init(&mut self) -> Cmd<Self> {
         Cmd::none()
     }
 
@@ -22,10 +22,10 @@ where
     /// The update function returns a Cmd, which can be executed by the runtime.
     ///
     /// Called each time an action is triggered from the view
-    fn update(&mut self, _msg: MSG) -> Cmd<Self, MSG>;
+    fn update(&mut self, _msg: Self::MSG) -> Cmd<Self>;
 
     /// Returns a node on how the component is presented.
-    fn view(&self) -> Node<MSG>;
+    fn view(&self) -> Node<Self::MSG>;
 
     /// optional logical code when to skip diffing some particular node
     /// by comparing field values of app and its old values
@@ -36,7 +36,7 @@ where
 
     /// 
     #[cfg(feature = "use-template")]
-    fn template(&self) -> Option<Node<MSG>> {
+    fn template(&self) -> Option<Node<Self::MSG>> {
         None
     }
 
@@ -54,7 +54,7 @@ where
     /// This is for diagnostic and performance measurement purposes.
     ///
     /// Warning: DO NOT use for anything else other than the intended purpose
-    fn measurements(&self, measurements: Measurements) -> Cmd<Self, MSG> {
+    fn measurements(&self, measurements: Measurements) -> Cmd<Self> {
         log::debug!("Measurements: {:#?}", measurements);
         Cmd::none().no_render()
     }

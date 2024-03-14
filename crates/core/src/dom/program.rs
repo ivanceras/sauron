@@ -43,11 +43,10 @@ pub(crate) type EventClosures = Vec<Closure<dyn FnMut(web_sys::Event)>>;
 pub(crate) type Closures = Vec<Closure<dyn FnMut()>>;
 
 /// Program handle the lifecycle of the APP
-pub struct Program<APP, MSG>
-where
-    MSG: 'static,
+pub struct Program<APP>
+    where APP: Application
 {
-    pub(crate) app_context: AppContext<APP, MSG>,
+    pub(crate) app_context: AppContext<APP>,
 
     /// the first element of the app view, where the patch is generated is relative to
     pub(crate) root_node: Rc<RefCell<Option<Node>>>,
@@ -77,11 +76,10 @@ where
     pub(crate) last_update: Rc<RefCell<Option<f64>>>,
 }
 
-pub struct WeakProgram<APP, MSG>
-where
-    MSG: 'static,
+pub struct WeakProgram<APP>
+    where APP: Application
 {
-    pub(crate) app_context: WeakContext<APP, MSG>,
+    pub(crate) app_context: WeakContext<APP>,
     pub(crate) root_node: Weak<RefCell<Option<Node>>>,
     mount_node: Weak<RefCell<Option<Node>>>,
     pub node_closures: Weak<RefCell<ActiveClosure>>,
@@ -101,12 +99,11 @@ where
 pub type ActiveClosure =
     IndexMap<usize, micromap::Map<&'static str, Closure<dyn FnMut(web_sys::Event)>, 5>>;
 
-impl<APP, MSG> WeakProgram<APP, MSG>
-where
-    MSG: 'static,
+impl<APP> WeakProgram<APP>
+    where APP: Application
 {
     ///
-    pub fn upgrade(&self) -> Option<Program<APP, MSG>> {
+    pub fn upgrade(&self) -> Option<Program<APP>> {
         let app_context = self.app_context.upgrade()?;
         let root_node = self.root_node.upgrade()?;
         let mount_node = self.mount_node.upgrade()?;
@@ -132,9 +129,8 @@ where
     }
 }
 
-impl<APP, MSG> Clone for WeakProgram<APP, MSG>
-where
-    MSG: 'static,
+impl<APP> Clone for WeakProgram<APP>
+    where APP: Application
 {
     fn clone(&self) -> Self {
         WeakProgram {
@@ -152,12 +148,11 @@ where
     }
 }
 
-impl<APP, MSG> Program<APP, MSG>
-where
-    MSG: 'static,
+impl<APP> Program<APP>
+    where APP: Application
 {
     ///
-    pub fn downgrade(&self) -> WeakProgram<APP, MSG> {
+    pub fn downgrade(&self) -> WeakProgram<APP> {
         WeakProgram {
             app_context: AppContext::downgrade(&self.app_context),
             root_node: Rc::downgrade(&self.root_node),
@@ -173,9 +168,8 @@ where
     }
 }
 
-impl<APP, MSG> Clone for Program<APP, MSG>
-where
-    MSG: 'static,
+impl<APP> Clone for Program<APP>
+    where APP: Application
 {
     fn clone(&self) -> Self {
         Program {
@@ -193,9 +187,8 @@ where
     }
 }
 
-impl<APP, MSG> Program<APP, MSG>
-where
-    MSG: 'static,
+impl<APP> Program<APP>
+    where APP: Application
 {
     /// get a reference to the APP
     pub fn app(&self) -> Ref<'_, APP> {
@@ -208,10 +201,9 @@ where
     }
 }
 
-impl<APP, MSG> Program<APP, MSG>
+impl<APP> Program<APP>
 where
-    MSG: 'static,
-    APP: Application<MSG>,
+    APP: Application,
 {
     /// Create an Rc wrapped instance of program, initializing DomUpdater with the initial view
     /// and root node, but doesn't mount it yet.
@@ -630,7 +622,7 @@ where
     /// This is called after the subsequenct updates,
     /// therefore vdom_template is not useful anymore, but skip_diff is still useful
     #[cfg(feature = "skip_diff")]
-    fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<MSG>, skip_diff: &Option<SkipDiff>) -> Vec<DomPatch>{
+    fn create_dom_patches_with_skip_diff(&self, new_vdom: &vdom::Node<APP::MSG>, skip_diff: &Option<SkipDiff>) -> Vec<DomPatch>{
         use crate::html::comment;
         if let Some(skip_diff) = skip_diff{
             let treepath = skip_diff.traverse();
@@ -681,7 +673,7 @@ where
         }
     }
 
-    fn create_dom_patch(&self, new_vdom: &vdom::Node<MSG>) -> Vec<DomPatch> {
+    fn create_dom_patch(&self, new_vdom: &vdom::Node<APP::MSG>) -> Vec<DomPatch> {
         let current_vdom = self.app_context.current_vdom();
         let patches = diff(&current_vdom, new_vdom);
 
@@ -883,22 +875,21 @@ where
     }
 
     /// dispatch multiple MSG
-    pub fn dispatch_multiple(&mut self, msgs: impl IntoIterator<Item = MSG>) {
+    pub fn dispatch_multiple(&mut self, msgs: impl IntoIterator<Item = APP::MSG>) {
         self.app_context.push_msgs(msgs);
         self.dispatch_inner_with_priority_ric();
     }
 
     /// dispatch a single msg
-    pub fn dispatch(&mut self, msg: MSG) {
+    pub fn dispatch(&mut self, msg: APP::MSG) {
         self.dispatch_multiple([msg])
     }
 }
 
 
-impl<APP, MSG> Program<APP, MSG>
+impl<APP> Program<APP>
 where
-    MSG: 'static,
-    APP: Application<MSG>,
+    APP: Application,
 {
     /// patch the DOM to reflect the App's view
     ///
@@ -906,7 +897,7 @@ where
     #[cfg(feature = "test-fixtures")]
     pub fn update_dom_with_vdom(
         &mut self,
-        new_vdom: vdom::Node<MSG>,
+        new_vdom: vdom::Node<APP::MSG>,
     ) -> Result<usize, JsValue> {
         let dom_patches = self.create_dom_patch(&new_vdom);
         let total_patches = dom_patches.len();

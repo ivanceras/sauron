@@ -42,19 +42,18 @@ impl Window {
     }
 }
 
-impl<APP, MSG> Program<APP, MSG>
+impl<APP> Program<APP>
 where
-    MSG: 'static,
-    APP: Application<MSG>,
+    APP: Application,
 {
     /// attach event listeners to the window object
-    pub fn add_window_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
+    pub fn add_window_event_listeners(&self, event_listeners: Vec<Attribute<APP::MSG>>) {
         self.add_event_listeners(&window(), event_listeners)
             .expect("must add to event listener");
     }
 
     /// attach event listeners to the document object
-    pub fn add_document_event_listeners(&self, event_listeners: Vec<Attribute<MSG>>) {
+    pub fn add_document_event_listeners(&self, event_listeners: Vec<Attribute<APP::MSG>>) {
         self.add_event_listeners(&document(), event_listeners)
             .expect("must add to event listener");
     }
@@ -63,7 +62,7 @@ where
     /// url is changed
     pub fn on_hashchange<F>(&self, mut cb: F)
     where
-        F: FnMut(String) -> MSG + 'static,
+        F: FnMut(String) -> APP::MSG + 'static,
     {
         let program = Program::downgrade(self);
         let closure: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_| {

@@ -74,12 +74,11 @@ pub enum PatchVariant {
     },
 }
 
-impl<APP, MSG> Program<APP, MSG>
+impl<APP> Program<APP>
 where
-    MSG: 'static,
-    APP: Application<MSG> + 'static,
+    APP: Application + 'static,
 {
-    pub(crate) fn convert_attr(&self, attr: &Attribute<MSG>) -> DomAttr {
+    pub(crate) fn convert_attr(&self, attr: &Attribute<APP::MSG>) -> DomAttr {
         DomAttr {
             namespace: attr.namespace,
             name: attr.name,
@@ -91,7 +90,7 @@ where
         }
     }
 
-    fn convert_attr_value(&self, attr_value: &AttributeValue<MSG>) -> Option<DomAttrValue> {
+    fn convert_attr_value(&self, attr_value: &AttributeValue<APP::MSG>) -> Option<DomAttrValue> {
         match attr_value {
             AttributeValue::FunctionCall(v) => Some(DomAttrValue::FunctionCall(v.clone())),
             AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
@@ -105,7 +104,7 @@ where
 
     fn convert_event_listener(
         &self,
-        event_listener: &EventCallback<MSG>,
+        event_listener: &EventCallback<APP::MSG>,
     ) -> Closure<dyn FnMut(web_sys::Event)> {
         let program = self.downgrade();
         let event_listener = event_listener.clone();
@@ -121,7 +120,7 @@ where
     pub(crate) fn convert_patches(
         &self,
         target_node: &web_sys::Node,
-        patches: &[Patch<MSG>],
+        patches: &[Patch<APP::MSG>],
     ) -> Result<Vec<DomPatch>, JsValue> {
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
             .iter()
@@ -162,7 +161,7 @@ where
         &self,
         nodes_lookup: &IndexMap<TreePath, Node>,
         target_element: &Element,
-        patch: &Patch<MSG>,
+        patch: &Patch<APP::MSG>,
     ) -> DomPatch {
         let target_element = target_element.clone();
         let Patch {

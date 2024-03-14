@@ -104,53 +104,53 @@ impl<MSG> Clone for StatefulModel<MSG> {
     }
 }
 
-impl<COMP, MSG> Application<MSG> for COMP
+impl<COMP> Application for COMP
 where
-    COMP: Component<MSG, ()> + StatefulComponent + 'static,
-    MSG: 'static,
+    COMP: Component<XMSG=()> + StatefulComponent + 'static,
 {
-    fn init(&mut self) -> Cmd<Self, MSG> {
-        Cmd::from(<Self as Component<MSG, ()>>::init(self))
+    type MSG = COMP::MSG;
+
+    fn init(&mut self) -> Cmd<Self> {
+        Cmd::from(<Self as Component>::init(self))
     }
 
-    fn update(&mut self, msg: MSG) -> Cmd<Self, MSG> {
-        let effects = <Self as Component<MSG, ()>>::update(self, msg);
+    fn update(&mut self, msg: COMP::MSG) -> Cmd<Self> {
+        let effects = <Self as Component>::update(self, msg);
         Cmd::from(effects)
     }
 
-    fn view(&self) -> Node<MSG> {
-        <Self as Component<MSG, ()>>::view(self)
+    fn view(&self) -> Node<COMP::MSG> {
+        <Self as Component>::view(self)
     }
 
     #[cfg(feature = "skip_diff")]
     fn skip_diff(&self) -> Option<SkipDiff>{
-        <Self as Component<MSG, ()>>::skip_diff(self)
+        <Self as Component>::skip_diff(self)
     }
 
     #[cfg(feature = "use-template")]
-    fn template(&self) -> Option<Node<MSG>>{
-        <Self as Component<MSG, ()>>::template(self)
+    fn template(&self) -> Option<Node<COMP::MSG>>{
+        <Self as Component>::template(self)
     }
 
     fn stylesheet() -> Vec<String> {
-        <Self as Component<MSG, ()>>::stylesheet()
+        <Self as Component>::stylesheet()
     }
 
     fn style(&self) -> Vec<String> {
-        <Self as Component<MSG, ()>>::style(self)
+        <Self as Component>::style(self)
     }
 }
 
 /// create a stateful component node
-pub fn stateful_component<COMP, MSG, MSG2>(
+pub fn stateful_component<COMP>(
     app: COMP,
-    attrs: impl IntoIterator<Item = Attribute<MSG>>,
-    children: impl IntoIterator<Item = Node<MSG>>,
-) -> Node<MSG>
+    attrs: impl IntoIterator<Item = Attribute<COMP::MSG>>,
+    children: impl IntoIterator<Item = Node<COMP::MSG>>,
+) -> Node<COMP::MSG>
 where
-    COMP: Component<MSG2, ()> + StatefulComponent + 'static,
-    MSG: Default + 'static,
-    MSG2: 'static,
+    COMP: Component<XMSG=()> + StatefulComponent + 'static,
+    COMP::MSG: Default,
 {
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
@@ -173,11 +173,11 @@ where
     let app = Rc::new(RefCell::new(app));
 
     let program = Program::from_rc_app(Rc::clone(&app));
-    let children: Vec<Node<MSG>> = children.into_iter().collect();
+    let children: Vec<Node<COMP::MSG>> = children.into_iter().collect();
     let mount_event = on_mount(move |me| {
         let mut program = program.clone();
         program.mount(&me.target_node, MountProcedure::append());
-        MSG::default()
+        COMP::MSG::default()
     });
     Node::Leaf(Leaf::StatefulComponent(StatefulModel {
         comp: app,
