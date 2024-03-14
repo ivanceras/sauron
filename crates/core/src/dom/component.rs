@@ -5,9 +5,8 @@ use crate::{dom::Effects, vdom::Node};
 use std::any::TypeId;
 use crate::dom::SkipDiff;
 use std::rc::Rc;
+use std::cell::RefCell;
 
-#[cfg(feature = "use-template")]
-pub use stateful_component::{lookup_template, add_template};
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
@@ -16,6 +15,40 @@ use crate::dom::template;
 mod stateful_component;
 #[cfg(feature = "custom_element")]
 mod web_component;
+
+#[cfg(feature = "use-template")]
+thread_local! {
+
+    // 10% spent time on lookup
+    //static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
+
+    /// 8% spent time on lookup
+    static TEMPLATE_LOOKUP: RefCell<micromap::Map<TypeId, web_sys::Node, 10>> = RefCell::new(micromap::Map::new());
+}
+
+
+#[cfg(feature = "use-template")]
+pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
+    TEMPLATE_LOOKUP.with_borrow_mut(|map| {
+        if map.contains_key(&type_id) {
+            //
+        } else {
+            map.insert(type_id, template.clone());
+        }
+    })
+}
+
+/// lookup for the template
+#[cfg(feature = "use-template")]
+pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node> {
+    TEMPLATE_LOOKUP.with_borrow_mut(|map| {
+        if let Some(existing) = map.get(&type_id) {
+            Some(existing.clone_node_with_deep(true).expect("deep clone"))
+        } else {
+            None
+        }
+    })
+}
 
 /// A component has a view and can update itself.
 ///

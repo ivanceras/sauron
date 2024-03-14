@@ -20,40 +20,9 @@ use std::rc::Rc;
 use wasm_bindgen::JsValue;
 #[cfg(feature = "skip_diff")]
 use crate::dom::SkipDiff;
-
 #[cfg(feature = "use-template")]
-thread_local! {
+use crate::dom::component::{lookup_template, add_template};
 
-    // 10% spent time on lookup
-    //static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
-
-    /// 8% spent time on lookup
-    static TEMPLATE_LOOKUP: RefCell<micromap::Map<TypeId, web_sys::Node, 10>> = RefCell::new(micromap::Map::new());
-}
-
-
-#[cfg(feature = "use-template")]
-pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
-    TEMPLATE_LOOKUP.with_borrow_mut(|map| {
-        if map.contains_key(&type_id) {
-            //
-        } else {
-            map.insert(type_id, template.clone());
-        }
-    })
-}
-
-/// lookup for the template
-#[cfg(feature = "use-template")]
-pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node> {
-    TEMPLATE_LOOKUP.with_borrow_mut(|map| {
-        if let Some(existing) = map.get(&type_id) {
-            Some(existing.clone_node_with_deep(true).expect("deep clone"))
-        } else {
-            None
-        }
-    })
-}
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
