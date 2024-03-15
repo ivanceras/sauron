@@ -6,6 +6,7 @@ use crate::{dom::Effects, vdom::Node};
 use std::any::TypeId;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::collections::HashMap;
 
 use crate::dom::template;
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
@@ -17,12 +18,7 @@ mod stateful_component;
 mod web_component;
 
 thread_local! {
-
-    // 10% spent time on lookup
-    //static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
-
-    /// 8% spent time on lookup
-    static TEMPLATE_LOOKUP: RefCell<micromap::Map<TypeId, web_sys::Node, 10>> = RefCell::new(micromap::Map::new());
+    static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
 }
 
 /// if the template is already registered, return the dom template
@@ -40,7 +36,7 @@ pub fn register_template<MSG>(type_id: TypeId, vdom_template: &Node<MSG>) -> web
 pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
     TEMPLATE_LOOKUP.with_borrow_mut(|map| {
         if map.contains_key(&type_id) {
-            //
+            // already added
         } else {
             map.insert(type_id, template.clone());
         }
@@ -49,7 +45,7 @@ pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
 
 /// lookup for the template
 pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node> {
-    TEMPLATE_LOOKUP.with_borrow_mut(|map| {
+    TEMPLATE_LOOKUP.with_borrow(|map| {
         if let Some(existing) = map.get(&type_id) {
             Some(existing.clone_node_with_deep(true).expect("deep clone"))
         } else {
