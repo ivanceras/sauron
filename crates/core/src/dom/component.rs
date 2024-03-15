@@ -252,6 +252,17 @@ impl<MSG> Clone for StatelessModel<MSG> {
     }
 }
 
+impl<MSG> PartialEq for StatelessModel<MSG>{
+    fn eq(&self, other: &Self) -> bool {
+            self.view == other.view
+            && self.skip_diff == other.skip_diff
+            && self.vdom_template == other.vdom_template
+            && self.type_id == other.type_id
+            && self.attrs == other.attrs
+            && self.children == other.children
+    }
+}
+
 /// create a stateless component node
 pub fn component<COMP>(
     app: &COMP,
