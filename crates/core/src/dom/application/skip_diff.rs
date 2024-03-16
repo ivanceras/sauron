@@ -38,19 +38,27 @@ impl SkipDiff {
     }
 
 
-    /// check if shall diff at this path
+    /// check if shall skip diffing attributes at this path
     /// if the path does not coincide in this skip diff, then by default it is skipped
-    pub fn eval(&self, mut path: TreePath) -> bool {
+    pub fn shall_skip_attributes(&self, path: &TreePath) -> bool {
+        let mut path = path.clone();
         if path.is_empty(){
             self.shall
         }else{
             let idx = path.remove_first();
             if let Some(child) = self.children.get(idx){
-                child.eval(path)
+                child.shall_skip_attributes(&path)
             }else{
                 true
             }
         }
+    }
+
+    /// skip this node if can skip the attributes and the children is empty
+    /// NOTE: we are not evaluating if all the children can be skip, since it is already dealt
+    /// (collapsed) in the extraction of skip_diff
+    pub fn shall_skip_node(&self, path: &TreePath) -> bool {
+        self.shall_skip_attributes(&path) && self.children.is_empty()
     }
 
     ///

@@ -606,6 +606,11 @@ where
         new_vdom: &'a vdom::Node<APP::MSG>,
         skip_diff: &SkipDiff,
     ) -> Vec<Patch<'a, APP::MSG>> {
+        use crate::vdom::TreePath;
+
+        //log::info!("skip_diff: {:#?}", skip_diff);
+        diff_recursive(&old_vdom, &new_vdom, &TreePath::root(), Some(skip_diff), None)
+        /*
         let treepath = skip_diff.traverse();
         treepath
             .into_iter()
@@ -615,7 +620,7 @@ where
                 match (old_node, new_node) {
                     (Some(old_node), Some(new_node)) => {
                         // only diff at level 0
-                        diff_recursive(&old_node, &new_node, &path, Some(0))
+                        diff_recursive(&old_node, &new_node, &path, None, Some(0))
                     }
                     _ => {
                         // backtrack old and new
@@ -626,11 +631,12 @@ where
                         let old_node = parent_path
                             .find_node_by_path(&old_vdom)
                             .expect("backtracked old node");
-                        diff_recursive(&old_node, &new_node, &parent_path, Some(0))
+                        diff_recursive(&old_node, &new_node, &parent_path, None, Some(0))
                     }
                 }
             })
             .collect()
+        */
     }
 
     /// This is called after the subsequenct updates,

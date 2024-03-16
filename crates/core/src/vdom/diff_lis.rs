@@ -4,16 +4,18 @@ use super::diff::diff_recursive;
 use super::{AttributeValue, Tag, KEY};
 use super::{Node, Patch, TreePath};
 use indexmap::IndexMap;
+use crate::dom::SkipDiff;
 
 pub fn diff_keyed_nodes<'a, MSG>(
     old_tag: Option<&'a Tag>,
     old_children: &'a [Node<MSG>],
     new_children: &'a [Node<MSG>],
     path: &TreePath,
+    skip_diff: Option<&SkipDiff>,
     depth_limit: Option<usize>,
 ) -> Vec<Patch<'a, MSG>> {
     let (patches, offsets) =
-        diff_keyed_ends(old_tag, old_children, new_children, path, depth_limit);
+        diff_keyed_ends(old_tag, old_children, new_children, path, skip_diff, depth_limit);
 
     let (left_offset, right_offset) = match offsets {
         Some(offsets) => offsets,
@@ -85,7 +87,7 @@ pub fn diff_keyed_nodes<'a, MSG>(
             all_patches.push(patch);
         }
     } else {
-        let patches = diff_keyed_middle(old_middle, new_middle, left_offset, path, depth_limit);
+        let patches = diff_keyed_middle(old_middle, new_middle, left_offset, path, skip_diff, depth_limit);
         all_patches.extend(patches);
     }
     all_patches
@@ -96,6 +98,7 @@ fn diff_keyed_ends<'a, MSG>(
     old_children: &'a [Node<MSG>],
     new_children: &'a [Node<MSG>],
     path: &TreePath,
+    skip_diff: Option<&SkipDiff>,
     depth_limit: Option<usize>,
 ) -> (Vec<Patch<'a, MSG>>, Option<(usize, usize)>) {
     // keep track of the old index that has been matched already
@@ -110,7 +113,7 @@ fn diff_keyed_ends<'a, MSG>(
         }
         let child_path = path.traverse(index);
         // diff the children and add to patches
-        let patches = diff_recursive(old, new, &child_path, depth_limit);
+        let patches = diff_recursive(old, new, &child_path, skip_diff, depth_limit);
         all_patches.extend(patches);
         old_index_matched.push(index);
         left_offset += 1;
@@ -156,7 +159,7 @@ fn diff_keyed_ends<'a, MSG>(
             break;
         }
         let child_path = path.traverse(old_index);
-        let patches = diff_recursive(old, new, &child_path, depth_limit);
+        let patches = diff_recursive(old, new, &child_path, skip_diff, depth_limit);
         all_patches.extend(patches);
         right_offset += 1;
     }
@@ -170,6 +173,7 @@ fn diff_keyed_middle<'a, MSG>(
     new_children: &'a [Node<MSG>],
     left_offset: usize,
     path: &TreePath,
+    skip_diff: Option<&SkipDiff>,
     depth_limit: Option<usize>,
 ) -> Vec<Patch<'a, MSG>> {
     let mut all_patches = vec![];
@@ -282,6 +286,7 @@ fn diff_keyed_middle<'a, MSG>(
             &old_children[new_index_to_old_index[*idx]],
             &new_children[*idx],
             path,
+            skip_diff,
             depth_limit,
         );
         all_patches.extend(patches);
@@ -299,7 +304,7 @@ fn diff_keyed_middle<'a, MSG>(
             if old_index == u32::MAX as usize {
                 new_nodes.push(new_node);
             } else {
-                let patches = diff_recursive(&old_children[old_index], new_node, path, depth_limit);
+                let patches = diff_recursive(&old_children[old_index], new_node, path, skip_diff, depth_limit);
                 all_patches.extend(patches);
 
                 node_paths.push(path.traverse(left_offset + old_index));
@@ -334,7 +339,7 @@ fn diff_keyed_middle<'a, MSG>(
             if old_index == u32::MAX as usize {
                 new_nodes.push(new_node)
             } else {
-                let patches = diff_recursive(&old_children[old_index], new_node, path, depth_limit);
+                let patches = diff_recursive(&old_children[old_index], new_node, path, skip_diff, depth_limit);
                 all_patches.extend(patches);
             }
         }
@@ -358,7 +363,7 @@ fn diff_keyed_middle<'a, MSG>(
             if old_index == u32::MAX as usize {
                 new_nodes.push(new_node);
             } else {
-                let patches = diff_recursive(&old_children[old_index], new_node, path, depth_limit);
+                let patches = diff_recursive(&old_children[old_index], new_node, path, skip_diff, depth_limit);
                 all_patches.extend(patches);
                 node_paths.push(path.traverse(left_offset + old_index));
             }
