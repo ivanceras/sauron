@@ -1,8 +1,8 @@
 //! provides diffing algorithm which returns patches
 use super::{diff_lis, Attribute, Element, Node, Patch, TreePath};
 use super::{Tag, KEY, REPLACE, SKIP, SKIP_CRITERIA};
-use std::{cmp, mem};
 use crate::vdom::Leaf;
+use std::{cmp, mem};
 
 /// Return the patches needed for `old_node` to have the same DOM as `new_node`
 ///
@@ -164,25 +164,20 @@ pub fn diff_recursive<'a, MSG>(
     // discriminants.
     match (old_node, new_node) {
         (Node::Leaf(old_leaf), Node::Leaf(new_leaf)) => {
-            match (old_leaf, new_leaf){
+            match (old_leaf, new_leaf) {
                 (Leaf::Text(_), Leaf::Text(_))
-                 | (Leaf::SafeHtml(_), Leaf::SafeHtml(_)) 
-                 | (Leaf::Comment(_), Leaf::Comment(_)) 
-                 | (Leaf::DocType(_), Leaf::DocType(_)) => {
-                     if old_leaf != new_leaf{
+                | (Leaf::SafeHtml(_), Leaf::SafeHtml(_))
+                | (Leaf::Comment(_), Leaf::Comment(_))
+                | (Leaf::DocType(_), Leaf::DocType(_)) => {
+                    if old_leaf != new_leaf {
                         let patch = Patch::replace_node(None, path.clone(), vec![new_node]);
                         patches.push(patch);
-                     }
+                    }
                 }
                 (Leaf::StatelessComponent(old_comp), Leaf::StatelessComponent(new_comp)) => {
                     log::info!("diffing stateless component..");
                     // diff the attributes here
-                    let patch = diff_recursive(
-                        &old_comp.view,
-                        &new_comp.view,
-                        path,
-                        depth_limit,
-                    );
+                    let patch = diff_recursive(&old_comp.view, &new_comp.view, path, depth_limit);
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(_old_comp), Leaf::StatefulComponent(_new_comp)) => {
@@ -190,8 +185,8 @@ pub fn diff_recursive<'a, MSG>(
                     todo!()
                 }
                 _ => {
-                   let patch = Patch::replace_node(None, path.clone(), vec![new_node]);
-                   patches.push(patch);
+                    let patch = Patch::replace_node(None, path.clone(), vec![new_node]);
+                    patches.push(patch);
                 }
             }
         }
@@ -301,7 +296,10 @@ pub fn diff_sibling_nodes<'a, MSG>(
             .skip(new_siblings_count)
             .enumerate()
             .map(|(i, old_child)| {
-                Patch::remove_node(old_child.tag(), path.jump_to_sibling(new_siblings_count + i))
+                Patch::remove_node(
+                    old_child.tag(),
+                    path.jump_to_sibling(new_siblings_count + i),
+                )
             })
             .collect::<Vec<_>>();
 
@@ -310,7 +308,6 @@ pub fn diff_sibling_nodes<'a, MSG>(
 
     patches
 }
-
 
 /// In diffing non_keyed nodes,
 ///  we reuse existing DOM elements as much as possible

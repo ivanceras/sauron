@@ -1,8 +1,7 @@
 use crate::vdom::TreePath;
 
-
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Marker{
+pub enum Marker {
     /// anything else in the valid block
     Block,
 }
@@ -34,7 +33,7 @@ impl SkipDiff {
         Self {
             shall: false,
             marker: Some(Marker::Block),
-            children: vec![]
+            children: vec![],
         }
     }
 
@@ -66,7 +65,11 @@ impl SkipDiff {
 
     /// collapse into 1 skip_if if all the children is skippable
     pub fn collapse_children(self) -> Self {
-        let Self { shall, children, marker} = self;
+        let Self {
+            shall,
+            children,
+            marker,
+        } = self;
         let can_skip_children = children.iter().all(Self::is_skippable_recursive);
         Self {
             shall,
@@ -82,9 +85,9 @@ impl SkipDiff {
 
 /// skip diffing the node is the val is true
 pub fn skip_if(shall: bool, children: impl IntoIterator<Item = SkipDiff>) -> SkipDiff {
-    SkipDiff{
-        shall, 
+    SkipDiff {
+        shall,
         marker: None,
-        children: children.into_iter().collect()
+        children: children.into_iter().collect(),
     }
 }

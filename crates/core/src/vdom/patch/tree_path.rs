@@ -191,7 +191,6 @@ mod tests {
         assert_eq!(path.next_sibling(), TreePath::from([1]));
     }
 
-
     #[test]
     fn test_next_sibling_deep() {
         let path = TreePath::from([0, 1, 1, 2]);

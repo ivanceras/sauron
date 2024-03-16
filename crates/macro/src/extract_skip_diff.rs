@@ -80,4 +80,3 @@ pub(crate) fn is_literal_attribute(attribute: &NodeAttribute) -> bool {
         NodeAttribute::Attribute(attribute) => attribute.value_literal_string().is_some(),
     }
 }
-

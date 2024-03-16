@@ -5,8 +5,8 @@ use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
 use std::any::TypeId;
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use crate::dom::template;
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
@@ -252,9 +252,9 @@ impl<MSG> Clone for StatelessModel<MSG> {
     }
 }
 
-impl<MSG> PartialEq for StatelessModel<MSG>{
+impl<MSG> PartialEq for StatelessModel<MSG> {
     fn eq(&self, other: &Self) -> bool {
-            self.view == other.view
+        self.view == other.view
             && self.skip_diff == other.skip_diff
             && self.vdom_template == other.vdom_template
             && self.type_id == other.type_id
