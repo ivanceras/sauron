@@ -115,7 +115,6 @@ impl App {
     }
 }
 
-#[derive(Default)]
 enum Msg {
     Run(usize),
     Add(usize),
@@ -124,8 +123,6 @@ enum Msg {
     Swap,
     Remove(usize),
     Select(usize),
-    #[default]
-    NoOp,
 }
 
 impl Application for App {
@@ -176,33 +173,12 @@ impl Application for App {
                     row.selected = self.selected_id == Some(row.id)
                 }
             }
-            Msg::NoOp => {
-                log::info!("mounted!");
-                return Cmd::none().no_render();
-            }
         }
         Cmd::none()
     }
 
     view! {
         <div class="container">
-            { self.view_jumbotron() }
-            <table class="table table-hover table-striped test-data">
-                <tbody id="tbody">
-                    {for row in self.rows.iter() {
-                        let is_selected = self.selected_id == Some(row.id);
-                        component(row, [selected(is_selected)], [])
-                    }}
-                </tbody>
-            </table>
-            <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
-        </div>
-    }
-}
-
-impl App {
-    fn view_jumbotron(&self) -> Node<Msg> {
-        node! {
              <div class="jumbotron">
                  <div class="row">
                      <div class="col-md-6">
@@ -269,9 +245,18 @@ impl App {
                      </div>
                  </div>
              </div>
-        }
+            <table class="table table-hover table-striped test-data">
+                <tbody id="tbody">
+                    {for row in self.rows.iter() {
+                        component(row, [], [])
+                    }}
+                </tbody>
+            </table>
+            <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </div>
     }
 }
+
 
 #[wasm_bindgen(start)]
 pub fn start() {
