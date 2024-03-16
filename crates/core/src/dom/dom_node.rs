@@ -24,7 +24,6 @@ use std::collections::HashMap;
 use std::fmt;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
-use crate::dom::program::create_patches_with_skip_diff;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -301,7 +300,7 @@ where
             (Some(template), Some(skip_diff)) => {
                 // use dept_limit 0 if it involves template
                 let patches =
-                    create_patches_with_skip_diff(&comp.vdom_template, &comp.view, skip_diff, Some(0));
+                    self.create_patches_with_skip_diff(&comp.vdom_template, &comp.view, skip_diff, Some(0));
                 #[cfg(feature = "with-debug")]
                 let t3 = now();
                 let dom_patches = self

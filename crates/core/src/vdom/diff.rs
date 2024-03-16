@@ -123,6 +123,7 @@ pub fn diff_recursive<'a, MSG>(
     // return if it has reach depth limit
     if let Some(depth_limit) = depth_limit {
         if path.path.len() == depth_limit {
+            log::warn!("depth limit reached!..");
             return vec![];
         }
     }
@@ -140,6 +141,7 @@ pub fn diff_recursive<'a, MSG>(
     };
     // skip diffing if the function evaluates to true
     if skip(old_node, new_node) {
+        log::warn!("here skip node..");
         return vec![];
     }
 
@@ -154,6 +156,7 @@ pub fn diff_recursive<'a, MSG>(
 
     // skip diffing if they are essentially the same node
     if old_node == new_node {
+        log::warn!("here equal node..");
         return vec![];
     }
 
@@ -181,6 +184,7 @@ pub fn diff_recursive<'a, MSG>(
                         path,
                         depth_limit,
                     );
+                    log::info!("component patch: {:#?}", patch);
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(_old_comp), Leaf::StatefulComponent(_new_comp)) => {
