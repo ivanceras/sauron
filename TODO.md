@@ -250,6 +250,10 @@
     - this way, it will be easier to see the flow of map_msg method
 - [X] remove `is_static` methods as they are not useful to template patches anymore
 - [ ] process the patches in the component when attributes and children are removed or added.
+- [ ] Make an additional diffing algorithm for the template blocks
+    - This is anchored as next to the last sibling
+    - This can not just be backtrack to the parent, as it defeats the purpose of
+      doing as little diff as possible.
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
