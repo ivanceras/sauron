@@ -298,9 +298,8 @@ where
         let skip_diff = self.app_context.skip_diff.as_ref();
         match (template, skip_diff) {
             (Some(template), Some(skip_diff)) => {
-                // use dept_limit 0 if it involves template
                 let patches =
-                    self.create_patches_with_skip_diff(&comp.vdom_template, &comp.view, skip_diff, Some(0));
+                    self.create_patches_with_skip_diff(&comp.vdom_template, &comp.view, skip_diff);
                 #[cfg(feature = "with-debug")]
                 let t3 = now();
                 let dom_patches = self
