@@ -114,6 +114,13 @@ impl TreePath {
         self.remove_first()
     }
 
+    /// go to the next sibling
+    pub fn next_sibling(&self) -> Self {
+        let mut new_path = self.clone();
+        let last = new_path.path.pop().expect("last");
+        new_path.traverse(last + 1)
+    }
+
     /// returns tree if the path is empty
     /// This is used for checking if the path has been traversed
     pub fn is_empty(&self) -> bool {
@@ -168,6 +175,20 @@ mod tests {
         let path = TreePath::from([0]);
 
         assert_eq!(path.traverse(1), TreePath::from([0, 1]));
+    }
+
+    #[test]
+    fn test_next_sibling() {
+        let path = TreePath::from([0]);
+
+        assert_eq!(path.next_sibling(), TreePath::from([1]));
+    }
+
+    #[test]
+    fn test_next_sibling_deep() {
+        let path = TreePath::from([0, 1, 1, 2]);
+
+        assert_eq!(path.next_sibling(), TreePath::from([0, 1, 1, 3]));
     }
 
     fn sample_node() -> Node<()> {
