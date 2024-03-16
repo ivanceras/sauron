@@ -1,7 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
 use rstml::node::{Node, NodeAttribute, NodeBlock};
-use syn::{Expr, ExprForLoop, ExprIf, Stmt};
 
 pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
     match rstml::parse(input) {
@@ -50,13 +49,9 @@ fn from_single_node(node: &Node) -> TokenStream {
                     compile_error!("invalid block: {:?}", #block);
                 }
             }
-            NodeBlock::ValidBlock(block) => {
-                if let Some(ExprForLoop { .. }) = braced_for_loop(&block) {
-                    quote! {skip_if(false, [])}
-                } else if let Some(ExprIf { .. }) = braced_if_expr(&block) {
-                    quote! {skip_if(false, [])}
-                } else {
-                    quote! {skip_if(false, [])}
+            NodeBlock::ValidBlock(_block) => {
+                quote! {
+                    sauron::SkipDiff::block()
                 }
             }
         },
@@ -86,28 +81,3 @@ pub(crate) fn is_literal_attribute(attribute: &NodeAttribute) -> bool {
     }
 }
 
-fn braced_for_loop(block: &syn::Block) -> Option<&ExprForLoop> {
-    let len = block.stmts.len();
-    if len != 1 {
-        None
-    } else {
-        let stmt = &block.stmts[0];
-        match stmt {
-            Stmt::Expr(Expr::ForLoop(expr), _semi) => Some(expr),
-            _ => None,
-        }
-    }
-}
-
-fn braced_if_expr(block: &syn::Block) -> Option<&ExprIf> {
-    let len = block.stmts.len();
-    if len != 1 {
-        None
-    } else {
-        let stmt = &block.stmts[0];
-        match stmt {
-            Stmt::Expr(Expr::If(expr), _semi) => Some(expr),
-            _ => None,
-        }
-    }
-}
