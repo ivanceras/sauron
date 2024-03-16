@@ -261,7 +261,7 @@ fn diff_nodes<'a, MSG>(
 /// The treepath is the first sibling
 #[allow(unused)]
 /// TODO: Test this, use this for diffing nodes inside template blocks
-fn diff_sibling_nodes<'a, MSG>(
+pub fn diff_sibling_nodes<'a, MSG>(
     old_element_tag: Option<&'a Tag>,
     old_siblings: &'a [Node<MSG>],
     new_siblings: &'a [Node<MSG>],
@@ -273,6 +273,7 @@ fn diff_sibling_nodes<'a, MSG>(
     let new_siblings_count = new_siblings.len();
 
     let min_count = cmp::min(old_siblings_count, new_siblings_count);
+    println!("min_count: {min_count}");
     for index in 0..min_count {
         // if we iterate trough the old elements, a new child_path is created for that iteration
         let child_path = path.jump_to_sibling(index);
