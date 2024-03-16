@@ -2,6 +2,7 @@
 use super::{diff_lis, Attribute, Element, Node, Patch, TreePath};
 use super::{Tag, KEY, REPLACE, SKIP, SKIP_CRITERIA};
 use std::{cmp, mem};
+use crate::vdom::Leaf;
 
 /// Return the patches needed for `old_node` to have the same DOM as `new_node`
 ///
@@ -163,9 +164,35 @@ pub fn diff_recursive<'a, MSG>(
     // discriminants.
     match (old_node, new_node) {
         (Node::Leaf(old_leaf), Node::Leaf(new_leaf)) => {
-            if old_leaf != new_leaf {
-                let ct = Patch::replace_node(old_node.tag(), path.clone(), vec![new_node]);
-                patches.push(ct);
+            match (old_leaf, new_leaf){
+                (Leaf::Text(_), Leaf::Text(_))
+                 | (Leaf::SafeHtml(_), Leaf::SafeHtml(_)) 
+                 | (Leaf::Comment(_), Leaf::Comment(_)) 
+                 | (Leaf::DocType(_), Leaf::DocType(_)) => {
+                     if old_leaf != new_leaf{
+                        let patch = Patch::replace_node(None, path.clone(), vec![new_node]);
+                        patches.push(patch);
+                     }
+                }
+                (Leaf::StatelessComponent(old_comp), Leaf::StatelessComponent(new_comp)) => {
+                    log::info!("diffing stateless component..");
+                    // diff the attributes here
+                    let patch = diff_recursive(
+                        &old_comp.view,
+                        &new_comp.view,
+                        path,
+                        depth_limit,
+                    );
+                    patches.extend(patch);
+                }
+                (Leaf::StatefulComponent(_old_comp), Leaf::StatefulComponent(_new_comp)) => {
+                    log::info!("diffing stateful component");
+                    todo!()
+                }
+                _ => {
+                   let patch = Patch::replace_node(None, path.clone(), vec![new_node]);
+                   patches.push(patch);
+                }
             }
         }
         // We're comparing two element nodes
