@@ -55,7 +55,7 @@ impl<MSG> PartialEq for Leaf<MSG> {
             (Self::Comment(v), Self::Comment(o)) => v == o,
             (Self::DocType(v), Self::DocType(o)) => v == o,
             (Self::StatefulComponent(v), Self::StatefulComponent(o)) => v.type_id == o.type_id,
-            (Self::StatelessComponent(v), Self::StatelessComponent(o)) => v.type_id == o.type_id,
+            (Self::StatelessComponent(v), Self::StatelessComponent(o)) => v == o,
             _ => false,
         }
     }
