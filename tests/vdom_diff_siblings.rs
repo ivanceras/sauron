@@ -30,7 +30,7 @@ fn test_siblings_insert_after() {
         old_children,
         new_children,
         &TreePath::new([0]),
-        Some(0),
+        None,
     );
     println!("patch: {patch:?}");
     assert_eq!(
@@ -72,7 +72,7 @@ fn test_siblings_removed() {
         old_children,
         new_children,
         &TreePath::new([0]),
-        Some(0),
+        None,
     );
     println!("patch: {patch:?}");
     assert_eq!(

@@ -224,7 +224,7 @@ pub fn extract_skip_diff(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 ///
 /// let name = "bob";
 /// let template: Node<()> = extract_template!{<h1>{text(format!("Hello {}!", name))}</h1>};
-/// assert_eq!(template, node!{<h1>PLACEHOLDER</h1>}, "formated text");
+/// assert_eq!(template, node!{<h1></h1>}, "formated text");
 /// ```
 #[proc_macro]
 pub fn extract_template(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
