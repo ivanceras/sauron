@@ -257,6 +257,60 @@ fn diff_nodes<'a, MSG>(
     }
 }
 
+/// diff sibling nodes, used in templates
+/// The treepath is the first sibling
+#[allow(unused)]
+/// TODO: Test this, use this for diffing nodes inside template blocks
+fn diff_sibling_nodes<'a, MSG>(
+    old_element_tag: Option<&'a Tag>,
+    old_siblings: &'a [Node<MSG>],
+    new_siblings: &'a [Node<MSG>],
+    path: &TreePath,
+    depth_limit: Option<usize>,
+) -> Vec<Patch<'a, MSG>> {
+    let mut patches = vec![];
+    let old_siblings_count = old_siblings.len();
+    let new_siblings_count = new_siblings.len();
+
+    let min_count = cmp::min(old_siblings_count, new_siblings_count);
+    for index in 0..min_count {
+        // if we iterate trough the old elements, a new child_path is created for that iteration
+        let child_path = path.jump_to_sibling(index);
+
+        let old_child = &old_siblings.get(index).expect("No old_node child node");
+        let new_child = &new_siblings.get(index).expect("No new child node");
+
+        let more_patches = diff_recursive(old_child, new_child, &child_path, depth_limit);
+        patches.extend(more_patches);
+    }
+
+    // If there are more new child than old_node child, we make a patch to append the excess element
+    // starting from old_siblings_count to the last item of the new_elements
+    if new_siblings_count > old_siblings_count {
+        patches.push(Patch::insert_after_node(
+            old_element_tag,
+            path.clone(),
+            new_siblings.iter().skip(old_siblings_count).collect(),
+        ));
+    }
+
+    if new_siblings_count < old_siblings_count {
+        let remove_node_patches = old_siblings
+            .iter()
+            .skip(new_siblings_count)
+            .enumerate()
+            .map(|(i, old_child)| {
+                Patch::remove_node(old_child.tag(), path.jump_to_sibling(new_siblings_count + i))
+            })
+            .collect::<Vec<_>>();
+
+        patches.extend(remove_node_patches);
+    }
+
+    patches
+}
+
+
 /// In diffing non_keyed nodes,
 ///  we reuse existing DOM elements as much as possible
 ///
