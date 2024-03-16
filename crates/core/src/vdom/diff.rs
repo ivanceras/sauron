@@ -258,12 +258,14 @@ fn diff_nodes<'a, MSG>(
 /// TODO: Test this, use this for diffing nodes inside template blocks
 pub fn diff_sibling_nodes<'a, MSG>(
     old_element_tag: Option<&'a Tag>,
-    old_siblings: &'a [Node<MSG>],
-    new_siblings: &'a [Node<MSG>],
+    old_siblings: impl IntoIterator<Item = &'a Node<MSG>>,
+    new_siblings: impl IntoIterator<Item = &'a Node<MSG>>,
     path: &TreePath,
     depth_limit: Option<usize>,
 ) -> Vec<Patch<'a, MSG>> {
     let mut patches = vec![];
+    let old_siblings = old_siblings.into_iter().collect::<Vec<_>>();
+    let new_siblings = new_siblings.into_iter().collect::<Vec<_>>();
     let old_siblings_count = old_siblings.len();
     let new_siblings_count = new_siblings.len();
 
@@ -286,7 +288,7 @@ pub fn diff_sibling_nodes<'a, MSG>(
         patches.push(Patch::insert_after_node(
             old_element_tag,
             path.clone(),
-            new_siblings.iter().skip(old_siblings_count).collect(),
+            new_siblings.into_iter().skip(old_siblings_count).collect(),
         ));
     }
 
