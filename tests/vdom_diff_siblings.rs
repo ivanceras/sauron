@@ -27,8 +27,8 @@ fn test_siblings_insert_after() {
 
     let patch = diff_sibling_nodes(
         Some(&"li"),
-        &old_children,
-        &new_children,
+        old_children,
+        new_children,
         &TreePath::new([0]),
         Some(0),
     );
@@ -69,8 +69,8 @@ fn test_siblings_removed() {
 
     let patch = diff_sibling_nodes(
         Some(&"li"),
-        &old_children,
-        &new_children,
+        old_children,
+        new_children,
         &TreePath::new([0]),
         Some(0),
     );

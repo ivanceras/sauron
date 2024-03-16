@@ -37,6 +37,22 @@ impl SkipDiff {
         }
     }
 
+
+    /// check if shall diff at this path
+    /// if the path does not coincide in this skip diff, then by default it is skipped
+    pub fn eval(&self, mut path: TreePath) -> bool {
+        if path.is_empty(){
+            self.shall
+        }else{
+            let idx = path.remove_first();
+            if let Some(child) = self.children.get(idx){
+                child.eval(path)
+            }else{
+                true
+            }
+        }
+    }
+
     ///
     pub fn traverse(&self) -> Vec<TreePath> {
         self.traverse_recursive(TreePath::root())
