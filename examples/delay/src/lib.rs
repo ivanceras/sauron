@@ -28,7 +28,7 @@ pub struct App {
 
 impl App {
     fn execute_delayed(
-        mut program: Program<Self, Msg>,
+        mut program: Program<Self>,
         current_handle: Rc<RefCell<Option<TimeoutCallbackHandle>>>,
         executed: Rc<AtomicBool>,
     ) {
@@ -53,7 +53,9 @@ impl App {
     }
 }
 
-impl Application<Msg> for App {
+impl Application for App {
+    type MSG = Msg;
+
     fn view(&self) -> Node<Msg> {
         sauron::html::main(
             [],
@@ -92,7 +94,7 @@ impl Application<Msg> for App {
         )
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::Click => {
                 spawn_local(some_async_function());

@@ -16,7 +16,9 @@ impl App {
     }
 }
 
-impl Application<Msg> for App {
+impl Application for App {
+    type MSG = Msg;
+
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
@@ -38,7 +40,7 @@ impl Application<Msg> for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         log::trace!("App is updating with msg: {:?}", msg);
         match msg {
             Msg::Click => self.click_count += 1,

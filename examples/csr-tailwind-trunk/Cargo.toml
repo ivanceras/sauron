@@ -9,7 +9,4 @@ publish = false
 console_error_panic_hook = "0.1"
 console_log = "1.0"
 log = "0.4"
-sauron = "0.60"
-
-[patch.crates-io]
 sauron = { path = "../../" }

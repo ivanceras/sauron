@@ -11,7 +11,9 @@ pub struct App {
     count: i32,
 }
 
-impl Application<Msg> for App {
+impl Application for App {
+    type MSG = Msg;
+
     fn view(&self) -> Node<Msg> {
         node! {
           <main class="mx-auto mt-10 text-center">
@@ -53,7 +55,7 @@ impl Application<Msg> for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,

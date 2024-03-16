@@ -8,13 +8,19 @@ pub fn start() {
     Program::mount_to_body(App::default());
 }
 
+enum Msg {
+    AddItem,
+}
+
 #[derive(Default)]
 struct App {
     items: Vec<Node<Msg>>,
 }
 
-impl Application<Msg> for App {
-    fn init(&mut self) -> Cmd<Self, Msg> {
+impl Application for App {
+    type MSG = Msg;
+
+    fn init(&mut self) -> Cmd<Self> {
         Cmd::new(|mut program| {
             spawn_local(async move {
                 loop {
@@ -24,7 +30,7 @@ impl Application<Msg> for App {
             })
         })
     }
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg>
+    fn update(&mut self, msg: Msg) -> Cmd<Self>
     where
         Self: Sized + 'static,
     {
@@ -44,8 +50,4 @@ impl Application<Msg> for App {
           </div>
         }
     }
-}
-
-enum Msg {
-    AddItem,
 }

@@ -14,8 +14,8 @@ edition = "2021"
 maintenance = { status = "actively-developed" }
 
 [dependencies]
-sauron-core = { version = "0.60", path = "crates/sauron-core", default-features = false }
-sauron-macro = { version = "0.60", path = "crates/sauron-macro", optional = true }
+sauron-core = { version = "0.60", path = "crates/core", default-features = false }
+sauron-macro = { version = "0.60", path = "crates/macro", optional = true }
 sauron-html-parser = { version = "0.60", path = "crates/html-parser", optional = true }
 
 [features]
@@ -26,13 +26,13 @@ with-ric = ["sauron-core/with-ric"]
 with-raf = ["sauron-core/with-raf"]
 with-interning = ["sauron-core/with-interning"]
 with-jss = ["sauron-macro", "with-lookup"] #enable use of jss (css style in json format)
-prediff = ["sauron-core/prediff"]
 
 # shows telemetry such as duration it took to update the dom
 with-measure = ["sauron-core/with-measure"]
 # log debug patches
 with-debug = ["sauron-core/with-debug"]
 log-patches = ["with-debug", "sauron-core/log-patches"]
+test-fixtures = ["sauron-core/test-fixtures"] #include the test-fixtures for updating the program with the supplied vdom
 
 # lets you use node! macro to write html like code in the view
 with-node-macro = ["sauron-macro"]
@@ -47,6 +47,8 @@ log = "0.4"
 wasm-bindgen-test = "0.3"
 wasm-bindgen-futures = "0.4.31"
 regex = "1"
+sauron-html-parser = { path = "crates/html-parser" }
+sauron = { path = ".", features = ["test-fixtures"] }
 
 [dev-dependencies.web-sys]
 version = "0.3"
@@ -80,3 +82,21 @@ exclude = [
 #mt-dom = { path = "../mt-dom" }
 #jss = { git = "https://github.com/ivanceras/jss.git", branch = "master" }
 #jss = { path = "../jss" }
+
+[dev-dependencies.criterion]
+version = "0.5.1"
+default-features = false
+
+[package.metadata.docs.rs]
+all-features = true
+default-target = "wasm32-unknown-unknown"
+
+
+[[bench]]
+name = "nodes_benchmark"
+harness = false
+
+[[bench]]
+name = "bench_view_performance"
+harness = false
+

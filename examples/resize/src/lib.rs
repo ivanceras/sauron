@@ -12,8 +12,10 @@ pub struct App {
     height: Option<i32>,
 }
 
-impl Application<Msg> for App {
-    fn init(&mut self) -> Cmd<Self, Msg> {
+impl Application for App {
+    type MSG = Msg;
+
+    fn init(&mut self) -> Cmd<Self> {
         Cmd::from(Window::on_resize(|w, h| {
             log::info!("This will trigger only once.. {w}x{h}");
             Msg::WindowResized(w, h)
@@ -44,7 +46,7 @@ impl Application<Msg> for App {
         )
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::WindowResized(w, h) => {
                 log::info!("Setting the App's width: {w} and height: {h}");

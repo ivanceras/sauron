@@ -1,9 +1,16 @@
+use sauron::dom::MountProcedure;
 use sauron::wasm_bindgen::JsCast;
 use sauron::{
-    custom_element, dom::Callback, html::attributes::*, html::events::*, html::*, jss,
+    custom_element, html::attributes::*, html::events::*, html::*, jss, vdom::Callback,
     wasm_bindgen, web_sys, Attribute, Effects, JsValue, Node, WebComponent, *,
 };
 use std::fmt::Debug;
+use sauron::dom::StatefulComponent;
+use sauron::dom::DomAttr;
+use sauron::dom::template;
+use sauron::dom::DomAttrValue;
+use sauron::vdom::AttributeName;
+use sauron::dom::DomNode;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -12,6 +19,7 @@ pub enum Msg {
     TimeOrDateModified(String),
     IntervalChange(f64),
     Mounted(MountEvent),
+    ExternContMounted(web_sys::Node),
     BtnClick,
 }
 
@@ -23,6 +31,8 @@ pub struct DateTimeWidget<XMSG> {
     time: String,
     cnt: i32,
     time_change_listener: Vec<Callback<String, XMSG>>,
+    children: Vec<web_sys::Node>,
+    external_children_node: Option<web_sys::Node>,
 }
 
 impl<XMSG> Default for DateTimeWidget<XMSG> {
@@ -33,6 +43,8 @@ impl<XMSG> Default for DateTimeWidget<XMSG> {
             time: String::new(),
             cnt: 0,
             time_change_listener: vec![],
+            children: vec![],
+            external_children_node: None,
         }
     }
 }
@@ -43,11 +55,10 @@ where
 {
     pub fn new(date: &str, time: &str) -> Self {
         DateTimeWidget {
-            host_element: None,
             date: date.to_string(),
             time: time.to_string(),
             cnt: 0,
-            time_change_listener: vec![],
+            ..Default::default()
         }
     }
 
@@ -64,7 +75,7 @@ where
     }
 }
 
-impl<XMSG> sauron::Container<Msg, XMSG> for DateTimeWidget<XMSG>
+impl<XMSG> sauron::Component<Msg, XMSG> for DateTimeWidget<XMSG>
 where
     XMSG: 'static,
 {
@@ -111,6 +122,14 @@ where
                 }
                 Effects::none()
             }
+            Msg::ExternContMounted(target_node) => {
+                log::info!("DateTime: extenal container mounted...");
+                for child in self.children.iter(){
+                    target_node.append_child(child).expect("must append");
+                }
+                self.external_children_node = Some(target_node);
+                Effects::none()
+            }
             Msg::BtnClick => {
                 log::trace!("btn is clicked..");
                 self.cnt += 1;
@@ -121,10 +140,6 @@ where
                 Effects::none()
             }
         }
-    }
-
-    fn append_child(&mut self, _child: Node<XMSG>) {
-        log::warn!("This doesn't support child nodes");
     }
 
     fn stylesheet() -> Vec<String> {
@@ -144,7 +159,12 @@ where
         }]
     }
 
-    fn view(&self, _content: impl IntoIterator<Item = Node<XMSG>>) -> Node<Msg> {
+    fn observed_attributes() -> Vec<AttributeName> {
+        vec!["date", "time", "interval"]
+    }
+
+
+    fn view(&self) -> Node<Msg> {
         div(
             [class("datetimebox"), on_mount(Msg::Mounted)],
             [
@@ -171,57 +191,160 @@ where
                 ),
                 input([r#type("text"), value(self.cnt)], []),
                 button([on_click(move |_| Msg::BtnClick)], [text("Do something")]),
+                div([class("external_children"), on_mount(|me|Msg::ExternContMounted(me.target_node))], [])
             ],
         )
     }
 }
 
-#[custom_element("date-time")]
-impl<XMSG> sauron::WebComponent<Msg> for DateTimeWidget<XMSG>
-where
-    XMSG: 'static,
-{
-    fn observed_attributes() -> Vec<&'static str> {
-        vec!["date", "time", "interval"]
+impl StatefulComponent for DateTimeWidget<()>{
+
+    fn build(
+        attrs: impl IntoIterator<Item = DomAttr>,
+        children: impl IntoIterator<Item = web_sys::Node>,
+    ) -> Self
+    where
+        Self: Sized,
+    {
+        DateTimeWidget::default()
+    }
+
+    fn template(&self) -> web_sys::Node {
+        template::build_template(&Component::view(self))
     }
 
     /// this is called when the attributes in the mount is changed
     fn attribute_changed(
-        mut program: Program<Self, Msg>,
+        &mut self,
         attr_name: &str,
-        old_value: Option<String>,
-        new_value: Option<String>,
+        old_value: DomAttrValue,
+        new_value: DomAttrValue,
     ) where
-        Self: Sized + Application<Msg>,
+        Self: Sized,
     {
-        log::info!("old_value: {:?}", old_value);
-        log::info!("new_value: {new_value:?}");
         match &*attr_name {
             "time" => {
-                if let Some(new_value) = new_value {
-                    program.dispatch(Msg::TimeChange(new_value))
+                if let Some(new_value) = new_value.get_string(){
+                    Component::update(self, Msg::TimeChange(new_value));
                 }
             }
             "date" => {
-                if let Some(new_value) = new_value {
-                    program.dispatch(Msg::DateChange(new_value))
+                if let Some(new_value) = new_value.get_string(){
+                    Component::update(self, Msg::DateChange(new_value));
                 }
             }
             "interval" => {
-                if let Some(new_value) = new_value {
+                if let Some(new_value) = new_value.get_string() {
                     let new_value: f64 = str::parse(&new_value).expect("must parse to f64");
-                    program.dispatch(Msg::IntervalChange(new_value))
+                    Component::update(self, Msg::IntervalChange(new_value));
                 }
             }
             _ => log::warn!("unknown attr_name: {attr_name:?}"),
         }
     }
 
+    fn append_child(&mut self, child: &web_sys::Node) {
+        log::info!("DateTime: appending child{:?}", child.inner_html());
+        if let Some(external_children_node) = self.external_children_node.as_ref(){
+            log::info!("DateTime: ok appending..");
+            external_children_node.append_child(child).expect("must append");
+        }else{
+            log::debug!("DateTime: Just pushing to children since the external holder is not yet mounted");
+            self.children.push(child.clone());
+        }
+    }
+
+    fn remove_attribute(&mut self, attr_name: AttributeName) {}
+
+    fn remove_child(&mut self, index: usize) {}
+
     fn connected_callback(&mut self) {}
 
     fn disconnected_callback(&mut self) {}
 
     fn adopted_callback(&mut self) {}
+}
+
+
+
+
+#[wasm_bindgen]
+pub struct DateTimeCustomElement {
+    program: Program<DateTimeWidget<()>, Msg>,
+    mount_node: web_sys::Node,
+}
+
+#[wasm_bindgen]
+impl DateTimeCustomElement {
+    #[wasm_bindgen(constructor)]
+    pub fn new(node: JsValue) -> Self {
+        let mount_node: web_sys::Node = node.unchecked_into();
+        Self {
+            program: Program::new(DateTimeWidget::<()>::default()),
+            mount_node,
+        }
+    }
+
+    #[allow(unused_variables)]
+    #[wasm_bindgen(getter, static_method_of = Self, js_name = observedAttributes)]
+    pub fn observed_attributes() -> JsValue {
+        let attributes = DateTimeWidget::<()>::observed_attributes();
+        serde_wasm_bindgen::to_value(&attributes).expect("convert to value")
+    }
+
+    #[wasm_bindgen(method, js_name = attributeChangedCallback)]
+    pub fn attribute_changed_callback(
+        &self,
+        attr_name: &str,
+        old_value: JsValue,
+        new_value: JsValue,
+    ) {
+
+         self.program.app_mut().attribute_changed(
+            attr_name,
+            old_value.into(),
+            new_value.into(),
+        );
+    }
+
+    #[wasm_bindgen(method, js_name = connectedCallback)]
+    pub fn connected_callback(&mut self) {
+        self.program
+            .mount(&self.mount_node, MountProcedure::append_to_shadow());
+
+        let static_style = <DateTimeWidget<()> as Application<Msg>>::stylesheet().join("");
+        self.program.inject_style_to_mount(&static_style);
+        let dynamic_style =
+            <DateTimeWidget<()> as Application<Msg>>::style(&self.program.app()).join("");
+        self.program.inject_style_to_mount(&dynamic_style);
+
+        self.program
+            .update_dom(&sauron::dom::Modifier::default(), None)
+            .expect("must update dom");
+    }
+
+    #[wasm_bindgen(method, js_name = disconnectedCallback)]
+    pub fn disconnected_callback(&mut self) {}
+
+    #[wasm_bindgen(method, js_name = adoptedCallback)]
+    pub fn adopted_callback(&mut self) {}
+
+    pub fn register() {
+        let constructor: Closure<dyn FnMut(JsValue)> = Closure::new(|node: JsValue| {
+            let new: Closure<dyn FnMut(JsValue) -> Self> =
+                Closure::new(|node: JsValue| Self::new(node));
+            js_sys::Reflect::set(&node, &JsValue::from_str("new"), &new.into_js_value())
+                .unwrap_throw();
+        });
+        sauron::dom::register_web_component(
+            "date-time",
+            constructor.into_js_value(),
+            Self::observed_attributes(),
+        );
+    }
+}
+pub fn register() {
+    DateTimeCustomElement::register();
 }
 
 pub fn date<MSG, V: Into<Value>>(v: V) -> Attribute<MSG> {

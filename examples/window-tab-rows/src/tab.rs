@@ -42,7 +42,10 @@ impl Tab {
     }
 }
 
-impl Component<Msg, ()> for Tab {
+impl Component for Tab {
+    type MSG = Msg;
+    type XMSG = ();
+
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::TabClick => {

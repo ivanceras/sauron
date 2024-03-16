@@ -9,7 +9,7 @@ use sauron::{
         units::*,
         *,
     },
-    Component, Effects, Node, NodeMapMsg,
+    Component, Effects, Node,
 };
 
 #[derive(Debug, PartialEq)]
@@ -53,7 +53,10 @@ impl PageView {
     }
 }
 
-impl Component<Msg, ()> for PageView {
+impl Component for PageView {
+    type MSG = Msg;
+    type XMSG = ();
+
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::RowMsg(row_index, row_msg) => {

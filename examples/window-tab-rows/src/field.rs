@@ -39,10 +39,13 @@ where
     }
 }
 
-impl<XMSG> Component<Msg, XMSG> for Field<XMSG>
+impl<XMSG> Component for Field<XMSG>
 where
     XMSG: 'static,
 {
+    type MSG = Msg;
+    type XMSG = XMSG;
+
     fn update(&mut self, msg: Msg) -> Effects<Msg, XMSG> {
         match msg {
             Msg::FieldClick => {

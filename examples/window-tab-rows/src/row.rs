@@ -35,7 +35,10 @@ impl Row {
     }
 }
 
-impl Component<Msg, ()> for Row {
+impl Component for Row {
+    type MSG = Msg;
+    type XMSG = ();
+
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         match msg {
             Msg::FieldMsg(index, field_msg) => {

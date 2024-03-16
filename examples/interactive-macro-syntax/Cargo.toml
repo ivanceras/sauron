@@ -1,0 +1,16 @@
+[package]
+name = "interactive-macro-syntax"
+version = "0.1.0"
+authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
+license = "MIT"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+console_error_panic_hook = "0.1"
+js-sys = "0.3"
+sauron = { path = "../../" }
+log = "0.4"
+console_log = "0.2"

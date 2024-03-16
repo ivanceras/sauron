@@ -2,7 +2,9 @@ use sauron::*;
 
 struct App;
 
-impl Application<()> for App {
+impl Application for App {
+    type MSG = ();
+
     fn view(&self) -> Node<()> {
         let count = 0;
         node! {
@@ -13,7 +15,7 @@ impl Application<()> for App {
         }
     }
 
-    fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
+    fn update(&mut self, _msg: ()) -> Cmd<Self> {
         Cmd::none()
     }
 }

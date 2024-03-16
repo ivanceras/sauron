@@ -38,8 +38,10 @@ pub enum Msg {
     NoOp,
 }
 
-impl Application<Msg> for Model {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+impl Application for Model {
+    type MSG = Msg;
+
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::Add => {
                 self.entries.push(Entry::new(&self.value, self.uid));

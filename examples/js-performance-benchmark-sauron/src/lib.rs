@@ -1,4 +1,6 @@
+#![deny(warnings)]
 use rand::prelude::*;
+use sauron::dom::component;
 use sauron::*;
 use std::cmp::min;
 
@@ -44,6 +46,7 @@ static NOUNS: &[&str] = &[
 struct RowData {
     id: usize,
     label: String,
+    selected: bool,
 }
 
 impl RowData {
@@ -54,26 +57,46 @@ impl RowData {
 
         let label = [adjective, colour, noun].join(" ");
 
-        Self { id, label }
-    }
-    fn view(&self, selected: bool) -> Node<Msg> {
-        let id = self.id;
-        node! {
-            <tr class={if selected { "danger" } else  { "" }} key=id >
-                <td class="col-md-1">{ text(id) }</td>
-                <td class="col-md-4" on_click={move |_| Msg::Select(id)}>
-                     <a class="lbl">{ text(&self.label) }</a>
-                </td>
-                <td class="col-md-1">
-                     <a class="remove" on_click={move |_| Msg::Remove(id) }>
-                         <span class="glyphicon glyphicon-remove remove" aria-hidden="true"></span>
-                     </a>
-                </td>
-                <td class="col-md-6"></td>
-            </tr>
+        Self {
+            id,
+            label,
+            selected: false,
         }
     }
 }
+
+impl Component for RowData {
+    type MSG = Msg;
+    type XMSG = ();
+
+    fn update(&mut self, _msg: Msg) -> Effects<Msg, ()> {
+        Effects::none()
+    }
+
+    view! {
+        <tr class={if self.selected { "danger" } else  { "" }} key=self.id >
+            <td class="col-md-1">{ text(self.id) }</td>
+            <td class="col-md-4"
+            on_click={
+                let id = self.id;
+                move |_| Msg::Select(id)
+            }>
+                 <a class="lbl">{ text(&self.label) }</a>
+            </td>
+            <td class="col-md-1">
+                 <a class="remove"
+                 on_click={
+                     let id = self.id;
+                     move |_| Msg::Remove(id)
+                 }>
+                     <span class="glyphicon glyphicon-remove remove" aria-hidden="true"></span>
+                 </a>
+            </td>
+            <td class="col-md-6"></td>
+        </tr>
+    }
+}
+
 struct App {
     rows: Vec<RowData>,
     next_id: usize,
@@ -92,6 +115,7 @@ impl App {
     }
 }
 
+#[derive(Default)]
 enum Msg {
     Run(usize),
     Add(usize),
@@ -100,10 +124,14 @@ enum Msg {
     Swap,
     Remove(usize),
     Select(usize),
+    #[default]
+    NoOp,
 }
 
-impl Application<Msg> for App {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+impl Application for App {
+    type MSG = Msg;
+
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::Run(amount) => {
                 let rng = &mut self.rng;
@@ -144,26 +172,31 @@ impl Application<Msg> for App {
             }
             Msg::Select(id) => {
                 self.selected_id = Some(id);
+                for row in &mut self.rows {
+                    row.selected = self.selected_id == Some(row.id)
+                }
+            }
+            Msg::NoOp => {
+                log::info!("mounted!");
+                return Cmd::none().no_render();
             }
         }
         Cmd::none()
     }
 
-    fn view(&self) -> Node<Msg> {
-        node! {
-            <div class="container">
-                { self.view_jumbotron() }
-                <table class="table table-hover table-striped test-data">
-                    <tbody id="tbody">
-                        {for row in self.rows.iter() {
-                            let selected = self.selected_id == Some(row.id);
-                            row.view(selected)
-                        }}
-                    </tbody>
-                </table>
-                <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
-            </div>
-        }
+    view! {
+        <div class="container">
+            { self.view_jumbotron() }
+            <table class="table table-hover table-striped test-data">
+                <tbody id="tbody">
+                    {for row in self.rows.iter() {
+                        let is_selected = self.selected_id == Some(row.id);
+                        component(row, [selected(is_selected)], [])
+                    }}
+                </tbody>
+            </table>
+            <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </div>
     }
 }
 
@@ -190,7 +223,10 @@ impl App {
                                 <button
                                     type="button"
                                     class="btn btn-primary btn-block"
-                                    on_click={|_| Msg::Run(10_000)}
+                                    on_click={|_| {
+                                        log::info!("Creating 10_000 rows...");
+                                        Msg::Run(10_000)
+                                    }}
                                     id="runlots">
                                     Create 10,000 rows
                                 </button>
@@ -240,6 +276,8 @@ impl App {
 #[wasm_bindgen(start)]
 pub fn start() {
     console_log::init().unwrap();
+    console_error_panic_hook::set_once();
+
     let mount_el = sauron::document().query_selector("#main").unwrap().unwrap();
     Program::append_to_mount(App::new(), &mount_el);
 }

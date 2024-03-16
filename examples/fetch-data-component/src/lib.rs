@@ -24,8 +24,10 @@ impl App {
     }
 }
 
-impl Application<Msg> for App {
-    fn init(&mut self) -> Cmd<Self, Msg> {
+impl Application for App {
+    type MSG = Msg;
+
+    fn init(&mut self) -> Cmd<Self> {
         console_log::init_with_level(log::Level::Trace).unwrap();
         Cmd::from(self.fetcher.init().map_msg(Msg::FetcherMsg))
     }
@@ -39,7 +41,7 @@ impl Application<Msg> for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::FetcherMsg(fmsg) => Cmd::from(self.fetcher.update(fmsg).map_msg(Msg::FetcherMsg)),
         }

@@ -18,7 +18,9 @@ impl App {
     }
 }
 
-impl Application<Msg> for App {
+impl Application for App {
+    type MSG = Msg;
+
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
@@ -39,7 +41,7 @@ impl Application<Msg> for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,
@@ -72,5 +74,7 @@ impl Application<Msg> for App {
 
 #[wasm_bindgen(start)]
 pub fn start() {
+    console_log::init_with_level(log::Level::Trace).unwrap();
+    console_error_panic_hook::set_once();
     Program::mount_to_body(App::new());
 }

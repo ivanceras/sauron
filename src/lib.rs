@@ -24,14 +24,17 @@ pub use prelude::*;
 pub mod prelude {
     pub use sauron_core::prelude::*;
     pub use sauron_core::*;
+
+    #[cfg(feature = "custom_element")]
+    pub use sauron_macro::custom_element;
+
+    pub use sauron_macro::extract_skip_diff;
+    pub use sauron_macro::extract_template;
+    pub use sauron_macro::view;
+
+    #[cfg(feature = "with-node-macro")]
+    pub use sauron_macro::node;
+
     #[cfg(feature = "with-jss")]
     pub use sauron_macro::{jss, jss_with_media, style};
 }
-
-#[cfg(feature = "custom_element")]
-pub use sauron_macro::custom_element;
-#[cfg(feature = "with-node-macro")]
-pub use sauron_macro::node;
-
-#[cfg(feature = "with-jss")]
-pub use sauron_macro::{jss, jss_with_media, style};

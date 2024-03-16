@@ -32,7 +32,10 @@ pub struct FieldView {
     pub height: i32,
 }
 
-impl Component<Msg, ()> for FieldView {
+impl Component for FieldView {
+    type MSG = Msg;
+    type XMSG = ();
+
     fn update(&mut self, msg: Msg) -> Effects<Msg, ()> {
         trace!("field updated: {:?}", msg);
         match msg {

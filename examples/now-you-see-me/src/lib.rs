@@ -8,18 +8,24 @@ pub fn start() {
     Program::mount_to_body(App::default());
 }
 
+enum Msg {
+    ToggleShow,
+}
+
 #[derive(Default)]
 struct App {
     show: bool,
 }
 
-impl Application<Msg> for App {
-    fn init(&mut self) -> Cmd<Self, Msg> {
+impl Application for App {
+    type MSG = Msg;
+
+    fn init(&mut self) -> Cmd<Self> {
         Cmd::new(|mut program| {
             program.dispatch(Msg::ToggleShow);
         })
     }
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
             Msg::ToggleShow => {
                 self.show = !self.show;
@@ -45,8 +51,4 @@ impl Application<Msg> for App {
             node! { <> </> }
         }
     }
-}
-
-enum Msg {
-    ToggleShow,
 }

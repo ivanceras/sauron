@@ -4,15 +4,17 @@
 //! use for doing component tests
 //!
 use log::*;
-use sauron::{html::div, Application, Cmd, Node, Program};
+use sauron::*;
 use std::mem::ManuallyDrop;
 
 /// This is a simple component for the puprpose of testing
 #[derive(Copy, Clone, Debug)]
 pub struct SimpleComponent;
 
-impl Application<()> for SimpleComponent {
-    fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
+impl Application for SimpleComponent {
+    type MSG = ();
+
+    fn update(&mut self, _msg: ()) -> Cmd<Self> {
         trace!("updating in SimpleComponent");
         Cmd::none()
     }
@@ -23,6 +25,7 @@ impl Application<()> for SimpleComponent {
 }
 
 /// creates a program from SimpleComponent
-pub fn simple_program() -> ManuallyDrop<Program<SimpleComponent, ()>> {
+pub fn simple_program() -> ManuallyDrop<Program<SimpleComponent>> {
+    console_log::init_with_level(log::Level::Trace).ok();
     Program::mount_to_body(SimpleComponent)
 }

@@ -59,8 +59,10 @@ impl Window {
     }
 }
 
-impl Application<Msg> for Window {
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+impl Application for Window {
+    type MSG = Msg;
+
+    fn update(&mut self, msg: Msg) -> Cmd<Self> {
         self.window_activities += 1;
         match msg {
             Msg::WindowClick => Cmd::none(),
