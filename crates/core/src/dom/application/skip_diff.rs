@@ -1,5 +1,6 @@
 use crate::vdom::TreePath;
 
+///
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Marker {
     /// anything else in the valid block
@@ -95,6 +96,17 @@ impl SkipDiff {
     ///
     pub fn traverse(&self) -> Vec<TreePath> {
         self.traverse_recursive(TreePath::root())
+    }
+
+    /// returns true if the skip diff at this path
+    /// have a sibling that is a template
+    pub fn has_sibling_template(&self, path: &TreePath) -> bool {
+        let parent = path.backtrack();
+        if let Some(skip_diff_parent) = self.get_skip_diff(&parent){
+            skip_diff_parent.children.iter().any(|c|c.marker.is_some())
+        }else{
+            false
+        }
     }
 
     /// traverse the skip diff and return a list of TreePath that will be evaluated

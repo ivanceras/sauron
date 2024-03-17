@@ -2,7 +2,8 @@ use crate::dom::Cmd;
 use crate::vdom::Node;
 pub use skip_diff::{skip_if, SkipDiff};
 
-mod skip_diff;
+///
+pub mod skip_diff;
 
 /// An Application is the root component of your program.
 /// Everything that happens in your application is done here.

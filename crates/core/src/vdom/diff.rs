@@ -195,7 +195,7 @@ pub fn diff_recursive<'a, MSG>(
         // We're comparing two element nodes
         (Node::Element(old_element), Node::Element(new_element)) => {
             let skip_attributes = if let Some(skip_diff) = skip_diff{
-                if skip_diff.shall_skip_attributes(path){
+                if skip_diff.shall_skip_attributes(path) && !skip_diff.has_sibling_template(path){
                     // skip attribute patches
                     true
                 }else{
