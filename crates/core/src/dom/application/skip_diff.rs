@@ -38,6 +38,37 @@ impl SkipDiff {
     }
 
 
+    #[allow(unused)]
+    /// check if this path is in the skip diff way of patch
+    pub(crate) fn in_path(&self, path: &TreePath) -> bool {
+        let mut path = path.clone();
+        if path.is_empty(){
+            true
+        }else{
+            let idx = path.remove_first();
+            if let Some(child) = self.children.get(idx){
+                child.in_path(&path)
+            }else{
+                false
+            }
+        }
+    }
+
+    /// return the skip diff at this path
+    pub fn get_skip_diff(&self, path: &TreePath) -> Option<&Self> {
+        let mut path = path.clone();
+        if path.is_empty(){
+            Some(self)
+        }else{
+            let idx = path.remove_first();
+            if let Some(child) = self.children.get(idx){
+                child.get_skip_diff(&path)
+            }else{
+                None
+            }
+        }
+    }
+
     /// check if shall skip diffing attributes at this path
     /// if the path does not coincide in this skip diff, then by default it is skipped
     pub fn shall_skip_attributes(&self, path: &TreePath) -> bool {
