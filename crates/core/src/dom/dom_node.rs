@@ -290,7 +290,6 @@ where
     }
 
     fn create_stateless_component(&self, comp: &StatelessModel<APP::MSG>) -> Node {
-        //log::info!("creating stateless component..");
         #[cfg(feature = "with-debug")]
         let t1 = now();
         let template = lookup_template(comp.type_id);
@@ -312,11 +311,6 @@ where
                 #[cfg(feature = "with-debug")]
                 let t5 = now();
 
-                //log::info!("looking up template took: {}ms", t2 - t1);
-                //log::info!("diffing took: {}ms", t3 - t2);
-                //log::info!("converting patches took: {}ms", t4 - t3);
-                //log::info!("applying patches took: {}ms", t5 - t4);
-                //log::info!("creating stateless component took: {}ms", t5 - t1);
                 #[cfg(feature = "with-debug")]
                 add_time_trace(Section {
                     lookup: t2 - t1,

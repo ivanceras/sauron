@@ -212,8 +212,6 @@ pub fn diff_recursive<'a, MSG>(
                     }
                 }
                 (Leaf::StatelessComponent(old_comp), Leaf::StatelessComponent(new_comp)) => {
-                    //log::info!("existing skip_path: {:#?}", path.skip_diff);
-                    //log::info!("component skip_diff:{:#?}", old_comp.skip_diff);
                     let new_path = SkipPath{
                         path: path.path.clone(),
                         skip_diff: old_comp.skip_diff.as_ref().clone()
@@ -360,8 +358,6 @@ fn create_attribute_patches<'a, MSG>(
     new_element: &'a Element<MSG>,
     path: &SkipPath,
 ) -> Vec<Patch<'a, MSG>> {
-    //let new_attributes = new_element.attributes().into_iter().filter(|a|a.has_non_static_value()).collect::<Vec<_>>();
-    //let old_attributes = old_element.attributes().into_iter().filter(|a|a.has_non_static_value()).collect::<Vec<_>>();
 
     let new_attributes = new_element.attributes();
     let old_attributes = old_element.attributes();
