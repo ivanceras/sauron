@@ -39,21 +39,21 @@ impl SkipDiff {
     }
 
 
-    #[allow(unused)]
-    /// check if this path is in the skip diff way of patch
-    pub(crate) fn in_path(&self, path: &TreePath) -> bool {
+    /// return SkipDiff in this path location
+    pub fn in_path(&self, path: &TreePath) -> Option<&Self> {
         let mut path = path.clone();
         if path.is_empty(){
-            true
+            Some(&self)
         }else{
             let idx = path.remove_first();
             if let Some(child) = self.children.get(idx){
                 child.in_path(&path)
             }else{
-                false
+                None
             }
         }
     }
+
 
     /// get the skip diff at this child index
     pub fn traverse(&self, idx: usize) -> Option<&Self> {
