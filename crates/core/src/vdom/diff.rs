@@ -311,6 +311,11 @@ fn diff_non_keyed_nodes<'a, MSG>(
     let old_child_count = old_children.len();
     let new_child_count = new_children.len();
 
+    // if there is no new children, then clear the children of this element
+    if old_child_count > 0 && new_child_count == 0 {
+        return vec![Patch::clear_children(old_element_tag, path.path.clone())];
+    }
+
     let min_count = cmp::min(old_child_count, new_child_count);
     for index in 0..min_count {
         // if we iterate trough the old elements, a new child_path is created for that iteration

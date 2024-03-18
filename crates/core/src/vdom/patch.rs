@@ -90,6 +90,8 @@ pub enum PatchType<'a, MSG> {
         /// children nodes to be appended and their corresponding new_node_idx
         children: Vec<&'a Node<MSG>>,
     },
+    /// clear the chilren of this node,
+    ClearChildren,
     /// remove the target node
     RemoveNode,
     /// remove the nodes pointed at these `nodes_path`
@@ -193,6 +195,15 @@ impl<'a, MSG> Patch<'a, MSG> {
             tag,
             patch_path,
             patch_type: PatchType::RemoveNode,
+        }
+    }
+
+    /// create a patch where the target element has to clear its children nodes
+    pub fn clear_children(tag: Option<&'a Tag>, patch_path: TreePath) -> Patch<'a, MSG> {
+        Patch{
+            tag,
+            patch_path,
+            patch_type: PatchType::ClearChildren,
         }
     }
 

@@ -10,8 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 rand = { version = "0.8.5", features = ["small_rng"] }
 getrandom = { version = "0.2.7", features = ["js"] }
-#sauron = { path = "../../../sauron", default-features = false, features = ["with-node-macro", "with-dom","with-lookup", "with-debug", "with-measure"] }
-sauron = { path = "../../../sauron", features = ["with-debug", "with-measure"] }
+sauron = { path = "../../../sauron", features = ["with-debug", "with-measure", "log-patches"] }
 #sauron = { path = "../../../sauron"}
 log = "0.4"
 console_log = "0.2"

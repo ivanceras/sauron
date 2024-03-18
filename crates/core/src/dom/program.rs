@@ -526,6 +526,11 @@ where
         let dom_patches = if let Some(skip_diff) = skip_diff {
             let current_vdom = self.app_context.current_vdom();
             let patches = self.create_patches_with_skip_diff(&current_vdom, &view, skip_diff);
+            #[cfg(all(feature = "with-debug", feature = "log-patches"))]
+            {
+                log::info!("There are {} patches", patches.len());
+                //log::info!("patches: {patches:#?}");
+            }
             self.convert_patches(
                 self.root_node
                     .borrow()
@@ -535,6 +540,7 @@ where
             )
             .expect("must convert patches")
         } else {
+            log::info!("no skip diff..");
             self.create_dom_patch(&view)
         };
 

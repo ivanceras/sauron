@@ -62,6 +62,8 @@ pub enum PatchVariant {
     },
     /// Remove the target node
     RemoveNode,
+    /// Clear the children of the target node
+    ClearChildren,
     /// Move the target node before the node specified in the path location
     MoveBeforeNode {
         /// before the node at this location
@@ -226,6 +228,11 @@ where
                 patch_path,
                 target_element,
                 patch_variant: PatchVariant::RemoveNode,
+            },
+            PatchType::ClearChildren => DomPatch {
+                patch_path,
+                target_element,
+                patch_variant: PatchVariant::ClearChildren,
             },
             PatchType::MoveBeforeNode { nodes_path } => {
                 let for_moving: Vec<Node> = nodes_path
@@ -431,6 +438,18 @@ where
                     .expect("must remove target node");
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     self.remove_event_listeners_recursive(&target_element)?;
+                }
+                Ok(None)
+            }
+            PatchVariant::ClearChildren => {
+                while let Some(first_child) = target_element.first_child() {
+                    target_element
+                        .remove_child(&first_child)
+                        .expect("must remove child");
+
+                    if first_child.node_type() == Node::ELEMENT_NODE {
+                        self.remove_event_listeners_recursive(&first_child.unchecked_ref())?;
+                    }
                 }
                 Ok(None)
             }
