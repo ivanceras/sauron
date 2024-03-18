@@ -55,79 +55,26 @@ impl SkipDiff {
         }
     }
 
-    /// return the skip diff at this path
-    pub fn get_skip_diff(&self, path: &TreePath) -> Option<&Self> {
-        let mut path = path.clone();
-        if path.is_empty(){
-            Some(self)
-        }else{
-            let idx = path.remove_first();
-            if let Some(child) = self.children.get(idx){
-                child.get_skip_diff(&path)
-            }else{
-                None
-            }
-        }
+    /// get the skip diff at this child index
+    pub fn traverse(&self, idx: usize) -> Option<&Self> {
+        self.children.get(idx)
     }
 
     /// check if shall skip diffing attributes at this path
     /// if the path does not coincide in this skip diff, then by default it is skipped
-    pub fn shall_skip_attributes(&self, path: &TreePath) -> bool {
-        let mut path = path.clone();
-        if path.is_empty(){
-            self.shall
-        }else{
-            let idx = path.remove_first();
-            if let Some(child) = self.children.get(idx){
-                child.shall_skip_attributes(&path)
-            }else{
-                true
-            }
-        }
+    pub fn shall_skip_attributes(&self) -> bool {
+        self.shall
     }
 
-    /// skip this node if can skip the attributes and the children is empty
-    /// NOTE: we are not evaluating if all the children can be skip, since it is already dealt
-    /// (collapsed) in the extraction of skip_diff
-    pub fn shall_skip_node(&self, path: &TreePath) -> bool {
-        self.shall_skip_attributes(&path) && self.children.is_empty()
-    }
-
-    ///
-    pub fn traverse(&self) -> Vec<TreePath> {
-        self.traverse_recursive(TreePath::root())
-    }
-
-    /// returns true if the skip diff at this path
-    /// have a sibling that is a template
-    pub fn has_sibling_template(&self, path: &TreePath) -> bool {
-        let parent = path.backtrack();
-        if let Some(skip_diff_parent) = self.get_skip_diff(&parent){
-            skip_diff_parent.children.iter().any(|c|c.marker.is_some())
-        }else{
-            false
-        }
-    }
-
-    /// traverse the skip diff and return a list of TreePath that will be evaluated
-    /// by the program
-    fn traverse_recursive(&self, current: TreePath) -> Vec<TreePath> {
-        let mut paths = vec![];
-        // if this SkipDiff evaluates to false, include it in the treepath to be diff
-        if !self.shall {
-            paths.push(current.clone());
-        }
-
-        for (i, eval) in self.children.iter().enumerate() {
-            let more_paths = eval.traverse_recursive(current.traverse(i));
-            paths.extend(more_paths);
-        }
-        paths
-    }
 
     /// return true if this skip diff and its children can be skipped
-    fn is_skippable_recursive(&self) -> bool {
+    pub fn is_skippable_recursive(&self) -> bool {
         self.shall && self.children.iter().all(Self::is_skippable_recursive)
+    }
+
+    /// 
+    pub fn shall_skip_node(&self) -> bool {
+        self.shall && self.children.is_empty()
     }
 
     /// collapse into 1 skip_if if all the children is skippable
@@ -158,3 +105,5 @@ pub fn skip_if(shall: bool, children: impl IntoIterator<Item = SkipDiff>) -> Ski
         children: children.into_iter().collect(),
     }
 }
+
+

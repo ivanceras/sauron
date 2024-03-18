@@ -26,6 +26,7 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
+use crate::vdom::diff::SkipPath;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
@@ -388,6 +389,7 @@ where
     /// create initial dom node generated
     /// from template and patched by the difference of vdom_template and current app view.
     fn create_initial_view(&self) -> web_sys::Node {
+        log::info!("creating initial view..");
         let app_view = self.app_context.app.borrow().view();
         let dom_template = self.app_context.template.clone();
         let vdom_template = self.app_context.vdom_template.as_ref();
@@ -607,7 +609,7 @@ where
         skip_diff: &SkipDiff,
     ) -> Vec<Patch<'a, APP::MSG>> {
         use crate::vdom::TreePath;
-        diff_recursive(&old_vdom, &new_vdom, &TreePath::root(), Some(skip_diff))
+        diff_recursive(&old_vdom, &new_vdom, &SkipPath::new(TreePath::root(),skip_diff.clone()))
     }
 
     /// This is called after the subsequenct updates,

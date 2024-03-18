@@ -290,12 +290,13 @@ where
     }
 
     fn create_stateless_component(&self, comp: &StatelessModel<APP::MSG>) -> Node {
+        //log::info!("creating stateless component..");
         #[cfg(feature = "with-debug")]
         let t1 = now();
         let template = lookup_template(comp.type_id);
         #[cfg(feature = "with-debug")]
         let t2 = now();
-        let skip_diff = self.app_context.skip_diff.as_ref();
+        let skip_diff = comp.skip_diff.as_ref();
         match (template, skip_diff) {
             (Some(template), Some(skip_diff)) => {
                 let patches =

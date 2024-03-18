@@ -191,8 +191,8 @@ impl Application for App {
                                     type="button"
                                     id="run"
                                     class="btn btn-primary btn-block"
-                                    on_click={|_| Msg::Run(1_000) }>
-                                    Create 1,000 rows
+                                    on_click={|_| Msg::Run(10) }>
+                                    Create 10 rows
                                 </button>
                              </div>
                              <div class="col-sm-6 smallpad">
