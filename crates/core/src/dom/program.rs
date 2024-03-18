@@ -524,7 +524,16 @@ where
         let skip_diff = self.app_context.skip_diff.as_ref();
 
         let dom_patches = if let Some(skip_diff) = skip_diff {
-            self.create_dom_patches_with_skip_diff(&view, skip_diff)
+            let current_vdom = self.app_context.current_vdom();
+            let patches = self.create_patches_with_skip_diff(&current_vdom, &view, skip_diff);
+            self.convert_patches(
+                self.root_node
+                    .borrow()
+                    .as_ref()
+                    .expect("must have a root node"),
+                &patches,
+            )
+            .expect("must convert patches")
         } else {
             self.create_dom_patch(&view)
         };
@@ -610,25 +619,6 @@ where
     ) -> Vec<Patch<'a, APP::MSG>> {
         use crate::vdom::TreePath;
         diff_recursive(&old_vdom, &new_vdom, &SkipPath::new(TreePath::root(),skip_diff.clone()))
-    }
-
-    /// This is called after the subsequenct updates,
-    /// therefore vdom_template is not useful anymore, but skip_diff is still useful
-    fn create_dom_patches_with_skip_diff(
-        &self,
-        new_vdom: &vdom::Node<APP::MSG>,
-        skip_diff: &SkipDiff,
-    ) -> Vec<DomPatch> {
-        let current_vdom = self.app_context.current_vdom();
-        let patches = self.create_patches_with_skip_diff(&current_vdom, new_vdom, skip_diff);
-        self.convert_patches(
-            self.root_node
-                .borrow()
-                .as_ref()
-                .expect("must have a root node"),
-            &patches,
-        )
-        .expect("must convert patches")
     }
 
     fn create_dom_patch(&self, new_vdom: &vdom::Node<APP::MSG>) -> Vec<DomPatch> {
