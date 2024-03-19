@@ -277,7 +277,7 @@ where
     /// The attributes can be diff and send the patches to the StatefulComponent
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
     fn create_stateful_component(&self, comp: &StatefulModel<APP::MSG>) -> Node {
-        let comp_node = self.create_dom_node(&crate::html::div(comp.attrs.clone(), []));
+        let comp_node = self.create_dom_node(&crate::html::div([crate::html::attributes::class("component")].into_iter().chain(comp.attrs.clone().into_iter()), []));
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
         // listener and removing the generics msg
