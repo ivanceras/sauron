@@ -162,5 +162,5 @@ pub fn doctype<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG> {
 
 /// create a node which contains a list of nodes
 pub fn node_list<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
-    Node::NodeList(nodes.into_iter().collect())
+    Node::Leaf(Leaf::NodeList(nodes.into_iter().collect()))
 }

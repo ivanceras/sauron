@@ -14,18 +14,6 @@ impl<MSG> Node<MSG> {
         match self {
             Node::Element(element) => Node::Element(element.map_msg(cb)),
             Node::Leaf(leaf) => Node::Leaf(leaf.map_msg(cb)),
-            Node::Fragment(nodes) => Node::Fragment(
-                nodes
-                    .into_iter()
-                    .map(|node| node.map_msg(cb.clone()))
-                    .collect(),
-            ),
-            Node::NodeList(node_list) => Node::NodeList(
-                node_list
-                    .into_iter()
-                    .map(|node| node.map_msg(cb.clone()))
-                    .collect(),
-            ),
         }
     }
 }

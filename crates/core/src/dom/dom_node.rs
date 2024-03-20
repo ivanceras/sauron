@@ -259,6 +259,11 @@ where
                     doctype is only used in rendering"
                 );
             }
+            Leaf::Fragment(nodes) => self.create_document_fragment(nodes),
+            // NodeList that goes here is only possible when it is the root_node,
+            // since node_list as children will be unrolled into as child_elements of the parent
+            // We need to wrap this node_list into doc_fragment since root_node is only 1 element
+            Leaf::NodeList(node_list) => self.create_document_fragment(node_list),
             Leaf::StatefulComponent(comp) => self.create_stateful_component(comp),
             Leaf::StatelessComponent(comp) => self.create_stateless_component(comp),
         }
@@ -352,11 +357,6 @@ where
                 }
                 created_node
             }
-            vdom::Node::Fragment(nodes) => self.create_document_fragment(nodes),
-            // NodeList that goes here is only possible when it is the root_node,
-            // since node_list as children will be unrolled into as child_elements of the parent
-            // We need to wrap this node_list into doc_fragment since root_node is only 1 element
-            vdom::Node::NodeList(node_list) => self.create_document_fragment(node_list),
         }
     }
 

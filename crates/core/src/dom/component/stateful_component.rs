@@ -15,6 +15,7 @@ use std::any::TypeId;
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
+use std::fmt;
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
@@ -58,6 +59,13 @@ pub struct StatefulModel<MSG> {
     pub attrs: Vec<Attribute<MSG>>,
     /// external children component
     pub children: Vec<Node<MSG>>,
+}
+
+impl<MSG> fmt::Debug for StatefulModel<MSG>{
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
+        write!(f, "StatefuleMode")
+    }
 }
 
 impl<MSG> StatefulModel<MSG> {

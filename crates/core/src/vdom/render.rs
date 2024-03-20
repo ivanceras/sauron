@@ -50,19 +50,7 @@ impl<MSG> Node<MSG> {
     ) -> fmt::Result {
         match self {
             Node::Element(element) => element.render_with_indent(buffer, indent, compressed),
-            Node::Leaf(leaf) => leaf.render(buffer),
-            Node::Fragment(nodes) => {
-                for node in nodes {
-                    node.render_with_indent(buffer, indent, compressed)?;
-                }
-                Ok(())
-            }
-            Node::NodeList(node_list) => {
-                for node in node_list {
-                    node.render_with_indent(buffer, indent, compressed)?;
-                }
-                Ok(())
-            }
+            Node::Leaf(leaf) => leaf.render_with_indent(buffer, indent, compressed),
         }
     }
 
@@ -93,7 +81,7 @@ impl<MSG> Node<MSG> {
 
 impl<MSG> Leaf<MSG> {
     /// render leaf nodes
-    pub fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
+    pub fn render_with_indent(&self, buffer: &mut dyn fmt::Write, indent: usize, compressed: bool) -> fmt::Result {
         match self {
             Leaf::Text(text) => {
                 write!(buffer, "{text}")
@@ -107,6 +95,18 @@ impl<MSG> Leaf<MSG> {
             }
             Leaf::DocType(doctype) => {
                 write!(buffer, "<!doctype {doctype}>")
+            }
+            Leaf::Fragment(nodes) => {
+                for node in nodes {
+                    node.render_with_indent(buffer, indent, compressed)?;
+                }
+                Ok(())
+            }
+            Leaf::NodeList(node_list) => {
+                for node in node_list {
+                    node.render_with_indent(buffer, indent, compressed)?;
+                }
+                Ok(())
             }
             Leaf::StatefulComponent(_comp) => {
                 write!(buffer, "<!-- stateful component -->")
@@ -147,10 +147,8 @@ impl<MSG> Element<MSG> {
     ) -> fmt::Result {
         write!(buffer, "<{}", self.tag())?;
 
-        println!("original attributes: {:#?}", self.attributes());
         let merged_attributes: Vec<Attribute<MSG>> =
             Attribute::merge_attributes_of_same_name(self.attributes().iter());
-        println!("merged_attributes: {:#?}", merged_attributes);
 
         for attr in &merged_attributes {
             write!(buffer, " ")?;
@@ -209,9 +207,6 @@ impl<MSG> Attribute<MSG> {
             function_calls: _,
         } = Attribute::group_values(self);
 
-        println!("plain values: {:#?}", plain_values);
-        println!("styles: {:#?}", styles);
-
         // These are attribute values which specifies the state of the element
         // regardless of it's value.
         // This is counter-intuitive to what we are trying to do, therefore
@@ -231,11 +226,9 @@ impl<MSG> Attribute<MSG> {
 
         if !should_skip_attribute {
             if let Some(merged_plain_values) = Value::merge_to_string(plain_values) {
-                println!("values: {}", merged_plain_values);
                 write!(buffer, "{}=\"{}\"", self.name(), merged_plain_values)?;
             }
             if let Some(merged_styles) = Style::merge_to_string(styles) {
-                println!("merged styles: {}", merged_styles);
                 write!(buffer, "{}=\"{}\"", self.name(), merged_styles)?;
             }
         }

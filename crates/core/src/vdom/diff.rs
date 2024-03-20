@@ -211,6 +211,15 @@ pub fn diff_recursive<'a, MSG>(
                         patches.push(patch);
                     }
                 }
+                (Leaf::Fragment(old_nodes), Leaf::Fragment(new_nodes)) => {
+                    // we back track since Fragment is not a real node, but it would still
+                    // be traversed from the prior call
+                    let patch = diff_nodes(None, old_nodes, new_nodes, &path.backtrack());
+                    patches.extend(patch);
+                }
+                (Leaf::NodeList(_old_elements), Leaf::NodeList(_new_elements)) => {
+                    panic!("Node list must have already unrolled when creating an element");
+                }
                 (Leaf::StatelessComponent(old_comp), Leaf::StatelessComponent(new_comp)) => {
                     let new_path = SkipPath{
                         path: path.path.clone(),
@@ -253,15 +262,6 @@ pub fn diff_recursive<'a, MSG>(
             );
 
             patches.extend(more_patches);
-        }
-        (Node::Fragment(old_nodes), Node::Fragment(new_nodes)) => {
-            // we back track since Fragment is not a real node, but it would still
-            // be traversed from the prior call
-            let patch = diff_nodes(None, old_nodes, new_nodes, &path.backtrack());
-            patches.extend(patch);
-        }
-        (Node::NodeList(_old_elements), Node::NodeList(_new_elements)) => {
-            panic!("Node list must have already unrolled when creating an element");
         }
         _ => {
             unreachable!("Unequal variant discriminants should already have been handled");

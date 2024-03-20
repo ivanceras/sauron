@@ -25,11 +25,6 @@ use std::fmt::{Debug, Formatter};
 pub enum Node<MSG> {
     /// Element variant of a virtual node
     Element(Element<MSG>),
-    /// A node containing nodes, this will be unrolled together with the rest of the children of
-    /// the node
-    NodeList(Vec<Node<MSG>>),
-    /// A document fragment node, will be created using fragment node and attached to the dom
-    Fragment(Vec<Node<MSG>>),
     /// A Leaf node
     Leaf(Leaf<MSG>),
 }
@@ -87,10 +82,12 @@ impl<MSG> Node<MSG> {
         matches!(self, Node::Leaf(_))
     }
 
+    /*
     /// returns true if the Node is a fragment variant
     pub fn is_fragment(&self) -> bool {
         matches!(self, Node::Fragment(_))
     }
+    */
 
     /// returns true if this is a text node
     pub fn is_text(&self) -> bool {
@@ -370,10 +367,10 @@ pub fn leaf<MSG>(leaf: impl Into<Leaf<MSG>>) -> Node<MSG> {
 
 /// create a node list
 pub fn node_list<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
-    Node::NodeList(nodes.into_iter().collect())
+    Node::Leaf(Leaf::NodeList(nodes.into_iter().collect()))
 }
 
 /// create fragment node
 pub fn fragment<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
-    Node::Fragment(nodes.into_iter().collect())
+    Node::Leaf(Leaf::Fragment(nodes.into_iter().collect()))
 }

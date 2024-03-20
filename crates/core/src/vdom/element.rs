@@ -4,6 +4,7 @@ use super::{Attribute, Node};
 use crate::vdom::AttributeValue;
 use crate::vdom::Value;
 use derive_where::derive_where;
+use crate::vdom::Leaf;
 
 /// Represents an element of the virtual node
 /// An element has a generic tag, this tag could be a static str tag, such as usage in html dom.
@@ -46,7 +47,7 @@ impl<MSG> Element<MSG> {
         let children = children
             .into_iter()
             .flat_map(|child| match child {
-                Node::NodeList(node_list) => node_list,
+                Node::Leaf(Leaf::NodeList(node_list)) => node_list,
                 _ => vec![child],
             })
             .collect();

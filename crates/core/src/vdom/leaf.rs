@@ -2,9 +2,11 @@
 use crate::dom::StatefulModel;
 use crate::dom::StatelessModel;
 use std::borrow::Cow;
-use std::fmt;
+use crate::vdom::Node;
+use derive_where::derive_where;
 
 /// A leaf node value of html dom tree
+#[derive_where(Clone, Debug)]
 pub enum Leaf<MSG> {
     /// Text variant of a virtual node
     Text(Cow<'static, str>),
@@ -15,37 +17,18 @@ pub enum Leaf<MSG> {
     /// doctype: html, math, svg
     /// <https://www.w3.org/QA/2002/04/valid-dtd-list.html>
     DocType(Cow<'static, str>),
+    /// A node containing nodes, this will be unrolled together with the rest of the children of
+    /// the node
+    NodeList(Vec<Node<MSG>>),
+    /// A document fragment node, will be created using fragment node and attached to the dom
+    Fragment(Vec<Node<MSG>>),
     /// Stateful Component leaf
     StatefulComponent(StatefulModel<MSG>),
     /// Stateless Component leaf
     StatelessComponent(StatelessModel<MSG>),
 }
 
-impl<MSG> Clone for Leaf<MSG> {
-    fn clone(&self) -> Self {
-        match self {
-            Self::Text(v) => Self::Text(v.clone()),
-            Self::SafeHtml(v) => Self::SafeHtml(v.clone()),
-            Self::Comment(v) => Self::Comment(v.clone()),
-            Self::DocType(v) => Self::DocType(v.clone()),
-            Self::StatefulComponent(v) => Self::StatefulComponent(v.clone()),
-            Self::StatelessComponent(v) => Self::StatelessComponent(v.clone()),
-        }
-    }
-}
 
-impl<MSG> fmt::Debug for Leaf<MSG> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::Text(v) => write!(f, "Text({v})"),
-            Self::SafeHtml(v) => write!(f, "SafeHtml({v})"),
-            Self::Comment(v) => write!(f, "Comment({v})"),
-            Self::DocType(v) => write!(f, "DocType({v}"),
-            Self::StatefulComponent(v) => write!(f, "StatefulComponent({:?})", v.type_id),
-            Self::StatelessComponent(v) => write!(f, "StatelessComponent({:?})", v.type_id),
-        }
-    }
-}
 
 impl<MSG> PartialEq for Leaf<MSG> {
     fn eq(&self, other: &Self) -> bool {
@@ -62,6 +45,7 @@ impl<MSG> PartialEq for Leaf<MSG> {
 }
 
 impl<MSG> Eq for Leaf<MSG> {}
+
 
 impl<MSG> Leaf<MSG> {
     /// returns true if this a text node
@@ -102,6 +86,18 @@ impl<MSG> Leaf<MSG> {
             Self::SafeHtml(v) => Leaf::SafeHtml(v),
             Self::Comment(v) => Leaf::Comment(v),
             Self::DocType(v) => Leaf::DocType(v),
+            Self::Fragment(nodes) => Leaf::Fragment(
+                nodes
+                    .into_iter()
+                    .map(|node| node.map_msg(cb.clone()))
+                    .collect(),
+            ),
+            Self::NodeList(node_list) => Leaf::NodeList(
+                node_list
+                    .into_iter()
+                    .map(|node| node.map_msg(cb.clone()))
+                    .collect(),
+            ),
             Self::StatefulComponent(v) => Leaf::StatefulComponent(v.map_msg(cb)),
             Self::StatelessComponent(v) => Leaf::StatelessComponent(v.map_msg(cb)),
         }

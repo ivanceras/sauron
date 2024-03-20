@@ -7,6 +7,7 @@ use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use derive_where::derive_where;
 
 use crate::dom::template;
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
@@ -197,6 +198,7 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
 
 /// Contains necessary information for creating template
 /// of the Component of this type_id
+#[derive_where(Debug)]
 pub struct StatelessModel<MSG> {
     /// the view of this stateless model
     pub view: Box<Node<MSG>>,
