@@ -1,4 +1,3 @@
-use sauron::dom::template;
 use sauron::dom::DomAttr;
 use sauron::dom::DomAttrValue;
 use sauron::dom::DomNode;

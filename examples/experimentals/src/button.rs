@@ -1,4 +1,3 @@
-use crate::dom::template;
 use crate::dom::DomAttr;
 use crate::dom::DomAttrValue;
 use sauron::dom::Component;
