@@ -7,6 +7,7 @@ use crate::vdom::Value;
 use derive_where::derive_where;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
+use crate::dom::SkipDiff;
 
 /// represents a node in a virtual dom
 /// A node could be an element which can contain one or more children of nodes.
@@ -307,6 +308,44 @@ impl<MSG> Node<MSG> {
     pub fn first_value(&self, att_name: &AttributeName) -> Option<&Value> {
         self.attribute_value(att_name)
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
+    }
+
+    /// return the template view if this node has one
+    pub fn template(&self) -> Option<Node<MSG>> {
+        match self{
+            Self::Leaf(Leaf::TemplatedView(view)) => Some((view.template)()),
+            _ => None,
+        }
+    }
+
+    /// returns true if this node is a templated view
+    pub fn is_template(&self) -> bool {
+        matches!(self, Self::Leaf(Leaf::TemplatedView(_)))
+    }
+
+    /// return the skip diff if this node has one
+    pub fn skip_diff(&self) -> Option<SkipDiff> {
+        match self{
+            Self::Leaf(Leaf::TemplatedView(view)) => Some((view.skip_diff)()),
+            _ => None,
+        }
+    }
+
+    /// extract the view Node when it is a templated view,
+    /// otherwise return self
+    pub fn extract(&self) -> &Node<MSG>{
+        match self{
+            Self::Leaf(Leaf::TemplatedView(view)) => &view.view,
+            _ => self,
+        }
+    }
+
+    ///
+    pub fn peel(self) -> Node<MSG>{
+        match self{
+            Self::Leaf(Leaf::TemplatedView(view)) => *view.view,
+            _ => self,
+        }
     }
 }
 

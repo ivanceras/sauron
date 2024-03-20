@@ -45,6 +45,7 @@ impl<MSG> PartialEq for Leaf<MSG> {
             (Self::Fragment(v), Self::Fragment(o)) => v == o,
             (Self::StatefulComponent(v), Self::StatefulComponent(o)) => v.type_id == o.type_id,
             (Self::StatelessComponent(v), Self::StatelessComponent(o)) => v == o,
+            (Self::TemplatedView(v), Self::TemplatedView(o)) => v == o,
             _ => false,
         }
     }
@@ -80,35 +81,6 @@ impl<MSG> Leaf<MSG> {
         }
     }
 
-    /// mape the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
-    pub fn map_msg<F, MSG2>(self, cb: F) -> Leaf<MSG2>
-    where
-        F: Fn(MSG) -> MSG2 + Clone + 'static,
-        MSG2: 'static,
-        MSG: 'static,
-    {
-        match self {
-            Self::Text(v) => Leaf::Text(v),
-            Self::SafeHtml(v) => Leaf::SafeHtml(v),
-            Self::Comment(v) => Leaf::Comment(v),
-            Self::DocType(v) => Leaf::DocType(v),
-            Self::Fragment(nodes) => Leaf::Fragment(
-                nodes
-                    .into_iter()
-                    .map(|node| node.map_msg(cb.clone()))
-                    .collect(),
-            ),
-            Self::NodeList(node_list) => Leaf::NodeList(
-                node_list
-                    .into_iter()
-                    .map(|node| node.map_msg(cb.clone()))
-                    .collect(),
-            ),
-            Self::StatefulComponent(v) => Leaf::StatefulComponent(v.map_msg(cb)),
-            Self::StatelessComponent(v) => Leaf::StatelessComponent(v.map_msg(cb)),
-            Self::TemplatedView(_) => todo!(),
-        }
-    }
 }
 
 impl<MSG> From<&'static str> for Leaf<MSG> {

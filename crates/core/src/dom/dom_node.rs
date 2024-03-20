@@ -1,4 +1,3 @@
-use crate::dom::component::lookup_template;
 use crate::dom::component::StatelessModel;
 #[cfg(feature = "with-debug")]
 use crate::dom::now;
@@ -24,6 +23,7 @@ use std::collections::HashMap;
 use std::fmt;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
+use crate::dom::component::register_template;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -266,7 +266,7 @@ where
             Leaf::NodeList(node_list) => self.create_document_fragment(node_list),
             Leaf::StatefulComponent(comp) => self.create_stateful_component(comp),
             Leaf::StatelessComponent(comp) => self.create_stateless_component(comp),
-            Leaf::TemplatedView(_) => todo!(),
+            Leaf::TemplatedView(_) => unreachable!("templated view should not be created!.."),
         }
     }
 
@@ -298,14 +298,18 @@ where
     fn create_stateless_component(&self, comp: &StatelessModel<APP::MSG>) -> Node {
         #[cfg(feature = "with-debug")]
         let t1 = now();
-        let template = lookup_template(comp.type_id);
+        let comp_view = &comp.view;
+        let real_view = comp_view.extract();
+        let vdom_template = comp_view.template();
         #[cfg(feature = "with-debug")]
         let t2 = now();
-        let skip_diff = comp.skip_diff.as_ref();
-        match (template, skip_diff) {
-            (Some(template), Some(skip_diff)) => {
+        let skip_diff = comp_view.skip_diff();
+        match (vdom_template, skip_diff){
+            (Some(vdom_template), Some(skip_diff)) => {
+                let template = register_template(comp.type_id, &vdom_template);
                 let patches =
-                    self.create_patches_with_skip_diff(&comp.vdom_template, &comp.view, skip_diff);
+                    self.create_patches_with_skip_diff(&vdom_template, &real_view, &skip_diff);
+                log::info!("patches: {:#?}", patches);
                 #[cfg(feature = "with-debug")]
                 let t3 = now();
                 let dom_patches = self
@@ -328,12 +332,10 @@ where
                 });
                 template
             }
-            _ => {
-                // create dom node without skip diff
-                self.create_dom_node(&comp.view)
-            }
+            _ => self.create_dom_node(real_view)
         }
     }
+
 
     /// Create and return a `CreatedNode` instance (containing a DOM `Node`
     /// together with potentially related closures) for this virtual node.

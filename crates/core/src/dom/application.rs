@@ -26,17 +26,6 @@ pub trait Application: Sized + 'static {
     /// Returns a node on how the component is presented.
     fn view(&self) -> Node<Self::MSG>;
 
-    /// optional logical code when to skip diffing some particular node
-    /// by comparing field values of app and its old values
-    fn skip_diff(&self) -> Option<SkipDiff> {
-        None
-    }
-
-    ///
-    fn template(&self) -> Option<Node<Self::MSG>> {
-        None
-    }
-
     /// The css style for the application, will be mounted automatically by the program
     fn stylesheet() -> Vec<String> {
         vec![]

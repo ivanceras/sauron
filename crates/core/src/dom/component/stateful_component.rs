@@ -1,4 +1,3 @@
-use crate::dom::component::register_template;
 use crate::dom::events::on_mount;
 use crate::dom::program::MountProcedure;
 use crate::dom::Application;
@@ -6,7 +5,6 @@ use crate::dom::Cmd;
 use crate::dom::Component;
 use crate::dom::DomAttrValue;
 use crate::dom::Program;
-use crate::dom::SkipDiff;
 use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
@@ -123,14 +121,6 @@ where
         <Self as Component>::view(self)
     }
 
-    fn skip_diff(&self) -> Option<SkipDiff> {
-        <Self as Component>::skip_diff(self)
-    }
-
-    fn template(&self) -> Option<Node<COMP::MSG>> {
-        <Self as Component>::template(self)
-    }
-
     fn stylesheet() -> Vec<String> {
         <Self as Component>::stylesheet()
     }
@@ -153,16 +143,6 @@ where
 {
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
-
-    // Note: we can not include the children in the build function
-    // as the children here contains the MSG generic
-    // and we can not discard the event listeners.
-    //
-    // The attribute(minus events) however can be used for configurations, for setting initial state
-    // of the stateful component.
-
-    let vdom_template = app.template().expect("must have a template");
-    let _template = register_template(type_id, &vdom_template);
 
     let app = Rc::new(RefCell::new(app));
 

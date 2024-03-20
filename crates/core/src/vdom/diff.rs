@@ -3,7 +3,6 @@ use super::{diff_lis, Attribute, Element, Node, Patch, TreePath};
 use super::{Tag, KEY, REPLACE, SKIP, SKIP_CRITERIA};
 use crate::dom::SkipDiff;
 use crate::vdom::Leaf;
-use std::{cmp, mem};
 
 /// combination of TreePath and SkipDiff
 #[derive(Debug)]
@@ -97,9 +96,11 @@ fn is_keyed_node<MSG>(node: &Node<MSG>) -> bool {
 
 fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> bool {
     // replace if they have different enum variants
+    /*
     if mem::discriminant(old_node) != mem::discriminant(new_node) {
         return true;
     }
+    */
     let replace = |_old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
         let explicit_replace_attr = new_node
             .first_value(&REPLACE)
@@ -223,7 +224,7 @@ pub fn diff_recursive<'a, MSG>(
                 (Leaf::StatelessComponent(old_comp), Leaf::StatelessComponent(new_comp)) => {
                     let new_path = SkipPath{
                         path: path.path.clone(),
-                        skip_diff: old_comp.skip_diff.as_ref().clone()
+                        skip_diff: old_comp.view.skip_diff(),
                     };
 
                     let patch =
@@ -231,8 +232,10 @@ pub fn diff_recursive<'a, MSG>(
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(_old_comp), Leaf::StatefulComponent(_new_comp)) => {
-                    log::info!("diffing stateful component");
-                    todo!()
+                    unreachable!("stateful component should not be diffed...");
+                }
+                (Leaf::TemplatedView(_old_view), Leaf::TemplatedView(_new_view)) => {
+                    unreachable!("templated view should not be diffed..")
                 }
                 _ => {
                     let patch = Patch::replace_node(None, path.path.clone(), vec![new_node]);
@@ -316,7 +319,7 @@ fn diff_non_keyed_nodes<'a, MSG>(
         return vec![Patch::clear_children(old_element_tag, path.path.clone())];
     }
 
-    let min_count = cmp::min(old_child_count, new_child_count);
+    let min_count = old_child_count.min(new_child_count);
     for index in 0..min_count {
         // if we iterate trough the old elements, a new child_path is created for that iteration
         let child_path = path.traverse(index);

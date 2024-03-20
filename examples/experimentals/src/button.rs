@@ -41,11 +41,13 @@ impl Component for Button {
         Effects::none()
     }
 
-    view! {
-        <button on_click=|_|Msg::Click >
-            Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}
-            <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
-        </button>
+    fn view(&self) -> Node<Msg>{
+        view! {
+            <button on_click=|_|Msg::Click >
+                Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}
+                <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
+            </button>
+        }
     }
 }
 
