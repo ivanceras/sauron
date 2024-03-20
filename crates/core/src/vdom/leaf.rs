@@ -37,6 +37,8 @@ impl<MSG> PartialEq for Leaf<MSG> {
             (Self::SafeHtml(v), Self::SafeHtml(o)) => v == o,
             (Self::Comment(v), Self::Comment(o)) => v == o,
             (Self::DocType(v), Self::DocType(o)) => v == o,
+            (Self::NodeList(v), Self::NodeList(o)) => v == o,
+            (Self::Fragment(v), Self::Fragment(o)) => v == o,
             (Self::StatefulComponent(v), Self::StatefulComponent(o)) => v.type_id == o.type_id,
             (Self::StatelessComponent(v), Self::StatelessComponent(o)) => v == o,
             _ => false,
