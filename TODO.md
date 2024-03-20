@@ -254,6 +254,14 @@
     - This is anchored as next to the last sibling
     - This can not just be backtrack to the parent, as it defeats the purpose of
       doing as little diff as possible.
+- [ ] Make a TemplateView struct and a variant of Leat
+    ```rust
+    struct TemplatedView<MSG>{
+        template: Box<dyn Fn() -> Node<MSG>>,
+        skip_diff: Box<dyn Fn() -> SkipDiff>,
+        view: Node<MSG> ,
+    }
+    ```
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
