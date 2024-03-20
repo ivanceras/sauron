@@ -112,6 +112,7 @@ impl<MSG> Leaf<MSG> {
                 write!(buffer, "<!-- stateful component -->")
             }
             Leaf::StatelessComponent(comp) => comp.view.render(buffer),
+            Leaf::TemplatedView(view) => view.view.render(buffer),
         }
     }
 }

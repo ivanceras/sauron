@@ -82,13 +82,6 @@ impl<MSG> Node<MSG> {
         matches!(self, Node::Leaf(_))
     }
 
-    /*
-    /// returns true if the Node is a fragment variant
-    pub fn is_fragment(&self) -> bool {
-        matches!(self, Node::Fragment(_))
-    }
-    */
-
     /// returns true if this is a text node
     pub fn is_text(&self) -> bool {
         match self {

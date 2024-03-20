@@ -266,6 +266,7 @@ where
             Leaf::NodeList(node_list) => self.create_document_fragment(node_list),
             Leaf::StatefulComponent(comp) => self.create_stateful_component(comp),
             Leaf::StatelessComponent(comp) => self.create_stateless_component(comp),
+            Leaf::TemplatedView(_) => todo!(),
         }
     }
 

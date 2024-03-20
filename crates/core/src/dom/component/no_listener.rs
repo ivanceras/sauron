@@ -59,6 +59,7 @@ fn create_leaf_node_without_listeners<MSG>(leaf: &Leaf<MSG>) -> web_sys::Node {
         Leaf::StatelessComponent(_comp) => {
             unreachable!("stateless component should not be here")
         }
+        Leaf::TemplatedView(_) => todo!(),
     }
 }
 

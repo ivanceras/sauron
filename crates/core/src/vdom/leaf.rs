@@ -4,6 +4,8 @@ use crate::dom::StatelessModel;
 use std::borrow::Cow;
 use crate::vdom::Node;
 use derive_where::derive_where;
+use crate::vdom::TemplatedView;
+
 
 /// A leaf node value of html dom tree
 #[derive_where(Clone, Debug)]
@@ -26,6 +28,8 @@ pub enum Leaf<MSG> {
     StatefulComponent(StatefulModel<MSG>),
     /// Stateless Component leaf
     StatelessComponent(StatelessModel<MSG>),
+    /// a view where a template and skip diff is provided
+    TemplatedView(TemplatedView<MSG>),
 }
 
 
@@ -102,6 +106,7 @@ impl<MSG> Leaf<MSG> {
             ),
             Self::StatefulComponent(v) => Leaf::StatefulComponent(v.map_msg(cb)),
             Self::StatelessComponent(v) => Leaf::StatelessComponent(v.map_msg(cb)),
+            Self::TemplatedView(_) => todo!(),
         }
     }
 }

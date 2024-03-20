@@ -11,12 +11,14 @@ pub use attribute::Callback;
 pub use attribute::GroupedAttributeValues;
 pub use element::Element;
 pub use leaf::Leaf;
+pub use templated_view::TemplatedView;
 
 mod attribute;
 mod element;
 mod leaf;
 mod map_msg;
 mod render;
+mod templated_view;
 
 pub use attribute::special::{
     key, replace, skip, skip_criteria, KEY, REPLACE, SKIP, SKIP_CRITERIA,
