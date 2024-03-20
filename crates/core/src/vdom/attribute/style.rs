@@ -28,10 +28,8 @@ impl Style {
             .into_iter()
             .map(|s| format!("{s};"))
             .collect::<Vec<_>>();
-        println!("stringed: {stringed:?}");
         if !stringed.is_empty() {
             let joined = stringed.join("");
-            println!("joined: {joined}");
             Some(joined)
         } else {
             None

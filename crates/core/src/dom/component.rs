@@ -315,7 +315,6 @@ mod test {
         }
 
         let name = extract_simple_struct_name::<AwesomeEditor>();
-        println!("name: {name}");
         assert_eq!("AwesomeEditor", name);
     }
 
@@ -328,7 +327,6 @@ mod test {
         enum Xmsg {}
 
         let name = extract_simple_struct_name::<ComplexEditor<Xmsg>>();
-        println!("name: {name}");
         assert_eq!("ComplexEditor", name);
     }
 
@@ -343,7 +341,6 @@ mod test {
         enum Xmsg {}
 
         let name = extract_simple_struct_name::<ComplexEditor<Msg, Xmsg>>();
-        println!("name: {name}");
         assert_eq!("ComplexEditor", name);
     }
 }
