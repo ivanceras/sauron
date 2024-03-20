@@ -9,7 +9,6 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use derive_where::derive_where;
 
-use crate::dom::template;
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
@@ -17,6 +16,7 @@ pub use web_component::{register_web_component, WebComponent, WebComponentWrappe
 mod stateful_component;
 #[cfg(feature = "custom_element")]
 mod web_component;
+mod no_listener;
 
 thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
@@ -28,7 +28,7 @@ pub fn register_template<MSG>(type_id: TypeId, vdom_template: &Node<MSG>) -> web
     if let Some(template) = lookup_template(type_id) {
         template
     } else {
-        let template = template::create_dom_node_without_listeners(&vdom_template);
+        let template = no_listener::create_dom_node_without_listeners(&vdom_template);
         add_template(type_id, &template);
         template
     }

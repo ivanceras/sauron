@@ -42,7 +42,6 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub mod events;
     mod http;
     mod program;
-    pub mod template;
     pub mod util;
     mod raf;
     mod ric;
