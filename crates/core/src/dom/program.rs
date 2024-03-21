@@ -67,8 +67,11 @@ where
 
     /// event listener closures
     pub(crate) event_closures: Rc<RefCell<EventClosures>>,
+
     /// generic closures that has no argument
     pub closures: Rc<RefCell<Closures>>,
+
+    /// keep track of the time when the dom is last updated
     pub(crate) last_update: Rc<RefCell<Option<f64>>>,
 }
 
