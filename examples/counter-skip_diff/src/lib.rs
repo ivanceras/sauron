@@ -1,6 +1,7 @@
 use sauron::{
     html::text, html::units::px, jss, node, skip_if, wasm_bindgen, Application, Cmd, Node, Program,
     SkipDiff,
+    view,
 };
 
 enum Msg {
@@ -23,35 +24,6 @@ impl App {
 impl Application for App {
     type MSG = Msg;
 
-    fn skip_diff(&self) -> Option<SkipDiff> {
-        Some(skip_if(
-            true,
-            [
-                skip_if(true, []),
-                skip_if(true, [skip_if(false, [])]),
-                skip_if(true, []),
-            ],
-        ))
-    }
-    fn view(&self) -> Node<Msg> {
-        node! {
-            <main>
-                <input type="button"
-                    value="+"
-                    on_click=|_| {
-                        Msg::Increment
-                    }
-                />
-                <button class="count" on_click=|_|{Msg::Reset} >{text(self.count)}</button>
-                <input type="button"
-                    value="-"
-                    on_click=|_| {
-                        Msg::Decrement
-                    }
-                />
-            </main>
-        }
-    }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
@@ -60,6 +32,24 @@ impl Application for App {
             Msg::Reset => self.count = 0,
         }
         Cmd::none()
+    }
+
+    view! {
+        <main>
+            <input type="button"
+                value="+"
+                on_click=|_| {
+                    Msg::Increment
+                }
+            />
+            <button class="count" on_click=|_|{Msg::Reset} >{text(self.count)}</button>
+            <input type="button"
+                value="-"
+                on_click=|_| {
+                    Msg::Decrement
+                }
+            />
+        </main>
     }
 
     fn stylesheet() -> Vec<String> {
