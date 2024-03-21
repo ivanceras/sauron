@@ -4,6 +4,7 @@ use crate::date_time::{self, DateTimeWidget};
 use js_sys::Date;
 use sauron::dom::stateful_component;
 use sauron::prelude::*;
+use sauron::dom::component;
 
 #[derive(Default)]
 pub enum Msg {
@@ -173,7 +174,7 @@ impl Application for App {
                 }}
             </ul>
             <div>
-                //{Component::view(&self.btn).map_msg(Msg::BtnMsg)}
+                {component(&self.btn, [], []).map_msg(Msg::BtnMsg)}
             </div>
             <div>
                 {stateful_component(Button::default(), [], [text("External child of btn stateful_component")])}
