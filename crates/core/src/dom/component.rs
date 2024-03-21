@@ -79,17 +79,6 @@ pub trait Component {
     /// the view of the component
     fn view(&self) -> Node<Self::MSG>;
 
-    /// optional logical code when to skip diffing some particular node
-    /// by comparing field values of app and its old values
-    fn skip_diff(&self) -> Option<SkipDiff> {
-        None
-    }
-
-    ///
-    fn template(&self) -> Option<Node<Self::MSG>> {
-        None
-    }
-
     /// component can have static styles
     fn stylesheet() -> Vec<String>
     where
@@ -275,14 +264,14 @@ where
     COMP: Component + 'static,
 {
     let type_id = TypeId::of::<COMP>();
-    let view = app.view();
-    let skip_diff = app.skip_diff();
+    let app_view = app.view();
+    let skip_diff = app_view.skip_diff();
 
-    let vdom_template = app.template().expect("must have a template");
+    let vdom_template = app_view.template().expect("must have a template");
 
     let _template = register_template(type_id, &vdom_template);
     Node::Leaf(Leaf::StatelessComponent(StatelessModel {
-        view: Box::new(view),
+        view: Box::new(app_view),
         skip_diff: Rc::new(skip_diff),
         vdom_template: Box::new(vdom_template),
         type_id,

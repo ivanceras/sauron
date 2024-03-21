@@ -6,7 +6,6 @@ use crate::dom::Cmd;
 use crate::dom::Component;
 use crate::dom::DomAttrValue;
 use crate::dom::Program;
-use crate::dom::SkipDiff;
 use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
@@ -123,14 +122,6 @@ where
         <Self as Component>::view(self)
     }
 
-    fn skip_diff(&self) -> Option<SkipDiff> {
-        <Self as Component>::skip_diff(self)
-    }
-
-    fn template(&self) -> Option<Node<COMP::MSG>> {
-        <Self as Component>::template(self)
-    }
-
     fn stylesheet() -> Vec<String> {
         <Self as Component>::stylesheet()
     }
@@ -160,8 +151,10 @@ where
     //
     // The attribute(minus events) however can be used for configurations, for setting initial state
     // of the stateful component.
+    
+    let app_view = app.view();
 
-    let vdom_template = app.template().expect("must have a template");
+    let vdom_template = app_view.template().expect("must have a template");
     let _template = register_template(type_id, &vdom_template);
 
     let app = Rc::new(RefCell::new(app));

@@ -98,6 +98,8 @@ fn is_keyed_node<MSG>(node: &Node<MSG>) -> bool {
 fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> bool {
     // replace if they have different enum variants
     if mem::discriminant(old_node) != mem::discriminant(new_node) {
+        log::warn!("different discriminant: old_node: {:#?}", old_node);
+        log::warn!("different discriminant: new_node: {:#?}", new_node);
         return true;
     }
     let replace = |_old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
@@ -226,15 +228,27 @@ pub fn diff_recursive<'a, MSG>(
                         skip_diff: old_comp.skip_diff.as_ref().clone()
                     };
 
+                    let old_real_view = old_comp.view.unwrap_template_ref();
+                    let new_real_view = new_comp.view.unwrap_template_ref();
+
+                    assert!(!old_real_view.is_template(), "old comp view should not be a template");
+                    assert!(!new_real_view.is_template(), "new comp view should not be a template");
                     let patch =
-                        diff_recursive(&old_comp.view, &new_comp.view, &new_path);
+                        diff_recursive(old_real_view, new_real_view, &new_path);
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(_old_comp), Leaf::StatefulComponent(_new_comp)) => {
                     log::info!("diffing stateful component");
                     todo!()
                 }
+                (Leaf::TemplatedView(_old_view),_) => {
+                    unreachable!("templated view should not be diffed..")
+                }
+                (_, Leaf::TemplatedView(_new_view)) => {
+                    unreachable!("templated view should not be diffed..")
+                }
                 _ => {
+                    log::info!("replace patch here...");
                     let patch = Patch::replace_node(None, path.path.clone(), vec![new_node]);
                     patches.push(patch);
                 }

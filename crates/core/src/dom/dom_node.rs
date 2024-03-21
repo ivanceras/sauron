@@ -266,7 +266,7 @@ where
             Leaf::NodeList(node_list) => self.create_document_fragment(node_list),
             Leaf::StatefulComponent(comp) => self.create_stateful_component(comp),
             Leaf::StatelessComponent(comp) => self.create_stateless_component(comp),
-            Leaf::TemplatedView(_) => todo!(),
+            Leaf::TemplatedView(view) => unreachable!("template view should not be created: {:#?}", view),
         }
     }
 
@@ -283,6 +283,7 @@ where
     /// The attributes can be diff and send the patches to the StatefulComponent
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
     fn create_stateful_component(&self, comp: &StatefulModel<APP::MSG>) -> Node {
+        log::info!("creating stateful component...");
         let comp_node = self.create_dom_node(&crate::html::div([crate::html::attributes::class("component")].into_iter().chain(comp.attrs.clone().into_iter()), []));
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
@@ -304,8 +305,9 @@ where
         let skip_diff = comp.skip_diff.as_ref();
         match (template, skip_diff) {
             (Some(template), Some(skip_diff)) => {
+                let real_comp_view = comp.view.unwrap_template_ref();
                 let patches =
-                    self.create_patches_with_skip_diff(&comp.vdom_template, &comp.view, skip_diff);
+                    self.create_patches_with_skip_diff(&comp.vdom_template, &real_comp_view, skip_diff);
                 #[cfg(feature = "with-debug")]
                 let t3 = now();
                 let dom_patches = self

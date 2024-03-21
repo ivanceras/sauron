@@ -5,9 +5,12 @@ use crate::vdom::Node;
 
 /// Templated view
 pub struct TemplatedView<MSG>{
-    pub(crate) view: Box<Node<MSG>>,
-    pub(crate) template: Rc<dyn Fn() -> Node<MSG>>,
-    pub(crate) skip_diff: Rc<dyn Fn() -> SkipDiff>,
+    ///
+    pub view: Box<Node<MSG>>,
+    ///
+    pub template: Rc<dyn Fn() -> Node<MSG>>,
+    ///
+    pub skip_diff: Rc<dyn Fn() -> SkipDiff>,
 }
 
 impl<MSG> Clone for TemplatedView<MSG>{

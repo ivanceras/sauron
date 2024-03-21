@@ -217,8 +217,8 @@ where
     pub fn from_rc_app(app: Rc<RefCell<APP>>) -> Self {
         let type_id = TypeId::of::<APP>();
         let app_view = app.borrow().view();
-        let skip_diff = app.borrow().skip_diff();
-        let vdom_template = app.borrow().template();
+        let skip_diff = app_view.skip_diff();
+        let vdom_template = app_view.template();
         let template = if let Some(vdom_template) = vdom_template.as_ref() {
             Some(register_template(type_id, vdom_template))
         } else {
@@ -394,10 +394,11 @@ where
         let dom_template = self.app_context.template.clone();
         let vdom_template = self.app_context.vdom_template.as_ref();
         let skip_diff = self.app_context.skip_diff.as_ref();
+        let real_view = app_view.unwrap_template();
         match (vdom_template, skip_diff) {
             (Some(vdom_template), Some(skip_diff)) => {
                 let patches =
-                    self.create_patches_with_skip_diff(&vdom_template, &app_view, skip_diff);
+                    self.create_patches_with_skip_diff(&vdom_template, &real_view, skip_diff);
                 if let Some(dom_template) = dom_template {
                     let dom_patches = self
                         .convert_patches(&dom_template, &patches)
@@ -525,12 +526,9 @@ where
 
         let dom_patches = if let Some(skip_diff) = skip_diff {
             let current_vdom = self.app_context.current_vdom();
-            let patches = self.create_patches_with_skip_diff(&current_vdom, &view, skip_diff);
-            #[cfg(all(feature = "with-debug", feature = "log-patches"))]
-            {
-                log::info!("There are {} patches", patches.len());
-                //log::info!("patches: {patches:#?}");
-            }
+            let real_current_vdom = current_vdom.unwrap_template_ref();
+            let real_view = view.unwrap_template_ref();
+            let patches = self.create_patches_with_skip_diff(&real_current_vdom, &real_view, skip_diff);
             self.convert_patches(
                 self.root_node
                     .borrow()
@@ -624,6 +622,8 @@ where
         skip_diff: &SkipDiff,
     ) -> Vec<Patch<'a, APP::MSG>> {
         use crate::vdom::TreePath;
+        assert!(!old_vdom.is_template(), "old vdom should not be a template");
+        assert!(!new_vdom.is_template(), "new vdom should not be a template");
         diff_recursive(&old_vdom, &new_vdom, &SkipPath::new(TreePath::root(),skip_diff.clone()))
     }
 
