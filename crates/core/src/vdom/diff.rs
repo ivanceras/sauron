@@ -225,7 +225,7 @@ pub fn diff_recursive<'a, MSG>(
                 (Leaf::StatelessComponent(old_comp), Leaf::StatelessComponent(new_comp)) => {
                     let new_path = SkipPath{
                         path: path.path.clone(),
-                        skip_diff: old_comp.skip_diff.as_ref().clone()
+                        skip_diff: old_comp.view.skip_diff(),
                     };
 
                     let old_real_view = old_comp.view.unwrap_template_ref();

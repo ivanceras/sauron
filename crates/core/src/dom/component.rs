@@ -1,4 +1,3 @@
-use crate::dom::SkipDiff;
 use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
@@ -6,7 +5,6 @@ use crate::{dom::Effects, vdom::Node};
 use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::Rc;
 use derive_where::derive_where;
 
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
@@ -39,7 +37,7 @@ pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
         if map.contains_key(&type_id) {
             // already added
         } else {
-            map.insert(type_id, template.clone());
+            map.insert(type_id, template.clone_node_with_deep(true).expect("deep clone"));
         }
     })
 }
@@ -191,10 +189,6 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
 pub struct StatelessModel<MSG> {
     /// the view of this stateless model
     pub view: Box<Node<MSG>>,
-    /// skip_diff
-    pub skip_diff: Rc<Option<SkipDiff>>,
-    /// the vdom template of this component
-    pub vdom_template: Box<Node<MSG>>,
     /// component type id
     pub type_id: TypeId,
     /// attributes of this model
@@ -214,8 +208,6 @@ impl<MSG> StatelessModel<MSG> {
         StatelessModel {
             type_id: self.type_id,
             view: Box::new(self.view.map_msg(cb.clone())),
-            skip_diff: self.skip_diff.clone(),
-            vdom_template: Box::new(self.vdom_template.map_msg(cb.clone())),
             attrs: self
                 .attrs
                 .into_iter()
@@ -234,8 +226,6 @@ impl<MSG> Clone for StatelessModel<MSG> {
     fn clone(&self) -> Self {
         Self {
             view: self.view.clone(),
-            skip_diff: self.skip_diff.clone(),
-            vdom_template: self.vdom_template.clone(),
             type_id: self.type_id.clone(),
             attrs: self.attrs.clone(),
             children: self.children.clone(),
@@ -246,8 +236,6 @@ impl<MSG> Clone for StatelessModel<MSG> {
 impl<MSG> PartialEq for StatelessModel<MSG> {
     fn eq(&self, other: &Self) -> bool {
         self.view == other.view
-            && self.skip_diff == other.skip_diff
-            && self.vdom_template == other.vdom_template
             && self.type_id == other.type_id
             && self.attrs == other.attrs
             && self.children == other.children
@@ -265,15 +253,8 @@ where
 {
     let type_id = TypeId::of::<COMP>();
     let app_view = app.view();
-    let skip_diff = app_view.skip_diff();
-
-    let vdom_template = app_view.template().expect("must have a template");
-
-    let _template = register_template(type_id, &vdom_template);
     Node::Leaf(Leaf::StatelessComponent(StatelessModel {
         view: Box::new(app_view),
-        skip_diff: Rc::new(skip_diff),
-        vdom_template: Box::new(vdom_template),
         type_id,
         attrs: attrs.into_iter().collect(),
         children: children.into_iter().collect(),

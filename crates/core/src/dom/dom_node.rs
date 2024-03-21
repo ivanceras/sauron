@@ -1,4 +1,3 @@
-use crate::dom::component::lookup_template;
 use crate::dom::component::StatelessModel;
 #[cfg(feature = "with-debug")]
 use crate::dom::now;
@@ -24,6 +23,7 @@ use std::collections::HashMap;
 use std::fmt;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
+use crate::dom::component::register_template;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -299,15 +299,17 @@ where
     fn create_stateless_component(&self, comp: &StatelessModel<APP::MSG>) -> Node {
         #[cfg(feature = "with-debug")]
         let t1 = now();
-        let template = lookup_template(comp.type_id);
+        let comp_view = &comp.view;
+        let vdom_template = comp_view.template();
         #[cfg(feature = "with-debug")]
         let t2 = now();
-        let skip_diff = comp.skip_diff.as_ref();
-        match (template, skip_diff) {
-            (Some(template), Some(skip_diff)) => {
-                let real_comp_view = comp.view.unwrap_template_ref();
+        let skip_diff = comp_view.skip_diff();
+        match (vdom_template, skip_diff) {
+            (Some(vdom_template), Some(skip_diff)) => {
+                let template = register_template(comp.type_id, &vdom_template);
+                let real_comp_view = comp_view.unwrap_template_ref();
                 let patches =
-                    self.create_patches_with_skip_diff(&comp.vdom_template, &real_comp_view, skip_diff);
+                    self.create_patches_with_skip_diff(&vdom_template, &real_comp_view, &skip_diff);
                 #[cfg(feature = "with-debug")]
                 let t3 = now();
                 let dom_patches = self

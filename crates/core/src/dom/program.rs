@@ -522,13 +522,13 @@ where
         let t2 = now();
 
         let node_count = view.node_count();
-        let skip_diff = self.app_context.skip_diff.as_ref();
+        let skip_diff = view.skip_diff();
 
         let dom_patches = if let Some(skip_diff) = skip_diff {
             let current_vdom = self.app_context.current_vdom();
             let real_current_vdom = current_vdom.unwrap_template_ref();
             let real_view = view.unwrap_template_ref();
-            let patches = self.create_patches_with_skip_diff(&real_current_vdom, &real_view, skip_diff);
+            let patches = self.create_patches_with_skip_diff(&real_current_vdom, &real_view, &skip_diff);
             self.convert_patches(
                 self.root_node
                     .borrow()
