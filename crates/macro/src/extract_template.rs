@@ -85,7 +85,6 @@ fn from_single_node(node: Node) -> TokenStream {
             }
             NodeBlock::ValidBlock(_block) => {
                 quote! {
-                    //sauron::Node::Leaf(sauron::vdom::Leaf::Text("PLACEHOLDER".into()))
                     sauron::html::node_list([])
                 }
             }
