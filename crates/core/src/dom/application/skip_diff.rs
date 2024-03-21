@@ -38,22 +38,20 @@ impl SkipDiff {
         }
     }
 
-
     /// return SkipDiff in this path location
     pub fn in_path(&self, path: &TreePath) -> Option<&Self> {
         let mut path = path.clone();
-        if path.is_empty(){
+        if path.is_empty() {
             Some(&self)
-        }else{
+        } else {
             let idx = path.remove_first();
-            if let Some(child) = self.children.get(idx){
+            if let Some(child) = self.children.get(idx) {
                 child.in_path(&path)
-            }else{
+            } else {
                 None
             }
         }
     }
-
 
     /// get the skip diff at this child index
     pub fn traverse(&self, idx: usize) -> Option<&Self> {
@@ -66,13 +64,12 @@ impl SkipDiff {
         self.shall
     }
 
-
     /// return true if this skip diff and its children can be skipped
     pub fn is_skippable_recursive(&self) -> bool {
         self.shall && self.children.iter().all(Self::is_skippable_recursive)
     }
 
-    /// 
+    ///
     pub fn shall_skip_node(&self) -> bool {
         self.shall && self.children.is_empty()
     }
@@ -105,5 +102,3 @@ pub fn skip_if(shall: bool, children: impl IntoIterator<Item = SkipDiff>) -> Ski
         children: children.into_iter().collect(),
     }
 }
-
-

@@ -2,9 +2,9 @@ use super::attribute::{AttributeName, Namespace, Tag};
 use super::{Attribute, Node};
 
 use crate::vdom::AttributeValue;
+use crate::vdom::Leaf;
 use crate::vdom::Value;
 use derive_where::derive_where;
-use crate::vdom::Leaf;
 
 /// Represents an element of the virtual node
 /// An element has a generic tag, this tag could be a static str tag, such as usage in html dom.

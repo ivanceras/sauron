@@ -257,7 +257,6 @@ impl Application for App {
     }
 }
 
-
 #[wasm_bindgen(start)]
 pub fn start() {
     console_log::init().unwrap();

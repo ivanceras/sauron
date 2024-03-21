@@ -1,5 +1,5 @@
-use sauron::*;
 use crate::dom::skip_diff::Marker;
+use sauron::*;
 
 #[test]
 fn simple() {
@@ -24,7 +24,6 @@ fn skip_level1() {
 
     assert_eq!(skip.in_path(&path).unwrap().shall_skip_attributes(), true);
 }
-
 
 #[test]
 fn dont_collapsed_with_templates() {

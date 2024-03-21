@@ -446,7 +446,6 @@ where
                     target_element
                         .remove_child(&first_child)
                         .expect("must remove child");
-
                 }
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     self.remove_event_listeners_recursive(&target_element)?;

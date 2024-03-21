@@ -1,7 +1,6 @@
 use sauron::{
-    html::text, html::units::px, jss, node, skip_if, wasm_bindgen, Application, Cmd, Node, Program,
-    SkipDiff,
-    view,
+    html::text, html::units::px, jss, node, skip_if, view, wasm_bindgen, Application, Cmd, Node,
+    Program, SkipDiff,
 };
 
 enum Msg {
@@ -23,7 +22,6 @@ impl App {
 
 impl Application for App {
     type MSG = Msg;
-
 
     fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {

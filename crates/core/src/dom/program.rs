@@ -10,6 +10,7 @@ use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCa
 use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
+use crate::vdom::diff::SkipPath;
 use crate::vdom::diff_recursive;
 use crate::vdom::Patch;
 use indexmap::IndexMap;
@@ -26,7 +27,6 @@ use std::{
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{self, Element, Node};
-use crate::vdom::diff::SkipPath;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
@@ -513,7 +513,8 @@ where
             let current_vdom = self.app_context.current_vdom();
             let real_current_vdom = current_vdom.unwrap_template_ref();
             let real_view = view.unwrap_template_ref();
-            let patches = self.create_patches_with_skip_diff(&real_current_vdom, &real_view, &skip_diff);
+            let patches =
+                self.create_patches_with_skip_diff(&real_current_vdom, &real_view, &skip_diff);
             self.convert_patches(
                 self.root_node
                     .borrow()
@@ -608,7 +609,11 @@ where
         use crate::vdom::TreePath;
         assert!(!old_vdom.is_template(), "old vdom should not be a template");
         assert!(!new_vdom.is_template(), "new vdom should not be a template");
-        diff_recursive(&old_vdom, &new_vdom, &SkipPath::new(TreePath::root(),skip_diff.clone()))
+        diff_recursive(
+            &old_vdom,
+            &new_vdom,
+            &SkipPath::new(TreePath::root(), skip_diff.clone()),
+        )
     }
 
     fn create_dom_patch(&self, new_vdom: &vdom::Node<APP::MSG>) -> Vec<DomPatch> {

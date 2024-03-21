@@ -13,9 +13,8 @@ pub struct SkipPath {
 }
 
 impl SkipPath {
-
     pub(crate) fn new(path: TreePath, skip_diff: SkipDiff) -> Self {
-        Self{
+        Self {
             path,
             skip_diff: Some(skip_diff),
         }
@@ -79,7 +78,14 @@ impl SkipPath {
 /// );
 /// ```
 pub fn diff<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> Vec<Patch<'a, MSG>> {
-    diff_recursive(old_node, new_node, &SkipPath{path: TreePath::root(), skip_diff: None})
+    diff_recursive(
+        old_node,
+        new_node,
+        &SkipPath {
+            path: TreePath::root(),
+            skip_diff: None,
+        },
+    )
 }
 
 fn is_any_keyed<MSG>(nodes: &[Node<MSG>]) -> bool {
@@ -158,9 +164,8 @@ pub fn diff_recursive<'a, MSG>(
     new_node: &'a Node<MSG>,
     path: &SkipPath,
 ) -> Vec<Patch<'a, MSG>> {
-
-    if let Some(skip_diff) = path.skip_diff.as_ref(){
-        if skip_diff.shall_skip_node(){
+    if let Some(skip_diff) = path.skip_diff.as_ref() {
+        if skip_diff.shall_skip_node() {
             return vec![];
         }
     }
@@ -223,7 +228,7 @@ pub fn diff_recursive<'a, MSG>(
                     panic!("Node list must have already unrolled when creating an element");
                 }
                 (Leaf::StatelessComponent(old_comp), Leaf::StatelessComponent(new_comp)) => {
-                    let new_path = SkipPath{
+                    let new_path = SkipPath {
                         path: path.path.clone(),
                         skip_diff: old_comp.view.skip_diff(),
                     };
@@ -231,17 +236,22 @@ pub fn diff_recursive<'a, MSG>(
                     let old_real_view = old_comp.view.unwrap_template_ref();
                     let new_real_view = new_comp.view.unwrap_template_ref();
 
-                    assert!(!old_real_view.is_template(), "old comp view should not be a template");
-                    assert!(!new_real_view.is_template(), "new comp view should not be a template");
-                    let patch =
-                        diff_recursive(old_real_view, new_real_view, &new_path);
+                    assert!(
+                        !old_real_view.is_template(),
+                        "old comp view should not be a template"
+                    );
+                    assert!(
+                        !new_real_view.is_template(),
+                        "new comp view should not be a template"
+                    );
+                    let patch = diff_recursive(old_real_view, new_real_view, &new_path);
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(_old_comp), Leaf::StatefulComponent(_new_comp)) => {
                     log::info!("diffing stateful component");
                     todo!()
                 }
-                (Leaf::TemplatedView(_old_view),_) => {
+                (Leaf::TemplatedView(_old_view), _) => {
                     unreachable!("templated view should not be diffed..")
                 }
                 (_, Leaf::TemplatedView(_new_view)) => {
@@ -256,10 +266,9 @@ pub fn diff_recursive<'a, MSG>(
         }
         // We're comparing two element nodes
         (Node::Element(old_element), Node::Element(new_element)) => {
-
-            let skip_attributes = if let Some(skip_diff) = path.skip_diff.as_ref(){
+            let skip_attributes = if let Some(skip_diff) = path.skip_diff.as_ref() {
                 skip_diff.shall
-            }else{
+            } else {
                 false
             };
 
@@ -294,16 +303,13 @@ fn diff_nodes<'a, MSG>(
     let diff_as_keyed = is_any_keyed(old_children) || is_any_keyed(new_children);
 
     if diff_as_keyed {
-        let keyed_patches =
-            diff_lis::diff_keyed_nodes(old_tag, old_children, new_children, path);
+        let keyed_patches = diff_lis::diff_keyed_nodes(old_tag, old_children, new_children, path);
         keyed_patches
     } else {
-        let non_keyed_patches =
-            diff_non_keyed_nodes(old_tag, old_children, new_children, path);
+        let non_keyed_patches = diff_non_keyed_nodes(old_tag, old_children, new_children, path);
         non_keyed_patches
     }
 }
-
 
 /// In diffing non_keyed nodes,
 ///  we reuse existing DOM elements as much as possible
@@ -377,7 +383,6 @@ fn create_attribute_patches<'a, MSG>(
     new_element: &'a Element<MSG>,
     path: &SkipPath,
 ) -> Vec<Patch<'a, MSG>> {
-
     let new_attributes = new_element.attributes();
     let old_attributes = old_element.attributes();
 

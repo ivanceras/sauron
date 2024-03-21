@@ -1,10 +1,10 @@
 use crate::dom::SkipDiff;
-use std::rc::Rc;
-use std::fmt;
 use crate::vdom::Node;
+use std::fmt;
+use std::rc::Rc;
 
 /// Templated view
-pub struct TemplatedView<MSG>{
+pub struct TemplatedView<MSG> {
     /// The view node
     pub view: Box<Node<MSG>>,
     /// The extracted template derived from the view node
@@ -13,8 +13,7 @@ pub struct TemplatedView<MSG>{
     pub skip_diff: Rc<dyn Fn() -> SkipDiff>,
 }
 
-impl<MSG> Clone for TemplatedView<MSG>{
-    
+impl<MSG> Clone for TemplatedView<MSG> {
     fn clone(&self) -> Self {
         Self {
             view: self.view.clone(),
@@ -24,9 +23,8 @@ impl<MSG> Clone for TemplatedView<MSG>{
     }
 }
 
-impl<MSG> fmt::Debug for TemplatedView<MSG>{
-
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
+impl<MSG> fmt::Debug for TemplatedView<MSG> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("TemplatedView")
             .field("view", &self.view)
             .field("template", &(&self.template)())

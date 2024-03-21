@@ -81,7 +81,12 @@ impl<MSG> Node<MSG> {
 
 impl<MSG> Leaf<MSG> {
     /// render leaf nodes
-    pub fn render_with_indent(&self, buffer: &mut dyn fmt::Write, indent: usize, compressed: bool) -> fmt::Result {
+    pub fn render_with_indent(
+        &self,
+        buffer: &mut dyn fmt::Write,
+        indent: usize,
+        compressed: bool,
+    ) -> fmt::Result {
         match self {
             Leaf::Text(text) => {
                 write!(buffer, "{text}")

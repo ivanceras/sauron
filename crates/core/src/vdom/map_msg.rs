@@ -1,9 +1,9 @@
 use crate::vdom::Attribute;
 use crate::vdom::AttributeValue;
 use crate::vdom::Element;
+use crate::vdom::Leaf;
 use crate::vdom::Node;
 use crate::vdom::TemplatedView;
-use crate::vdom::Leaf;
 use std::rc::Rc;
 
 impl<MSG> Node<MSG> {
@@ -87,7 +87,6 @@ impl<MSG> AttributeValue<MSG> {
 }
 
 impl<MSG> Leaf<MSG> {
-
     /// map the msg of this Leaf such that `Leaf<MSG>` becomes `Leaf<MSG2>`
     pub fn map_msg<F, MSG2>(self, cb: F) -> Leaf<MSG2>
     where
@@ -119,8 +118,7 @@ impl<MSG> Leaf<MSG> {
     }
 }
 
-impl<MSG> TemplatedView<MSG>{
-
+impl<MSG> TemplatedView<MSG> {
     /// mape the msg of this TemplatedView such that `TemplatedView<MSG>` becomes `TemplatedView<MSG2>`
     pub fn map_msg<F, MSG2>(self, cb: F) -> TemplatedView<MSG2>
     where
@@ -128,9 +126,9 @@ impl<MSG> TemplatedView<MSG>{
         MSG2: 'static,
         MSG: 'static,
     {
-        TemplatedView{
+        TemplatedView {
             view: Box::new(self.view.map_msg(cb.clone())),
-            template: Rc::new(move||(self.template)().map_msg(cb.clone())),
+            template: Rc::new(move || (self.template)().map_msg(cb.clone())),
             skip_diff: self.skip_diff,
         }
     }

@@ -1,11 +1,10 @@
 //! Leaf node for html dom tree
 use crate::dom::StatefulModel;
 use crate::dom::StatelessModel;
-use std::borrow::Cow;
 use crate::vdom::Node;
-use derive_where::derive_where;
 use crate::vdom::TemplatedView;
-
+use derive_where::derive_where;
+use std::borrow::Cow;
 
 /// A leaf node value of html dom tree
 #[derive_where(Clone, Debug)]
@@ -32,8 +31,6 @@ pub enum Leaf<MSG> {
     TemplatedView(TemplatedView<MSG>),
 }
 
-
-
 impl<MSG> PartialEq for Leaf<MSG> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
@@ -51,7 +48,6 @@ impl<MSG> PartialEq for Leaf<MSG> {
 }
 
 impl<MSG> Eq for Leaf<MSG> {}
-
 
 impl<MSG> Leaf<MSG> {
     /// returns true if this a text node
@@ -79,7 +75,6 @@ impl<MSG> Leaf<MSG> {
             _ => None,
         }
     }
-
 }
 
 impl<MSG> From<&'static str> for Leaf<MSG> {

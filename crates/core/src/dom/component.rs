@@ -2,19 +2,19 @@ use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
+use derive_where::derive_where;
 use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use derive_where::derive_where;
 
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
 
+mod no_listener;
 mod stateful_component;
 #[cfg(feature = "custom_element")]
 mod web_component;
-mod no_listener;
 
 thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
@@ -37,7 +37,10 @@ pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
         if map.contains_key(&type_id) {
             // already added
         } else {
-            map.insert(type_id, template.clone_node_with_deep(true).expect("deep clone"));
+            map.insert(
+                type_id,
+                template.clone_node_with_deep(true).expect("deep clone"),
+            );
         }
     })
 }

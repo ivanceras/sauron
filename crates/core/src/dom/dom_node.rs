@@ -1,3 +1,4 @@
+use crate::dom::component::register_template;
 use crate::dom::component::StatelessModel;
 #[cfg(feature = "with-debug")]
 use crate::dom::now;
@@ -23,7 +24,6 @@ use std::collections::HashMap;
 use std::fmt;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
-use crate::dom::component::register_template;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -266,7 +266,9 @@ where
             Leaf::NodeList(node_list) => self.create_document_fragment(node_list),
             Leaf::StatefulComponent(comp) => self.create_stateful_component(comp),
             Leaf::StatelessComponent(comp) => self.create_stateless_component(comp),
-            Leaf::TemplatedView(view) => unreachable!("template view should not be created: {:#?}", view),
+            Leaf::TemplatedView(view) => {
+                unreachable!("template view should not be created: {:#?}", view)
+            }
         }
     }
 
@@ -283,7 +285,12 @@ where
     /// The attributes can be diff and send the patches to the StatefulComponent
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
     fn create_stateful_component(&self, comp: &StatefulModel<APP::MSG>) -> Node {
-        let comp_node = self.create_dom_node(&crate::html::div([crate::html::attributes::class("component")].into_iter().chain(comp.attrs.clone().into_iter()), []));
+        let comp_node = self.create_dom_node(&crate::html::div(
+            [crate::html::attributes::class("component")]
+                .into_iter()
+                .chain(comp.attrs.clone().into_iter()),
+            [],
+        ));
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
         // listener and removing the generics msg
@@ -403,13 +410,17 @@ where
         );
     }
 
-    pub(crate) fn dispatch_mount_event_to_children(target_node: &Node, deep: usize, current_depth: usize){
-        if current_depth > deep{
+    pub(crate) fn dispatch_mount_event_to_children(
+        target_node: &Node,
+        deep: usize,
+        current_depth: usize,
+    ) {
+        if current_depth > deep {
             Self::dispatch_mount_event(&target_node);
         }
         let children = target_node.child_nodes();
         let len = children.length();
-        for i in 0..len{
+        for i in 0..len {
             let child = children.get(i).expect("child");
             Self::dispatch_mount_event_to_children(&child, deep, current_depth + 1);
         }

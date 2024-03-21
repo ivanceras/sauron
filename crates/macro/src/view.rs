@@ -13,7 +13,7 @@ pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
              ::sauron::Node::Leaf(sauron::vdom::Leaf::TemplatedView(sauron::vdom::TemplatedView{
                         view: Box::new(#view),
                         template: std::rc::Rc::new(||#template),
-                        skip_diff: std::rc::Rc::new(||#skip_diff), 
+                        skip_diff: std::rc::Rc::new(||#skip_diff),
                     }))
         }
     }
