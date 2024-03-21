@@ -283,15 +283,14 @@ where
     /// The attributes can be diff and send the patches to the StatefulComponent
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
     fn create_stateful_component(&self, comp: &StatefulModel<APP::MSG>) -> Node {
-        log::info!("creating stateful component...");
         let comp_node = self.create_dom_node(&crate::html::div([crate::html::attributes::class("component")].into_iter().chain(comp.attrs.clone().into_iter()), []));
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
         // listener and removing the generics msg
         for child in comp.children.iter() {
             let child_dom = self.create_dom_node(&child);
-            Self::dispatch_mount_event(&child_dom);
             comp.comp.borrow_mut().append_child(&child_dom);
+            Self::dispatch_mount_event(&child_dom);
         }
         comp_node
     }
@@ -402,6 +401,18 @@ where
             Ok(true),
             event_target.dispatch_event(&MountEvent::create_web_event())
         );
+    }
+
+    pub(crate) fn dispatch_mount_event_to_children(target_node: &Node, deep: usize, current_depth: usize){
+        if current_depth > deep{
+            Self::dispatch_mount_event(&target_node);
+        }
+        let children = target_node.child_nodes();
+        let len = children.length();
+        for i in 0..len{
+            let child = children.get(i).expect("child");
+            Self::dispatch_mount_event_to_children(&child, deep, current_depth + 1);
+        }
     }
 
     /// a helper method to append a node to its parent and trigger a mount event if there is any

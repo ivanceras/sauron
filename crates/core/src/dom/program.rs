@@ -378,7 +378,6 @@ where
     /// create initial dom node generated
     /// from template and patched by the difference of vdom_template and current app view.
     fn create_initial_view(&self) -> web_sys::Node {
-        log::info!("creating initial view..");
         let app_view = self.app_context.app.borrow().view();
         let vdom_template = app_view.template();
         let skip_diff = app_view.skip_diff();
@@ -392,10 +391,10 @@ where
                 let dom_patches = self
                     .convert_patches(&dom_template, &patches)
                     .expect("convert patches");
-                log::info!("first time patches {}: {patches:#?}", patches.len());
                 let _new_template_node = self
                     .apply_dom_patches(dom_patches)
                     .expect("template patching");
+                Self::dispatch_mount_event_to_children(&dom_template, 2, 0);
                 dom_template
             }
             _ => self.create_dom_node(&self.app_context.current_vdom()),
@@ -524,7 +523,6 @@ where
             )
             .expect("must convert patches")
         } else {
-            log::info!("no skip diff..");
             self.create_dom_patch(&view)
         };
 
@@ -567,7 +565,7 @@ where
             }
         }
 
-        #[cfg(feature = "with-debug")]
+        #[cfg(all(feature = "with-debug", feature = "with-measure"))]
         {
             let total = crate::dom::dom_node::total_time_spent();
             log::info!("total: {:#?}", total);

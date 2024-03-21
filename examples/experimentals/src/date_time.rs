@@ -20,6 +20,7 @@ pub enum Msg {
     Mounted(MountEvent),
     ExternContMounted(web_sys::Node),
     BtnClick,
+    NoOp,
 }
 
 #[derive(Debug, Clone)]
@@ -113,19 +114,13 @@ where
                 Effects::with_external(parent_msg)
             }
             Msg::Mounted(mount_event) => {
+                log::info!("==> Ok the DateTime widget is now mounted for real..");
                 let mount_element: web_sys::Element = mount_event.target_node.unchecked_into();
-                let root_node = mount_element.get_root_node();
-                if let Some(shadow_root) = root_node.dyn_ref::<web_sys::ShadowRoot>() {
-                    log::info!("There is a shadow root");
-                    let host_element = shadow_root.host();
-                    self.host_element = Some(host_element);
-                } else {
-                    log::warn!("There is no shadow root");
-                }
+                self.host_element = Some(mount_element);
                 Effects::none()
             }
             Msg::ExternContMounted(target_node) => {
-                log::info!("DateTime: extenal container mounted...");
+                log::warn!("-->>> Container for children is now mounted..!");
                 for child in self.children.iter() {
                     target_node.append_child(child).expect("must append");
                 }
@@ -141,6 +136,7 @@ where
                 log::trace!("There is an interval: {}", interval);
                 Effects::none()
             }
+            Msg::NoOp => Effects::none(),
         }
     }
 
@@ -178,8 +174,8 @@ where
                     on_change=|input|Msg::TimeChange(input.value())
                     value=&self.time/>
             <input type="text" value=self.cnt/>
-            <button on_click=move |_| Msg::BtnClick>Do something</button>
-            <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
+            <button on_click=move |_| Msg::BtnClick on_mount=|me|{log::info!("button is mounted...");Msg::NoOp}>Do something</button>
+            <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)>Here is something!</div>
         </div>
     }
 }

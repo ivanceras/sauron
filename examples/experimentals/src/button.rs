@@ -43,7 +43,7 @@ impl Component for Button {
 
     view! {
         <button on_click=|_|Msg::Click >
-            Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}
+            <span>Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}</span>
             <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
         </button>
     }
