@@ -128,7 +128,6 @@ impl<MSG> TemplatedView<MSG>{
         MSG2: 'static,
         MSG: 'static,
     {
-        log::info!("mapping template view..");
         TemplatedView{
             view: Box::new(self.view.map_msg(cb.clone())),
             template: Rc::new(move||(self.template)().map_msg(cb.clone())),
