@@ -1,4 +1,3 @@
-use crate::dom::component::register_template;
 use crate::dom::events::on_mount;
 use crate::dom::program::MountProcedure;
 use crate::dom::Application;
@@ -144,18 +143,6 @@ where
 {
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
-
-    // Note: we can not include the children in the build function
-    // as the children here contains the MSG generic
-    // and we can not discard the event listeners.
-    //
-    // The attribute(minus events) however can be used for configurations, for setting initial state
-    // of the stateful component.
-    
-    let app_view = app.view();
-
-    let vdom_template = app_view.template().expect("must have a template");
-    let _template = register_template(type_id, &vdom_template);
 
     let app = Rc::new(RefCell::new(app));
 

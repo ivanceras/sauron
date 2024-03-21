@@ -215,22 +215,11 @@ where
 
     /// create a program from Rc<RefCell<APP>>
     pub fn from_rc_app(app: Rc<RefCell<APP>>) -> Self {
-        let type_id = TypeId::of::<APP>();
         let app_view = app.borrow().view();
-        let skip_diff = app_view.skip_diff();
-        let vdom_template = app_view.template();
-        let template = if let Some(vdom_template) = vdom_template.as_ref() {
-            Some(register_template(type_id, vdom_template))
-        } else {
-            None
-        };
 
         Program {
             app_context: AppContext {
                 app,
-                template: template,
-                skip_diff: Rc::new(skip_diff),
-                vdom_template: Rc::new(vdom_template),
                 current_vdom: Rc::new(RefCell::new(app_view)),
                 pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
                 pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
@@ -391,26 +380,23 @@ where
     fn create_initial_view(&self) -> web_sys::Node {
         log::info!("creating initial view..");
         let app_view = self.app_context.app.borrow().view();
-        let dom_template = self.app_context.template.clone();
-        let vdom_template = self.app_context.vdom_template.as_ref();
-        let skip_diff = self.app_context.skip_diff.as_ref();
+        let vdom_template = app_view.template();
+        let skip_diff = app_view.skip_diff();
         let real_view = app_view.unwrap_template();
         match (vdom_template, skip_diff) {
             (Some(vdom_template), Some(skip_diff)) => {
                 let patches =
-                    self.create_patches_with_skip_diff(&vdom_template, &real_view, skip_diff);
-                if let Some(dom_template) = dom_template {
-                    let dom_patches = self
-                        .convert_patches(&dom_template, &patches)
-                        .expect("convert patches");
-                    log::info!("first time patches {}: {patches:#?}", patches.len());
-                    let _new_template_node = self
-                        .apply_dom_patches(dom_patches)
-                        .expect("template patching");
-                    dom_template
-                } else {
-                    self.create_dom_node(&self.app_context.current_vdom())
-                }
+                    self.create_patches_with_skip_diff(&vdom_template, &real_view, &skip_diff);
+                let type_id = TypeId::of::<APP>();
+                let dom_template = register_template(type_id, &vdom_template);
+                let dom_patches = self
+                    .convert_patches(&dom_template, &patches)
+                    .expect("convert patches");
+                log::info!("first time patches {}: {patches:#?}", patches.len());
+                let _new_template_node = self
+                    .apply_dom_patches(dom_patches)
+                    .expect("template patching");
+                dom_template
             }
             _ => self.create_dom_node(&self.app_context.current_vdom()),
         }
