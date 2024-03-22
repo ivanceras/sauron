@@ -114,25 +114,6 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
             .and_then(|v| v.as_bool())
             .unwrap_or(false);
 
-        /*
-        let old_callbacks = old_node.get_callbacks();
-        let new_callbacks = new_node.get_callbacks();
-        let old_node_has_event = !old_callbacks.is_empty();
-        let new_node_has_event = !new_callbacks.is_empty();
-        // don't recycle when old node has event while new new doesn't have
-        let forbid_recycle = old_node_has_event && !new_node_has_event;
-        log::debug!("forbit_recycle: {forbid_recycle}");
-
-        // event is added in the new when the old node has no events yet
-        let events_added = !old_node_has_event && new_node_has_event;
-        log::debug!("events added: {events_added}");
-
-        // replace if the number of callbacks changed as it is not just adding event
-        let event_listeners_altered = !events_added && old_callbacks.len() != new_callbacks.len();
-        log::debug!("event_listeners_altered: {event_listeners_altered}");
-
-        explicit_replace_attr || forbid_recycle || event_listeners_altered
-        */
         explicit_replace_attr
     };
     // handle explicit replace if the Rep fn evaluates to true
@@ -196,11 +177,6 @@ pub fn diff_recursive<'a, MSG>(
         )];
     }
 
-    // skip diffing if they are essentially the same node
-    if old_node == new_node {
-        return vec![];
-    }
-
     let mut patches = vec![];
 
     // The following comparison can only contain identical variants, other
@@ -247,9 +223,10 @@ pub fn diff_recursive<'a, MSG>(
                     let patch = diff_recursive(old_real_view, new_real_view, &new_path);
                     patches.extend(patch);
                 }
-                (Leaf::StatefulComponent(_old_comp), Leaf::StatefulComponent(_new_comp)) => {
+                (Leaf::StatefulComponent(old_comp), Leaf::StatefulComponent(new_comp)) => {
                     log::info!("diffing stateful component");
-                    todo!()
+                    let patch = diff_nodes(None, &old_comp.children, &new_comp.children, &path);
+                    patches.extend(patch);
                 }
                 (Leaf::TemplatedView(_old_view), _) => {
                     unreachable!("templated view should not be diffed..")

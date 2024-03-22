@@ -1,7 +1,7 @@
+use frame::Frame;
 use sauron::*;
 use status::Status;
 use theme::Theme;
-use frame::Frame;
 
 mod frame;
 mod status;
@@ -9,9 +9,7 @@ mod theme;
 
 #[derive(Default)]
 enum Msg {
-    Increment,
-    Decrement,
-    Reset,
+    Clicked,
     #[default]
     NoOp,
 }
@@ -33,7 +31,7 @@ impl Application for App {
         node! {
             <main>
             {stateful_component(Frame::default(), [], [
-                button([],[text("This is a button")])
+                button([on_click(|_|Msg::Clicked)],[text!("Button has been clicked {} times", self.count)])
             ])}
             </main>
         }
@@ -41,9 +39,10 @@ impl Application for App {
 
     fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
-            Msg::Increment => self.count += 1,
-            Msg::Decrement => self.count -= 1,
-            Msg::Reset => self.count = 0,
+            Msg::Clicked => {
+                log::info!("Button has been clicked...");
+                self.count += 1;
+            }
             Msg::NoOp => (),
         }
         Cmd::none()

@@ -101,6 +101,15 @@ impl<MSG> Clone for StatefulModel<MSG> {
     }
 }
 
+impl<MSG> PartialEq for StatefulModel<MSG>{
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.comp, &other.comp)
+           && self.type_id == other.type_id
+            && self.attrs == other.attrs
+            && self.children == other.children
+    }
+}
+
 impl<COMP> Application for COMP
 where
     COMP: Component<XMSG = ()> + StatefulComponent + 'static,

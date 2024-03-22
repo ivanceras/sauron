@@ -248,7 +248,7 @@ impl Application for App {
             <table class="table table-hover table-striped test-data">
                 <tbody id="tbody">
                     {for row in self.rows.iter() {
-                        component(row, [], [])
+                        component(row)
                     }}
                 </tbody>
             </table>

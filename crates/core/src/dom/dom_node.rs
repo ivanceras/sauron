@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::dom::component::register_template;
 use crate::dom::component::StatelessModel;
 #[cfg(feature = "with-debug")]
@@ -18,12 +19,14 @@ use crate::{
 use indexmap::IndexMap;
 use js_sys::Function;
 use std::cell::Cell;
-#[cfg(feature = "with-debug")]
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node, Text};
+use std::rc::Rc;
+use crate::dom::StatefulComponent;
+use std::cell::RefCell;
+use crate::dom::program::EventClosures;
 
 /// data attribute name used in assigning the node id of an element with events
 pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
@@ -102,65 +105,68 @@ pub fn total_time_spent() -> Section {
     TIME_SPENT.with_borrow(|values| total(values))
 }
 
-// a cache of commonly used elements, so we can clone them.
-// cloning is much faster then creating the element
-thread_local! {
-    static CACHE_ELEMENTS: HashMap<&'static str, web_sys::Element> =
-        HashMap::from_iter(["div", "span", "ol", "ul", "li"].map(web_sys::Node::create_element_with_tag));
+
+
+/// A counter part of the vdom Node
+/// This is needed, so that we can
+/// 1. Keep track of event closure and drop them when nodes has been removed
+/// 2. Custom removal of children nodes on a stateful component
+pub enum DomNode{
+    /// a reference to the node in the Dom and its listeners
+    Node{
+        /// the actual dom node
+        node: web_sys::Node,
+        /// the event listeners of this Node,
+        /// which we will drop when this node is removed
+        listeners: EventClosures,
+    },
+    /// a reference to an element node
+    Element{
+        /// the reference to the actual element
+        element: web_sys::Element,
+        /// the listeners of this element, which we will drop when this element is removed
+        listeners: EventClosures,
+        /// keeps track of the children nodes 
+        /// this needs to be synced with the actual element children
+        children: Vec<DomNode>,
+    },
+    /// text node
+    Text(web_sys::Text),
+    /// comment node
+    Comment(web_sys::Comment),
+    /// Fragment node
+    Fragment(web_sys::DocumentFragment),
+    /// StatefulComponent
+    StatefulComponent(Rc<RefCell<dyn StatefulComponent>>),
 }
 
-/// Provides helper traits for web_sys::Node
-pub trait DomNode {
-    /// return the inner html if it is an element
-    fn inner_html(&self) -> Option<String>;
+impl DomNode {
+    fn inner_html(&self) -> Option<String> {
+        match self{
+            Self::Element{element,..} => Some(element.inner_html()),
+            Self::Node{node,..} => {
+                let element: &Element = node.dyn_ref()?;
+                Some(element.inner_html())
+            }
+            _ => None
+        }
+    }
 
-    /// create a text node
-    fn create_text_node(txt: &str) -> Text {
+    pub(crate) fn create_text_node(txt: &str) -> Text {
         document().create_text_node(txt)
+    }
+
+    /// create dom element from tag name
+    pub(crate) fn create_element(tag: &'static str) -> web_sys::Element {
+        document()
+            .create_element(intern(tag))
+            .expect("create element")
     }
 
     /// create a web_sys::Element with the specified tag
     fn create_element_with_tag(tag: &'static str) -> (&'static str, web_sys::Element) {
         let elm = document().create_element(intern(tag)).unwrap();
         (tag, elm)
-    }
-
-    /// create dom element from tag name
-    #[cfg(feature = "use-cached-elements")]
-    fn create_element(tag: &'static str) -> web_sys::Element {
-        // find the element from the most created element and clone it, else create it
-        CACHE_ELEMENTS.with(|map| {
-            if let Some(elm) = map.get(tag) {
-                elm.clone_node_with_deep(false)
-                    .expect("must clone node")
-                    .unchecked_into()
-            } else {
-                document()
-                    .create_element(intern(tag))
-                    .expect("create element")
-            }
-        })
-    }
-
-    /// create dom element from tag name
-    #[cfg(not(feature = "use-cached-elements"))]
-    fn create_element(tag: &'static str) -> web_sys::Element {
-        document()
-            .create_element(intern(tag))
-            .expect("create element")
-    }
-
-    ///
-    fn render_to_string(&self) -> String;
-
-    ///
-    fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result;
-}
-
-impl DomNode for web_sys::Node {
-    fn inner_html(&self) -> Option<String> {
-        let element: &Element = self.dyn_ref()?;
-        Some(element.inner_html())
     }
 
     fn render_to_string(&self) -> String {
@@ -170,19 +176,17 @@ impl DomNode for web_sys::Node {
     }
 
     fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
-        match self.node_type() {
-            Node::TEXT_NODE => {
-                let text_node = self.unchecked_ref::<Text>();
+        match self {
+            Self::Text(text_node) => {
                 let text = text_node.whole_text().expect("whole text");
                 write!(buffer, "{text}")?;
                 Ok(())
             }
-            Node::ELEMENT_NODE => {
-                let elm = self.unchecked_ref::<Element>();
-                let tag = elm.tag_name().to_lowercase();
+            Self::Element{element,children,..} => {
+                let tag = element.tag_name().to_lowercase();
 
                 write!(buffer, "<{tag}")?;
-                let attrs = elm.attributes();
+                let attrs = element.attributes();
                 let attrs_len = attrs.length();
                 for i in 0..attrs_len {
                     let attr = attrs.item(i).expect("attr");
@@ -194,10 +198,7 @@ impl DomNode for web_sys::Node {
                     write!(buffer, ">")?;
                 }
 
-                let children = elm.children();
-                let children_len = children.length();
-                for i in 0..children_len {
-                    let child = children.item(i).expect("element child");
+                for child in children {
                     child.render(buffer)?;
                 }
                 if !lookup::is_self_closing(&tag) {
@@ -252,7 +253,7 @@ where
 
     fn create_leaf_node(&self, leaf: &Leaf<APP::MSG>) -> Node {
         match leaf {
-            Leaf::Text(txt) => web_sys::Node::create_text_node(txt).into(),
+            Leaf::Text(txt) => DomNode::create_text_node(txt).into(),
             Leaf::Comment(comment) => document().create_comment(comment).into(),
             Leaf::SafeHtml(_safe_html) => {
                 panic!("safe html must have already been dealt in create_element node");
@@ -385,7 +386,7 @@ where
                 .create_element_ns(Some(intern(namespace)), intern(velem.tag()))
                 .expect("Unable to create element")
         } else {
-            Node::create_element(velem.tag())
+            DomNode::create_element(velem.tag())
         };
 
         let attrs = Attribute::merge_attributes_of_same_name(velem.attributes().iter());

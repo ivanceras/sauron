@@ -265,6 +265,13 @@
 - [ ] remove `SafeHtml` variant in leaf, instead provide a safe_html which is parsed and converted into node
     - using safe html alters the dom tree
 - [ ] remove `innerHTML` func in AttributeValue as it could alter the DOM node tree
+- [ ] Keep track of which attributes to be skipped in `SkipDiff{shall:false}`
+    ```rust
+    enum SkipStrat{
+        SkipAll,
+        SkippIndex(Vec<usize>),
+    }
+    ```
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)

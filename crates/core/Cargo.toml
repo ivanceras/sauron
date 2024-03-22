@@ -14,7 +14,7 @@ edition = "2021"
 maintenance = { status = "actively-developed" }
 
 [features]
-default = ["with-dom", "use-cached-elements","ensure-check", "ensure-attr-set"]
+default = ["with-dom", "ensure-check", "ensure-attr-set"]
 with-dom = ["wasm-bindgen", "js-sys", "web-sys", "wasm-bindgen-futures"] # for client-side usage
 with-lookup = [] #enumerates html tags and attributes
 with-measure = [] # log traces for measurements in various parts of the system where performance matters.
@@ -23,7 +23,6 @@ log-patches = [] # use in combination to with-debug to log the debug patches
 with-ric = [] # use of request_idle_callback in javascript
 with-raf = [] # use of request_animation_frame in javascript
 with-interning = [] # use caching of strings when crossing rust to js, for faster transfer
-use-cached-elements = [] # use caching of common elements
 custom_element = [] # use of register_custom_element, adding this will add the js snippets
 ensure-check = [] #do checking if pending msgs, patches, cmds,  has been processed accordingly to ensure proper order and synchronized dom state
 ensure-attr-set = [] #ensure attributes is reflected into the element by explicitly calling the element corresponding methods aside fro just setting its attribute by name
