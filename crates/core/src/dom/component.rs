@@ -196,10 +196,6 @@ pub struct StatelessModel<MSG> {
     pub view: Box<Node<MSG>>,
     /// component type id
     pub type_id: TypeId,
-    /// attributes of this model
-    pub attrs: Vec<Attribute<MSG>>,
-    /// external children component
-    pub children: Vec<Node<MSG>>,
 }
 
 impl<MSG> StatelessModel<MSG> {
@@ -213,16 +209,6 @@ impl<MSG> StatelessModel<MSG> {
         StatelessModel {
             type_id: self.type_id,
             view: Box::new(self.view.map_msg(cb.clone())),
-            attrs: self
-                .attrs
-                .into_iter()
-                .map(|a| a.map_msg(cb.clone()))
-                .collect(),
-            children: self
-                .children
-                .into_iter()
-                .map(|c| c.map_msg(cb.clone()))
-                .collect(),
         }
     }
 }
@@ -232,8 +218,6 @@ impl<MSG> Clone for StatelessModel<MSG> {
         Self {
             view: self.view.clone(),
             type_id: self.type_id.clone(),
-            attrs: self.attrs.clone(),
-            children: self.children.clone(),
         }
     }
 }
@@ -242,16 +226,12 @@ impl<MSG> PartialEq for StatelessModel<MSG> {
     fn eq(&self, other: &Self) -> bool {
         self.view == other.view
             && self.type_id == other.type_id
-            && self.attrs == other.attrs
-            && self.children == other.children
     }
 }
 
 /// create a stateless component node
 pub fn component<COMP>(
     app: &COMP,
-    attrs: impl IntoIterator<Item = Attribute<COMP::MSG>>,
-    children: impl IntoIterator<Item = Node<COMP::MSG>>,
 ) -> Node<COMP::MSG>
 where
     COMP: Component + 'static,
@@ -261,8 +241,6 @@ where
     Node::Leaf(Leaf::StatelessComponent(StatelessModel {
         view: Box::new(app_view),
         type_id,
-        attrs: attrs.into_iter().collect(),
-        children: children.into_iter().collect(),
     }))
 }
 
