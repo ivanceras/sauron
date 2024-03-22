@@ -30,6 +30,7 @@ pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
 
+#[allow(unused)]
 #[cfg(feature = "with-debug")]
 #[derive(Clone, Copy, Default, Debug)]
 pub struct Section {
@@ -41,6 +42,7 @@ pub struct Section {
     len: usize,
 }
 
+#[allow(unused)]
 #[cfg(feature = "with-debug")]
 impl Section {
     pub fn average(&self) -> Section {
@@ -78,6 +80,7 @@ pub fn add_time_trace(section: Section) {
     })
 }
 
+#[allow(unused)]
 #[cfg(feature = "with-debug")]
 fn total(values: &[Section]) -> Section {
     let len = values.len();
@@ -93,6 +96,7 @@ fn total(values: &[Section]) -> Section {
     sum
 }
 
+#[allow(unused)]
 #[cfg(feature = "with-debug")]
 pub fn total_time_spent() -> Section {
     TIME_SPENT.with_borrow(|values| total(values))
@@ -386,8 +390,7 @@ where
 
         let attrs = Attribute::merge_attributes_of_same_name(velem.attributes().iter());
 
-        Self::set_element_dom_attrs(
-            self,
+        self.set_element_dom_attrs(
             &element,
             attrs
                 .iter()

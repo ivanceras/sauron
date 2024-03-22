@@ -1,0 +1,16 @@
+[package]
+name = "fancy-ui"
+version = "0.1.0"
+authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+sauron = { path = "../../", features = ["log-patches"] }
+log = "0.4"
+console_log = "0.2"
+console_error_panic_hook = "0.1"
+css-colors = "1" # for using lighten, and darken when calculating theme colors
+css-color = "0.1.1" #for parsing hex color into rgb, don't get mix with css-colors with a `s`

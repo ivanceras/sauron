@@ -198,12 +198,16 @@ where
                 }
             }
 
-            PatchType::AddAttributes { attrs } => DomPatch {
-                patch_path,
-                target_element,
-                patch_variant: PatchVariant::AddAttributes {
-                    attrs: attrs.iter().map(|a| self.convert_attr(a)).collect(),
-                },
+            PatchType::AddAttributes { attrs } => {
+                // we merge the attributes here prior to conversion
+                let attrs = Attribute::merge_attributes_of_same_name(attrs.iter().map(|a|*a));
+                DomPatch {
+                    patch_path,
+                    target_element,
+                    patch_variant: PatchVariant::AddAttributes {
+                        attrs: attrs.iter().map(|a| self.convert_attr(a)).collect(),
+                    },
+                }
             },
             PatchType::RemoveAttributes { attrs } => DomPatch {
                 patch_path,

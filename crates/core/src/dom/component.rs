@@ -126,7 +126,9 @@ pub trait Component {
     where
         Self: Sized,
     {
-        class(Self::prefix_class(class_name))
+        let class_names:Vec<&str> = class_name.split(" ").collect();
+        let prefixed_classes = class_names.iter().map(|c|Self::prefix_class(c)).collect::<Vec<_>>().join(" ");
+        class(prefixed_classes)
     }
 
     /// create namespaced class names to pair that evaluates to true
