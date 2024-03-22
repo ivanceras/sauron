@@ -69,7 +69,6 @@ impl Application for App {
             }
         }];
 
-        main.extend(<Frame<Msg> as Component>::stylesheet());
         main
     }
 }

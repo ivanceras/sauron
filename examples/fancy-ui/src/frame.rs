@@ -76,7 +76,7 @@ pub struct Dimension {
 
 impl Default for Dimension {
     fn default() -> Self {
-        Self::static_frame()
+        Self::large()
     }
 }
 
@@ -572,7 +572,7 @@ where
 
 impl Default for Feature {
     fn default() -> Self {
-        Self::static_frame()
+        Self::tight()
     }
 }
 
