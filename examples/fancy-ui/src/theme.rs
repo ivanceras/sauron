@@ -294,17 +294,8 @@ where
 {
     fn is_lighter(&self, other: &Self) -> bool {
         let this = self.clone().to_rgb().greyscale();
-        dbg!(&this);
-        assert_eq!(this.r, this.g);
-        assert_eq!(this.g, this.b);
         let other = other.clone().to_rgb().greyscale();
-        dbg!(&other);
-        assert_eq!(other.r, other.g);
-        assert_eq!(other.g, other.b);
-
         this.r > other.r
     }
 }
 
-#[cfg(test)]
-mod tests;

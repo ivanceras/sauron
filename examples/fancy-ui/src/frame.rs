@@ -256,7 +256,6 @@ where
     fn view(&self) -> Node<Msg<XMSG>> {
         div(
             [
-                class("top-most"),
                 class(COMPONENT_NAME),
                 classes_flag([
                     ("clicked", self.clicked),
