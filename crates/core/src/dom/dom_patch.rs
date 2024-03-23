@@ -309,15 +309,14 @@ where
         match patch_variant {
             PatchVariant::InsertBeforeNode { nodes } => {
                 // we insert the node before this target element
-                if let Some(parent_target) = target_element.parent_node() {
-                    for for_insert in nodes {
-                        parent_target
-                            .insert_before(&for_insert, Some(&target_element))
-                            .expect("must remove target node");
-                        Self::dispatch_mount_event(&for_insert);
-                    }
-                } else {
-                    panic!("unable to get parent node of the target element: {target_element:?} for patching: {nodes:#?}");
+                for for_insert in nodes {
+                    let created_element: &Element = for_insert
+                        .dyn_ref()
+                        .expect("only elements is supported for now");
+                    target_element
+                        .insert_adjacent_element(intern("beforebegin"), created_element)
+                        .expect("must remove target node");
+                    Self::dispatch_mount_event(&for_insert);
                 }
                 Ok(None)
             }
@@ -454,20 +453,17 @@ where
                 Ok(None)
             }
             PatchVariant::MoveBeforeNode { for_moving } => {
-                if let Some(target_parent) = target_element.parent_node() {
-                    for move_node in for_moving {
-                        let move_node_parent = move_node
-                            .parent_node()
-                            .expect("node for moving must have parent");
-                        let move_node = move_node_parent
-                            .remove_child(&move_node)
-                            .expect("must remove child");
-                        target_parent
-                            .insert_before(&move_node, Some(&target_element))
-                            .expect("must insert before this node");
-                    }
-                } else {
-                    panic!("unable to get the parent node of the target element");
+                for move_node in for_moving {
+                    let move_node_parent = move_node
+                        .parent_node()
+                        .expect("node for moving must have parent");
+                    let move_node = move_node_parent
+                        .remove_child(&move_node)
+                        .expect("must remove child");
+
+                    let move_element = move_node.dyn_ref().expect("must be element");
+                    target_element.insert_adjacent_element(intern("beforebegin"),
+                        move_element).expect("insert adjacent");
                 }
                 Ok(None)
             }
