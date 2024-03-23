@@ -8,7 +8,8 @@ use crate::vdom::Attribute;
 use crate::vdom::Leaf;
 use wasm_bindgen::intern;
 
-pub(crate) fn create_dom_node_without_listeners<MSG>(vnode: &vdom::Node<MSG>) -> web_sys::Node {
+pub(crate) fn create_dom_node_without_listeners<MSG>(vnode: &vdom::Node<MSG>) -> DomNode {
+    /*
     match vnode {
         vdom::Node::Leaf(leaf_node) => create_leaf_node_without_listeners(leaf_node),
         vdom::Node::Element(element_node) => {
@@ -22,9 +23,12 @@ pub(crate) fn create_dom_node_without_listeners<MSG>(vnode: &vdom::Node<MSG>) ->
             created_node
         }
     }
+    */
+    todo!()
 }
 
 fn create_document_fragment_without_listeners<MSG>(nodes: &[vdom::Node<MSG>]) -> web_sys::Node {
+    /*
     let doc_fragment = document().create_document_fragment();
     for vnode in nodes {
         let created_node = create_dom_node_without_listeners(vnode);
@@ -33,6 +37,8 @@ fn create_document_fragment_without_listeners<MSG>(nodes: &[vdom::Node<MSG>]) ->
             .expect("append child");
     }
     doc_fragment.into()
+    */
+    todo!()
 }
 
 fn create_leaf_node_without_listeners<MSG>(leaf: &Leaf<MSG>) -> web_sys::Node {

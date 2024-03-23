@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::dom;
 use crate::dom::dom_node::find_all_nodes;
 use crate::dom::dom_node::intern;
@@ -13,6 +14,7 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use web_sys::Element;
 use web_sys::Node;
+use crate::dom::DomNode;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -23,7 +25,7 @@ pub struct DomPatch {
     /// The path to traverse to get to the target_element
     pub patch_path: TreePath,
     /// the target node
-    pub target_element: Element,
+    pub target_element: DomNode,
     /// the patch variant
     pub patch_variant: PatchVariant,
 }
@@ -33,17 +35,17 @@ pub enum PatchVariant {
     /// Insert nodes before the target node
     InsertBeforeNode {
         /// nodes to be inserted before the target node
-        nodes: Vec<Node>,
+        nodes: Vec<DomNode>,
     },
     /// Insert nodes after the target node
     InsertAfterNode {
         /// the nodes to be inserted after the target node
-        nodes: Vec<Node>,
+        nodes: Vec<DomNode>,
     },
     /// Append nodes into the target node
     AppendChildren {
         /// the children nodes to be appended into the target node
-        children: Vec<Node>,
+        children: Vec<DomNode>,
     },
     /// Add attributes to the target node
     AddAttributes {
@@ -58,7 +60,7 @@ pub enum PatchVariant {
     /// Replace the target node with the replacement node
     ReplaceNode {
         /// the replacement node
-        replacement: Vec<Node>,
+        replacement: Vec<DomNode>,
     },
     /// Remove the target node
     RemoveNode,
@@ -67,12 +69,12 @@ pub enum PatchVariant {
     /// Move the target node before the node specified in the path location
     MoveBeforeNode {
         /// before the node at this location
-        for_moving: Vec<Node>,
+        for_moving: Vec<DomNode>,
     },
     /// Move the target node after the node specified in the path location
     MoveAfterNode {
         /// after the node at this location
-        for_moving: Vec<Node>,
+        for_moving: Vec<DomNode>,
     },
 }
 
@@ -121,7 +123,7 @@ where
     /// get the real DOM target node and make a DomPatch object for each of the Patch
     pub(crate) fn convert_patches(
         &self,
-        target_node: &web_sys::Node,
+        target_node: &DomNode,
         patches: &[Patch<APP::MSG>],
     ) -> Result<Vec<DomPatch>, JsValue> {
         let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
@@ -141,16 +143,18 @@ where
             let patch_path = patch.path();
             let patch_tag = patch.tag();
             if let Some(target_node) = nodes_lookup.get(patch_path) {
-                let target_element: &Element = target_node.unchecked_ref();
-                if let Some(tag) = patch_tag {
-                    let target_tag = target_element.tag_name().to_lowercase();
-                    if target_tag != **tag {
-                        panic!(
-                            "expecting a tag: {tag:?}, but found: {target_tag:?}"
-                        );
+                let target_tag = target_node.tag();
+                match (patch_tag, target_tag){
+                    (Some(patch_tag), Some(target_tag)) => {
+                        if **patch_tag != target_tag{
+                            panic!(
+                                "expecting a tag: {patch_tag:?}, but found: {target_tag:?}"
+                            );
+                        }
                     }
+                    _ => (),
                 }
-                self.convert_patch(&nodes_lookup, target_element, patch)
+                self.convert_patch(&nodes_lookup, target_node, patch)
             } else {
                 unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
             }
@@ -161,8 +165,8 @@ where
     /// convert a virtual DOM Patch into a created DOM node Patch
     pub fn convert_patch(
         &self,
-        nodes_lookup: &IndexMap<TreePath, Node>,
-        target_element: &Element,
+        nodes_lookup: &IndexMap<TreePath, DomNode>,
+        target_element: &DomNode,
         patch: &Patch<APP::MSG>,
     ) -> DomPatch {
         let target_element = target_element.clone();
@@ -176,7 +180,7 @@ where
 
         match patch_type {
             PatchType::InsertBeforeNode { nodes } => {
-                let nodes: Vec<Node> = nodes
+                let nodes = nodes
                     .iter()
                     .map(|for_insert| self.create_dom_node(for_insert))
                     .collect();
@@ -187,7 +191,7 @@ where
                 }
             }
             PatchType::InsertAfterNode { nodes } => {
-                let nodes: Vec<Node> = nodes
+                let nodes = nodes
                     .iter()
                     .map(|for_insert| self.create_dom_node(for_insert))
                     .collect();
@@ -218,7 +222,7 @@ where
             },
 
             PatchType::ReplaceNode { replacement } => {
-                let replacement: Vec<Node> = replacement
+                let replacement = replacement
                     .iter()
                     .map(|node| self.create_dom_node(node))
                     .collect();
@@ -239,7 +243,7 @@ where
                 patch_variant: PatchVariant::ClearChildren,
             },
             PatchType::MoveBeforeNode { nodes_path } => {
-                let for_moving: Vec<Node> = nodes_path
+                let for_moving = nodes_path
                     .iter()
                     .map(|path| {
                         nodes_lookup
@@ -255,7 +259,7 @@ where
                 }
             }
             PatchType::MoveAfterNode { nodes_path } => {
-                let for_moving: Vec<Node> = nodes_path
+                let for_moving = nodes_path
                     .iter()
                     .map(|path| {
                         nodes_lookup
@@ -271,7 +275,7 @@ where
                 }
             }
             PatchType::AppendChildren { children } => {
-                let children: Vec<Node> = children
+                let children = children
                     .iter()
                     .map(|for_insert| self.create_dom_node(for_insert))
                     .collect();
@@ -313,47 +317,60 @@ where
         match patch_variant {
             PatchVariant::InsertBeforeNode { nodes } => {
                 // we insert the node before this target element
-                if let Some(parent_target) = target_element.parent_node() {
+                //if let Some(parent_target) = target_element.parent_node() {
                     for for_insert in nodes {
+                        /*
                         parent_target
                             .insert_before(&for_insert, Some(&target_element))
                             .expect("must remove target node");
                         Self::dispatch_mount_event(&for_insert);
+                        */
+                        target_element.insert_before(for_insert).expect("must insert");
                     }
-                } else {
-                    panic!("unable to get parent node of the target element: {target_element:?} for patching: {nodes:#?}");
-                }
+                //} else {
+                //     panic!("unable to get parent node of the target element: {target_element:?} for patching: {nodes:#?}");
+                //}
                 Ok(None)
             }
 
             PatchVariant::InsertAfterNode { nodes } => {
                 // we insert the node before this target element
                 for for_insert in nodes.into_iter().rev() {
+                    /*
                     let created_element: &Element = for_insert
                         .dyn_ref()
                         .expect("only elements is supported for now");
                     target_element
-                        .insert_adjacent_element(intern("afterend"), created_element)
+                        .insert_adjacent_element(intern("afterend"), for_insert)
                         .expect("must insert after the target element");
                     Self::dispatch_mount_event(&for_insert);
+                    */
+                    target_element.insert_after(&for_insert).expect("insert after");
                 }
                 Ok(None)
             }
             PatchVariant::AppendChildren { children } => {
                 for child in children.into_iter() {
+                    /*
                     Self::append_child_and_dispatch_mount_event(
                         target_element.unchecked_ref(),
                         &child,
                     );
+                    */
                 }
+                todo!();
                 Ok(None)
             }
 
             PatchVariant::AddAttributes { attrs } => {
+                /*
                 self.set_element_dom_attrs(&target_element, attrs);
+                */
+                todo!();
                 Ok(None)
             }
             PatchVariant::RemoveAttributes { attrs } => {
+                /*
                 for attr in attrs.iter() {
                     for att_value in attr.value.iter() {
                         match att_value {
@@ -376,6 +393,8 @@ where
                         }
                     }
                 }
+                */
+                todo!();
                 Ok(None)
             }
 
@@ -383,6 +402,7 @@ where
             // including the associated closures of the descendant of replaced node
             // before it is actully replaced in the DOM
             PatchVariant::ReplaceNode { mut replacement } => {
+                /*
                 let first_node = replacement.pop().expect("must have a first node");
                 if target_element.node_type() == Node::DOCUMENT_FRAGMENT_NODE {
                     // if we are patching a fragment mode in the top-level document
@@ -432,8 +452,14 @@ where
                 } else {
                     Ok(None)
                 }
+                */
+                target_element.replace_node(replacement)?;
+                log::info!("target element is now: {}", target_element.render_to_string());
+                log::info!("the root should is now: {}", self.root_node.borrow().as_ref().unwrap().render_to_string());
+                Ok(None)
             }
             PatchVariant::RemoveNode => {
+                /*
                 let parent_target = target_element
                     .parent_node()
                     .expect("must have a parent node");
@@ -443,9 +469,12 @@ where
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     self.remove_event_listeners_recursive(&target_element)?;
                 }
+                */
+                todo!();
                 Ok(None)
             }
             PatchVariant::ClearChildren => {
+                /*
                 while let Some(first_child) = target_element.first_child() {
                     target_element
                         .remove_child(&first_child)
@@ -454,9 +483,12 @@ where
                 if target_element.node_type() == Node::ELEMENT_NODE {
                     self.remove_event_listeners_recursive(&target_element)?;
                 }
+                */
+                todo!();
                 Ok(None)
             }
             PatchVariant::MoveBeforeNode { for_moving } => {
+                /*
                 if let Some(target_parent) = target_element.parent_node() {
                     for move_node in for_moving {
                         let move_node_parent = move_node
@@ -472,10 +504,13 @@ where
                 } else {
                     panic!("unable to get the parent node of the target element");
                 }
+                */
+                todo!();
                 Ok(None)
             }
 
             PatchVariant::MoveAfterNode { for_moving } => {
+                /*
                 for move_node in for_moving {
                     let move_node_parent = move_node
                         .parent_node()
@@ -490,6 +525,8 @@ where
                         .insert_adjacent_element(intern("afterend"), to_move_element)
                         .expect("must insert before this node");
                 }
+                */
+                todo!();
                 Ok(None)
             }
         }

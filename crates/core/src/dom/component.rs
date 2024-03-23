@@ -6,6 +6,7 @@ use derive_where::derive_where;
 use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use crate::dom::DomNode;
 
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
@@ -17,12 +18,12 @@ mod stateful_component;
 mod web_component;
 
 thread_local! {
-    static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
+    static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, DomNode>> = RefCell::new(HashMap::new());
 }
 
 /// if the template is already registered, return the dom template
 /// if not, create the dom template and add it
-pub fn register_template<MSG>(type_id: TypeId, vdom_template: &Node<MSG>) -> web_sys::Node {
+pub fn register_template<MSG>(type_id: TypeId, vdom_template: &Node<MSG>) -> DomNode {
     if let Some(template) = lookup_template(type_id) {
         template
     } else {
@@ -32,24 +33,26 @@ pub fn register_template<MSG>(type_id: TypeId, vdom_template: &Node<MSG>) -> web
     }
 }
 
-pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
+pub fn add_template(type_id: TypeId, template: &DomNode) {
     TEMPLATE_LOOKUP.with_borrow_mut(|map| {
         if map.contains_key(&type_id) {
             // already added
         } else {
             map.insert(
                 type_id,
-                template.clone_node_with_deep(true).expect("deep clone"),
+                //template.clone_node_with_deep(true).expect("deep clone"),
+                template.deep_clone().expect("deep clone"),
             );
         }
     })
 }
 
 /// lookup for the template
-pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node> {
+pub fn lookup_template(type_id: TypeId) -> Option<DomNode> {
     TEMPLATE_LOOKUP.with_borrow(|map| {
         if let Some(existing) = map.get(&type_id) {
-            Some(existing.clone_node_with_deep(true).expect("deep clone"))
+            //Some(existing.clone_node_with_deep(true).expect("deep clone"))
+            Some(existing.deep_clone().expect("deep clone"))
         } else {
             None
         }
