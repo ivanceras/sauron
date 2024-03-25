@@ -221,7 +221,7 @@ where
     /// create a program from Rc<RefCell<APP>>
     pub fn from_rc_app(app: Rc<RefCell<APP>>) -> Self {
         let app_view = app.borrow().view();
-
+        log::info!("app_view: {}", app_view.render_to_string());
         Program {
             app_context: AppContext {
                 app,
@@ -452,24 +452,15 @@ where
 
         match mount_procedure.action {
             MountAction::Append => {
-                //Self::append_child_and_dispatch_mount_event(&mount_node, &created_node);
                 mount_node.append_child(created_node.clone());
             }
             MountAction::ClearAppend => {
-                //Self::clear_children(&mount_node);
-                //Self::append_child_and_dispatch_mount_event(&mount_node, &created_node);
-                todo!();
+                log::info!("doing a clear append..");
+                mount_node.clear_children();
+                mount_node.append_child(created_node.clone());
             }
             MountAction::Replace => {
-                /*
-                let mount_element: &Element = mount_node.unchecked_ref();
-                mount_element
-                    .replace_with_with_node_1(&created_node)
-                    .expect("Could not append child to mount");
-                Self::dispatch_mount_event(&created_node);
-                *self.mount_node.borrow_mut() = Some(created_node.clone())
-                */
-                todo!();
+                mount_node.replace_node(created_node.clone());
             }
         }
         *self.root_node.borrow_mut() = Some(created_node);
@@ -549,7 +540,6 @@ where
 
         // update the last DOM node tree with this new view
         self.queue_dom_patches(dom_patches).expect("must not error");
-        log::info!("root node is now: {}", self.root_node.borrow().as_ref().unwrap().render_to_string());
         // set the current dom
         self.app_context.set_current_dom(view);
         let t3 = now();
@@ -637,6 +627,8 @@ where
 
     fn create_dom_patch(&self, new_vdom: &vdom::Node<APP::MSG>) -> Vec<DomPatch> {
         let current_vdom = self.app_context.current_vdom();
+        log::info!("current_vdom: {}", current_vdom.render_to_string());
+        log::info!("    new_vdom: {}", new_vdom.render_to_string());
         let patches = diff(&current_vdom, new_vdom);
 
         #[cfg(all(feature = "with-debug", feature = "log-patches"))]
@@ -681,8 +673,6 @@ where
         // we replace the root node here, so that's reference is updated
         // to the newly created node
         if let Some(new_root_node) = new_root_node {
-            #[cfg(feature = "with-debug")]
-            log::info!("the root_node is replaced with {:?}", &self.root_node);
             *self.root_node.borrow_mut() = Some(new_root_node);
         }
         Ok(())

@@ -156,7 +156,7 @@ impl fmt::Debug for DomInner{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
         match self{
             Self::Element{..} => write!(f, "Element"),
-            Self::Text(_) => write!(f, "Text"),
+            Self::Text(text_node) => f.debug_tuple("Text").field(&text_node.borrow().whole_text().expect("whole text")).finish(),
             Self::Comment(_) => write!(f, "Comment"),
             Self::Fragment{..} => write!(f, "Fragment"),
             Self::StatefulComponent(_) => write!(f, "StatefulComponent"),
@@ -265,9 +265,8 @@ impl DomNode{
     pub(crate) fn append_child(&self, child: DomNode) -> Result<(), JsValue> {
         match &self.inner{
             DomInner::Element{element,children,..} => {
-                log::info!("appending to {}", self.render_to_string());
-                log::info!("child: {}", child.render_to_string());
                 element.append_child(&child.as_node()).expect("append child");
+                child.set_parent(&self);
                 children.borrow_mut().push(child);
                 Ok(())
             }
@@ -286,14 +285,16 @@ impl DomNode{
             unreachable!("target element should be an element");
         };
         let parent_target = self.parent.borrow();
-        let DomInner::Element{element: parent_element,..} = &parent_target.as_ref().expect("must have a parent").inner else {
+        let parent_target = parent_target.as_ref().expect("must have a parent");
+        let DomInner::Element{element: parent_element,..} = &parent_target.inner else {
             unreachable!("parent must be an element");
         };
-        let DomInner::Element{element: for_insert,..} = &for_insert.inner else{
+        let DomInner::Element{element: for_insert_elm,..} = &for_insert.inner else{
             unreachable!("for insert must be an element");
         };
+        for_insert.set_parent(parent_target);
         parent_element
-            .insert_before(&for_insert, Some(&target_element))
+            .insert_before(&for_insert_elm, Some(&target_element))
             .expect("must remove target node");
         Ok(None)
     }
@@ -350,6 +351,7 @@ impl DomNode{
                         child_index = Some(i);
                     }
                 }
+                log::info!("child to be removed: {:?}", child_index);
                 if let Some(child_index) = child_index{
                     let child = children.borrow_mut().remove(child_index);
                     if let Some(parent) = self.parent.borrow().as_ref(){
@@ -367,8 +369,14 @@ impl DomNode{
     pub(crate) fn clear_children(&self) {
         match &self.inner{
             DomInner::Element{element, children, ..} => {
+                log::info!("Remove this children: {}", children.borrow().len());
                 for child in children.borrow().iter(){
                     self.remove_child(child);
+                }
+                while let Some(first_child) = element.first_child() {
+                    element
+                        .remove_child(&first_child)
+                        .expect("must remove child");
                 }
             }
             _ => todo!(),
@@ -385,12 +393,9 @@ impl DomNode{
     pub(crate) fn replace_node(&self, replacement: DomNode) -> Result<Option<DomNode>, JsValue> {
         match &self.inner{
             DomInner::Text(text_node) => {
-                log::info!("replacing text node...");
-                //*text_node.borrow_mut() = first_node.as_node().unchecked_into();
                 if let Some(parent) = self.parent.borrow().as_ref(){
                     parent.replace_child(self, replacement);
                 }else{
-                    log::info!("no parent for {}", self.render_to_string());
                     unreachable!("There should be parent of this...");
                 }
             }
@@ -400,7 +405,6 @@ impl DomNode{
                 if let Some(parent) = self.parent.borrow().as_ref(){
                     parent.replace_child(self, replacement);
                 }else{
-                    log::info!("no parent for {}", self.render_to_string());
                     unreachable!("There should be parent of this...");
                 }
             }
@@ -838,14 +842,6 @@ where
         Self::dispatch_mount_event(child_node);
     }
 
-    /// clear all children of the element
-    pub(crate) fn clear_children(target_node: &Node) {
-        while let Some(first_child) = target_node.first_child() {
-            target_node
-                .remove_child(&first_child)
-                .expect("must remove child");
-        }
-    }
 
     /// set element with the dom attrs
     pub(crate) fn set_element_dom_attrs(
