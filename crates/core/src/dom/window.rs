@@ -46,6 +46,7 @@ impl<APP> Program<APP>
 where
     APP: Application,
 {
+    /*
     /// attach event listeners to the window object
     pub fn add_window_event_listeners(&self, event_listeners: Vec<Attribute<APP::MSG>>) {
         self.add_event_listeners(&window(), event_listeners)
@@ -57,6 +58,7 @@ where
         self.add_event_listeners(&document(), event_listeners)
             .expect("must add to event listener");
     }
+    */
 
     /// attached a callback and will be triggered when the hash portion of the window location
     /// url is changed

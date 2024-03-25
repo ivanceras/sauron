@@ -27,7 +27,7 @@ pub fn register_template<MSG>(type_id: TypeId, vdom_template: &Node<MSG>) -> Dom
     if let Some(template) = lookup_template(type_id) {
         template
     } else {
-        let template = no_listener::create_dom_node_without_listeners(&vdom_template);
+        let template = no_listener::create_dom_node_no_listeners(None, &vdom_template);
         add_template(type_id, &template);
         template
     }

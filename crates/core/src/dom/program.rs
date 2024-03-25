@@ -406,7 +406,7 @@ where
                 //Self::dispatch_mount_event_to_children(&dom_template, 2, 0);
                 dom_template
             }
-            _ => self.create_dom_node(&self.app_context.current_vdom()),
+            _ => self.create_dom_node(None, &self.app_context.current_vdom()),
         }
     }
 
@@ -683,7 +683,7 @@ where
         if let Some(new_root_node) = new_root_node {
             #[cfg(feature = "with-debug")]
             log::info!("the root_node is replaced with {:?}", &self.root_node);
-            //*self.root_node.borrow_mut() = Some(new_root_node);
+            *self.root_node.borrow_mut() = Some(new_root_node);
         }
         Ok(())
     }
@@ -815,7 +815,7 @@ where
     /// Inject a style to the global document
     fn inject_style(&mut self, class_names: String, style: &str) {
         let style_node = html::tags::style([class(class_names)], [text(style)]);
-        let created_node = self.create_dom_node(&style_node);
+        let created_node = self.create_dom_node(None, &style_node);
 
         let head = document().head().expect("must have a head");
         let head_node: web_sys::Node = head.unchecked_into();
@@ -826,7 +826,7 @@ where
     /// inject style element to the mount node
     pub fn inject_style_to_mount(&mut self, style: &str) {
         let style_node = html::tags::style([], [text(style)]);
-        let created_node = self.create_dom_node(&style_node);
+        let created_node = self.create_dom_node(None, &style_node);
 
         /*
         self.mount_node

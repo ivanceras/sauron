@@ -15,6 +15,7 @@ use wasm_bindgen::JsValue;
 use web_sys::Element;
 use web_sys::Node;
 use crate::dom::DomNode;
+use crate::dom::dom_node::DomInner;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -182,7 +183,7 @@ where
             PatchType::InsertBeforeNode { nodes } => {
                 let nodes = nodes
                     .iter()
-                    .map(|for_insert| self.create_dom_node(for_insert))
+                    .map(|for_insert| self.create_dom_node(None, for_insert))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -193,7 +194,7 @@ where
             PatchType::InsertAfterNode { nodes } => {
                 let nodes = nodes
                     .iter()
-                    .map(|for_insert| self.create_dom_node(for_insert))
+                    .map(|for_insert| self.create_dom_node(None, for_insert))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -224,7 +225,7 @@ where
             PatchType::ReplaceNode { replacement } => {
                 let replacement = replacement
                     .iter()
-                    .map(|node| self.create_dom_node(node))
+                    .map(|node| self.create_dom_node(None, node))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -277,7 +278,7 @@ where
             PatchType::AppendChildren { children } => {
                 let children = children
                     .iter()
-                    .map(|for_insert| self.create_dom_node(for_insert))
+                    .map(|for_insert| self.create_dom_node(None, for_insert))
                     .collect();
 
                 DomPatch {
@@ -294,7 +295,7 @@ where
     pub(crate) fn apply_dom_patches(
         &self,
         dom_patches: impl IntoIterator<Item = DomPatch>,
-    ) -> Result<Option<Node>, JsValue> {
+    ) -> Result<Option<DomNode>, JsValue> {
         let mut new_root_node = None;
         for dom_patch in dom_patches {
             if let Some(replacement_node) = self.apply_dom_patch(dom_patch)? {
@@ -307,7 +308,7 @@ where
     /// apply a dom patch to this root node,
     /// return a new root_node if it would replace the original root_node
     /// TODO: this should have no access to root_node, so it can be used in general sense
-    pub(crate) fn apply_dom_patch(&self, dom_patch: DomPatch) -> Result<Option<Node>, JsValue> {
+    pub(crate) fn apply_dom_patch(&self, dom_patch: DomPatch) -> Result<Option<DomNode>, JsValue> {
         let DomPatch {
             patch_path,
             target_element,
@@ -316,75 +317,51 @@ where
 
         match patch_variant {
             PatchVariant::InsertBeforeNode { nodes } => {
-                // we insert the node before this target element
-                //if let Some(parent_target) = target_element.parent_node() {
-                    for for_insert in nodes {
-                        /*
-                        parent_target
-                            .insert_before(&for_insert, Some(&target_element))
-                            .expect("must remove target node");
-                        Self::dispatch_mount_event(&for_insert);
-                        */
-                        target_element.insert_before(for_insert).expect("must insert");
-                    }
-                //} else {
-                //     panic!("unable to get parent node of the target element: {target_element:?} for patching: {nodes:#?}");
-                //}
+                for for_insert in nodes {
+                    target_element.insert_before(for_insert).expect("must insert");
+                }
                 Ok(None)
             }
 
             PatchVariant::InsertAfterNode { nodes } => {
                 // we insert the node before this target element
                 for for_insert in nodes.into_iter().rev() {
-                    /*
-                    let created_element: &Element = for_insert
-                        .dyn_ref()
-                        .expect("only elements is supported for now");
-                    target_element
-                        .insert_adjacent_element(intern("afterend"), for_insert)
-                        .expect("must insert after the target element");
-                    Self::dispatch_mount_event(&for_insert);
-                    */
                     target_element.insert_after(&for_insert).expect("insert after");
                 }
                 Ok(None)
             }
             PatchVariant::AppendChildren { children } => {
                 for child in children.into_iter() {
-                    /*
-                    Self::append_child_and_dispatch_mount_event(
-                        target_element.unchecked_ref(),
-                        &child,
-                    );
-                    */
+                    target_element.append_child(child).expect("append child");
                 }
-                todo!();
                 Ok(None)
             }
 
             PatchVariant::AddAttributes { attrs } => {
-                /*
-                self.set_element_dom_attrs(&target_element, attrs);
-                */
-                todo!();
+                target_element.set_dom_attrs(attrs);
                 Ok(None)
             }
             PatchVariant::RemoveAttributes { attrs } => {
-                /*
                 for attr in attrs.iter() {
                     for att_value in attr.value.iter() {
                         match att_value {
                             DomAttrValue::Simple(_) => {
-                                DomAttr::remove_element_dom_attr(&target_element, attr)?;
+                                target_element.remove_dom_attr(attr)?;
                             }
                             // it is an event listener
                             DomAttrValue::EventListener(_) => {
+                                let DomInner::Element{element: target_element, ..} = &target_element.inner else{
+                                    unreachable!("must be an element");
+                                };
                                 self.remove_event_listener_with_name(attr.name, &target_element)?;
                             }
                             DomAttrValue::Style(_) => {
-                                DomAttr::remove_element_dom_attr(&target_element, attr)?;
+                                target_element.remove_dom_attr(attr)?;
                             }
                             DomAttrValue::FunctionCall(_) => {
+                                let DomInner::Element{element: target_element, ..} = &target_element.inner else{
+                                    unreachable!("must be an element");
+                                };
                                 if attr.name == "inner_html" {
                                     target_element.set_inner_html("");
                                 }
@@ -393,8 +370,6 @@ where
                         }
                     }
                 }
-                */
-                todo!();
                 Ok(None)
             }
 
@@ -402,89 +377,36 @@ where
             // including the associated closures of the descendant of replaced node
             // before it is actully replaced in the DOM
             PatchVariant::ReplaceNode { mut replacement } => {
-                /*
                 let first_node = replacement.pop().expect("must have a first node");
-                if target_element.node_type() == Node::DOCUMENT_FRAGMENT_NODE {
-                    // if we are patching a fragment mode in the top-level document
-                    // it has no access to it's parent other than accessing the mount-node itself
-                    if patch_path.is_empty() {
-                        let mount_node = self.mount_node().expect("mount node");
-                        Self::clear_children(&mount_node);
-                        mount_node
-                            .append_child(&first_node)
-                            .expect("must append child");
-                        Self::dispatch_mount_event(&first_node);
+                log::info!("target element: {:#?}", target_element);
+                if target_element.is_fragment(){
+                    log::info!("append to the root node..");
 
-                        for node in replacement.into_iter() {
-                            let node_elm: &web_sys::Element = node.unchecked_ref();
-                            mount_node.append_child(node_elm).expect("append child");
-                            Self::dispatch_mount_event(node_elm);
-                        }
-                    } else {
-                        // the diffing algorithmn doesn't concern with fragment, instead it test the nodes contain in the fragment as if it where a list of nodes
-                        unreachable!("patching a document fragment other than the target_node should not happen");
+                    for replace_node in replacement{
+                        self.root_node.borrow_mut().as_mut().expect("must have root_node")
+                            .append_child(replace_node).expect("append root_node");
                     }
-                } else {
-                    if target_element.node_type() == Node::ELEMENT_NODE {
-                        self.remove_event_listeners_recursive(&target_element)?;
-                    }
-                    target_element
-                        .replace_with_with_node_1(&first_node)
-                        .unwrap_or_else(|e| {
-                            panic!("unable to replace node with {first_node:?}, {e:?}");
-                        });
-
-                    Self::dispatch_mount_event(&first_node);
-
-                    let first_node_elm: &web_sys::Element = first_node.unchecked_ref();
-
-                    for node in replacement.into_iter() {
-                        let node_elm: &web_sys::Element = node.unchecked_ref();
-                        first_node_elm
-                            .insert_adjacent_element(intern("beforebegin"), node_elm)
-                            .expect("append child");
-                        Self::dispatch_mount_event(node_elm);
+                    if patch_path.path.is_empty(){
+                        Ok(Some(first_node))
+                    }else{
+                        Ok(None)
                     }
                 }
-
-                if patch_path.path.is_empty() {
-                    Ok(Some(first_node))
-                } else {
+                else{
+                    target_element.replace_node(first_node)?;
+                    for replace_node in replacement.into_iter() {
+                        log::info!("inserting the rest..");
+                        target_element.insert_before(replace_node)?;
+                    }
                     Ok(None)
                 }
-                */
-                target_element.replace_node(replacement)?;
-                log::info!("target element is now: {}", target_element.render_to_string());
-                log::info!("the root should is now: {}", self.root_node.borrow().as_ref().unwrap().render_to_string());
-                Ok(None)
             }
             PatchVariant::RemoveNode => {
-                /*
-                let parent_target = target_element
-                    .parent_node()
-                    .expect("must have a parent node");
-                parent_target
-                    .remove_child(&target_element)
-                    .expect("must remove target node");
-                if target_element.node_type() == Node::ELEMENT_NODE {
-                    self.remove_event_listeners_recursive(&target_element)?;
-                }
-                */
-                todo!();
+                target_element.remove_node();
                 Ok(None)
             }
             PatchVariant::ClearChildren => {
-                /*
-                while let Some(first_child) = target_element.first_child() {
-                    target_element
-                        .remove_child(&first_child)
-                        .expect("must remove child");
-                }
-                if target_element.node_type() == Node::ELEMENT_NODE {
-                    self.remove_event_listeners_recursive(&target_element)?;
-                }
-                */
-                todo!();
+                target_element.clear_children();
                 Ok(None)
             }
             PatchVariant::MoveBeforeNode { for_moving } => {

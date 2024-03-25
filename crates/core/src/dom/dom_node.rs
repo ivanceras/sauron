@@ -114,15 +114,15 @@ pub fn total_time_spent() -> Section {
 /// 1. Keep track of event closure and drop them when nodes has been removed
 /// 2. Custom removal of children nodes on a stateful component
 ///
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DomNode {
-    inner: DomInner,
+    pub(crate) inner: DomInner,
     //TODO: don't really need to have reference to the parent
     //as RemoveNode patch can just be called with Node::remove
     //though remove doesn't return the node to be removed
     //
     //MoveAfterNode and  with insertAdjacentElement
-    parent: Rc<RefCell<Option<DomNode>>>,
+    pub(crate) parent: Rc<RefCell<Option<DomNode>>>,
 }
 #[derive(Clone)]
 pub enum DomInner {
@@ -131,7 +131,7 @@ pub enum DomInner {
         /// the reference to the actual element
         element: web_sys::Element,
         /// the listeners of this element, which we will drop when this element is removed
-        listeners: Rc<Option<NamedEventClosures>>,
+        listeners: Rc<RefCell<Option<NamedEventClosures>>>,
         /// keeps track of the children nodes
         /// this needs to be synced with the actual element children
         children: Rc<RefCell<Vec<DomNode>>>,
@@ -151,13 +151,58 @@ pub enum DomInner {
     StatefulComponent(Rc<RefCell<dyn StatefulComponent>>),
 }
 
+impl fmt::Debug for DomInner{
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
+        match self{
+            Self::Element{..} => write!(f, "Element"),
+            Self::Text(_) => write!(f, "Text"),
+            Self::Comment(_) => write!(f, "Comment"),
+            Self::Fragment{..} => write!(f, "Fragment"),
+            Self::StatefulComponent(_) => write!(f, "StatefulComponent"),
+        }
+    }
+}
+
+impl DomInner{
+
+    fn deep_clone(&self) -> Self {
+        match self{
+            Self::Element{element, listeners, children} => {
+                let element = element.clone_node_with_deep(true).expect("deep_cline");
+                Self::Element{
+                    element: element.unchecked_into(),
+                    listeners: listeners.clone(),
+                    children: children.clone(),
+                }
+            },
+            Self::Text(text_node) => {
+                let text_node = text_node.borrow().clone_node_with_deep(true).expect("deep_clone");
+                Self::Text(RefCell::new(text_node.unchecked_into()))
+            }
+            Self::Comment(comment_node) => {
+                let comment_node = comment_node.clone_node_with_deep(true).expect("deep_clone");
+                Self::Comment(comment_node.unchecked_into())
+            }
+            Self::Fragment{fragment, children} => {
+                let fragment = fragment.clone_node_with_deep(true).expect("deep_clone");
+                Self::Fragment{
+                    fragment: fragment.unchecked_into(),
+                    children: children.clone(),
+                }
+            },
+            Self::StatefulComponent(_) => unreachable!("can not deep clone stateful component"),
+        }
+    }
+}
+
 impl From<web_sys::Node> for DomNode{
 
     fn from(node: web_sys::Node) -> Self {
         let element: web_sys::Element = node.dyn_into().expect("must be an element");
         DomNode{
             inner: DomInner::Element{element, 
-                listeners: Rc::new(None),
+                listeners: Rc::new(RefCell::new(None)),
                 children: Rc::new(RefCell::new(vec![])),
             },
             parent: Rc::new(RefCell::new(None)),
@@ -173,6 +218,10 @@ impl DomNode{
             DomInner::Fragment{children,..} => Some(children.borrow()),
             _ => None,
         }
+    }
+
+    pub(crate) fn is_fragment(&self) -> bool {
+        matches!(&self.inner, DomInner::Fragment{..})
     }
 
     pub(crate) fn tag(&self) -> Option<String>{
@@ -192,10 +241,16 @@ impl DomNode{
         }
     }
 
-    fn as_element(&self) -> web_sys::Element{
+    pub(crate) fn as_element(&self) -> web_sys::Element{
         match &self.inner{
             DomInner::Element{element,..} => element.clone().unchecked_into(),
-            DomInner::Fragment{fragment,..} => fragment.clone().unchecked_into(),
+            DomInner::Fragment{fragment,..} => {
+                log::info!("fragment into element..");
+                let fragment: web_sys::Element = fragment.clone().unchecked_into();
+                assert!(fragment.is_object());
+                log::info!("fragment: {:#?}", fragment);
+                fragment
+            }
             DomInner::Text(text_node) => text_node.borrow().clone().unchecked_into(),
             DomInner::Comment(comment_node) => comment_node.clone().unchecked_into(),
             DomInner::StatefulComponent(_) => todo!("for stateful component.."),
@@ -213,13 +268,19 @@ impl DomNode{
                 log::info!("appending to {}", self.render_to_string());
                 log::info!("child: {}", child.render_to_string());
                 element.append_child(&child.as_node()).expect("append child");
-                children.borrow_mut().push(child.clone());
+                children.borrow_mut().push(child);
                 Ok(())
             }
-            _ => unreachable!("appending should only be called to Element node"),
+            DomInner::Fragment{fragment, children} => {
+                fragment.append_child(&child.as_node()).expect("append child");
+                children.borrow_mut().push(child);
+                Ok(())
+            }
+            _ => unreachable!("appending should only be called to Element and Fragment, found: {:#?}", self),
         }
     }
 
+    /// insert this DomNode before this DomNode
     pub(crate) fn insert_before(&self, for_insert: DomNode) -> Result<Option<DomNode>, JsValue> {
         let DomInner::Element{element: target_element,..} = &self.inner else {
             unreachable!("target element should be an element");
@@ -237,6 +298,7 @@ impl DomNode{
         Ok(None)
     }
 
+    /// insert this node after this DomNode
     pub(crate) fn insert_after(&self, for_insert: &DomNode) -> Result<Option<DomNode>, JsValue> {
         let target_element = match &self.inner{
             DomInner::Element{element,..} => element,
@@ -279,145 +341,178 @@ impl DomNode{
         }
     }
 
-    pub(crate) fn replace_node(&self, mut replacement: Vec<DomNode>) -> Result<Option<DomNode>, JsValue> {
-        let first_node = replacement.pop().expect("must have a first node");
-        log::info!("replacing with {}", first_node.render_to_string());
+    pub(crate) fn remove_child(&self, child: &DomNode) -> Option<DomNode> {
+        match &self.inner{
+            DomInner::Element{element, children,..} => {
+                let mut child_index = None;
+                for (i,c) in children.borrow().iter().enumerate(){
+                    if c.as_node() == child.as_node(){
+                        child_index = Some(i);
+                    }
+                }
+                if let Some(child_index) = child_index{
+                    let child = children.borrow_mut().remove(child_index);
+                    if let Some(parent) = self.parent.borrow().as_ref(){
+                        parent.as_element().remove_child(&child.as_node());
+                    }
+                    Some(child)
+                }else{
+                    unreachable!("no parent")
+                }
+            }
+            _ => todo!(),
+        }
+    }
+
+    pub(crate) fn clear_children(&self) {
+        match &self.inner{
+            DomInner::Element{element, children, ..} => {
+                for child in children.borrow().iter(){
+                    self.remove_child(child);
+                }
+            }
+            _ => todo!(),
+        }
+    }
+
+    pub(crate) fn remove_node(&self) {
+        if let Some(parent) = self.parent.borrow().as_ref(){
+            parent.remove_child(self);
+        }
+    }
+
+
+    pub(crate) fn replace_node(&self, replacement: DomNode) -> Result<Option<DomNode>, JsValue> {
         match &self.inner{
             DomInner::Text(text_node) => {
                 log::info!("replacing text node...");
                 //*text_node.borrow_mut() = first_node.as_node().unchecked_into();
                 if let Some(parent) = self.parent.borrow().as_ref(){
-                    parent.replace_child(self, first_node);
+                    parent.replace_child(self, replacement);
                 }else{
                     log::info!("no parent for {}", self.render_to_string());
                     unreachable!("There should be parent of this...");
                 }
             }
-            _ => todo!(),
-        }
-        log::info!("self is now: {}", self.render_to_string());
-        for node in replacement.into_iter() {
-            log::info!("inserting the rest..");
-            self.insert_before(node)?;
+            DomInner::Fragment{fragment,..} => {
+                // replacing the fragment with a first node,
+                // but the fragment don't exist anymore
+                if let Some(parent) = self.parent.borrow().as_ref(){
+                    parent.replace_child(self, replacement);
+                }else{
+                    log::info!("no parent for {}", self.render_to_string());
+                    unreachable!("There should be parent of this...");
+                }
+            }
+            DomInner::Element{element,..} => {
+                if let Some(parent) = self.parent.borrow().as_ref(){
+                    parent.replace_child(self, replacement);
+                }else{
+                    log::info!("There is no parent here..");
+                }
+            }
+            _ => todo!("for: {:#?}", self),
         }
         Ok(None)
     }
 
     /// clones this DomNode
     pub(crate) fn deep_clone(&self) -> Result<DomNode, JsValue>{
-        todo!()
+        Ok(DomNode{
+            inner: self.inner.deep_clone(),
+            parent: self.parent.clone(),
+        })
     }
-}
 
-impl fmt::Debug for DomNode{
-
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "DomNode")
-    }
-}
-
-impl<APP> Program<APP>
-where
-    APP: Application + 'static,
-{
-    fn into_dom_node(&self, parent_node: Option<DomNode>, node: &vdom::Node<APP::MSG>) -> DomNode {
-        match node {
-            vdom::Node::Element(elm) => {
-                let document = document();
-                let element = if let Some(namespace) = elm.namespace() {
-                    document
-                        .create_element_ns(Some(intern(namespace)), intern(elm.tag()))
-                        .expect("Unable to create element")
-                } else {
-                    document
-                        .create_element(intern(elm.tag()))
-                        .expect("create element")
-                };
-                // TODO: dispatch the mount event recursively after the dom node is mounted into
-                // the root node
-                let attrs = Attribute::merge_attributes_of_same_name(elm.attributes().iter());
-
-
-                let listeners = self.set_element_dom_attrs(
-                    &element,
-                    attrs
-                        .iter()
-                        .map(|a| self.convert_attr(a))
-                        .collect::<Vec<_>>(),
-                );
-                let dom_node = DomNode{
-                    inner: DomInner::Element {
-                        element,
-                        listeners: Rc::new(listeners),
-                        children: Rc::new(RefCell::new(vec![])),
-                    },
-                    parent: Rc::new(RefCell::new(parent_node)),
-                };
-                let children: Vec<DomNode> = elm
-                    .children()
-                    .iter()
-                    .map(|child| self.into_dom_node(Some(dom_node.clone()), child))
-                    .collect();
-                for child in children.into_iter(){
-                    dom_node.append_child(child);
-                }
-                dom_node
-            }
-            vdom::Node::Leaf(leaf) => match leaf {
-                Leaf::Text(txt) => {
-                    DomNode{
-                        inner: DomInner::Text(RefCell::new(document().create_text_node(txt))),
-                        parent: Rc::new(RefCell::new(parent_node)),
-                    }
-                }
-                Leaf::Comment(comment) => {
-                    DomNode{
-                        inner: DomInner::Comment(document().create_comment(comment)),
-                        parent: Rc::new(RefCell::new(parent_node)),
-                    }
-                }
-                Leaf::Fragment(nodes) => {
-                    let fragment = document().create_document_fragment();
-                    let dom_node = DomNode{
-                        inner: DomInner::Fragment { fragment, children: Rc::new(RefCell::new(vec![])) },
-                        parent: Rc::new(RefCell::new(parent_node)),
-                    };
-                    let children:Vec<DomNode> = nodes.iter().map(|node| self.into_dom_node(Some(dom_node.clone()), node)).collect();
-                    for child in children.into_iter(){
-                        dom_node.append_child(child);
-                    }
-                    dom_node
-                }
-                // NodeList that goes here is only possible when it is the root_node,
-                // since node_list as children will be unrolled into as child_elements of the parent
-                // We need to wrap this node_list into doc_fragment since root_node is only 1 element
-                Leaf::NodeList(nodes) => {
-                    let fragment = document().create_document_fragment();
-                    let dom_node = DomNode{
-                        inner: DomInner::Fragment { fragment, children: Rc::new(RefCell::new(vec![])) },
-                        parent: Rc::new(RefCell::new(parent_node)),
-                    };
-                    let children:Vec<DomNode> = nodes.iter().map(|node| self.into_dom_node(Some(dom_node.clone()), node)).collect();
-                    for child in children.into_iter(){
-                        dom_node.append_child(child);
-                    }
-                    dom_node
-                }
-                Leaf::StatefulComponent(comp) => todo!(),
-                Leaf::StatelessComponent(comp) => {
-                    todo!("just like element")
-                }
-                Leaf::TemplatedView(view) => {
-                    unreachable!("template view should not be created: {:#?}", view)
-                }
-                Leaf::SafeHtml(_) => unreachable!("must be converted throught html parse already"),
-                Leaf::DocType(_) => unreachable!("doc type is never converted"),
-            },
+    pub(crate) fn set_dom_attrs(&self, attrs: impl IntoIterator<Item = DomAttr>) -> Result<(),JsValue>{
+        for attr in attrs.into_iter(){
+            self.set_dom_attr(attr)?;
         }
+        Ok(())
     }
-}
 
-impl DomNode {
+    fn set_dom_attr(&self, attr: DomAttr) -> Result<(),JsValue>{
+        match &self.inner{
+            DomInner::Element{element,listeners,..} => {
+                let attr_name = intern(attr.name);
+                let attr_namespace = attr.namespace;
+
+                let GroupedDomAttrValues {
+                    listeners: event_callbacks,
+                    plain_values,
+                    styles,
+                    function_calls,
+                } = attr.group_values();
+
+                Self::add_event_dom_listeners(&element, attr_name, &event_callbacks);
+                let is_none = listeners.borrow().is_none();
+                if is_none{
+                    log::info!("no listeners yet..");
+
+                    let listener_closures: IndexMap<&'static str, Closure<dyn FnMut(web_sys::Event)>> =
+                        IndexMap::from_iter(event_callbacks.into_iter().map(|c| (attr_name, c)));
+                    *listeners.borrow_mut() = Some(listener_closures);
+                }else if let Some(listeners) = listeners.borrow_mut().as_mut(){
+                    log::info!("inserting listeners...");
+                    for event_cb in event_callbacks.into_iter(){
+                        listeners.insert(attr_name, event_cb);
+                    }
+                }
+
+                DomAttr::set_element_style(&element, attr_name, styles);
+                DomAttr::set_element_function_call_values(&element, attr_name, function_calls);
+                DomAttr::set_element_simple_values(&element, attr_name, attr_namespace, plain_values);
+            }
+            _ => unreachable!("should only be called for element"),
+        }
+        Ok(())
+    }
+
+    pub(crate) fn remove_dom_attr(&self, attr: &DomAttr) -> Result<(), JsValue> {
+        let DomInner::Element{element,..} = &self.inner else{
+            unreachable!("expecting an element");
+        };
+        DomAttr::remove_element_dom_attr(&element, attr)
+    }
+
+    /// attach and event listener to an event target
+    pub(crate) fn add_event_dom_listeners(
+        target: &web_sys::EventTarget,
+        attr_name: &'static str,
+        event_listeners: &[EventClosure],
+    ) -> Result<(), JsValue> {
+        for event_cb in event_listeners.into_iter() {
+            Self::add_event_listener(target, attr_name, &event_cb)?;
+        }
+        Ok(())
+    }
+
+    /// add a event listener to a target element
+    pub(crate) fn add_event_listener(
+        event_target: &web_sys::EventTarget,
+        event_name: &str,
+        listener: &EventClosure,
+    ) -> Result<(), JsValue> {
+        event_target.add_event_listener_with_callback(
+            intern(event_name),
+            listener.as_ref().unchecked_ref(),
+        )?;
+        Ok(())
+    }
+
+    pub(crate) fn remove_event_dom_listeners(
+        target: &web_sys::EventTarget,
+        event_listeners: Vec<DomAttr>,
+    ) -> Result<(), JsValue> {
+        for attr in event_listeners.into_iter() {
+            for event_cb in attr.value.into_iter() {
+                let closure: Closure<dyn FnMut(web_sys::Event)> =
+                    event_cb.as_event_closure().expect("expecting a callback");
+            }
+        }
+        Ok(())
+    }
+
     fn inner_html(&self) -> Option<String> {
         match &self.inner {
             DomInner::Element { element, .. } => Some(element.inner_html()),
@@ -455,6 +550,9 @@ impl DomNode {
                 write!(buffer, "{text}")?;
                 Ok(())
             }
+            DomInner::Comment(comment) => {
+                write!(buffer, "<!--{}-->", comment.data())
+            }
             DomInner::Element {
                 element, children, ..
             } => {
@@ -478,6 +576,12 @@ impl DomNode {
                 }
                 if !lookup::is_self_closing(&tag) {
                     write!(buffer, "</{tag}>")?;
+                }
+                Ok(())
+            }
+            DomInner::Fragment{children,..} => {
+                for child in children.borrow().iter(){
+                    child.render(buffer)?;
                 }
                 Ok(())
             }
@@ -511,50 +615,113 @@ fn create_unique_identifier() -> usize {
     })
 }
 
+impl<APP> Program<APP>
+where
+    APP: Application + 'static,
+{
+    pub(crate) fn create_dom_node(&self, parent_node: Option<DomNode>, node: &vdom::Node<APP::MSG>) -> DomNode {
+        match node {
+            vdom::Node::Element(elm) => self.create_element_node(parent_node, elm),
+            vdom::Node::Leaf(leaf) => self.create_leaf_node(parent_node, leaf),
+        }
+    }
+
+    fn create_element_node(&self, parent_node: Option<DomNode>, elm: &vdom::Element<APP::MSG>) -> DomNode{
+        let document = document();
+        let element = if let Some(namespace) = elm.namespace() {
+            document
+                .create_element_ns(Some(intern(namespace)), intern(elm.tag()))
+                .expect("Unable to create element")
+        } else {
+            document
+                .create_element(intern(elm.tag()))
+                .expect("create element")
+        };
+        // TODO: dispatch the mount event recursively after the dom node is mounted into
+        // the root node
+        let attrs = Attribute::merge_attributes_of_same_name(elm.attributes().iter());
+
+
+        let listeners = self.set_element_dom_attrs(
+            &element,
+            attrs
+                .iter()
+                .map(|a| self.convert_attr(a))
+                .collect::<Vec<_>>(),
+        );
+        let dom_node = DomNode{
+            inner: DomInner::Element {
+                element,
+                listeners: Rc::new(RefCell::new(listeners)),
+                children: Rc::new(RefCell::new(vec![])),
+            },
+            parent: Rc::new(RefCell::new(parent_node)),
+        };
+        let children: Vec<DomNode> = elm
+            .children()
+            .iter()
+            .map(|child| self.create_dom_node(Some(dom_node.clone()), child))
+            .collect();
+        for child in children.into_iter(){
+            dom_node.append_child(child);
+        }
+        dom_node
+    }
+
+    fn create_leaf_node(&self, parent_node: Option<DomNode>, leaf: &vdom::Leaf<APP::MSG>) -> DomNode {
+         match leaf {
+            Leaf::Text(txt) => {
+                DomNode{
+                    inner: DomInner::Text(RefCell::new(document().create_text_node(txt))),
+                    parent: Rc::new(RefCell::new(parent_node)),
+                }
+            }
+            Leaf::Comment(comment) => {
+                DomNode{
+                    inner: DomInner::Comment(document().create_comment(comment)),
+                    parent: Rc::new(RefCell::new(parent_node)),
+                }
+            }
+            Leaf::Fragment(nodes) => self.create_fragment_node(parent_node, nodes),
+            // NodeList that goes here is only possible when it is the root_node,
+            // since node_list as children will be unrolled into as child_elements of the parent
+            // We need to wrap this node_list into doc_fragment since root_node is only 1 element
+            Leaf::NodeList(nodes) => self.create_fragment_node(parent_node, nodes),
+            Leaf::StatefulComponent(comp) => todo!(),
+            Leaf::StatelessComponent(comp) => {
+                todo!("just like element")
+            }
+            Leaf::TemplatedView(view) => {
+                unreachable!("template view should not be created: {:#?}", view)
+            }
+            Leaf::SafeHtml(_) => unreachable!("must be converted throught html parse already"),
+            Leaf::DocType(_) => unreachable!("doc type is never converted"),
+        }
+    }
+
+
+    fn create_fragment_node<'a>(&self, parent_node: Option<DomNode>, nodes: impl IntoIterator<Item = &'a vdom::Node<APP::MSG>>) -> DomNode {
+        let fragment = document().create_document_fragment();
+        let dom_node = DomNode{
+            inner: DomInner::Fragment { fragment, children: Rc::new(RefCell::new(vec![])) },
+            parent: Rc::new(RefCell::new(parent_node)),
+        };
+        let children:Vec<DomNode> = nodes.into_iter().map(|node| self.create_dom_node(Some(dom_node.clone()), &node)).collect();
+        for child in children.into_iter(){
+            dom_node.append_child(child).expect("append child");
+        }
+        dom_node
+    }
+
+}
+
 /// A node along with all of the closures that were created for that
 /// node's events and all of it's child node's events.
 impl<APP> Program<APP>
 where
     APP: Application,
 {
-    /*
-    fn create_document_fragment(&self, nodes: &[vdom::Node<APP::MSG>]) -> Node {
-        let doc_fragment = document().create_document_fragment();
-        for vnode in nodes {
-            let created_node = self.create_dom_node(vnode);
-            Self::append_child_and_dispatch_mount_event(&doc_fragment, &created_node)
-        }
-        doc_fragment.into()
-    }
-    */
 
-    /*
-    fn create_leaf_node(&self, leaf: &Leaf<APP::MSG>) -> Node {
-        match leaf {
-            Leaf::Text(txt) => DomNode::create_text_node(txt).into(),
-            Leaf::Comment(comment) => document().create_comment(comment).into(),
-            Leaf::SafeHtml(_safe_html) => {
-                panic!("safe html must have already been dealt in create_element node");
-            }
-            Leaf::DocType(_doctype) => {
-                panic!(
-                    "It looks like you are using doctype in the middle of an app,
-                    doctype is only used in rendering"
-                );
-            }
-            Leaf::Fragment(nodes) => self.create_document_fragment(nodes),
-            // NodeList that goes here is only possible when it is the root_node,
-            // since node_list as children will be unrolled into as child_elements of the parent
-            // We need to wrap this node_list into doc_fragment since root_node is only 1 element
-            Leaf::NodeList(node_list) => self.create_document_fragment(node_list),
-            Leaf::StatefulComponent(comp) => self.create_stateful_component(comp),
-            Leaf::StatelessComponent(comp) => self.create_stateless_component(comp),
-            Leaf::TemplatedView(view) => {
-                unreachable!("template view should not be created: {:#?}", view)
-            }
-        }
-    }
-    */
 
     /*
     /// TODO: register the template if not yet
@@ -633,62 +800,7 @@ where
     }
     */
 
-    /// Create and return a `CreatedNode` instance (containing a DOM `Node`
-    /// together with potentially related closures) for this virtual node.
-    pub fn create_dom_node(&self, vnode: &vdom::Node<APP::MSG>) -> DomNode {
-        self.into_dom_node(None, vnode)
-        /*
-        match vnode {
-            vdom::Node::Leaf(leaf_node) => self.create_leaf_node(leaf_node),
-            vdom::Node::Element(element_node) => {
-                let created_node = self.create_element_node(element_node);
-                for child in element_node.children().iter() {
-                    if let Some(child_text) = child.as_safe_html() {
-                        // https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
-                        // TODO: html parse the SafeHtml -> maybe rename it to RawHtml
-                        let created_element: &Element = created_node.unchecked_ref();
-                        created_element
-                            .insert_adjacent_html(intern("beforeend"), child_text)
-                            .expect("must not error");
-                    } else {
-                        let created_child = self.create_dom_node(child);
 
-                        Self::append_child_and_dispatch_mount_event(&created_node, &created_child);
-                    }
-                }
-                created_node
-            }
-        }
-        */
-    }
-
-    /*
-    /// Build a DOM element by recursively creating DOM nodes for this element and it's
-    /// children, it's children's children, etc.
-    fn create_element_node(&self, velem: &vdom::Element<APP::MSG>) -> Node {
-        let document = document();
-
-        let element = if let Some(namespace) = velem.namespace() {
-            document
-                .create_element_ns(Some(intern(namespace)), intern(velem.tag()))
-                .expect("Unable to create element")
-        } else {
-            DomNode::create_element(velem.tag())
-        };
-
-        let attrs = Attribute::merge_attributes_of_same_name(velem.attributes().iter());
-
-        self.set_element_dom_attrs(
-            &element,
-            attrs
-                .iter()
-                .map(|a| self.convert_attr(a))
-                .collect::<Vec<_>>(),
-        );
-
-        element.into()
-    }
-    */
 
     /// dispatch the mount event,
     /// call the listener since browser don't allow asynchronous execution of
@@ -752,12 +864,7 @@ where
             })
     }
 
-    /// set the element with dom attr
-    pub(crate) fn set_element_dom_attr(
-        &self,
-        element: &Element,
-        attr: DomAttr,
-    ) -> Option<NamedEventClosures> {
+    fn set_element_dom_attr(&self, element: &Element, attr: DomAttr)-> Option<NamedEventClosures>  {
         let attr_name = intern(attr.name);
         let attr_namespace = attr.namespace;
 
@@ -771,69 +878,23 @@ where
         DomAttr::set_element_style(element, attr_name, styles);
         DomAttr::set_element_function_call_values(element, attr_name, function_calls);
         DomAttr::set_element_simple_values(element, attr_name, attr_namespace, plain_values);
-        self.set_element_listeners(element, attr_name, listeners)
-    }
-
-    pub(crate) fn set_element_listeners(
-        &self,
-        element: &Element,
-        attr_name: AttributeName,
-        listeners: Vec<Closure<dyn FnMut(web_sys::Event)>>,
-    ) -> Option<NamedEventClosures> {
-        for listener in listeners.iter() {
-            self.add_event_listener(element, attr_name, &listener)
-                .expect("add listener");
-        }
-
-        if !listeners.is_empty() {
-            let unique_id = create_unique_identifier();
-            // set the data-sauron_vdom-id this will be read later on
-            // when it's time to remove this element and its closures and event listeners
-            element
-                .set_attribute(intern(DATA_VDOM_ID), &unique_id.to_string())
-                .expect("Could not set attribute on element");
-
-            let listener_closures: IndexMap<&'static str, Closure<dyn FnMut(web_sys::Event)>> =
-                IndexMap::from_iter(listeners.into_iter().map(|c| (attr_name, c)));
-
-            /*
-            self.node_closures
-                .borrow_mut()
-                .insert(unique_id, listener_closures);
-            */
-            Some(listener_closures)
-        } else {
+        self.add_event_listeners(element, attr_name, &listeners);
+        if !listeners.is_empty(){
+            let event_closures = IndexMap::from_iter(listeners.into_iter().map(|cb|(attr_name, cb)));
+            Some(event_closures)
+        }else{
             None
         }
     }
 
-    /// attach and event listener to an event target
     pub(crate) fn add_event_listeners(
         &self,
-        target: &web_sys::EventTarget,
-        event_listeners: Vec<Attribute<APP::MSG>>,
+        event_target: &web_sys::EventTarget,
+        event_name: &str,
+        listeners: &[EventClosure],
     ) -> Result<(), JsValue> {
-        let dom_attrs = event_listeners
-            .into_iter()
-            .map(|a| self.convert_attr(&a))
-            .collect();
-        self.add_event_dom_listeners(target, dom_attrs)?;
-        Ok(())
-    }
-
-    /// attach and event listener to an event target
-    pub(crate) fn add_event_dom_listeners(
-        &self,
-        target: &web_sys::EventTarget,
-        event_listeners: Vec<DomAttr>,
-    ) -> Result<(), JsValue> {
-        for attr in event_listeners.into_iter() {
-            for event_cb in attr.value.into_iter() {
-                let closure: Closure<dyn FnMut(web_sys::Event)> =
-                    event_cb.as_event_closure().expect("expecting a callback");
-                self.add_event_listener(target, attr.name, &closure)?;
-                self.event_closures.borrow_mut().push(closure);
-            }
+        for listener in listeners.iter(){
+            self.add_event_listener(event_target, event_name, listener);
         }
         Ok(())
     }
