@@ -909,63 +909,6 @@ where
         Ok(())
     }
 
-    /// remove all the event listeners for this node
-    pub(crate) fn remove_event_listeners_recursive(
-        &self,
-        target_element: &Element,
-    ) -> Result<(), JsValue> {
-        let all_descendant_vdom_id = get_node_descendant_data_vdom_id(target_element);
-        let mut node_closures = self.node_closures.borrow_mut();
-        for vdom_id in all_descendant_vdom_id {
-            if let Some(old_closure) = node_closures.get(&vdom_id) {
-                for (event, oc) in old_closure.iter() {
-                    let func: &Function = oc.as_ref().unchecked_ref();
-                    target_element.remove_event_listener_with_callback(intern(event), func)?;
-                }
-                // remove closure active_closure in dom_updater to free up memory
-                node_closures
-                    .swap_remove(&vdom_id)
-                    .expect("Unable to remove old closure");
-            } else {
-                log::warn!("There is no closure marked with that vdom_id: {}", vdom_id);
-            }
-        }
-        Ok(())
-    }
-
-    /// remove the event listener which matches the given event name
-    /// TODO: this is iterating over the decedant nodes to find the `vdom-id`
-    /// maybe we can make the dropping of closure faster
-    /// by making it automatically dropped by wrapping the Node with its closure
-    pub(crate) fn remove_event_listener_with_name(
-        &self,
-        event_name: &'static str,
-        target_element: &Element,
-    ) -> Result<(), JsValue> {
-        let mut node_closures = self.node_closures.borrow_mut();
-        if let Some(vdom_id) = get_node_data_vdom_id(target_element) {
-            if let Some(old_closure) = node_closures.get_mut(&vdom_id) {
-                for (event, oc) in old_closure.iter() {
-                    if *event == event_name {
-                        let func: &Function = oc.as_ref().unchecked_ref();
-                        target_element.remove_event_listener_with_callback(intern(event), func)?;
-                    }
-                }
-
-                old_closure.retain(|event, _oc| *event != event_name);
-
-                // remove closure active_closure in dom_updater to free up memory
-                if old_closure.is_empty() {
-                    node_closures
-                        .swap_remove(&vdom_id)
-                        .expect("Unable to remove old closure");
-                }
-            } else {
-                log::warn!("There is no closure marked with that vdom_id: {}", vdom_id);
-            }
-        }
-        Ok(())
-    }
 }
 
 pub(crate) fn find_node(target_node: &DomNode, path: &mut TreePath) -> Option<DomNode> {

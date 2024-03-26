@@ -52,10 +52,6 @@ where
     /// the actual DOM element where the APP is mounted to.
     pub(crate) mount_node: Rc<RefCell<Option<DomNode>>>,
 
-    /// The closures that are currently attached to all the nodes used in the Application
-    /// We keep these around so that they don't get dropped (and thus stop working);
-    pub node_closures: Rc<RefCell<ActiveClosure>>,
-
     /// Pending patches that hasn't been applied to the DOM yet
     /// for optimization purposes to avoid sluggishness of the app, when a patch
     /// can not be run in 1 execution due to limited remaining time deadline
@@ -84,7 +80,6 @@ where
     pub(crate) app_context: WeakContext<APP>,
     pub(crate) root_node: Weak<RefCell<Option<DomNode>>>,
     mount_node: Weak<RefCell<Option<DomNode>>>,
-    pub node_closures: Weak<RefCell<ActiveClosure>>,
     pending_patches: Weak<RefCell<VecDeque<DomPatch>>>,
     idle_callback_handles: Weak<RefCell<Vec<IdleCallbackHandle>>>,
     animation_frame_handles: Weak<RefCell<Vec<AnimationFrameHandle>>>,
@@ -110,7 +105,6 @@ where
         let app_context = self.app_context.upgrade()?;
         let root_node = self.root_node.upgrade()?;
         let mount_node = self.mount_node.upgrade()?;
-        let node_closures = self.node_closures.upgrade()?;
         let pending_patches = self.pending_patches.upgrade()?;
         let idle_callback_handles = self.idle_callback_handles.upgrade()?;
         let animation_frame_handles = self.animation_frame_handles.upgrade()?;
@@ -121,7 +115,6 @@ where
             app_context,
             root_node,
             mount_node,
-            node_closures,
             pending_patches,
             idle_callback_handles,
             animation_frame_handles,
@@ -141,7 +134,6 @@ where
             app_context: self.app_context.clone(),
             root_node: Weak::clone(&self.root_node),
             mount_node: Weak::clone(&self.mount_node),
-            node_closures: Weak::clone(&self.node_closures),
             pending_patches: Weak::clone(&self.pending_patches),
             idle_callback_handles: Weak::clone(&self.idle_callback_handles),
             animation_frame_handles: Weak::clone(&self.animation_frame_handles),
@@ -162,7 +154,6 @@ where
             app_context: AppContext::downgrade(&self.app_context),
             root_node: Rc::downgrade(&self.root_node),
             mount_node: Rc::downgrade(&self.mount_node),
-            node_closures: Rc::downgrade(&self.node_closures),
             pending_patches: Rc::downgrade(&self.pending_patches),
             idle_callback_handles: Rc::downgrade(&self.idle_callback_handles),
             animation_frame_handles: Rc::downgrade(&self.animation_frame_handles),
@@ -182,7 +173,6 @@ where
             app_context: self.app_context.clone(),
             root_node: Rc::clone(&self.root_node),
             mount_node: Rc::clone(&self.mount_node),
-            node_closures: Rc::clone(&self.node_closures),
             pending_patches: Rc::clone(&self.pending_patches),
             idle_callback_handles: Rc::clone(&self.idle_callback_handles),
             animation_frame_handles: Rc::clone(&self.animation_frame_handles),
@@ -231,7 +221,6 @@ where
             },
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(None)),
-            node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
             idle_callback_handles: Rc::new(RefCell::new(vec![])),
             animation_frame_handles: Rc::new(RefCell::new(vec![])),
@@ -283,16 +272,6 @@ where
         }
     }
 
-    /*
-    /// return the node where the app is mounted into
-    pub fn mount_node(&self) -> Option<web_sys::Node> {
-        if let Some(mount_node) = self.mount_node.borrow().as_ref() {
-            Some(mount_node.clone())
-        } else {
-            None
-        }
-    }
-    */
 
     ///  Instantiage an app and append the view to the root_node
     /// # Example
@@ -728,20 +707,6 @@ where
         }
     }
 
-    /// clone the app
-    #[allow(unsafe_code)]
-    pub fn app_clone(&self) -> ManuallyDrop<APP> {
-        unsafe {
-            let app: APP = std::mem::transmute_copy(&*self.app_context.app.borrow());
-            //TODO: We are creating a copy of the app everytime,
-            // as dropping the app will error in the runtime
-            // This might be leaking the memory
-            ManuallyDrop::new(app)
-        }
-        // An alternative to transmute_copy is to just plainly clone the app
-        //let borrowed_app = self.app_context.app.borrow();
-        //borrowed_app.clone()
-    }
 
     /// This is called when an event is triggered in the html DOM.
     /// The sequence of things happening here:
@@ -818,14 +783,12 @@ where
         let style_node = html::tags::style([], [text(style)]);
         let created_node = self.create_dom_node(None, &style_node);
 
-        /*
         self.mount_node
             .borrow_mut()
             .as_mut()
             .expect("mount node")
-            .append_child(&created_node)
+            .append_child(created_node)
             .expect("could not append child to mount shadow");
-        */
     }
 
     /// dispatch multiple MSG

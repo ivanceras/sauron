@@ -350,10 +350,10 @@ where
                             }
                             // it is an event listener
                             DomAttrValue::EventListener(_) => {
-                                let DomInner::Element{element: target_element, ..} = &target_element.inner else{
+                                let DomInner::Element{element: target_element, listeners, ..} = &target_element.inner else{
                                     unreachable!("must be an element");
                                 };
-                                self.remove_event_listener_with_name(attr.name, &target_element)?;
+                                listeners.borrow_mut().as_mut().map(|listener|listener.retain(|event,_|*event != attr.name));
                             }
                             DomAttrValue::Style(_) => {
                                 target_element.remove_dom_attr(attr)?;
