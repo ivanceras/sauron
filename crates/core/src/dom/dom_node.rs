@@ -231,7 +231,7 @@ impl DomNode{
         }
     }
 
-    fn as_node(&self) -> web_sys::Node{
+    pub fn as_node(&self) -> web_sys::Node{
         match &self.inner{
             DomInner::Element{element,..} => element.clone().unchecked_into(),
             DomInner::Fragment{fragment,..} => fragment.clone().unchecked_into(),
@@ -262,7 +262,7 @@ impl DomNode{
         *self.parent.borrow_mut() = Some(parent_node.clone());
     }
 
-    pub(crate) fn append_child(&self, child: DomNode) -> Result<(), JsValue> {
+    pub fn append_child(&self, child: DomNode) -> Result<(), JsValue> {
         match &self.inner{
             DomInner::Element{element,children,..} => {
                 element.append_child(&child.as_node()).expect("append child");
@@ -541,7 +541,7 @@ impl DomNode{
         (tag, elm)
     }
 
-    pub(crate) fn render_to_string(&self) -> String {
+    pub fn render_to_string(&self) -> String {
         let mut buffer = String::new();
         self.render(&mut buffer).expect("must render");
         buffer
@@ -691,10 +691,8 @@ where
             // since node_list as children will be unrolled into as child_elements of the parent
             // We need to wrap this node_list into doc_fragment since root_node is only 1 element
             Leaf::NodeList(nodes) => self.create_fragment_node(parent_node, nodes),
-            Leaf::StatefulComponent(comp) => todo!(),
-            Leaf::StatelessComponent(comp) => {
-                todo!("just like element")
-            }
+            Leaf::StatefulComponent(comp) => self.create_stateful_component(parent_node, comp),
+            Leaf::StatelessComponent(comp) => self.create_stateless_component(parent_node, comp),
             Leaf::TemplatedView(view) => {
                 unreachable!("template view should not be created: {:#?}", view)
             }
@@ -727,7 +725,6 @@ where
 {
 
 
-    /*
     /// TODO: register the template if not yet
     /// pass a program to leaf component and mount itself and its view to the program
     /// There are 2 types of children components of Stateful Component
@@ -740,8 +737,8 @@ where
     /// The attributes affects the Stateful component state.
     /// The attributes can be diff and send the patches to the StatefulComponent
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
-    fn create_stateful_component(&self, comp: &StatefulModel<APP::MSG>) -> Node {
-        let comp_node = self.create_dom_node(&crate::html::div(
+    fn create_stateful_component(&self, parent_node: Option<DomNode>, comp: &StatefulModel<APP::MSG>) -> DomNode {
+        let comp_node = self.create_dom_node(parent_node.clone(), &crate::html::div(
             [crate::html::attributes::class("component")]
                 .into_iter()
                 .chain(comp.attrs.clone().into_iter()),
@@ -751,16 +748,14 @@ where
         // here to allow the conversion of dom nodes with its event
         // listener and removing the generics msg
         for child in comp.children.iter() {
-            let child_dom = self.create_dom_node(&child);
-            comp.comp.borrow_mut().append_child(&child_dom);
-            Self::dispatch_mount_event(&child_dom);
+            let child_dom = self.create_dom_node(parent_node.clone(), &child);
+            comp.comp.borrow_mut().append_child(child_dom.clone());
+            //Self::dispatch_mount_event(&child_dom);
         }
         comp_node
     }
-    */
 
-    /*
-    fn create_stateless_component(&self, comp: &StatelessModel<APP::MSG>) -> Node {
+    fn create_stateless_component(&self, parent_node: Option<DomNode>, comp: &StatelessModel<APP::MSG>) -> DomNode {
         #[cfg(feature = "with-debug")]
         let t1 = now();
         let comp_view = &comp.view;
@@ -774,6 +769,7 @@ where
                 let real_comp_view = comp_view.unwrap_template_ref();
                 let patches =
                     self.create_patches_with_skip_diff(&vdom_template, &real_comp_view, &skip_diff);
+                log::info!("stateless component patches: {:#?}", patches);
                 #[cfg(feature = "with-debug")]
                 let t3 = now();
                 let dom_patches = self
@@ -798,11 +794,10 @@ where
             }
             _ => {
                 // create dom node without skip diff
-                self.create_dom_node(&comp.view)
+                self.create_dom_node(parent_node, &comp.view)
             }
         }
     }
-    */
 
 
 

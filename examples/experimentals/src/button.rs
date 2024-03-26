@@ -9,7 +9,7 @@ use sauron::vdom::AttributeName;
 #[derive(Default)]
 pub enum Msg {
     Click,
-    ExternContMounted(web_sys::Node),
+    ExternContMounted(DomNode),
     #[default]
     NoOp,
 }
@@ -17,8 +17,8 @@ pub enum Msg {
 #[derive(Default)]
 pub struct Button {
     /// holds the children while the external children node hasn't been mounted
-    children: Vec<web_sys::Node>,
-    external_children_node: Option<web_sys::Node>,
+    children: Vec<DomNode>,
+    external_children_node: Option<DomNode>,
     cnt: i32,
 }
 
@@ -32,7 +32,7 @@ impl Component for Button {
             Msg::ExternContMounted(target_node) => {
                 log::info!("Button: extenal container mounted...");
                 for child in self.children.iter() {
-                    target_node.append_child(child).expect("must append");
+                    target_node.append_child(child.clone()).expect("must append");
                 }
                 self.external_children_node = Some(target_node);
             }
@@ -61,7 +61,7 @@ impl StatefulComponent for Button {
     }
 
     /// append a child into this component
-    fn append_child(&mut self, child: &web_sys::Node) {
+    fn append_child(&mut self, child: DomNode) {
         log::info!("Btn appending {:?}", child);
         if let Some(external_children_node) = self.external_children_node.as_ref() {
             log::info!("Btn ok appending..");

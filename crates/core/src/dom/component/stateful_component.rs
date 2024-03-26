@@ -14,6 +14,7 @@ use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
+use crate::dom::DomNode;
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
@@ -33,7 +34,7 @@ pub trait StatefulComponent {
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
 
     /// append a child into this component
-    fn append_child(&mut self, _child: &web_sys::Node) {}
+    fn append_child(&mut self, _child: DomNode) {}
 
     /// remove a child in this index
     fn remove_child(&mut self, _index: usize) {}
@@ -159,7 +160,7 @@ where
     let mount_event = on_mount(move |me| {
         let mut program = program.clone();
         log::info!("stateful component is now mounted...");
-        program.mount(&me.target_node, MountProcedure::append());
+        program.mount(&me.target_node.as_node(), MountProcedure::append());
         MSG::default()
     });
     Node::Leaf(Leaf::StatefulComponent(StatefulModel {

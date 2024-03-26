@@ -50,7 +50,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
 
 
     /// Map the Event to DomEvent, which are browser events
-    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[derive(Debug, Clone)]
     pub enum Event {
         /// native dome events web_sys::Events
         WebEvent(web_sys::Event),
