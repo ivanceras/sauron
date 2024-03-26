@@ -169,11 +169,11 @@ impl DomInner{
     fn deep_clone(&self) -> Self {
         match self{
             Self::Element{element, listeners, children} => {
-                let element = element.clone_node_with_deep(true).expect("deep_cline");
+                let element = element.clone_node_with_deep(true).expect("deep_clone");
                 Self::Element{
                     element: element.unchecked_into(),
                     listeners: listeners.clone(),
-                    children: children.clone(),
+                    children: Rc::new(RefCell::new(children.borrow().iter().map(|c|c.deep_clone()).collect())),
                 }
             },
             Self::Text(text_node) => {
@@ -188,7 +188,7 @@ impl DomInner{
                 let fragment = fragment.clone_node_with_deep(true).expect("deep_clone");
                 Self::Fragment{
                     fragment: fragment.unchecked_into(),
-                    children: children.clone(),
+                    children: Rc::new(RefCell::new(children.borrow().iter().map(|c|c.deep_clone()).collect())),
                 }
             },
             Self::StatefulComponent(_) => unreachable!("can not deep clone stateful component"),
@@ -263,6 +263,8 @@ impl DomNode{
     }
 
     pub fn append_child(&self, child: DomNode) -> Result<(), JsValue> {
+        log::info!("appending child: {:?}", child.render_to_string());
+        log::info!("to: {:?}", self.render_to_string());
         match &self.inner{
             DomInner::Element{element,children,..} => {
                 element.append_child(&child.as_node()).expect("append child");
@@ -300,7 +302,7 @@ impl DomNode{
     }
 
     /// insert this node after this DomNode
-    pub(crate) fn insert_after(&self, for_insert: &DomNode) -> Result<Option<DomNode>, JsValue> {
+    pub(crate) fn insert_after(&self, for_insert: DomNode) -> Result<Option<DomNode>, JsValue> {
         let target_element = match &self.inner{
             DomInner::Element{element,..} => element,
             _ => unreachable!("target element should be an element"),
@@ -316,13 +318,13 @@ impl DomNode{
     }
 
     pub(crate) fn replace_child(&self, child: &DomNode, replacement: DomNode) -> Option<DomNode>{
-        log::debug!("atttempt to remove child..");
+        log::debug!("atttempt to replace child..{}",child.render_to_string());
         match &self.inner{
             DomInner::Element{element,children,..} => {
                 let mut child_index = None;
                 for (i,c) in children.borrow().iter().enumerate(){
                     if c.as_node() == child.as_node(){
-                        log::info!("This is the child to be removed at: {}", i);
+                        log::info!("This is the child to be replaced is at: {}", i);
                         child_index = Some(i);
                     }
                 }
@@ -333,8 +335,9 @@ impl DomNode{
                     children.borrow_mut().insert(child_index, replacement);
                     Some(child)
                 }else{
-                    log::info!("can not find child to be removed...");
-                    //None
+                    log::info!("we are removing from: {}", self.render_to_string());
+                    log::info!("can not find child to be removed...: {:#?}, {}", child, child.render_to_string());
+                    // if can not find the child, then must be the root node
                     unreachable!("must find the child...");
                 }
             }
@@ -394,6 +397,7 @@ impl DomNode{
         match &self.inner{
             DomInner::Text(text_node) => {
                 if let Some(parent) = self.parent.borrow().as_ref(){
+                    log::info!("replacing a text  node...");
                     parent.replace_child(self, replacement);
                 }else{
                     unreachable!("There should be parent of this...");
@@ -403,6 +407,7 @@ impl DomNode{
                 // replacing the fragment with a first node,
                 // but the fragment don't exist anymore
                 if let Some(parent) = self.parent.borrow().as_ref(){
+                    log::info!("---->>> replacing a fragment node...");
                     parent.replace_child(self, replacement);
                 }else{
                     unreachable!("There should be parent of this...");
@@ -410,6 +415,9 @@ impl DomNode{
             }
             DomInner::Element{element,..} => {
                 if let Some(parent) = self.parent.borrow().as_ref(){
+                    log::info!("replacing an element node, parent: {}", parent.render_to_string());
+                    log::info!("the element to be replaced: {}", self.render_to_string());
+                    log::info!("the replacement: {}", replacement.render_to_string());
                     parent.replace_child(self, replacement);
                 }else{
                     log::info!("There is no parent here..");
@@ -421,11 +429,11 @@ impl DomNode{
     }
 
     /// clones this DomNode
-    pub(crate) fn deep_clone(&self) -> Result<DomNode, JsValue>{
-        Ok(DomNode{
+    pub(crate) fn deep_clone(&self) -> DomNode{
+        DomNode{
             inner: self.inner.deep_clone(),
             parent: self.parent.clone(),
-        })
+        }
     }
 
     pub(crate) fn set_dom_attrs(&self, attrs: impl IntoIterator<Item = DomAttr>) -> Result<(),JsValue>{
@@ -756,6 +764,13 @@ where
     }
 
     fn create_stateless_component(&self, parent_node: Option<DomNode>, comp: &StatelessModel<APP::MSG>) -> DomNode {
+        /*
+        let comp_view = &comp.view;
+        let real_comp_view = comp_view.unwrap_template_ref();
+        self.create_dom_node(None, &real_comp_view)
+        */
+
+        
         #[cfg(feature = "with-debug")]
         let t1 = now();
         let comp_view = &comp.view;
@@ -765,7 +780,8 @@ where
         let skip_diff = comp_view.skip_diff();
         match (vdom_template, skip_diff) {
             (Some(vdom_template), Some(skip_diff)) => {
-                let template = register_template(comp.type_id, &vdom_template);
+                let template = register_template(comp.type_id, parent_node, &vdom_template);
+                log::info!("template: {}", template.render_to_string());
                 let real_comp_view = comp_view.unwrap_template_ref();
                 let patches =
                     self.create_patches_with_skip_diff(&vdom_template, &real_comp_view, &skip_diff);
@@ -775,6 +791,7 @@ where
                 let dom_patches = self
                     .convert_patches(&template, &patches)
                     .expect("convert patches");
+                log::info!("dom patches: {:#?}", dom_patches);
                 #[cfg(feature = "with-debug")]
                 let t4 = now();
                 self.apply_dom_patches(dom_patches).expect("patch template");
@@ -790,6 +807,7 @@ where
                     total: t5 - t1,
                     ..Default::default()
                 });
+                log::info!("the patched template is now: {}", template.render_to_string());
                 template
             }
             _ => {

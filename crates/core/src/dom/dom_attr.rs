@@ -21,6 +21,7 @@ use web_sys::{
 };
 
 /// a dom version of the Attribute, thereby removing the MSG generic
+#[derive(Debug)]
 pub struct DomAttr {
     /// namespace of the attribute
     pub namespace: Option<&'static str>,
@@ -31,6 +32,7 @@ pub struct DomAttr {
 }
 
 /// a dom version of the Attribute value, thereby removing the MSG generic
+#[derive(Debug)]
 pub enum DomAttrValue {
     /// function calls
     FunctionCall(Value),

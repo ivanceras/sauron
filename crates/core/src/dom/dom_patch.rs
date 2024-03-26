@@ -21,7 +21,7 @@ use crate::dom::dom_node::DomInner;
 /// This is necessary since the created Node  doesn't contain references
 /// as opposed to Patch which contains reference to the vdom, which makes it hard
 /// to be included in a struct
-///
+#[derive(Debug)]
 pub struct DomPatch {
     /// The path to traverse to get to the target_element
     pub patch_path: TreePath,
@@ -32,6 +32,7 @@ pub struct DomPatch {
 }
 
 /// patch variant
+#[derive(Debug)]
 pub enum PatchVariant {
     /// Insert nodes before the target node
     InsertBeforeNode {
@@ -299,6 +300,7 @@ where
         let mut new_root_node = None;
         for dom_patch in dom_patches {
             if let Some(replacement_node) = self.apply_dom_patch(dom_patch)? {
+                log::info!("We got a new root node..");
                 new_root_node = Some(replacement_node);
             }
         }
@@ -326,11 +328,12 @@ where
             PatchVariant::InsertAfterNode { nodes } => {
                 // we insert the node before this target element
                 for for_insert in nodes.into_iter().rev() {
-                    target_element.insert_after(&for_insert).expect("insert after");
+                    target_element.insert_after(for_insert).expect("insert after");
                 }
                 Ok(None)
             }
             PatchVariant::AppendChildren { children } => {
+                log::info!("appending {} children...", children.len());
                 for child in children.into_iter() {
                     target_element.append_child(child).expect("append child");
                 }
@@ -380,24 +383,29 @@ where
                 let first_node = replacement.pop().expect("must have a first node");
                 log::info!("target element: {:#?}", target_element);
                 if target_element.is_fragment(){
-                    log::info!("append to the root node..");
-
+                    assert!(patch_path.is_empty(), "this should only happen to root node");
+                    log::info!("appending to the mount node, because it is a framgnet....");
+                    let mount_node = self.mount_node.borrow();
+                    let mount_node = mount_node.as_ref().expect("must have a mount node");
+                    mount_node.append_child(first_node.clone());
                     for replace_node in replacement{
-                        self.root_node.borrow_mut().as_mut().expect("must have root_node")
-                            .append_child(replace_node).expect("append root_node");
-                    }
-                    if patch_path.path.is_empty(){
-                        Ok(Some(first_node))
-                    }else{
-                        Ok(None)
+                         mount_node.append_child(replace_node).expect("append root_node");
                     }
                 }
                 else{
-                    target_element.replace_node(first_node)?;
+                    log::info!("just a regular replace node...");
+                    target_element.replace_node(first_node.clone())?;
                     for replace_node in replacement.into_iter() {
                         log::info!("inserting the rest..");
-                        target_element.insert_before(replace_node)?;
+                        first_node.insert_after(replace_node)?;
                     }
+                }
+                // always return the first_node as the new root_node
+                // TODO: maybe use multiple root nodes
+                if patch_path.path.is_empty(){
+                    log::info!("patch path is empty...");
+                    Ok(Some(first_node))
+                }else{
                     Ok(None)
                 }
             }

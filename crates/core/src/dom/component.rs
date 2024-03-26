@@ -23,11 +23,11 @@ thread_local! {
 
 /// if the template is already registered, return the dom template
 /// if not, create the dom template and add it
-pub fn register_template<MSG>(type_id: TypeId, vdom_template: &Node<MSG>) -> DomNode {
+pub fn register_template<MSG>(type_id: TypeId, parent_node: Option<DomNode>, vdom_template: &Node<MSG>) -> DomNode {
     if let Some(template) = lookup_template(type_id) {
         template
     } else {
-        let template = no_listener::create_dom_node_no_listeners(None, &vdom_template);
+        let template = no_listener::create_dom_node_no_listeners(parent_node, &vdom_template);
         add_template(type_id, &template);
         template
     }
@@ -41,7 +41,7 @@ pub fn add_template(type_id: TypeId, template: &DomNode) {
             map.insert(
                 type_id,
                 //template.clone_node_with_deep(true).expect("deep clone"),
-                template.deep_clone().expect("deep clone"),
+                template.deep_clone(),
             );
         }
     })
@@ -52,7 +52,7 @@ pub fn lookup_template(type_id: TypeId) -> Option<DomNode> {
     TEMPLATE_LOOKUP.with_borrow(|map| {
         if let Some(existing) = map.get(&type_id) {
             //Some(existing.clone_node_with_deep(true).expect("deep clone"))
-            Some(existing.deep_clone().expect("deep clone"))
+            Some(existing.deep_clone())
         } else {
             None
         }

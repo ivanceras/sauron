@@ -219,7 +219,7 @@ impl Application for App {
                                 <button
                                     type="button"
                                     class="btn btn-primary btn-block"
-                                    on_click={|_|Msg::Update(10)}
+                                    on_click={|_|Msg::Update(2)}
                                     id="update">
                                     Update every 10th row
                                 </button>
