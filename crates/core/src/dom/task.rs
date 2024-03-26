@@ -4,6 +4,7 @@ use futures::channel::mpsc::UnboundedReceiver;
 use futures::StreamExt;
 use std::future::Future;
 use std::pin::Pin;
+use crate::dom::dom_node::EventClosure;
 
 /// encapsulate anything a component can do
 pub enum Task<MSG> {
@@ -109,6 +110,8 @@ where
 
 pub struct RecurringTask<MSG> {
     pub(crate) receiver: UnboundedReceiver<MSG>,
+    /// store the associated closures so it is not dropped before being event executed
+    pub(crate) event_closures: Vec<EventClosure>,
 }
 
 impl<MSG> RecurringTask<MSG>
@@ -126,11 +129,13 @@ where
         MSG2: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
+        let event_closures = self.event_closures;
+        let mut receiver = self.receiver;
         spawn_local(async move {
-            while let Some(msg) = self.next().await {
+            while let Some(msg) = receiver.next().await {
                 tx.start_send(f(msg)).expect("must send");
             }
         });
-        RecurringTask { receiver: rx }
+        RecurringTask { receiver: rx, event_closures }
     }
 }

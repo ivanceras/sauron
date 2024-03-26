@@ -5,6 +5,7 @@ use crate::{
 };
 use futures::channel::mpsc;
 use wasm_bindgen::{prelude::*, JsCast};
+use web_sys::MouseEvent;
 
 /// Provides function for window related functions
 #[derive(Clone, Copy)]
@@ -24,7 +25,7 @@ impl Window {
                 log::info!("event: {}", e.type_());
                 let (w, h) = util::get_window_size();
                 let msg = cb(w, h);
-                tx.start_send(msg).unwrap();
+                tx.start_send(msg).expect("send");
             });
         window()
             .add_event_listener_with_callback(
@@ -32,13 +33,44 @@ impl Window {
                 resize_callback.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        //TODO: this needs to be managed in the Program
-        // but components may not have access to the Program
-        // TODO: maybe put them in the Task
-        // which will get drop together when Task is dropped as well
-        resize_callback.forget();
 
-        Task::Recurring(RecurringTask { receiver: rx })
+        Task::Recurring(RecurringTask { receiver: rx,
+            event_closures: vec![resize_callback],
+        })
+    }
+
+    pub fn on_mousemove<F, MSG>(mut cb: F) -> Task<MSG>
+        where F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
+              MSG: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        let mousemove_cb: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move|event: web_sys::Event|{
+            let mouse_event: MouseEvent = event.dyn_into().expect("must be mouse event");
+            let msg = cb(mouse_event);
+            tx.start_send(msg).expect("send");
+        });
+        window().add_event_listener_with_callback(intern("mousemove"), mousemove_cb.as_ref().unchecked_ref())
+            .expect("add event callback");
+        Task::Recurring(RecurringTask{receiver: rx,
+            event_closures: vec![mousemove_cb]
+        })
+    }
+
+    pub fn on_mouseup<F, MSG>(mut cb: F) -> Task<MSG>
+        where F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
+              MSG: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        let mousemove_cb: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move|event: web_sys::Event|{
+            let mouse_event: MouseEvent = event.dyn_into().expect("must be mouse event");
+            let msg = cb(mouse_event);
+            tx.start_send(msg).expect("send");
+        });
+        window().add_event_listener_with_callback(intern("mouseup"), mousemove_cb.as_ref().unchecked_ref())
+            .expect("add event callback");
+        Task::Recurring(RecurringTask{receiver: rx,
+            event_closures: vec![mousemove_cb]
+        })
     }
 }
 
