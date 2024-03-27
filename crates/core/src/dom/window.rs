@@ -1,7 +1,6 @@
 use crate::dom::task::RecurringTask;
 use crate::{
-    dom::{document, dom_node::intern, util, window, Application, Program, Task},
-    vdom::Attribute,
+    dom::{dom_node::intern, util, window, Application, Program, Task},
 };
 use futures::channel::mpsc;
 use wasm_bindgen::{prelude::*, JsCast};

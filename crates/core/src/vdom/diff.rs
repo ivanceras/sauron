@@ -1,7 +1,6 @@
 //! provides diffing algorithm which returns patches
 use super::{diff_lis, Attribute, Element, Node, Patch, TreePath};
 use super::{Tag, KEY, REPLACE, SKIP, SKIP_CRITERIA};
-use crate::dom::SkipDiff;
 use crate::vdom::Leaf;
 use std::{cmp, mem};
 use crate::dom::SkipPath;

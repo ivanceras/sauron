@@ -1,15 +1,12 @@
-#![allow(unused)]
 use crate::dom::component::register_template;
 use crate::dom::component::StatelessModel;
 #[cfg(feature = "with-debug")]
 use crate::dom::now;
-use crate::dom::program::EventClosures;
 use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
 use crate::dom::StatefulComponent;
 use crate::dom::StatefulModel;
 use crate::html::lookup;
-use crate::vdom::AttributeName;
 use crate::vdom::TreePath;
 use crate::{
     dom::document,
@@ -19,10 +16,8 @@ use crate::{
     vdom::{Attribute, Leaf},
 };
 use indexmap::IndexMap;
-use js_sys::Function;
 use std::cell::Cell;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::fmt;
 use std::rc::Rc;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
@@ -284,7 +279,7 @@ impl DomNode{
         }
     }
 
-    /// insert this DomNode before this DomNode
+    /// Insert the DomNode `for_insert` before `self` DomNode
     pub(crate) fn insert_before(&self, for_insert: DomNode) -> Result<Option<DomNode>, JsValue> {
         let DomInner::Element{element: target_element,..} = &self.inner else {
             unreachable!("target element should be an element");
@@ -304,7 +299,7 @@ impl DomNode{
         Ok(None)
     }
 
-    /// insert this node after this DomNode
+    /// Insert the DomNode `for_insert` after `self` DomNode
     pub(crate) fn insert_after(&self, for_insert: DomNode) -> Result<Option<DomNode>, JsValue> {
         let target_element = match &self.inner{
             DomInner::Element{element,..} => element,
@@ -320,10 +315,11 @@ impl DomNode{
         }
     }
 
+    /// Replace the child `child` DomNode with a replacement DomNode `replacement`
     pub(crate) fn replace_child(&self, child: &DomNode, replacement: DomNode) -> Option<DomNode>{
         log::debug!("atttempt to replace child..{}",child.render_to_string());
         match &self.inner{
-            DomInner::Element{element,children,..} => {
+            DomInner::Element{children,..} => {
                 let mut child_index = None;
                 for (i,c) in children.borrow().iter().enumerate(){
                     if c.as_node() == child.as_node(){
@@ -345,20 +341,23 @@ impl DomNode{
         }
     }
 
+    /// Remove the DomNode `child` from the children of `self`
     pub(crate) fn remove_child(&self, child: &DomNode) -> Option<DomNode> {
         match &self.inner{
             DomInner::Element{element, children,..} => {
                 let mut child_index = None;
-                for (i,c) in children.borrow().iter().enumerate(){
-                    if c.as_node() == child.as_node(){
-                        child_index = Some(i);
+                {
+                    for (i,c) in children.borrow().iter().enumerate(){
+                        if c.as_node() == child.as_node(){
+                            child_index = Some(i);
+                        }
                     }
                 }
                 if let Some(child_index) = child_index{
                     let child = children.borrow_mut().remove(child_index);
-                    if let Some(parent) = self.parent.borrow().as_ref(){
-                        parent.as_element().remove_child(&child.as_node());
-                    }
+                    //TODO: shouldn't we just remove the child from element
+                    // why from parent here?
+                    //element.remove_child(&child.as_node()).expect("remove child");
                     Some(child)
                 }else{
                     unreachable!("no parent")
@@ -368,17 +367,22 @@ impl DomNode{
         }
     }
 
+    /// remove all the children of this element
     pub(crate) fn clear_children(&self) {
+        use crate::dom::now;
         match &self.inner{
             DomInner::Element{element, children, ..} => {
-                for child in children.borrow().iter(){
-                    self.remove_child(child);
-                }
+                let t1 = now();
+                children.borrow_mut().clear();
+                let t2 = now();
                 while let Some(first_child) = element.first_child() {
                     element
                         .remove_child(&first_child)
                         .expect("must remove child");
                 }
+                let t3 = now();
+                log::info!("for_each took: {}ms", t2 - t1);
+                log::info!("while loop took: {}ms", t3 - t2);
             }
             _ => todo!(),
         }
@@ -449,7 +453,7 @@ impl DomNode{
                     function_calls,
                 } = attr.group_values();
 
-                Self::add_event_dom_listeners(&element, attr_name, &event_callbacks);
+                Self::add_event_dom_listeners(&element, attr_name, &event_callbacks).expect("event listeners");
                 let is_none = listeners.borrow().is_none();
                 if is_none{
 
@@ -666,7 +670,7 @@ where
             .map(|child| self.create_dom_node(Some(dom_node.clone()), child))
             .collect();
         for child in children.into_iter(){
-            dom_node.append_child(child);
+            dom_node.append_child(child).unwrap();
         }
         dom_node
     }
@@ -882,7 +886,7 @@ where
         DomAttr::set_element_style(element, attr_name, styles);
         DomAttr::set_element_function_call_values(element, attr_name, function_calls);
         DomAttr::set_element_simple_values(element, attr_name, attr_namespace, plain_values);
-        self.add_event_listeners(element, attr_name, &listeners);
+        self.add_event_listeners(element, attr_name, &listeners).unwrap();
         if !listeners.is_empty(){
             let event_closures = IndexMap::from_iter(listeners.into_iter().map(|cb|(attr_name, cb)));
             Some(event_closures)
@@ -898,7 +902,7 @@ where
         listeners: &[EventClosure],
     ) -> Result<(), JsValue> {
         for listener in listeners.iter(){
-            self.add_event_listener(event_target, event_name, listener);
+            self.add_event_listener(event_target, event_name, listener).unwrap();
         }
         Ok(())
     }

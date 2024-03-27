@@ -26,7 +26,7 @@ use std::{
 };
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{self, Element, Node};
+use web_sys;
 use crate::dom::DomNode;
 
 pub(crate) use app_context::AppContext;

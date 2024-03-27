@@ -1,7 +1,5 @@
-#![allow(unused)]
 use crate::dom;
 use crate::dom::dom_node::find_all_nodes;
-use crate::dom::dom_node::intern;
 use crate::dom::DomAttr;
 use crate::dom::DomAttrValue;
 use crate::dom::{Application, Program};
@@ -10,10 +8,7 @@ use crate::vdom::TreePath;
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use indexmap::IndexMap;
 use wasm_bindgen::closure::Closure;
-use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
-use web_sys::Element;
-use web_sys::Node;
 use crate::dom::DomNode;
 use crate::dom::dom_node::DomInner;
 
@@ -339,7 +334,7 @@ where
             }
 
             PatchVariant::AddAttributes { attrs } => {
-                target_element.set_dom_attrs(attrs);
+                target_element.set_dom_attrs(attrs).unwrap();
                 Ok(None)
             }
             PatchVariant::RemoveAttributes { attrs } => {
@@ -383,7 +378,7 @@ where
                     assert!(patch_path.is_empty(), "this should only happen to root node");
                     let mount_node = self.mount_node.borrow();
                     let mount_node = mount_node.as_ref().expect("must have a mount node");
-                    mount_node.append_child(first_node.clone());
+                    mount_node.append_child(first_node.clone()).unwrap();
                     for replace_node in replacement{
                          mount_node.append_child(replace_node).expect("append root_node");
                     }
@@ -411,45 +406,24 @@ where
                 Ok(None)
             }
             PatchVariant::MoveBeforeNode { for_moving } => {
-                /*
-                if let Some(target_parent) = target_element.parent_node() {
+                if let Some(target_parent) = target_element.parent.borrow().as_ref() {
                     for move_node in for_moving {
-                        let move_node_parent = move_node
-                            .parent_node()
-                            .expect("node for moving must have parent");
-                        let move_node = move_node_parent
-                            .remove_child(&move_node)
-                            .expect("must remove child");
-                        target_parent
-                            .insert_before(&move_node, Some(&target_element))
-                            .expect("must insert before this node");
+                        target_parent.remove_child(&move_node);
+                        target_element.insert_before(move_node).unwrap();
                     }
                 } else {
                     panic!("unable to get the parent node of the target element");
                 }
-                */
-                todo!();
                 Ok(None)
             }
 
             PatchVariant::MoveAfterNode { for_moving } => {
-                /*
-                for move_node in for_moving {
-                    let move_node_parent = move_node
-                        .parent_node()
-                        .expect("node for moving must have parent");
-                    let to_move_node = move_node_parent
-                        .remove_child(&move_node)
-                        .expect("must remove child");
-
-                    let to_move_element: &web_sys::Element =
-                        to_move_node.dyn_ref().expect("an element");
-                    target_element
-                        .insert_adjacent_element(intern("afterend"), to_move_element)
-                        .expect("must insert before this node");
+                if let Some(target_parent) = target_element.parent.borrow().as_ref() {
+                    for move_node in for_moving {
+                        target_parent.remove_child(&move_node);
+                        target_element.insert_after(move_node);
+                    }
                 }
-                */
-                todo!();
                 Ok(None)
             }
         }
