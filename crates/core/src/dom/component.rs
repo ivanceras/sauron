@@ -1,3 +1,4 @@
+use crate::dom::DomNode;
 use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
@@ -6,7 +7,6 @@ use derive_where::derive_where;
 use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use crate::dom::DomNode;
 
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
@@ -23,7 +23,11 @@ thread_local! {
 
 /// if the template is already registered, return the dom template
 /// if not, create the dom template and add it
-pub fn register_template<MSG>(type_id: TypeId, parent_node: Option<DomNode>, vdom_template: &Node<MSG>) -> DomNode {
+pub fn register_template<MSG>(
+    type_id: TypeId,
+    parent_node: Option<DomNode>,
+    vdom_template: &Node<MSG>,
+) -> DomNode {
     if let Some(template) = lookup_template(type_id) {
         template
     } else {
@@ -38,10 +42,7 @@ pub fn add_template(type_id: TypeId, template: &DomNode) {
         if map.contains_key(&type_id) {
             // already added
         } else {
-            map.insert(
-                type_id,
-                template.deep_clone(),
-            );
+            map.insert(type_id, template.deep_clone());
         }
     })
 }
@@ -127,8 +128,12 @@ pub trait Component {
     where
         Self: Sized,
     {
-        let class_names:Vec<&str> = class_name.split(" ").collect();
-        let prefixed_classes = class_names.iter().map(|c|Self::prefix_class(c)).collect::<Vec<_>>().join(" ");
+        let class_names: Vec<&str> = class_name.split(" ").collect();
+        let prefixed_classes = class_names
+            .iter()
+            .map(|c| Self::prefix_class(c))
+            .collect::<Vec<_>>()
+            .join(" ");
         class(prefixed_classes)
     }
 
@@ -225,15 +230,12 @@ impl<MSG> Clone for StatelessModel<MSG> {
 
 impl<MSG> PartialEq for StatelessModel<MSG> {
     fn eq(&self, other: &Self) -> bool {
-        self.view == other.view
-            && self.type_id == other.type_id
+        self.view == other.view && self.type_id == other.type_id
     }
 }
 
 /// create a stateless component node
-pub fn component<COMP>(
-    app: &COMP,
-) -> Node<COMP::MSG>
+pub fn component<COMP>(app: &COMP) -> Node<COMP::MSG>
 where
     COMP: Component + 'static,
 {

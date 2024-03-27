@@ -1,6 +1,7 @@
 //! Create [events][0] Object
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
+use crate::dom::DomNode;
 use crate::dom::{document, window, Event};
 use crate::vdom;
 use crate::vdom::{Attribute, AttributeValue, EventCallback};
@@ -15,7 +16,6 @@ use web_sys::{
     EventTarget, HtmlDetailsElement, HtmlElement, HtmlInputElement, HtmlSelectElement,
     HtmlTextAreaElement,
 };
-use crate::dom::DomNode;
 
 #[derive(Clone, Copy)]
 #[repr(i16)]

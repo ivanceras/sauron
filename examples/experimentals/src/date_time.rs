@@ -124,7 +124,9 @@ where
             Msg::ExternContMounted(target_node) => {
                 log::warn!("-->>> Container for children is now mounted..!");
                 for child in self.children.iter() {
-                    target_node.append_child(child.clone()).expect("must append");
+                    target_node
+                        .append_child(child.clone())
+                        .expect("must append");
                 }
                 self.external_children_node = Some(target_node);
                 Effects::none()

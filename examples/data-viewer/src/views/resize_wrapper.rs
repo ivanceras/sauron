@@ -1,9 +1,9 @@
 use crate::views::{data_view, DataView};
+use sauron::Window;
 use sauron::{
     html::{attributes::*, events::*, *},
     jss, Application, Cmd, Component, Node,
 };
-use sauron::Window;
 
 #[derive(Debug, PartialEq)]
 pub enum Msg {
@@ -55,8 +55,12 @@ impl Application for ResizeWrapper {
     /// not being triggered
     fn init(&mut self) -> Cmd<Self> {
         Cmd::batch([
-            Cmd::from(Window::on_mouseup(|event| Msg::EndResize(event.client_x(), event.client_y()))),
-            Cmd::from(Window::on_mousemove(|event| Msg::MouseMove(event.client_x(), event.client_y()))),
+            Cmd::from(Window::on_mouseup(|event| {
+                Msg::EndResize(event.client_x(), event.client_y())
+            })),
+            Cmd::from(Window::on_mousemove(|event| {
+                Msg::MouseMove(event.client_x(), event.client_y())
+            })),
             Cmd::from(self.data_view.init().map_msg(Msg::DataViewMsg)),
         ])
     }

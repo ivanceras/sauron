@@ -1,10 +1,10 @@
+use crate::dom::dom_node::EventClosure;
 use crate::dom::spawn_local;
 use futures::channel::mpsc;
 use futures::channel::mpsc::UnboundedReceiver;
 use futures::StreamExt;
 use std::future::Future;
 use std::pin::Pin;
-use crate::dom::dom_node::EventClosure;
 use wasm_bindgen::closure::Closure;
 
 /// encapsulate anything a component can do
@@ -131,12 +131,20 @@ where
         MSG2: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
-        let RecurringTask{ mut receiver, event_closures, closures} = self;
+        let RecurringTask {
+            mut receiver,
+            event_closures,
+            closures,
+        } = self;
         spawn_local(async move {
             while let Some(msg) = receiver.next().await {
                 tx.start_send(f(msg)).expect("must send");
             }
         });
-        RecurringTask { receiver: rx, event_closures, closures }
+        RecurringTask {
+            receiver: rx,
+            event_closures,
+            closures,
+        }
     }
 }

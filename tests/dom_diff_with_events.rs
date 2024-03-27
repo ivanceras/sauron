@@ -37,4 +37,3 @@ fn nodes_with_event_should_not_recycle() {
         )]
     );
 }
-

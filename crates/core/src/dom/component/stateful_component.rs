@@ -4,6 +4,7 @@ use crate::dom::Application;
 use crate::dom::Cmd;
 use crate::dom::Component;
 use crate::dom::DomAttrValue;
+use crate::dom::DomNode;
 use crate::dom::Program;
 use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
@@ -14,7 +15,6 @@ use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
-use crate::dom::DomNode;
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
@@ -102,10 +102,10 @@ impl<MSG> Clone for StatefulModel<MSG> {
     }
 }
 
-impl<MSG> PartialEq for StatefulModel<MSG>{
+impl<MSG> PartialEq for StatefulModel<MSG> {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.comp, &other.comp)
-           && self.type_id == other.type_id
+            && self.type_id == other.type_id
             && self.attrs == other.attrs
             && self.children == other.children
     }

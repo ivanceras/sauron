@@ -1,9 +1,9 @@
-
 use crate::Status;
 use crate::Theme;
 use css_colors::Color;
+use sauron::dom::DomNode;
 use sauron::{
-    dom::{WebComponent},
+    dom::WebComponent,
     html::{attributes::*, events::*, *},
     vdom::Callback,
     *,
@@ -11,7 +11,6 @@ use sauron::{
 use std::collections::BTreeMap;
 use std::str::FromStr;
 use web_sys::MouseEvent;
-use sauron::dom::DomNode;
 
 const COMPONENT_NAME: &str = "sfui-frame";
 const DEFAULT_WIDTH: usize = 100;
@@ -241,7 +240,7 @@ where
             Msg::ContentTargetMounted(me) => {
                 let mount_event = me.clone();
                 let target_node = me.target_node;
-                for child in self.children.drain(..){
+                for child in self.children.drain(..) {
                     target_node.append_child(child).expect("append child");
                 }
                 self.content_target_node = Some(target_node);
@@ -291,7 +290,7 @@ where
                             class("content_wrap"),
                             on_mount(|me| Msg::ContentTargetMounted(me)),
                         ],
-                        []
+                        [],
                     ),
                 ],
             )],
@@ -377,7 +376,7 @@ where
         let border_width = 1; // the width of the border for each side of the button
         let base = &theme.controls;
         let transition_time_ms = Self::transition_time_ms(); //transition time for most effects on the button
-                                                            //
+                                                             //
         let Dimension { corner_length, .. } = Dimension::default();
 
         let feature = Feature::default();
@@ -602,7 +601,6 @@ impl Feature {
 }
 
 impl<XMSG> StatefulComponent for Frame<XMSG> {
-
     /// called when any of the attributes in observed_attributes is changed
     fn attribute_changed(
         &mut self,
@@ -634,7 +632,7 @@ impl<XMSG> StatefulComponent for Frame<XMSG> {
         }
     }
 
-    fn append_child(&mut self, child: DomNode){
+    fn append_child(&mut self, child: DomNode) {
         self.children.push(child);
     }
 
@@ -642,4 +640,3 @@ impl<XMSG> StatefulComponent for Frame<XMSG> {
     fn disconnected_callback(&mut self) {}
     fn adopted_callback(&mut self) {}
 }
-

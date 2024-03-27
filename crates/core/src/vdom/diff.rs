@@ -1,9 +1,9 @@
 //! provides diffing algorithm which returns patches
 use super::{diff_lis, Attribute, Element, Node, Patch, TreePath};
 use super::{Tag, KEY, REPLACE, SKIP, SKIP_CRITERIA};
+use crate::dom::SkipPath;
 use crate::vdom::Leaf;
 use std::{cmp, mem};
-use crate::dom::SkipPath;
 
 /// Return the patches needed for `old_node` to have the same DOM as `new_node`
 ///

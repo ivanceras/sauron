@@ -1,7 +1,9 @@
 use crate::dom;
 use crate::dom::dom_node::find_all_nodes;
+use crate::dom::dom_node::DomInner;
 use crate::dom::DomAttr;
 use crate::dom::DomAttrValue;
+use crate::dom::DomNode;
 use crate::dom::{Application, Program};
 use crate::vdom::EventCallback;
 use crate::vdom::TreePath;
@@ -9,8 +11,6 @@ use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use indexmap::IndexMap;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
-use crate::dom::DomNode;
-use crate::dom::dom_node::DomInner;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -201,7 +201,7 @@ where
 
             PatchType::AddAttributes { attrs } => {
                 // we merge the attributes here prior to conversion
-                let attrs = Attribute::merge_attributes_of_same_name(attrs.iter().map(|a|*a));
+                let attrs = Attribute::merge_attributes_of_same_name(attrs.iter().map(|a| *a));
                 DomPatch {
                     patch_path,
                     target_element,
@@ -209,7 +209,7 @@ where
                         attrs: attrs.iter().map(|a| self.convert_attr(a)).collect(),
                     },
                 }
-            },
+            }
             PatchType::RemoveAttributes { attrs } => DomPatch {
                 patch_path,
                 target_element,
@@ -314,7 +314,9 @@ where
         match patch_variant {
             PatchVariant::InsertBeforeNode { nodes } => {
                 for for_insert in nodes {
-                    target_element.insert_before(for_insert).expect("must insert");
+                    target_element
+                        .insert_before(for_insert)
+                        .expect("must insert");
                 }
                 Ok(None)
             }
@@ -322,7 +324,9 @@ where
             PatchVariant::InsertAfterNode { nodes } => {
                 // we insert the node before this target element
                 for for_insert in nodes.into_iter().rev() {
-                    target_element.insert_after(for_insert).expect("insert after");
+                    target_element
+                        .insert_after(for_insert)
+                        .expect("insert after");
                 }
                 Ok(None)
             }
@@ -346,16 +350,23 @@ where
                             }
                             // it is an event listener
                             DomAttrValue::EventListener(_) => {
-                                let DomInner::Element{listeners, ..} = &target_element.inner else{
+                                let DomInner::Element { listeners, .. } = &target_element.inner
+                                else {
                                     unreachable!("must be an element");
                                 };
-                                listeners.borrow_mut().as_mut().map(|listener|listener.retain(|event,_|*event != attr.name));
+                                listeners.borrow_mut().as_mut().map(|listener| {
+                                    listener.retain(|event, _| *event != attr.name)
+                                });
                             }
                             DomAttrValue::Style(_) => {
                                 target_element.remove_dom_attr(attr)?;
                             }
                             DomAttrValue::FunctionCall(_) => {
-                                let DomInner::Element{element: target_element, ..} = &target_element.inner else{
+                                let DomInner::Element {
+                                    element: target_element,
+                                    ..
+                                } = &target_element.inner
+                                else {
                                     unreachable!("must be an element");
                                 };
                                 if attr.name == "inner_html" {
@@ -374,16 +385,20 @@ where
             // before it is actully replaced in the DOM
             PatchVariant::ReplaceNode { mut replacement } => {
                 let first_node = replacement.pop().expect("must have a first node");
-                if target_element.is_fragment(){
-                    assert!(patch_path.is_empty(), "this should only happen to root node");
+                if target_element.is_fragment() {
+                    assert!(
+                        patch_path.is_empty(),
+                        "this should only happen to root node"
+                    );
                     let mount_node = self.mount_node.borrow();
                     let mount_node = mount_node.as_ref().expect("must have a mount node");
                     mount_node.append_child(first_node.clone()).unwrap();
-                    for replace_node in replacement{
-                         mount_node.append_child(replace_node).expect("append root_node");
+                    for replace_node in replacement {
+                        mount_node
+                            .append_child(replace_node)
+                            .expect("append root_node");
                     }
-                }
-                else{
+                } else {
                     target_element.replace_node(first_node.clone())?;
                     for replace_node in replacement.into_iter() {
                         first_node.insert_after(replace_node)?;
@@ -391,9 +406,9 @@ where
                 }
                 // always return the first_node as the new root_node
                 // TODO: maybe use multiple root nodes
-                if patch_path.path.is_empty(){
+                if patch_path.path.is_empty() {
                     Ok(Some(first_node))
-                }else{
+                } else {
                     Ok(None)
                 }
             }

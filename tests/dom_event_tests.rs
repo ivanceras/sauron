@@ -163,5 +163,3 @@ fn remove_event() {
     //the `new` vdom which has no attached event
     assert_eq!(&*text.borrow(), "Start Text");
 }
-
-

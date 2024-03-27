@@ -4,13 +4,14 @@ use crate::dom::program::app_context::WeakContext;
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
+use crate::dom::DomNode;
 use crate::dom::SkipDiff;
+use crate::dom::SkipPath;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
 use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
-use crate::dom::SkipPath;
 use crate::vdom::diff_recursive;
 use crate::vdom::Patch;
 use std::collections::hash_map::DefaultHasher;
@@ -25,14 +26,12 @@ use std::{
 };
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys;
-use crate::dom::DomNode;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
 
 mod app_context;
 mod mount_procedure;
-
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP>
@@ -74,7 +73,6 @@ where
     animation_frame_handles: Weak<RefCell<Vec<AnimationFrameHandle>>>,
     last_update: Weak<RefCell<Option<f64>>>,
 }
-
 
 impl<APP> WeakProgram<APP>
 where
@@ -240,7 +238,6 @@ where
         }
     }
 
-
     ///  Instantiage an app and append the view to the root_node
     /// # Example
     /// ```rust,ignore
@@ -334,12 +331,12 @@ where
     fn create_initial_view(&self) -> DomNode {
         log::info!("Creating initial view..");
         let use_template = true;
-        if !use_template{
+        if !use_template {
             log::info!("no template usage..");
             let current_view = self.app_context.current_vdom();
             //let real_view = current_view.unwrap_template_ref();
             self.create_dom_node(None, &current_view)
-        }else{
+        } else {
             log::info!("Creating initial view..");
             let app_view = self.app_context.app.borrow().view();
             let vdom_template = app_view.template();
@@ -379,7 +376,8 @@ where
                 .mount_node
                 .borrow()
                 .as_ref()
-                .expect("mount node").clone(),
+                .expect("mount node")
+                .clone(),
             MountTarget::ShadowRoot => {
                 /*
                 let mount_element: web_sys::Element = self
@@ -407,15 +405,21 @@ where
 
         match mount_procedure.action {
             MountAction::Append => {
-                mount_node.append_child(created_node.clone()).expect("append_child");
+                mount_node
+                    .append_child(created_node.clone())
+                    .expect("append_child");
             }
             MountAction::ClearAppend => {
                 log::info!("doing a clear append..");
                 mount_node.clear_children();
-                mount_node.append_child(created_node.clone()).expect("append_child");
+                mount_node
+                    .append_child(created_node.clone())
+                    .expect("append_child");
             }
             MountAction::Replace => {
-                mount_node.replace_node(created_node.clone()).expect("replace node");
+                mount_node
+                    .replace_node(created_node.clone())
+                    .expect("replace node");
             }
         }
         *self.root_node.borrow_mut() = Some(created_node);
@@ -489,7 +493,6 @@ where
         } else {
             self.create_dom_patch(&view)
         };
-
 
         let total_patches = dom_patches.len();
 
@@ -684,7 +687,6 @@ where
         }
     }
 
-
     /// This is called when an event is triggered in the html DOM.
     /// The sequence of things happening here:
     /// - The app component update is executed.
@@ -752,7 +754,9 @@ where
         let head = document().head().expect("must have a head");
         let head_node: web_sys::Node = head.unchecked_into();
         let dom_head = DomNode::from(head_node);
-        dom_head.append_child(created_node).expect("must append style");
+        dom_head
+            .append_child(created_node)
+            .expect("must append style");
     }
 
     /// inject style element to the mount node

@@ -1,7 +1,5 @@
 use crate::dom::task::RecurringTask;
-use crate::{
-    dom::{dom_node::intern, util, window, Application, Program, Task},
-};
+use crate::dom::{dom_node::intern, util, window, Application, Program, Task};
 use futures::channel::mpsc;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::MouseEvent;
@@ -33,70 +31,87 @@ impl Window {
             )
             .expect("add event callback");
 
-        Task::Recurring(RecurringTask { receiver: rx,
+        Task::Recurring(RecurringTask {
+            receiver: rx,
             event_closures: vec![resize_callback],
-                closures: vec![],
+            closures: vec![],
         })
     }
 
     ///
     pub fn on_mousemove<F, MSG>(mut cb: F) -> Task<MSG>
-        where F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
-              MSG: 'static,
+    where
+        F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
+        MSG: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
-        let mousemove_cb: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move|event: web_sys::Event|{
-            let mouse_event: MouseEvent = event.dyn_into().expect("must be mouse event");
-            let msg = cb(mouse_event);
-            tx.start_send(msg).expect("send");
-        });
-        window().add_event_listener_with_callback(intern("mousemove"), mousemove_cb.as_ref().unchecked_ref())
+        let mousemove_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let mouse_event: MouseEvent = event.dyn_into().expect("must be mouse event");
+                let msg = cb(mouse_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("mousemove"),
+                mousemove_cb.as_ref().unchecked_ref(),
+            )
             .expect("add event callback");
-        Task::Recurring(RecurringTask{receiver: rx,
+        Task::Recurring(RecurringTask {
+            receiver: rx,
             event_closures: vec![mousemove_cb],
-                closures: vec![],
+            closures: vec![],
         })
     }
 
     ///
     pub fn on_mouseup<F, MSG>(mut cb: F) -> Task<MSG>
-        where F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
-              MSG: 'static,
+    where
+        F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
+        MSG: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
-        let mousemove_cb: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move|event: web_sys::Event|{
-            let mouse_event: MouseEvent = event.dyn_into().expect("must be mouse event");
-            let msg = cb(mouse_event);
-            tx.start_send(msg).expect("send");
-        });
-        window().add_event_listener_with_callback(intern("mouseup"), mousemove_cb.as_ref().unchecked_ref())
+        let mousemove_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let mouse_event: MouseEvent = event.dyn_into().expect("must be mouse event");
+                let msg = cb(mouse_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("mouseup"),
+                mousemove_cb.as_ref().unchecked_ref(),
+            )
             .expect("add event callback");
-        Task::Recurring(RecurringTask{receiver: rx,
+        Task::Recurring(RecurringTask {
+            receiver: rx,
             event_closures: vec![mousemove_cb],
-                closures: vec![],
+            closures: vec![],
         })
     }
 
     /// do this task at every `ms` interval
-    pub fn every_interval<F,MSG>(interval_ms: i32, mut cb: F) -> Task<MSG>
-        where F: FnMut() -> MSG + 'static,
-        MSG: 'static
+    pub fn every_interval<F, MSG>(interval_ms: i32, mut cb: F) -> Task<MSG>
+    where
+        F: FnMut() -> MSG + 'static,
+        MSG: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
-            let closure_cb: Closure<dyn FnMut()> = Closure::new(move || {
-                let msg = cb();
-                tx.start_send(msg).unwrap();
-            });
-            window()
-                .set_interval_with_callback_and_timeout_and_arguments_0(
-                    closure_cb.as_ref().unchecked_ref(),
-                    interval_ms,
-                )
-                .expect("Unable to start interval");
-            Task::Recurring(RecurringTask { receiver: rx,
-                event_closures: vec![],
-                closures: vec![closure_cb],
-            })
+        let closure_cb: Closure<dyn FnMut()> = Closure::new(move || {
+            let msg = cb();
+            tx.start_send(msg).unwrap();
+        });
+        window()
+            .set_interval_with_callback_and_timeout_and_arguments_0(
+                closure_cb.as_ref().unchecked_ref(),
+                interval_ms,
+            )
+            .expect("Unable to start interval");
+        Task::Recurring(RecurringTask {
+            receiver: rx,
+            event_closures: vec![],
+            closures: vec![closure_cb],
+        })
     }
 }
 

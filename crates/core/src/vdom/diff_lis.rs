@@ -3,8 +3,8 @@
 use super::diff::diff_recursive;
 use super::{AttributeValue, Tag, KEY};
 use super::{Node, Patch};
-use indexmap::IndexMap;
 use crate::dom::SkipPath;
+use indexmap::IndexMap;
 
 pub fn diff_keyed_nodes<'a, MSG>(
     old_tag: Option<&'a Tag>,

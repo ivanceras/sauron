@@ -32,7 +32,9 @@ impl Component for Button {
             Msg::ExternContMounted(target_node) => {
                 log::info!("Button: extenal container mounted...");
                 for child in self.children.iter() {
-                    target_node.append_child(child.clone()).expect("must append");
+                    target_node
+                        .append_child(child.clone())
+                        .expect("must append");
                 }
                 self.external_children_node = Some(target_node);
             }
