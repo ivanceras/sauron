@@ -21,11 +21,8 @@ use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
-use web_sys::{self, Element, Node, Text};
+use web_sys::{self, Element, Node};
 use std::cell::Ref;
-
-/// data attribute name used in assigning the node id of an element with events
-pub(crate) const DATA_VDOM_ID: &str = "data-vdom-id";
 
 pub(crate) type EventClosure = Closure<dyn FnMut(web_sys::Event)>;
 pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
@@ -143,6 +140,7 @@ pub enum DomInner {
         children: Rc<RefCell<Vec<DomNode>>>,
     },
     /// StatefulComponent
+    #[allow(unused)]
     StatefulComponent(Rc<RefCell<dyn StatefulComponent>>),
 }
 
@@ -232,6 +230,7 @@ impl DomNode{
         }
     }
 
+    /// exposed the underlying wrapped node as `web_sys::Node`
     pub fn as_node(&self) -> web_sys::Node{
         match &self.inner{
             DomInner::Element{element,..} => element.clone().unchecked_into(),
@@ -261,6 +260,7 @@ impl DomNode{
         *self.parent.borrow_mut() = Some(parent_node.clone());
     }
 
+    /// append the DomNode `child` into this DomNode `self`
     pub fn append_child(&self, child: DomNode) -> Result<(), JsValue> {
         match &self.inner{
             DomInner::Element{element,children,..} => {
@@ -394,31 +394,10 @@ impl DomNode{
 
 
     pub(crate) fn replace_node(&self, replacement: DomNode) -> Result<Option<DomNode>, JsValue> {
-        match &self.inner{
-            DomInner::Text(text_node) => {
-                if let Some(parent) = self.parent.borrow().as_ref(){
-                    parent.replace_child(self, replacement);
-                }else{
-                    unreachable!("There should be parent of this...");
-                }
-            }
-            DomInner::Fragment{fragment,..} => {
-                // replacing the fragment with a first node,
-                // but the fragment don't exist anymore
-                if let Some(parent) = self.parent.borrow().as_ref(){
-                    parent.replace_child(self, replacement);
-                }else{
-                    unreachable!("There should be parent of this...");
-                }
-            }
-            DomInner::Element{element,..} => {
-                if let Some(parent) = self.parent.borrow().as_ref(){
-                    parent.replace_child(self, replacement);
-                }else{
-                    log::info!("There is no parent here..");
-                }
-            }
-            _ => todo!("for: {:#?}", self),
+        if let Some(parent) = self.parent.borrow().as_ref(){
+            parent.replace_child(self, replacement);
+        }else{
+            log::info!("There is no parent here..");
         }
         Ok(None)
     }
@@ -505,43 +484,8 @@ impl DomNode{
         Ok(())
     }
 
-    pub(crate) fn remove_event_dom_listeners(
-        target: &web_sys::EventTarget,
-        event_listeners: Vec<DomAttr>,
-    ) -> Result<(), JsValue> {
-        for attr in event_listeners.into_iter() {
-            for event_cb in attr.value.into_iter() {
-                let closure: Closure<dyn FnMut(web_sys::Event)> =
-                    event_cb.as_event_closure().expect("expecting a callback");
-            }
-        }
-        Ok(())
-    }
 
-    fn inner_html(&self) -> Option<String> {
-        match &self.inner {
-            DomInner::Element { element, .. } => Some(element.inner_html()),
-            _ => None,
-        }
-    }
-
-    pub(crate) fn create_text_node(txt: &str) -> Text {
-        document().create_text_node(txt)
-    }
-
-    /// create dom element from tag name
-    pub(crate) fn create_element(tag: &'static str) -> web_sys::Element {
-        document()
-            .create_element(intern(tag))
-            .expect("create element")
-    }
-
-    /// create a web_sys::Element with the specified tag
-    fn create_element_with_tag(tag: &'static str) -> (&'static str, web_sys::Element) {
-        let elm = document().create_element(intern(tag)).unwrap();
-        (tag, elm)
-    }
-
+    /// render this DomNode into an html string represenation
     pub fn render_to_string(&self) -> String {
         let mut buffer = String::new();
         self.render(&mut buffer).expect("must render");
@@ -605,19 +549,6 @@ pub fn intern(s: &str) -> &str {
 #[inline(always)]
 pub fn intern(s: &str) -> &str {
     s
-}
-
-/// This is the value of the data-sauron-vdom-id.
-/// Used to uniquely identify elements that contain closures so that the DomUpdater can
-/// look them up by their unique id.
-/// When the DomUpdater sees that the element no longer exists it will drop all of it's
-/// Rc'd Closures for those events.
-fn create_unique_identifier() -> usize {
-    NODE_ID_COUNTER.with(|x| {
-        let val = x.get();
-        x.set(val + 1);
-        val
-    })
 }
 
 impl<APP> Program<APP>
@@ -819,7 +750,7 @@ where
     /// dispatch the mount event,
     /// call the listener since browser don't allow asynchronous execution of
     /// dispatching custom events (non-native browser events)
-    ///
+    #[allow(unused)]
     pub(crate) fn dispatch_mount_event(target_node: &Node) {
         let event_target: &web_sys::EventTarget = target_node.unchecked_ref();
         assert_eq!(
@@ -828,6 +759,7 @@ where
         );
     }
 
+    #[allow(unused)]
     pub(crate) fn dispatch_mount_event_to_children(
         target_node: &Node,
         deep: usize,
@@ -842,14 +774,6 @@ where
             let child = children.get(i).expect("child");
             Self::dispatch_mount_event_to_children(&child, deep, current_depth + 1);
         }
-    }
-
-    /// a helper method to append a node to its parent and trigger a mount event if there is any
-    pub(crate) fn append_child_and_dispatch_mount_event(parent: &Node, child_node: &Node) {
-        parent
-            .append_child(child_node)
-            .expect("must append child node");
-        Self::dispatch_mount_event(child_node);
     }
 
 
@@ -954,38 +878,4 @@ pub(crate) fn find_all_nodes(
         }
     }
     nodes_to_patch
-}
-
-/// return the "data-vdom-id" value of this node
-fn get_node_data_vdom_id(target_element: &Element) -> Option<usize> {
-    if let Some(vdom_id_str) = target_element.get_attribute(intern(DATA_VDOM_ID)) {
-        let vdom_id = vdom_id_str
-            .parse::<usize>()
-            .expect("unable to parse sauron_vdom-id");
-        Some(vdom_id)
-    } else {
-        None
-    }
-}
-
-/// Get the "data-vdom-id" of all the desendent of this node including itself
-/// This is needed to free-up the closure that was attached ActiveClosure manually
-fn get_node_descendant_data_vdom_id(target_element: &Element) -> Vec<usize> {
-    let mut data_vdom_id = vec![];
-
-    if let Some(vdom_id) = get_node_data_vdom_id(target_element) {
-        data_vdom_id.push(vdom_id);
-    }
-
-    let children = target_element.child_nodes();
-    let child_node_count = children.length();
-    for i in 0..child_node_count {
-        let child_node = children.item(i).expect("Expecting a child node");
-        if child_node.node_type() == Node::ELEMENT_NODE {
-            let child_element = child_node.unchecked_ref::<Element>();
-            let child_data_vdom_id = get_node_descendant_data_vdom_id(child_element);
-            data_vdom_id.extend(child_data_vdom_id);
-        }
-    }
-    data_vdom_id
 }

@@ -13,7 +13,6 @@ use crate::vdom::diff;
 use crate::dom::SkipPath;
 use crate::vdom::diff_recursive;
 use crate::vdom::Patch;
-use indexmap::IndexMap;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
 use std::hash::{Hash, Hasher};
@@ -24,7 +23,6 @@ use std::{
     rc::Rc,
     rc::Weak,
 };
-use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys;
 use crate::dom::DomNode;
@@ -35,8 +33,6 @@ pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
 mod app_context;
 mod mount_procedure;
 
-pub(crate) type EventClosures = Vec<Closure<dyn FnMut(web_sys::Event)>>;
-pub(crate) type Closures = Vec<Closure<dyn FnMut()>>;
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP>
@@ -79,13 +75,6 @@ where
     last_update: Weak<RefCell<Option<f64>>>,
 }
 
-/// Closures that we are holding on to to make sure that they don't get invalidated after a
-/// VirtualNode is dropped.
-///
-/// The usize is a unique identifier that is associated with the DOM element that this closure is
-/// attached to.
-pub type ActiveClosure =
-    IndexMap<usize, IndexMap<&'static str, Closure<dyn FnMut(web_sys::Event)>>>;
 
 impl<APP> WeakProgram<APP>
 where

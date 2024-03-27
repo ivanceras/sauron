@@ -382,14 +382,6 @@ impl DomAttrValue {
         Some(simple.to_string())
     }
 
-    /// return event clousre if it an event listener variant
-    pub(crate) fn as_event_closure(self) -> Option<Closure<dyn FnMut(web_sys::Event)>> {
-        match self {
-            Self::EventListener(cb) => Some(cb),
-            _ => None,
-        }
-    }
-
     fn convert_attr_value_except_listener<MSG>(
         attr_value: &AttributeValue<MSG>,
     ) -> Option<DomAttrValue> {

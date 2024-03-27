@@ -38,6 +38,7 @@ impl Window {
         })
     }
 
+    ///
     pub fn on_mousemove<F, MSG>(mut cb: F) -> Task<MSG>
         where F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
               MSG: 'static,
@@ -55,6 +56,7 @@ impl Window {
         })
     }
 
+    ///
     pub fn on_mouseup<F, MSG>(mut cb: F) -> Task<MSG>
         where F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
               MSG: 'static,

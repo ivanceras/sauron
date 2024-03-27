@@ -346,7 +346,7 @@ where
                             }
                             // it is an event listener
                             DomAttrValue::EventListener(_) => {
-                                let DomInner::Element{element: target_element, listeners, ..} = &target_element.inner else{
+                                let DomInner::Element{listeners, ..} = &target_element.inner else{
                                     unreachable!("must be an element");
                                 };
                                 listeners.borrow_mut().as_mut().map(|listener|listener.retain(|event,_|*event != attr.name));
@@ -421,7 +421,7 @@ where
                 if let Some(target_parent) = target_element.parent.borrow().as_ref() {
                     for move_node in for_moving {
                         target_parent.remove_child(&move_node);
-                        target_element.insert_after(move_node);
+                        target_element.insert_after(move_node).unwrap();
                     }
                 }
                 Ok(None)
