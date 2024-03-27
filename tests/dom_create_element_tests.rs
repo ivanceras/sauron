@@ -21,10 +21,9 @@ wasm_bindgen_test_configure!(run_in_browser);
 fn nested_divs() {
     let vdiv: Node<()> = div(vec![], vec![div(vec![], vec![div(vec![], vec![])])]); // <div> <div> <div></div> </div> </div>
     let program = simple_program();
-    let created_node = program.create_dom_node(&vdiv);
-    let div: Element = created_node.unchecked_into();
+    let created_node = program.create_dom_node(None, &vdiv);
 
-    assert_eq!(&div.inner_html(), "<div><div></div></div>");
+    assert_eq!(&vdiv.render_to_string(), "<div><div></div></div>");
 }
 
 #[wasm_bindgen_test]
@@ -36,11 +35,10 @@ fn svg_element() {
             vec![circle(vec![cx("50"), cy("50"), r("50")], vec![])],
         )],
     );
-    let created_node = simple_program().create_dom_node(&vdiv);
-    let div: Element = created_node.unchecked_into();
+    let created_node = simple_program().create_dom_node(None, &vdiv);
 
     assert_eq!(
-        &div.inner_html(),
+        &vdiv.render_to_string(),
         r#"<svg xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50"></circle></svg>"#
     );
 }
@@ -49,7 +47,7 @@ fn svg_element() {
 fn div_with_attributes() {
     let vdiv: Node<()> = div(vec![id("id-here"), class("two classes")], vec![]);
 
-    let created_node = simple_program().create_dom_node(&vdiv);
+    let created_node = simple_program().create_dom_node(None, &vdiv);
     let div: Element = created_node.unchecked_into();
 
     assert_eq!(&div.id(), "id-here");

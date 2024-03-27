@@ -555,7 +555,8 @@ impl<APP> Program<APP>
 where
     APP: Application + 'static,
 {
-    pub(crate) fn create_dom_node(&self, parent_node: Option<DomNode>, node: &vdom::Node<APP::MSG>) -> DomNode {
+    /// Create a dom node
+    pub fn create_dom_node(&self, parent_node: Option<DomNode>, node: &vdom::Node<APP::MSG>) -> DomNode {
         match node {
             vdom::Node::Element(elm) => self.create_element_node(parent_node, elm),
             vdom::Node::Leaf(leaf) => self.create_leaf_node(parent_node, leaf),
