@@ -123,7 +123,7 @@ where
     }
 
     /// apply a function to the msg to create a different task which has a different msg
-    fn map_msg<F, MSG2>(mut self, f: F) -> RecurringTask<MSG2>
+    fn map_msg<F, MSG2>(self, f: F) -> RecurringTask<MSG2>
     where
         F: Fn(MSG) -> MSG2 + 'static,
         MSG2: 'static,

@@ -300,7 +300,6 @@ where
         let mut new_root_node = None;
         for dom_patch in dom_patches {
             if let Some(replacement_node) = self.apply_dom_patch(dom_patch)? {
-                log::info!("We got a new root node..");
                 new_root_node = Some(replacement_node);
             }
         }
@@ -333,7 +332,6 @@ where
                 Ok(None)
             }
             PatchVariant::AppendChildren { children } => {
-                log::info!("appending {} children...", children.len());
                 for child in children.into_iter() {
                     target_element.append_child(child).expect("append child");
                 }
@@ -381,10 +379,8 @@ where
             // before it is actully replaced in the DOM
             PatchVariant::ReplaceNode { mut replacement } => {
                 let first_node = replacement.pop().expect("must have a first node");
-                log::info!("target element: {:#?}", target_element);
                 if target_element.is_fragment(){
                     assert!(patch_path.is_empty(), "this should only happen to root node");
-                    log::info!("appending to the mount node, because it is a framgnet....");
                     let mount_node = self.mount_node.borrow();
                     let mount_node = mount_node.as_ref().expect("must have a mount node");
                     mount_node.append_child(first_node.clone());
@@ -393,17 +389,14 @@ where
                     }
                 }
                 else{
-                    log::info!("just a regular replace node...");
                     target_element.replace_node(first_node.clone())?;
                     for replace_node in replacement.into_iter() {
-                        log::info!("inserting the rest..");
                         first_node.insert_after(replace_node)?;
                     }
                 }
                 // always return the first_node as the new root_node
                 // TODO: maybe use multiple root nodes
                 if patch_path.path.is_empty(){
-                    log::info!("patch path is empty...");
                     Ok(Some(first_node))
                 }else{
                     Ok(None)

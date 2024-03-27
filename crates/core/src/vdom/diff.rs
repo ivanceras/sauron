@@ -204,6 +204,7 @@ pub fn diff_recursive<'a, MSG>(
                     panic!("Node list must have already unrolled when creating an element");
                 }
                 (Leaf::StatelessComponent(old_comp), Leaf::StatelessComponent(new_comp)) => {
+                    log::info!("diffing stateless component...");
                     let new_path = SkipPath {
                         path: path.path.clone(),
                         skip_diff: old_comp.view.skip_diff(),

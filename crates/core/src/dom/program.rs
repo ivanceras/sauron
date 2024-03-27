@@ -373,7 +373,6 @@ where
             (Some(vdom_template), Some(skip_diff)) => {
                 let patches =
                     self.create_patches_with_skip_diff(&vdom_template, &real_view, &skip_diff);
-                log::info!("patches: {:#?}", patches);
                 let type_id = TypeId::of::<APP>();
                 let dom_template = register_template(type_id, None, &vdom_template);
                 let dom_patches = self
@@ -382,7 +381,6 @@ where
                 let _new_template_node = self
                     .apply_dom_patches(dom_patches)
                     .expect("template patching");
-                log::info!("new_template_node: {:#?}", _new_template_node);
                 //Self::dispatch_mount_event_to_children(&dom_template, 2, 0);
                 dom_template
             }

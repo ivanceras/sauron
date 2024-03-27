@@ -155,7 +155,13 @@ impl fmt::Debug for DomInner{
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
         match self{
-            Self::Element{..} => write!(f, "Element"),
+            Self::Element{element, children, ..} => {
+                f.debug_struct("Element")
+                    .field("tag", &element.tag_name().to_lowercase()) 
+                    .field("children", &children.borrow().iter().map(|c|c.as_element().tag_name().to_lowercase()).collect::<Vec<_>>())
+                .finish()?;
+                Ok(())
+            }
             Self::Text(text_node) => f.debug_tuple("Text").field(&text_node.borrow().whole_text().expect("whole text")).finish(),
             Self::Comment(_) => write!(f, "Comment"),
             Self::Fragment{..} => write!(f, "Fragment"),
@@ -245,10 +251,8 @@ impl DomNode{
         match &self.inner{
             DomInner::Element{element,..} => element.clone().unchecked_into(),
             DomInner::Fragment{fragment,..} => {
-                log::info!("fragment into element..");
                 let fragment: web_sys::Element = fragment.clone().unchecked_into();
                 assert!(fragment.is_object());
-                log::info!("fragment: {:#?}", fragment);
                 fragment
             }
             DomInner::Text(text_node) => text_node.borrow().clone().unchecked_into(),
@@ -263,8 +267,6 @@ impl DomNode{
     }
 
     pub fn append_child(&self, child: DomNode) -> Result<(), JsValue> {
-        log::info!("appending child: {:?}", child.render_to_string());
-        log::info!("to: {:?}", self.render_to_string());
         match &self.inner{
             DomInner::Element{element,children,..} => {
                 element.append_child(&child.as_node()).expect("append child");
@@ -324,7 +326,6 @@ impl DomNode{
                 let mut child_index = None;
                 for (i,c) in children.borrow().iter().enumerate(){
                     if c.as_node() == child.as_node(){
-                        log::info!("This is the child to be replaced is at: {}", i);
                         child_index = Some(i);
                     }
                 }
@@ -335,8 +336,6 @@ impl DomNode{
                     children.borrow_mut().insert(child_index, replacement);
                     Some(child)
                 }else{
-                    log::info!("we are removing from: {}", self.render_to_string());
-                    log::info!("can not find child to be removed...: {:#?}, {}", child, child.render_to_string());
                     // if can not find the child, then must be the root node
                     unreachable!("must find the child...");
                 }
@@ -354,7 +353,6 @@ impl DomNode{
                         child_index = Some(i);
                     }
                 }
-                log::info!("child to be removed: {:?}", child_index);
                 if let Some(child_index) = child_index{
                     let child = children.borrow_mut().remove(child_index);
                     if let Some(parent) = self.parent.borrow().as_ref(){
@@ -372,7 +370,6 @@ impl DomNode{
     pub(crate) fn clear_children(&self) {
         match &self.inner{
             DomInner::Element{element, children, ..} => {
-                log::info!("Remove this children: {}", children.borrow().len());
                 for child in children.borrow().iter(){
                     self.remove_child(child);
                 }
@@ -397,7 +394,6 @@ impl DomNode{
         match &self.inner{
             DomInner::Text(text_node) => {
                 if let Some(parent) = self.parent.borrow().as_ref(){
-                    log::info!("replacing a text  node...");
                     parent.replace_child(self, replacement);
                 }else{
                     unreachable!("There should be parent of this...");
@@ -407,7 +403,6 @@ impl DomNode{
                 // replacing the fragment with a first node,
                 // but the fragment don't exist anymore
                 if let Some(parent) = self.parent.borrow().as_ref(){
-                    log::info!("---->>> replacing a fragment node...");
                     parent.replace_child(self, replacement);
                 }else{
                     unreachable!("There should be parent of this...");
@@ -415,9 +410,6 @@ impl DomNode{
             }
             DomInner::Element{element,..} => {
                 if let Some(parent) = self.parent.borrow().as_ref(){
-                    log::info!("replacing an element node, parent: {}", parent.render_to_string());
-                    log::info!("the element to be replaced: {}", self.render_to_string());
-                    log::info!("the replacement: {}", replacement.render_to_string());
                     parent.replace_child(self, replacement);
                 }else{
                     log::info!("There is no parent here..");
@@ -459,13 +451,11 @@ impl DomNode{
                 Self::add_event_dom_listeners(&element, attr_name, &event_callbacks);
                 let is_none = listeners.borrow().is_none();
                 if is_none{
-                    log::info!("no listeners yet..");
 
                     let listener_closures: IndexMap<&'static str, Closure<dyn FnMut(web_sys::Event)>> =
                         IndexMap::from_iter(event_callbacks.into_iter().map(|c| (attr_name, c)));
                     *listeners.borrow_mut() = Some(listener_closures);
                 }else if let Some(listeners) = listeners.borrow_mut().as_mut(){
-                    log::info!("inserting listeners...");
                     for event_cb in event_callbacks.into_iter(){
                         listeners.insert(attr_name, event_cb);
                     }
@@ -764,13 +754,12 @@ where
     }
 
     fn create_stateless_component(&self, parent_node: Option<DomNode>, comp: &StatelessModel<APP::MSG>) -> DomNode {
-        /*
         let comp_view = &comp.view;
         let real_comp_view = comp_view.unwrap_template_ref();
         self.create_dom_node(None, &real_comp_view)
-        */
 
         
+        /*
         #[cfg(feature = "with-debug")]
         let t1 = now();
         let comp_view = &comp.view;
@@ -780,6 +769,9 @@ where
         let skip_diff = comp_view.skip_diff();
         match (vdom_template, skip_diff) {
             (Some(vdom_template), Some(skip_diff)) => {
+                //TODO: something is wrong with the chain of elements here 
+                //from base node to it's children
+                // disabling template for stateless component for now
                 let template = register_template(comp.type_id, parent_node, &vdom_template);
                 log::info!("template: {}", template.render_to_string());
                 let real_comp_view = comp_view.unwrap_template_ref();
@@ -807,6 +799,7 @@ where
                     total: t5 - t1,
                     ..Default::default()
                 });
+                log::info!("the patched template is now: {:#?}", template);
                 log::info!("the patched template is now: {}", template.render_to_string());
                 template
             }
@@ -815,6 +808,7 @@ where
                 self.create_dom_node(parent_node, &comp.view)
             }
         }
+        */
     }
 
 
