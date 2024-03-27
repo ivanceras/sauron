@@ -355,9 +355,7 @@ impl DomNode{
                 }
                 if let Some(child_index) = child_index{
                     let child = children.borrow_mut().remove(child_index);
-                    //TODO: shouldn't we just remove the child from element
-                    // why from parent here?
-                    //element.remove_child(&child.as_node()).expect("remove child");
+                    element.remove_child(&child.as_node()).expect("remove child");
                     Some(child)
                 }else{
                     unreachable!("no parent")
@@ -375,9 +373,9 @@ impl DomNode{
                 let t1 = now();
                 children.borrow_mut().clear();
                 let t2 = now();
-                while let Some(first_child) = element.first_child() {
+                while let Some(last_child) = element.last_child() {
                     element
-                        .remove_child(&first_child)
+                        .remove_child(&last_child)
                         .expect("must remove child");
                 }
                 let t3 = now();
