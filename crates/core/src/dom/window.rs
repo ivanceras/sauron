@@ -35,6 +35,7 @@ impl Window {
 
         Task::Recurring(RecurringTask { receiver: rx,
             event_closures: vec![resize_callback],
+                closures: vec![],
         })
     }
 
@@ -52,7 +53,8 @@ impl Window {
         window().add_event_listener_with_callback(intern("mousemove"), mousemove_cb.as_ref().unchecked_ref())
             .expect("add event callback");
         Task::Recurring(RecurringTask{receiver: rx,
-            event_closures: vec![mousemove_cb]
+            event_closures: vec![mousemove_cb],
+                closures: vec![],
         })
     }
 
@@ -70,8 +72,31 @@ impl Window {
         window().add_event_listener_with_callback(intern("mouseup"), mousemove_cb.as_ref().unchecked_ref())
             .expect("add event callback");
         Task::Recurring(RecurringTask{receiver: rx,
-            event_closures: vec![mousemove_cb]
+            event_closures: vec![mousemove_cb],
+                closures: vec![],
         })
+    }
+
+    /// do this task at every `ms` interval
+    pub fn every_interval<F,MSG>(interval_ms: i32, mut cb: F) -> Task<MSG>
+        where F: FnMut() -> MSG + 'static,
+        MSG: 'static
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+            let closure_cb: Closure<dyn FnMut()> = Closure::new(move || {
+                let msg = cb();
+                tx.start_send(msg).unwrap();
+            });
+            window()
+                .set_interval_with_callback_and_timeout_and_arguments_0(
+                    closure_cb.as_ref().unchecked_ref(),
+                    interval_ms,
+                )
+                .expect("Unable to start interval");
+            Task::Recurring(RecurringTask { receiver: rx,
+                event_closures: vec![],
+                closures: vec![closure_cb],
+            })
     }
 }
 

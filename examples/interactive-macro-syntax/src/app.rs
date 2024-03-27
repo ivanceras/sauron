@@ -37,19 +37,7 @@ impl Application for App {
     type MSG = Msg;
 
     fn init(&mut self) -> Cmd<Self> {
-        Cmd::new(|mut program| {
-            let program2 = program.clone();
-            let clock: Closure<dyn FnMut()> = Closure::new(move || {
-                program.dispatch(Msg::Clock);
-            });
-            window()
-                .set_interval_with_callback_and_timeout_and_arguments_0(
-                    clock.as_ref().unchecked_ref(),
-                    10_000,
-                )
-                .expect("Unable to start interval");
-            program2.closures.borrow_mut().push(clock);
-        })
+        Cmd::from(Window::every_interval(10_000, ||Msg::Clock))
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self> {
