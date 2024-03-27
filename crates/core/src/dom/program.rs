@@ -333,26 +333,35 @@ where
     /// from template and patched by the difference of vdom_template and current app view.
     fn create_initial_view(&self) -> DomNode {
         log::info!("Creating initial view..");
-        let app_view = self.app_context.app.borrow().view();
-        let vdom_template = app_view.template();
-        let skip_diff = app_view.skip_diff();
-        let real_view = app_view.unwrap_template();
-        match (vdom_template, skip_diff) {
-            (Some(vdom_template), Some(skip_diff)) => {
-                let patches =
-                    self.create_patches_with_skip_diff(&vdom_template, &real_view, &skip_diff);
-                let type_id = TypeId::of::<APP>();
-                let dom_template = register_template(type_id, None, &vdom_template);
-                let dom_patches = self
-                    .convert_patches(&dom_template, &patches)
-                    .expect("convert patches");
-                let _new_template_node = self
-                    .apply_dom_patches(dom_patches)
-                    .expect("template patching");
-                //Self::dispatch_mount_event_to_children(&dom_template, 2, 0);
-                dom_template
+        let use_template = true;
+        if !use_template{
+            log::info!("no template usage..");
+            let current_view = self.app_context.current_vdom();
+            //let real_view = current_view.unwrap_template_ref();
+            self.create_dom_node(None, &current_view)
+        }else{
+            log::info!("Creating initial view..");
+            let app_view = self.app_context.app.borrow().view();
+            let vdom_template = app_view.template();
+            let skip_diff = app_view.skip_diff();
+            let real_view = app_view.unwrap_template();
+            match (vdom_template, skip_diff) {
+                (Some(vdom_template), Some(skip_diff)) => {
+                    let patches =
+                        self.create_patches_with_skip_diff(&vdom_template, &real_view, &skip_diff);
+                    let type_id = TypeId::of::<APP>();
+                    let dom_template = register_template(type_id, None, &vdom_template);
+                    let dom_patches = self
+                        .convert_patches(&dom_template, &patches)
+                        .expect("convert patches");
+                    let _new_template_node = self
+                        .apply_dom_patches(dom_patches)
+                        .expect("template patching");
+                    //Self::dispatch_mount_event_to_children(&dom_template, 2, 0);
+                    dom_template
+                }
+                _ => self.create_dom_node(None, &self.app_context.current_vdom()),
             }
-            _ => self.create_dom_node(None, &self.app_context.current_vdom()),
         }
     }
 

@@ -169,7 +169,6 @@ pub fn diff_recursive<'a, MSG>(
                     panic!("Node list must have already unrolled when creating an element");
                 }
                 (Leaf::StatelessComponent(old_comp), Leaf::StatelessComponent(new_comp)) => {
-                    log::info!("diffing stateless component...");
                     let new_path = SkipPath {
                         path: path.path.clone(),
                         skip_diff: old_comp.view.skip_diff(),
@@ -190,7 +189,6 @@ pub fn diff_recursive<'a, MSG>(
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(old_comp), Leaf::StatefulComponent(new_comp)) => {
-                    log::info!("diffing stateful component");
                     let patch = diff_nodes(None, &old_comp.children, &new_comp.children, &path);
                     patches.extend(patch);
                 }
@@ -201,7 +199,6 @@ pub fn diff_recursive<'a, MSG>(
                     unreachable!("templated view should not be diffed..")
                 }
                 _ => {
-                    log::info!("replace patch here...");
                     let patch = Patch::replace_node(None, path.path.clone(), vec![new_node]);
                     patches.push(patch);
                 }

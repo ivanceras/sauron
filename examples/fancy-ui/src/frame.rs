@@ -11,6 +11,7 @@ use sauron::{
 use std::collections::BTreeMap;
 use std::str::FromStr;
 use web_sys::MouseEvent;
+use sauron::dom::DomNode;
 
 const COMPONENT_NAME: &str = "sfui-frame";
 const DEFAULT_WIDTH: usize = 100;
@@ -39,8 +40,8 @@ pub struct Frame<XMSG> {
     theme: Theme,
     /// the status of the button which changes the color pallet of the button
     status: Option<Status>,
-    children: Vec<web_sys::Node>,
-    content_target_node: Option<web_sys::Node>,
+    children: Vec<DomNode>,
+    content_target_node: Option<DomNode>,
     dimension: Dimension,
 }
 
@@ -240,7 +241,7 @@ where
             Msg::ContentTargetMounted(me) => {
                 let mount_event = me.clone();
                 let target_node = me.target_node;
-                for child in self.children.iter(){
+                for child in self.children.drain(..){
                     target_node.append_child(child).expect("append child");
                 }
                 self.content_target_node = Some(target_node);
@@ -633,8 +634,8 @@ impl<XMSG> StatefulComponent for Frame<XMSG> {
         }
     }
 
-    fn append_child(&mut self, child: &web_sys::Node){
-        self.children.push(child.clone());
+    fn append_child(&mut self, child: DomNode){
+        self.children.push(child);
     }
 
     fn connected_callback(&mut self) {}
