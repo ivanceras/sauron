@@ -63,12 +63,6 @@ where
     /// store the Closure used in request_animation_frame calls
     pub(crate) animation_frame_handles: Rc<RefCell<Vec<AnimationFrameHandle>>>,
 
-    /// event listener closures
-    pub(crate) event_closures: Rc<RefCell<EventClosures>>,
-
-    /// generic closures that has no argument
-    pub closures: Rc<RefCell<Closures>>,
-
     /// keep track of the time when the dom is last updated
     pub(crate) last_update: Rc<RefCell<Option<f64>>>,
 }
@@ -83,8 +77,6 @@ where
     pending_patches: Weak<RefCell<VecDeque<DomPatch>>>,
     idle_callback_handles: Weak<RefCell<Vec<IdleCallbackHandle>>>,
     animation_frame_handles: Weak<RefCell<Vec<AnimationFrameHandle>>>,
-    pub(crate) event_closures: Weak<RefCell<EventClosures>>,
-    pub(crate) closures: Weak<RefCell<Closures>>,
     last_update: Weak<RefCell<Option<f64>>>,
 }
 
@@ -108,8 +100,6 @@ where
         let pending_patches = self.pending_patches.upgrade()?;
         let idle_callback_handles = self.idle_callback_handles.upgrade()?;
         let animation_frame_handles = self.animation_frame_handles.upgrade()?;
-        let event_closures = self.event_closures.upgrade()?;
-        let closures = self.closures.upgrade()?;
         let last_update = self.last_update.upgrade()?;
         Some(Program {
             app_context,
@@ -118,8 +108,6 @@ where
             pending_patches,
             idle_callback_handles,
             animation_frame_handles,
-            event_closures,
-            closures,
             last_update,
         })
     }
@@ -137,8 +125,6 @@ where
             pending_patches: Weak::clone(&self.pending_patches),
             idle_callback_handles: Weak::clone(&self.idle_callback_handles),
             animation_frame_handles: Weak::clone(&self.animation_frame_handles),
-            event_closures: Weak::clone(&self.event_closures),
-            closures: Weak::clone(&self.closures),
             last_update: Weak::clone(&self.last_update),
         }
     }
@@ -157,8 +143,6 @@ where
             pending_patches: Rc::downgrade(&self.pending_patches),
             idle_callback_handles: Rc::downgrade(&self.idle_callback_handles),
             animation_frame_handles: Rc::downgrade(&self.animation_frame_handles),
-            event_closures: Rc::downgrade(&self.event_closures),
-            closures: Rc::downgrade(&self.closures),
             last_update: Rc::downgrade(&self.last_update),
         }
     }
@@ -176,8 +160,6 @@ where
             pending_patches: Rc::clone(&self.pending_patches),
             idle_callback_handles: Rc::clone(&self.idle_callback_handles),
             animation_frame_handles: Rc::clone(&self.animation_frame_handles),
-            event_closures: Rc::clone(&self.event_closures),
-            closures: Rc::clone(&self.closures),
             last_update: Rc::clone(&self.last_update),
         }
     }
@@ -224,8 +206,6 @@ where
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
             idle_callback_handles: Rc::new(RefCell::new(vec![])),
             animation_frame_handles: Rc::new(RefCell::new(vec![])),
-            event_closures: Rc::new(RefCell::new(vec![])),
-            closures: Rc::new(RefCell::new(vec![])),
             last_update: Rc::new(RefCell::new(None)),
         }
     }

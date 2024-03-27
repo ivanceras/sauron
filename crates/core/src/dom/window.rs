@@ -92,6 +92,7 @@ where
     }
     */
 
+    /*
     /// attached a callback and will be triggered when the hash portion of the window location
     /// url is changed
     pub fn on_hashchange<F>(&self, mut cb: F)
@@ -108,4 +109,5 @@ where
         window().set_onhashchange(Some(closure.as_ref().unchecked_ref()));
         self.event_closures.borrow_mut().push(closure);
     }
+    */
 }
