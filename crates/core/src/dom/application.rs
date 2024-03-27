@@ -1,6 +1,6 @@
 use crate::dom::Cmd;
 use crate::vdom::Node;
-pub use skip_diff::{skip_if, SkipDiff};
+pub use skip_diff::{skip_if, SkipDiff, SkipPath};
 
 ///
 pub mod skip_diff;

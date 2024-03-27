@@ -102,3 +102,39 @@ pub fn skip_if(shall: bool, children: impl IntoIterator<Item = SkipDiff>) -> Ski
         children: children.into_iter().collect(),
     }
 }
+
+/// combination of TreePath and SkipDiff
+#[derive(Debug)]
+pub struct SkipPath {
+    pub(crate) path: TreePath,
+    pub(crate) skip_diff: Option<SkipDiff>,
+}
+
+impl SkipPath {
+    pub(crate) fn new(path: TreePath, skip_diff: SkipDiff) -> Self {
+        Self {
+            path,
+            skip_diff: Some(skip_diff),
+        }
+    }
+
+    pub(crate) fn traverse(&self, idx: usize) -> Self {
+        Self {
+            path: self.path.traverse(idx),
+            skip_diff: if let Some(skip_diff) = self.skip_diff.as_ref() {
+                skip_diff.traverse(idx).cloned()
+            } else {
+                None
+            },
+        }
+    }
+
+    pub(crate) fn backtrack(&self) -> Self {
+        Self {
+            path: self.path.backtrack(),
+            //TODO: here the skip_diff can not back track as we lose that info already
+            skip_diff: None,
+        }
+    }
+}
+

@@ -1,4 +1,3 @@
-#![allow(unused)]
 use crate::dom::component::register_template;
 use crate::dom::program::app_context::WeakContext;
 #[cfg(feature = "with-raf")]
@@ -11,7 +10,7 @@ use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCa
 use crate::html::{self, attributes::class, text};
 use crate::vdom;
 use crate::vdom::diff;
-use crate::vdom::diff::SkipPath;
+use crate::dom::SkipPath;
 use crate::vdom::diff_recursive;
 use crate::vdom::Patch;
 use indexmap::IndexMap;
@@ -410,15 +409,15 @@ where
 
         match mount_procedure.action {
             MountAction::Append => {
-                mount_node.append_child(created_node.clone());
+                mount_node.append_child(created_node.clone()).expect("append_child");
             }
             MountAction::ClearAppend => {
                 log::info!("doing a clear append..");
                 mount_node.clear_children();
-                mount_node.append_child(created_node.clone());
+                mount_node.append_child(created_node.clone()).expect("append_child");
             }
             MountAction::Replace => {
-                mount_node.replace_node(created_node.clone());
+                mount_node.replace_node(created_node.clone()).expect("replace node");
             }
         }
         *self.root_node.borrow_mut() = Some(created_node);
