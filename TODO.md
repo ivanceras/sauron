@@ -272,6 +272,7 @@
         SkippIndex(Vec<usize>),
     }
     ```
+- [ ] Maybe disable the template usage for now
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)

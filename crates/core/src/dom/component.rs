@@ -40,7 +40,6 @@ pub fn add_template(type_id: TypeId, template: &DomNode) {
         } else {
             map.insert(
                 type_id,
-                //template.clone_node_with_deep(true).expect("deep clone"),
                 template.deep_clone(),
             );
         }
@@ -51,7 +50,6 @@ pub fn add_template(type_id: TypeId, template: &DomNode) {
 pub fn lookup_template(type_id: TypeId) -> Option<DomNode> {
     TEMPLATE_LOOKUP.with_borrow(|map| {
         if let Some(existing) = map.get(&type_id) {
-            //Some(existing.clone_node_with_deep(true).expect("deep clone"))
             Some(existing.deep_clone())
         } else {
             None

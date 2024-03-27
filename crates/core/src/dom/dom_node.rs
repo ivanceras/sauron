@@ -276,6 +276,7 @@ impl DomNode{
             }
             DomInner::Fragment{fragment, children} => {
                 fragment.append_child(&child.as_node()).expect("append child");
+                child.set_parent(&self);
                 children.borrow_mut().push(child);
                 Ok(())
             }
@@ -754,61 +755,61 @@ where
     }
 
     fn create_stateless_component(&self, parent_node: Option<DomNode>, comp: &StatelessModel<APP::MSG>) -> DomNode {
-        let comp_view = &comp.view;
-        let real_comp_view = comp_view.unwrap_template_ref();
-        self.create_dom_node(None, &real_comp_view)
+        let use_template = false;
+        if !use_template{
+            let comp_view = &comp.view;
+            let real_comp_view = comp_view.unwrap_template_ref();
+            self.create_dom_node(parent_node, &real_comp_view)
+        }else{
+            #[cfg(feature = "with-debug")]
+            let t1 = now();
+            let comp_view = &comp.view;
+            let vdom_template = comp_view.template();
+            #[cfg(feature = "with-debug")]
+            let t2 = now();
+            let skip_diff = comp_view.skip_diff();
+            match (vdom_template, skip_diff) {
+                (Some(vdom_template), Some(skip_diff)) => {
+                    //TODO: something is wrong with the chain of elements here 
+                    //from base node to it's children
+                    // disabling template for stateless component for now
+                    let template = register_template(comp.type_id, parent_node, &vdom_template);
+                    //log::info!("template: {}", template.render_to_string());
+                    let real_comp_view = comp_view.unwrap_template_ref();
+                    let patches =
+                        self.create_patches_with_skip_diff(&vdom_template, &real_comp_view, &skip_diff);
+                    //log::info!("stateless component patches: {:#?}", patches);
+                    #[cfg(feature = "with-debug")]
+                    let t3 = now();
+                    let dom_patches = self
+                        .convert_patches(&template, &patches)
+                        .expect("convert patches");
+                    //log::info!("dom patches: {:#?}", dom_patches);
+                    #[cfg(feature = "with-debug")]
+                    let t4 = now();
+                    self.apply_dom_patches(dom_patches).expect("patch template");
+                    #[cfg(feature = "with-debug")]
+                    let t5 = now();
 
-        
-        /*
-        #[cfg(feature = "with-debug")]
-        let t1 = now();
-        let comp_view = &comp.view;
-        let vdom_template = comp_view.template();
-        #[cfg(feature = "with-debug")]
-        let t2 = now();
-        let skip_diff = comp_view.skip_diff();
-        match (vdom_template, skip_diff) {
-            (Some(vdom_template), Some(skip_diff)) => {
-                //TODO: something is wrong with the chain of elements here 
-                //from base node to it's children
-                // disabling template for stateless component for now
-                let template = register_template(comp.type_id, parent_node, &vdom_template);
-                log::info!("template: {}", template.render_to_string());
-                let real_comp_view = comp_view.unwrap_template_ref();
-                let patches =
-                    self.create_patches_with_skip_diff(&vdom_template, &real_comp_view, &skip_diff);
-                log::info!("stateless component patches: {:#?}", patches);
-                #[cfg(feature = "with-debug")]
-                let t3 = now();
-                let dom_patches = self
-                    .convert_patches(&template, &patches)
-                    .expect("convert patches");
-                log::info!("dom patches: {:#?}", dom_patches);
-                #[cfg(feature = "with-debug")]
-                let t4 = now();
-                self.apply_dom_patches(dom_patches).expect("patch template");
-                #[cfg(feature = "with-debug")]
-                let t5 = now();
-
-                #[cfg(feature = "with-debug")]
-                add_time_trace(Section {
-                    lookup: t2 - t1,
-                    diffing: t3 - t2,
-                    convert_patch: t4 - t3,
-                    apply_patch: t5 - t4,
-                    total: t5 - t1,
-                    ..Default::default()
-                });
-                log::info!("the patched template is now: {:#?}", template);
-                log::info!("the patched template is now: {}", template.render_to_string());
-                template
-            }
-            _ => {
-                // create dom node without skip diff
-                self.create_dom_node(parent_node, &comp.view)
+                    #[cfg(feature = "with-debug")]
+                    add_time_trace(Section {
+                        lookup: t2 - t1,
+                        diffing: t3 - t2,
+                        convert_patch: t4 - t3,
+                        apply_patch: t5 - t4,
+                        total: t5 - t1,
+                        ..Default::default()
+                    });
+                    //log::info!("the patched template is now: {:#?}", template);
+                    //log::info!("the patched template is now: {}", template.render_to_string());
+                    template
+                }
+                _ => {
+                    // create dom node without skip diff
+                    self.create_dom_node(parent_node, &comp.view)
+                }
             }
         }
-        */
     }
 
 
