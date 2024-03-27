@@ -47,19 +47,7 @@ impl Application for App {
     type MSG = Msg;
 
     fn init(&mut self) -> Cmd<Self> {
-        Cmd::new(|mut program| {
-            let program2 = program.clone();
-            let clock: Closure<dyn FnMut()> = Closure::new(move || {
-                program.dispatch(Msg::Clock);
-            });
-            window()
-                .set_interval_with_callback_and_timeout_and_arguments_0(
-                    clock.as_ref().unchecked_ref(),
-                    5000,
-                )
-                .expect("Unable to start interval");
-            program2.closures.borrow_mut().push(clock);
-        })
+        Cmd::from(Window::every_interval(5_000, ||Msg::Clock))
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Self> {
@@ -177,7 +165,7 @@ impl Application for App {
                 {component(&self.btn).map_msg(Msg::BtnMsg)}
             </div>
             <div>
-                {stateful_component(Button::default(), [], [text!("External child of btn stateful_component: {}", self.click_count)])}
+                //{stateful_component(Button::default(), [], [text!("External child of btn stateful_component: {}", self.click_count)])}
             </div>
             <div>
                 //{stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
