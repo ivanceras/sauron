@@ -217,6 +217,7 @@ impl DomNode {
         let parent_target = parent_target.as_ref().expect("must have a parent");
         let DomInner::Element {
             element: parent_element,
+            children: parent_children,
             ..
         } = &parent_target.inner
         else {
@@ -229,10 +230,24 @@ impl DomNode {
         else {
             unreachable!("for insert must be an element");
         };
+        //TODO: find the index of `self` in the parent and insert before that index
         for_insert.set_parent(parent_target);
         parent_element
             .insert_before(&for_insert_elm, Some(&target_element))
             .expect("must remove target node");
+
+        let mut self_index = None;
+        for (i,child) in parent_children.borrow().iter().enumerate(){
+            if self.as_node() == child.as_node(){
+                self_index = Some(i);
+            }
+        }
+        for_insert.set_parent(parent_target);
+        if let Some(self_index) = self_index{
+            parent_children.borrow_mut().insert(self_index, for_insert);
+        }else{
+            unreachable!("should have a self index");
+        }
         Ok(None)
     }
 
@@ -242,13 +257,37 @@ impl DomNode {
             DomInner::Element { element, .. } => element,
             _ => unreachable!("target element should be an element"),
         };
+        //TODO: find the index of `self` in the parent and insert the for_insert into that index
         match &for_insert.inner {
             DomInner::Element { element, .. } => {
                 target_element.insert_adjacent_element(intern("afterend"), &element)?;
-                Ok(None)
+
             }
             _ => unreachable!("unexpected variant to be inserted after.."),
         }
+
+        let parent_target = self.parent.borrow();
+        let parent_target = parent_target.as_ref().expect("must have a parent");
+        let DomInner::Element {
+            children: parent_children,
+            ..
+        } = &parent_target.inner
+        else {
+            unreachable!("parent must be an element");
+        };
+        let mut self_index = None;
+        for (i,child) in parent_children.borrow().iter().enumerate(){
+            if self.as_node() == child.as_node(){
+                self_index = Some(i);
+            }
+        }
+        for_insert.set_parent(parent_target);
+        if let Some(self_index) = self_index{
+            parent_children.borrow_mut().insert(self_index + 1, for_insert);
+        }else{
+            unreachable!("should have a self index");
+        }
+        Ok(None)
     }
 
     /// Replace the child `child` DomNode with a replacement DomNode `replacement`
@@ -342,6 +381,7 @@ impl DomNode {
             parent.replace_child(self, replacement);
         } else {
             log::info!("There is no parent here..");
+            unreachable!("unable to replace a node without a parent..");
         }
         Ok(None)
     }
