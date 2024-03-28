@@ -1,23 +1,23 @@
-use std::rc::Rc;
-use std::cell::RefCell;
-use std::any::TypeId;
-use crate::dom::DomAttrValue;
-use crate::vdom::AttributeValue;
-use crate::dom::DomNode;
-use crate::dom::dom_node::DomInner;
-use std::collections::HashMap;
-use crate::vdom::Attribute;
-use crate::dom::DomAttr;
-use crate::vdom;
+use crate::dom::document;
 use crate::dom::dom_node::intern;
-use crate::dom::GroupedDomAttrValues;
+use crate::dom::dom_node::DomInner;
+use crate::dom::now;
 use crate::dom::Application;
+use crate::dom::DomAttr;
+use crate::dom::DomAttrValue;
+use crate::dom::DomNode;
+use crate::dom::GroupedDomAttrValues;
 use crate::dom::Program;
 use crate::dom::StatelessModel;
-use crate::dom::document;
+use crate::vdom;
+use crate::vdom::Attribute;
+use crate::vdom::AttributeValue;
 use crate::vdom::Leaf;
+use std::any::TypeId;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
 use wasm_bindgen::JsCast;
-use crate::dom::now;
 
 thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, DomNode>> = RefCell::new(HashMap::new());
@@ -234,134 +234,131 @@ fn create_element_node_no_listeners<MSG>(
         .children()
         .iter()
         .map(|child| create_dom_node_no_listeners(Some(dom_node.clone()), child));
-        dom_node.append_children(children);
+    dom_node.append_children(children);
     dom_node
 }
 
-    pub(crate) fn convert_attr_except_listener<MSG>(attr: &Attribute<MSG>) -> DomAttr {
-        DomAttr {
-            namespace: attr.namespace,
-            name: attr.name,
-            value: attr
-                .value
-                .iter()
-                .filter_map(|v| convert_attr_value_except_listener(v))
-                .collect(),
-        }
+pub(crate) fn convert_attr_except_listener<MSG>(attr: &Attribute<MSG>) -> DomAttr {
+    DomAttr {
+        namespace: attr.namespace,
+        name: attr.name,
+        value: attr
+            .value
+            .iter()
+            .filter_map(|v| convert_attr_value_except_listener(v))
+            .collect(),
     }
+}
 
-    /// Note: Used only templates
-    /// set the lement with dom attr except for the event listeners
-    pub(crate) fn set_element_dom_attr_except_listeners(element: &web_sys::Element, attr: DomAttr) {
-        let attr_name = intern(attr.name);
-        let attr_namespace = attr.namespace;
+/// Note: Used only templates
+/// set the lement with dom attr except for the event listeners
+pub(crate) fn set_element_dom_attr_except_listeners(element: &web_sys::Element, attr: DomAttr) {
+    let attr_name = intern(attr.name);
+    let attr_namespace = attr.namespace;
 
-        let GroupedDomAttrValues {
-            listeners: _,
-            plain_values,
-            styles,
-        } = attr.group_values();
-        DomAttr::set_element_style(element, attr_name, styles);
-        DomAttr::set_element_simple_values(element, attr_name, attr_namespace, plain_values);
+    let GroupedDomAttrValues {
+        listeners: _,
+        plain_values,
+        styles,
+    } = attr.group_values();
+    DomAttr::set_element_style(element, attr_name, styles);
+    DomAttr::set_element_simple_values(element, attr_name, attr_namespace, plain_values);
+}
+
+fn convert_attr_value_except_listener<MSG>(
+    attr_value: &AttributeValue<MSG>,
+) -> Option<DomAttrValue> {
+    match attr_value {
+        AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
+        AttributeValue::Style(v) => Some(DomAttrValue::Style(v.clone())),
+        AttributeValue::EventListener(_v) => None,
+        AttributeValue::Empty => None,
     }
-
-    fn convert_attr_value_except_listener<MSG>(
-        attr_value: &AttributeValue<MSG>,
-    ) -> Option<DomAttrValue> {
-        match attr_value {
-            AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
-            AttributeValue::Style(v) => Some(DomAttrValue::Style(v.clone())),
-            AttributeValue::EventListener(_v) => None,
-            AttributeValue::Empty => None,
-        }
-    }
+}
 
 impl<APP> Program<APP>
 where
     APP: Application,
 {
-
-    pub(crate) fn create_stateless_component_with_template(&self,
+    pub(crate) fn create_stateless_component_with_template(
+        &self,
         parent_node: Option<DomNode>,
         comp: &StatelessModel<APP::MSG>,
-        ) -> DomNode {
-           #[cfg(feature = "with-debug")]
-            let t1 = now();
-            let comp_view = &comp.view;
-            let vdom_template = comp_view.template();
-            #[cfg(feature = "with-debug")]
-            let t2 = now();
-            let skip_diff = comp_view.skip_diff();
-            match (vdom_template, skip_diff) {
-                (Some(vdom_template), Some(skip_diff)) => {
-                    //TODO: something is wrong with the chain of elements here
-                    //from base node to it's children
-                    // disabling template for stateless component for now
-                    let template = register_template(comp.type_id, parent_node, &vdom_template);
-                    //log::info!("template: {}", template.render_to_string());
-                    let real_comp_view = comp_view.unwrap_template_ref();
-                    let patches = self.create_patches_with_skip_diff(
-                        &vdom_template,
-                        &real_comp_view,
-                        &skip_diff,
-                    );
-                    //log::info!("stateless component patches: {:#?}", patches);
-                    #[cfg(feature = "with-debug")]
-                    let t3 = now();
-                    let dom_patches = self
-                        .convert_patches(&template, &patches)
-                        .expect("convert patches");
-                    //log::info!("dom patches: {:#?}", dom_patches);
-                    #[cfg(feature = "with-debug")]
-                    let t4 = now();
-                    self.apply_dom_patches(dom_patches).expect("patch template");
-                    #[cfg(feature = "with-debug")]
-                    let t5 = now();
+    ) -> DomNode {
+        #[cfg(feature = "with-debug")]
+        let t1 = now();
+        let comp_view = &comp.view;
+        let vdom_template = comp_view.template();
+        #[cfg(feature = "with-debug")]
+        let t2 = now();
+        let skip_diff = comp_view.skip_diff();
+        match (vdom_template, skip_diff) {
+            (Some(vdom_template), Some(skip_diff)) => {
+                //TODO: something is wrong with the chain of elements here
+                //from base node to it's children
+                // disabling template for stateless component for now
+                let template = register_template(comp.type_id, parent_node, &vdom_template);
+                //log::info!("template: {}", template.render_to_string());
+                let real_comp_view = comp_view.unwrap_template_ref();
+                let patches =
+                    self.create_patches_with_skip_diff(&vdom_template, &real_comp_view, &skip_diff);
+                //log::info!("stateless component patches: {:#?}", patches);
+                #[cfg(feature = "with-debug")]
+                let t3 = now();
+                let dom_patches = self
+                    .convert_patches(&template, &patches)
+                    .expect("convert patches");
+                //log::info!("dom patches: {:#?}", dom_patches);
+                #[cfg(feature = "with-debug")]
+                let t4 = now();
+                self.apply_dom_patches(dom_patches).expect("patch template");
+                #[cfg(feature = "with-debug")]
+                let t5 = now();
 
-                    #[cfg(feature = "with-debug")]
-                    add_time_trace(Section {
-                        lookup: t2 - t1,
-                        diffing: t3 - t2,
-                        convert_patch: t4 - t3,
-                        apply_patch: t5 - t4,
-                        total: t5 - t1,
-                        ..Default::default()
-                    });
-                    //log::info!("the patched template is now: {:#?}", template);
-                    //log::info!("the patched template is now: {}", template.render_to_string());
-                    template
-                }
-                _ => unreachable!("should have template and skip_diff")
+                #[cfg(feature = "with-debug")]
+                add_time_trace(Section {
+                    lookup: t2 - t1,
+                    diffing: t3 - t2,
+                    convert_patch: t4 - t3,
+                    apply_patch: t5 - t4,
+                    total: t5 - t1,
+                    ..Default::default()
+                });
+                //log::info!("the patched template is now: {:#?}", template);
+                //log::info!("the patched template is now: {}", template.render_to_string());
+                template
             }
+            _ => unreachable!("should have template and skip_diff"),
         }
+    }
 
     pub(crate) fn create_initial_view_with_template(&self) -> DomNode {
-            log::info!("Creating initial view..");
-            let app_view = self.app_context.app.borrow().view();
-            let vdom_template = app_view.template();
-            let skip_diff = app_view.skip_diff();
-            let real_view = app_view.unwrap_template();
-            match (vdom_template, skip_diff) {
-                (Some(vdom_template), Some(skip_diff)) => {
-                    let patches =
-                        self.create_patches_with_skip_diff(&vdom_template, &real_view, &skip_diff);
-                    let type_id = TypeId::of::<APP>();
-                    let dom_template = register_template(type_id, None, &vdom_template);
-                    let dom_patches = self
-                        .convert_patches(&dom_template, &patches)
-                        .expect("convert patches");
-                    let _new_template_node = self
-                        .apply_dom_patches(dom_patches)
-                        .expect("template patching");
-                    //Self::dispatch_mount_event_to_children(&dom_template, 2, 0);
-                    dom_template
-                }
-                _ =>  unreachable!("must have a template and skip_diff"),
+        log::info!("Creating initial view..");
+        let app_view = self.app_context.app.borrow().view();
+        let vdom_template = app_view.template();
+        let skip_diff = app_view.skip_diff();
+        let real_view = app_view.unwrap_template();
+        match (vdom_template, skip_diff) {
+            (Some(vdom_template), Some(skip_diff)) => {
+                let patches =
+                    self.create_patches_with_skip_diff(&vdom_template, &real_view, &skip_diff);
+                let type_id = TypeId::of::<APP>();
+                let dom_template = register_template(type_id, None, &vdom_template);
+                let dom_patches = self
+                    .convert_patches(&dom_template, &patches)
+                    .expect("convert patches");
+                let _new_template_node = self
+                    .apply_dom_patches(dom_patches)
+                    .expect("template patching");
+                //Self::dispatch_mount_event_to_children(&dom_template, 2, 0);
+                dom_template
             }
+            _ => unreachable!("must have a template and skip_diff"),
+        }
     }
 }
 
-impl DomNode{
+impl DomNode {
     pub(crate) fn deep_clone(&self) -> DomNode {
         DomNode {
             inner: self.inner.deep_clone(),

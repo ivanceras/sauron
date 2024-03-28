@@ -280,7 +280,7 @@ impl<MSG> Node<MSG> {
 
     /// return the attribute values of this node which match the attribute name `name`
     pub fn attribute_value(&self, name: &AttributeName) -> Option<Vec<&AttributeValue<MSG>>> {
-        match self{
+        match self {
             Self::Element(elm) => elm.attribute_value(name),
             Self::Leaf(leaf) => leaf.attribute_value(name),
         }

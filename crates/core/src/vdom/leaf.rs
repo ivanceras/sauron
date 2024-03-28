@@ -1,13 +1,13 @@
 //! Leaf node for html dom tree
 use crate::dom::StatefulModel;
 use crate::dom::StatelessModel;
+use crate::vdom::Attribute;
+use crate::vdom::AttributeName;
+use crate::vdom::AttributeValue;
 use crate::vdom::Node;
 use crate::vdom::TemplatedView;
 use derive_where::derive_where;
 use std::borrow::Cow;
-use crate::vdom::AttributeName;
-use crate::vdom::AttributeValue;
-use crate::vdom::Attribute;
 
 /// A leaf node value of html dom tree
 #[derive_where(Clone, Debug)]
@@ -62,10 +62,10 @@ impl<MSG> Leaf<MSG> {
             _ => None,
         }
     }
-    
+
     /// return the attribute value of this leaf
     pub fn attribute_value(&self, name: &AttributeName) -> Option<Vec<&AttributeValue<MSG>>> {
-        match self{
+        match self {
             Self::StatelessComponent(comp) => comp.attribute_value(name),
             Self::TemplatedView(templated_view) => templated_view.view.attribute_value(name),
             _ => None,
@@ -75,7 +75,7 @@ impl<MSG> Leaf<MSG> {
     /// attributes, we are returning the attributes of the top level node of this stateless mode
     /// view
     pub fn attributes(&self) -> Option<&[Attribute<MSG>]> {
-        match self{
+        match self {
             Self::StatelessComponent(comp) => comp.attributes(),
             Self::TemplatedView(templated_view) => templated_view.view.attributes(),
             _ => None,

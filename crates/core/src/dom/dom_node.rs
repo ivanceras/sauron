@@ -580,9 +580,13 @@ where
             Leaf::StatefulComponent(comp) => self.create_stateful_component(parent_node, comp),
             Leaf::StatelessComponent(comp) => {
                 #[cfg(feature = "use-template")]
-                {self.create_stateless_component_with_template(parent_node, comp)}
+                {
+                    self.create_stateless_component_with_template(parent_node, comp)
+                }
                 #[cfg(not(feature = "use-template"))]
-                {self.create_stateless_component(parent_node, comp)}
+                {
+                    self.create_stateless_component(parent_node, comp)
+                }
             }
             Leaf::TemplatedView(view) => {
                 unreachable!("template view should not be created: {:#?}", view)

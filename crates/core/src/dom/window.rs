@@ -153,4 +153,3 @@ impl Window {
         })
     }
 }
-
