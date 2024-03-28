@@ -177,17 +177,18 @@ impl DomNode {
     }
 
     /// append the DomNode `child` into this DomNode `self`
-    pub fn append_children(&self, child: impl IntoIterator<Item = DomNode>) -> Result<(), JsValue> {
+    pub fn append_children(&self, for_append: impl IntoIterator<Item = DomNode>) -> Result<(), JsValue> {
         match &self.inner {
             DomInner::Element {
                 element, children, ..
             } => {
-                for ch in child.into_iter(){
+                let for_append = for_append.into_iter();
+                for child in for_append{
                     element
-                        .append_child(&ch.as_node())
+                        .append_child(&child.as_node())
                         .expect("append child");
-                    ch.set_parent(&self);
-                    children.borrow_mut().push(ch);
+                    child.set_parent(&self);
+                    children.borrow_mut().push(child);
                 }
                 Ok(())
             }
@@ -217,17 +218,8 @@ impl DomNode {
         else {
             unreachable!("parent must be an element");
         };
-        let DomInner::Element {
-            element: for_insert_elm,
-            ..
-        } = &for_insert.inner
-        else {
-            unreachable!("for insert must be an element");
-        };
-        //TODO: find the index of `self` in the parent and insert before that index
-        for_insert.set_parent(parent_target);
         parent_element
-            .insert_before(&for_insert_elm, Some(&target_element))
+            .insert_before(&for_insert.as_node(), Some(&target_element))
             .expect("must remove target node");
 
         let mut self_index = None;
@@ -252,14 +244,7 @@ impl DomNode {
             DomInner::Element { element, .. } => element,
             _ => unreachable!("target element should be an element"),
         };
-        //TODO: find the index of `self` in the parent and insert the for_insert into that index
-        match &for_insert.inner {
-            DomInner::Element { element, .. } => {
-                target_element.insert_adjacent_element(intern("afterend"), &element)?;
-
-            }
-            _ => unreachable!("unexpected variant to be inserted after.."),
-        }
+        target_element.insert_adjacent_element(intern("afterend"), &for_insert.as_element())?;
 
         let parent_target = self.parent.borrow();
         let parent_target = parent_target.as_ref().expect("must have a parent");
