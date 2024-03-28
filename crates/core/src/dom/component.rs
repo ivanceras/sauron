@@ -1,62 +1,17 @@
-use crate::dom::DomNode;
 use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
 use derive_where::derive_where;
 use std::any::TypeId;
-use std::cell::RefCell;
-use std::collections::HashMap;
 
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
 
-mod no_listener;
 mod stateful_component;
 #[cfg(feature = "custom_element")]
 mod web_component;
-
-thread_local! {
-    static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, DomNode>> = RefCell::new(HashMap::new());
-}
-
-/// if the template is already registered, return the dom template
-/// if not, create the dom template and add it
-pub fn register_template<MSG>(
-    type_id: TypeId,
-    parent_node: Option<DomNode>,
-    vdom_template: &Node<MSG>,
-) -> DomNode {
-    if let Some(template) = lookup_template(type_id) {
-        template
-    } else {
-        let template = no_listener::create_dom_node_no_listeners(parent_node, &vdom_template);
-        add_template(type_id, &template);
-        template
-    }
-}
-
-pub fn add_template(type_id: TypeId, template: &DomNode) {
-    TEMPLATE_LOOKUP.with_borrow_mut(|map| {
-        if map.contains_key(&type_id) {
-            // already added
-        } else {
-            map.insert(type_id, template.deep_clone());
-        }
-    })
-}
-
-/// lookup for the template
-pub fn lookup_template(type_id: TypeId) -> Option<DomNode> {
-    TEMPLATE_LOOKUP.with_borrow(|map| {
-        if let Some(existing) = map.get(&type_id) {
-            Some(existing.deep_clone())
-        } else {
-            None
-        }
-    })
-}
 
 /// A component has a view and can update itself.
 ///

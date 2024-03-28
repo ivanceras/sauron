@@ -1,6 +1,4 @@
-use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
-use crate::vdom::AttributeValue;
 use crate::vdom::Namespace;
 use crate::vdom::Style;
 use crate::vdom::Value;
@@ -91,34 +89,7 @@ impl DomAttr {
         }
     }
 
-    pub(crate) fn convert_attr_except_listener<MSG>(attr: &Attribute<MSG>) -> DomAttr {
-        DomAttr {
-            namespace: attr.namespace,
-            name: attr.name,
-            value: attr
-                .value
-                .iter()
-                .filter_map(|v| DomAttrValue::convert_attr_value_except_listener(v))
-                .collect(),
-        }
-    }
 
-    /// Note: Used only templates
-    /// set the lement with dom attr except for the event listeners
-    pub(crate) fn set_element_dom_attr_except_listeners(element: &Element, attr: DomAttr) {
-        let attr_name = intern(attr.name);
-        let attr_namespace = attr.namespace;
-
-        let GroupedDomAttrValues {
-            listeners: _,
-            plain_values,
-            styles,
-            function_calls,
-        } = attr.group_values();
-        Self::set_element_style(element, attr_name, styles);
-        Self::set_element_function_call_values(element, attr_name, function_calls);
-        Self::set_element_simple_values(element, attr_name, attr_namespace, plain_values);
-    }
 
     /// set the style of this element
     pub(crate) fn set_element_style(
@@ -382,15 +353,4 @@ impl DomAttrValue {
         Some(simple.to_string())
     }
 
-    fn convert_attr_value_except_listener<MSG>(
-        attr_value: &AttributeValue<MSG>,
-    ) -> Option<DomAttrValue> {
-        match attr_value {
-            AttributeValue::FunctionCall(v) => Some(DomAttrValue::FunctionCall(v.clone())),
-            AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
-            AttributeValue::Style(v) => Some(DomAttrValue::Style(v.clone())),
-            AttributeValue::EventListener(_v) => None,
-            AttributeValue::Empty => None,
-        }
-    }
 }
