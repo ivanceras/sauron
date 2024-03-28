@@ -40,7 +40,7 @@ where
     pub(crate) app_context: AppContext<APP>,
 
     /// the first element of the app view, where the patch is generated is relative to
-    pub(crate) root_node: Rc<RefCell<Option<DomNode>>>,
+    pub root_node: Rc<RefCell<Option<DomNode>>>,
 
     /// the actual DOM element where the APP is mounted to.
     pub(crate) mount_node: Rc<RefCell<Option<DomNode>>>,

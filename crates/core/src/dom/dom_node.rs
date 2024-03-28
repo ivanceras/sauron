@@ -160,6 +160,18 @@ impl DomNode {
         }
     }
 
+    /// return the outer html string of an element
+    pub fn outer_html(&self) -> String {
+        let DomInner::Element {
+            element,
+            ..
+        } = &self.inner
+        else {
+            unreachable!("should only be called to element");
+        };
+        element.outer_html()
+    }
+
     fn set_parent(&self, parent_node: &DomNode) {
         *self.parent.borrow_mut() = Some(parent_node.clone());
     }

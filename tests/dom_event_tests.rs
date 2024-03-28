@@ -1,5 +1,5 @@
 #![deny(warnings)]
-use sauron::{html::attributes::*, html::events::*, html::*, vdom::TreePath, *};
+use sauron::{html::attributes::*, html::events::*, html::*, *};
 use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;

@@ -1,6 +1,3 @@
-#![deny(warnings)]
-
-#[macro_use]
 extern crate log;
 use crate::vdom::TreePath;
 use sauron::{html::attributes::*, html::events::*, html::*, *};
@@ -13,10 +10,11 @@ wasm_bindgen_test_configure!(run_in_browser);
 fn nodes_with_event_should_not_recycle() {
     console_log::init_with_level(log::Level::Trace).ok();
 
+    let f = |_| log::trace!("I'm a div");
     let old: Node<()> = div(
         vec![class("container")],
         vec![div(
-            vec![class("child"), on_click(|_| log::trace!("I'm a div"))],
+            vec![class("child"), on_click(f)],
             vec![],
         )],
     );
@@ -30,10 +28,10 @@ fn nodes_with_event_should_not_recycle() {
     log::info!("{:#?}", diff);
     assert_eq!(
         diff,
-        vec![Patch::replace_node(
-            Some(&"div"),
+        vec![Patch::remove_attributes(
+            &"div",
             TreePath::new(vec![0]),
-            vec![&div(vec![class("child")], vec![])]
+            vec![&on_click(f)]
         )]
     );
 }

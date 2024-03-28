@@ -114,32 +114,31 @@ fn subsequent_updates() {
 
     let patches1 = diff(&old, &update1);
 
-    log::trace!("patches1: {:#?}", patches1);
+    log::trace!("patches1: {:#?} at line: {}", patches1, line!());
 
-    let mut old_html = String::new();
-    old.render(&mut old_html).expect("must render");
+    let old_html = old.render_to_string();
     log::trace!("old html: {}", old_html);
-    let expected_old = r#"<main class="editor">
-  <section class="lines">
-    <div key="hash0">
-      <div>0</div>
-      <div>line0</div>
-    </div>
-    <div key="hash1">
-      <div>1</div>
-      <div>line1</div>
-    </div>
-    <div key="hash2">
-      <div>2</div>
-      <div>line2</div>
-    </div>
-    <div key="hash3">
-      <div>3</div>
-      <div>line3</div>
-    </div>
-  </section>
-  <footer>line:0, col:0</footer>
-</main>"#;
+    let expected_old = "<main class=\"editor\">\
+  <section class=\"lines\">\
+    <div key=\"hash0\">\
+      <div>0</div>\
+      <div>line0</div>\
+    </div>\
+    <div key=\"hash1\">\
+      <div>1</div>\
+      <div>line1</div>\
+    </div>\
+    <div key=\"hash2\">\
+      <div>2</div>\
+      <div>line2</div>\
+    </div>\
+    <div key=\"hash3\">\
+      <div>3</div>\
+      <div>line3</div>\
+    </div>\
+  </section>\
+  <footer>line:0, col:0</footer>\
+</main>";
 
     assert_eq!(old_html, expected_old);
 
@@ -273,12 +272,19 @@ fn subsequent_updates() {
         ],
     );
 
+    {
+        let root_node = simple_program.root_node.borrow();
+        let root_node_html = root_node.as_ref().unwrap().outer_html();
+        log::trace!("current root node: {}", root_node_html);
+    }
     let patches2 = diff(&update1, &update2);
     log::trace!("-->patches2: {:#?}", patches2);
 
+    log::info!("Updating dom with update2");
     simple_program
         .update_dom_with_vdom(update2.clone())
         .expect("must not error");
+    log::info!("Done doing updates2");
 
     let container = document
         .query_selector(".editor")
