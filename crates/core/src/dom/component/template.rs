@@ -53,6 +53,7 @@ pub fn add_template(type_id: TypeId, template: &DomNode) {
 pub fn lookup_template(type_id: TypeId) -> Option<DomNode> {
     TEMPLATE_LOOKUP.with_borrow(|map| {
         if let Some(existing) = map.get(&type_id) {
+            // TODO: have to traverse the real children and convert each into DomNode
             Some(existing.deep_clone())
         } else {
             None
