@@ -451,7 +451,7 @@ where
             let real_view = view.unwrap_template_ref();
             let patches =
                 self.create_patches_with_skip_diff(&real_current_vdom, &real_view, &skip_diff);
-            //log::info!("patches: {:#?}",patches);
+            log::info!("patches: {:#?}",patches);
             self.convert_patches(
                 self.root_node
                     .borrow()
@@ -547,8 +547,6 @@ where
 
     fn create_dom_patch(&self, new_vdom: &vdom::Node<APP::MSG>) -> Vec<DomPatch> {
         let current_vdom = self.app_context.current_vdom();
-        log::info!("current_vdom: {}", current_vdom.render_to_string());
-        log::info!("    new_vdom: {}", new_vdom.render_to_string());
         let patches = diff(&current_vdom, new_vdom);
 
         #[cfg(all(feature = "with-debug", feature = "log-patches"))]

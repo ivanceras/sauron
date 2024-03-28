@@ -167,9 +167,9 @@ impl<MSG> Node<MSG> {
     /// get the attributes of this node
     /// returns None if it is a text node
     pub fn attributes(&self) -> Option<&[Attribute<MSG>]> {
-        match *self {
-            Node::Element(ref element) => Some(element.attributes()),
-            _ => None,
+        match self {
+            Node::Element(element) => Some(element.attributes()),
+            Node::Leaf(leaf) => leaf.attributes(),
         }
     }
 
@@ -278,12 +278,11 @@ impl<MSG> Node<MSG> {
         self
     }
 
-    /// returh the attribute values of this node which match the attribute name `name`
+    /// return the attribute values of this node which match the attribute name `name`
     pub fn attribute_value(&self, name: &AttributeName) -> Option<Vec<&AttributeValue<MSG>>> {
-        if let Some(elm) = self.element_ref() {
-            elm.attribute_value(name)
-        } else {
-            None
+        match self{
+            Self::Element(elm) => elm.attribute_value(name),
+            Self::Leaf(leaf) => leaf.attribute_value(name),
         }
     }
 

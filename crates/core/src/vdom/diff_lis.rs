@@ -228,6 +228,7 @@ fn diff_keyed_middle<'a, MSG>(
         }
 
         let first = 0;
+        log::info!("Creating a replace node in diff_keyed_middle");
 
         let patch = Patch::replace_node(
             old_children[left_offset + first].tag(),

@@ -215,7 +215,6 @@ impl DomNode {
         }
         for_insert.set_parent(parent_target);
         if let Some(self_index) = self_index {
-            log::info!("insert before self_index: {}", self_index);
             parent_children.borrow_mut().insert(self_index, for_insert);
         } else {
             unreachable!("should have a self index");
@@ -269,19 +268,12 @@ impl DomNode {
                     }
                 }
                 if let Some(child_index) = child_index {
-                    log::info!("--oo in replace_child, Replacing at: {}", child_index);
                     let child = children.borrow_mut().remove(child_index);
-                    log::info!("--oo Removed {}", child.render_to_string());
                     child
                         .as_element()
                         .replace_with_with_node_1(&replacement.as_node())
                         .expect("must replace child");
                     replacement.set_parent(self);
-                    log::info!(
-                        "--oo in replace_child, Inserted at: {}, {}",
-                        child_index,
-                        replacement.render_to_string()
-                    );
                     children.borrow_mut().insert(child_index, replacement);
                 } else {
                     // if can not find the child, then must be the root node
@@ -307,12 +299,7 @@ impl DomNode {
                     }
                 }
                 if let Some(child_index) = child_index {
-                    log::info!("-->> In remove_child, Removing child at {}", child_index);
                     let child = children.borrow_mut().remove(child_index);
-                    log::info!(
-                        "-->> In remove_child, The remove child: {}",
-                        child.render_to_string()
-                    );
                     element
                         .remove_child(&child.as_node())
                         .expect("remove child");

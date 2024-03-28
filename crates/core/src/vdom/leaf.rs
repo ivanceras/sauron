@@ -5,6 +5,9 @@ use crate::vdom::Node;
 use crate::vdom::TemplatedView;
 use derive_where::derive_where;
 use std::borrow::Cow;
+use crate::vdom::AttributeName;
+use crate::vdom::AttributeValue;
+use crate::vdom::Attribute;
 
 /// A leaf node value of html dom tree
 #[derive_where(Clone, Debug)]
@@ -56,6 +59,25 @@ impl<MSG> Leaf<MSG> {
     pub fn as_text(&self) -> Option<&str> {
         match self {
             Self::Text(ref text) => Some(text),
+            _ => None,
+        }
+    }
+    
+    /// return the attribute value of this leaf
+    pub fn attribute_value(&self, name: &AttributeName) -> Option<Vec<&AttributeValue<MSG>>> {
+        match self{
+            Self::StatelessComponent(comp) => comp.attribute_value(name),
+            Self::TemplatedView(templated_view) => templated_view.view.attribute_value(name),
+            _ => None,
+        }
+    }
+
+    /// attributes, we are returning the attributes of the top level node of this stateless mode
+    /// view
+    pub fn attributes(&self) -> Option<&[Attribute<MSG>]> {
+        match self{
+            Self::StatelessComponent(comp) => comp.attributes(),
+            Self::TemplatedView(templated_view) => templated_view.view.attributes(),
             _ => None,
         }
     }

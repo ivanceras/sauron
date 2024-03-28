@@ -4,6 +4,7 @@ use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
 use derive_where::derive_where;
 use std::any::TypeId;
+use crate::vdom::AttributeValue;
 
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
@@ -173,6 +174,20 @@ impl<MSG> StatelessModel<MSG> {
             type_id: self.type_id,
             view: Box::new(self.view.map_msg(cb.clone())),
         }
+    }
+
+    /// return the attribute values of the view node matching the attribute name `name`
+    pub fn attribute_value(&self, name: &AttributeName) -> Option<Vec<&AttributeValue<MSG>>> {
+        let value = self.view.attribute_value(name);
+        log::info!("view is {}", self.view.render_to_string());
+        log::info!("view: {:#?}", self.view);
+        log::info!("attribute_value of stateless model {:?}:{:#?}", name, value);
+        value
+    }
+
+    ///
+    pub fn attributes(&self) -> Option<&[Attribute<MSG>]> {
+        self.view.attributes()
     }
 }
 
