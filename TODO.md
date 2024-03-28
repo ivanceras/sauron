@@ -265,7 +265,7 @@
     ```
 - [X] remove `SafeHtml` variant in leaf, instead provide a safe_html which is parsed and converted into node
     - using safe html alters the dom tree
-- [ ] add `symbol_html` for html entities such as `&nbsp;` `&gt`, `&lt` etc.
+- [X] add `symbol_html` for html entities such as `&nbsp;` `&gt`, `&lt` etc.
     - this should be safe to be inserted
 - [X] remove `innerHTML` func in AttributeValue as it could alter the DOM node tree
 - [ ] Keep track of which attributes to be skipped in `SkipDiff{shall:false}`
@@ -310,6 +310,10 @@
     - Right now, it is triggered when the virtual Node is created into a real Node.
 - [X] Maybe rename `#[web_component]` macro to `#[custom_element]`
     - Also `WebComponent` to `CustomElementWrapper`
+- [ ] Implement the `StatefulComponent`
+    - [ ] attributes and attribute value (key)
+    - [ ] removing children and setting attributes
+- [ ] Make the fancy-ui example work
 
 
 ## Performance
