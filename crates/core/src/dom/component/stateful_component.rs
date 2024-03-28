@@ -34,7 +34,7 @@ pub trait StatefulComponent {
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
 
     /// append a child into this component
-    fn append_child(&mut self, _child: DomNode) {}
+    fn append_children(&mut self, _children: Vec<DomNode>) {}
 
     /// remove a child in this index
     fn remove_child(&mut self, _index: usize) {}

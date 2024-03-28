@@ -330,9 +330,7 @@ where
                 Ok(None)
             }
             PatchVariant::AppendChildren { children } => {
-                for child in children.into_iter() {
-                    target_element.append_child(child).expect("append child");
-                }
+                target_element.append_children(children).expect("append child");
                 Ok(None)
             }
 
@@ -379,11 +377,19 @@ where
                     );
                     let mount_node = self.mount_node.borrow();
                     let mount_node = mount_node.as_ref().expect("must have a mount node");
-                    mount_node.append_child(first_node.clone()).unwrap();
-                    for replace_node in replacement {
-                        mount_node
-                            .append_child(replace_node)
-                            .expect("append root_node");
+                    mount_node.append_children([first_node.clone()]).unwrap();
+
+                    let multiple_node_replacement = !replacement.is_empty();
+
+                    mount_node
+                        .append_children(replacement)
+                        .expect("append root_node");
+
+                    if patch_path.path.is_empty() {
+                        assert!(!multiple_node_replacement, "There are multiple nodes, this becomes unsound");
+                        Ok(Some(first_node))
+                    } else {
+                        Ok(None)
                     }
                 } else {
                     target_element.replace_node(first_node.clone())?;
@@ -391,13 +397,11 @@ where
                         log::info!("Inserting the rest, after the first node: {}", replace_node.render_to_string());
                         first_node.insert_after(replace_node)?;
                     }
-                }
-                // always return the first_node as the new root_node
-                // TODO: maybe use multiple root nodes
-                if patch_path.path.is_empty() {
-                    Ok(Some(first_node))
-                } else {
-                    Ok(None)
+                    if patch_path.path.is_empty() {
+                        Ok(Some(first_node))
+                    } else {
+                        Ok(None)
+                    }
                 }
             }
             PatchVariant::RemoveNode => {

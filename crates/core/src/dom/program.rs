@@ -377,14 +377,14 @@ where
         match mount_procedure.action {
             MountAction::Append => {
                 mount_node
-                    .append_child(created_node.clone())
+                    .append_children([created_node.clone()])
                     .expect("append_child");
             }
             MountAction::ClearAppend => {
                 log::info!("doing a clear append..");
                 mount_node.clear_children();
                 mount_node
-                    .append_child(created_node.clone())
+                    .append_children([created_node.clone()])
                     .expect("append_child");
             }
             MountAction::Replace => {
@@ -453,6 +453,7 @@ where
             let real_view = view.unwrap_template_ref();
             let patches =
                 self.create_patches_with_skip_diff(&real_current_vdom, &real_view, &skip_diff);
+            //log::info!("patches: {:#?}",patches);
             self.convert_patches(
                 self.root_node
                     .borrow()
@@ -719,7 +720,7 @@ where
         let head_node: web_sys::Node = head.unchecked_into();
         let dom_head = DomNode::from(head_node);
         dom_head
-            .append_child(created_node)
+            .append_children([created_node])
             .expect("must append style");
     }
 
@@ -732,7 +733,7 @@ where
             .borrow_mut()
             .as_mut()
             .expect("mount node")
-            .append_child(created_node)
+            .append_children([created_node])
             .expect("could not append child to mount shadow");
     }
 

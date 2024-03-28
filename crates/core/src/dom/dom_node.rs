@@ -177,24 +177,18 @@ impl DomNode {
     }
 
     /// append the DomNode `child` into this DomNode `self`
-    pub fn append_child(&self, child: DomNode) -> Result<(), JsValue> {
+    pub fn append_children(&self, child: impl IntoIterator<Item = DomNode>) -> Result<(), JsValue> {
         match &self.inner {
             DomInner::Element {
                 element, children, ..
             } => {
-                element
-                    .append_child(&child.as_node())
-                    .expect("append child");
-                child.set_parent(&self);
-                children.borrow_mut().push(child);
-                Ok(())
-            }
-            DomInner::Fragment { fragment, children } => {
-                fragment
-                    .append_child(&child.as_node())
-                    .expect("append child");
-                child.set_parent(&self);
-                children.borrow_mut().push(child);
+                for ch in child.into_iter(){
+                    element
+                        .append_child(&ch.as_node())
+                        .expect("append child");
+                    ch.set_parent(&self);
+                    children.borrow_mut().push(ch);
+                }
                 Ok(())
             }
             _ => unreachable!(
@@ -598,9 +592,7 @@ where
             .iter()
             .map(|child| self.create_dom_node(Some(dom_node.clone()), child))
             .collect();
-        for child in children.into_iter() {
-            dom_node.append_child(child).unwrap();
-        }
+        dom_node.append_children(children).unwrap();
         dom_node
     }
 
@@ -645,13 +637,10 @@ where
             },
             parent: Rc::new(RefCell::new(parent_node)),
         };
-        let children: Vec<DomNode> = nodes
+        let children = nodes
             .into_iter()
-            .map(|node| self.create_dom_node(Some(dom_node.clone()), &node))
-            .collect();
-        for child in children.into_iter() {
-            dom_node.append_child(child).expect("append child");
-        }
+            .map(|node| self.create_dom_node(Some(dom_node.clone()), &node));
+        dom_node.append_children(children).unwrap();
         dom_node
     }
 }
@@ -691,11 +680,10 @@ where
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
         // listener and removing the generics msg
-        for child in comp.children.iter() {
-            let child_dom = self.create_dom_node(parent_node.clone(), &child);
-            comp.comp.borrow_mut().append_child(child_dom.clone());
-            //Self::dispatch_mount_event(&child_dom);
-        }
+        let created_children = comp.children.iter().map(|child| {
+            self.create_dom_node(parent_node.clone(), &child)
+        }).collect();
+        comp.comp.borrow_mut().append_children(created_children);
         comp_node
     }
 
