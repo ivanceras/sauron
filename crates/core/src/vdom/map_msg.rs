@@ -95,6 +95,7 @@ impl<MSG> Leaf<MSG> {
     {
         match self {
             Self::Text(v) => Leaf::Text(v),
+            Self::Symbol(v) => Leaf::Symbol(v),
             Self::Comment(v) => Leaf::Comment(v),
             Self::DocType(v) => Leaf::DocType(v),
             Self::Fragment(nodes) => Leaf::Fragment(

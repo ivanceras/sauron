@@ -150,3 +150,22 @@ pub fn doctype<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG> {
 pub fn node_list<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
     Node::Leaf(Leaf::NodeList(nodes.into_iter().collect()))
 }
+
+/// Create html entities such as `&nbsp;` `&gt`
+pub fn symbol<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG> {
+    let s = s.into();
+    let s = escape_html_text(&s);
+    Node::Leaf(Leaf::Symbol(s.into()))
+}
+
+fn escape_html_text(s: &str) -> String {
+    s.chars()
+        .map(|ch| match ch {
+            '>' => Cow::from("&gt;"),
+            '<' => Cow::from("&lt;"),
+            '\'' => Cow::from("&#39;"),
+            '"' => Cow::from("&quot;"),
+            _ => Cow::from(ch.to_string()),
+        })
+        .collect()
+}

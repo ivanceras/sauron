@@ -91,6 +91,9 @@ impl<MSG> Leaf<MSG> {
             Leaf::Text(text) => {
                 write!(buffer, "{text}")
             }
+            Leaf::Symbol(symbol) => {
+                write!(buffer, "{symbol}")
+            }
             Leaf::Comment(comment) => {
                 write!(buffer, "<!--{comment}-->")
             }

@@ -14,6 +14,8 @@ use std::borrow::Cow;
 pub enum Leaf<MSG> {
     /// Text variant of a virtual node
     Text(Cow<'static, str>),
+    /// Html entities such as &nbsp; &gt; 
+    Symbol(Cow<'static, str>),
     /// A comment node
     Comment(Cow<'static, str>),
     /// doctype: html, math, svg
@@ -36,6 +38,7 @@ impl<MSG> PartialEq for Leaf<MSG> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::Text(v), Self::Text(o)) => v == o,
+            (Self::Symbol(v), Self::Symbol(o)) => v == o,
             (Self::Comment(v), Self::Comment(o)) => v == o,
             (Self::DocType(v), Self::DocType(o)) => v == o,
             (Self::NodeList(v), Self::NodeList(o)) => v == o,

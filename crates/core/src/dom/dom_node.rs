@@ -19,6 +19,7 @@ use std::fmt;
 use std::rc::Rc;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node};
+use std::borrow::Cow;
 
 pub(crate) type EventClosure = Closure<dyn FnMut(web_sys::Event)>;
 pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
@@ -47,6 +48,7 @@ pub enum DomInner {
     },
     /// text node
     Text(RefCell<web_sys::Text>),
+    Symbol(Rc<RefCell<Cow<'static, str>>>),
     /// comment node
     Comment(web_sys::Comment),
     /// Fragment node
@@ -83,6 +85,10 @@ impl fmt::Debug for DomInner {
             Self::Text(text_node) => f
                 .debug_tuple("Text")
                 .field(&text_node.borrow().whole_text().expect("whole text"))
+                .finish(),
+            Self::Symbol(symbol) => f
+                .debug_tuple("Symbol")
+                .field(&symbol.borrow())
                 .finish(),
             Self::Comment(_) => write!(f, "Comment"),
             Self::Fragment { .. } => write!(f, "Fragment"),
@@ -131,6 +137,7 @@ impl DomNode {
             DomInner::Element { element, .. } => element.clone().unchecked_into(),
             DomInner::Fragment { fragment, .. } => fragment.clone().unchecked_into(),
             DomInner::Text(text_node) => text_node.borrow().clone().unchecked_into(),
+            DomInner::Symbol(_) => panic!("don't know how to deal with symbol"),
             DomInner::Comment(comment_node) => comment_node.clone().unchecked_into(),
             DomInner::StatefulComponent(_) => todo!("for stateful component.."),
         }
@@ -145,8 +152,17 @@ impl DomNode {
                 fragment
             }
             DomInner::Text(text_node) => text_node.borrow().clone().unchecked_into(),
+            DomInner::Symbol(_) => panic!("don't know how to deal with symbol"),
             DomInner::Comment(comment_node) => comment_node.clone().unchecked_into(),
             DomInner::StatefulComponent(_) => todo!("for stateful component.."),
+        }
+    }
+
+    /// return the string content of this symbol
+    pub fn as_symbol(&self) -> Option<String>{
+        match &self.inner{
+            DomInner::Symbol(symbol) => Some(symbol.borrow().as_ref().to_string()),
+            _ => None,
         }
     }
 
@@ -170,9 +186,15 @@ impl DomNode {
             } => {
                 let for_append = for_append.into_iter();
                 for child in for_append {
-                    element
-                        .append_child(&child.as_node())
-                        .expect("append child");
+                    if let Some(symbol) = child.as_symbol(){
+                        //TODO: escape the `<` and `>`
+                        element.insert_adjacent_html(intern("beforeend"), &symbol)
+                            .expect("must not error");
+                    }else{
+                        element
+                            .append_child(&child.as_node())
+                            .expect("append child");
+                    }
                     child.set_parent(&self);
                     children.borrow_mut().push(child);
                 }
@@ -566,6 +588,10 @@ where
         match leaf {
             Leaf::Text(txt) => DomNode {
                 inner: DomInner::Text(RefCell::new(document().create_text_node(txt))),
+                parent: Rc::new(RefCell::new(parent_node)),
+            },
+            Leaf::Symbol(symbol) => DomNode{
+                inner: DomInner::Symbol(Rc::new(RefCell::new(symbol.clone()))),
                 parent: Rc::new(RefCell::new(parent_node)),
             },
             Leaf::Comment(comment) => DomNode {

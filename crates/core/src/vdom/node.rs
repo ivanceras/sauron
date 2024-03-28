@@ -99,6 +99,14 @@ impl<MSG> Node<MSG> {
         }
     }
 
+    /// return the html entity if it is a symbol variant
+    pub fn as_symbol(&self) -> Option<&str>{
+        match self{
+            Self::Leaf(Leaf::Symbol(symbol)) => Some(symbol),
+            _ => None,
+        }
+    }
+
     /// Get a mutable reference to the element, if this node is an element node
     pub fn element_mut(&mut self) -> Option<&mut Element<MSG>> {
         match *self {
