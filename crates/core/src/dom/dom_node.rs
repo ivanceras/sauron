@@ -13,7 +13,6 @@ use crate::{
     vdom::{Attribute, Leaf},
 };
 use indexmap::IndexMap;
-use std::cell::Cell;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;
@@ -24,8 +23,6 @@ use web_sys::{self, Element, Node};
 pub(crate) type EventClosure = Closure<dyn FnMut(web_sys::Event)>;
 pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
 
-thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
-
 /// A counter part of the vdom Node
 /// This is needed, so that we can
 /// 1. Keep track of event closure and drop them when nodes has been removed
@@ -34,11 +31,6 @@ thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
 #[derive(Clone, Debug)]
 pub struct DomNode {
     pub(crate) inner: DomInner,
-    //TODO: don't really need to have reference to the parent
-    //as RemoveNode patch can just be called with Node::remove
-    //though remove doesn't return the node to be removed
-    //
-    //MoveAfterNode and  with insertAdjacentElement
     pub(crate) parent: Rc<RefCell<Option<DomNode>>>,
 }
 #[derive(Clone)]
