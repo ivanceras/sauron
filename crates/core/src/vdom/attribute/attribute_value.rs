@@ -72,7 +72,6 @@ impl<MSG> AttributeValue<MSG> {
         }
     }
 
-
     /// returns true if this attribute value is a style
     pub fn is_style(&self) -> bool {
         matches!(self, Self::Style(_))
@@ -98,7 +97,6 @@ impl<MSG> AttributeValue<MSG> {
             _ => None,
         }
     }
-
 
     /// returns true if this attribute value is the filler empty attribute
     pub fn is_just_empty(&self) -> bool {

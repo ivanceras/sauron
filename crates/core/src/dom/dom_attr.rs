@@ -80,8 +80,6 @@ impl DomAttr {
         }
     }
 
-
-
     /// set the style of this element
     pub(crate) fn set_element_style(
         element: &Element,
@@ -156,12 +154,9 @@ impl DomAttr {
                         .set_attribute(attr_name, &is_disabled.to_string())
                         .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
                     Self::set_disabled(element, is_disabled);
-                } 
-                else if "inner_html" == attr_name{
+                } else if "inner_html" == attr_name {
                     panic!("Setting inner_html is not allowed, as it breaks the tracking of the DomTree, use html-parse instead")
-                }
-
-                else {
+                } else {
                     element
                         .set_attribute(attr_name, &merged_plain_values)
                         .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
@@ -334,5 +329,4 @@ impl DomAttrValue {
         let simple = self.get_simple()?;
         Some(simple.to_string())
     }
-
 }

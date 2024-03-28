@@ -223,7 +223,6 @@ pub fn open<MSG>(is_open: bool) -> Attribute<MSG> {
     }
 }
 
-
 /// focus the html element
 /// # Examples
 /// ```rust

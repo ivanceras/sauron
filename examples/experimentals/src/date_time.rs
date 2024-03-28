@@ -123,9 +123,7 @@ where
             }
             Msg::ExternContMounted(target_node) => {
                 log::warn!("-->>> Container for children is now mounted..!");
-                target_node
-                    .append_children(self.children.drain(..))
-                    ;
+                target_node.append_children(self.children.drain(..));
                 self.external_children_node = Some(target_node);
                 Effects::none()
             }
@@ -216,9 +214,7 @@ impl StatefulComponent for DateTimeWidget<()> {
     fn append_children(&mut self, children: Vec<DomNode>) {
         if let Some(external_children_node) = self.external_children_node.as_ref() {
             log::info!("DateTime: ok appending..");
-            external_children_node
-                .append_children(children)
-                ;
+            external_children_node.append_children(children);
         } else {
             log::debug!(
                 "DateTime: Just pushing to children since the external holder is not yet mounted"

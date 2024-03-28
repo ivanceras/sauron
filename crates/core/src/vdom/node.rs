@@ -91,7 +91,6 @@ impl<MSG> Node<MSG> {
         }
     }
 
-
     /// return the text if this is text node leaf
     pub fn as_text(&self) -> Option<&str> {
         match self {
@@ -99,7 +98,6 @@ impl<MSG> Node<MSG> {
             _ => None,
         }
     }
-
 
     /// Get a mutable reference to the element, if this node is an element node
     pub fn element_mut(&mut self) -> Option<&mut Element<MSG>> {

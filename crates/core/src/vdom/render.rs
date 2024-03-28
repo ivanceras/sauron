@@ -118,7 +118,6 @@ impl<MSG> Leaf<MSG> {
     }
 }
 
-
 impl<MSG> Element<MSG> {
     /// render element nodes
     pub fn render_with_indent(
@@ -166,7 +165,6 @@ impl<MSG> Element<MSG> {
         if !is_lone_child_text_node && !children.is_empty() {
             maybe_indent(buffer, indent, compressed)?;
         }
-
 
         if !self.self_closing {
             write!(buffer, "</{}>", self.tag())?;

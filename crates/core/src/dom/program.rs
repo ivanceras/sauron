@@ -328,9 +328,9 @@ where
     /// create initial dom node generated
     /// from template and patched by the difference of vdom_template and current app view.
     fn create_initial_view(&self) -> DomNode {
-         let current_view = self.app_context.current_vdom();
-         let real_view = current_view.unwrap_template_ref();
-         self.create_dom_node(None, &real_view)
+        let current_view = self.app_context.current_vdom();
+        let real_view = current_view.unwrap_template_ref();
+        self.create_dom_node(None, &real_view)
     }
 
     /// each element and it's descendant in the vdom is created into
@@ -376,21 +376,15 @@ where
 
         match mount_procedure.action {
             MountAction::Append => {
-                mount_node
-                    .append_children([created_node.clone()])
-                    ;
+                mount_node.append_children([created_node.clone()]);
             }
             MountAction::ClearAppend => {
                 log::info!("doing a clear append..");
                 mount_node.clear_children();
-                mount_node
-                    .append_children([created_node.clone()])
-                    ;
+                mount_node.append_children([created_node.clone()]);
             }
             MountAction::Replace => {
-                mount_node
-                    .replace_node(created_node.clone())
-                    ;
+                mount_node.replace_node(created_node.clone());
             }
         }
         *self.root_node.borrow_mut() = Some(created_node);
@@ -504,7 +498,6 @@ where
                 // TODO: maybe return early here, but do a dispatch_multiple([])
             }
         }
-
 
         // tell the app about the performance measurement and only if there was patches applied
         #[cfg(feature = "with-measure")]
@@ -719,9 +712,7 @@ where
         let head = document().head().expect("must have a head");
         let head_node: web_sys::Node = head.unchecked_into();
         let dom_head = DomNode::from(head_node);
-        dom_head
-            .append_children([created_node])
-            ;
+        dom_head.append_children([created_node]);
     }
 
     /// inject style element to the mount node
@@ -733,8 +724,7 @@ where
             .borrow_mut()
             .as_mut()
             .expect("mount node")
-            .append_children([created_node])
-            ;
+            .append_children([created_node]);
     }
 
     /// dispatch multiple MSG

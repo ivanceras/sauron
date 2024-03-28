@@ -13,10 +13,7 @@ fn nodes_with_event_should_not_recycle() {
     let f = |_| log::trace!("I'm a div");
     let old: Node<()> = div(
         vec![class("container")],
-        vec![div(
-            vec![class("child"), on_click(f)],
-            vec![],
-        )],
+        vec![div(vec![class("child"), on_click(f)], vec![])],
     );
 
     let new: Node<()> = div(

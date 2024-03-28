@@ -1,9 +1,9 @@
 #![deny(warnings)]
-use sauron::{*, html::attributes::replace};
+use sauron::{html::attributes::replace, *};
 use std::{cell::Cell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
-use web_sys::{console,  EventTarget};
+use web_sys::{console, EventTarget};
 
 mod test_fixtures;
 
@@ -15,7 +15,10 @@ fn nested_divs() {
     let program = simple_program();
     let _created_node = program.create_dom_node(None, &vdiv);
 
-    assert_eq!(&vdiv.render_to_string(), "<div><div><div></div></div></div>");
+    assert_eq!(
+        &vdiv.render_to_string(),
+        "<div><div><div></div></div></div>"
+    );
 }
 
 #[wasm_bindgen_test]
@@ -34,7 +37,6 @@ fn svg_element() {
         r#"<div><svg xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50"></circle></svg></div>"#
     );
 }
-
 
 #[wasm_bindgen_test]
 fn click_event() {

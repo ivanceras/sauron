@@ -52,7 +52,6 @@ impl<MSG> Leaf<MSG> {
         matches!(self, Self::Text(_))
     }
 
-
     /// return the text content if it is a text node
     pub fn as_text(&self) -> Option<&str> {
         match self {
@@ -60,7 +59,6 @@ impl<MSG> Leaf<MSG> {
             _ => None,
         }
     }
-
 }
 
 impl<MSG> From<&'static str> for Leaf<MSG> {

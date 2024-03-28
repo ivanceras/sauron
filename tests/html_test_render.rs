@@ -17,7 +17,6 @@ fn test_checked() {
     assert_eq!(view.render_to_string(), r#"<input type="text" />"#);
 }
 
-
 #[test]
 fn test_self_closing_tag() {
     let view1: Node<()> = main(
@@ -32,7 +31,6 @@ fn test_self_closing_tag() {
 
     assert_eq!(expected, view1.render_to_string());
 }
-
 
 #[test]
 fn text_node_in_script_work_as_is() {

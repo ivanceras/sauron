@@ -26,7 +26,6 @@ pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
 
 thread_local!(static NODE_ID_COUNTER: Cell<usize> = Cell::new(1));
 
-
 /// A counter part of the vdom Node
 /// This is needed, so that we can
 /// 1. Keep track of event closure and drop them when nodes has been removed
@@ -100,7 +99,6 @@ impl fmt::Debug for DomInner {
     }
 }
 
-
 impl From<web_sys::Node> for DomNode {
     fn from(node: web_sys::Node) -> Self {
         let element: web_sys::Element = node.dyn_into().expect("must be an element");
@@ -162,11 +160,7 @@ impl DomNode {
 
     /// return the outer html string of an element
     pub fn outer_html(&self) -> String {
-        let DomInner::Element {
-            element,
-            ..
-        } = &self.inner
-        else {
+        let DomInner::Element { element, .. } = &self.inner else {
             unreachable!("should only be called to element");
         };
         element.outer_html()
@@ -183,7 +177,7 @@ impl DomNode {
                 element, children, ..
             } => {
                 let for_append = for_append.into_iter();
-                for child in for_append{
+                for child in for_append {
                     element
                         .append_child(&child.as_node())
                         .expect("append child");
@@ -222,16 +216,16 @@ impl DomNode {
             .expect("must remove target node");
 
         let mut self_index = None;
-        for (i,child) in parent_children.borrow().iter().enumerate(){
-            if self.as_node() == child.as_node(){
+        for (i, child) in parent_children.borrow().iter().enumerate() {
+            if self.as_node() == child.as_node() {
                 self_index = Some(i);
             }
         }
         for_insert.set_parent(parent_target);
-        if let Some(self_index) = self_index{
+        if let Some(self_index) = self_index {
             log::info!("insert before self_index: {}", self_index);
             parent_children.borrow_mut().insert(self_index, for_insert);
-        }else{
+        } else {
             unreachable!("should have a self index");
         }
     }
@@ -242,7 +236,9 @@ impl DomNode {
             DomInner::Element { element, .. } => element,
             _ => unreachable!("target element should be an element"),
         };
-        target_element.insert_adjacent_element(intern("afterend"), &for_insert.as_element()).expect("must insert after this element");
+        target_element
+            .insert_adjacent_element(intern("afterend"), &for_insert.as_element())
+            .expect("must insert after this element");
 
         let parent_target = self.parent.borrow();
         let parent_target = parent_target.as_ref().expect("must have a parent");
@@ -254,15 +250,17 @@ impl DomNode {
             unreachable!("parent must be an element");
         };
         let mut self_index = None;
-        for (i,child) in parent_children.borrow().iter().enumerate(){
-            if self.as_node() == child.as_node(){
+        for (i, child) in parent_children.borrow().iter().enumerate() {
+            if self.as_node() == child.as_node() {
                 self_index = Some(i);
             }
         }
         for_insert.set_parent(parent_target);
-        if let Some(self_index) = self_index{
-            parent_children.borrow_mut().insert(self_index + 1, for_insert);
-        }else{
+        if let Some(self_index) = self_index {
+            parent_children
+                .borrow_mut()
+                .insert(self_index + 1, for_insert);
+        } else {
             unreachable!("should have a self index");
         }
     }
@@ -287,7 +285,11 @@ impl DomNode {
                         .replace_with_with_node_1(&replacement.as_node())
                         .expect("must replace child");
                     replacement.set_parent(self);
-                    log::info!("--oo in replace_child, Inserted at: {}, {}", child_index, replacement.render_to_string());
+                    log::info!(
+                        "--oo in replace_child, Inserted at: {}, {}",
+                        child_index,
+                        replacement.render_to_string()
+                    );
                     children.borrow_mut().insert(child_index, replacement);
                 } else {
                     // if can not find the child, then must be the root node
@@ -315,7 +317,10 @@ impl DomNode {
                 if let Some(child_index) = child_index {
                     log::info!("-->> In remove_child, Removing child at {}", child_index);
                     let child = children.borrow_mut().remove(child_index);
-                    log::info!("-->> In remove_child, The remove child: {}", child.render_to_string());
+                    log::info!(
+                        "-->> In remove_child, The remove child: {}",
+                        child.render_to_string()
+                    );
                     element
                         .remove_child(&child.as_node())
                         .expect("remove child");
@@ -364,7 +369,6 @@ impl DomNode {
             unreachable!("unable to replace a node without a parent..");
         }
     }
-
 
     pub(crate) fn set_dom_attrs(
         &self,
@@ -659,9 +663,11 @@ where
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
         // listener and removing the generics msg
-        let created_children = comp.children.iter().map(|child| {
-            self.create_dom_node(parent_node.clone(), &child)
-        }).collect();
+        let created_children = comp
+            .children
+            .iter()
+            .map(|child| self.create_dom_node(parent_node.clone(), &child))
+            .collect();
         comp.comp.borrow_mut().append_children(created_children);
         comp_node
     }

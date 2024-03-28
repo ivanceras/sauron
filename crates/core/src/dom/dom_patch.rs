@@ -313,9 +313,7 @@ where
         match patch_variant {
             PatchVariant::InsertBeforeNode { nodes } => {
                 for for_insert in nodes {
-                    target_element
-                        .insert_before(for_insert)
-                        ;
+                    target_element.insert_before(for_insert);
                 }
                 Ok(None)
             }
@@ -323,9 +321,7 @@ where
             PatchVariant::InsertAfterNode { nodes } => {
                 // we insert the node before this target element
                 for for_insert in nodes.into_iter().rev() {
-                    target_element
-                        .insert_after(for_insert)
-                        ;
+                    target_element.insert_after(for_insert);
                 }
                 Ok(None)
             }
@@ -381,11 +377,13 @@ where
 
                     let multiple_node_replacement = !replacement.is_empty();
 
-                    mount_node
-                        .append_children(replacement);
+                    mount_node.append_children(replacement);
 
                     if patch_path.path.is_empty() {
-                        assert!(!multiple_node_replacement, "There are multiple nodes, this becomes unsound");
+                        assert!(
+                            !multiple_node_replacement,
+                            "There are multiple nodes, this becomes unsound"
+                        );
                         Ok(Some(first_node))
                     } else {
                         Ok(None)
@@ -393,7 +391,10 @@ where
                 } else {
                     target_element.replace_node(first_node.clone());
                     for replace_node in replacement.into_iter().rev() {
-                        log::info!("Inserting the rest, after the first node: {}", replace_node.render_to_string());
+                        log::info!(
+                            "Inserting the rest, after the first node: {}",
+                            replace_node.render_to_string()
+                        );
                         first_node.insert_after(replace_node);
                     }
                     if patch_path.path.is_empty() {

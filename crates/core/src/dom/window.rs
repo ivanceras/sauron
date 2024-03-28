@@ -120,7 +120,7 @@ impl Window {
         MSG: 'static,
     {
         use std::future::ready;
-        Task::single(ready({ 
+        Task::single(ready({
             util::scroll_window_to_top();
             msg
         }))
@@ -130,11 +130,13 @@ impl Window {
     pub fn on_popstate<F, MSG>(mut cb: F) -> Task<MSG>
     where
         F: FnMut(web_sys::PopStateEvent) -> MSG + 'static,
-        MSG: 'static, {
+        MSG: 'static,
+    {
         let (mut tx, rx) = mpsc::unbounded();
         let closure_cb: Closure<dyn FnMut(web_sys::Event)> =
             Closure::new(move |event: web_sys::Event| {
-                let popstate_event: web_sys::PopStateEvent = event.dyn_into().expect("popstate event");
+                let popstate_event: web_sys::PopStateEvent =
+                    event.dyn_into().expect("popstate event");
                 let msg = cb(popstate_event);
                 tx.start_send(msg).expect("send");
             });

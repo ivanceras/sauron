@@ -153,8 +153,10 @@ fn insert_multiple_in_the_middle() {
 
     let document = web_sys::window().unwrap().document().unwrap();
 
-    let old: Node<()> = main([class("middle_nodes_test1")],
-        vec![ul([class("todo")],
+    let old: Node<()> = main(
+        [class("middle_nodes_test1")],
+        vec![ul(
+            [class("todo")],
             vec![
                 li([key(1)], vec![text("item1")]),
                 li([key(2)], vec![text("item2")]),
@@ -163,8 +165,10 @@ fn insert_multiple_in_the_middle() {
         )],
     );
 
-    let update1: Node<()> = main([class("middle_nodes_test1")],
-        vec![ul([class("todo")],
+    let update1: Node<()> = main(
+        [class("middle_nodes_test1")],
+        vec![ul(
+            [class("todo")],
             vec![
                 li([], vec![text("itemA")]),
                 li([], vec![text("itemB")]),
@@ -202,7 +206,7 @@ fn insert_multiple_in_the_middle() {
 
     assert_eq!(expected, container.outer_html());
     {
-        let root_node  = simple_program.root_node.borrow();
+        let root_node = simple_program.root_node.borrow();
         let root_node = root_node.as_ref().unwrap();
         log::info!("root node: {}", root_node.render_to_string());
         assert_eq!(container.outer_html(), root_node.render_to_string());
@@ -231,7 +235,7 @@ fn insert_multiple_in_the_middle() {
     assert_eq!(expected1, container.outer_html());
 
     {
-        let root_node  = simple_program.root_node.borrow();
+        let root_node = simple_program.root_node.borrow();
         let root_node = root_node.as_ref().unwrap();
         log::info!("The root node is: {}", root_node.render_to_string());
         assert_eq!(container.outer_html(), root_node.render_to_string());
