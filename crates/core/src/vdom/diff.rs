@@ -151,7 +151,6 @@ pub fn diff_recursive<'a, MSG>(
         (Node::Leaf(old_leaf), Node::Leaf(new_leaf)) => {
             match (old_leaf, new_leaf) {
                 (Leaf::Text(_), Leaf::Text(_))
-                | (Leaf::SafeHtml(_), Leaf::SafeHtml(_))
                 | (Leaf::Comment(_), Leaf::Comment(_))
                 | (Leaf::DocType(_), Leaf::DocType(_)) => {
                     if old_leaf != new_leaf {

@@ -415,7 +415,6 @@ impl DomNode {
                     listeners: event_callbacks,
                     plain_values,
                     styles,
-                    function_calls,
                 } = attr.group_values();
 
                 Self::add_event_dom_listeners(&element, attr_name, &event_callbacks)
@@ -434,7 +433,6 @@ impl DomNode {
                 }
 
                 DomAttr::set_element_style(&element, attr_name, styles);
-                DomAttr::set_element_function_call_values(&element, attr_name, function_calls);
                 DomAttr::set_element_simple_values(
                     &element,
                     attr_name,
@@ -630,7 +628,6 @@ where
             Leaf::TemplatedView(view) => {
                 unreachable!("template view should not be created: {:#?}", view)
             }
-            Leaf::SafeHtml(_) => unreachable!("must be converted throught html parse already"),
             Leaf::DocType(_) => unreachable!("doc type is never converted"),
         }
     }
@@ -766,11 +763,9 @@ where
             listeners,
             plain_values,
             styles,
-            function_calls,
         } = attr.group_values();
 
         DomAttr::set_element_style(element, attr_name, styles);
-        DomAttr::set_element_function_call_values(element, attr_name, function_calls);
         DomAttr::set_element_simple_values(element, attr_name, attr_namespace, plain_values);
         self.add_event_listeners(element, attr_name, &listeners)
             .unwrap();

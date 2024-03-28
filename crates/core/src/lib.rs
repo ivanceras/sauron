@@ -25,7 +25,7 @@ pub mod prelude {
         },
         br, comment,
         commons::*,
-        hr, img, input, lazy_view_if, safe_html, text,
+        hr, img, input, lazy_view_if, text,
         units::{ch, cm, deg, ex, grad, mm, ms, percent, pt, px, rad, rgb, rgba, s, turn, vh, vw},
         view_if,
     };

@@ -93,7 +93,6 @@ where
 
     fn convert_attr_value(&self, attr_value: &AttributeValue<APP::MSG>) -> Option<DomAttrValue> {
         match attr_value {
-            AttributeValue::FunctionCall(v) => Some(DomAttrValue::FunctionCall(v.clone())),
             AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
             AttributeValue::Style(v) => Some(DomAttrValue::Style(v.clone())),
             AttributeValue::EventListener(v) => {
@@ -360,18 +359,6 @@ where
                             }
                             DomAttrValue::Style(_) => {
                                 target_element.remove_dom_attr(attr)?;
-                            }
-                            DomAttrValue::FunctionCall(_) => {
-                                let DomInner::Element {
-                                    element: target_element,
-                                    ..
-                                } = &target_element.inner
-                                else {
-                                    unreachable!("must be an element");
-                                };
-                                if attr.name == "inner_html" {
-                                    target_element.set_inner_html("");
-                                }
                             }
                             DomAttrValue::Empty => (),
                         }

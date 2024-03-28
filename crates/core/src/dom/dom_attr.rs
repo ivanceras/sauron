@@ -32,8 +32,6 @@ pub struct DomAttr {
 /// a dom version of the Attribute value, thereby removing the MSG generic
 #[derive(Debug)]
 pub enum DomAttrValue {
-    /// function calls
-    FunctionCall(Value),
     /// simple value
     Simple(Value),
     /// a style
@@ -53,8 +51,6 @@ pub struct GroupedDomAttrValues {
     pub plain_values: Vec<Value>,
     /// style attribute values
     pub styles: Vec<Style>,
-    /// function calls
-    pub function_calls: Vec<Value>,
 }
 
 impl DomAttr {
@@ -63,14 +59,10 @@ impl DomAttr {
         let mut listeners = vec![];
         let mut plain_values = vec![];
         let mut styles = vec![];
-        let mut function_calls = vec![];
         for av in self.value {
             match av {
                 DomAttrValue::Simple(v) => {
                     plain_values.push(v);
-                }
-                DomAttrValue::FunctionCall(v) => {
-                    function_calls.push(v);
                 }
                 DomAttrValue::Style(s) => {
                     styles.extend(s);
@@ -85,7 +77,6 @@ impl DomAttr {
             listeners,
             plain_values,
             styles,
-            function_calls,
         }
     }
 
@@ -108,19 +99,6 @@ impl DomAttr {
             element
                 .remove_attribute(attr_name)
                 .expect("must remove attribute");
-        }
-    }
-
-    /// do function calls such as set_inner_html
-    pub(crate) fn set_element_function_call_values(
-        element: &Element,
-        attr_name: AttributeName,
-        function_calls: Vec<Value>,
-    ) {
-        if let Some(merged_func_values) = Value::merge_to_string(function_calls.iter()) {
-            if attr_name == "inner_html" {
-                element.set_inner_html(&merged_func_values);
-            }
         }
     }
 
@@ -178,12 +156,16 @@ impl DomAttr {
                         .set_attribute(attr_name, &is_disabled.to_string())
                         .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
                     Self::set_disabled(element, is_disabled);
-                } else {
+                } 
+                else if "inner_html" == attr_name{
+                    panic!("Setting inner_html is not allowed, as it breaks the tracking of the DomTree, use html-parse instead")
+                }
+
+                else {
                     element
                         .set_attribute(attr_name, &merged_plain_values)
                         .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
                 }
-
                 #[cfg(not(feature = "ensure-attr-set"))]
                 element
                     .set_attribute(attr_name, &merged_plain_values)

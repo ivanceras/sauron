@@ -77,7 +77,6 @@ impl<MSG> AttributeValue<MSG> {
         MSG: 'static,
     {
         match self {
-            AttributeValue::FunctionCall(this) => AttributeValue::FunctionCall(this),
             AttributeValue::Simple(this) => AttributeValue::Simple(this),
             AttributeValue::Style(this) => AttributeValue::Style(this),
             AttributeValue::EventListener(this) => AttributeValue::EventListener(this.map_msg(cb)),
@@ -96,7 +95,6 @@ impl<MSG> Leaf<MSG> {
     {
         match self {
             Self::Text(v) => Leaf::Text(v),
-            Self::SafeHtml(v) => Leaf::SafeHtml(v),
             Self::Comment(v) => Leaf::Comment(v),
             Self::DocType(v) => Leaf::DocType(v),
             Self::Fragment(nodes) => Leaf::Fragment(

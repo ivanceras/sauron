@@ -1,5 +1,4 @@
 #![deny(warnings)]
-use crate::vdom::TreePath;
 use sauron::{
     html::{attributes::*, *},
     *,
@@ -18,17 +17,6 @@ fn test_checked() {
     assert_eq!(view.render_to_string(), r#"<input type="text" />"#);
 }
 
-#[test]
-fn test_render() {
-    let view1: Node<()> = main(
-        vec![class("container")],
-        vec![article(vec![inner_html("<h1>Lorep Ipsum</h1>")], vec![])],
-    );
-
-    let expected = r#"<main class="container"><article ><h1>Lorep Ipsum</h1></article></main>"#;
-
-    assert_eq!(expected, view1.render_to_string());
-}
 
 #[test]
 fn test_self_closing_tag() {
@@ -45,45 +33,6 @@ fn test_self_closing_tag() {
     assert_eq!(expected, view1.render_to_string());
 }
 
-#[test]
-fn test_inner_html_patch() {
-    let view1: Node<()> = main(vec![class("container")], vec![article(vec![], vec![])]);
-
-    let view2: Node<()> = main(
-        vec![class("container")],
-        vec![article(vec![inner_html("<h1>Lorep Ipsum</h1>")], vec![])],
-    );
-
-    let patch = diff(&view1, &view2);
-    assert_eq!(
-        patch,
-        vec![Patch::add_attributes(
-            &"article",
-            TreePath::new(vec![0]),
-            vec![&inner_html("<h1>Lorep Ipsum</h1>")]
-        )]
-    );
-}
-
-#[test]
-fn test_inner_html_removed() {
-    let view1: Node<()> = main(
-        vec![class("container")],
-        vec![article(vec![inner_html("<h1>Lorep Ipsum</h1>")], vec![])],
-    );
-
-    let view2: Node<()> = main(vec![class("container")], vec![article(vec![], vec![])]);
-
-    let patch = diff(&view1, &view2);
-    assert_eq!(
-        patch,
-        vec![Patch::remove_attributes(
-            &"article",
-            TreePath::new(vec![0]),
-            vec![&inner_html("<h1>Lorep Ipsum</h1>")]
-        )]
-    );
-}
 
 #[test]
 fn text_node_in_script_work_as_is() {

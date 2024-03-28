@@ -120,20 +120,6 @@ pub fn text<MSG>(s: impl ToString) -> Node<MSG> {
     Node::Leaf(Leaf::Text(Cow::from(s.to_string())))
 }
 
-/// Create an html and instruct the DOM renderer and/or DOM patcher that the operation is safe.
-///
-/// Note: this operation doesn't sanitize the html code. It is your responsibility
-/// as a programmer to sanitize the input here.
-/// # Example
-/// ```rust
-/// use sauron::{*,html::safe_html};
-///
-/// let node: Node<()> = safe_html("<div>In a safe html</div>");
-/// ```
-pub fn safe_html<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG> {
-    Node::Leaf(Leaf::SafeHtml(s.into()))
-}
-
 /// create a comment node
 /// # Example
 /// ```rust

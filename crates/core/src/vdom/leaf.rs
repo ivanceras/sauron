@@ -11,8 +11,6 @@ use std::borrow::Cow;
 pub enum Leaf<MSG> {
     /// Text variant of a virtual node
     Text(Cow<'static, str>),
-    /// A safe html variant
-    SafeHtml(Cow<'static, str>),
     /// A comment node
     Comment(Cow<'static, str>),
     /// doctype: html, math, svg
@@ -35,7 +33,6 @@ impl<MSG> PartialEq for Leaf<MSG> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::Text(v), Self::Text(o)) => v == o,
-            (Self::SafeHtml(v), Self::SafeHtml(o)) => v == o,
             (Self::Comment(v), Self::Comment(o)) => v == o,
             (Self::DocType(v), Self::DocType(o)) => v == o,
             (Self::NodeList(v), Self::NodeList(o)) => v == o,
@@ -55,10 +52,6 @@ impl<MSG> Leaf<MSG> {
         matches!(self, Self::Text(_))
     }
 
-    /// returns true if this is a safe html text node
-    pub fn is_safe_html(&self) -> bool {
-        matches!(self, Self::SafeHtml(_))
-    }
 
     /// return the text content if it is a text node
     pub fn as_text(&self) -> Option<&str> {
@@ -68,13 +61,6 @@ impl<MSG> Leaf<MSG> {
         }
     }
 
-    /// return the text content if this a text node,
-    pub fn as_safe_html(&self) -> Option<&str> {
-        match self {
-            Self::SafeHtml(ref html) => Some(html),
-            _ => None,
-        }
-    }
 }
 
 impl<MSG> From<&'static str> for Leaf<MSG> {

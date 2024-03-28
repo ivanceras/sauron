@@ -91,13 +91,6 @@ impl<MSG> Node<MSG> {
         }
     }
 
-    /// returns true if this is a safe html text node
-    pub fn is_safe_html(&self) -> bool {
-        match self {
-            Self::Leaf(leaf) => leaf.is_safe_html(),
-            _ => false,
-        }
-    }
 
     /// return the text if this is text node leaf
     pub fn as_text(&self) -> Option<&str> {
@@ -107,13 +100,6 @@ impl<MSG> Node<MSG> {
         }
     }
 
-    /// return the text if this is safe html leaf
-    pub fn as_safe_html(&self) -> Option<&str> {
-        match self {
-            Self::Leaf(ref leaf) => leaf.as_safe_html(),
-            _ => None,
-        }
-    }
 
     /// Get a mutable reference to the element, if this node is an element node
     pub fn element_mut(&mut self) -> Option<&mut Element<MSG>> {

@@ -91,10 +91,6 @@ impl<MSG> Leaf<MSG> {
             Leaf::Text(text) => {
                 write!(buffer, "{text}")
             }
-            Leaf::SafeHtml(html) => {
-                //TODO: html escape this one
-                write!(buffer, "{html}")
-            }
             Leaf::Comment(comment) => {
                 write!(buffer, "<!--{comment}-->")
             }
@@ -122,26 +118,6 @@ impl<MSG> Leaf<MSG> {
     }
 }
 
-fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
-    merged_attributes
-        .iter()
-        .flat_map(|attr| {
-            let GroupedAttributeValues {
-                listeners: _,
-                plain_values: _,
-                styles: _,
-                function_calls,
-            } = Attribute::group_values(attr);
-
-            if attr.name == "inner_html" {
-                Value::merge_to_string(function_calls)
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
-}
 
 impl<MSG> Element<MSG> {
     /// render element nodes
@@ -191,10 +167,6 @@ impl<MSG> Element<MSG> {
             maybe_indent(buffer, indent, compressed)?;
         }
 
-        let inner_html = extract_inner_html(&merged_attributes);
-        if !inner_html.is_empty() {
-            write!(buffer, "{inner_html}")?;
-        }
 
         if !self.self_closing {
             write!(buffer, "</{}>", self.tag())?;
@@ -210,7 +182,6 @@ impl<MSG> Attribute<MSG> {
             listeners: _,
             plain_values,
             styles,
-            function_calls: _,
         } = Attribute::group_values(self);
 
         // These are attribute values which specifies the state of the element
