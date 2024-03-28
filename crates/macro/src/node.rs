@@ -84,11 +84,13 @@ fn single_node(node: Node) -> TokenStream {
                 }) = braced_for_loop(&block)
                 {
                     quote! {
-                        sauron::html::node_list(
-                            (#expr).map(|#pat|{
-                                #[allow(unused_braces)]
-                                #body
-                            }))
+                        {
+                            let mut receiver = vec![];
+                            for #pat in #expr{
+                                receiver.push(#body);
+                            }
+                            sauron::html::node_list(receiver)
+                        }
                     }
                 } else if let Some(ExprIf { .. }) = braced_if_expr(&block) {
                     quote! {
