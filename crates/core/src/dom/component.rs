@@ -178,11 +178,7 @@ impl<MSG> StatelessModel<MSG> {
 
     /// return the attribute values of the view node matching the attribute name `name`
     pub fn attribute_value(&self, name: &AttributeName) -> Option<Vec<&AttributeValue<MSG>>> {
-        let value = self.view.attribute_value(name);
-        log::info!("view is {}", self.view.render_to_string());
-        log::info!("view: {:#?}", self.view);
-        log::info!("attribute_value of stateless model {:?}:{:#?}", name, value);
-        value
+        self.view.attribute_value(name)
     }
 
     ///

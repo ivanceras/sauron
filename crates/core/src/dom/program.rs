@@ -451,7 +451,7 @@ where
             let real_view = view.unwrap_template_ref();
             let patches =
                 self.create_patches_with_skip_diff(&real_current_vdom, &real_view, &skip_diff);
-            log::info!("patches: {:#?}",patches);
+            //log::info!("patches: {:#?}",patches);
             self.convert_patches(
                 self.root_node
                     .borrow()
