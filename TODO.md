@@ -262,9 +262,11 @@
         view: Node<MSG> ,
     }
     ```
-- [ ] remove `SafeHtml` variant in leaf, instead provide a safe_html which is parsed and converted into node
+- [X] remove `SafeHtml` variant in leaf, instead provide a safe_html which is parsed and converted into node
     - using safe html alters the dom tree
-- [ ] remove `innerHTML` func in AttributeValue as it could alter the DOM node tree
+- [ ] add `symbol_html` for html entities such as `&nbsp;` `&gt`, `&lt` etc.
+    - this should be safe to be inserted
+- [X] remove `innerHTML` func in AttributeValue as it could alter the DOM node tree
 - [ ] Keep track of which attributes to be skipped in `SkipDiff{shall:false}`
     ```rust
     enum SkipStrat{
@@ -272,7 +274,7 @@
         SkippIndex(Vec<usize>),
     }
     ```
-- [ ] Maybe disable the template usage for now
+- [X] Maybe disable the template usage for now
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)

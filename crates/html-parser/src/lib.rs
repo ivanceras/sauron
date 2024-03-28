@@ -51,6 +51,9 @@ pub fn parse_html<MSG>(html: &str) -> Result<Option<Node<MSG>>, ParseError> {
     process_node(doc.get_root_node().borrow().deref())
 }
 
+//TODO: This is not dealing with html symbols such as
+//   `&#9650;`
+//   `&#9660;`
 fn process_node<MSG>(node: &rphtml::parser::Node) -> Result<Option<Node<MSG>>, ParseError> {
     let content = if let Some(content) = &node.content {
         let content = String::from_iter(content.iter());
