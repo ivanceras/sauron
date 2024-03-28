@@ -393,7 +393,7 @@ impl DomInner {
                     .expect("deep_clone");
                 Self::Text(RefCell::new(text_node.unchecked_into()))
             }
-            Self::Symbol(symbol) => Self::Text(Rc::new(RefCell::new(symbol.clone()))),
+            Self::Symbol(symbol) => Self::Symbol(Rc::new(RefCell::new(symbol.borrow().clone()))),
             Self::Comment(comment_node) => {
                 let comment_node = comment_node.clone_node_with_deep(true).expect("deep_clone");
                 Self::Comment(comment_node.unchecked_into())
