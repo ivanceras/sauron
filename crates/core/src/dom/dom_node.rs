@@ -591,7 +591,12 @@ where
             // We need to wrap this node_list into doc_fragment since root_node is only 1 element
             Leaf::NodeList(nodes) => self.create_fragment_node(parent_node, nodes),
             Leaf::StatefulComponent(comp) => self.create_stateful_component(parent_node, comp),
-            Leaf::StatelessComponent(comp) => self.create_stateless_component(parent_node, comp),
+            Leaf::StatelessComponent(comp) => {
+                #[cfg(feature = "use-template")]
+                {self.create_stateless_component_with_template(parent_node, comp)}
+                #[cfg(not(feature = "use-template"))]
+                {self.create_stateless_component(parent_node, comp)}
+            }
             Leaf::TemplatedView(view) => {
                 unreachable!("template view should not be created: {:#?}", view)
             }
@@ -664,6 +669,7 @@ where
         comp_node
     }
 
+    #[allow(unused)]
     fn create_stateless_component(
         &self,
         parent_node: Option<DomNode>,

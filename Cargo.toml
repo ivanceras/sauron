@@ -38,6 +38,7 @@ test-fixtures = ["sauron-core/test-fixtures"] #include the test-fixtures for upd
 with-node-macro = ["sauron-macro"]
 custom_element = ["sauron-macro","sauron-core/custom_element"]
 html-parser = ["sauron-html-parser"]
+use-template = ["sauron-core/use-template"]
 
 
 [dev-dependencies]

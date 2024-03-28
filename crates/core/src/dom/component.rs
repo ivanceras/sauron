@@ -12,6 +12,8 @@ pub use web_component::{register_web_component, WebComponent, WebComponentWrappe
 mod stateful_component;
 #[cfg(feature = "custom_element")]
 mod web_component;
+#[cfg(feature = "use-template")]
+mod template;
 
 /// A component has a view and can update itself.
 ///

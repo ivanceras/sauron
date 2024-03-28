@@ -325,6 +325,7 @@ where
         self.inject_stylesheet();
     }
 
+    #[allow(unused)]
     /// create initial dom node generated
     /// from template and patched by the difference of vdom_template and current app view.
     fn create_initial_view(&self) -> DomNode {
@@ -340,6 +341,9 @@ where
         *self.mount_node.borrow_mut() = Some(mount_node);
         self.pre_mount();
 
+        #[cfg(feature = "use-template")]
+        let created_node = self.create_initial_view_with_template();
+        #[cfg(not(feature = "use-template"))]
         let created_node = self.create_initial_view();
 
         let mount_node: DomNode = match mount_procedure.target {
