@@ -169,12 +169,14 @@ fn create_leaf_node_no_listeners<MSG>(parent_node: Option<DomNode>, leaf: &Leaf<
             inner: DomInner::Text(RefCell::new(document().create_text_node(txt))),
             parent: Rc::new(RefCell::new(parent_node)),
         },
-
+        Leaf::Symbol(symbol) => DomNode {
+            inner: DomInner::Symbol(Rc::new(RefCell::new(symbol.clone()))),
+            parent: Rc::new(RefCell::new(parent_node)),
+        },
         Leaf::Comment(comment) => DomNode {
             inner: DomInner::Comment(document().create_comment(comment)),
             parent: Rc::new(RefCell::new(parent_node)),
         },
-
         Leaf::DocType(_doctype) => {
             panic!(
                 "It looks like you are using doctype in the middle of an app,
@@ -390,6 +392,9 @@ impl DomInner {
                     .clone_node_with_deep(true)
                     .expect("deep_clone");
                 Self::Text(RefCell::new(text_node.unchecked_into()))
+            }
+            Self::Symbol(symbol) => {
+                Self::Text(Rc::new(RefCell::new(symbol.clone())))
             }
             Self::Comment(comment_node) => {
                 let comment_node = comment_node.clone_node_with_deep(true).expect("deep_clone");
