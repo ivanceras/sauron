@@ -13,13 +13,13 @@ use crate::{
     vdom::{Attribute, Leaf},
 };
 use indexmap::IndexMap;
+use std::borrow::Cow;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node};
-use std::borrow::Cow;
 
 pub(crate) type EventClosure = Closure<dyn FnMut(web_sys::Event)>;
 pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
@@ -86,10 +86,7 @@ impl fmt::Debug for DomInner {
                 .debug_tuple("Text")
                 .field(&text_node.borrow().whole_text().expect("whole text"))
                 .finish(),
-            Self::Symbol(symbol) => f
-                .debug_tuple("Symbol")
-                .field(&symbol.borrow())
-                .finish(),
+            Self::Symbol(symbol) => f.debug_tuple("Symbol").field(&symbol.borrow()).finish(),
             Self::Comment(_) => write!(f, "Comment"),
             Self::Fragment { .. } => write!(f, "Fragment"),
             Self::StatefulComponent(_) => write!(f, "StatefulComponent"),
@@ -159,8 +156,8 @@ impl DomNode {
     }
 
     /// return the string content of this symbol
-    pub fn as_symbol(&self) -> Option<String>{
-        match &self.inner{
+    pub fn as_symbol(&self) -> Option<String> {
+        match &self.inner {
             DomInner::Symbol(symbol) => Some(symbol.borrow().as_ref().to_string()),
             _ => None,
         }
@@ -186,11 +183,12 @@ impl DomNode {
             } => {
                 let for_append = for_append.into_iter();
                 for child in for_append {
-                    if let Some(symbol) = child.as_symbol(){
+                    if let Some(symbol) = child.as_symbol() {
                         //TODO: escape the `<` and `>`
-                        element.insert_adjacent_html(intern("beforeend"), &symbol)
+                        element
+                            .insert_adjacent_html(intern("beforeend"), &symbol)
                             .expect("must not error");
-                    }else{
+                    } else {
                         element
                             .append_child(&child.as_node())
                             .expect("append child");
@@ -590,7 +588,7 @@ where
                 inner: DomInner::Text(RefCell::new(document().create_text_node(txt))),
                 parent: Rc::new(RefCell::new(parent_node)),
             },
-            Leaf::Symbol(symbol) => DomNode{
+            Leaf::Symbol(symbol) => DomNode {
                 inner: DomInner::Symbol(Rc::new(RefCell::new(symbol.clone()))),
                 parent: Rc::new(RefCell::new(parent_node)),
             },

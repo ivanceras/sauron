@@ -14,7 +14,7 @@ use std::borrow::Cow;
 pub enum Leaf<MSG> {
     /// Text variant of a virtual node
     Text(Cow<'static, str>),
-    /// Html entities such as &nbsp; &gt; 
+    /// Html entities such as &nbsp; &gt;
     Symbol(Cow<'static, str>),
     /// A comment node
     Comment(Cow<'static, str>),
