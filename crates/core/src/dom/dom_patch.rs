@@ -384,7 +384,7 @@ where
             // including the associated closures of the descendant of replaced node
             // before it is actully replaced in the DOM
             PatchVariant::ReplaceNode { mut replacement } => {
-                let first_node = replacement.pop().expect("must have a first node");
+                let first_node = replacement.remove(0);
                 if target_element.is_fragment() {
                     assert!(
                         patch_path.is_empty(),
@@ -400,7 +400,8 @@ where
                     }
                 } else {
                     target_element.replace_node(first_node.clone())?;
-                    for replace_node in replacement.into_iter() {
+                    for replace_node in replacement.into_iter().rev() {
+                        log::info!("Inserting the rest, after the first node: {}", replace_node.render_to_string());
                         first_node.insert_after(replace_node)?;
                     }
                 }
