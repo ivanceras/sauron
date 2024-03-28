@@ -177,7 +177,7 @@ impl DomNode {
     }
 
     /// append the DomNode `child` into this DomNode `self`
-    pub fn append_children(&self, for_append: impl IntoIterator<Item = DomNode>) -> Result<(), JsValue> {
+    pub fn append_children(&self, for_append: impl IntoIterator<Item = DomNode>) {
         match &self.inner {
             DomInner::Element {
                 element, children, ..
@@ -190,7 +190,6 @@ impl DomNode {
                     child.set_parent(&self);
                     children.borrow_mut().push(child);
                 }
-                Ok(())
             }
             _ => unreachable!(
                 "appending should only be called to Element and Fragment, found: {:#?}",
@@ -200,7 +199,7 @@ impl DomNode {
     }
 
     /// Insert the DomNode `for_insert` before `self` DomNode
-    pub(crate) fn insert_before(&self, for_insert: DomNode) -> Result<Option<DomNode>, JsValue> {
+    pub(crate) fn insert_before(&self, for_insert: DomNode) {
         let DomInner::Element {
             element: target_element,
             ..
@@ -235,16 +234,15 @@ impl DomNode {
         }else{
             unreachable!("should have a self index");
         }
-        Ok(None)
     }
 
     /// Insert the DomNode `for_insert` after `self` DomNode
-    pub(crate) fn insert_after(&self, for_insert: DomNode) -> Result<Option<DomNode>, JsValue> {
+    pub(crate) fn insert_after(&self, for_insert: DomNode) {
         let target_element = match &self.inner {
             DomInner::Element { element, .. } => element,
             _ => unreachable!("target element should be an element"),
         };
-        target_element.insert_adjacent_element(intern("afterend"), &for_insert.as_element())?;
+        target_element.insert_adjacent_element(intern("afterend"), &for_insert.as_element()).expect("must insert after this element");
 
         let parent_target = self.parent.borrow();
         let parent_target = parent_target.as_ref().expect("must have a parent");
@@ -267,11 +265,10 @@ impl DomNode {
         }else{
             unreachable!("should have a self index");
         }
-        Ok(None)
     }
 
     /// Replace the child `child` DomNode with a replacement DomNode `replacement`
-    pub(crate) fn replace_child(&self, child: &DomNode, replacement: DomNode) -> Option<DomNode> {
+    pub(crate) fn replace_child(&self, child: &DomNode, replacement: DomNode) {
         log::debug!("atttempt to replace child..{}", child.render_to_string());
         match &self.inner {
             DomInner::Element { children, .. } => {
@@ -292,7 +289,6 @@ impl DomNode {
                     replacement.set_parent(self);
                     log::info!("--oo in replace_child, Inserted at: {}, {}", child_index, replacement.render_to_string());
                     children.borrow_mut().insert(child_index, replacement);
-                    Some(child)
                 } else {
                     // if can not find the child, then must be the root node
                     unreachable!("must find the child...");
@@ -303,7 +299,7 @@ impl DomNode {
     }
 
     /// Remove the DomNode `child` from the children of `self`
-    pub(crate) fn remove_child(&self, child: &DomNode) -> Option<DomNode> {
+    pub(crate) fn remove_child(&self, child: &DomNode) {
         match &self.inner {
             DomInner::Element {
                 element, children, ..
@@ -323,7 +319,6 @@ impl DomNode {
                     element
                         .remove_child(&child.as_node())
                         .expect("remove child");
-                    Some(child)
                 } else {
                     unreachable!("no parent")
                 }
@@ -361,14 +356,13 @@ impl DomNode {
         }
     }
 
-    pub(crate) fn replace_node(&self, replacement: DomNode) -> Result<Option<DomNode>, JsValue> {
+    pub(crate) fn replace_node(&self, replacement: DomNode) {
         if let Some(parent) = self.parent.borrow().as_ref() {
             parent.replace_child(self, replacement);
         } else {
             log::info!("There is no parent here..");
             unreachable!("unable to replace a node without a parent..");
         }
-        Ok(None)
     }
 
 
@@ -577,7 +571,7 @@ where
             .iter()
             .map(|child| self.create_dom_node(Some(dom_node.clone()), child))
             .collect();
-        dom_node.append_children(children).unwrap();
+        dom_node.append_children(children);
         dom_node
     }
 
@@ -625,7 +619,7 @@ where
         let children = nodes
             .into_iter()
             .map(|node| self.create_dom_node(Some(dom_node.clone()), &node));
-        dom_node.append_children(children).unwrap();
+        dom_node.append_children(children);
         dom_node
     }
 }

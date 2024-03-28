@@ -315,7 +315,7 @@ where
                 for for_insert in nodes {
                     target_element
                         .insert_before(for_insert)
-                        .expect("must insert");
+                        ;
                 }
                 Ok(None)
             }
@@ -325,12 +325,12 @@ where
                 for for_insert in nodes.into_iter().rev() {
                     target_element
                         .insert_after(for_insert)
-                        .expect("insert after");
+                        ;
                 }
                 Ok(None)
             }
             PatchVariant::AppendChildren { children } => {
-                target_element.append_children(children).expect("append child");
+                target_element.append_children(children);
                 Ok(None)
             }
 
@@ -377,13 +377,12 @@ where
                     );
                     let mount_node = self.mount_node.borrow();
                     let mount_node = mount_node.as_ref().expect("must have a mount node");
-                    mount_node.append_children([first_node.clone()]).unwrap();
+                    mount_node.append_children([first_node.clone()]);
 
                     let multiple_node_replacement = !replacement.is_empty();
 
                     mount_node
-                        .append_children(replacement)
-                        .expect("append root_node");
+                        .append_children(replacement);
 
                     if patch_path.path.is_empty() {
                         assert!(!multiple_node_replacement, "There are multiple nodes, this becomes unsound");
@@ -392,10 +391,10 @@ where
                         Ok(None)
                     }
                 } else {
-                    target_element.replace_node(first_node.clone())?;
+                    target_element.replace_node(first_node.clone());
                     for replace_node in replacement.into_iter().rev() {
                         log::info!("Inserting the rest, after the first node: {}", replace_node.render_to_string());
-                        first_node.insert_after(replace_node)?;
+                        first_node.insert_after(replace_node);
                     }
                     if patch_path.path.is_empty() {
                         Ok(Some(first_node))
@@ -416,7 +415,7 @@ where
                 if let Some(target_parent) = target_element.parent.borrow().as_ref() {
                     for move_node in for_moving {
                         target_parent.remove_child(&move_node);
-                        target_element.insert_before(move_node).unwrap();
+                        target_element.insert_before(move_node);
                     }
                 } else {
                     panic!("unable to get the parent node of the target element");
@@ -428,7 +427,7 @@ where
                 if let Some(target_parent) = target_element.parent.borrow().as_ref() {
                     for move_node in for_moving {
                         target_parent.remove_child(&move_node);
-                        target_element.insert_after(move_node).unwrap();
+                        target_element.insert_after(move_node);
                     }
                 }
                 Ok(None)

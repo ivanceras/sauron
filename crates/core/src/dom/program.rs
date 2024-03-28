@@ -378,19 +378,19 @@ where
             MountAction::Append => {
                 mount_node
                     .append_children([created_node.clone()])
-                    .expect("append_child");
+                    ;
             }
             MountAction::ClearAppend => {
                 log::info!("doing a clear append..");
                 mount_node.clear_children();
                 mount_node
                     .append_children([created_node.clone()])
-                    .expect("append_child");
+                    ;
             }
             MountAction::Replace => {
                 mount_node
                     .replace_node(created_node.clone())
-                    .expect("replace node");
+                    ;
             }
         }
         *self.root_node.borrow_mut() = Some(created_node);
@@ -721,7 +721,7 @@ where
         let dom_head = DomNode::from(head_node);
         dom_head
             .append_children([created_node])
-            .expect("must append style");
+            ;
     }
 
     /// inject style element to the mount node
@@ -734,7 +734,7 @@ where
             .as_mut()
             .expect("mount node")
             .append_children([created_node])
-            .expect("could not append child to mount shadow");
+            ;
     }
 
     /// dispatch multiple MSG

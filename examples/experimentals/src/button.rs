@@ -33,7 +33,7 @@ impl Component for Button {
                 log::info!("Button: extenal container mounted...");
                 target_node
                     .append_children(self.children.drain(..))
-                    .expect("must append");
+                    ;
                 self.external_children_node = Some(target_node);
             }
             Msg::NoOp => (),
@@ -66,7 +66,7 @@ impl StatefulComponent for Button {
             log::info!("Btn ok appending..");
             external_children_node
                 .append_children(children)
-                .expect("must append");
+                ;
         } else {
             log::debug!(
                 "Button: Just pushing to children since the external holder is not yet mounted"
