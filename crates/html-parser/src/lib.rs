@@ -30,6 +30,12 @@ pub enum ParseError {
     InvalidTag(String),
 }
 
+/// parse the html string and build a node tree
+pub fn safe_html<MSG>(html: &str) -> Node<MSG>{
+    parse_html(html).expect("must be ok")
+        .expect("must have a node")
+}
+
 /// the document is not wrapped with html
 pub fn parse_html<MSG>(html: &str) -> Result<Option<Node<MSG>>, ParseError> {
     let doc = Doc::parse(

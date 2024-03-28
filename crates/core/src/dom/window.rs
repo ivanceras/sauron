@@ -113,6 +113,43 @@ impl Window {
             closures: vec![closure_cb],
         })
     }
+
+    /// scroll the window to the top of the document
+    pub fn scroll_to_top<MSG>(msg: MSG) -> Task<MSG>
+    where
+        MSG: 'static,
+    {
+        use std::future::ready;
+        Task::single(ready({ 
+            util::scroll_window_to_top();
+            msg
+        }))
+    }
+
+    ///
+    pub fn on_popstate<F, MSG>(mut cb: F) -> Task<MSG>
+    where
+        F: FnMut(web_sys::PopStateEvent) -> MSG + 'static,
+        MSG: 'static, {
+        let (mut tx, rx) = mpsc::unbounded();
+        let closure_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let popstate_event: web_sys::PopStateEvent = event.dyn_into().expect("popstate event");
+                let msg = cb(popstate_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("mouseup"),
+                closure_cb.as_ref().unchecked_ref(),
+            )
+            .expect("add event callback");
+        Task::Recurring(RecurringTask {
+            receiver: rx,
+            event_closures: vec![closure_cb],
+            closures: vec![],
+        })
+    }
 }
 
 impl<APP> Program<APP>
