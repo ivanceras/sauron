@@ -240,9 +240,7 @@ where
             Msg::ContentTargetMounted(me) => {
                 let mount_event = me.clone();
                 let target_node = me.target_node;
-                for child in self.children.drain(..) {
-                    target_node.append_child(child).expect("append child");
-                }
+                target_node.append_children(self.children.drain(..)).expect("append child");
                 self.content_target_node = Some(target_node);
                 let external = self
                     .container_mounted_listeners
@@ -632,8 +630,8 @@ impl<XMSG> StatefulComponent for Frame<XMSG> {
         }
     }
 
-    fn append_child(&mut self, child: DomNode) {
-        self.children.push(child);
+    fn append_children(&mut self, children: Vec<DomNode>) {
+        self.children.extend(children);
     }
 
     fn connected_callback(&mut self) {}

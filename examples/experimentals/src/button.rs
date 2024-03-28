@@ -31,11 +31,9 @@ impl Component for Button {
             Msg::Click => self.cnt += 1,
             Msg::ExternContMounted(target_node) => {
                 log::info!("Button: extenal container mounted...");
-                for child in self.children.iter() {
-                    target_node
-                        .append_child(child.clone())
-                        .expect("must append");
-                }
+                target_node
+                    .append_children(self.children.drain(..))
+                    .expect("must append");
                 self.external_children_node = Some(target_node);
             }
             Msg::NoOp => (),
@@ -63,18 +61,17 @@ impl StatefulComponent for Button {
     }
 
     /// append a child into this component
-    fn append_child(&mut self, child: DomNode) {
-        log::info!("Btn appending {:?}", child);
+    fn append_children(&mut self, children: Vec<DomNode>) {
         if let Some(external_children_node) = self.external_children_node.as_ref() {
             log::info!("Btn ok appending..");
             external_children_node
-                .append_child(child)
+                .append_children(children)
                 .expect("must append");
         } else {
             log::debug!(
                 "Button: Just pushing to children since the external holder is not yet mounted"
             );
-            self.children.push(child.clone());
+            self.children.extend(children);
         }
     }
 }
