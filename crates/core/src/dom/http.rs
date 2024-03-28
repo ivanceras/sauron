@@ -4,6 +4,7 @@ use std::fmt::Debug;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{RequestInit, Response};
+use crate::dom::window;
 
 /// Provides functions for doing http network request
 #[derive(Copy, Clone, Debug)]
@@ -30,12 +31,11 @@ impl Http {
         url: &str,
         request_init: Option<RequestInit>,
     ) -> Result<Response, TypeError> {
-        let window = web_sys::window().expect("should a refernce to window");
 
         let fetch_promise = if let Some(ref request_init) = request_init {
-            window.fetch_with_str_and_init(url, request_init)
+            window().fetch_with_str_and_init(url, request_init)
         } else {
-            window.fetch_with_str(url)
+            window().fetch_with_str(url)
         };
 
         match JsFuture::from(fetch_promise).await {

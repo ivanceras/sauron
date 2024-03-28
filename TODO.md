@@ -225,6 +225,7 @@
     add these events:
     - `on_interval(|i32|{})` for attaching interval in the Window
     Http can be done with task
+- [ ] Make Http functions return a Task
 - [ ] Make `Sub` as counterpart to `Cmd`
     - We can use `Sub` in the `Component`
     ```rust

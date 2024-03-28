@@ -1,5 +1,5 @@
 use crate::dom::task::RecurringTask;
-use crate::dom::{dom_node::intern, util, window, Application, Program, Task};
+use crate::dom::{dom_node::intern, util, window, Task};
 use futures::channel::mpsc;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::MouseEvent;
