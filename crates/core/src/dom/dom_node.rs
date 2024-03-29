@@ -285,6 +285,7 @@ impl DomNode {
                 for (i, c) in children.borrow().iter().enumerate() {
                     if c.as_node() == child.as_node() {
                         child_index = Some(i);
+                        break;
                     }
                 }
                 if let Some(child_index) = child_index {
