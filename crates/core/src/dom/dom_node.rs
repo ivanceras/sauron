@@ -318,6 +318,7 @@ impl DomNode {
                         }
                     }
                 }
+
                 if let Some(child_index) = child_index {
                     let child = children.borrow_mut().remove(child_index);
                     element
@@ -357,6 +358,8 @@ impl DomNode {
     pub(crate) fn remove_node(&self) {
         if let Some(parent) = self.parent.borrow().as_ref() {
             parent.remove_child(self);
+        }else{
+            unreachable!("this has no parent node");
         }
     }
 
