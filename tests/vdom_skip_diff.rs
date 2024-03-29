@@ -1,5 +1,5 @@
-use crate::dom::skip_diff::Marker;
 use sauron::*;
+use sauron::dom::skip_diff::SkipAttrs;
 
 #[test]
 fn simple() {
@@ -30,8 +30,7 @@ fn dont_collapsed_with_templates() {
     let skip = skip_if(
         true,
         [SkipDiff {
-            shall: false,
-            marker: Some(Marker::Block),
+            skip_attrs: SkipAttrs::none(),
             children: vec![],
         }],
     );
@@ -45,8 +44,7 @@ fn dont_skip_if_path_has_a_sibling_that_cant_be_skipped() {
     let skip = skip_if(
         true,
         [SkipDiff {
-            shall: false,
-            marker: Some(Marker::Block),
+            skip_attrs: SkipAttrs::none(),
             children: vec![],
         }],
     );

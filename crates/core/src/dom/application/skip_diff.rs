@@ -1,29 +1,40 @@
 use crate::vdom::TreePath;
 
 
+/// specifies how attributes will be skipped
+#[derive(Debug, PartialEq, Clone)]
+pub enum SkipAttrs{
+    /// all attributes are skipped
+    All,
+    /// skip only the listed indices
+    Indices(Vec<usize>),
+}
+
+impl SkipAttrs{
+
+    /// dont skip anything
+    pub fn none() -> Self{
+        Self::Indices(vec![])
+    }
+}
+
+
 /// if the expression evaluates to true,
 /// diffing at this node will be skipped entirely
 #[derive(Debug, PartialEq, Clone)]
 pub struct SkipDiff {
     /// shall skip or not
-    pub shall: bool,
+    pub skip_attrs: SkipAttrs,
     /// children skip diff
     pub children: Vec<SkipDiff>,
 }
 
 impl SkipDiff {
-    /// new
-    pub fn new(shall: bool, children: impl IntoIterator<Item = Self>) -> Self {
-        Self {
-            shall,
-            children: children.into_iter().collect(),
-        }
-    }
 
     /// the skip diff is a block
     pub fn block() -> Self {
         Self {
-            shall: false,
+            skip_attrs: SkipAttrs::none(),
             children: vec![],
         }
     }
@@ -51,28 +62,28 @@ impl SkipDiff {
     /// check if shall skip diffing attributes at this path
     /// if the path does not coincide in this skip diff, then by default it is skipped
     pub fn shall_skip_attributes(&self) -> bool {
-        self.shall
+        self.skip_attrs == SkipAttrs::All
     }
 
     /// return true if this skip diff and its children can be skipped
     pub fn is_skippable_recursive(&self) -> bool {
-        self.shall && self.children.iter().all(Self::is_skippable_recursive)
+        self.shall_skip_attributes() && self.children.iter().all(Self::is_skippable_recursive)
     }
 
     ///
     pub fn shall_skip_node(&self) -> bool {
-        self.shall && self.children.is_empty()
+        self.shall_skip_attributes() && self.children.is_empty()
     }
 
     /// collapse into 1 skip_if if all the children is skippable
     pub fn collapse_children(self) -> Self {
         let Self {
-            shall,
+            skip_attrs,
             children,
         } = self;
         let can_skip_children = children.iter().all(Self::is_skippable_recursive);
         Self {
-            shall,
+            skip_attrs,
             children: if can_skip_children {
                 vec![]
             } else {
@@ -85,7 +96,7 @@ impl SkipDiff {
 /// skip diffing the node is the val is true
 pub fn skip_if(shall: bool, children: impl IntoIterator<Item = SkipDiff>) -> SkipDiff {
     SkipDiff {
-        shall,
+        skip_attrs: if shall{SkipAttrs::All}else{SkipAttrs::none()},
         children: children.into_iter().collect(),
     }
 }

@@ -35,9 +35,29 @@ fn from_single_node(node: &Node) -> TokenStream {
     match node {
         Node::Element(elm) => {
             //also returns true if there is no attributes
-            let is_attrs_literal = is_all_literal_attributes(&elm.open_tag.attributes);
+            let skip_attrs = if is_all_literal_attributes(&elm.open_tag.attributes){
+                quote!{
+                   ::sauron::dom::skip_diff::SkipAttrs::All
+                }
+            }else{
+                let indices = literal_attributes_indices(&elm.open_tag.attributes);
+                let mut indices_tokens = TokenStream::new();
+                for index in indices{
+                    indices_tokens.extend(quote!{
+                        #index,
+                    });
+                }
+                quote!{
+                    ::sauron::dom::skip_diff::SkipAttrs::Indices(vec![#indices_tokens])
+                }
+            };
             let children = nodes_to_tokens(&elm.children);
-            quote! {::sauron::skip_if(#is_attrs_literal, [#children])}
+            quote! {
+                ::sauron::SkipDiff{
+                    skip_attrs: #skip_attrs, 
+                    children: vec![#children],
+                }
+            }
         }
         Node::Fragment(fragment) => from_multiple_nodes(&fragment.children),
         Node::Text(_) | Node::RawText(_) | Node::Comment(_) | Node::Doctype(_) => {
@@ -72,6 +92,10 @@ fn nodes_to_tokens(nodes: &[Node]) -> TokenStream {
 
 fn is_all_literal_attributes(attributes: &[NodeAttribute]) -> bool {
     attributes.iter().all(is_literal_attribute)
+}
+
+fn literal_attributes_indices(attributes: &[NodeAttribute]) -> Vec<usize>{
+    attributes.iter().enumerate().filter_map(|(i,att)|if is_literal_attribute(att){Some(i)}else{None}).collect()
 }
 
 pub(crate) fn is_literal_attribute(attribute: &NodeAttribute) -> bool {
