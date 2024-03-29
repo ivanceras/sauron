@@ -312,17 +312,12 @@ where
 
         match patch_variant {
             PatchVariant::InsertBeforeNode { nodes } => {
-                for for_insert in nodes {
-                    target_element.insert_before(for_insert);
-                }
+                target_element.insert_before(nodes);
                 Ok(None)
             }
 
             PatchVariant::InsertAfterNode { nodes } => {
-                // we insert the node before this target element
-                for for_insert in nodes.into_iter().rev() {
-                    target_element.insert_after(for_insert);
-                }
+                target_element.insert_after(nodes);
                 Ok(None)
             }
             PatchVariant::AppendChildren { children } => {
@@ -390,13 +385,7 @@ where
                     }
                 } else {
                     target_element.replace_node(first_node.clone());
-                    for replace_node in replacement.into_iter().rev() {
-                        log::info!(
-                            "Inserting the rest, after the first node: {}",
-                            replace_node.render_to_string()
-                        );
-                        first_node.insert_after(replace_node);
-                    }
+                    first_node.insert_after(replacement);
                     if patch_path.path.is_empty() {
                         Ok(Some(first_node))
                     } else {
@@ -415,9 +404,7 @@ where
             PatchVariant::MoveBeforeNode { for_moving } => {
                 if let Some(target_parent) = target_element.parent.borrow().as_ref() {
                     target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
-                    for move_node in for_moving {
-                        target_element.insert_before(move_node);
-                    }
+                    target_element.insert_before(for_moving);
                 } else {
                     panic!("unable to get the parent node of the target element");
                 }
@@ -427,9 +414,7 @@ where
             PatchVariant::MoveAfterNode { for_moving } => {
                 if let Some(target_parent) = target_element.parent.borrow().as_ref() {
                     target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
-                    for move_node in for_moving {
-                        target_element.insert_after(move_node);
-                    }
+                    target_element.insert_after(for_moving);
                 }
                 Ok(None)
             }

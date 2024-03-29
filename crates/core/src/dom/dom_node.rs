@@ -204,14 +204,7 @@ impl DomNode {
     }
 
     /// Insert the DomNode `for_insert` before `self` DomNode
-    pub(crate) fn insert_before(&self, for_insert: DomNode) {
-        let DomInner::Element {
-            element: target_element,
-            ..
-        } = &self.inner
-        else {
-            unreachable!("target element should be an element");
-        };
+    pub(crate) fn insert_before(&self, for_insert: Vec<DomNode>) {
         let parent_target = self.parent.borrow();
         let parent_target = parent_target.as_ref().expect("must have a parent");
         let DomInner::Element {
@@ -221,36 +214,35 @@ impl DomNode {
         else {
             unreachable!("parent must be an element");
         };
-        target_element.insert_adjacent_element(intern("beforebegin"), &for_insert.as_element())
-            .expect("must insert before this element");
 
         let mut self_index = None;
         for (i, child) in parent_children.borrow().iter().enumerate() {
             if self.as_node() == child.as_node() {
                 self_index = Some(i);
+                break;
             }
         }
-        for_insert.set_parent(parent_target);
-        if let Some(self_index) = self_index {
-            parent_children.borrow_mut().insert(self_index, for_insert);
-        } else {
-            unreachable!("should have a self index");
+        // NOTE: This is not reverse since inserting the last insert_node will always be next
+        // before the target element
+        for insert_node in for_insert.iter(){
+            self.as_element().insert_adjacent_element(intern("beforebegin"), &insert_node.as_element())
+                .expect("must insert before this element");
+        }
+
+        // NOTE: It is important that we reverse the insertion to the wrapper DomNode since it is
+        // just a Vec where inserting from the last will preserve the index to insert into
+        for insert_node in for_insert.into_iter().rev(){
+            insert_node.set_parent(parent_target);
+            if let Some(self_index) = self_index {
+                parent_children.borrow_mut().insert(self_index, insert_node);
+            } else {
+                unreachable!("should have a self index");
+            }
         }
     }
 
     /// Insert the DomNode `for_insert` after `self` DomNode
-    pub(crate) fn insert_after(&self, for_insert: DomNode) {
-        let DomInner::Element {
-            element: target_element,
-            ..
-        } = &self.inner
-        else {
-            unreachable!("target element should be an element");
-        };
-        target_element
-            .insert_adjacent_element(intern("afterend"), &for_insert.as_element())
-            .expect("must insert after this element");
-
+    pub(crate) fn insert_after(&self, for_insert: Vec<DomNode>) {
         let parent_target = self.parent.borrow();
         let parent_target = parent_target.as_ref().expect("must have a parent");
         let DomInner::Element {
@@ -264,15 +256,21 @@ impl DomNode {
         for (i, child) in parent_children.borrow().iter().enumerate() {
             if self.as_node() == child.as_node() {
                 self_index = Some(i);
+                break;
             }
         }
-        for_insert.set_parent(parent_target);
-        if let Some(self_index) = self_index {
-            parent_children
-                .borrow_mut()
-                .insert(self_index + 1, for_insert);
-        } else {
-            unreachable!("should have a self index");
+        for insert_node in for_insert.into_iter().rev(){
+            self.as_element()
+                .insert_adjacent_element(intern("afterend"), &insert_node.as_element())
+                .expect("must insert after this element");
+            insert_node.set_parent(parent_target);
+            if let Some(self_index) = self_index {
+                parent_children
+                    .borrow_mut()
+                    .insert(self_index + 1, insert_node);
+            } else {
+                unreachable!("should have a self index");
+            }
         }
     }
 
