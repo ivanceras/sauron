@@ -1,11 +1,5 @@
 use crate::vdom::TreePath;
 
-///
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Marker {
-    /// anything else in the valid block
-    Block,
-}
 
 /// if the expression evaluates to true,
 /// diffing at this node will be skipped entirely
@@ -13,8 +7,6 @@ pub enum Marker {
 pub struct SkipDiff {
     /// shall skip or not
     pub shall: bool,
-    /// marker for template blocks
-    pub marker: Option<Marker>,
     /// children skip diff
     pub children: Vec<SkipDiff>,
 }
@@ -24,7 +16,6 @@ impl SkipDiff {
     pub fn new(shall: bool, children: impl IntoIterator<Item = Self>) -> Self {
         Self {
             shall,
-            marker: None,
             children: children.into_iter().collect(),
         }
     }
@@ -33,7 +24,6 @@ impl SkipDiff {
     pub fn block() -> Self {
         Self {
             shall: false,
-            marker: Some(Marker::Block),
             children: vec![],
         }
     }
@@ -79,12 +69,10 @@ impl SkipDiff {
         let Self {
             shall,
             children,
-            marker,
         } = self;
         let can_skip_children = children.iter().all(Self::is_skippable_recursive);
         Self {
             shall,
-            marker,
             children: if can_skip_children {
                 vec![]
             } else {
@@ -98,7 +86,6 @@ impl SkipDiff {
 pub fn skip_if(shall: bool, children: impl IntoIterator<Item = SkipDiff>) -> SkipDiff {
     SkipDiff {
         shall,
-        marker: None,
         children: children.into_iter().collect(),
     }
 }

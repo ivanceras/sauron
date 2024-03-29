@@ -257,7 +257,7 @@
     - This is anchored as next to the last sibling
     - This can not just be backtrack to the parent, as it defeats the purpose of
       doing as little diff as possible.
-- [X] Make a TemplateView struct and a variant of Leat
+- [X] Make a TemplateView struct and a variant of Leaf
     ```rust
     struct TemplatedView<MSG>{
         template: Box<dyn Fn() -> Node<MSG>>,
