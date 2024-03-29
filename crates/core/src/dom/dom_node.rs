@@ -184,7 +184,6 @@ impl DomNode {
                 let for_append = for_append.into_iter();
                 for child in for_append {
                     if let Some(symbol) = child.as_symbol() {
-                        //TODO: escape the `<` and `>`
                         element
                             .insert_adjacent_html(intern("beforeend"), &symbol)
                             .expect("must not error");
