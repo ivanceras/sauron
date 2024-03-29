@@ -100,7 +100,6 @@ impl Component for RowData {
 struct App {
     rows: Vec<RowData>,
     next_id: usize,
-    selected_id: Option<usize>,
     rng: SmallRng,
 }
 
@@ -109,7 +108,6 @@ impl App {
         App {
             rows: Vec::new(),
             next_id: 1,
-            selected_id: None,
             rng: SmallRng::from_entropy(),
         }
     }
@@ -168,9 +166,8 @@ impl Application for App {
                 }
             }
             Msg::Select(id) => {
-                self.selected_id = Some(id);
                 for row in &mut self.rows {
-                    row.selected = self.selected_id == Some(row.id)
+                    row.selected = row.id == id;
                 }
             }
         }
