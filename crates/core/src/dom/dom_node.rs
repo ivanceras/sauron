@@ -474,6 +474,7 @@ impl DomNode {
                 element, children, ..
             } => {
                 let tag = element.tag_name().to_lowercase();
+                let is_self_closing = lookup::is_self_closing(&tag);
 
                 write!(buffer, "<{tag}")?;
                 let attrs = element.attributes();
@@ -482,7 +483,7 @@ impl DomNode {
                     let attr = attrs.item(i).expect("attr");
                     write!(buffer, " {}=\"{}\"", attr.local_name(), attr.value())?;
                 }
-                if lookup::is_self_closing(&tag) {
+                if is_self_closing {
                     write!(buffer, "/>")?;
                 } else {
                     write!(buffer, ">")?;
@@ -491,7 +492,7 @@ impl DomNode {
                 for child in children.borrow().iter() {
                     child.render(buffer)?;
                 }
-                if !lookup::is_self_closing(&tag) {
+                if !is_self_closing {
                     write!(buffer, "</{tag}>")?;
                 }
                 Ok(())
