@@ -224,14 +224,15 @@ impl DomNode {
         }
         // NOTE: This is not reverse since inserting the last insert_node will always be next
         // before the target element
-        for insert_node in for_insert.iter(){
-            self.as_element().insert_adjacent_element(intern("beforebegin"), &insert_node.as_element())
+        for insert_node in for_insert.iter() {
+            self.as_element()
+                .insert_adjacent_element(intern("beforebegin"), &insert_node.as_element())
                 .expect("must insert before this element");
         }
 
         // NOTE: It is important that we reverse the insertion to the wrapper DomNode since it is
         // just a Vec where inserting from the last will preserve the index to insert into
-        for insert_node in for_insert.into_iter().rev(){
+        for insert_node in for_insert.into_iter().rev() {
             insert_node.set_parent(parent_target);
             if let Some(self_index) = self_index {
                 parent_children.borrow_mut().insert(self_index, insert_node);
@@ -259,7 +260,7 @@ impl DomNode {
                 break;
             }
         }
-        for insert_node in for_insert.into_iter().rev(){
+        for insert_node in for_insert.into_iter().rev() {
             self.as_element()
                 .insert_adjacent_element(intern("afterend"), &insert_node.as_element())
                 .expect("must insert after this element");
@@ -311,7 +312,7 @@ impl DomNode {
             } => {
                 let mut child_indexes = vec![];
                 for (i, c) in children.borrow().iter().enumerate() {
-                    for remove_node in for_remove{
+                    for remove_node in for_remove {
                         if c.as_node() == remove_node.as_node() {
                             child_indexes.push(i);
                             break;
@@ -328,7 +329,7 @@ impl DomNode {
                     element
                         .remove_child(&child.as_node())
                         .expect("remove child");
-                } 
+                }
             }
             _ => todo!(),
         }
@@ -363,7 +364,7 @@ impl DomNode {
     pub(crate) fn remove_node(&self) {
         if let Some(parent) = self.parent.borrow().as_ref() {
             parent.remove_children(&[self]);
-        }else{
+        } else {
             unreachable!("this has no parent node");
         }
     }

@@ -1,5 +1,5 @@
-use sauron::*;
 use sauron::dom::skip_diff::SkipAttrs;
+use sauron::*;
 
 #[test]
 fn simple() {

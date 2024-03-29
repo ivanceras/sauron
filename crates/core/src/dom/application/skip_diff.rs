@@ -1,23 +1,20 @@
 use crate::vdom::TreePath;
 
-
 /// specifies how attributes will be skipped
 #[derive(Debug, PartialEq, Clone)]
-pub enum SkipAttrs{
+pub enum SkipAttrs {
     /// all attributes are skipped
     All,
     /// skip only the listed indices
     Indices(Vec<usize>),
 }
 
-impl SkipAttrs{
-
+impl SkipAttrs {
     /// dont skip anything
-    pub fn none() -> Self{
+    pub fn none() -> Self {
         Self::Indices(vec![])
     }
 }
-
 
 /// if the expression evaluates to true,
 /// diffing at this node will be skipped entirely
@@ -30,7 +27,6 @@ pub struct SkipDiff {
 }
 
 impl SkipDiff {
-
     /// the skip diff is a block
     pub fn block() -> Self {
         Self {
@@ -96,7 +92,11 @@ impl SkipDiff {
 /// skip diffing the node is the val is true
 pub fn skip_if(shall: bool, children: impl IntoIterator<Item = SkipDiff>) -> SkipDiff {
     SkipDiff {
-        skip_attrs: if shall{SkipAttrs::All}else{SkipAttrs::none()},
+        skip_attrs: if shall {
+            SkipAttrs::All
+        } else {
+            SkipAttrs::none()
+        },
         children: children.into_iter().collect(),
     }
 }

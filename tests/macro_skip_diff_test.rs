@@ -1,6 +1,6 @@
+use crate::dom::skip_diff::SkipAttrs;
 use sauron::*;
 use sauron_macro::*;
-use crate::dom::skip_diff::SkipAttrs;
 
 #[test]
 fn skip_if_all_attribute_values_are_static() {
@@ -15,9 +15,14 @@ fn skip_if_all_attribute_values_are_static() {
 #[test]
 fn dont_skip_if_some_attributes_are_computed() {
     let skip = extract_skip_diff! {<ul class="some-list" id=format!("some-id",100)></ul>};
-    assert_eq!(skip, sauron::SkipDiff{
-        skip_attrs: SkipAttrs::Indices(vec![0]),
-        children: vec![]}, "the id is generated");
+    assert_eq!(
+        skip,
+        sauron::SkipDiff {
+            skip_attrs: SkipAttrs::Indices(vec![0]),
+            children: vec![]
+        },
+        "the id is generated"
+    );
 }
 
 #[test]
