@@ -215,16 +215,14 @@ impl DomNode {
         let parent_target = self.parent.borrow();
         let parent_target = parent_target.as_ref().expect("must have a parent");
         let DomInner::Element {
-            element: parent_element,
             children: parent_children,
             ..
         } = &parent_target.inner
         else {
             unreachable!("parent must be an element");
         };
-        parent_element
-            .insert_before(&for_insert.as_node(), Some(&target_element))
-            .expect("must remove target node");
+        target_element.insert_adjacent_element(intern("beforebegin"), &for_insert.as_element())
+            .expect("must insert before this element");
 
         let mut self_index = None;
         for (i, child) in parent_children.borrow().iter().enumerate() {
@@ -242,9 +240,12 @@ impl DomNode {
 
     /// Insert the DomNode `for_insert` after `self` DomNode
     pub(crate) fn insert_after(&self, for_insert: DomNode) {
-        let target_element = match &self.inner {
-            DomInner::Element { element, .. } => element,
-            _ => unreachable!("target element should be an element"),
+        let DomInner::Element {
+            element: target_element,
+            ..
+        } = &self.inner
+        else {
+            unreachable!("target element should be an element");
         };
         target_element
             .insert_adjacent_element(intern("afterend"), &for_insert.as_element())
