@@ -84,6 +84,7 @@ fn single_node(node: Node) -> TokenStream {
                 }) = braced_for_loop(&block)
                 {
                     quote! {
+                        #[allow(unused_braces)]
                         {
                             let mut receiver = vec![];
                             for #pat in #expr{
