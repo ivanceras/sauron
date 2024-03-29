@@ -305,21 +305,26 @@ impl DomNode {
     }
 
     /// Remove the DomNode `child` from the children of `self`
-    pub(crate) fn remove_child(&self, for_remove: &DomNode) {
+    pub(crate) fn remove_children(&self, for_remove: &[&DomNode]) {
         match &self.inner {
             DomInner::Element {
                 element, children, ..
             } => {
                 let mut child_indexes = vec![];
                 for (i, c) in children.borrow().iter().enumerate() {
-                    if c.as_node() == for_remove.as_node() {
-                        child_indexes.push(i);
-                        break;
+                    for remove_node in for_remove{
+                        if c.as_node() == remove_node.as_node() {
+                            child_indexes.push(i);
+                            break;
+                        }
                     }
                 }
-                assert!(!child_indexes.is_empty(), "must find child");
+                assert_eq!(child_indexes.len(), for_remove.len(), "must find all");
 
-                for child_index in child_indexes {
+                // NOTE: It is important to remove from the last, since
+                // vec shifts to the left, while removing from the last
+                // with the rev child index, we remove the correct child_index
+                for child_index in child_indexes.into_iter().rev() {
                     let child = children.borrow_mut().remove(child_index);
                     element
                         .remove_child(&child.as_node())
@@ -340,6 +345,9 @@ impl DomNode {
                 let t1 = now();
                 children.borrow_mut().clear();
                 let t2 = now();
+                // NOTE: It is faster to remove from the last
+                // This is removing the children of the actual node
+                // regardless if it is mapped with the DomNode wrapper
                 while let Some(last_child) = element.last_child() {
                     element
                         .remove_child(&last_child)
@@ -355,7 +363,7 @@ impl DomNode {
 
     pub(crate) fn remove_node(&self) {
         if let Some(parent) = self.parent.borrow().as_ref() {
-            parent.remove_child(self);
+            parent.remove_children(&[self]);
         }else{
             unreachable!("this has no parent node");
         }

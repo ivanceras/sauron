@@ -414,8 +414,8 @@ where
             }
             PatchVariant::MoveBeforeNode { for_moving } => {
                 if let Some(target_parent) = target_element.parent.borrow().as_ref() {
+                    target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
                     for move_node in for_moving {
-                        target_parent.remove_child(&move_node);
                         target_element.insert_before(move_node);
                     }
                 } else {
@@ -426,8 +426,8 @@ where
 
             PatchVariant::MoveAfterNode { for_moving } => {
                 if let Some(target_parent) = target_element.parent.borrow().as_ref() {
+                    target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
                     for move_node in for_moving {
-                        target_parent.remove_child(&move_node);
                         target_element.insert_after(move_node);
                     }
                 }
