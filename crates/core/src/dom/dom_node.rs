@@ -305,28 +305,26 @@ impl DomNode {
     }
 
     /// Remove the DomNode `child` from the children of `self`
-    pub(crate) fn remove_child(&self, child: &DomNode) {
+    pub(crate) fn remove_child(&self, for_remove: &DomNode) {
         match &self.inner {
             DomInner::Element {
                 element, children, ..
             } => {
-                let mut child_index = None;
-                {
-                    for (i, c) in children.borrow().iter().enumerate() {
-                        if c.as_node() == child.as_node() {
-                            child_index = Some(i);
-                        }
+                let mut child_indexes = vec![];
+                for (i, c) in children.borrow().iter().enumerate() {
+                    if c.as_node() == for_remove.as_node() {
+                        child_indexes.push(i);
+                        break;
                     }
                 }
+                assert!(!child_indexes.is_empty(), "must find child");
 
-                if let Some(child_index) = child_index {
+                for child_index in child_indexes {
                     let child = children.borrow_mut().remove(child_index);
                     element
                         .remove_child(&child.as_node())
                         .expect("remove child");
-                } else {
-                    unreachable!("no parent")
-                }
+                } 
             }
             _ => todo!(),
         }
