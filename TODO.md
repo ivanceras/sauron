@@ -106,6 +106,8 @@
     }
     ```
 - [ ] Make the compilation error in `jss!`, `style!`, more informative
+- [ ] Optimize handling of style by diffing each style properties
+    - Update only specific stype instead of setting the whole style attributes
 
 
 ## Internal
