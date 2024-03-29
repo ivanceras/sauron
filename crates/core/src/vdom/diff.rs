@@ -1,11 +1,11 @@
 //! provides diffing algorithm which returns patches
 use super::{diff_lis, Attribute, Element, Node, Patch, TreePath};
 use super::{Tag, KEY, REPLACE, SKIP, SKIP_CRITERIA};
+use crate::dom::skip_diff::SkipAttrs;
 use crate::dom::SkipPath;
+use crate::vdom::AttributeValue;
 use crate::vdom::Leaf;
 use std::{cmp, mem};
-use crate::dom::skip_diff::SkipAttrs;
-use crate::vdom::AttributeValue;
 
 static USE_SKIP_DIFF: bool = true;
 
@@ -326,18 +326,18 @@ fn create_attribute_patches<'a, MSG>(
     new_element: &'a Element<MSG>,
     path: &SkipPath,
 ) -> Vec<Patch<'a, MSG>> {
-    let skip_indices = if let Some(skip_diff) = &path.skip_diff{
-        if let SkipAttrs::Indices(skip_indices) = &skip_diff.skip_attrs{
+    let skip_indices = if let Some(skip_diff) = &path.skip_diff {
+        if let SkipAttrs::Indices(skip_indices) = &skip_diff.skip_attrs {
             skip_indices.clone()
-        }else{
+        } else {
             vec![]
         }
-    } else{
+    } else {
         vec![]
     };
 
     let has_skip_indices = !skip_indices.is_empty();
-    
+
     let new_attributes = new_element.attributes();
     let old_attributes = old_element.attributes();
 
@@ -358,29 +358,40 @@ fn create_attribute_patches<'a, MSG>(
     // or the values differ
     // add it to the AddAttribute patches
     for (new_attr_name, new_attrs) in new_attributes_grouped.iter() {
-        let old_indexed_attr_values: Option<Vec<(usize, &Vec<AttributeValue<MSG>>)>> = old_attributes_grouped
-            .get(new_attr_name)
-            .map(|attrs| attrs.iter().map(|(i,attr)| (*i,&attr.value)).collect::<Vec<_>>());
+        let old_indexed_attr_values: Option<Vec<(usize, &Vec<AttributeValue<MSG>>)>> =
+            old_attributes_grouped.get(new_attr_name).map(|attrs| {
+                attrs
+                    .iter()
+                    .map(|(i, attr)| (*i, &attr.value))
+                    .collect::<Vec<_>>()
+            });
 
-        let new_indexed_attr_values: Option<Vec<(usize, &Vec<AttributeValue<MSG>>)>>  = new_attributes_grouped
-            .get(new_attr_name)
-            .map(|attrs| attrs.iter().map(|(i,attr)| (*i,&attr.value)).collect::<Vec<_>>());
+        let new_indexed_attr_values: Option<Vec<(usize, &Vec<AttributeValue<MSG>>)>> =
+            new_attributes_grouped.get(new_attr_name).map(|attrs| {
+                attrs
+                    .iter()
+                    .map(|(i, attr)| (*i, &attr.value))
+                    .collect::<Vec<_>>()
+            });
 
         if let Some(old_indexed_attr_values) = old_indexed_attr_values {
-            let new_indexed_attr_values = new_indexed_attr_values.expect("must have new attr values");
-            let (_new_indices, new_attr_values):(Vec<usize>, Vec<&Vec<AttributeValue<MSG>>>) = new_indexed_attr_values.into_iter().unzip();
-            let (old_indices, old_attr_values):(Vec<usize>, Vec<&Vec<AttributeValue<MSG>>>) = old_indexed_attr_values.into_iter().unzip();
-            if USE_SKIP_DIFF && has_skip_indices && is_subset_of(&old_indices, &skip_indices).0{
+            let new_indexed_attr_values =
+                new_indexed_attr_values.expect("must have new attr values");
+            let (_new_indices, new_attr_values): (Vec<usize>, Vec<&Vec<AttributeValue<MSG>>>) =
+                new_indexed_attr_values.into_iter().unzip();
+            let (old_indices, old_attr_values): (Vec<usize>, Vec<&Vec<AttributeValue<MSG>>>) =
+                old_indexed_attr_values.into_iter().unzip();
+            if USE_SKIP_DIFF && has_skip_indices && is_subset_of(&old_indices, &skip_indices) {
                 //
-            }else{
-                if  old_attr_values != new_attr_values {
-                    for (_i,new_att) in new_attrs{
+            } else {
+                if old_attr_values != new_attr_values {
+                    for (_i, new_att) in new_attrs {
                         add_attributes.push(new_att);
                     }
                 }
             }
         } else {
-            for (_i,new_att) in new_attrs{
+            for (_i, new_att) in new_attrs {
                 add_attributes.push(new_att);
             }
         }
@@ -389,10 +400,11 @@ fn create_attribute_patches<'a, MSG>(
     // if this attribute name does not exist anymore
     // to the new element, remove it
     for (old_attr_name, old_indexed_attrs) in old_attributes_grouped.into_iter() {
-        let (old_indices, old_attrs):(Vec<usize>, Vec<&Attribute<MSG>>) = old_indexed_attrs.into_iter().unzip();
-        if USE_SKIP_DIFF && has_skip_indices && is_subset_of(&old_indices, &skip_indices).0{
+        let (old_indices, old_attrs): (Vec<usize>, Vec<&Attribute<MSG>>) =
+            old_indexed_attrs.into_iter().unzip();
+        if USE_SKIP_DIFF && has_skip_indices && is_subset_of(&old_indices, &skip_indices) {
             //
-        }else{
+        } else {
             if !new_attributes_grouped.contains_key(old_attr_name) {
                 remove_attributes.extend(old_attrs.clone());
             }
@@ -416,25 +428,8 @@ fn create_attribute_patches<'a, MSG>(
     patches
 }
 
-
 /// returns true if all the elements in subset is in big_set
 /// This also returns the indices of big_set that are not found in the subset
-fn is_subset_of<T: PartialEq>(
-    subset: &[T],
-    big_set: &[T],
-) -> (bool, Vec<usize>) {
-    let mut unmatched = vec![];
-    let mut matched = 0;
-    for (_i, set) in subset.iter().enumerate() {
-        if big_set.contains(set) {
-            matched += 1;
-        }
-    }
-    for (bi, bset) in big_set.iter().enumerate() {
-        if !subset.contains(bset) {
-            unmatched.push(bi);
-        }
-    }
-    (matched == subset.len(), unmatched)
+fn is_subset_of<T: PartialEq>(subset: &[T], big_set: &[T]) -> bool {
+    subset.iter().all(|set| big_set.contains(set))
 }
-
