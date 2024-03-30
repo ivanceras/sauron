@@ -255,7 +255,7 @@ impl DomNode {
 
         let mut self_index = None;
         for (i, child) in parent_children.borrow().iter().enumerate() {
-            if self.as_node() == child.as_node() {
+            if self == child {
                 self_index = Some(i);
                 break;
             }
@@ -294,7 +294,7 @@ impl DomNode {
         };
         let mut self_index = None;
         for (i, child) in parent_children.borrow().iter().enumerate() {
-            if self.as_node() == child.as_node() {
+            if self == child {
                 self_index = Some(i);
                 break;
             }
@@ -318,21 +318,24 @@ impl DomNode {
     }
 
     /// Replace the child `child` DomNode with a replacement DomNode `replacement`
-    pub(crate) fn replace_child(&self, child: &DomNode, mut replacement: DomNode) {
-        log::debug!("atttempt to replace child..{}", child.render_to_string());
+    pub(crate) fn replace_child(&self, target_child: &DomNode, mut replacement: DomNode) {
+        log::debug!(
+            "atttempt to replace child..{}",
+            target_child.render_to_string()
+        );
         match &self.inner {
             DomInner::Element { children, .. } => {
                 let mut child_index = None;
-                for (i, c) in children.borrow().iter().enumerate() {
-                    if c.as_node() == child.as_node() {
+                for (i, ch) in children.borrow().iter().enumerate() {
+                    if ch == target_child {
                         child_index = Some(i);
                         break;
                     }
                 }
                 replacement.parent = Rc::new(Some(self.clone()));
                 if let Some(child_index) = child_index {
-                    let child = children.borrow_mut().remove(child_index);
-                    child
+                    children.borrow_mut().remove(child_index);
+                    target_child
                         .as_element()
                         .replace_with_with_node_1(&replacement.as_node())
                         .expect("must replace child");
@@ -353,9 +356,9 @@ impl DomNode {
                 element, children, ..
             } => {
                 let mut child_indexes = vec![];
-                for (i, c) in children.borrow().iter().enumerate() {
-                    for remove_node in for_remove {
-                        if c.as_node() == remove_node.as_node() {
+                for (i, ch) in children.borrow().iter().enumerate() {
+                    for remove_node in for_remove.iter() {
+                        if ch == *remove_node {
                             child_indexes.push(i);
                             break;
                         }
@@ -379,14 +382,11 @@ impl DomNode {
 
     /// remove all the children of this element
     pub(crate) fn clear_children(&self) {
-        use crate::dom::now;
         match &self.inner {
             DomInner::Element {
                 element, children, ..
             } => {
-                let t1 = now();
                 children.borrow_mut().clear();
-                let t2 = now();
                 // NOTE: It is faster to remove from the last
                 // This is removing the children of the actual node
                 // regardless if it is mapped with the DomNode wrapper
@@ -395,9 +395,6 @@ impl DomNode {
                         .remove_child(&last_child)
                         .expect("must remove child");
                 }
-                let t3 = now();
-                log::info!("for_each took: {}ms", t2 - t1);
-                log::info!("while loop took: {}ms", t3 - t2);
             }
             _ => todo!(),
         }
