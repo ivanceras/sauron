@@ -97,15 +97,17 @@ impl fmt::Debug for DomInner {
 
 impl From<web_sys::Node> for DomNode {
     fn from(node: web_sys::Node) -> Self {
-        match node.node_type(){
+        match node.node_type() {
             Node::ELEMENT_NODE => {
                 let element: web_sys::Element = node.unchecked_into();
                 let child_nodes = element.child_nodes();
                 let children_count = child_nodes.length();
-                let children = (0..children_count).map(|i|{
-                    let child = child_nodes.get(i).expect("child");
-                    DomNode::from(child)
-                }).collect();
+                let children = (0..children_count)
+                    .map(|i| {
+                        let child = child_nodes.get(i).expect("child");
+                        DomNode::from(child)
+                    })
+                    .collect();
                 DomNode {
                     inner: DomInner::Element {
                         element,
@@ -117,14 +119,14 @@ impl From<web_sys::Node> for DomNode {
             }
             Node::TEXT_NODE => {
                 let text_node: web_sys::Text = node.unchecked_into();
-                DomNode{
+                DomNode {
                     inner: DomInner::Text(text_node),
                     parent: Rc::new(None),
                 }
             }
             Node::COMMENT_NODE => {
                 let comment: web_sys::Comment = node.unchecked_into();
-                DomNode{
+                DomNode {
                     inner: DomInner::Comment(comment),
                     parent: Rc::new(None),
                 }
@@ -134,16 +136,17 @@ impl From<web_sys::Node> for DomNode {
     }
 }
 
-impl PartialEq for DomNode{
-
+impl PartialEq for DomNode {
     fn eq(&self, other: &Self) -> bool {
         match (&self.inner, &other.inner) {
-            (DomInner::Element { element: v, .. }, DomInner::Element { element: o, .. }) =>  v== o,
-            (DomInner::Fragment { fragment: v, .. },DomInner::Fragment { fragment: o, .. }) => v == o,
-            (DomInner::Text(v), DomInner::Text(o))=> v == o,
-            (DomInner::Symbol(v),DomInner::Symbol(o)) => v == o,
-            (DomInner::Comment(v),DomInner::Comment(o)) => v == o,
-            (DomInner::StatefulComponent(_v),DomInner::StatefulComponent(_o)) => todo!(),
+            (DomInner::Element { element: v, .. }, DomInner::Element { element: o, .. }) => v == o,
+            (DomInner::Fragment { fragment: v, .. }, DomInner::Fragment { fragment: o, .. }) => {
+                v == o
+            }
+            (DomInner::Text(v), DomInner::Text(o)) => v == o,
+            (DomInner::Symbol(v), DomInner::Symbol(o)) => v == o,
+            (DomInner::Comment(v), DomInner::Comment(o)) => v == o,
+            (DomInner::StatefulComponent(_v), DomInner::StatefulComponent(_o)) => todo!(),
             _ => false,
         }
     }
@@ -212,7 +215,6 @@ impl DomNode {
         element.outer_html()
     }
 
-
     /// append the DomNode `child` into this DomNode `self`
     pub fn append_children(&self, for_append: Vec<DomNode>) {
         match &self.inner {
@@ -258,7 +260,7 @@ impl DomNode {
                 break;
             }
         }
-        for insert_node in for_insert.iter_mut(){
+        for insert_node in for_insert.iter_mut() {
             insert_node.parent = Rc::clone(&self.parent);
         }
         // NOTE: This is not reverse since inserting the last insert_node will always be next
@@ -297,7 +299,7 @@ impl DomNode {
                 break;
             }
         }
-        for insert_node in for_insert.iter_mut(){
+        for insert_node in for_insert.iter_mut() {
             insert_node.parent = Rc::clone(&self.parent);
         }
         for insert_node in for_insert.into_iter().rev() {
@@ -684,7 +686,8 @@ where
         };
         let children = nodes
             .into_iter()
-            .map(|node| self.create_dom_node(Some(dom_node.clone()), &node)).collect();
+            .map(|node| self.create_dom_node(Some(dom_node.clone()), &node))
+            .collect();
         dom_node.append_children(children);
         dom_node
     }

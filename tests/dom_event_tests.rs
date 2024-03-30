@@ -92,17 +92,14 @@ fn added_event() {
         .expect("must not error");
 
     let document = sauron_core::dom::document();
-    let input_element = document
-        .get_element_by_id(elem_id)
-        .unwrap();
+    let input_element = document.get_element_by_id(elem_id).unwrap();
     log::info!("input_element: {}", input_element.outer_html());
     log::info!("input element: {:#?}", input_element);
 
     assert_eq!(&*text.borrow(), "Start Text");
 
     // Dispatching the event, after the dom is updated
-    let ret = web_sys::EventTarget::from(input_element)
-        .dispatch_event(&input_event);
+    let ret = web_sys::EventTarget::from(input_element).dispatch_event(&input_event);
     log::info!("dispatched ret: {:?}", ret);
 
     // TODO: this seems to be not working anymore

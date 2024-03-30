@@ -9,9 +9,9 @@ use crate::vdom::EventCallback;
 use crate::vdom::TreePath;
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use indexmap::IndexMap;
+use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
-use std::rc::Rc;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -356,20 +356,20 @@ where
             PatchVariant::ReplaceNode { mut replacement } => {
                 let mut first_node = replacement.remove(0);
 
-                let parent_node = if patch_path.path.is_empty(){
-                        let mount_node = self.mount_node.borrow();
-                        let mount_node = mount_node.as_ref().expect("must have a mount node");
-                        Rc::new(Some(mount_node.clone()))
-                }else{
-                    if let Some(parent_target) = target_element.parent.as_ref(){
+                let parent_node = if patch_path.path.is_empty() {
+                    let mount_node = self.mount_node.borrow();
+                    let mount_node = mount_node.as_ref().expect("must have a mount node");
+                    Rc::new(Some(mount_node.clone()))
+                } else {
+                    if let Some(parent_target) = target_element.parent.as_ref() {
                         Rc::new(Some(parent_target.clone()))
-                    }else{
+                    } else {
                         unreachable!("target element should have a parent");
                     }
                 };
 
                 first_node.parent = Rc::clone(&parent_node);
-                for replace_node in replacement.iter_mut(){
+                for replace_node in replacement.iter_mut() {
                     replace_node.parent = Rc::clone(&parent_node);
                 }
 
@@ -382,13 +382,12 @@ where
                     let mount_node = mount_node.as_mut().expect("must have a mount node");
                     mount_node.append_children(vec![first_node.clone()]);
                     mount_node.append_children(replacement);
-
                 } else {
-                    if patch_path.path.is_empty(){
+                    if patch_path.path.is_empty() {
                         let mut mount_node = self.mount_node.borrow_mut();
                         let mount_node = mount_node.as_mut().expect("must have a mount node");
                         mount_node.replace_child(&target_element, first_node.clone());
-                    }else{
+                    } else {
                         target_element.replace_node(first_node.clone());
                     }
                     //insert the rest
@@ -397,7 +396,7 @@ where
                 if patch_path.path.is_empty() {
                     log::info!("setting root node to the first node at non-fragment");
                     *self.root_node.borrow_mut() = Some(first_node);
-                } 
+                }
             }
             PatchVariant::RemoveNode => {
                 target_element.remove_node();

@@ -48,19 +48,20 @@ fn click_event() {
     let clicked_clone = Rc::clone(&clicked);
 
     let elem_id = "click-on-div";
-    let vdiv: Node<()> = div([],
-        vec![
-        div([
-            id(elem_id),
-            replace(true),
-            on_click(move |_| {
-                console::log_1(&"clicked event called".into());
-                clicked_clone.set(true);
-            }),
-        ],
-        vec![],
-        )
-    ]);
+    let vdiv: Node<()> = div(
+        [],
+        vec![div(
+            [
+                id(elem_id),
+                replace(true),
+                on_click(move |_| {
+                    console::log_1(&"clicked event called".into());
+                    clicked_clone.set(true);
+                }),
+            ],
+            vec![],
+        )],
+    );
 
     let mut simple_program = simple_program();
 

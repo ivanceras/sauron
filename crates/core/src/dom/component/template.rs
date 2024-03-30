@@ -158,7 +158,8 @@ fn create_fragment_node_no_listeners<MSG>(
     };
     let children = nodes
         .into_iter()
-        .map(|node| create_dom_node_no_listeners(Some(dom_node.clone()), &node)).collect();
+        .map(|node| create_dom_node_no_listeners(Some(dom_node.clone()), &node))
+        .collect();
     dom_node.append_children(children);
     dom_node
 }
@@ -235,7 +236,8 @@ fn create_element_node_no_listeners<MSG>(
     let children = elm
         .children()
         .iter()
-        .map(|child| create_dom_node_no_listeners(Some(dom_node.clone()), child)).collect();
+        .map(|child| create_dom_node_no_listeners(Some(dom_node.clone()), child))
+        .collect();
     dom_node.append_children(children);
     dom_node
 }
@@ -366,17 +368,17 @@ impl DomNode {
 impl DomInner {
     fn deep_clone(&self) -> Self {
         match self {
-            Self::Element {
-                element,..
-            } => {
+            Self::Element { element, .. } => {
                 let node = element.clone_node_with_deep(true).expect("deep_clone");
                 let element: web_sys::Element = node.unchecked_into();
                 let child_nodes = element.child_nodes();
                 let children_count = child_nodes.length();
-                let children = (0..children_count).map(|i|{
-                    let child = child_nodes.get(i).expect("child");
-                    DomNode::from(child)
-                }).collect();
+                let children = (0..children_count)
+                    .map(|i| {
+                        let child = child_nodes.get(i).expect("child");
+                        DomNode::from(child)
+                    })
+                    .collect();
                 DomInner::Element {
                     element,
                     listeners: Rc::new(RefCell::new(None)),
@@ -386,7 +388,7 @@ impl DomInner {
             Self::Text(_) => todo!(),
             Self::Symbol(_) => todo!(),
             Self::Comment(_) => todo!(),
-            Self::Fragment {..} => todo!(),
+            Self::Fragment { .. } => todo!(),
             Self::StatefulComponent(_) => unreachable!("can not deep clone stateful component"),
         }
     }
