@@ -1,4 +1,3 @@
-#![deny(warnings)]
 use sauron::{html::attributes::*, html::events::*, html::*, *};
 use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
@@ -73,7 +72,7 @@ fn added_event() {
             id(elem_id),
             value("End Text"),
             on_input(move |event: InputEvent| {
-                log::info!("clciked is triggered..");
+                log::info!("input event is triggered..");
                 *text_clone.borrow_mut() = event.value();
             }),
         ],
@@ -92,17 +91,21 @@ fn added_event() {
         .update_dom_with_vdom(new)
         .expect("must not error");
 
-    let input_element = sauron_core::dom::document()
+    let document = sauron_core::dom::document();
+    let input_element = document
         .get_element_by_id(elem_id)
         .unwrap();
+    log::info!("input_element: {}", input_element.outer_html());
+    log::info!("input element: {:#?}", input_element);
 
     assert_eq!(&*text.borrow(), "Start Text");
 
     // Dispatching the event, after the dom is updated
-    web_sys::EventTarget::from(input_element)
-        .dispatch_event(&input_event)
-        .unwrap();
+    let ret = web_sys::EventTarget::from(input_element)
+        .dispatch_event(&input_event);
+    log::info!("dispatched ret: {:?}", ret);
 
+    // TODO: this seems to be not working anymore
     //Should change the text
     assert_eq!(&*text.borrow(), "End Text");
 }

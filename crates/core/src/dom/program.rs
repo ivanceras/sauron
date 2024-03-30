@@ -750,10 +750,6 @@ where
         let total_patches = dom_patches.len();
         self.pending_patches.borrow_mut().extend(dom_patches);
 
-        #[cfg(feature = "with-raf")]
-        self.apply_pending_patches_with_raf().expect("raf");
-
-        #[cfg(not(feature = "with-raf"))]
         self.apply_pending_patches().expect("raf");
 
         self.app_context.set_current_dom(new_vdom);
