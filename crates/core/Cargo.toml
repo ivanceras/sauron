@@ -28,6 +28,7 @@ ensure-check = [] #do checking if pending msgs, patches, cmds,  has been process
 ensure-attr-set = [] #ensure attributes is reflected into the element by explicitly calling the element corresponding methods aside fro just setting its attribute by name
 test-fixtures = [] #include the test-fixtures for updating the program with the supplied vdom
 use-template = [] #use the templated view and building before hand
+use-skipdiff = [] #use skipdiff to selectively skip attributes that can not change
 
 [dependencies]
 js-sys = { version = "0.3", optional = true }

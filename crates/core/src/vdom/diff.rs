@@ -7,7 +7,11 @@ use crate::vdom::AttributeValue;
 use crate::vdom::Leaf;
 use std::{cmp, mem};
 
+#[cfg(feature = "use-skipdiff")]
 static USE_SKIP_DIFF: bool = true;
+
+#[cfg(not(feature = "use-skipdiff"))]
+static USE_SKIP_DIFF: bool = false;
 
 /// Return the patches needed for `old_node` to have the same DOM as `new_node`
 ///
