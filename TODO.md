@@ -270,7 +270,7 @@
 - [X] add `symbol_html` for html entities such as `&nbsp;` `&gt`, `&lt` etc.
     - this should be safe to be inserted
 - [X] remove `innerHTML` func in AttributeValue as it could alter the DOM node tree
-- [ ] Keep track of which attributes to be skipped in `SkipDiff{shall:false}`
+- [X] Keep track of which attributes to be skipped in `SkipDiff{shall:false}`
     ```rust
     enum SkipStrat{
         SkipAll,
@@ -278,6 +278,11 @@
     }
     ```
 - [X] Maybe disable the template usage for now
+- [ ] Make `Cmd` to be used internally as it needs reference to the `Program<APP>`
+    - [ ] Use `Task` for returning from `Application` init and `update`.
+    - The `Recurring Task` is actually just a Sub in elm
+    - The `SingleTask` is a Cmd in sauron
+    - Sauron just consilidate them into one enum struct for simplicity
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
