@@ -154,7 +154,7 @@ fn create_fragment_node_no_listeners<MSG>(
             fragment,
             children: Rc::new(RefCell::new(vec![])),
         },
-        parent: Rc::new(RefCell::new(parent_node)),
+        parent: Rc::new(parent_node),
     };
     let children = nodes
         .into_iter()
@@ -166,16 +166,16 @@ fn create_fragment_node_no_listeners<MSG>(
 fn create_leaf_node_no_listeners<MSG>(parent_node: Option<DomNode>, leaf: &Leaf<MSG>) -> DomNode {
     match leaf {
         Leaf::Text(txt) => DomNode {
-            inner: DomInner::Text(RefCell::new(document().create_text_node(txt))),
-            parent: Rc::new(RefCell::new(parent_node)),
+            inner: DomInner::Text(document().create_text_node(txt)),
+            parent: Rc::new(parent_node),
         },
         Leaf::Symbol(symbol) => DomNode {
-            inner: DomInner::Symbol(Rc::new(RefCell::new(symbol.clone()))),
-            parent: Rc::new(RefCell::new(parent_node)),
+            inner: DomInner::Symbol(symbol.clone()),
+            parent: Rc::new(parent_node),
         },
         Leaf::Comment(comment) => DomNode {
             inner: DomInner::Comment(document().create_comment(comment)),
-            parent: Rc::new(RefCell::new(parent_node)),
+            parent: Rc::new(parent_node),
         },
         Leaf::DocType(_doctype) => {
             panic!(
@@ -230,7 +230,7 @@ fn create_element_node_no_listeners<MSG>(
             listeners: Rc::new(RefCell::new(None)),
             children: Rc::new(RefCell::new(vec![])),
         },
-        parent: Rc::new(RefCell::new(parent_node)),
+        parent: Rc::new(parent_node),
     };
     let children = elm
         .children()

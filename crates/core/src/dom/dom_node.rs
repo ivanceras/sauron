@@ -404,7 +404,7 @@ impl DomNode {
     }
 
     pub(crate) fn set_dom_attrs(
-        &mut self,
+        &self,
         attrs: impl IntoIterator<Item = DomAttr>,
     ) -> Result<(), JsValue> {
         for attr in attrs.into_iter() {
@@ -413,10 +413,10 @@ impl DomNode {
         Ok(())
     }
 
-    fn set_dom_attr(&mut self, attr: DomAttr) -> Result<(), JsValue> {
-        match &mut self.inner {
+    fn set_dom_attr(&self, attr: DomAttr) -> Result<(), JsValue> {
+        match &self.inner {
             DomInner::Element {
-                element, ref mut listeners, ..
+                element, listeners, ..
             } => {
                 let attr_name = intern(attr.name);
                 let attr_namespace = attr.namespace;
@@ -435,7 +435,7 @@ impl DomNode {
                         &'static str,
                         Closure<dyn FnMut(web_sys::Event)>,
                     > = IndexMap::from_iter(event_callbacks.into_iter().map(|c| (attr_name, c)));
-                    *listeners = Rc::new(RefCell::new(Some(listener_closures)));
+                    *listeners.borrow_mut() = Some(listener_closures);
                 } else if let Some(listeners) = listeners.borrow_mut().as_mut() {
                     for event_cb in event_callbacks.into_iter() {
                         listeners.insert(attr_name, event_cb);

@@ -289,7 +289,7 @@ where
     /// TODO: this should not have access to root_node, so it can generically
     /// apply patch to any dom node
     pub(crate) fn apply_dom_patches(
-        &mut self,
+        &self,
         dom_patches: impl IntoIterator<Item = DomPatch>,
     ) -> Result<(), JsValue> {
         for dom_patch in dom_patches {
@@ -301,10 +301,10 @@ where
     /// apply a dom patch to this root node,
     /// return a new root_node if it would replace the original root_node
     /// TODO: this should have no access to root_node, so it can be used in general sense
-    pub(crate) fn apply_dom_patch(&mut self, dom_patch: DomPatch) -> Result<(), JsValue> {
+    pub(crate) fn apply_dom_patch(&self, dom_patch: DomPatch) -> Result<(), JsValue> {
         let DomPatch {
             patch_path,
-            mut target_element,
+            target_element,
             patch_variant,
         } = dom_patch;
 
