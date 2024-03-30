@@ -179,7 +179,7 @@ where
             PatchType::InsertBeforeNode { nodes } => {
                 let nodes = nodes
                     .iter()
-                    .map(|for_insert| self.create_dom_node(None, for_insert))
+                    .map(|for_insert| self.create_dom_node(Rc::new(None), for_insert))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -190,7 +190,7 @@ where
             PatchType::InsertAfterNode { nodes } => {
                 let nodes = nodes
                     .iter()
-                    .map(|for_insert| self.create_dom_node(None, for_insert))
+                    .map(|for_insert| self.create_dom_node(Rc::new(None), for_insert))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -221,7 +221,7 @@ where
             PatchType::ReplaceNode { replacement } => {
                 let replacement = replacement
                     .iter()
-                    .map(|node| self.create_dom_node(None, node))
+                    .map(|node| self.create_dom_node(Rc::new(None), node))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -274,7 +274,7 @@ where
             PatchType::AppendChildren { children } => {
                 let children = children
                     .iter()
-                    .map(|for_insert| self.create_dom_node(None, for_insert))
+                    .map(|for_insert| self.create_dom_node(Rc::new(None), for_insert))
                     .collect();
 
                 DomPatch {

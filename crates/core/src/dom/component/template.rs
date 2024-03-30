@@ -27,7 +27,7 @@ thread_local! {
 /// if not, create the dom template and add it
 pub fn register_template<MSG>(
     type_id: TypeId,
-    parent_node: Option<DomNode>,
+    parent_node: Rc<Option<DomNode>>,
     vdom_template: &vdom::Node<MSG>,
 ) -> DomNode {
     if let Some(template) = lookup_template(type_id) {
@@ -133,7 +133,7 @@ pub fn total_time_spent() -> Section {
 }
 
 pub(crate) fn create_dom_node_no_listeners<MSG>(
-    parent_node: Option<DomNode>,
+    parent_node: Rc<Option<DomNode>>,
     vnode: &vdom::Node<MSG>,
 ) -> DomNode {
     match vnode {
@@ -145,7 +145,7 @@ pub(crate) fn create_dom_node_no_listeners<MSG>(
 }
 
 fn create_fragment_node_no_listeners<MSG>(
-    parent_node: Option<DomNode>,
+    parent_node: Rc<Option<DomNode>>,
     nodes: &[vdom::Node<MSG>],
 ) -> DomNode {
     let fragment = document().create_document_fragment();
@@ -154,29 +154,30 @@ fn create_fragment_node_no_listeners<MSG>(
             fragment,
             children: Rc::new(RefCell::new(vec![])),
         },
-        parent: Rc::new(parent_node),
+        parent: parent_node,
     };
+    let dom_node_rc = Rc::new(Some(dom_node.clone()));
     let children = nodes
         .into_iter()
-        .map(|node| create_dom_node_no_listeners(Some(dom_node.clone()), &node))
+        .map(|node| create_dom_node_no_listeners(Rc::clone(&dom_node_rc), &node))
         .collect();
     dom_node.append_children(children);
     dom_node
 }
 
-fn create_leaf_node_no_listeners<MSG>(parent_node: Option<DomNode>, leaf: &Leaf<MSG>) -> DomNode {
+fn create_leaf_node_no_listeners<MSG>(parent_node: Rc<Option<DomNode>>, leaf: &Leaf<MSG>) -> DomNode {
     match leaf {
         Leaf::Text(txt) => DomNode {
             inner: DomInner::Text(document().create_text_node(txt)),
-            parent: Rc::new(parent_node),
+            parent: parent_node,
         },
         Leaf::Symbol(symbol) => DomNode {
             inner: DomInner::Symbol(symbol.clone()),
-            parent: Rc::new(parent_node),
+            parent: parent_node,
         },
         Leaf::Comment(comment) => DomNode {
             inner: DomInner::Comment(document().create_comment(comment)),
-            parent: Rc::new(parent_node),
+            parent: parent_node,
         },
         Leaf::DocType(_doctype) => {
             panic!(
@@ -200,7 +201,7 @@ fn create_leaf_node_no_listeners<MSG>(parent_node: Option<DomNode>, leaf: &Leaf<
 }
 
 fn create_element_node_no_listeners<MSG>(
-    parent_node: Option<DomNode>,
+    parent_node: Rc<Option<DomNode>>,
     elm: &vdom::Element<MSG>,
 ) -> DomNode {
     let document = document();
@@ -231,12 +232,13 @@ fn create_element_node_no_listeners<MSG>(
             listeners: Rc::new(RefCell::new(None)),
             children: Rc::new(RefCell::new(vec![])),
         },
-        parent: Rc::new(parent_node),
+        parent: parent_node,
     };
+    let dom_node_rc = Rc::new(Some(dom_node.clone()));
     let children = elm
         .children()
         .iter()
-        .map(|child| create_dom_node_no_listeners(Some(dom_node.clone()), child))
+        .map(|child| create_dom_node_no_listeners(Rc::clone(&dom_node_rc), child))
         .collect();
     dom_node.append_children(children);
     dom_node
@@ -286,7 +288,7 @@ where
 {
     pub(crate) fn create_stateless_component_with_template(
         &self,
-        parent_node: Option<DomNode>,
+        parent_node: Rc<Option<DomNode>>,
         comp: &StatelessModel<APP::MSG>,
     ) -> DomNode {
         #[cfg(feature = "with-debug")]
@@ -341,7 +343,7 @@ where
                 let patches =
                     self.create_patches_with_skip_diff(&vdom_template, &real_view, &skip_diff);
                 let type_id = TypeId::of::<APP>();
-                let dom_template = register_template(type_id, None, &vdom_template);
+                let dom_template = register_template(type_id, Rc::new(None), &vdom_template);
                 let dom_patches = self
                     .convert_patches(&dom_template, &patches)
                     .expect("convert patches");

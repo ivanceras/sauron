@@ -4,6 +4,7 @@ use sauron::parse_html;
 use sauron::*;
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
+use std::rc::Rc;
 
 mod test_fixtures;
 
@@ -27,8 +28,8 @@ fn same_node() {
     );
     let new: Node<()> = ul([], [li([], [text("Hi")]), li([], [text("Hello")])]);
     let simple_program = simple_program();
-    let old_node = simple_program.create_dom_node(None, &old);
-    let new_node = simple_program.create_dom_node(None, &new);
+    let old_node = simple_program.create_dom_node(Rc::new(None), &old);
+    let new_node = simple_program.create_dom_node(Rc::new(None), &new);
     log::info!("old_node: {}", old_node.render_to_string());
     assert_eq!(old_node.render_to_string(), new_node.render_to_string());
 }
