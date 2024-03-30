@@ -48,8 +48,8 @@ pub enum DomInner {
         children: Rc<RefCell<Vec<DomNode>>>,
     },
     /// text node
-    Text(RefCell<web_sys::Text>),
-    Symbol(Rc<RefCell<Cow<'static, str>>>),
+    Text(web_sys::Text),
+    Symbol(Cow<'static, str>),
     /// comment node
     Comment(web_sys::Comment),
     /// Fragment node
@@ -85,9 +85,9 @@ impl fmt::Debug for DomInner {
             }
             Self::Text(text_node) => f
                 .debug_tuple("Text")
-                .field(&text_node.borrow().whole_text().expect("whole text"))
+                .field(&text_node.whole_text().expect("whole text"))
                 .finish(),
-            Self::Symbol(symbol) => f.debug_tuple("Symbol").field(&symbol.borrow()).finish(),
+            Self::Symbol(symbol) => f.debug_tuple("Symbol").field(&symbol).finish(),
             Self::Comment(_) => write!(f, "Comment"),
             Self::Fragment { .. } => write!(f, "Fragment"),
             Self::StatefulComponent(_) => write!(f, "StatefulComponent"),
@@ -118,7 +118,7 @@ impl From<web_sys::Node> for DomNode {
             Node::TEXT_NODE => {
                 let text_node: web_sys::Text = node.unchecked_into();
                 DomNode{
-                    inner: DomInner::Text(RefCell::new(text_node)),
+                    inner: DomInner::Text(text_node),
                     parent: Rc::new(None),
                 }
             }
@@ -159,7 +159,7 @@ impl DomNode {
         match &self.inner {
             DomInner::Element { element, .. } => element.clone().unchecked_into(),
             DomInner::Fragment { fragment, .. } => fragment.clone().unchecked_into(),
-            DomInner::Text(text_node) => text_node.borrow().clone().unchecked_into(),
+            DomInner::Text(text_node) => text_node.clone().unchecked_into(),
             DomInner::Symbol(_) => panic!("don't know how to deal with symbol"),
             DomInner::Comment(comment_node) => comment_node.clone().unchecked_into(),
             DomInner::StatefulComponent(_) => todo!("for stateful component.."),
@@ -174,7 +174,7 @@ impl DomNode {
                 assert!(fragment.is_object());
                 fragment
             }
-            DomInner::Text(text_node) => text_node.borrow().clone().unchecked_into(),
+            DomInner::Text(text_node) => text_node.clone().unchecked_into(),
             DomInner::Symbol(_) => panic!("don't know how to deal with symbol"),
             DomInner::Comment(comment_node) => comment_node.clone().unchecked_into(),
             DomInner::StatefulComponent(_) => todo!("for stateful component.."),
@@ -184,7 +184,7 @@ impl DomNode {
     /// return the string content of this symbol
     pub fn as_symbol(&self) -> Option<String> {
         match &self.inner {
-            DomInner::Symbol(symbol) => Some(symbol.borrow().as_ref().to_string()),
+            DomInner::Symbol(symbol) => Some(symbol.as_ref().to_string()),
             _ => None,
         }
     }
@@ -497,7 +497,7 @@ impl DomNode {
     fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
         match &self.inner {
             DomInner::Text(text_node) => {
-                let text = text_node.borrow().whole_text().expect("whole text");
+                let text = text_node.whole_text().expect("whole text");
                 write!(buffer, "{text}")?;
                 Ok(())
             }
@@ -620,11 +620,11 @@ where
     ) -> DomNode {
         match leaf {
             Leaf::Text(txt) => DomNode {
-                inner: DomInner::Text(RefCell::new(document().create_text_node(txt))),
+                inner: DomInner::Text(document().create_text_node(txt)),
                 parent: Rc::new(parent_node),
             },
             Leaf::Symbol(symbol) => DomNode {
-                inner: DomInner::Symbol(Rc::new(RefCell::new(symbol.clone()))),
+                inner: DomInner::Symbol(symbol.clone()),
                 parent: Rc::new(parent_node),
             },
             Leaf::Comment(comment) => DomNode {
