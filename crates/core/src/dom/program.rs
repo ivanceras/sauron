@@ -487,6 +487,15 @@ where
             weak_count,
         };
 
+        #[cfg(all(feature = "with-debug",feature = "use-template"))]
+        {
+            let total = crate::dom::component::template::total_time_spent();
+            log::info!("total: {:#?}", total);
+            log::info!("average: {:#?}", total.average());
+            log::info!("percentile: {:#?}", total.percentile());
+            crate::dom::component::template::clear_time_spent();
+        }
+
         if measurements.total_time > 16.0 {
             #[cfg(all(feature = "with-measure", feature = "with-debug"))]
             {

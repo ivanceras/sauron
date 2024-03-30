@@ -132,6 +132,12 @@ pub fn total_time_spent() -> Section {
     TIME_SPENT.with_borrow(|values| total(values))
 }
 
+#[allow(unused)]
+#[cfg(feature = "with-debug")]
+pub fn clear_time_spent() {
+    TIME_SPENT.with_borrow_mut(|values| values.clear())
+}
+
 pub(crate) fn create_dom_node_no_listeners<MSG>(
     parent_node: Rc<Option<DomNode>>,
     vnode: &vdom::Node<MSG>,
@@ -295,8 +301,6 @@ where
         let t1 = now();
         let comp_view = &comp.view;
         let vdom_template = comp_view.template();
-        #[cfg(feature = "with-debug")]
-        let t2 = now();
         let skip_diff = comp_view.skip_diff();
         match (vdom_template, skip_diff) {
             (Some(vdom_template), Some(skip_diff)) => {
@@ -305,6 +309,8 @@ where
                 // disabling template for stateless component for now
                 let template = register_template(comp.type_id, parent_node, &vdom_template);
                 let real_comp_view = comp_view.unwrap_template_ref();
+                #[cfg(feature = "with-debug")]
+                let t2 = now();
                 let patches =
                     self.create_patches_with_skip_diff(&vdom_template, &real_comp_view, &skip_diff);
                 #[cfg(feature = "with-debug")]
