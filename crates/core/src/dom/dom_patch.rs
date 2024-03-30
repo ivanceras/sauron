@@ -292,20 +292,17 @@ where
     pub(crate) fn apply_dom_patches(
         &self,
         dom_patches: impl IntoIterator<Item = DomPatch>,
-    ) -> Result<Option<DomNode>, JsValue> {
-        let mut new_root_node = None;
+    ) -> Result<(), JsValue> {
         for dom_patch in dom_patches {
-            if let Some(replacement_node) = self.apply_dom_patch(dom_patch)? {
-                new_root_node = Some(replacement_node);
-            }
+            self.apply_dom_patch(dom_patch)?;
         }
-        Ok(new_root_node)
+        Ok(())
     }
 
     /// apply a dom patch to this root node,
     /// return a new root_node if it would replace the original root_node
     /// TODO: this should have no access to root_node, so it can be used in general sense
-    pub(crate) fn apply_dom_patch(&self, dom_patch: DomPatch) -> Result<Option<DomNode>, JsValue> {
+    pub(crate) fn apply_dom_patch(&self, dom_patch: DomPatch) -> Result<(), JsValue> {
         let DomPatch {
             patch_path,
             target_element,
@@ -315,21 +312,17 @@ where
         match patch_variant {
             PatchVariant::InsertBeforeNode { nodes } => {
                 target_element.insert_before(nodes);
-                Ok(None)
             }
 
             PatchVariant::InsertAfterNode { nodes } => {
                 target_element.insert_after(nodes);
-                Ok(None)
             }
             PatchVariant::AppendChildren { children } => {
                 target_element.append_children(children);
-                Ok(None)
             }
 
             PatchVariant::AddAttributes { attrs } => {
                 target_element.set_dom_attrs(attrs).unwrap();
-                Ok(None)
             }
             PatchVariant::RemoveAttributes { attrs } => {
                 for attr in attrs.iter() {
@@ -355,7 +348,6 @@ where
                         }
                     }
                 }
-                Ok(None)
             }
 
             // This also removes the associated closures and event listeners to the node being replaced
@@ -389,10 +381,8 @@ where
                             !multiple_node_replacement,
                             "There are multiple nodes, this becomes unsound"
                         );
-                        Ok(Some(first_node))
-                    } else {
-                        Ok(None)
-                    }
+                        *self.root_node.borrow_mut() = Some(first_node);
+                    } 
                 } else {
                     log::info!("non fragment replacement..");
                     if let Some(parent_target) = target_element.parent.borrow().as_ref(){
@@ -407,19 +397,15 @@ where
                     target_element.replace_node(first_node.clone());
                     first_node.insert_after(replacement);
                     if patch_path.path.is_empty() {
-                        Ok(Some(first_node))
-                    } else {
-                        Ok(None)
-                    }
+                        *self.root_node.borrow_mut() = Some(first_node);
+                    } 
                 }
             }
             PatchVariant::RemoveNode => {
                 target_element.remove_node();
-                Ok(None)
             }
             PatchVariant::ClearChildren => {
                 target_element.clear_children();
-                Ok(None)
             }
             PatchVariant::MoveBeforeNode { for_moving } => {
                 if let Some(target_parent) = target_element.parent.borrow().as_ref() {
@@ -428,7 +414,6 @@ where
                 } else {
                     panic!("unable to get the parent node of the target element");
                 }
-                Ok(None)
             }
 
             PatchVariant::MoveAfterNode { for_moving } => {
@@ -436,8 +421,8 @@ where
                     target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
                     target_element.insert_after(for_moving);
                 }
-                Ok(None)
             }
         }
+        Ok(())
     }
 }
