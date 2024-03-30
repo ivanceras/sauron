@@ -134,6 +134,21 @@ impl From<web_sys::Node> for DomNode {
     }
 }
 
+impl PartialEq for DomNode{
+
+    fn eq(&self, other: &Self) -> bool {
+        match (&self.inner, &other.inner) {
+            (DomInner::Element { element: v, .. }, DomInner::Element { element: o, .. }) =>  v== o,
+            (DomInner::Fragment { fragment: v, .. },DomInner::Fragment { fragment: o, .. }) => v == o,
+            (DomInner::Text(v), DomInner::Text(o))=> v == o,
+            (DomInner::Symbol(v),DomInner::Symbol(o)) => v == o,
+            (DomInner::Comment(v),DomInner::Comment(o)) => v == o,
+            (DomInner::StatefulComponent(_v),DomInner::StatefulComponent(_o)) => todo!(),
+            _ => false,
+        }
+    }
+}
+
 impl DomNode {
     fn children(&self) -> Option<Ref<'_, Vec<DomNode>>> {
         match &self.inner {
