@@ -33,7 +33,7 @@ pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
 pub struct DomNode {
     pub(crate) inner: DomInner,
     //TODO: parent needs to be a weak reference
-    pub(crate) parent: Rc<RefCell<Option<DomNode>>>,
+    pub(crate) parent: Rc<Option<DomNode>>,
 }
 #[derive(Clone)]
 pub enum DomInner {
@@ -112,21 +112,21 @@ impl From<web_sys::Node> for DomNode {
                         listeners: Rc::new(RefCell::new(None)),
                         children: Rc::new(RefCell::new(children)),
                     },
-                    parent: Rc::new(RefCell::new(None)),
+                    parent: Rc::new(None),
                 }
             }
             Node::TEXT_NODE => {
                 let text_node: web_sys::Text = node.unchecked_into();
                 DomNode{
                     inner: DomInner::Text(RefCell::new(text_node)),
-                    parent: Rc::new(RefCell::new(None)),
+                    parent: Rc::new(None),
                 }
             }
             Node::COMMENT_NODE => {
                 let comment: web_sys::Comment = node.unchecked_into();
                 DomNode{
                     inner: DomInner::Comment(comment),
-                    parent: Rc::new(RefCell::new(None)),
+                    parent: Rc::new(None),
                 }
             }
             _node_type => todo!("for: {_node_type:?}"),
@@ -214,7 +214,7 @@ impl DomNode {
                             .append_child(&child.as_node())
                             .expect("append child");
                     }
-                    child.parent = Rc::new(RefCell::new(Some(self.clone())));
+                    child.parent = Rc::new(Some(self.clone()));
                     children.borrow_mut().push(child);
                 }
             }
@@ -227,8 +227,7 @@ impl DomNode {
 
     /// Insert the DomNode `for_insert` before `self` DomNode
     pub(crate) fn insert_before(&self, mut for_insert: Vec<DomNode>) {
-        let parent_target = self.parent.borrow();
-        let parent_target = parent_target.as_ref().expect("must have a parent");
+        let parent_target = self.parent.as_ref().as_ref().expect("must have a parent");
         let DomInner::Element {
             children: parent_children,
             ..
@@ -268,8 +267,7 @@ impl DomNode {
 
     /// Insert the DomNode `for_insert` after `self` DomNode
     pub(crate) fn insert_after(&self, mut for_insert: Vec<DomNode>) {
-        let parent_target = self.parent.borrow();
-        let parent_target = parent_target.as_ref().expect("must have a parent");
+        let parent_target = self.parent.as_ref().as_ref().expect("must have a parent");
         let DomInner::Element {
             children: parent_children,
             ..
@@ -314,7 +312,7 @@ impl DomNode {
                         break;
                     }
                 }
-                replacement.parent = Rc::new(RefCell::new(Some(self.clone())));
+                replacement.parent = Rc::new(Some(self.clone()));
                 if let Some(child_index) = child_index {
                     let child = children.borrow_mut().remove(child_index);
                     child
@@ -389,7 +387,7 @@ impl DomNode {
     }
 
     pub(crate) fn remove_node(&self) {
-        if let Some(parent) = self.parent.borrow().as_ref() {
+        if let Some(parent) = self.parent.as_ref() {
             parent.remove_children(&[self]);
         } else {
             unreachable!("this has no parent node");
@@ -397,7 +395,7 @@ impl DomNode {
     }
 
     pub(crate) fn replace_node(&self, replacement: DomNode) {
-        if let Some(parent) = self.parent.borrow().as_ref() {
+        if let Some(parent) = self.parent.as_ref() {
             parent.replace_child(self, replacement);
         } else {
             log::info!("There is no parent here..");
@@ -604,7 +602,7 @@ where
                 listeners: Rc::new(RefCell::new(listeners)),
                 children: Rc::new(RefCell::new(vec![])),
             },
-            parent: Rc::new(RefCell::new(parent_node)),
+            parent: Rc::new(parent_node),
         };
         let children: Vec<DomNode> = elm
             .children()
@@ -623,15 +621,15 @@ where
         match leaf {
             Leaf::Text(txt) => DomNode {
                 inner: DomInner::Text(RefCell::new(document().create_text_node(txt))),
-                parent: Rc::new(RefCell::new(parent_node)),
+                parent: Rc::new(parent_node),
             },
             Leaf::Symbol(symbol) => DomNode {
                 inner: DomInner::Symbol(Rc::new(RefCell::new(symbol.clone()))),
-                parent: Rc::new(RefCell::new(parent_node)),
+                parent: Rc::new(parent_node),
             },
             Leaf::Comment(comment) => DomNode {
                 inner: DomInner::Comment(document().create_comment(comment)),
-                parent: Rc::new(RefCell::new(parent_node)),
+                parent: Rc::new(parent_node),
             },
             Leaf::Fragment(nodes) => self.create_fragment_node(parent_node, nodes),
             // NodeList that goes here is only possible when it is the root_node,
@@ -667,7 +665,7 @@ where
                 fragment,
                 children: Rc::new(RefCell::new(vec![])),
             },
-            parent: Rc::new(RefCell::new(parent_node)),
+            parent: Rc::new(parent_node),
         };
         let children = nodes
             .into_iter()

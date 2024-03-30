@@ -12,7 +12,6 @@ use indexmap::IndexMap;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 use std::rc::Rc;
-use std::cell::RefCell;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -364,7 +363,7 @@ where
                     let mount_node = self.mount_node.borrow();
                     let mount_node = mount_node.as_ref().expect("must have a mount node");
 
-                    let parent_rc = Rc::new(RefCell::new(Some(mount_node.clone())));
+                    let parent_rc = Rc::new(Some(mount_node.clone()));
                     for replace_node in replacement.iter_mut(){
                         replace_node.parent = Rc::clone(&parent_rc);
                     }
@@ -384,9 +383,8 @@ where
                         *self.root_node.borrow_mut() = Some(first_node);
                     } 
                 } else {
-                    log::info!("non fragment replacement..");
-                    if let Some(parent_target) = target_element.parent.borrow().as_ref(){
-                        let parent_rc = Rc::new(RefCell::new(Some(parent_target.clone())));
+                    if let Some(parent_target) = target_element.parent.as_ref(){
+                        let parent_rc = Rc::new(Some(parent_target.clone()));
                         for replace_node in replacement.iter_mut(){
                             replace_node.parent = Rc::clone(&parent_rc);
                         }
@@ -408,7 +406,7 @@ where
                 target_element.clear_children();
             }
             PatchVariant::MoveBeforeNode { for_moving } => {
-                if let Some(target_parent) = target_element.parent.borrow().as_ref() {
+                if let Some(target_parent) = target_element.parent.as_ref() {
                     target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
                     target_element.insert_before(for_moving);
                 } else {
@@ -417,7 +415,7 @@ where
             }
 
             PatchVariant::MoveAfterNode { for_moving } => {
-                if let Some(target_parent) = target_element.parent.borrow().as_ref() {
+                if let Some(target_parent) = target_element.parent.as_ref() {
                     target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
                     target_element.insert_after(for_moving);
                 }
