@@ -73,6 +73,7 @@ fn added_event() {
             id(elem_id),
             value("End Text"),
             on_input(move |event: InputEvent| {
+                log::info!("clciked is triggered..");
                 *text_clone.borrow_mut() = event.value();
             }),
         ],
