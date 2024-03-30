@@ -11,6 +11,8 @@ use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use indexmap::IndexMap;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -359,8 +361,9 @@ where
             // This also removes the associated closures and event listeners to the node being replaced
             // including the associated closures of the descendant of replaced node
             // before it is actully replaced in the DOM
+            // TODO: make root node a Vec
             PatchVariant::ReplaceNode { mut replacement } => {
-                let first_node = replacement.remove(0);
+                let mut first_node = replacement.remove(0);
                 if target_element.is_fragment() {
                     assert!(
                         patch_path.is_empty(),
@@ -368,6 +371,13 @@ where
                     );
                     let mount_node = self.mount_node.borrow();
                     let mount_node = mount_node.as_ref().expect("must have a mount node");
+
+                    let parent_rc = Rc::new(RefCell::new(Some(mount_node.clone())));
+                    for replace_node in replacement.iter_mut(){
+                        replace_node.parent = Rc::clone(&parent_rc);
+                    }
+                    first_node.parent = Rc::clone(&parent_rc);
+
                     mount_node.append_children(vec![first_node.clone()]);
 
                     let multiple_node_replacement = !replacement.is_empty();
@@ -384,6 +394,16 @@ where
                         Ok(None)
                     }
                 } else {
+                    log::info!("non fragment replacement..");
+                    if let Some(parent_target) = target_element.parent.borrow().as_ref(){
+                        let parent_rc = Rc::new(RefCell::new(Some(parent_target.clone())));
+                        for replace_node in replacement.iter_mut(){
+                            replace_node.parent = Rc::clone(&parent_rc);
+                        }
+                        first_node.parent = Rc::clone(&parent_rc);
+                    }else{
+                        log::info!("No parent here in non fragment replacement");
+                    }
                     target_element.replace_node(first_node.clone());
                     first_node.insert_after(replacement);
                     if patch_path.path.is_empty() {

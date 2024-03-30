@@ -123,7 +123,7 @@ where
             }
             Msg::ExternContMounted(target_node) => {
                 log::warn!("-->>> Container for children is now mounted..!");
-                target_node.append_children(self.children.drain(..));
+                target_node.append_children(self.children.drain(..).collect());
                 self.external_children_node = Some(target_node);
                 Effects::none()
             }

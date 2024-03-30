@@ -32,6 +32,7 @@ pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
 #[derive(Clone, Debug)]
 pub struct DomNode {
     pub(crate) inner: DomInner,
+    //TODO: parent needs to be a weak reference
     pub(crate) parent: Rc<RefCell<Option<DomNode>>>,
 }
 #[derive(Clone)]
@@ -196,9 +197,6 @@ impl DomNode {
         element.outer_html()
     }
 
-    fn set_parent(&self, parent_node: &DomNode) {
-        *self.parent.borrow_mut() = Some(parent_node.clone());
-    }
 
     /// append the DomNode `child` into this DomNode `self`
     pub fn append_children(&self, for_append: Vec<DomNode>) {
@@ -206,7 +204,7 @@ impl DomNode {
             DomInner::Element {
                 element, children, ..
             } => {
-                for child in for_append.into_iter() {
+                for mut child in for_append.into_iter() {
                     if let Some(symbol) = child.as_symbol() {
                         element
                             .insert_adjacent_html(intern("beforeend"), &symbol)
@@ -216,7 +214,7 @@ impl DomNode {
                             .append_child(&child.as_node())
                             .expect("append child");
                     }
-                    child.set_parent(&self);
+                    child.parent = Rc::new(RefCell::new(Some(self.clone())));
                     children.borrow_mut().push(child);
                 }
             }
@@ -305,7 +303,7 @@ impl DomNode {
     }
 
     /// Replace the child `child` DomNode with a replacement DomNode `replacement`
-    pub(crate) fn replace_child(&self, child: &DomNode, replacement: DomNode) {
+    pub(crate) fn replace_child(&self, child: &DomNode, mut replacement: DomNode) {
         log::debug!("atttempt to replace child..{}", child.render_to_string());
         match &self.inner {
             DomInner::Element { children, .. } => {
@@ -316,9 +314,8 @@ impl DomNode {
                         break;
                     }
                 }
+                replacement.parent = Rc::new(RefCell::new(Some(self.clone())));
                 if let Some(child_index) = child_index {
-                    //log::info!("setting parent in replace_child");
-                    replacement.set_parent(self);
                     let child = children.borrow_mut().remove(child_index);
                     child
                         .as_element()

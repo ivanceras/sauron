@@ -240,7 +240,7 @@ where
             Msg::ContentTargetMounted(me) => {
                 let mount_event = me.clone();
                 let target_node = me.target_node;
-                target_node.append_children(self.children.drain(..));
+                target_node.append_children(self.children.drain(..).collect());
                 self.content_target_node = Some(target_node);
                 let external = self
                     .container_mounted_listeners

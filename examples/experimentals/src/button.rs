@@ -31,7 +31,7 @@ impl Component for Button {
             Msg::Click => self.cnt += 1,
             Msg::ExternContMounted(target_node) => {
                 log::info!("Button: extenal container mounted...");
-                target_node.append_children(self.children.drain(..));
+                target_node.append_children(self.children.drain(..).collect());
                 self.external_children_node = Some(target_node);
             }
             Msg::NoOp => (),
