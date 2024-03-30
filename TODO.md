@@ -282,7 +282,11 @@
     - [ ] Use `Task` for returning from `Application` init and `update`.
     - The `Recurring Task` is actually just a Sub in elm
         - Issue with recurring task, how to store the closures which has different multiple types for the in arguments
+        - Store the closures with `Closure<dyn Fn(IN)->MSG>`
+        - Then task becomes `Task<IN,MSG>`
     - The `SingleTask` is a Cmd in sauron
+    - Rename `Cmd` to `Command` alternative: `Action`, `Operation`, `Instruction`, `Effects`, `Dispatch`
+        - This is effects in elm
     - Sauron just consilidate them into one enum struct for simplicity
 
 ## Features
