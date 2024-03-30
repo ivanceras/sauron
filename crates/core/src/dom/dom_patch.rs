@@ -355,68 +355,49 @@ where
             // TODO: make root node a Vec
             PatchVariant::ReplaceNode { mut replacement } => {
                 let mut first_node = replacement.remove(0);
+
+                let parent_node = if patch_path.path.is_empty(){
+                        let mount_node = self.mount_node.borrow();
+                        let mount_node = mount_node.as_ref().expect("must have a mount node");
+                        Rc::new(Some(mount_node.clone()))
+                }else{
+                    if let Some(parent_target) = target_element.parent.as_ref(){
+                        Rc::new(Some(parent_target.clone()))
+                    }else{
+                        unreachable!("target element should have a parent");
+                    }
+                };
+
+                first_node.parent = Rc::clone(&parent_node);
+                for replace_node in replacement.iter_mut(){
+                    replace_node.parent = Rc::clone(&parent_node);
+                }
+
                 if target_element.is_fragment() {
                     assert!(
                         patch_path.is_empty(),
                         "this should only happen to root node"
                     );
-                    let mount_node = self.mount_node.borrow();
-                    let mount_node = mount_node.as_ref().expect("must have a mount node");
-
-                    let parent_rc = Rc::new(Some(mount_node.clone()));
-                    for replace_node in replacement.iter_mut(){
-                        replace_node.parent = Rc::clone(&parent_rc);
-                    }
-                    first_node.parent = Rc::clone(&parent_rc);
-
+                    let mut mount_node = self.mount_node.borrow_mut();
+                    let mount_node = mount_node.as_mut().expect("must have a mount node");
                     mount_node.append_children(vec![first_node.clone()]);
-
-                    let multiple_node_replacement = !replacement.is_empty();
-
                     mount_node.append_children(replacement);
 
-                    if patch_path.path.is_empty() {
-                        log::info!("setting root node to the first node at fragment");
-                        assert!(
-                            !multiple_node_replacement,
-                            "There are multiple nodes, this becomes unsound"
-                        );
-                        *self.root_node.borrow_mut() = Some(first_node);
-                    } 
                 } else {
-                    if let Some(parent_target) = target_element.parent.as_ref(){
-                        let parent_rc = Rc::new(Some(parent_target.clone()));
-                        for replace_node in replacement.iter_mut(){
-                            replace_node.parent = Rc::clone(&parent_rc);
-                        }
-                        first_node.parent = Rc::clone(&parent_rc);
-                    }else{
-                        log::info!("No parent here in non fragment replacement");
-                    }
                     if patch_path.path.is_empty(){
-                        {
-                            let mount_node = self.mount_node.borrow();
-                            let mount_node = mount_node.as_ref().expect("must have a mount node");
-                            let mount_node_rc = Rc::new(Some(mount_node.clone()));
-                            for replace_node in replacement.iter_mut(){
-                                replace_node.parent = Rc::clone(&mount_node_rc);
-                            }
-                            first_node.parent = mount_node_rc;
-                        }
-                        log::info!("Should set the parent as root node since path path is empty");
-
                         let mut mount_node = self.mount_node.borrow_mut();
-                        let mount_node = mount_node.as_mut().unwrap();
+                        let mount_node = mount_node.as_mut().expect("must have a mount node");
                         mount_node.replace_child(&target_element, first_node.clone());
                     }else{
                         target_element.replace_node(first_node.clone());
                     }
+                    //insert the rest
                     first_node.insert_after(replacement);
-                    if patch_path.path.is_empty() {
-                        log::info!("setting root node to the first node at non-fragment");
-                        *self.root_node.borrow_mut() = Some(first_node);
-                    } 
                 }
+                if patch_path.path.is_empty() {
+                    log::info!("setting root node to the first node at non-fragment");
+                    *self.root_node.borrow_mut() = Some(first_node);
+                } 
             }
             PatchVariant::RemoveNode => {
                 target_element.remove_node();
