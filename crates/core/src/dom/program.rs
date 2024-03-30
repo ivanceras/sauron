@@ -178,7 +178,6 @@ where
     /// create a program from Rc<RefCell<APP>>
     pub fn from_rc_app(app: Rc<RefCell<APP>>) -> Self {
         let app_view = app.borrow().view();
-        log::info!("app_view: {}", app_view.render_to_string());
         Program {
             app_context: AppContext {
                 app,
@@ -380,12 +379,11 @@ where
 
         match mount_procedure.action {
             MountAction::Append => {
-                mount_node.append_children([created_node.clone()]);
+                mount_node.append_children(vec![created_node.clone()]);
             }
             MountAction::ClearAppend => {
-                log::info!("doing a clear append..");
                 mount_node.clear_children();
-                mount_node.append_children([created_node.clone()]);
+                mount_node.append_children(vec![created_node.clone()]);
             }
             MountAction::Replace => {
                 mount_node.replace_node(created_node.clone());
@@ -718,7 +716,7 @@ where
         let head = document().head().expect("must have a head");
         let head_node: web_sys::Node = head.unchecked_into();
         let dom_head = DomNode::from(head_node);
-        dom_head.append_children([created_node]);
+        dom_head.append_children(vec![created_node]);
     }
 
     /// inject style element to the mount node
@@ -730,7 +728,7 @@ where
             .borrow_mut()
             .as_mut()
             .expect("mount node")
-            .append_children([created_node]);
+            .append_children(vec![created_node]);
     }
 
     /// dispatch multiple MSG

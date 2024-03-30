@@ -368,7 +368,7 @@ where
                     );
                     let mount_node = self.mount_node.borrow();
                     let mount_node = mount_node.as_ref().expect("must have a mount node");
-                    mount_node.append_children([first_node.clone()]);
+                    mount_node.append_children(vec![first_node.clone()]);
 
                     let multiple_node_replacement = !replacement.is_empty();
 

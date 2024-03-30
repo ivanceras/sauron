@@ -158,7 +158,7 @@ fn create_fragment_node_no_listeners<MSG>(
     };
     let children = nodes
         .into_iter()
-        .map(|node| create_dom_node_no_listeners(Some(dom_node.clone()), &node));
+        .map(|node| create_dom_node_no_listeners(Some(dom_node.clone()), &node)).collect();
     dom_node.append_children(children);
     dom_node
 }
@@ -235,7 +235,7 @@ fn create_element_node_no_listeners<MSG>(
     let children = elm
         .children()
         .iter()
-        .map(|child| create_dom_node_no_listeners(Some(dom_node.clone()), child));
+        .map(|child| create_dom_node_no_listeners(Some(dom_node.clone()), child)).collect();
     dom_node.append_children(children);
     dom_node
 }
@@ -300,17 +300,14 @@ where
                 //from base node to it's children
                 // disabling template for stateless component for now
                 let template = register_template(comp.type_id, parent_node, &vdom_template);
-                //log::info!("template: {}", template.render_to_string());
                 let real_comp_view = comp_view.unwrap_template_ref();
                 let patches =
                     self.create_patches_with_skip_diff(&vdom_template, &real_comp_view, &skip_diff);
-                //log::info!("stateless component patches: {:#?}", patches);
                 #[cfg(feature = "with-debug")]
                 let t3 = now();
                 let dom_patches = self
                     .convert_patches(&template, &patches)
                     .expect("convert patches");
-                //log::info!("dom patches: {:#?}", dom_patches);
                 #[cfg(feature = "with-debug")]
                 let t4 = now();
                 self.apply_dom_patches(dom_patches).expect("patch template");
@@ -326,8 +323,6 @@ where
                     total: t5 - t1,
                     ..Default::default()
                 });
-                //log::info!("the patched template is now: {:#?}", template);
-                //log::info!("the patched template is now: {}", template.render_to_string());
                 template
             }
             _ => unreachable!("should have template and skip_diff"),
@@ -335,7 +330,6 @@ where
     }
 
     pub(crate) fn create_initial_view_with_template(&self) -> DomNode {
-        log::info!("Creating initial view..");
         let app_view = self.app_context.app.borrow().view();
         let vdom_template = app_view.template();
         let skip_diff = app_view.skip_diff();
@@ -373,40 +367,26 @@ impl DomInner {
     fn deep_clone(&self) -> Self {
         match self {
             Self::Element {
-                element,
-                listeners,
-                children,
+                element,..
             } => {
-                let element = element.clone_node_with_deep(true).expect("deep_clone");
-                Self::Element {
-                    element: element.unchecked_into(),
-                    listeners: listeners.clone(),
-                    children: Rc::new(RefCell::new(
-                        children.borrow().iter().map(|c| c.deep_clone()).collect(),
-                    )),
+                let node = element.clone_node_with_deep(true).expect("deep_clone");
+                let element: web_sys::Element = node.unchecked_into();
+                let child_nodes = element.child_nodes();
+                let children_count = child_nodes.length();
+                let children = (0..children_count).map(|i|{
+                    let child = child_nodes.get(i).expect("child");
+                    DomNode::from(child)
+                }).collect();
+                DomInner::Element {
+                    element,
+                    listeners: Rc::new(RefCell::new(None)),
+                    children: Rc::new(RefCell::new(children)),
                 }
             }
-            Self::Text(text_node) => {
-                let text_node = text_node
-                    .borrow()
-                    .clone_node_with_deep(true)
-                    .expect("deep_clone");
-                Self::Text(RefCell::new(text_node.unchecked_into()))
-            }
-            Self::Symbol(symbol) => Self::Symbol(Rc::new(RefCell::new(symbol.borrow().clone()))),
-            Self::Comment(comment_node) => {
-                let comment_node = comment_node.clone_node_with_deep(true).expect("deep_clone");
-                Self::Comment(comment_node.unchecked_into())
-            }
-            Self::Fragment { fragment, children } => {
-                let fragment = fragment.clone_node_with_deep(true).expect("deep_clone");
-                Self::Fragment {
-                    fragment: fragment.unchecked_into(),
-                    children: Rc::new(RefCell::new(
-                        children.borrow().iter().map(|c| c.deep_clone()).collect(),
-                    )),
-                }
-            }
+            Self::Text(_) => todo!(),
+            Self::Symbol(_) => todo!(),
+            Self::Comment(_) => todo!(),
+            Self::Fragment {..} => todo!(),
             Self::StatefulComponent(_) => unreachable!("can not deep clone stateful component"),
         }
     }

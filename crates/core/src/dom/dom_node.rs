@@ -96,14 +96,39 @@ impl fmt::Debug for DomInner {
 
 impl From<web_sys::Node> for DomNode {
     fn from(node: web_sys::Node) -> Self {
-        let element: web_sys::Element = node.dyn_into().expect("must be an element");
-        DomNode {
-            inner: DomInner::Element {
-                element,
-                listeners: Rc::new(RefCell::new(None)),
-                children: Rc::new(RefCell::new(vec![])),
-            },
-            parent: Rc::new(RefCell::new(None)),
+        match node.node_type(){
+            Node::ELEMENT_NODE => {
+                let element: web_sys::Element = node.unchecked_into();
+                let child_nodes = element.child_nodes();
+                let children_count = child_nodes.length();
+                let children = (0..children_count).map(|i|{
+                    let child = child_nodes.get(i).expect("child");
+                    DomNode::from(child)
+                }).collect();
+                DomNode {
+                    inner: DomInner::Element {
+                        element,
+                        listeners: Rc::new(RefCell::new(None)),
+                        children: Rc::new(RefCell::new(children)),
+                    },
+                    parent: Rc::new(RefCell::new(None)),
+                }
+            }
+            Node::TEXT_NODE => {
+                let text_node: web_sys::Text = node.unchecked_into();
+                DomNode{
+                    inner: DomInner::Text(RefCell::new(text_node)),
+                    parent: Rc::new(RefCell::new(None)),
+                }
+            }
+            Node::COMMENT_NODE => {
+                let comment: web_sys::Comment = node.unchecked_into();
+                DomNode{
+                    inner: DomInner::Comment(comment),
+                    parent: Rc::new(RefCell::new(None)),
+                }
+            }
+            _node_type => todo!("for: {_node_type:?}"),
         }
     }
 }
@@ -176,13 +201,12 @@ impl DomNode {
     }
 
     /// append the DomNode `child` into this DomNode `self`
-    pub fn append_children(&self, for_append: impl IntoIterator<Item = DomNode>) {
+    pub fn append_children(&self, for_append: Vec<DomNode>) {
         match &self.inner {
             DomInner::Element {
                 element, children, ..
             } => {
-                let for_append = for_append.into_iter();
-                for child in for_append {
+                for child in for_append.into_iter() {
                     if let Some(symbol) = child.as_symbol() {
                         element
                             .insert_adjacent_html(intern("beforeend"), &symbol)
@@ -204,7 +228,7 @@ impl DomNode {
     }
 
     /// Insert the DomNode `for_insert` before `self` DomNode
-    pub(crate) fn insert_before(&self, for_insert: Vec<DomNode>) {
+    pub(crate) fn insert_before(&self, mut for_insert: Vec<DomNode>) {
         let parent_target = self.parent.borrow();
         let parent_target = parent_target.as_ref().expect("must have a parent");
         let DomInner::Element {
@@ -221,6 +245,9 @@ impl DomNode {
                 self_index = Some(i);
                 break;
             }
+        }
+        for insert_node in for_insert.iter_mut(){
+            insert_node.parent = Rc::clone(&self.parent);
         }
         // NOTE: This is not reverse since inserting the last insert_node will always be next
         // before the target element
@@ -233,7 +260,6 @@ impl DomNode {
         // NOTE: It is important that we reverse the insertion to the wrapper DomNode since it is
         // just a Vec where inserting from the last will preserve the index to insert into
         for insert_node in for_insert.into_iter().rev() {
-            insert_node.set_parent(parent_target);
             if let Some(self_index) = self_index {
                 parent_children.borrow_mut().insert(self_index, insert_node);
             } else {
@@ -243,7 +269,7 @@ impl DomNode {
     }
 
     /// Insert the DomNode `for_insert` after `self` DomNode
-    pub(crate) fn insert_after(&self, for_insert: Vec<DomNode>) {
+    pub(crate) fn insert_after(&self, mut for_insert: Vec<DomNode>) {
         let parent_target = self.parent.borrow();
         let parent_target = parent_target.as_ref().expect("must have a parent");
         let DomInner::Element {
@@ -260,11 +286,14 @@ impl DomNode {
                 break;
             }
         }
+        for insert_node in for_insert.iter_mut(){
+            insert_node.parent = Rc::clone(&self.parent);
+        }
         for insert_node in for_insert.into_iter().rev() {
             self.as_element()
                 .insert_adjacent_element(intern("afterend"), &insert_node.as_element())
                 .expect("must insert after this element");
-            insert_node.set_parent(parent_target);
+
             if let Some(self_index) = self_index {
                 parent_children
                     .borrow_mut()
@@ -288,12 +317,13 @@ impl DomNode {
                     }
                 }
                 if let Some(child_index) = child_index {
+                    //log::info!("setting parent in replace_child");
+                    replacement.set_parent(self);
                     let child = children.borrow_mut().remove(child_index);
                     child
                         .as_element()
                         .replace_with_with_node_1(&replacement.as_node())
                         .expect("must replace child");
-                    replacement.set_parent(self);
                     children.borrow_mut().insert(child_index, replacement);
                 } else {
                     // if can not find the child, then must be the root node
@@ -644,7 +674,7 @@ where
         };
         let children = nodes
             .into_iter()
-            .map(|node| self.create_dom_node(Some(dom_node.clone()), &node));
+            .map(|node| self.create_dom_node(Some(dom_node.clone()), &node)).collect();
         dom_node.append_children(children);
         dom_node
     }
