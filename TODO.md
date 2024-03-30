@@ -281,6 +281,7 @@
 - [ ] Make `Cmd` to be used internally as it needs reference to the `Program<APP>`
     - [ ] Use `Task` for returning from `Application` init and `update`.
     - The `Recurring Task` is actually just a Sub in elm
+        - Issue with recurring task, how to store the closures which has different multiple types for the in arguments
     - The `SingleTask` is a Cmd in sauron
     - Sauron just consilidate them into one enum struct for simplicity
 

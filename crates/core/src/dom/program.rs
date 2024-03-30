@@ -705,6 +705,7 @@ where
             );
         }
 
+        // execute this `cmd` batched pending_cmds that may have resulted from updating the app
         cmd.emit(self.clone());
     }
 
