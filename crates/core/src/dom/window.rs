@@ -34,7 +34,6 @@ impl Window {
         Task::Recurring(RecurringTask {
             receiver: rx,
             event_closures: vec![resize_callback],
-            closures: vec![],
         })
     }
 
@@ -60,7 +59,6 @@ impl Window {
         Task::Recurring(RecurringTask {
             receiver: rx,
             event_closures: vec![mousemove_cb],
-            closures: vec![],
         })
     }
 
@@ -86,7 +84,6 @@ impl Window {
         Task::Recurring(RecurringTask {
             receiver: rx,
             event_closures: vec![mousemove_cb],
-            closures: vec![],
         })
     }
 
@@ -97,7 +94,10 @@ impl Window {
         MSG: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
-        let closure_cb: Closure<dyn FnMut()> = Closure::new(move || {
+        //The web_sys::Event here is undefined, it is just used here to make storing the closure
+        //uniform
+        let closure_cb: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_event| {
+            log::info!("event: {:?}", _event);
             let msg = cb();
             tx.start_send(msg).unwrap();
         });
@@ -109,8 +109,7 @@ impl Window {
             .expect("Unable to start interval");
         Task::Recurring(RecurringTask {
             receiver: rx,
-            event_closures: vec![],
-            closures: vec![closure_cb],
+            event_closures: vec![closure_cb],
         })
     }
 
@@ -149,7 +148,6 @@ impl Window {
         Task::Recurring(RecurringTask {
             receiver: rx,
             event_closures: vec![closure_cb],
-            closures: vec![],
         })
     }
 }
