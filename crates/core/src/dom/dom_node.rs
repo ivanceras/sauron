@@ -319,10 +319,6 @@ impl DomNode {
 
     /// Replace the child `child` DomNode with a replacement DomNode `replacement`
     pub(crate) fn replace_child(&self, target_child: &DomNode, mut replacement: DomNode) {
-        log::debug!(
-            "atttempt to replace child..{}",
-            target_child.render_to_string()
-        );
         match &self.inner {
             DomInner::Element { children, .. } => {
                 let mut child_index = None;
@@ -412,7 +408,6 @@ impl DomNode {
         if let Some(parent) = self.parent.as_ref() {
             parent.replace_child(self, replacement);
         } else {
-            log::info!("There is no parent here..");
             unreachable!("unable to replace a node without a parent..");
         }
     }
