@@ -126,7 +126,7 @@ enum Msg {
 impl Application for App {
     type MSG = Msg;
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Task<Msg> {
         match msg {
             Msg::Run(amount) => {
                 let rng = &mut self.rng;
@@ -171,7 +171,7 @@ impl Application for App {
                 }
             }
         }
-        Cmd::none()
+        Task::none()
     }
 
     view! {

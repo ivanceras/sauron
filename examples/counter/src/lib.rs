@@ -1,5 +1,6 @@
 use sauron::{
-    html::text, html::units::px, jss, node, wasm_bindgen, Application, Dispatch, Node, Program,
+    html::text, html::units::px, jss, node, wasm_bindgen, Application, Node, Program,
+    Task,
 };
 
 enum Msg {
@@ -41,13 +42,13 @@ impl Application for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Dispatch<Self> {
+    fn update(&mut self, msg: Msg) -> Task<Msg> {
         match msg {
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,
             Msg::Reset => self.count = 0,
         }
-        Dispatch::none()
+        Task::none()
     }
 
     fn stylesheet() -> Vec<String> {

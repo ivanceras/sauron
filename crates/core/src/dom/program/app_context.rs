@@ -137,7 +137,7 @@ where
 
     #[cfg(feature = "with-measure")]
     pub fn measurements(&self, measurements: Measurements) -> Dispatch<APP> {
-        self.app.borrow().measurements(measurements).no_render()
+        Dispatch::from(self.app.borrow().measurements(measurements).no_render())
     }
 
     pub fn push_msgs(&mut self, msgs: impl IntoIterator<Item = APP::MSG>) {

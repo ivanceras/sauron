@@ -293,6 +293,16 @@
     - [ ] enum Task{Cmd,Sub} into one unified type.
     - Sauron just consilidate them into one enum struct for simplicity
 - [ ] Remove `Modifier` and `measurements`
+    - [ ] Have a measurement in the Application trait
+    - [ ] Remove StatefulComponent as it is now the same as Application and serve the same purpose
+        - add methods for Application: 
+            - attribute_changed
+            - remove_attribute 
+            - append_child 
+            - remove_child
+            - connected_callback
+            - disconnected_callback
+            - adopted_callback
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
