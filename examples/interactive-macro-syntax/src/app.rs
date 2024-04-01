@@ -36,11 +36,11 @@ impl App {
 impl Application for App {
     type MSG = Msg;
 
-    fn init(&mut self) -> Dispatch<Self> {
-        Dispatch::from(Window::every_interval(1_000, || Msg::Clock))
+    fn init(&mut self) -> Task<Msg> {
+        Window::every_interval(1_000, || Msg::Clock)
     }
 
-    fn update(&mut self, msg: Msg) -> Dispatch<Self> {
+    fn update(&mut self, msg: Msg) -> Task<Msg> {
         match msg {
             Msg::Click => {
                 self.click_count += 1;
@@ -66,7 +66,7 @@ impl Application for App {
                 }
             }
         }
-        Dispatch::none()
+        Task::none()
     }
 
     view! {

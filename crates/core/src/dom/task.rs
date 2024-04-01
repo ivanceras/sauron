@@ -6,6 +6,7 @@ use futures::StreamExt;
 use std::future::Future;
 use std::pin::Pin;
 use crate::dom::Effects;
+use crate::dom::Modifier;
 
 /// encapsulate anything a component can do
 pub enum Command<MSG> {
@@ -19,6 +20,7 @@ pub enum Command<MSG> {
 pub struct Task<MSG>{
     /// commands
     pub(crate) commands: Vec<Command<MSG>>,
+    pub(crate) modifier: Modifier,
 }
 
 impl<MSG> Task<MSG>
@@ -31,13 +33,15 @@ where
         F: Future<Output = MSG> + 'static,
     {
         Self{
-            commands: vec![Command::single(f)]
+            commands: vec![Command::single(f)],
+            modifier: Default::default(),
         }
     }
     /// 
     pub fn sub(rx: UnboundedReceiver<MSG>, event_closure: EventClosure) -> Self {
         Self{
             commands: vec![Command::sub(rx, event_closure)],
+            modifier: Default::default(),
         }
     }
 
@@ -49,6 +53,7 @@ where
     {
         Task{
             commands: self.commands.into_iter().map(|t|t.map_msg(f.clone())).collect(),
+            modifier: Default::default(),
         }
     }
 
@@ -58,7 +63,22 @@ where
         for task in tasks.into_iter(){
             commands.extend(task.commands);
         }
-        Self {commands}
+        Self {commands,
+            modifier: Default::default(),
+        }
+    }
+
+    ///
+    pub fn none() -> Self {
+        Self{commands: vec![],
+            modifier: Default::default(),
+        }
+    }
+
+    ///
+    pub fn no_render(mut self) -> Self {
+        self.modifier.should_update_view = false;
+        self
     }
 
 }
@@ -119,6 +139,7 @@ where
             Self::Sub(task) => task.next().await,
         }
     }
+
 }
 
 /// Action is used to do asynchronous operations

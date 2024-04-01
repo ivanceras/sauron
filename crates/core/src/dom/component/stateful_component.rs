@@ -1,7 +1,8 @@
+#![allow(unused)]
 use crate::dom::events::on_mount;
 use crate::dom::program::MountProcedure;
 use crate::dom::Application;
-use crate::dom::Dispatch;
+use crate::dom::Task;
 use crate::dom::Component;
 use crate::dom::DomAttrValue;
 use crate::dom::DomNode;
@@ -111,19 +112,20 @@ impl<MSG> PartialEq for StatefulModel<MSG> {
     }
 }
 
+/*
 impl<COMP> Application for COMP
 where
     COMP: Component<XMSG = ()> + StatefulComponent + 'static,
 {
     type MSG = COMP::MSG;
 
-    fn init(&mut self) -> Dispatch<Self> {
-        Dispatch::from(<Self as Component>::init(self))
+    fn init(&mut self) -> Cmd<Self> {
+        Cmd::from(<Self as Component>::init(self))
     }
 
-    fn update(&mut self, msg: COMP::MSG) -> Dispatch<Self> {
+    fn update(&mut self, msg: COMP::MSG) -> Cmd<Self> {
         let effects = <Self as Component>::update(self, msg);
-        Dispatch::from(effects)
+        Cmd::from(effects)
     }
 
     fn view(&self) -> Node<COMP::MSG> {
@@ -138,6 +140,7 @@ where
         <Self as Component>::style(self)
     }
 }
+*/
 
 /// create a stateful component node
 pub fn stateful_component<COMP, MSG, MSG2>(
@@ -150,6 +153,7 @@ where
     MSG: Default + 'static,
     MSG2: 'static,
 {
+/*
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
 
@@ -169,6 +173,8 @@ where
         attrs: attrs.into_iter().chain([mount_event]).collect(),
         children: children.into_iter().collect(),
     }))
+*/
+    todo!()
 }
 
 impl Into<DomAttrValue> for JsValue {

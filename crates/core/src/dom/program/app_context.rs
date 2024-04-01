@@ -113,7 +113,7 @@ where
     APP: Application,
 {
     pub fn init_app(&self) -> Dispatch<APP> {
-        self.app.borrow_mut().init()
+        Dispatch::from(self.app.borrow_mut().init())
     }
 
     pub fn view(&self) -> vdom::Node<APP::MSG> {
@@ -145,7 +145,7 @@ where
     }
 
     pub fn update_app(&mut self, msg: APP::MSG) -> Dispatch<APP> {
-        self.app.borrow_mut().update(msg)
+        Dispatch::from(self.app.borrow_mut().update(msg))
     }
 
     /// return true if there are still pending msgs
