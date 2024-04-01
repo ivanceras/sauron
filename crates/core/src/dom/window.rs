@@ -1,4 +1,3 @@
-use crate::dom::task::RecurringTask;
 use crate::dom::{dom_node::intern, util, window, Task};
 use futures::channel::mpsc;
 use wasm_bindgen::{prelude::*, JsCast};
@@ -31,10 +30,7 @@ impl Window {
             )
             .expect("add event callback");
 
-        Task::Recurring(RecurringTask {
-            receiver: rx,
-            event_closures: vec![resize_callback],
-        })
+        Task::recurring(rx, resize_callback)
     }
 
     ///
@@ -56,10 +52,7 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::Recurring(RecurringTask {
-            receiver: rx,
-            event_closures: vec![mousemove_cb],
-        })
+        Task::recurring(rx, mousemove_cb)
     }
 
     ///
@@ -81,10 +74,7 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::Recurring(RecurringTask {
-            receiver: rx,
-            event_closures: vec![mousemove_cb],
-        })
+        Task::recurring(rx, mousemove_cb)
     }
 
     /// do this task at every `ms` interval
@@ -107,10 +97,7 @@ impl Window {
                 interval_ms,
             )
             .expect("Unable to start interval");
-        Task::Recurring(RecurringTask {
-            receiver: rx,
-            event_closures: vec![closure_cb],
-        })
+        Task::recurring(rx, closure_cb)
     }
 
     /// scroll the window to the top of the document
@@ -145,9 +132,6 @@ impl Window {
                 closure_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::Recurring(RecurringTask {
-            receiver: rx,
-            event_closures: vec![closure_cb],
-        })
+        Task::recurring(rx, closure_cb)
     }
 }

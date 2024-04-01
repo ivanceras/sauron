@@ -287,6 +287,10 @@
     - The `SingleTask` is a Cmd in sauron
     - Rename `Cmd` to `Command` alternative: `Action`, `Operation`, `Instruction`, `Effects`, `Dispatch`
         - This is effects in elm
+    - [ ] Rename `Cmd` to `Dispatch`
+    - [ ] Rename `SingleTask` to `Cmd`
+    - [ ] Rename `RecurringTask` to `Sub`
+    - [ ] enum Task{Cmd,Sub} into 1.
     - Sauron just consilidate them into one enum struct for simplicity
 
 ## Features

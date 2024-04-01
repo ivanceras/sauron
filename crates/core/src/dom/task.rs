@@ -11,7 +11,7 @@ pub enum Task<MSG> {
     /// A task with one single resulting MSG
     Single(SingleTask<MSG>),
     /// A task with recurring resulting MSG
-    Recurring(RecurringTask<MSG>),
+    Sub(Sub<MSG>),
 }
 
 impl<MSG> Task<MSG>
@@ -25,6 +25,13 @@ where
     {
         Self::Single(SingleTask::new(f))
     }
+    /// 
+    pub fn recurring(rx: UnboundedReceiver<MSG>, event_closure: EventClosure) -> Self {
+        Self::Sub(Sub{
+            receiver: rx,
+            event_closures: vec![event_closure],
+        })
+    }
 
     /// apply a function to the msg to create a different task which has a different msg
     pub fn map_msg<F, MSG2>(self, f: F) -> Task<MSG2>
@@ -34,7 +41,7 @@ where
     {
         match self {
             Self::Single(task) => Task::Single(task.map_msg(f)),
-            Self::Recurring(task) => Task::Recurring(task.map_msg(f)),
+            Self::Sub(task) => Task::Sub(task.map_msg(f)),
         }
     }
 
@@ -42,7 +49,7 @@ where
     pub async fn next(&mut self) -> Option<MSG> {
         match self {
             Self::Single(task) => task.next().await,
-            Self::Recurring(task) => task.next().await,
+            Self::Sub(task) => task.next().await,
         }
     }
 }
@@ -70,6 +77,7 @@ where
             done: false,
         }
     }
+
 
     /// apply a function to the msg to create a different task which has a different msg
     fn map_msg<F, MSG2>(self, f: F) -> SingleTask<MSG2>
@@ -108,13 +116,13 @@ where
     }
 }
 
-pub struct RecurringTask<MSG> {
+pub struct Sub<MSG> {
     pub(crate) receiver: UnboundedReceiver<MSG>,
     /// store the associated closures so it is not dropped before being event executed
     pub(crate) event_closures: Vec<EventClosure>,
 }
 
-impl<MSG> RecurringTask<MSG>
+impl<MSG> Sub<MSG>
 where
     MSG: 'static,
 {
@@ -123,13 +131,13 @@ where
     }
 
     /// apply a function to the msg to create a different task which has a different msg
-    fn map_msg<F, MSG2>(self, f: F) -> RecurringTask<MSG2>
+    fn map_msg<F, MSG2>(self, f: F) -> Sub<MSG2>
     where
         F: Fn(MSG) -> MSG2 + 'static,
         MSG2: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
-        let RecurringTask {
+        let Sub {
             mut receiver,
             event_closures,
         } = self;
@@ -138,7 +146,7 @@ where
                 tx.start_send(f(msg)).expect("must send");
             }
         });
-        RecurringTask {
+        Sub {
             receiver: rx,
             event_closures,
         }
