@@ -4,6 +4,7 @@ use sauron::{html::*, *};
 
 pub enum Msg {
     WindowResized(i32, i32),
+    TickTock,
 }
 
 #[derive(Default)]
@@ -16,10 +17,13 @@ impl Application for App {
     type MSG = Msg;
 
     fn init(&mut self) -> Task<Msg> {
-        Window::on_resize(|w, h| {
-            log::info!("This will trigger only once.. {w}x{h}");
-            Msg::WindowResized(w, h)
-        })
+        Task::batch([
+            Window::on_resize(|w, h| {
+                log::info!("This will trigger only once.. {w}x{h}");
+                Msg::WindowResized(w, h)
+            }),
+            Window::every_interval(1_000, || Msg::TickTock),
+        ])
     }
 
     fn view(&self) -> Node<Msg> {
@@ -52,6 +56,10 @@ impl Application for App {
                 log::info!("Setting the App's width: {w} and height: {h}");
                 self.width = Some(w);
                 self.height = Some(h);
+                Task::none()
+            }
+            Msg::TickTock => {
+                log::info!("tick tock!");
                 Task::none()
             }
         }

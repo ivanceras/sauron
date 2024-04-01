@@ -1,11 +1,10 @@
 #![deny(warnings)]
-use sauron::dom::spawn_local;
 use sauron::dom::Http;
 use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
 use sauron::js_sys::TypeError;
-use sauron::{jss, text, wasm_bindgen, Application, Cmd, Node, Program};
+use sauron::{jss, text, wasm_bindgen, Application, Node, Program, Task};
 use serde::Deserialize;
 
 #[macro_use]
@@ -56,10 +55,10 @@ impl App {
         }
     }
 
-    fn fetch_page(&self) -> Cmd<Self> {
+    fn fetch_page(&self) -> Task<Msg> {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
-        Cmd::new(|mut program| {
-            spawn_local(async move {
+        Task::single(
+            async move {
                 let msg = match Http::fetch_text(&url).await {
                     Ok(v) => match serde_json::from_str(&v) {
                         Ok(data1) => Msg::ReceivedData(data1),
@@ -67,16 +66,16 @@ impl App {
                     },
                     Err(e) => Msg::RequestError(e),
                 };
-                program.dispatch(msg);
-            })
-        })
+                msg
+            }
+        )
     }
 }
 
 impl Application for App {
     type MSG = Msg;
 
-    fn init(&mut self) -> Cmd<Self> {
+    fn init(&mut self) -> Task<Msg> {
         console_log::init_with_level(log::Level::Trace).unwrap();
         self.fetch_page()
     }
@@ -140,7 +139,7 @@ impl Application for App {
         )
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Task<Msg> {
         trace!("App is updating from msg: {:?}", msg);
         match msg {
             Msg::NextPage => {
@@ -148,7 +147,7 @@ impl Application for App {
                     self.page += 1;
                     self.fetch_page()
                 } else {
-                    Cmd::none()
+                    Task::none()
                 }
             }
             Msg::PrevPage => {
@@ -159,12 +158,12 @@ impl Application for App {
             }
             Msg::ReceivedData(data1) => {
                 self.data = data1;
-                Cmd::none()
+                Task::none()
             }
             Msg::JsonError(err) => {
                 trace!("Error fetching users! {:#?}", err);
                 self.error = Some(format!("There was an error fetching the page: {:?}", err));
-                Cmd::none()
+                Task::none()
             }
             Msg::RequestError(type_error) => {
                 trace!("Error requesting the page: {:?}", type_error);
@@ -172,7 +171,7 @@ impl Application for App {
                     "There was an error fetching the page: {:?}",
                     type_error
                 ));
-                Cmd::none()
+                Task::none()
             }
         }
     }

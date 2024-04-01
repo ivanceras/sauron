@@ -78,9 +78,9 @@ impl Window {
     }
 
     /// do this task at every `ms` interval
-    pub fn every_interval<F, MSG>(interval_ms: i32, mut cb: F) -> Task<MSG>
+    pub fn every_interval<F, MSG>(interval_ms: i32, cb: F) -> Task<MSG>
     where
-        F: FnMut() -> MSG + 'static,
+        F: Fn() -> MSG + 'static,
         MSG: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
