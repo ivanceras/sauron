@@ -289,8 +289,8 @@
         - This is effects in elm
     - [ ] Rename `Cmd` to `Dispatch`
     - [ ] Rename `SingleTask` to `Cmd`
-    - [ ] Rename `RecurringTask` to `Sub`
-    - [ ] enum Task{Cmd,Sub} into 1.
+    - [X] Rename `RecurringTask` to `Sub`
+    - [ ] enum Task{Cmd,Sub} into one unified type.
     - Sauron just consilidate them into one enum struct for simplicity
 
 ## Features
