@@ -1,21 +1,20 @@
-use crate::dom::component::register_template;
 use crate::dom::events::on_mount;
 use crate::dom::program::MountProcedure;
 use crate::dom::Application;
 use crate::dom::Cmd;
 use crate::dom::Component;
 use crate::dom::DomAttrValue;
+use crate::dom::DomNode;
 use crate::dom::Program;
-use crate::dom::SkipDiff;
 use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
 use crate::vdom::Leaf;
 use crate::vdom::Node;
 use std::any::TypeId;
 use std::cell::RefCell;
+use std::fmt;
 use std::rc::Rc;
 use wasm_bindgen::JsValue;
-use std::fmt;
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
@@ -35,7 +34,7 @@ pub trait StatefulComponent {
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
 
     /// append a child into this component
-    fn append_child(&mut self, _child: &web_sys::Node) {}
+    fn append_children(&mut self, _children: Vec<DomNode>) {}
 
     /// remove a child in this index
     fn remove_child(&mut self, _index: usize) {}
@@ -61,9 +60,8 @@ pub struct StatefulModel<MSG> {
     pub children: Vec<Node<MSG>>,
 }
 
-impl<MSG> fmt::Debug for StatefulModel<MSG>{
-
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
+impl<MSG> fmt::Debug for StatefulModel<MSG> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "StatefuleMode")
     }
 }
@@ -104,6 +102,15 @@ impl<MSG> Clone for StatefulModel<MSG> {
     }
 }
 
+impl<MSG> PartialEq for StatefulModel<MSG> {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.comp, &other.comp)
+            && self.type_id == other.type_id
+            && self.attrs == other.attrs
+            && self.children == other.children
+    }
+}
+
 impl<COMP> Application for COMP
 where
     COMP: Component<XMSG = ()> + StatefulComponent + 'static,
@@ -121,14 +128,6 @@ where
 
     fn view(&self) -> Node<COMP::MSG> {
         <Self as Component>::view(self)
-    }
-
-    fn skip_diff(&self) -> Option<SkipDiff> {
-        <Self as Component>::skip_diff(self)
-    }
-
-    fn template(&self) -> Option<Node<COMP::MSG>> {
-        <Self as Component>::template(self)
     }
 
     fn stylesheet() -> Vec<String> {
@@ -154,16 +153,6 @@ where
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
 
-    // Note: we can not include the children in the build function
-    // as the children here contains the MSG generic
-    // and we can not discard the event listeners.
-    //
-    // The attribute(minus events) however can be used for configurations, for setting initial state
-    // of the stateful component.
-
-    let vdom_template = app.template().expect("must have a template");
-    let _template = register_template(type_id, &vdom_template);
-
     let app = Rc::new(RefCell::new(app));
 
     let program = Program::from_rc_app(Rc::clone(&app));
@@ -171,7 +160,7 @@ where
     let mount_event = on_mount(move |me| {
         let mut program = program.clone();
         log::info!("stateful component is now mounted...");
-        program.mount(&me.target_node, MountProcedure::append());
+        program.mount(&me.target_node.as_node(), MountProcedure::append());
         MSG::default()
     });
     Node::Leaf(Leaf::StatefulComponent(StatefulModel {

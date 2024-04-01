@@ -5,8 +5,6 @@ use derive_where::derive_where;
 /// Values of an attribute can be in these variants
 #[derive_where(Clone, Debug)]
 pub enum AttributeValue<MSG> {
-    /// an argument value, to be called as parameter, the function is called to the element
-    FunctionCall(Value),
     /// a simple value, wrapper of primitive types
     Simple(Value),
     /// style values
@@ -23,9 +21,6 @@ pub enum AttributeValue<MSG> {
 impl<MSG> PartialEq for AttributeValue<MSG> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (AttributeValue::FunctionCall(this), AttributeValue::FunctionCall(other)) => {
-                this == other
-            }
             (AttributeValue::Simple(this), AttributeValue::Simple(other)) => this == other,
             (AttributeValue::Style(this), AttributeValue::Style(other)) => this == other,
             (AttributeValue::EventListener(this), AttributeValue::EventListener(other)) => {
@@ -60,11 +55,6 @@ impl<MSG> AttributeValue<MSG> {
         Self::Style(styles.into_iter().collect())
     }
 
-    /// create an attribute from a function `name` with arguments `value`
-    pub fn function_call(value: Value) -> Self {
-        Self::FunctionCall(value)
-    }
-
     /// return the value if it is a Simple variant
     pub fn get_simple(&self) -> Option<&Value> {
         match self {
@@ -79,14 +69,6 @@ impl<MSG> AttributeValue<MSG> {
             simple.as_str()
         } else {
             None
-        }
-    }
-
-    /// return the function call argument value if it is a FunctionCall variant
-    pub fn get_function_call_value(&self) -> Option<&Value> {
-        match self {
-            Self::FunctionCall(v) => Some(v),
-            _ => None,
         }
     }
 
@@ -114,11 +96,6 @@ impl<MSG> AttributeValue<MSG> {
             Self::Style(styles) => Some(styles),
             _ => None,
         }
-    }
-
-    /// return true if this is a function call
-    pub fn is_function_call(&self) -> bool {
-        matches!(self, Self::FunctionCall(_))
     }
 
     /// returns true if this attribute value is the filler empty attribute

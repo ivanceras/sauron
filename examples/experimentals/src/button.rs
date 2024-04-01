@@ -9,7 +9,7 @@ use sauron::vdom::AttributeName;
 #[derive(Default)]
 pub enum Msg {
     Click,
-    ExternContMounted(web_sys::Node),
+    ExternContMounted(DomNode),
     #[default]
     NoOp,
 }
@@ -17,8 +17,8 @@ pub enum Msg {
 #[derive(Default)]
 pub struct Button {
     /// holds the children while the external children node hasn't been mounted
-    children: Vec<web_sys::Node>,
-    external_children_node: Option<web_sys::Node>,
+    children: Vec<DomNode>,
+    external_children_node: Option<DomNode>,
     cnt: i32,
 }
 
@@ -31,9 +31,7 @@ impl Component for Button {
             Msg::Click => self.cnt += 1,
             Msg::ExternContMounted(target_node) => {
                 log::info!("Button: extenal container mounted...");
-                for child in self.children.iter() {
-                    target_node.append_child(child).expect("must append");
-                }
+                target_node.append_children(self.children.drain(..).collect());
                 self.external_children_node = Some(target_node);
             }
             Msg::NoOp => (),
@@ -43,7 +41,7 @@ impl Component for Button {
 
     view! {
         <button on_click=|_|Msg::Click >
-            Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}
+            <span>Hello!{text!("I'm just a button, clicked {} time(s)", self.cnt)}</span>
             <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
         </button>
     }
@@ -61,18 +59,15 @@ impl StatefulComponent for Button {
     }
 
     /// append a child into this component
-    fn append_child(&mut self, child: &web_sys::Node) {
-        log::info!("Btn appending {:?}", child);
+    fn append_children(&mut self, children: Vec<DomNode>) {
         if let Some(external_children_node) = self.external_children_node.as_ref() {
             log::info!("Btn ok appending..");
-            external_children_node
-                .append_child(child)
-                .expect("must append");
+            external_children_node.append_children(children);
         } else {
             log::debug!(
                 "Button: Just pushing to children since the external holder is not yet mounted"
             );
-            self.children.push(child.clone());
+            self.children.extend(children);
         }
     }
 }

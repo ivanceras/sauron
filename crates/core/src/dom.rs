@@ -14,7 +14,7 @@ mod task;
 use cfg_if::cfg_if;
 
 cfg_if! {if #[cfg(feature = "with-dom")] {
-    pub use application::{Application, Measurements, SkipDiff, skip_if, skip_diff};
+    pub use application::{Application, Measurements, SkipDiff, skip_if, skip_diff, SkipPath};
     #[cfg(feature = "custom_element")]
     pub use component::{register_web_component, WebComponent, WebComponentWrapper};
     pub use component::{component, stateful_component, StatefulComponent, StatefulModel, StatelessModel};
@@ -50,7 +50,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
 
 
     /// Map the Event to DomEvent, which are browser events
-    #[derive(Debug, Clone, PartialEq, Eq)]
+    #[derive(Debug, Clone)]
     pub enum Event {
         /// native dome events web_sys::Events
         WebEvent(web_sys::Event),

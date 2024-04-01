@@ -200,7 +200,7 @@ impl<'a, MSG> Patch<'a, MSG> {
 
     /// create a patch where the target element has to clear its children nodes
     pub fn clear_children(tag: Option<&'a Tag>, patch_path: TreePath) -> Patch<'a, MSG> {
-        Patch{
+        Patch {
             tag,
             patch_path,
             patch_type: PatchType::ClearChildren,

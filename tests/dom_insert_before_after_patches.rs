@@ -145,3 +145,99 @@ fn insert_multiple_after_nodes() {
 
     assert_eq!(expected1, container.outer_html());
 }
+
+#[wasm_bindgen_test]
+fn insert_multiple_in_the_middle() {
+    console_log::init_with_level(log::Level::Trace).ok();
+    console_error_panic_hook::set_once();
+
+    let document = web_sys::window().unwrap().document().unwrap();
+
+    let old: Node<()> = main(
+        [class("middle_nodes_test1")],
+        vec![ul(
+            [class("todo")],
+            vec![
+                li([key(1)], vec![text("item1")]),
+                li([key(2)], vec![text("item2")]),
+                li([key(3)], vec![text("item3")]),
+            ],
+        )],
+    );
+
+    let update1: Node<()> = main(
+        [class("middle_nodes_test1")],
+        vec![ul(
+            [class("todo")],
+            vec![
+                li([], vec![text("itemA")]),
+                li([], vec![text("itemB")]),
+                li([key(1)], vec![text("item1")]),
+                li([key(2)], vec![text("item2")]),
+                li([key(3)], vec![text("item3")]),
+                li([], vec![text("itemC")]),
+            ],
+        )],
+    );
+
+    let patches = diff(&old, &update1);
+    log::debug!("patching old to update1: {:#?}", patches);
+
+    let mut old_html = String::new();
+    old.render(&mut old_html).expect("must render");
+
+    let mut simple_program = simple_program();
+    simple_program
+        .update_dom_with_vdom(old)
+        .expect("must update dom");
+
+    let container = document
+        .query_selector(".middle_nodes_test1")
+        .expect("must not error")
+        .expect("must exist");
+
+    let expected = "<main class=\"middle_nodes_test1\">\
+        <ul class=\"todo\">\
+            <li key=\"1\">item1</li>\
+            <li key=\"2\">item2</li>\
+            <li key=\"3\">item3</li>\
+        </ul>\
+    </main>";
+
+    assert_eq!(expected, container.outer_html());
+    {
+        let root_node = simple_program.root_node.borrow();
+        let root_node = root_node.as_ref().unwrap();
+        log::info!("root node: {}", root_node.render_to_string());
+        assert_eq!(container.outer_html(), root_node.render_to_string());
+    }
+
+    simple_program
+        .update_dom_with_vdom(update1)
+        .expect("must not error");
+
+    let container = document
+        .query_selector(".middle_nodes_test1")
+        .expect("must not error")
+        .expect("must exist");
+
+    let expected1 = "<main class=\"middle_nodes_test1\">\
+        <ul class=\"todo\">\
+            <li>itemA</li>\
+            <li>itemB</li>\
+            <li key=\"1\">item1</li>\
+            <li key=\"2\">item2</li>\
+            <li key=\"3\">item3</li>\
+            <li>itemC</li>\
+        </ul>\
+    </main>";
+
+    assert_eq!(expected1, container.outer_html());
+
+    {
+        let root_node = simple_program.root_node.borrow();
+        let root_node = root_node.as_ref().unwrap();
+        log::info!("The root node is: {}", root_node.render_to_string());
+        assert_eq!(container.outer_html(), root_node.render_to_string());
+    }
+}

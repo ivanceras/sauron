@@ -1,6 +1,7 @@
 //! Create [events][0] Object
 //!
 //! [0]: https://developer.mozilla.org/en-US/docs/Web/Events
+use crate::dom::DomNode;
 use crate::dom::{document, window, Event};
 use crate::vdom;
 use crate::vdom::{Attribute, AttributeValue, EventCallback};
@@ -124,10 +125,10 @@ where
 
 /// an event when a virtual Node is mounted the field node is the actual
 /// dom node where the virtual Node is created in the actual dom
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct MountEvent {
     /// the node where the virtual node is materialized into the actual dom
-    pub target_node: web_sys::Node,
+    pub target_node: DomNode,
 }
 
 impl MountEvent {
@@ -146,8 +147,9 @@ where
     on("mount", move |event: Event| {
         let web_event = event.as_web().expect("must be a web event");
         let event_target = web_event.target().expect("must have a target");
+        let target_node: web_sys::Node = event_target.unchecked_into();
         let me = MountEvent {
-            target_node: event_target.unchecked_into(),
+            target_node: DomNode::from(target_node),
         };
         f(me)
     })

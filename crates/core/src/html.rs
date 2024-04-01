@@ -120,20 +120,6 @@ pub fn text<MSG>(s: impl ToString) -> Node<MSG> {
     Node::Leaf(Leaf::Text(Cow::from(s.to_string())))
 }
 
-/// Create an html and instruct the DOM renderer and/or DOM patcher that the operation is safe.
-///
-/// Note: this operation doesn't sanitize the html code. It is your responsibility
-/// as a programmer to sanitize the input here.
-/// # Example
-/// ```rust
-/// use sauron::{*,html::safe_html};
-///
-/// let node: Node<()> = safe_html("<div>In a safe html</div>");
-/// ```
-pub fn safe_html<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG> {
-    Node::Leaf(Leaf::SafeHtml(s.into()))
-}
-
 /// create a comment node
 /// # Example
 /// ```rust
@@ -163,4 +149,23 @@ pub fn doctype<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG> {
 /// create a node which contains a list of nodes
 pub fn node_list<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
     Node::Leaf(Leaf::NodeList(nodes.into_iter().collect()))
+}
+
+/// Create html entities such as `&nbsp;` `&gt`
+pub fn symbol<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG> {
+    let s = s.into();
+    let s = escape_html_text(&s);
+    Node::Leaf(Leaf::Symbol(s.into()))
+}
+
+fn escape_html_text(s: &str) -> String {
+    s.chars()
+        .map(|ch| match ch {
+            '>' => Cow::from("&gt;"),
+            '<' => Cow::from("&lt;"),
+            '\'' => Cow::from("&#39;"),
+            '"' => Cow::from("&quot;"),
+            _ => Cow::from(ch.to_string()),
+        })
+        .collect()
 }

@@ -1,59 +1,20 @@
-use crate::dom::SkipDiff;
 use crate::html::attributes::{class, classes, Attribute};
 use crate::vdom::AttributeName;
+use crate::vdom::AttributeValue;
 use crate::vdom::Leaf;
 use crate::{dom::Effects, vdom::Node};
-use std::any::TypeId;
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::rc::Rc;
 use derive_where::derive_where;
+use std::any::TypeId;
 
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
 #[cfg(feature = "custom_element")]
 pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
 
 mod stateful_component;
+#[cfg(feature = "use-template")]
+pub(crate) mod template;
 #[cfg(feature = "custom_element")]
 mod web_component;
-mod no_listener;
-
-thread_local! {
-    static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, web_sys::Node>> = RefCell::new(HashMap::new());
-}
-
-/// if the template is already registered, return the dom template
-/// if not, create the dom template and add it
-pub fn register_template<MSG>(type_id: TypeId, vdom_template: &Node<MSG>) -> web_sys::Node {
-    if let Some(template) = lookup_template(type_id) {
-        template
-    } else {
-        let template = no_listener::create_dom_node_without_listeners(&vdom_template);
-        add_template(type_id, &template);
-        template
-    }
-}
-
-pub fn add_template(type_id: TypeId, template: &web_sys::Node) {
-    TEMPLATE_LOOKUP.with_borrow_mut(|map| {
-        if map.contains_key(&type_id) {
-            // already added
-        } else {
-            map.insert(type_id, template.clone());
-        }
-    })
-}
-
-/// lookup for the template
-pub fn lookup_template(type_id: TypeId) -> Option<web_sys::Node> {
-    TEMPLATE_LOOKUP.with_borrow(|map| {
-        if let Some(existing) = map.get(&type_id) {
-            Some(existing.clone_node_with_deep(true).expect("deep clone"))
-        } else {
-            None
-        }
-    })
-}
 
 /// A component has a view and can update itself.
 ///
@@ -78,17 +39,6 @@ pub trait Component {
 
     /// the view of the component
     fn view(&self) -> Node<Self::MSG>;
-
-    /// optional logical code when to skip diffing some particular node
-    /// by comparing field values of app and its old values
-    fn skip_diff(&self) -> Option<SkipDiff> {
-        None
-    }
-
-    ///
-    fn template(&self) -> Option<Node<Self::MSG>> {
-        None
-    }
 
     /// component can have static styles
     fn stylesheet() -> Vec<String>
@@ -136,7 +86,13 @@ pub trait Component {
     where
         Self: Sized,
     {
-        class(Self::prefix_class(class_name))
+        let class_names: Vec<&str> = class_name.split(" ").collect();
+        let prefixed_classes = class_names
+            .iter()
+            .map(|c| Self::prefix_class(c))
+            .collect::<Vec<_>>()
+            .join(" ");
+        class(prefixed_classes)
     }
 
     /// create namespaced class names to pair that evaluates to true
@@ -202,16 +158,8 @@ pub(crate) fn extract_simple_struct_name<T: ?Sized>() -> String {
 pub struct StatelessModel<MSG> {
     /// the view of this stateless model
     pub view: Box<Node<MSG>>,
-    /// skip_diff
-    pub skip_diff: Rc<Option<SkipDiff>>,
-    /// the vdom template of this component
-    pub vdom_template: Box<Node<MSG>>,
     /// component type id
     pub type_id: TypeId,
-    /// attributes of this model
-    pub attrs: Vec<Attribute<MSG>>,
-    /// external children component
-    pub children: Vec<Node<MSG>>,
 }
 
 impl<MSG> StatelessModel<MSG> {
@@ -225,19 +173,17 @@ impl<MSG> StatelessModel<MSG> {
         StatelessModel {
             type_id: self.type_id,
             view: Box::new(self.view.map_msg(cb.clone())),
-            skip_diff: self.skip_diff.clone(),
-            vdom_template: Box::new(self.vdom_template.map_msg(cb.clone())),
-            attrs: self
-                .attrs
-                .into_iter()
-                .map(|a| a.map_msg(cb.clone()))
-                .collect(),
-            children: self
-                .children
-                .into_iter()
-                .map(|c| c.map_msg(cb.clone()))
-                .collect(),
         }
+    }
+
+    /// return the attribute values of the view node matching the attribute name `name`
+    pub fn attribute_value(&self, name: &AttributeName) -> Option<Vec<&AttributeValue<MSG>>> {
+        self.view.attribute_value(name)
+    }
+
+    ///
+    pub fn attributes(&self) -> Option<&[Attribute<MSG>]> {
+        self.view.attributes()
     }
 }
 
@@ -245,49 +191,27 @@ impl<MSG> Clone for StatelessModel<MSG> {
     fn clone(&self) -> Self {
         Self {
             view: self.view.clone(),
-            skip_diff: self.skip_diff.clone(),
-            vdom_template: self.vdom_template.clone(),
             type_id: self.type_id.clone(),
-            attrs: self.attrs.clone(),
-            children: self.children.clone(),
         }
     }
 }
 
 impl<MSG> PartialEq for StatelessModel<MSG> {
     fn eq(&self, other: &Self) -> bool {
-        self.view == other.view
-            && self.skip_diff == other.skip_diff
-            && self.vdom_template == other.vdom_template
-            && self.type_id == other.type_id
-            && self.attrs == other.attrs
-            && self.children == other.children
+        self.view == other.view && self.type_id == other.type_id
     }
 }
 
 /// create a stateless component node
-pub fn component<COMP>(
-    app: &COMP,
-    attrs: impl IntoIterator<Item = Attribute<COMP::MSG>>,
-    children: impl IntoIterator<Item = Node<COMP::MSG>>,
-) -> Node<COMP::MSG>
+pub fn component<COMP>(app: &COMP) -> Node<COMP::MSG>
 where
     COMP: Component + 'static,
 {
     let type_id = TypeId::of::<COMP>();
-    let view = app.view();
-    let skip_diff = app.skip_diff();
-
-    let vdom_template = app.template().expect("must have a template");
-
-    let _template = register_template(type_id, &vdom_template);
+    let app_view = app.view();
     Node::Leaf(Leaf::StatelessComponent(StatelessModel {
-        view: Box::new(view),
-        skip_diff: Rc::new(skip_diff),
-        vdom_template: Box::new(vdom_template),
+        view: Box::new(app_view),
         type_id,
-        attrs: attrs.into_iter().collect(),
-        children: children.into_iter().collect(),
     }))
 }
 

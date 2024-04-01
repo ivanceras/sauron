@@ -37,4 +37,7 @@ pub mod prelude {
 
     #[cfg(feature = "with-jss")]
     pub use sauron_macro::{jss, jss_with_media, style};
+
+    #[cfg(feature = "html-parser")]
+    pub use sauron_html_parser::{parse_html, safe_html};
 }

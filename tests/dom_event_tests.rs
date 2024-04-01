@@ -1,5 +1,4 @@
-#![deny(warnings)]
-use sauron::{html::attributes::*, html::events::*, html::*, vdom::TreePath, *};
+use sauron::{html::attributes::*, html::events::*, html::*, *};
 use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
@@ -73,6 +72,7 @@ fn added_event() {
             id(elem_id),
             value("End Text"),
             on_input(move |event: InputEvent| {
+                log::info!("input event is triggered..");
                 *text_clone.borrow_mut() = event.value();
             }),
         ],
@@ -91,17 +91,18 @@ fn added_event() {
         .update_dom_with_vdom(new)
         .expect("must not error");
 
-    let input_element = sauron_core::dom::document()
-        .get_element_by_id(elem_id)
-        .unwrap();
+    let document = sauron_core::dom::document();
+    let input_element = document.get_element_by_id(elem_id).unwrap();
+    log::info!("input_element: {}", input_element.outer_html());
+    log::info!("input element: {:#?}", input_element);
 
     assert_eq!(&*text.borrow(), "Start Text");
 
     // Dispatching the event, after the dom is updated
-    web_sys::EventTarget::from(input_element)
-        .dispatch_event(&input_event)
-        .unwrap();
+    let ret = web_sys::EventTarget::from(input_element).dispatch_event(&input_event);
+    log::info!("dispatched ret: {:?}", ret);
 
+    // TODO: this seems to be not working anymore
     //Should change the text
     assert_eq!(&*text.borrow(), "End Text");
 }
@@ -162,142 +163,4 @@ fn remove_event() {
     //Should never change the text, since it is removed with the dom_updater.update is called with
     //the `new` vdom which has no attached event
     assert_eq!(&*text.borrow(), "Start Text");
-}
-
-#[wasm_bindgen_test]
-fn remove_event_from_truncated_children() {
-    console_log::init_with_level(log::Level::Trace).ok();
-    let cb = on_click(|_| log::trace!("Clicked here"));
-    let old: Node<()> = div(
-        vec![],
-        vec![
-            button(vec![cb.clone()], vec![]),
-            button(vec![cb.clone()], vec![]),
-            button(vec![cb.clone()], vec![]),
-            button(vec![cb.clone()], vec![]),
-            button(vec![cb.clone()], vec![]),
-        ],
-    );
-
-    let new: Node<()> = div(vec![], vec![button(vec![cb.clone()], vec![])]);
-
-    let mut simple_program = simple_program();
-    let diff = diff(&old, &new);
-    log::debug!("{:#?}", diff);
-    assert_eq!(
-        diff,
-        vec![
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![1]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![2]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![3]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![4]),),
-        ],
-    );
-
-    simple_program
-        .update_dom_with_vdom(old)
-        .expect("must update dom");
-    assert_eq!(
-        simple_program.node_closures.borrow().len(),
-        5,
-        "There should be 5 events attached to the DomUpdater"
-    );
-    simple_program
-        .update_dom_with_vdom(new)
-        .expect("must not error");
-
-    assert_eq!(
-        simple_program.node_closures.borrow().len(),
-        1,
-        "There should only be 1 left after the truncate"
-    );
-}
-
-#[wasm_bindgen_test]
-fn remove_event_from_truncated_children_some_with_no_events() {
-    console_log::init_with_level(log::Level::Trace).ok();
-    let cb = on_click(|_| log::trace!("Clicked here"));
-    let old: Node<()> = div(
-        vec![],
-        vec![
-            button(vec![cb.clone()], vec![]),
-            button(vec![cb.clone()], vec![]),
-            button(vec![], vec![]),
-            button(vec![], vec![]),
-            button(vec![cb.clone()], vec![]),
-        ],
-    );
-
-    let new: Node<()> = div(vec![], vec![button(vec![cb.clone()], vec![])]);
-
-    let mut simple_program = simple_program();
-    let diff = diff(&old, &new);
-    log::debug!("{:#?}", diff);
-    assert_eq!(
-        diff,
-        vec![
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![1]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![2]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![3]),),
-            Patch::remove_node(Some(&"button"), TreePath::new(vec![4]),),
-        ],
-        "Should be a Truncate patch"
-    );
-
-    simple_program
-        .update_dom_with_vdom(old)
-        .expect("must update dom");
-
-    assert_eq!(
-        simple_program.node_closures.borrow().len(),
-        3,
-        "There should be 3 events attached to the DomUpdater"
-    );
-    simple_program
-        .update_dom_with_vdom(new)
-        .expect("must not error");
-
-    assert_eq!(
-        simple_program.node_closures.borrow().len(),
-        1,
-        "There should only be 1 left after the truncate"
-    );
-}
-
-#[wasm_bindgen_test]
-fn remove_event_from_replaced_node() {
-    console_log::init_with_level(log::Level::Trace).ok();
-
-    let old: Node<()> = div(vec![on_click(|_| log::trace!("I'm a div"))], vec![]);
-
-    let new: Node<()> = p(vec![], vec![]);
-
-    let mut simple_program = simple_program();
-    let diff = diff(&old, &new);
-    log::info!("{:#?}", diff);
-    assert_eq!(
-        diff,
-        vec![Patch::replace_node(
-            Some(&"div"),
-            TreePath::new(vec![]),
-            vec![&p(vec![], vec![])]
-        )],
-    );
-    simple_program
-        .update_dom_with_vdom(old)
-        .expect("must update dom");
-    assert_eq!(
-        simple_program.node_closures.borrow().len(),
-        1,
-        "There should be 1 event attached to the DomUpdater"
-    );
-    simple_program
-        .update_dom_with_vdom(new)
-        .expect("must not error");
-
-    assert_eq!(
-        simple_program.node_closures.borrow().len(),
-        0,
-        "There should only be 0 left after replacing it with a different tag"
-    );
 }

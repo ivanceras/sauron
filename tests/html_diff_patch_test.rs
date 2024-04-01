@@ -169,9 +169,7 @@ fn remove_nodes1() {
 
     assert_eq!(
         dbg!(diff(&old, &new)),
-        vec![
-            Patch::clear_children(Some(&"div"), TreePath::new(vec![]),),
-        ],
+        vec![Patch::clear_children(Some(&"div"), TreePath::new(vec![]),),],
         "Remove all child nodes at and after child sibling index 1",
     );
 }

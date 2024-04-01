@@ -1,4 +1,5 @@
 use super::{AttributeName, Namespace, Tag};
+use crate::dom::SkipDiff;
 use crate::vdom::Attribute;
 use crate::vdom::AttributeValue;
 use crate::vdom::Element;
@@ -90,14 +91,6 @@ impl<MSG> Node<MSG> {
         }
     }
 
-    /// returns true if this is a safe html text node
-    pub fn is_safe_html(&self) -> bool {
-        match self {
-            Self::Leaf(leaf) => leaf.is_safe_html(),
-            _ => false,
-        }
-    }
-
     /// return the text if this is text node leaf
     pub fn as_text(&self) -> Option<&str> {
         match self {
@@ -106,10 +99,10 @@ impl<MSG> Node<MSG> {
         }
     }
 
-    /// return the text if this is safe html leaf
-    pub fn as_safe_html(&self) -> Option<&str> {
+    /// return the html entity if it is a symbol variant
+    pub fn as_symbol(&self) -> Option<&str> {
         match self {
-            Self::Leaf(ref leaf) => leaf.as_safe_html(),
+            Self::Leaf(Leaf::Symbol(symbol)) => Some(symbol),
             _ => None,
         }
     }
@@ -182,9 +175,9 @@ impl<MSG> Node<MSG> {
     /// get the attributes of this node
     /// returns None if it is a text node
     pub fn attributes(&self) -> Option<&[Attribute<MSG>]> {
-        match *self {
-            Node::Element(ref element) => Some(element.attributes()),
-            _ => None,
+        match self {
+            Node::Element(element) => Some(element.attributes()),
+            Node::Leaf(leaf) => leaf.attributes(),
         }
     }
 
@@ -203,7 +196,6 @@ impl<MSG> Node<MSG> {
     pub fn children(&self) -> &[Node<MSG>] {
         match self {
             Self::Element(elm) => elm.children(),
-            Self::Leaf(Leaf::StatelessComponent(comp)) => &comp.children,
             _ => &[],
         }
     }
@@ -294,12 +286,11 @@ impl<MSG> Node<MSG> {
         self
     }
 
-    /// returh the attribute values of this node which match the attribute name `name`
+    /// return the attribute values of this node which match the attribute name `name`
     pub fn attribute_value(&self, name: &AttributeName) -> Option<Vec<&AttributeValue<MSG>>> {
-        if let Some(elm) = self.element_ref() {
-            elm.attribute_value(name)
-        } else {
-            None
+        match self {
+            Self::Element(elm) => elm.attribute_value(name),
+            Self::Leaf(leaf) => leaf.attribute_value(name),
         }
     }
 
@@ -307,6 +298,42 @@ impl<MSG> Node<MSG> {
     pub fn first_value(&self, att_name: &AttributeName) -> Option<&Value> {
         self.attribute_value(att_name)
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
+    }
+
+    /// return the template view if this node has one
+    pub fn template(&self) -> Option<Node<MSG>> {
+        match self {
+            Self::Leaf(Leaf::TemplatedView(view)) => Some((view.template)()),
+            _ => None,
+        }
+    }
+
+    /// return the skip diff if this node has one
+    pub fn skip_diff(&self) -> Option<SkipDiff> {
+        match self {
+            Self::Leaf(Leaf::TemplatedView(view)) => Some((view.skip_diff)()),
+            _ => None,
+        }
+    }
+
+    ///
+    pub fn unwrap_template(self) -> Node<MSG> {
+        match self {
+            Self::Leaf(Leaf::TemplatedView(view)) => *view.view,
+            _ => self,
+        }
+    }
+
+    ///
+    pub fn unwrap_template_ref(&self) -> &Node<MSG> {
+        match self {
+            Self::Leaf(Leaf::TemplatedView(view)) => &view.view,
+            _ => self,
+        }
+    }
+    /// returns true if this node is a templated view
+    pub fn is_template(&self) -> bool {
+        matches!(self, Self::Leaf(Leaf::TemplatedView(_)))
     }
 }
 

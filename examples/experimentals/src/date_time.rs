@@ -18,20 +18,21 @@ pub enum Msg {
     TimeOrDateModified(String),
     IntervalChange(f64),
     Mounted(MountEvent),
-    ExternContMounted(web_sys::Node),
+    ExternContMounted(DomNode),
     BtnClick,
+    NoOp,
 }
 
 #[derive(Debug, Clone)]
 pub struct DateTimeWidget<XMSG> {
     /// the host element the web editor is mounted to, when mounted as a custom web component
-    host_element: Option<web_sys::Element>,
+    host_element: Option<DomNode>,
     date: String,
     time: String,
     cnt: i32,
     time_change_listener: Vec<Callback<String, XMSG>>,
-    children: Vec<web_sys::Node>,
-    external_children_node: Option<web_sys::Node>,
+    children: Vec<DomNode>,
+    external_children_node: Option<DomNode>,
 }
 
 impl<XMSG> Default for DateTimeWidget<XMSG> {
@@ -101,34 +102,28 @@ where
                     parent_msg.push(pmsg);
                 }
                 if let Some(host_element) = self.host_element.as_ref() {
+                    /*
                     host_element
                         .set_attribute("date_time", &date_time)
                         .expect("change attribute");
                     host_element
                         .dispatch_event(&InputEvent::create_web_event_composed())
                         .expect("must dispatch event");
+                    */
                 } else {
                     log::debug!("There is no host_element");
                 }
                 Effects::with_external(parent_msg)
             }
             Msg::Mounted(mount_event) => {
-                let mount_element: web_sys::Element = mount_event.target_node.unchecked_into();
-                let root_node = mount_element.get_root_node();
-                if let Some(shadow_root) = root_node.dyn_ref::<web_sys::ShadowRoot>() {
-                    log::info!("There is a shadow root");
-                    let host_element = shadow_root.host();
-                    self.host_element = Some(host_element);
-                } else {
-                    log::warn!("There is no shadow root");
-                }
+                log::info!("==> Ok the DateTime widget is now mounted for real..");
+                let mount_element = mount_event.target_node;
+                self.host_element = Some(mount_element);
                 Effects::none()
             }
             Msg::ExternContMounted(target_node) => {
-                log::info!("DateTime: extenal container mounted...");
-                for child in self.children.iter() {
-                    target_node.append_child(child).expect("must append");
-                }
+                log::warn!("-->>> Container for children is now mounted..!");
+                target_node.append_children(self.children.drain(..).collect());
                 self.external_children_node = Some(target_node);
                 Effects::none()
             }
@@ -141,6 +136,7 @@ where
                 log::trace!("There is an interval: {}", interval);
                 Effects::none()
             }
+            Msg::NoOp => Effects::none(),
         }
     }
 
@@ -178,8 +174,8 @@ where
                     on_change=|input|Msg::TimeChange(input.value())
                     value=&self.time/>
             <input type="text" value=self.cnt/>
-            <button on_click=move |_| Msg::BtnClick>Do something</button>
-            <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
+            <button on_click=move |_| Msg::BtnClick on_mount=|me|{log::info!("button is mounted...");Msg::NoOp}>Do something</button>
+            <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)>Here is something!</div>
         </div>
     }
 }
@@ -215,18 +211,15 @@ impl StatefulComponent for DateTimeWidget<()> {
         }
     }
 
-    fn append_child(&mut self, child: &web_sys::Node) {
-        log::info!("DateTime: appending child{:?}", child.inner_html());
+    fn append_children(&mut self, children: Vec<DomNode>) {
         if let Some(external_children_node) = self.external_children_node.as_ref() {
             log::info!("DateTime: ok appending..");
-            external_children_node
-                .append_child(child)
-                .expect("must append");
+            external_children_node.append_children(children);
         } else {
             log::debug!(
                 "DateTime: Just pushing to children since the external holder is not yet mounted"
             );
-            self.children.push(child.clone());
+            self.children.extend(children);
         }
     }
 }

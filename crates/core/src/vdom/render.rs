@@ -81,14 +81,18 @@ impl<MSG> Node<MSG> {
 
 impl<MSG> Leaf<MSG> {
     /// render leaf nodes
-    pub fn render_with_indent(&self, buffer: &mut dyn fmt::Write, indent: usize, compressed: bool) -> fmt::Result {
+    pub fn render_with_indent(
+        &self,
+        buffer: &mut dyn fmt::Write,
+        indent: usize,
+        compressed: bool,
+    ) -> fmt::Result {
         match self {
             Leaf::Text(text) => {
                 write!(buffer, "{text}")
             }
-            Leaf::SafeHtml(html) => {
-                //TODO: html escape this one
-                write!(buffer, "{html}")
+            Leaf::Symbol(symbol) => {
+                write!(buffer, "{symbol}")
             }
             Leaf::Comment(comment) => {
                 write!(buffer, "<!--{comment}-->")
@@ -115,27 +119,6 @@ impl<MSG> Leaf<MSG> {
             Leaf::TemplatedView(view) => view.view.render(buffer),
         }
     }
-}
-
-fn extract_inner_html<MSG>(merged_attributes: &[Attribute<MSG>]) -> String {
-    merged_attributes
-        .iter()
-        .flat_map(|attr| {
-            let GroupedAttributeValues {
-                listeners: _,
-                plain_values: _,
-                styles: _,
-                function_calls,
-            } = Attribute::group_values(attr);
-
-            if attr.name == "inner_html" {
-                Value::merge_to_string(function_calls)
-            } else {
-                None
-            }
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
 }
 
 impl<MSG> Element<MSG> {
@@ -186,11 +169,6 @@ impl<MSG> Element<MSG> {
             maybe_indent(buffer, indent, compressed)?;
         }
 
-        let inner_html = extract_inner_html(&merged_attributes);
-        if !inner_html.is_empty() {
-            write!(buffer, "{inner_html}")?;
-        }
-
         if !self.self_closing {
             write!(buffer, "</{}>", self.tag())?;
         }
@@ -205,7 +183,6 @@ impl<MSG> Attribute<MSG> {
             listeners: _,
             plain_values,
             styles,
-            function_calls: _,
         } = Attribute::group_values(self);
 
         // These are attribute values which specifies the state of the element

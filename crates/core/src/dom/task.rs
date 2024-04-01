@@ -1,3 +1,4 @@
+use crate::dom::dom_node::EventClosure;
 use crate::dom::spawn_local;
 use futures::channel::mpsc;
 use futures::channel::mpsc::UnboundedReceiver;
@@ -109,6 +110,8 @@ where
 
 pub struct RecurringTask<MSG> {
     pub(crate) receiver: UnboundedReceiver<MSG>,
+    /// store the associated closures so it is not dropped before being event executed
+    pub(crate) event_closures: Vec<EventClosure>,
 }
 
 impl<MSG> RecurringTask<MSG>
@@ -120,17 +123,24 @@ where
     }
 
     /// apply a function to the msg to create a different task which has a different msg
-    fn map_msg<F, MSG2>(mut self, f: F) -> RecurringTask<MSG2>
+    fn map_msg<F, MSG2>(self, f: F) -> RecurringTask<MSG2>
     where
         F: Fn(MSG) -> MSG2 + 'static,
         MSG2: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
+        let RecurringTask {
+            mut receiver,
+            event_closures,
+        } = self;
         spawn_local(async move {
-            while let Some(msg) = self.next().await {
+            while let Some(msg) = receiver.next().await {
                 tx.start_send(f(msg)).expect("must send");
             }
         });
-        RecurringTask { receiver: rx }
+        RecurringTask {
+            receiver: rx,
+            event_closures,
+        }
     }
 }

@@ -25,7 +25,7 @@ pub mod prelude {
         },
         br, comment,
         commons::*,
-        hr, img, input, lazy_view_if, safe_html, text,
+        hr, img, input, lazy_view_if, text,
         units::{ch, cm, deg, ex, grad, mm, ms, percent, pt, px, rad, rgb, rgba, s, turn, vh, vw},
         view_if,
     };
@@ -50,8 +50,9 @@ pub mod prelude {
         pub use serde_wasm_bindgen;
         pub use crate::html::events::*;
         pub use crate::dom::{Application, SkipDiff, skip_if, events, Program, document, now, window, Window, Cmd,
-            AnimationFrameHandle, Component, Effects, Measurements, MountAction,
-            MountTarget, Task, TimeoutCallbackHandle,
+            AnimationFrameHandle, Component, StatefulComponent, Effects, Measurements, MountAction,
+            MountTarget, Task, TimeoutCallbackHandle, DomAttrValue,
+            stateful_component,
         };
         #[cfg(feature = "custom_element")]
         pub use crate::dom::WebComponent;

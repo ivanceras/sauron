@@ -46,8 +46,6 @@ pub struct GroupedAttributeValues<'a, MSG> {
     pub plain_values: Vec<&'a Value>,
     /// style attribute values
     pub styles: Vec<&'a Style>,
-    /// function calls
-    pub function_calls: Vec<&'a Value>,
 }
 
 impl<MSG> Attribute<MSG> {
@@ -105,14 +103,10 @@ impl<MSG> Attribute<MSG> {
         let mut listeners = vec![];
         let mut plain_values = vec![];
         let mut styles = vec![];
-        let mut function_calls = vec![];
         for av in attr.value() {
             match av {
                 AttributeValue::Simple(v) => {
                     plain_values.push(v);
-                }
-                AttributeValue::FunctionCall(v) => {
-                    function_calls.push(v);
                 }
                 AttributeValue::Style(v) => {
                     styles.extend(v);
@@ -127,7 +121,6 @@ impl<MSG> Attribute<MSG> {
             listeners,
             plain_values,
             styles,
-            function_calls,
         }
     }
 

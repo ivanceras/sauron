@@ -38,6 +38,8 @@ test-fixtures = ["sauron-core/test-fixtures"] #include the test-fixtures for upd
 with-node-macro = ["sauron-macro"]
 custom_element = ["sauron-macro","sauron-core/custom_element"]
 html-parser = ["sauron-html-parser"]
+use-template = ["sauron-core/use-template"]
+use-skipdiff = ["sauron-core/use-skipdiff"]
 
 
 [dev-dependencies]
@@ -48,7 +50,7 @@ wasm-bindgen-test = "0.3"
 wasm-bindgen-futures = "0.4.31"
 regex = "1"
 sauron-html-parser = { path = "crates/html-parser" }
-sauron = { path = ".", features = ["test-fixtures"] }
+sauron = { path = ".", features = ["test-fixtures", "html-parser", "log-patches"] }
 
 [dev-dependencies.web-sys]
 version = "0.3"

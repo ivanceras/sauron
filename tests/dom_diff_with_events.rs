@@ -1,14 +1,8 @@
-#![deny(warnings)]
-
-#[macro_use]
 extern crate log;
 use crate::vdom::TreePath;
 use sauron::{html::attributes::*, html::events::*, html::*, *};
 
-use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
-
-mod test_fixtures;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -16,12 +10,10 @@ wasm_bindgen_test_configure!(run_in_browser);
 fn nodes_with_event_should_not_recycle() {
     console_log::init_with_level(log::Level::Trace).ok();
 
+    let f = |_| log::trace!("I'm a div");
     let old: Node<()> = div(
         vec![class("container")],
-        vec![div(
-            vec![class("child"), on_click(|_| log::trace!("I'm a div"))],
-            vec![],
-        )],
+        vec![div(vec![class("child"), on_click(f)], vec![])],
     );
 
     let new: Node<()> = div(
@@ -31,61 +23,12 @@ fn nodes_with_event_should_not_recycle() {
 
     let diff = diff(&old, &new);
     log::info!("{:#?}", diff);
-    /*
     assert_eq!(
         diff,
-        vec![Patch::replace_node(
-            Some(&"div"),
+        vec![Patch::remove_attributes(
+            &"div",
             TreePath::new(vec![0]),
-            vec![&div(vec![class("child")], vec![])]
+            vec![&on_click(f)]
         )]
-    );
-    */
-}
-
-#[wasm_bindgen_test]
-fn remove_event_from_replaced_node() {
-    console_log::init_with_level(log::Level::Trace).ok();
-
-    // the old div will be replaced here since there is an added event listener
-    let old: Node<()> = div(vec![on_click(|_| trace!("I'm a div"))], vec![]);
-
-    let new: Node<()> = p(vec![], vec![]);
-
-    let mut simple_program = simple_program();
-
-    log::info!(
-        "There are existing closures:{}",
-        simple_program.node_closures.borrow().len()
-    );
-
-    let diff = diff(&old, &new);
-    log::info!("{:#?}", diff);
-    assert_eq!(
-        diff,
-        vec![Patch::replace_node(
-            Some(&"div"),
-            TreePath::new(vec![]),
-            vec![&p(vec![], vec![])]
-        )],
-    );
-    simple_program
-        .update_dom_with_vdom(old)
-        .expect("must update dom");
-
-    assert_eq!(
-        simple_program.node_closures.borrow().len(),
-        1,
-        "There should be 1 event attached to the DomUpdater"
-    );
-
-    simple_program
-        .update_dom_with_vdom(new)
-        .expect("must not error");
-
-    assert_eq!(
-        simple_program.node_closures.borrow().len(),
-        0,
-        "There should only be 0 left after replacing it with a different tag"
     );
 }

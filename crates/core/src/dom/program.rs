@@ -1,10 +1,11 @@
-use crate::dom::component::register_template;
 use crate::dom::program::app_context::WeakContext;
 #[cfg(feature = "with-raf")]
 use crate::dom::request_animation_frame;
 #[cfg(feature = "with-ric")]
 use crate::dom::request_idle_callback;
+use crate::dom::DomNode;
 use crate::dom::SkipDiff;
+use crate::dom::SkipPath;
 use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
 use crate::html::{self, attributes::class, text};
@@ -12,7 +13,6 @@ use crate::vdom;
 use crate::vdom::diff;
 use crate::vdom::diff_recursive;
 use crate::vdom::Patch;
-use indexmap::IndexMap;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
 use std::hash::{Hash, Hasher};
@@ -23,19 +23,14 @@ use std::{
     rc::Rc,
     rc::Weak,
 };
-use wasm_bindgen::closure::Closure;
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{self, Element, Node};
-use crate::vdom::diff::SkipPath;
+use web_sys;
 
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
 
 mod app_context;
 mod mount_procedure;
-
-pub(crate) type EventClosures = Vec<Closure<dyn FnMut(web_sys::Event)>>;
-pub(crate) type Closures = Vec<Closure<dyn FnMut()>>;
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP>
@@ -45,14 +40,10 @@ where
     pub(crate) app_context: AppContext<APP>,
 
     /// the first element of the app view, where the patch is generated is relative to
-    pub(crate) root_node: Rc<RefCell<Option<Node>>>,
+    pub root_node: Rc<RefCell<Option<DomNode>>>,
 
     /// the actual DOM element where the APP is mounted to.
-    pub(crate) mount_node: Rc<RefCell<Option<Node>>>,
-
-    /// The closures that are currently attached to all the nodes used in the Application
-    /// We keep these around so that they don't get dropped (and thus stop working);
-    pub node_closures: Rc<RefCell<ActiveClosure>>,
+    pub(crate) mount_node: Rc<RefCell<Option<DomNode>>>,
 
     /// Pending patches that hasn't been applied to the DOM yet
     /// for optimization purposes to avoid sluggishness of the app, when a patch
@@ -65,10 +56,7 @@ where
     /// store the Closure used in request_animation_frame calls
     pub(crate) animation_frame_handles: Rc<RefCell<Vec<AnimationFrameHandle>>>,
 
-    /// event listener closures
-    pub(crate) event_closures: Rc<RefCell<EventClosures>>,
-    /// generic closures that has no argument
-    pub closures: Rc<RefCell<Closures>>,
+    /// keep track of the time when the dom is last updated
     pub(crate) last_update: Rc<RefCell<Option<f64>>>,
 }
 
@@ -77,24 +65,13 @@ where
     APP: Application,
 {
     pub(crate) app_context: WeakContext<APP>,
-    pub(crate) root_node: Weak<RefCell<Option<Node>>>,
-    mount_node: Weak<RefCell<Option<Node>>>,
-    pub node_closures: Weak<RefCell<ActiveClosure>>,
+    pub(crate) root_node: Weak<RefCell<Option<DomNode>>>,
+    mount_node: Weak<RefCell<Option<DomNode>>>,
     pending_patches: Weak<RefCell<VecDeque<DomPatch>>>,
     idle_callback_handles: Weak<RefCell<Vec<IdleCallbackHandle>>>,
     animation_frame_handles: Weak<RefCell<Vec<AnimationFrameHandle>>>,
-    pub(crate) event_closures: Weak<RefCell<EventClosures>>,
-    pub(crate) closures: Weak<RefCell<Closures>>,
     last_update: Weak<RefCell<Option<f64>>>,
 }
-
-/// Closures that we are holding on to to make sure that they don't get invalidated after a
-/// VirtualNode is dropped.
-///
-/// The usize is a unique identifier that is associated with the DOM element that this closure is
-/// attached to.
-pub type ActiveClosure =
-    IndexMap<usize, micromap::Map<&'static str, Closure<dyn FnMut(web_sys::Event)>, 5>>;
 
 impl<APP> WeakProgram<APP>
 where
@@ -105,23 +82,17 @@ where
         let app_context = self.app_context.upgrade()?;
         let root_node = self.root_node.upgrade()?;
         let mount_node = self.mount_node.upgrade()?;
-        let node_closures = self.node_closures.upgrade()?;
         let pending_patches = self.pending_patches.upgrade()?;
         let idle_callback_handles = self.idle_callback_handles.upgrade()?;
         let animation_frame_handles = self.animation_frame_handles.upgrade()?;
-        let event_closures = self.event_closures.upgrade()?;
-        let closures = self.closures.upgrade()?;
         let last_update = self.last_update.upgrade()?;
         Some(Program {
             app_context,
             root_node,
             mount_node,
-            node_closures,
             pending_patches,
             idle_callback_handles,
             animation_frame_handles,
-            event_closures,
-            closures,
             last_update,
         })
     }
@@ -136,12 +107,9 @@ where
             app_context: self.app_context.clone(),
             root_node: Weak::clone(&self.root_node),
             mount_node: Weak::clone(&self.mount_node),
-            node_closures: Weak::clone(&self.node_closures),
             pending_patches: Weak::clone(&self.pending_patches),
             idle_callback_handles: Weak::clone(&self.idle_callback_handles),
             animation_frame_handles: Weak::clone(&self.animation_frame_handles),
-            event_closures: Weak::clone(&self.event_closures),
-            closures: Weak::clone(&self.closures),
             last_update: Weak::clone(&self.last_update),
         }
     }
@@ -157,12 +125,9 @@ where
             app_context: AppContext::downgrade(&self.app_context),
             root_node: Rc::downgrade(&self.root_node),
             mount_node: Rc::downgrade(&self.mount_node),
-            node_closures: Rc::downgrade(&self.node_closures),
             pending_patches: Rc::downgrade(&self.pending_patches),
             idle_callback_handles: Rc::downgrade(&self.idle_callback_handles),
             animation_frame_handles: Rc::downgrade(&self.animation_frame_handles),
-            event_closures: Rc::downgrade(&self.event_closures),
-            closures: Rc::downgrade(&self.closures),
             last_update: Rc::downgrade(&self.last_update),
         }
     }
@@ -177,12 +142,9 @@ where
             app_context: self.app_context.clone(),
             root_node: Rc::clone(&self.root_node),
             mount_node: Rc::clone(&self.mount_node),
-            node_closures: Rc::clone(&self.node_closures),
             pending_patches: Rc::clone(&self.pending_patches),
             idle_callback_handles: Rc::clone(&self.idle_callback_handles),
             animation_frame_handles: Rc::clone(&self.animation_frame_handles),
-            event_closures: Rc::clone(&self.event_closures),
-            closures: Rc::clone(&self.closures),
             last_update: Rc::clone(&self.last_update),
         }
     }
@@ -215,34 +177,19 @@ where
 
     /// create a program from Rc<RefCell<APP>>
     pub fn from_rc_app(app: Rc<RefCell<APP>>) -> Self {
-        let type_id = TypeId::of::<APP>();
         let app_view = app.borrow().view();
-        let skip_diff = app.borrow().skip_diff();
-        let vdom_template = app.borrow().template();
-        let template = if let Some(vdom_template) = vdom_template.as_ref() {
-            Some(register_template(type_id, vdom_template))
-        } else {
-            None
-        };
-
         Program {
             app_context: AppContext {
                 app,
-                template: template,
-                skip_diff: Rc::new(skip_diff),
-                vdom_template: Rc::new(vdom_template),
                 current_vdom: Rc::new(RefCell::new(app_view)),
                 pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
                 pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
             },
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(None)),
-            node_closures: Rc::new(RefCell::new(ActiveClosure::new())),
             pending_patches: Rc::new(RefCell::new(VecDeque::new())),
             idle_callback_handles: Rc::new(RefCell::new(vec![])),
             animation_frame_handles: Rc::new(RefCell::new(vec![])),
-            event_closures: Rc::new(RefCell::new(vec![])),
-            closures: Rc::new(RefCell::new(vec![])),
             last_update: Rc::new(RefCell::new(None)),
         }
     }
@@ -286,15 +233,6 @@ where
         if !dynamic_style.is_empty() {
             let class_names = format!("dynamic {}", Self::app_hash());
             self.inject_style(class_names, &dynamic_style);
-        }
-    }
-
-    /// return the node where the app is mounted into
-    pub fn mount_node(&self) -> Option<web_sys::Node> {
-        if let Some(mount_node) = self.mount_node.borrow().as_ref() {
-            Some(mount_node.clone())
-        } else {
-            None
         }
     }
 
@@ -386,44 +324,28 @@ where
         self.inject_stylesheet();
     }
 
+    #[allow(unused)]
     /// create initial dom node generated
     /// from template and patched by the difference of vdom_template and current app view.
-    fn create_initial_view(&self) -> web_sys::Node {
-        log::info!("creating initial view..");
-        let app_view = self.app_context.app.borrow().view();
-        let dom_template = self.app_context.template.clone();
-        let vdom_template = self.app_context.vdom_template.as_ref();
-        let skip_diff = self.app_context.skip_diff.as_ref();
-        match (vdom_template, skip_diff) {
-            (Some(vdom_template), Some(skip_diff)) => {
-                let patches =
-                    self.create_patches_with_skip_diff(&vdom_template, &app_view, skip_diff);
-                if let Some(dom_template) = dom_template {
-                    let dom_patches = self
-                        .convert_patches(&dom_template, &patches)
-                        .expect("convert patches");
-                    log::info!("first time patches {}: {patches:#?}", patches.len());
-                    let _new_template_node = self
-                        .apply_dom_patches(dom_patches)
-                        .expect("template patching");
-                    dom_template
-                } else {
-                    self.create_dom_node(&self.app_context.current_vdom())
-                }
-            }
-            _ => self.create_dom_node(&self.app_context.current_vdom()),
-        }
+    fn create_initial_view(&self) -> DomNode {
+        let current_view = self.app_context.current_vdom();
+        let real_view = current_view.unwrap_template_ref();
+        self.create_dom_node(Rc::new(None), &real_view)
     }
 
     /// each element and it's descendant in the vdom is created into
     /// an actual DOM node.
     pub fn mount(&mut self, mount_node: &web_sys::Node, mount_procedure: MountProcedure) {
-        *self.mount_node.borrow_mut() = Some(mount_node.clone());
+        let mount_node = DomNode::from(mount_node.clone());
+        *self.mount_node.borrow_mut() = Some(mount_node);
         self.pre_mount();
 
+        #[cfg(feature = "use-template")]
+        let created_node = self.create_initial_view_with_template();
+        #[cfg(not(feature = "use-template"))]
         let created_node = self.create_initial_view();
 
-        let mount_node: web_sys::Node = match mount_procedure.target {
+        let mount_node: DomNode = match mount_procedure.target {
             MountTarget::MountNode => self
                 .mount_node
                 .borrow()
@@ -431,6 +353,7 @@ where
                 .expect("mount node")
                 .clone(),
             MountTarget::ShadowRoot => {
+                /*
                 let mount_element: web_sys::Element = self
                     .mount_node
                     .borrow()
@@ -449,24 +372,21 @@ where
                     .as_ref()
                     .expect("mount_node")
                     .clone()
+                */
+                todo!("shadow onhold!..")
             }
         };
 
         match mount_procedure.action {
             MountAction::Append => {
-                Self::append_child_and_dispatch_mount_event(&mount_node, &created_node);
+                mount_node.append_children(vec![created_node.clone()]);
             }
             MountAction::ClearAppend => {
-                Self::clear_children(&mount_node);
-                Self::append_child_and_dispatch_mount_event(&mount_node, &created_node);
+                mount_node.clear_children();
+                mount_node.append_children(vec![created_node.clone()]);
             }
             MountAction::Replace => {
-                let mount_element: &Element = mount_node.unchecked_ref();
-                mount_element
-                    .replace_with_with_node_1(&created_node)
-                    .expect("Could not append child to mount");
-                Self::dispatch_mount_event(&created_node);
-                *self.mount_node.borrow_mut() = Some(created_node.clone())
+                mount_node.replace_node(created_node.clone());
             }
         }
         *self.root_node.borrow_mut() = Some(created_node);
@@ -521,15 +441,18 @@ where
         let t2 = now();
 
         let node_count = view.node_count();
-        let skip_diff = self.app_context.skip_diff.as_ref();
+        let skip_diff = view.skip_diff();
 
         let dom_patches = if let Some(skip_diff) = skip_diff {
             let current_vdom = self.app_context.current_vdom();
-            let patches = self.create_patches_with_skip_diff(&current_vdom, &view, skip_diff);
+            let real_current_vdom = current_vdom.unwrap_template_ref();
+            let real_view = view.unwrap_template_ref();
+            let patches =
+                self.create_patches_with_skip_diff(&real_current_vdom, &real_view, &skip_diff);
             #[cfg(all(feature = "with-debug", feature = "log-patches"))]
             {
                 log::info!("There are {} patches", patches.len());
-                //log::info!("patches: {patches:#?}");
+                log::info!("patches: {patches:#?}");
             }
             self.convert_patches(
                 self.root_node
@@ -540,7 +463,6 @@ where
             )
             .expect("must convert patches")
         } else {
-            log::info!("no skip diff..");
             self.create_dom_patch(&view)
         };
 
@@ -565,6 +487,15 @@ where
             weak_count,
         };
 
+        #[cfg(all(feature = "with-debug",feature = "use-template"))]
+        {
+            let total = crate::dom::component::template::total_time_spent();
+            log::info!("total: {:#?}", total);
+            log::info!("average: {:#?}", total.average());
+            log::info!("percentile: {:#?}", total.percentile());
+            crate::dom::component::template::clear_time_spent();
+        }
+
         if measurements.total_time > 16.0 {
             #[cfg(all(feature = "with-measure", feature = "with-debug"))]
             {
@@ -581,14 +512,6 @@ where
                 //log::warn!("update is {remaining} too soon!... time_delta: {time_delta}, frame_time: {frame_time}");
                 // TODO: maybe return early here, but do a dispatch_multiple([])
             }
-        }
-
-        #[cfg(feature = "with-debug")]
-        {
-            let total = crate::dom::dom_node::total_time_spent();
-            log::info!("total: {:#?}", total);
-            log::info!("average: {:#?}", total.average());
-            log::info!("percentile: {:#?}", total.percentile());
         }
 
         // tell the app about the performance measurement and only if there was patches applied
@@ -624,7 +547,13 @@ where
         skip_diff: &SkipDiff,
     ) -> Vec<Patch<'a, APP::MSG>> {
         use crate::vdom::TreePath;
-        diff_recursive(&old_vdom, &new_vdom, &SkipPath::new(TreePath::root(),skip_diff.clone()))
+        assert!(!old_vdom.is_template(), "old vdom should not be a template");
+        assert!(!new_vdom.is_template(), "new vdom should not be a template");
+        diff_recursive(
+            &old_vdom,
+            &new_vdom,
+            &SkipPath::new(TreePath::root(), skip_diff.clone()),
+        )
     }
 
     fn create_dom_patch(&self, new_vdom: &vdom::Node<APP::MSG>) -> Vec<DomPatch> {
@@ -665,18 +594,8 @@ where
             return Ok(());
         }
         let dom_patches: Vec<DomPatch> = self.pending_patches.borrow_mut().drain(..).collect();
-        let new_root_node = self.apply_dom_patches(dom_patches)?;
+        self.apply_dom_patches(dom_patches)?;
 
-        //Note: it is important that root_node points to the original mutable reference here
-        // since it can be replaced with a new root Node(the top-level node of the view) when patching
-        // if what we are replacing is a root node:
-        // we replace the root node here, so that's reference is updated
-        // to the newly created node
-        if let Some(new_root_node) = new_root_node {
-            #[cfg(feature = "with-debug")]
-            log::info!("the root_node is replaced with {:?}", &self.root_node);
-            *self.root_node.borrow_mut() = Some(new_root_node);
-        }
         Ok(())
     }
 
@@ -728,21 +647,6 @@ where
                 })
             }
         }
-    }
-
-    /// clone the app
-    #[allow(unsafe_code)]
-    pub fn app_clone(&self) -> ManuallyDrop<APP> {
-        unsafe {
-            let app: APP = std::mem::transmute_copy(&*self.app_context.app.borrow());
-            //TODO: We are creating a copy of the app everytime,
-            // as dropping the app will error in the runtime
-            // This might be leaking the memory
-            ManuallyDrop::new(app)
-        }
-        // An alternative to transmute_copy is to just plainly clone the app
-        //let borrowed_app = self.app_context.app.borrow();
-        //borrowed_app.clone()
     }
 
     /// This is called when an event is triggered in the html DOM.
@@ -801,29 +705,31 @@ where
             );
         }
 
+        // execute this `cmd` batched pending_cmds that may have resulted from updating the app
         cmd.emit(self.clone());
     }
 
     /// Inject a style to the global document
     fn inject_style(&mut self, class_names: String, style: &str) {
         let style_node = html::tags::style([class(class_names)], [text(style)]);
-        let created_node = self.create_dom_node(&style_node);
+        let created_node = self.create_dom_node(Rc::new(None), &style_node);
 
         let head = document().head().expect("must have a head");
-        head.append_child(&created_node).expect("must append style");
+        let head_node: web_sys::Node = head.unchecked_into();
+        let dom_head = DomNode::from(head_node);
+        dom_head.append_children(vec![created_node]);
     }
 
     /// inject style element to the mount node
     pub fn inject_style_to_mount(&mut self, style: &str) {
         let style_node = html::tags::style([], [text(style)]);
-        let created_node = self.create_dom_node(&style_node);
+        let created_node = self.create_dom_node(Rc::new(None), &style_node);
 
         self.mount_node
             .borrow_mut()
             .as_mut()
             .expect("mount node")
-            .append_child(&created_node)
-            .expect("could not append child to mount shadow");
+            .append_children(vec![created_node]);
     }
 
     /// dispatch multiple MSG
@@ -854,10 +760,6 @@ where
         let total_patches = dom_patches.len();
         self.pending_patches.borrow_mut().extend(dom_patches);
 
-        #[cfg(feature = "with-raf")]
-        self.apply_pending_patches_with_raf().expect("raf");
-
-        #[cfg(not(feature = "with-raf"))]
         self.apply_pending_patches().expect("raf");
 
         self.app_context.set_current_dom(new_vdom);

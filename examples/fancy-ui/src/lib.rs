@@ -1,15 +1,19 @@
-use sauron::{
-    html::text, html::units::px, jss, node, skip_if, view, wasm_bindgen, Application, Cmd, Node,
-    Program, SkipDiff,
-};
+use frame::Frame;
+use sauron::*;
+use status::Status;
+use theme::Theme;
 
+mod frame;
+mod status;
+mod theme;
+
+#[derive(Default)]
 enum Msg {
-    Increment,
-    Decrement,
-    Reset,
+    Clicked,
+    #[default]
+    NoOp,
 }
 
-#[derive(Clone)]
 struct App {
     count: i32,
 }
@@ -23,35 +27,29 @@ impl App {
 impl Application for App {
     type MSG = Msg;
 
+    fn view(&self) -> Node<Msg> {
+        node! {
+            <main>
+            {stateful_component(Frame::default(), [], [
+                button([on_click(|_|Msg::Clicked)],[text!("Button has been clicked {} times", self.count)])
+            ])}
+            </main>
+        }
+    }
+
     fn update(&mut self, msg: Msg) -> Cmd<Self> {
         match msg {
-            Msg::Increment => self.count += 1,
-            Msg::Decrement => self.count -= 1,
-            Msg::Reset => self.count = 0,
+            Msg::Clicked => {
+                log::info!("Button has been clicked...");
+                self.count += 1;
+            }
+            Msg::NoOp => (),
         }
         Cmd::none()
     }
 
-    view! {
-        <main>
-            <input type="button"
-                value="+"
-                on_click=|_| {
-                    Msg::Increment
-                }
-            />
-            <button class="count" on_click=|_|{Msg::Reset} >{text(self.count)}</button>
-            <input type="button"
-                value="-"
-                on_click=|_| {
-                    Msg::Decrement
-                }
-            />
-        </main>
-    }
-
     fn stylesheet() -> Vec<String> {
-        vec![jss! {
+        let mut main = vec![jss! {
             "body":{
                 font_family: "verdana, arial, monospace",
             },
@@ -68,7 +66,9 @@ impl Application for App {
                 padding: px(30),
                 margin: px(30),
             }
-        }]
+        }];
+
+        main
     }
 }
 

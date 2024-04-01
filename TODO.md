@@ -106,6 +106,8 @@
     }
     ```
 - [ ] Make the compilation error in `jss!`, `style!`, more informative
+- [ ] Optimize handling of style by diffing each style properties
+    - Update only specific stype instead of setting the whole style attributes
 
 
 ## Internal
@@ -225,6 +227,7 @@
     add these events:
     - `on_interval(|i32|{})` for attaching interval in the Window
     Http can be done with task
+- [ ] Make Http functions return a Task
 - [ ] Make `Sub` as counterpart to `Cmd`
     - We can use `Sub` in the `Component`
     ```rust
@@ -254,7 +257,7 @@
     - This is anchored as next to the last sibling
     - This can not just be backtrack to the parent, as it defeats the purpose of
       doing as little diff as possible.
-- [ ] Make a TemplateView struct and a variant of Leat
+- [X] Make a TemplateView struct and a variant of Leaf
     ```rust
     struct TemplatedView<MSG>{
         template: Box<dyn Fn() -> Node<MSG>>,
@@ -262,6 +265,29 @@
         view: Node<MSG> ,
     }
     ```
+- [X] remove `SafeHtml` variant in leaf, instead provide a safe_html which is parsed and converted into node
+    - using safe html alters the dom tree
+- [X] add `symbol_html` for html entities such as `&nbsp;` `&gt`, `&lt` etc.
+    - this should be safe to be inserted
+- [X] remove `innerHTML` func in AttributeValue as it could alter the DOM node tree
+- [X] Keep track of which attributes to be skipped in `SkipDiff{shall:false}`
+    ```rust
+    enum SkipStrat{
+        SkipAll,
+        SkippIndex(Vec<usize>),
+    }
+    ```
+- [X] Maybe disable the template usage for now
+- [ ] Make `Cmd` to be used internally as it needs reference to the `Program<APP>`
+    - [ ] Use `Task` for returning from `Application` init and `update`.
+    - The `Recurring Task` is actually just a Sub in elm
+        - Issue with recurring task, how to store the closures which has different multiple types for the in arguments
+        - Store the closures with `Closure<dyn Fn(IN)->MSG>`
+        - Then task becomes `Task<IN,MSG>`
+    - The `SingleTask` is a Cmd in sauron
+    - Rename `Cmd` to `Command` alternative: `Action`, `Operation`, `Instruction`, `Effects`, `Dispatch`
+        - This is effects in elm
+    - Sauron just consilidate them into one enum struct for simplicity
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
@@ -296,6 +322,10 @@
     - Right now, it is triggered when the virtual Node is created into a real Node.
 - [X] Maybe rename `#[web_component]` macro to `#[custom_element]`
     - Also `WebComponent` to `CustomElementWrapper`
+- [ ] Implement the `StatefulComponent`
+    - [ ] attributes and attribute value (key)
+    - [ ] removing children and setting attributes
+- [ ] Make the fancy-ui example work
 
 
 ## Performance

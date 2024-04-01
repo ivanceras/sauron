@@ -223,24 +223,6 @@ pub fn open<MSG>(is_open: bool) -> Attribute<MSG> {
     }
 }
 
-/// set the inner html of this element without comparing in the diff
-/// this always sets the value
-/// This is for optimization purposes
-/// and will lead to some hacks in the implementation
-/// # Examples
-/// ```rust
-/// use sauron::{*, html::{*, attributes::*}};
-///
-/// let html:Node<()> =
-///     div(vec![inner_html("<p>This is a paragraph <b>injected</b> into a <strong>div</strong> via <i>inner_html</i></p>")], vec![]);
-/// ```
-pub fn inner_html<MSG>(inner_html: impl Into<Value>) -> Attribute<MSG> {
-    vdom::attr(
-        "inner_html",
-        AttributeValue::function_call(inner_html.into()),
-    )
-}
-
 /// focus the html element
 /// # Examples
 /// ```rust

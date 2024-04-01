@@ -1,17 +1,9 @@
 #![deny(warnings)]
-use sauron::{
-    html::attributes::*,
-    html::events::*,
-    html::*,
-    svg::attributes::{cx, cy, r, xmlns},
-    svg::*,
-    *,
-};
+use sauron::{html::attributes::replace, *};
 use std::{cell::Cell, rc::Rc};
 use test_fixtures::simple_program;
-use wasm_bindgen::JsCast;
 use wasm_bindgen_test::*;
-use web_sys::{console, Element, EventTarget};
+use web_sys::{console, EventTarget};
 
 mod test_fixtures;
 
@@ -21,10 +13,13 @@ wasm_bindgen_test_configure!(run_in_browser);
 fn nested_divs() {
     let vdiv: Node<()> = div(vec![], vec![div(vec![], vec![div(vec![], vec![])])]); // <div> <div> <div></div> </div> </div>
     let program = simple_program();
-    let created_node = program.create_dom_node(&vdiv);
-    let div: Element = created_node.unchecked_into();
+    let created_node = program.create_dom_node(Rc::new(None), &vdiv);
 
-    assert_eq!(&div.inner_html(), "<div><div></div></div>");
+    assert_eq!(
+        &vdiv.render_to_string(),
+        "<div><div><div></div></div></div>"
+    );
+    assert_eq!(vdiv.render_to_string(), created_node.render_to_string());
 }
 
 #[wasm_bindgen_test]
@@ -36,28 +31,13 @@ fn svg_element() {
             vec![circle(vec![cx("50"), cy("50"), r("50")], vec![])],
         )],
     );
-    let created_node = simple_program().create_dom_node(&vdiv);
-    let div: Element = created_node.unchecked_into();
+    let created_node = simple_program().create_dom_node(Rc::new(None), &vdiv);
 
     assert_eq!(
-        &div.inner_html(),
-        r#"<svg xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50"></circle></svg>"#
+        &vdiv.render_to_string(),
+        r#"<div><svg xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="50"></circle></svg></div>"#
     );
-}
-
-#[wasm_bindgen_test]
-fn div_with_attributes() {
-    let vdiv: Node<()> = div(vec![id("id-here"), class("two classes")], vec![]);
-
-    let created_node = simple_program().create_dom_node(&vdiv);
-    let div: Element = created_node.unchecked_into();
-
-    assert_eq!(&div.id(), "id-here");
-
-    assert!(div.class_list().contains("two"));
-    assert!(div.class_list().contains("classes"));
-
-    assert_eq!(div.class_list().length(), 2);
+    assert_eq!(vdiv.render_to_string(), created_node.render_to_string());
 }
 
 #[wasm_bindgen_test]
@@ -71,15 +51,18 @@ fn click_event() {
 
     let elem_id = "click-on-div";
     let vdiv: Node<()> = div(
-        vec![
-            id(elem_id),
-            replace(true),
-            on_click(move |_| {
-                console::log_1(&"clicked event called".into());
-                clicked_clone.set(true);
-            }),
-        ],
-        vec![],
+        [],
+        vec![div(
+            [
+                id(elem_id),
+                replace(true),
+                on_click(move |_| {
+                    console::log_1(&"clicked event called".into());
+                    clicked_clone.set(true);
+                }),
+            ],
+            vec![],
+        )],
     );
 
     let mut simple_program = simple_program();

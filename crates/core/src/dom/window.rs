@@ -1,10 +1,8 @@
 use crate::dom::task::RecurringTask;
-use crate::{
-    dom::{document, dom_node::intern, util, window, Application, Program, Task},
-    vdom::Attribute,
-};
+use crate::dom::{dom_node::intern, util, window, Task};
 use futures::channel::mpsc;
 use wasm_bindgen::{prelude::*, JsCast};
+use web_sys::MouseEvent;
 
 /// Provides function for window related functions
 #[derive(Clone, Copy)]
@@ -24,7 +22,7 @@ impl Window {
                 log::info!("event: {}", e.type_());
                 let (w, h) = util::get_window_size();
                 let msg = cb(w, h);
-                tx.start_send(msg).unwrap();
+                tx.start_send(msg).expect("send");
             });
         window()
             .add_event_listener_with_callback(
@@ -32,46 +30,124 @@ impl Window {
                 resize_callback.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        //TODO: this needs to be managed in the Program
-        // but components may not have access to the Program
-        // TODO: maybe put them in the Task
-        // which will get drop together when Task is dropped as well
-        resize_callback.forget();
 
-        Task::Recurring(RecurringTask { receiver: rx })
-    }
-}
-
-impl<APP> Program<APP>
-where
-    APP: Application,
-{
-    /// attach event listeners to the window object
-    pub fn add_window_event_listeners(&self, event_listeners: Vec<Attribute<APP::MSG>>) {
-        self.add_event_listeners(&window(), event_listeners)
-            .expect("must add to event listener");
+        Task::Recurring(RecurringTask {
+            receiver: rx,
+            event_closures: vec![resize_callback],
+        })
     }
 
-    /// attach event listeners to the document object
-    pub fn add_document_event_listeners(&self, event_listeners: Vec<Attribute<APP::MSG>>) {
-        self.add_event_listeners(&document(), event_listeners)
-            .expect("must add to event listener");
-    }
-
-    /// attached a callback and will be triggered when the hash portion of the window location
-    /// url is changed
-    pub fn on_hashchange<F>(&self, mut cb: F)
+    ///
+    pub fn on_mousemove<F, MSG>(mut cb: F) -> Task<MSG>
     where
-        F: FnMut(String) -> APP::MSG + 'static,
+        F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
+        MSG: 'static,
     {
-        let program = Program::downgrade(self);
-        let closure: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_| {
-            let hash = util::get_location_hash();
-            let msg = cb(hash);
-            let mut program = program.upgrade().expect("must upgrade");
-            program.dispatch(msg);
+        let (mut tx, rx) = mpsc::unbounded();
+        let mousemove_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let mouse_event: MouseEvent = event.dyn_into().expect("must be mouse event");
+                let msg = cb(mouse_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("mousemove"),
+                mousemove_cb.as_ref().unchecked_ref(),
+            )
+            .expect("add event callback");
+        Task::Recurring(RecurringTask {
+            receiver: rx,
+            event_closures: vec![mousemove_cb],
+        })
+    }
+
+    ///
+    pub fn on_mouseup<F, MSG>(mut cb: F) -> Task<MSG>
+    where
+        F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
+        MSG: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        let mousemove_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let mouse_event: MouseEvent = event.dyn_into().expect("must be mouse event");
+                let msg = cb(mouse_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("mouseup"),
+                mousemove_cb.as_ref().unchecked_ref(),
+            )
+            .expect("add event callback");
+        Task::Recurring(RecurringTask {
+            receiver: rx,
+            event_closures: vec![mousemove_cb],
+        })
+    }
+
+    /// do this task at every `ms` interval
+    pub fn every_interval<F, MSG>(interval_ms: i32, mut cb: F) -> Task<MSG>
+    where
+        F: FnMut() -> MSG + 'static,
+        MSG: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        //The web_sys::Event here is undefined, it is just used here to make storing the closure
+        //uniform
+        let closure_cb: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_event| {
+            log::info!("event: {:?}", _event);
+            let msg = cb();
+            tx.start_send(msg).unwrap();
         });
-        window().set_onhashchange(Some(closure.as_ref().unchecked_ref()));
-        self.event_closures.borrow_mut().push(closure);
+        window()
+            .set_interval_with_callback_and_timeout_and_arguments_0(
+                closure_cb.as_ref().unchecked_ref(),
+                interval_ms,
+            )
+            .expect("Unable to start interval");
+        Task::Recurring(RecurringTask {
+            receiver: rx,
+            event_closures: vec![closure_cb],
+        })
+    }
+
+    /// scroll the window to the top of the document
+    pub fn scroll_to_top<MSG>(msg: MSG) -> Task<MSG>
+    where
+        MSG: 'static,
+    {
+        use std::future::ready;
+        Task::single(ready({
+            util::scroll_window_to_top();
+            msg
+        }))
+    }
+
+    ///
+    pub fn on_popstate<F, MSG>(mut cb: F) -> Task<MSG>
+    where
+        F: FnMut(web_sys::PopStateEvent) -> MSG + 'static,
+        MSG: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        let closure_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let popstate_event: web_sys::PopStateEvent =
+                    event.dyn_into().expect("popstate event");
+                let msg = cb(popstate_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("mouseup"),
+                closure_cb.as_ref().unchecked_ref(),
+            )
+            .expect("add event callback");
+        Task::Recurring(RecurringTask {
+            receiver: rx,
+            event_closures: vec![closure_cb],
+        })
     }
 }

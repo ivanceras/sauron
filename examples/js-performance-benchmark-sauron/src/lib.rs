@@ -100,7 +100,6 @@ impl Component for RowData {
 struct App {
     rows: Vec<RowData>,
     next_id: usize,
-    selected_id: Option<usize>,
     rng: SmallRng,
 }
 
@@ -109,7 +108,6 @@ impl App {
         App {
             rows: Vec::new(),
             next_id: 1,
-            selected_id: None,
             rng: SmallRng::from_entropy(),
         }
     }
@@ -168,9 +166,8 @@ impl Application for App {
                 }
             }
             Msg::Select(id) => {
-                self.selected_id = Some(id);
                 for row in &mut self.rows {
-                    row.selected = self.selected_id == Some(row.id)
+                    row.selected = row.id == id;
                 }
             }
         }
@@ -191,7 +188,7 @@ impl Application for App {
                                     type="button"
                                     id="run"
                                     class="btn btn-primary btn-block"
-                                    on_click={|_| Msg::Run(1_000) }>
+                                    on_click={|_| Msg::Run(10) }>
                                     Create 1,000 rows
                                 </button>
                              </div>
@@ -248,7 +245,7 @@ impl Application for App {
             <table class="table table-hover table-striped test-data">
                 <tbody id="tbody">
                     {for row in self.rows.iter() {
-                        component(row, [], [])
+                        component(row)
                     }}
                 </tbody>
             </table>
@@ -256,7 +253,6 @@ impl Application for App {
         </div>
     }
 }
-
 
 #[wasm_bindgen(start)]
 pub fn start() {

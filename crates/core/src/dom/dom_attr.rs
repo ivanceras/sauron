@@ -1,6 +1,4 @@
-use crate::vdom::Attribute;
 use crate::vdom::AttributeName;
-use crate::vdom::AttributeValue;
 use crate::vdom::Namespace;
 use crate::vdom::Style;
 use crate::vdom::Value;
@@ -21,6 +19,7 @@ use web_sys::{
 };
 
 /// a dom version of the Attribute, thereby removing the MSG generic
+#[derive(Debug)]
 pub struct DomAttr {
     /// namespace of the attribute
     pub namespace: Option<&'static str>,
@@ -31,9 +30,8 @@ pub struct DomAttr {
 }
 
 /// a dom version of the Attribute value, thereby removing the MSG generic
+#[derive(Debug)]
 pub enum DomAttrValue {
-    /// function calls
-    FunctionCall(Value),
     /// simple value
     Simple(Value),
     /// a style
@@ -53,8 +51,6 @@ pub struct GroupedDomAttrValues {
     pub plain_values: Vec<Value>,
     /// style attribute values
     pub styles: Vec<Style>,
-    /// function calls
-    pub function_calls: Vec<Value>,
 }
 
 impl DomAttr {
@@ -63,14 +59,10 @@ impl DomAttr {
         let mut listeners = vec![];
         let mut plain_values = vec![];
         let mut styles = vec![];
-        let mut function_calls = vec![];
         for av in self.value {
             match av {
                 DomAttrValue::Simple(v) => {
                     plain_values.push(v);
-                }
-                DomAttrValue::FunctionCall(v) => {
-                    function_calls.push(v);
                 }
                 DomAttrValue::Style(s) => {
                     styles.extend(s);
@@ -85,37 +77,7 @@ impl DomAttr {
             listeners,
             plain_values,
             styles,
-            function_calls,
         }
-    }
-
-    pub(crate) fn convert_attr_except_listener<MSG>(attr: &Attribute<MSG>) -> DomAttr {
-        DomAttr {
-            namespace: attr.namespace,
-            name: attr.name,
-            value: attr
-                .value
-                .iter()
-                .filter_map(|v| DomAttrValue::convert_attr_value_except_listener(v))
-                .collect(),
-        }
-    }
-
-    /// Note: Used only templates
-    /// set the lement with dom attr except for the event listeners
-    pub(crate) fn set_element_dom_attr_except_listeners(element: &Element, attr: DomAttr) {
-        let attr_name = intern(attr.name);
-        let attr_namespace = attr.namespace;
-
-        let GroupedDomAttrValues {
-            listeners: _,
-            plain_values,
-            styles,
-            function_calls,
-        } = attr.group_values();
-        Self::set_element_style(element, attr_name, styles);
-        Self::set_element_function_call_values(element, attr_name, function_calls);
-        Self::set_element_simple_values(element, attr_name, attr_namespace, plain_values);
     }
 
     /// set the style of this element
@@ -135,19 +97,6 @@ impl DomAttr {
             element
                 .remove_attribute(attr_name)
                 .expect("must remove attribute");
-        }
-    }
-
-    /// do function calls such as set_inner_html
-    pub(crate) fn set_element_function_call_values(
-        element: &Element,
-        attr_name: AttributeName,
-        function_calls: Vec<Value>,
-    ) {
-        if let Some(merged_func_values) = Value::merge_to_string(function_calls.iter()) {
-            if attr_name == "inner_html" {
-                element.set_inner_html(&merged_func_values);
-            }
         }
     }
 
@@ -205,12 +154,13 @@ impl DomAttr {
                         .set_attribute(attr_name, &is_disabled.to_string())
                         .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
                     Self::set_disabled(element, is_disabled);
+                } else if "inner_html" == attr_name {
+                    panic!("Setting inner_html is not allowed, as it breaks the tracking of the DomTree, use html-parse instead")
                 } else {
                     element
                         .set_attribute(attr_name, &merged_plain_values)
                         .unwrap_or_else(|_| panic!("Error setting an attribute for {element:?}"));
                 }
-
                 #[cfg(not(feature = "ensure-attr-set"))]
                 element
                     .set_attribute(attr_name, &merged_plain_values)
@@ -378,25 +328,5 @@ impl DomAttrValue {
     pub fn get_string(&self) -> Option<String> {
         let simple = self.get_simple()?;
         Some(simple.to_string())
-    }
-
-    /// return event clousre if it an event listener variant
-    pub(crate) fn as_event_closure(self) -> Option<Closure<dyn FnMut(web_sys::Event)>> {
-        match self {
-            Self::EventListener(cb) => Some(cb),
-            _ => None,
-        }
-    }
-
-    fn convert_attr_value_except_listener<MSG>(
-        attr_value: &AttributeValue<MSG>,
-    ) -> Option<DomAttrValue> {
-        match attr_value {
-            AttributeValue::FunctionCall(v) => Some(DomAttrValue::FunctionCall(v.clone())),
-            AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
-            AttributeValue::Style(v) => Some(DomAttrValue::Style(v.clone())),
-            AttributeValue::EventListener(_v) => None,
-            AttributeValue::Empty => None,
-        }
     }
 }

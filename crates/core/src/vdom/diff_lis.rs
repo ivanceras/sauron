@@ -3,8 +3,8 @@
 use super::diff::diff_recursive;
 use super::{AttributeValue, Tag, KEY};
 use super::{Node, Patch};
+use crate::dom::SkipPath;
 use indexmap::IndexMap;
-use crate::vdom::diff::SkipPath;
 
 pub fn diff_keyed_nodes<'a, MSG>(
     old_tag: Option<&'a Tag>,
@@ -12,8 +12,11 @@ pub fn diff_keyed_nodes<'a, MSG>(
     new_children: &'a [Node<MSG>],
     path: &SkipPath,
 ) -> Vec<Patch<'a, MSG>> {
-    let (patches, offsets) =
-        diff_keyed_ends(old_tag, old_children, new_children, path);
+    if old_children.len() > 0 && new_children.len() == 0 {
+        return vec![Patch::clear_children(old_tag, path.path.clone())];
+    }
+
+    let (patches, offsets) = diff_keyed_ends(old_tag, old_children, new_children, path);
 
     let (left_offset, right_offset) = match offsets {
         Some(offsets) => offsets,
@@ -229,6 +232,7 @@ fn diff_keyed_middle<'a, MSG>(
         }
 
         let first = 0;
+        log::info!("Creating a replace node in diff_keyed_middle");
 
         let patch = Patch::replace_node(
             old_children[left_offset + first].tag(),
@@ -243,12 +247,14 @@ fn diff_keyed_middle<'a, MSG>(
     for (index, old_child) in old_children.iter().enumerate() {
         if let Some(old_key) = old_child.attribute_value(KEY) {
             if !shared_keys.contains(&old_key) {
-                let patch = Patch::remove_node(old_child.tag(), path.traverse(left_offset + index).path);
+                let patch =
+                    Patch::remove_node(old_child.tag(), path.traverse(left_offset + index).path);
                 all_patches.push(patch);
             }
         } else {
             // also remove the node that has no key
-            let patch = Patch::remove_node(old_child.tag(), path.traverse(left_offset + index).path);
+            let patch =
+                Patch::remove_node(old_child.tag(), path.traverse(left_offset + index).path);
             all_patches.push(patch);
         }
     }
@@ -313,8 +319,11 @@ fn diff_keyed_middle<'a, MSG>(
         let old_index = new_index_to_old_index[last];
         let tag = old_children[old_index].tag();
         if !new_nodes.is_empty() {
-            let patch =
-                Patch::insert_after_node(tag, path.traverse(left_offset + old_index).path, new_nodes);
+            let patch = Patch::insert_after_node(
+                tag,
+                path.traverse(left_offset + old_index).path,
+                new_nodes,
+            );
             all_patches.push(patch);
         }
     }
@@ -365,7 +374,7 @@ fn diff_keyed_middle<'a, MSG>(
             let patch = Patch::move_before_node(
                 old_children[left_offset + first].tag(),
                 path.traverse(left_offset + first).path, //target_element
-                node_paths,                         //to be move after the target_element
+                node_paths,                              //to be move after the target_element
             );
             move_before_nodes.push(patch);
         }
@@ -373,8 +382,11 @@ fn diff_keyed_middle<'a, MSG>(
         if !new_nodes.is_empty() {
             let old_index = new_index_to_old_index[first_lis];
             let tag = old_children[old_index].tag();
-            let patch =
-                Patch::insert_before_node(tag, path.traverse(left_offset + old_index).path, new_nodes);
+            let patch = Patch::insert_before_node(
+                tag,
+                path.traverse(left_offset + old_index).path,
+                new_nodes,
+            );
             all_patches.push(patch);
         }
     }

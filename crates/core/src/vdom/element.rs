@@ -2,9 +2,10 @@ use super::attribute::{AttributeName, Namespace, Tag};
 use super::{Attribute, Node};
 
 use crate::vdom::AttributeValue;
+use crate::vdom::Leaf;
 use crate::vdom::Value;
 use derive_where::derive_where;
-use crate::vdom::Leaf;
+use indexmap::IndexMap;
 
 /// Represents an element of the virtual node
 /// An element has a generic tag, this tag could be a static str tag, such as usage in html dom.
@@ -185,5 +186,22 @@ impl<MSG> Element<MSG> {
     pub fn first_value(&self, att_name: &AttributeName) -> Option<&Value> {
         self.attribute_value(att_name)
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
+    }
+
+    /// grouped the attributes, but retain the index of the attribute
+    /// relative to its location in the element
+    pub fn group_indexed_attributes_per_name<'a>(
+        &'a self,
+    ) -> IndexMap<&'a AttributeName, Vec<(usize, &'a Attribute<MSG>)>> {
+        let mut grouped: IndexMap<&'a AttributeName, Vec<(usize, &'a Attribute<MSG>)>> =
+            IndexMap::new();
+        for (i, attr) in self.attributes().iter().enumerate() {
+            if let Some(existing) = grouped.get_mut(&attr.name) {
+                existing.push((i, attr));
+            } else {
+                grouped.insert(&attr.name, vec![(i, attr)]);
+            }
+        }
+        grouped
     }
 }
