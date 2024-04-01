@@ -51,7 +51,7 @@ pub mod prelude {
         pub use crate::html::events::*;
         pub use crate::dom::{Application, SkipDiff, skip_if, events, Program, document, now, window, Window, Dispatch,
             AnimationFrameHandle, Component, StatefulComponent, Effects, Measurements, MountAction,
-            MountTarget, Task, TimeoutCallbackHandle, DomAttrValue,
+            MountTarget, Cmd, TimeoutCallbackHandle, DomAttrValue,
             stateful_component,
         };
         #[cfg(feature = "custom_element")]

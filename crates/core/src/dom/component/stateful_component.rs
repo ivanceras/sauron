@@ -2,7 +2,7 @@
 use crate::dom::events::on_mount;
 use crate::dom::program::MountProcedure;
 use crate::dom::Application;
-use crate::dom::Task;
+use crate::dom::Cmd;
 use crate::dom::Component;
 use crate::dom::DomAttrValue;
 use crate::dom::DomNode;

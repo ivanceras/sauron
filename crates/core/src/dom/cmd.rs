@@ -17,13 +17,13 @@ pub enum Command<MSG> {
 }
 
 /// 
-pub struct Task<MSG>{
+pub struct Cmd<MSG>{
     /// commands
     pub(crate) commands: Vec<Command<MSG>>,
     pub(crate) modifier: Modifier,
 }
 
-impl<MSG> Task<MSG>
+impl<MSG> Cmd<MSG>
 where
     MSG: 'static,
 {
@@ -45,19 +45,19 @@ where
         }
     }
 
-    /// map the msg of this Task such that Task<MSG> becomes Task<MSG2>.
-    pub fn map_msg<F, MSG2>(self, f: F) -> Task<MSG2>
+    /// map the msg of this Cmd such that Cmd<MSG> becomes Cmd<MSG2>.
+    pub fn map_msg<F, MSG2>(self, f: F) -> Cmd<MSG2>
     where
         F: Fn(MSG) -> MSG2 + 'static + Clone,
         MSG2: 'static,
     {
-        Task{
+        Cmd{
             commands: self.commands.into_iter().map(|t|t.map_msg(f.clone())).collect(),
             modifier: Default::default(),
         }
     }
 
-    /// batch together multiple Task into one task
+    /// batch together multiple Cmd into one task
     pub fn batch(tasks: impl IntoIterator<Item = Self>) -> Self {
         let mut commands = vec![];
         for task in tasks.into_iter(){
@@ -83,7 +83,8 @@ where
 
 }
 
-impl<MSG> From<Effects<MSG, MSG>> for Task<MSG>
+/*
+impl<MSG> From<Effects<MSG, MSG>> for Cmd<MSG>
     where MSG: 'static
 {
     /// Convert Effects that has only follow ups
@@ -96,7 +97,27 @@ impl<MSG> From<Effects<MSG, MSG>> for Task<MSG>
             modifier:_,
         } = effects;
 
-        Task::batch(local.into_iter().chain(external.into_iter()).map(Task::from))
+        Cmd::batch(local.into_iter().chain(external.into_iter()).map(Cmd::from))
+    }
+}
+*/
+
+impl<MSG> From<Effects<MSG, ()>> for Cmd<MSG>
+    where MSG: 'static
+{
+    /// Convert Effects that has only follow ups
+    fn from(effects: Effects<MSG, ()>) -> Self {
+        // we can safely ignore the effects here
+        // as there is no content on it.
+        let Effects {
+            local,
+            external:_,
+            modifier,
+        } = effects;
+
+        let mut cmd = Cmd::batch(local.into_iter().map(Cmd::from));
+        cmd.modifier = modifier;
+        cmd
     }
 }
 

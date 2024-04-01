@@ -1,4 +1,4 @@
-use crate::dom::{dom_node::intern, util, window, Task};
+use crate::dom::{dom_node::intern, util, window, Cmd};
 use futures::channel::mpsc;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::MouseEvent;
@@ -8,9 +8,9 @@ use web_sys::MouseEvent;
 pub struct Window;
 
 impl Window {
-    /// Create a recurring Task which will be triggered
+    /// Create a recurring Cmd which will be triggered
     /// everytime the window is resized
-    pub fn on_resize<F, MSG>(mut cb: F) -> Task<MSG>
+    pub fn on_resize<F, MSG>(mut cb: F) -> Cmd<MSG>
     where
         F: FnMut(i32, i32) -> MSG + Clone + 'static,
         MSG: 'static,
@@ -30,11 +30,11 @@ impl Window {
             )
             .expect("add event callback");
 
-        Task::sub(rx, resize_callback)
+        Cmd::sub(rx, resize_callback)
     }
 
     ///
-    pub fn on_mousemove<F, MSG>(mut cb: F) -> Task<MSG>
+    pub fn on_mousemove<F, MSG>(mut cb: F) -> Cmd<MSG>
     where
         F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
         MSG: 'static,
@@ -52,11 +52,11 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::sub(rx, mousemove_cb)
+        Cmd::sub(rx, mousemove_cb)
     }
 
     ///
-    pub fn on_mouseup<F, MSG>(mut cb: F) -> Task<MSG>
+    pub fn on_mouseup<F, MSG>(mut cb: F) -> Cmd<MSG>
     where
         F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
         MSG: 'static,
@@ -74,11 +74,11 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::sub(rx, mousemove_cb)
+        Cmd::sub(rx, mousemove_cb)
     }
 
     /// do this task at every `ms` interval
-    pub fn every_interval<F, MSG>(interval_ms: i32, cb: F) -> Task<MSG>
+    pub fn every_interval<F, MSG>(interval_ms: i32, cb: F) -> Cmd<MSG>
     where
         F: Fn() -> MSG + 'static,
         MSG: 'static,
@@ -97,23 +97,23 @@ impl Window {
                 interval_ms,
             )
             .expect("Unable to start interval");
-        Task::sub(rx, closure_cb)
+        Cmd::sub(rx, closure_cb)
     }
 
     /// scroll the window to the top of the document
-    pub fn scroll_to_top<MSG>(msg: MSG) -> Task<MSG>
+    pub fn scroll_to_top<MSG>(msg: MSG) -> Cmd<MSG>
     where
         MSG: 'static,
     {
         use std::future::ready;
-        Task::single(ready({
+        Cmd::single(ready({
             util::scroll_window_to_top();
             msg
         }))
     }
 
     ///
-    pub fn on_popstate<F, MSG>(mut cb: F) -> Task<MSG>
+    pub fn on_popstate<F, MSG>(mut cb: F) -> Cmd<MSG>
     where
         F: FnMut(web_sys::PopStateEvent) -> MSG + 'static,
         MSG: 'static,
@@ -132,6 +132,6 @@ impl Window {
                 closure_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::sub(rx, closure_cb)
+        Cmd::sub(rx, closure_cb)
     }
 }

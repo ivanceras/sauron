@@ -1,5 +1,4 @@
-#![deny(warnings)]
-use sauron::{dom::spawn_local, dom::Http, js_sys::TypeError, jss, *};
+use sauron::{dom::Http, js_sys::TypeError, jss, *};
 use serde::Deserialize;
 
 #[macro_use]
@@ -50,11 +49,12 @@ impl App {
         }
     }
 
-    fn fetch_page(&self) -> Cmd<Self> {
+    fn fetch_page(&self) -> Cmd<Msg> {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
 
-        Cmd::new(|mut program| {
-            spawn_local(async move {
+        /*
+        Cmd::single(
+            async move {
                 let msg = match Http::fetch_text(&url).await {
                     Ok(v) => match serde_json::from_str(&v) {
                         Ok(data1) => Msg::ReceivedData(data1),
@@ -62,26 +62,41 @@ impl App {
                     },
                     Err(e) => Msg::RequestError(e),
                 };
-                program.dispatch(msg);
-            })
-        })
+                msg
+            }
+        )
+        */
+        Cmd::single(
+            async move{
+                let response = reqwest::Client::new()
+                    .get(url)
+                    .send()
+                    .await.expect("dont error pls");
+
+                match serde_json::from_str(&response.text().await.unwrap()) {
+                    Ok(data1) => Msg::ReceivedData(data1),
+                    Err(err) => Msg::JsonError(err),
+                }
+            }
+        )
     }
 }
 
 impl Application for App {
     type MSG = Msg;
 
-    fn init(&mut self) -> Cmd<Self> {
+    fn init(&mut self) -> Cmd<Msg> {
         console_log::init_with_level(log::Level::Trace).unwrap();
         self.fetch_page()
     }
 
     fn view(&self) -> Node<Msg> {
+        log::info!("disabled: {}", {self.page <= 1});
         node! {
             <div>
                  <div class="some-class" id="some-id" {attr("data-id", 1)}>
                          <input class="prev_page" type="button"
-                                 disabled={self.page <= 1}
+                                {disabled(self.page <= 1)}
                                  value="<< Prev Page"
                                  on_click=|_| {
                                      trace!("Button is clicked");
@@ -90,7 +105,7 @@ impl Application for App {
                          />
                          {text(format!("Page: {}", self.page))}
                          <input class="next_page" type="button"
-                                 disabled={self.page >= self.data.total_pages}
+                                {disabled(self.page >= self.data.total_pages)}
                                  value="Next Page >>"
                                  on_click=|_|{
                                      trace!("Button is clicked");
@@ -123,7 +138,7 @@ impl Application for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         trace!("App is updating from msg: {:?}", msg);
         match msg {
             Msg::NextPage => {

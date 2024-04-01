@@ -16,8 +16,8 @@ pub struct App {
 impl Application for App {
     type MSG = Msg;
 
-    fn init(&mut self) -> Task<Msg> {
-        Task::batch([
+    fn init(&mut self) -> Cmd<Msg> {
+        Cmd::batch([
             Window::on_resize(|w, h| {
                 log::info!("This will trigger only once.. {w}x{h}");
                 Msg::WindowResized(w, h)
@@ -50,17 +50,17 @@ impl Application for App {
         )
     }
 
-    fn update(&mut self, msg: Msg) -> Task<Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::WindowResized(w, h) => {
                 log::info!("Setting the App's width: {w} and height: {h}");
                 self.width = Some(w);
                 self.height = Some(h);
-                Task::none()
+                Cmd::none()
             }
             Msg::TickTock => {
                 log::info!("tick tock!");
-                Task::none()
+                Cmd::none()
             }
         }
     }

@@ -4,7 +4,7 @@ use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
 use sauron::js_sys::TypeError;
-use sauron::{jss, text, wasm_bindgen, Application, Node, Program, Task};
+use sauron::{jss, text, wasm_bindgen, Application, Node, Program, Cmd};
 use serde::Deserialize;
 
 #[macro_use]
@@ -55,9 +55,9 @@ impl App {
         }
     }
 
-    fn fetch_page(&self) -> Task<Msg> {
+    fn fetch_page(&self) -> Cmd<Msg> {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
-        Task::single(
+        Cmd::single(
             async move {
                 let msg = match Http::fetch_text(&url).await {
                     Ok(v) => match serde_json::from_str(&v) {
@@ -75,7 +75,7 @@ impl App {
 impl Application for App {
     type MSG = Msg;
 
-    fn init(&mut self) -> Task<Msg> {
+    fn init(&mut self) -> Cmd<Msg> {
         console_log::init_with_level(log::Level::Trace).unwrap();
         self.fetch_page()
     }
@@ -139,7 +139,7 @@ impl Application for App {
         )
     }
 
-    fn update(&mut self, msg: Msg) -> Task<Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         trace!("App is updating from msg: {:?}", msg);
         match msg {
             Msg::NextPage => {
@@ -147,7 +147,7 @@ impl Application for App {
                     self.page += 1;
                     self.fetch_page()
                 } else {
-                    Task::none()
+                    Cmd::none()
                 }
             }
             Msg::PrevPage => {
@@ -158,12 +158,12 @@ impl Application for App {
             }
             Msg::ReceivedData(data1) => {
                 self.data = data1;
-                Task::none()
+                Cmd::none()
             }
             Msg::JsonError(err) => {
                 trace!("Error fetching users! {:#?}", err);
                 self.error = Some(format!("There was an error fetching the page: {:?}", err));
-                Task::none()
+                Cmd::none()
             }
             Msg::RequestError(type_error) => {
                 trace!("Error requesting the page: {:?}", type_error);
@@ -171,7 +171,7 @@ impl Application for App {
                     "There was an error fetching the page: {:?}",
                     type_error
                 ));
-                Task::none()
+                Cmd::none()
             }
         }
     }

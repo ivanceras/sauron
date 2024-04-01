@@ -394,7 +394,6 @@ where
                     first_node.insert_after(replacement);
                 }
                 if patch_path.path.is_empty() {
-                    log::info!("setting root node to the first node at non-fragment");
                     *self.root_node.borrow_mut() = Some(first_node);
                 }
             }

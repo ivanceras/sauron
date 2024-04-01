@@ -435,6 +435,7 @@ where
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
     pub fn update_dom(&mut self, modifier: &Modifier) -> Result<(), JsValue> {
+        log::info!("updating the dom...");
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app_context.view();
@@ -684,6 +685,8 @@ where
 
         if cmd.modifier.should_update_view {
             self.update_dom(&cmd.modifier).expect("must update dom");
+        }else{
+            log::warn!("not updating dom...");
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update

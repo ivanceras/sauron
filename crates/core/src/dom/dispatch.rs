@@ -2,7 +2,7 @@
 //! when the application starts or after the application updates.
 //!
 use crate::dom::Program;
-use crate::dom::{Application, Effects, Modifier, Task};
+use crate::dom::{Application, Effects, Modifier, Cmd};
 use wasm_bindgen_futures::spawn_local;
 
 /// Dispatch is a command to be executed by the system.
@@ -150,11 +150,11 @@ where
     }
 }
 
-impl<APP> From<Task<APP::MSG>> for Dispatch<APP>
+impl<APP> From<Cmd<APP::MSG>> for Dispatch<APP>
 where
     APP: Application,
 {
-    fn from(task: Task<APP::MSG>) -> Self {
+    fn from(task: Cmd<APP::MSG>) -> Self {
         Dispatch::new(move |program| {
             for mut command in task.commands.into_iter(){
                 let program = program.downgrade();
