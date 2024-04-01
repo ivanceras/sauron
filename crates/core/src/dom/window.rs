@@ -30,7 +30,7 @@ impl Window {
             )
             .expect("add event callback");
 
-        Task::recurring(rx, resize_callback)
+        Task::sub(rx, resize_callback)
     }
 
     ///
@@ -52,7 +52,7 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::recurring(rx, mousemove_cb)
+        Task::sub(rx, mousemove_cb)
     }
 
     ///
@@ -74,7 +74,7 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::recurring(rx, mousemove_cb)
+        Task::sub(rx, mousemove_cb)
     }
 
     /// do this task at every `ms` interval
@@ -97,7 +97,7 @@ impl Window {
                 interval_ms,
             )
             .expect("Unable to start interval");
-        Task::recurring(rx, closure_cb)
+        Task::sub(rx, closure_cb)
     }
 
     /// scroll the window to the top of the document
@@ -132,6 +132,6 @@ impl Window {
                 closure_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::recurring(rx, closure_cb)
+        Task::sub(rx, closure_cb)
     }
 }

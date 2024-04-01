@@ -26,10 +26,10 @@ where
         Self::Single(SingleTask::new(f))
     }
     /// 
-    pub fn recurring(rx: UnboundedReceiver<MSG>, event_closure: EventClosure) -> Self {
+    pub fn sub(rx: UnboundedReceiver<MSG>, event_closure: EventClosure) -> Self {
         Self::Sub(Sub{
             receiver: rx,
-            event_closures: vec![event_closure],
+            event_closure,
         })
     }
 
@@ -119,7 +119,7 @@ where
 pub struct Sub<MSG> {
     pub(crate) receiver: UnboundedReceiver<MSG>,
     /// store the associated closures so it is not dropped before being event executed
-    pub(crate) event_closures: Vec<EventClosure>,
+    pub(crate) event_closure: EventClosure,
 }
 
 impl<MSG> Sub<MSG>
@@ -139,7 +139,7 @@ where
         let (mut tx, rx) = mpsc::unbounded();
         let Sub {
             mut receiver,
-            event_closures,
+            event_closure,
         } = self;
         spawn_local(async move {
             while let Some(msg) = receiver.next().await {
@@ -148,7 +148,7 @@ where
         });
         Sub {
             receiver: rx,
-            event_closures,
+            event_closure,
         }
     }
 }
