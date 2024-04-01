@@ -139,6 +139,7 @@ where
     }
 }
 
+
 impl<APP, IN> From<IN> for Dispatch<APP>
 where
     APP: Application,
@@ -153,13 +154,17 @@ impl<APP> From<Task<APP::MSG>> for Dispatch<APP>
 where
     APP: Application,
 {
-    fn from(mut task: Task<APP::MSG>) -> Self {
-        Dispatch::new(move |mut program| {
-            spawn_local(async move {
-                while let Some(msg) = task.next().await {
-                    program.dispatch(msg)
-                }
-            });
+    fn from(task: Task<APP::MSG>) -> Self {
+        Dispatch::new(move |program| {
+            for mut command in task.commands.into_iter(){
+                let program = program.downgrade();
+                spawn_local(async move {
+                    let mut program = program.upgrade().expect("upgrade");
+                    while let Some(msg) = command.next().await {
+                        program.dispatch(msg)
+                    }
+                });
+            }
         })
     }
 }

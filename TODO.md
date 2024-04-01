@@ -292,6 +292,7 @@
     - [X] Rename `RecurringTask` to `Sub`
     - [ ] enum Task{Cmd,Sub} into one unified type.
     - Sauron just consilidate them into one enum struct for simplicity
+- [ ] Remove `Modifier` and `measurements`
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
