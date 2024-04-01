@@ -1,6 +1,6 @@
 #[cfg(feature = "with-measure")]
 use crate::dom::Measurements;
-use crate::dom::{Application, Cmd};
+use crate::dom::{Application, Dispatch};
 use crate::vdom;
 use std::{
     cell::{Ref, RefCell},
@@ -29,7 +29,7 @@ where
     pub(crate) pending_msgs: Rc<RefCell<VecDeque<APP::MSG>>>,
 
     /// pending cmds that hasn't been emited yet
-    pub(crate) pending_cmds: Rc<RefCell<VecDeque<Cmd<APP>>>>,
+    pub(crate) pending_cmds: Rc<RefCell<VecDeque<Dispatch<APP>>>>,
 }
 
 pub(crate) struct WeakContext<APP>
@@ -39,7 +39,7 @@ where
     pub(crate) app: Weak<RefCell<APP>>,
     pub(crate) current_vdom: Weak<RefCell<vdom::Node<APP::MSG>>>,
     pub(crate) pending_msgs: Weak<RefCell<VecDeque<APP::MSG>>>,
-    pub(crate) pending_cmds: Weak<RefCell<VecDeque<Cmd<APP>>>>,
+    pub(crate) pending_cmds: Weak<RefCell<VecDeque<Dispatch<APP>>>>,
 }
 
 impl<APP> WeakContext<APP>
@@ -112,7 +112,7 @@ impl<APP> AppContext<APP>
 where
     APP: Application,
 {
-    pub fn init_app(&self) -> Cmd<APP> {
+    pub fn init_app(&self) -> Dispatch<APP> {
         self.app.borrow_mut().init()
     }
 
@@ -136,7 +136,7 @@ where
     }
 
     #[cfg(feature = "with-measure")]
-    pub fn measurements(&self, measurements: Measurements) -> Cmd<APP> {
+    pub fn measurements(&self, measurements: Measurements) -> Dispatch<APP> {
         self.app.borrow().measurements(measurements).no_render()
     }
 
@@ -144,7 +144,7 @@ where
         self.pending_msgs.borrow_mut().extend(msgs);
     }
 
-    pub fn update_app(&mut self, msg: APP::MSG) -> Cmd<APP> {
+    pub fn update_app(&mut self, msg: APP::MSG) -> Dispatch<APP> {
         self.app.borrow_mut().update(msg)
     }
 
@@ -181,7 +181,7 @@ where
         }
     }
 
-    pub fn batch_pending_cmds(&mut self) -> Cmd<APP> {
-        Cmd::batch(self.pending_cmds.borrow_mut().drain(..))
+    pub fn batch_pending_cmds(&mut self) -> Dispatch<APP> {
+        Dispatch::batch(self.pending_cmds.borrow_mut().drain(..))
     }
 }

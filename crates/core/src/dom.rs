@@ -29,13 +29,13 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use raf::{request_animation_frame, AnimationFrameHandle};
     pub use ric::{request_idle_callback, IdleCallbackHandle, IdleDeadline};
     pub use timeout::{delay, request_timeout_callback, TimeoutCallbackHandle};
-    pub use cmd::Cmd;
+    pub use dispatch::Dispatch;
     use crate::dom::events::MountEvent;
     pub use window::Window;
     pub use dom_node::DomNode;
 
     mod application;
-    pub mod cmd;
+    pub mod dispatch;
     mod dom_node;
     mod dom_patch;
     mod dom_attr;

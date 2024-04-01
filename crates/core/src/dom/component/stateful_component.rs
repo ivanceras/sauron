@@ -1,7 +1,7 @@
 use crate::dom::events::on_mount;
 use crate::dom::program::MountProcedure;
 use crate::dom::Application;
-use crate::dom::Cmd;
+use crate::dom::Dispatch;
 use crate::dom::Component;
 use crate::dom::DomAttrValue;
 use crate::dom::DomNode;
@@ -117,13 +117,13 @@ where
 {
     type MSG = COMP::MSG;
 
-    fn init(&mut self) -> Cmd<Self> {
-        Cmd::from(<Self as Component>::init(self))
+    fn init(&mut self) -> Dispatch<Self> {
+        Dispatch::from(<Self as Component>::init(self))
     }
 
-    fn update(&mut self, msg: COMP::MSG) -> Cmd<Self> {
+    fn update(&mut self, msg: COMP::MSG) -> Dispatch<Self> {
         let effects = <Self as Component>::update(self, msg);
-        Cmd::from(effects)
+        Dispatch::from(effects)
     }
 
     fn view(&self) -> Node<COMP::MSG> {
