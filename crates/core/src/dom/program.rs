@@ -183,7 +183,7 @@ where
                 app,
                 current_vdom: Rc::new(RefCell::new(app_view)),
                 pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
-                pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
+                pending_dispatches: Rc::new(RefCell::new(VecDeque::new())),
             },
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(None)),
@@ -708,7 +708,7 @@ where
             );
         }
 
-        // execute this `cmd` batched pending_cmds that may have resulted from updating the app
+        // execute this `cmd` batched pending_dispatches that may have resulted from updating the app
         cmd.emit(self.clone());
     }
 

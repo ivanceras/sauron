@@ -29,7 +29,7 @@ where
     pub(crate) pending_msgs: Rc<RefCell<VecDeque<APP::MSG>>>,
 
     /// pending cmds that hasn't been emited yet
-    pub(crate) pending_cmds: Rc<RefCell<VecDeque<Dispatch<APP>>>>,
+    pub(crate) pending_dispatches: Rc<RefCell<VecDeque<Dispatch<APP>>>>,
 }
 
 pub(crate) struct WeakContext<APP>
@@ -39,7 +39,7 @@ where
     pub(crate) app: Weak<RefCell<APP>>,
     pub(crate) current_vdom: Weak<RefCell<vdom::Node<APP::MSG>>>,
     pub(crate) pending_msgs: Weak<RefCell<VecDeque<APP::MSG>>>,
-    pub(crate) pending_cmds: Weak<RefCell<VecDeque<Dispatch<APP>>>>,
+    pub(crate) pending_dispatches: Weak<RefCell<VecDeque<Dispatch<APP>>>>,
 }
 
 impl<APP> WeakContext<APP>
@@ -50,12 +50,12 @@ where
         let app = self.app.upgrade()?;
         let current_vdom = self.current_vdom.upgrade()?;
         let pending_msgs = self.pending_msgs.upgrade()?;
-        let pending_cmds = self.pending_cmds.upgrade()?;
+        let pending_dispatches = self.pending_dispatches.upgrade()?;
         Some(AppContext {
             app,
             current_vdom,
             pending_msgs,
-            pending_cmds,
+            pending_dispatches,
         })
     }
 }
@@ -69,7 +69,7 @@ where
             app: Weak::clone(&self.app),
             current_vdom: Weak::clone(&self.current_vdom),
             pending_msgs: Weak::clone(&self.pending_msgs),
-            pending_cmds: Weak::clone(&self.pending_cmds),
+            pending_dispatches: Weak::clone(&self.pending_dispatches),
         }
     }
 }
@@ -83,7 +83,7 @@ where
             app: Rc::downgrade(&this.app),
             current_vdom: Rc::downgrade(&this.current_vdom),
             pending_msgs: Rc::downgrade(&this.pending_msgs),
-            pending_cmds: Rc::downgrade(&this.pending_cmds),
+            pending_dispatches: Rc::downgrade(&this.pending_dispatches),
         }
     }
     pub fn strong_count(&self) -> usize {
@@ -103,7 +103,7 @@ where
             app: Rc::clone(&self.app),
             current_vdom: Rc::clone(&self.current_vdom),
             pending_msgs: Rc::clone(&self.pending_msgs),
-            pending_cmds: Rc::clone(&self.pending_cmds),
+            pending_dispatches: Rc::clone(&self.pending_dispatches),
         }
     }
 }
@@ -174,7 +174,7 @@ where
 
         if let Some(cmd) = cmd {
             // we put the cmd in the pending_cmd queue
-            self.pending_cmds.borrow_mut().push_back(cmd);
+            self.pending_dispatches.borrow_mut().push_back(cmd);
             true
         } else {
             false
@@ -182,6 +182,6 @@ where
     }
 
     pub fn batch_pending_cmds(&mut self) -> Dispatch<APP> {
-        Dispatch::batch(self.pending_cmds.borrow_mut().drain(..))
+        Dispatch::batch(self.pending_dispatches.borrow_mut().drain(..))
     }
 }

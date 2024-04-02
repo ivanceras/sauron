@@ -1,7 +1,6 @@
 use crate::dom::Modifier;
 use crate::dom::Cmd;
 use std::future::ready;
-use std::future::Future;
 
 /// Effects is a convenient way to group Msg for component to execute subsequent updates based on certain conditions.
 /// This can be used for doing animation and incremental changes to the view to provide an effect
@@ -41,23 +40,6 @@ where
         }
     }
 
-    /// Create a new Effects with local and external futures that can resolve to MSG and XMSG
-    /// respectively
-    pub fn with_async<F, FX>(
-        local: impl IntoIterator<Item = F>,
-        external: impl IntoIterator<Item = FX>,
-    ) -> Self
-    where
-        F: Future<Output = MSG> + 'static,
-        FX: Future<Output = XMSG> + 'static,
-        XMSG: 'static,
-    {
-        Self {
-            local: local.into_iter().map(Cmd::single).collect(),
-            external: external.into_iter().map(Cmd::single).collect(),
-            modifier: Modifier::default(),
-        }
-    }
 
     /// Create an Effects with  local messages that will be executed on the next update loop on this Component
     pub fn with_local(local: impl IntoIterator<Item = MSG>) -> Self {
@@ -68,18 +50,6 @@ where
         }
     }
 
-    /// Create an Effects with local message that will can resolved into MSG, it will be executed
-    /// on the next update loop on the component it is being returned
-    pub fn with_local_async<F>(local: impl IntoIterator<Item = F>) -> Self
-    where
-        F: Future<Output = MSG> + 'static,
-    {
-        Self {
-            local: local.into_iter().map(Cmd::single).collect(),
-            external: vec![],
-            modifier: Modifier::default(),
-        }
-    }
 
     /// Create an Effects with extern messages that will be executed on the parent Component
     pub fn with_external(external: impl IntoIterator<Item = XMSG>) -> Self
@@ -96,19 +66,6 @@ where
         }
     }
 
-    /// Create an Effects with external messages that will can be resolved into an XMSG, this will
-    /// be dispatch in the next Component update
-    pub fn with_external_async<F>(external: impl IntoIterator<Item = F>) -> Self
-    where
-        F: Future<Output = XMSG> + 'static,
-        XMSG: 'static,
-    {
-        Self {
-            local: vec![],
-            external: external.into_iter().map(Cmd::single).collect(),
-            modifier: Modifier::default(),
-        }
-    }
 
     /// Create and empty Effects
     pub fn none() -> Self {
