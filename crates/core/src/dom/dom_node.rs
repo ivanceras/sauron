@@ -184,9 +184,10 @@ impl DomNode {
         }
     }
 
-    pub(crate) fn as_element(&self) -> web_sys::Element {
+    /// exposed the underlying wrapped node as `web_sys::Element`
+    pub fn as_element(&self) -> web_sys::Element {
         match &self.inner {
-            DomInner::Element { element, .. } => element.clone().unchecked_into(),
+            DomInner::Element { element, .. } => element.clone(),
             DomInner::Fragment { fragment, .. } => {
                 let fragment: web_sys::Element = fragment.clone().unchecked_into();
                 assert!(fragment.is_object());
