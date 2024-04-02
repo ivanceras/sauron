@@ -28,6 +28,6 @@ impl Document {
                 closure_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Cmd::sub(rx, closure_cb)
+        Cmd::recurring(rx, closure_cb)
     }
 }

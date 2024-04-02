@@ -50,7 +50,7 @@ impl Fetcher {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
         log::info!("url: {}", url);
 
-        Effects::from(Cmd::single(async move {
+        Effects::from(Cmd::new(async move {
             match Http::fetch_text(&url).await {
                 Ok(v) => match serde_json::from_str(&v) {
                     Ok(data1) => Msg::ReceivedData(data1),

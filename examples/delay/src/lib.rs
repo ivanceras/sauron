@@ -95,7 +95,7 @@ impl Application for App {
                 .expect("must have a handle");
 
                 *current_handle.borrow_mut() = Some(handle);
-                Cmd::sub(rx, sauron::Closure::new(|_:sauron::web_sys::Event|{
+                Cmd::recurring(rx, sauron::Closure::new(|_:sauron::web_sys::Event|{
                     panic!("This is not called!");
                 }))
             }

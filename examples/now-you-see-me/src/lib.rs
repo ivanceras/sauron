@@ -21,7 +21,7 @@ impl Application for App {
     type MSG = Msg;
 
     fn init(&mut self) -> Cmd<Msg> {
-        Cmd::single( async move{
+        Cmd::new( async move{
             Msg::ToggleShow
         })
     }
@@ -34,7 +34,7 @@ impl Application for App {
                 } else {
                     document().set_title("Now, you don't!");
                 }
-                Cmd::single(
+                Cmd::new(
                     async move {
                         delay(2000).await;
                         Msg::ToggleShow

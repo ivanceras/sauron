@@ -30,7 +30,7 @@ impl Window {
             )
             .expect("add event callback");
 
-        Cmd::sub(rx, resize_callback)
+        Cmd::recurring(rx, resize_callback)
     }
 
     ///
@@ -52,7 +52,7 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Cmd::sub(rx, mousemove_cb)
+        Cmd::recurring(rx, mousemove_cb)
     }
 
     ///
@@ -74,7 +74,7 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Cmd::sub(rx, mousemove_cb)
+        Cmd::recurring(rx, mousemove_cb)
     }
 
     ///
@@ -96,7 +96,7 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Cmd::sub(rx, mousemove_cb)
+        Cmd::recurring(rx, mousemove_cb)
     }
 
     ///
@@ -118,7 +118,7 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Cmd::sub(rx, mousemove_cb)
+        Cmd::recurring(rx, mousemove_cb)
     }
 
     ///
@@ -140,7 +140,7 @@ impl Window {
                 closure_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Cmd::sub(rx, closure_cb)
+        Cmd::recurring(rx, closure_cb)
     }
 
     ///
@@ -162,7 +162,7 @@ impl Window {
                 closure_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Cmd::sub(rx, closure_cb)
+        Cmd::recurring(rx, closure_cb)
     }
 
     /// do this task at every `ms` interval
@@ -185,7 +185,7 @@ impl Window {
                 interval_ms,
             )
             .expect("Unable to start interval");
-        Cmd::sub(rx, closure_cb)
+        Cmd::recurring(rx, closure_cb)
     }
 
     /// scroll the window to the top of the document
@@ -194,7 +194,7 @@ impl Window {
         MSG: 'static,
     {
         use std::future::ready;
-        Cmd::single(ready({
+        Cmd::once(ready({
             util::scroll_window_to_top();
             msg
         }))
@@ -220,6 +220,6 @@ impl Window {
                 closure_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Cmd::sub(rx, closure_cb)
+        Cmd::recurring(rx, closure_cb)
     }
 }

@@ -28,8 +28,16 @@ impl<MSG> Cmd<MSG>
 where
     MSG: 'static,
 {
-    ///
-    pub fn single<F>(f: F) -> Self
+    /// maps to a once future
+    pub fn new<F>(f: F) -> Self
+    where
+        F: Future<Output = MSG> + 'static,
+    {
+        Self::once(f)
+    }
+
+    /// Creates a Cmd which expects to be polled only once
+    pub fn once<F>(f: F) -> Self
     where
         F: Future<Output = MSG> + 'static,
     {
@@ -38,8 +46,8 @@ where
             modifier: Default::default(),
         }
     }
-    /// 
-    pub fn sub(rx: UnboundedReceiver<MSG>, event_closure: Closure<dyn FnMut(web_sys::Event)>) -> Self {
+    /// Creates a Cmd which will be polled multiple times
+    pub fn recurring(rx: UnboundedReceiver<MSG>, event_closure: Closure<dyn FnMut(web_sys::Event)>) -> Self {
         Self{
             commands: vec![Command::sub(rx, event_closure)],
             modifier: Default::default(),
@@ -210,6 +218,7 @@ where
     }
 }
 
+/// Sub is a recurring operation
 pub struct Sub<MSG> {
     pub(crate) receiver: UnboundedReceiver<MSG>,
     /// store the associated closures so it is not dropped before being event executed

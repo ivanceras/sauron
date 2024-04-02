@@ -48,7 +48,7 @@ impl Application for App {
                 1000,
             )
             .expect("Unable to start interval");
-        Cmd::sub(rx, clock_cb)
+        Cmd::recurring(rx, clock_cb)
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Msg> {

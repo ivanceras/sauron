@@ -51,9 +51,7 @@ impl App {
 
     fn fetch_page(&self) -> Cmd<Msg> {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
-
-        /*
-        Cmd::single(
+        Cmd::new(
             async move {
                 let msg = match Http::fetch_text(&url).await {
                     Ok(v) => match serde_json::from_str(&v) {
@@ -63,20 +61,6 @@ impl App {
                     Err(e) => Msg::RequestError(e),
                 };
                 msg
-            }
-        )
-        */
-        Cmd::single(
-            async move{
-                let response = reqwest::Client::new()
-                    .get(url)
-                    .send()
-                    .await.expect("dont error pls");
-
-                match serde_json::from_str(&response.text().await.unwrap()) {
-                    Ok(data1) => Msg::ReceivedData(data1),
-                    Err(err) => Msg::JsonError(err),
-                }
             }
         )
     }
