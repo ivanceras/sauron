@@ -235,6 +235,17 @@ impl DomNode {
                     children.borrow_mut().push(child);
                 }
             }
+            DomInner::Fragment {
+                fragment, children, ..
+            } => {
+                for mut child in for_append.into_iter() {
+                    fragment
+                        .append_child(&child.as_node())
+                        .expect("append child");
+                    child.parent = Rc::new(Some(self.clone()));
+                    children.borrow_mut().push(child);
+                }
+            }
             _ => unreachable!(
                 "appending should only be called to Element and Fragment, found: {:#?}",
                 self

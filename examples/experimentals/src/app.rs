@@ -46,11 +46,11 @@ impl App {
 impl Application for App {
     type MSG = Msg;
 
-    fn init(&mut self) -> Cmd<Self> {
+    fn init(&mut self) -> Cmd<Msg> {
         Cmd::from(Window::every_interval(5_000, || Msg::Clock))
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::Click => {
                 self.click_count += 1;

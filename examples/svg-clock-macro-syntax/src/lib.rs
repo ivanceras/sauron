@@ -5,7 +5,7 @@
 #![deny(clippy::all)]
 
 use js_sys::Date;
-use sauron::{html::units::percent, jss, wasm_bindgen::JsCast, *};
+use sauron::{html::units::percent, jss, *};
 
 #[macro_use]
 extern crate log;
@@ -31,24 +31,11 @@ impl Application for Clock {
 
     // we wire the window set_interval api to trigger an Msg::Tick
     // by dispatching it from the program, through the Cmd interface
-    fn init(&mut self) -> Cmd<Self> {
-        Cmd::new(move |mut program| {
-            let clock: Closure<dyn FnMut()> = Closure::new(move || {
-                program.dispatch(Msg::Tick);
-            });
-
-            web_sys::window()
-                .expect("no global `window` exists")
-                .set_interval_with_callback_and_timeout_and_arguments_0(
-                    clock.as_ref().unchecked_ref(),
-                    1_000 / 60, // try to Tick at 60fps
-                )
-                .expect("Unable to start interval");
-            clock.forget();
-        })
+    fn init(&mut self) -> Cmd<Msg> {
+        Window::every_interval(1_000/60, ||Msg::Tick)
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::Tick => {
                 info!("Tick Tock");

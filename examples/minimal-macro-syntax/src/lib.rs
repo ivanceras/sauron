@@ -40,7 +40,7 @@ impl Application for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         log::trace!("App is updating with msg: {:?}", msg);
         match msg {
             Msg::Click => self.click_count += 1,

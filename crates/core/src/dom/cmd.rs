@@ -1,4 +1,3 @@
-use crate::dom::dom_node::EventClosure;
 use crate::dom::spawn_local;
 use futures::channel::mpsc;
 use futures::channel::mpsc::UnboundedReceiver;
@@ -7,6 +6,7 @@ use std::future::Future;
 use std::pin::Pin;
 use crate::dom::Effects;
 use crate::dom::Modifier;
+use wasm_bindgen::closure::Closure;
 
 /// encapsulate anything a component can do
 pub enum Command<MSG> {
@@ -38,7 +38,7 @@ where
         }
     }
     /// 
-    pub fn sub(rx: UnboundedReceiver<MSG>, event_closure: EventClosure) -> Self {
+    pub fn sub(rx: UnboundedReceiver<MSG>, event_closure: Closure<dyn FnMut(web_sys::Event)>) -> Self {
         Self{
             commands: vec![Command::sub(rx, event_closure)],
             modifier: Default::default(),
@@ -134,7 +134,7 @@ where
         Self::Action(Action::new(f))
     }
     /// 
-    pub fn sub(rx: UnboundedReceiver<MSG>, event_closure: EventClosure) -> Self {
+    pub fn sub(rx: UnboundedReceiver<MSG>, event_closure: Closure<dyn FnMut(web_sys::Event)>) -> Self {
         Self::Sub(Sub{
             receiver: rx,
             event_closure,
@@ -155,6 +155,7 @@ where
 
     /// return the next value
     pub async fn next(&mut self) -> Option<MSG> {
+        log::info!("Calling on next..");
         match self {
             Self::Action(task) => task.next().await,
             Self::Sub(task) => task.next().await,
@@ -203,6 +204,7 @@ where
 
     /// get the next value
     async fn next(&mut self) -> Option<MSG> {
+        log::info!("it is in Action");
         // return None is already done since awaiting it again is an error
         if self.done {
             None
@@ -228,7 +230,7 @@ where
 pub struct Sub<MSG> {
     pub(crate) receiver: UnboundedReceiver<MSG>,
     /// store the associated closures so it is not dropped before being event executed
-    pub(crate) event_closure: EventClosure,
+    pub(crate) event_closure: Closure<dyn FnMut(web_sys::Event)>,
 }
 
 impl<MSG> Sub<MSG>
@@ -236,6 +238,7 @@ where
     MSG: 'static,
 {
     async fn next(&mut self) -> Option<MSG> {
+        log::info!("It is in Sub..");
         self.receiver.next().await
     }
 

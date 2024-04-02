@@ -15,7 +15,7 @@ pub struct App;
 impl Application for App {
     type MSG = Msg;
 
-    fn update(&mut self, _msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, _msg: Msg) -> Cmd<Msg> {
         Cmd::none()
     }
 

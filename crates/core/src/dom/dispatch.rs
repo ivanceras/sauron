@@ -155,12 +155,18 @@ where
     APP: Application,
 {
     fn from(task: Cmd<APP::MSG>) -> Self {
+        log::info!("converting cmd into dispatch...");
         Dispatch::new(move |program| {
+            log::info!("There are {}", task.commands.len());
             for mut command in task.commands.into_iter(){
+                log::info!("spawning 1 command..");
                 let program = program.downgrade();
                 spawn_local(async move {
+                    log::info!("spawned here..");
                     let mut program = program.upgrade().expect("upgrade");
+                    log::info!("program upgraded...");
                     while let Some(msg) = command.next().await {
+                        log::info!("waiting...");
                         program.dispatch(msg)
                     }
                 });

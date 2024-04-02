@@ -15,7 +15,7 @@ impl Application for App {
         }
     }
 
-    fn update(&mut self, _msg: ()) -> Cmd<Self> {
+    fn update(&mut self, _msg: ()) -> Cmd<()> {
         Cmd::none()
     }
 }
