@@ -231,6 +231,7 @@ impl DomNode {
                         element
                             .append_child(&child.as_node())
                             .expect("append child");
+                        child.dispatch_mount_event();
                     }
                     child.parent = Rc::new(Some(self.clone()));
                     children.borrow_mut().push(child);
@@ -243,6 +244,7 @@ impl DomNode {
                     fragment
                         .append_child(&child.as_node())
                         .expect("append child");
+                    child.dispatch_mount_event();
                     child.parent = Rc::new(Some(self.clone()));
                     children.borrow_mut().push(child);
                 }
@@ -281,6 +283,7 @@ impl DomNode {
             self.as_element()
                 .insert_adjacent_element(intern("beforebegin"), &insert_node.as_element())
                 .expect("must insert before this element");
+            insert_node.dispatch_mount_event();
         }
 
         // NOTE: It is important that we reverse the insertion to the wrapper DomNode since it is
@@ -318,6 +321,7 @@ impl DomNode {
             self.as_element()
                 .insert_adjacent_element(intern("afterend"), &insert_node.as_element())
                 .expect("must insert after this element");
+            insert_node.dispatch_mount_event();
 
             if let Some(self_index) = self_index {
                 parent_children
@@ -347,6 +351,7 @@ impl DomNode {
                         .as_element()
                         .replace_with_with_node_1(&replacement.as_node())
                         .expect("must replace child");
+                    replacement.dispatch_mount_event();
                     children.borrow_mut().insert(child_index, replacement);
                 } else {
                     // if can not find the child, then must be the root node
@@ -420,7 +425,12 @@ impl DomNode {
         if let Some(parent) = self.parent.as_ref() {
             parent.replace_child(self, replacement);
         } else {
-            unreachable!("unable to replace a node without a parent..");
+            //NOTE: This must be replacing a mount node
+            log::info!("replacing on the self level..");
+            self
+                .as_element()
+                .replace_with_with_node_1(&replacement.as_node())
+                .expect("must replace child");
         }
     }
 
@@ -506,6 +516,11 @@ impl DomNode {
             listener.as_ref().unchecked_ref(),
         )?;
         Ok(())
+    }
+
+    fn dispatch_mount_event(&self){
+        let event_target:web_sys::EventTarget = self.as_element().unchecked_into();
+        event_target.dispatch_event(&MountEvent::create_web_event()).expect("must be ok");
     }
 
     /// render this DomNode into an html string represenation
@@ -754,34 +769,6 @@ where
         self.create_dom_node(parent_node, &real_comp_view)
     }
 
-    /// dispatch the mount event,
-    /// call the listener since browser don't allow asynchronous execution of
-    /// dispatching custom events (non-native browser events)
-    #[allow(unused)]
-    pub(crate) fn dispatch_mount_event(target_node: &Node) {
-        let event_target: &web_sys::EventTarget = target_node.unchecked_ref();
-        assert_eq!(
-            Ok(true),
-            event_target.dispatch_event(&MountEvent::create_web_event())
-        );
-    }
-
-    #[allow(unused)]
-    pub(crate) fn dispatch_mount_event_to_children(
-        target_node: &Node,
-        deep: usize,
-        current_depth: usize,
-    ) {
-        if current_depth > deep {
-            Self::dispatch_mount_event(&target_node);
-        }
-        let children = target_node.child_nodes();
-        let len = children.length();
-        for i in 0..len {
-            let child = children.get(i).expect("child");
-            Self::dispatch_mount_event_to_children(&child, deep, current_depth + 1);
-        }
-    }
 
     /// set element with the dom attrs
     pub(crate) fn set_element_dom_attrs(
