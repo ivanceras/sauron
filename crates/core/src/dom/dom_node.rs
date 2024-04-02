@@ -426,7 +426,6 @@ impl DomNode {
             parent.replace_child(self, replacement);
         } else {
             //NOTE: This must be replacing a mount node
-            log::info!("replacing on the self level..");
             self
                 .as_element()
                 .replace_with_with_node_1(&replacement.as_node())
