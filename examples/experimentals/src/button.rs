@@ -47,6 +47,32 @@ impl Component for Button {
     }
 }
 
+impl Application for Button
+{
+    type MSG = Msg;
+
+    fn init(&mut self) -> Cmd<Msg> {
+        Cmd::from(<Self as Component>::init(self))
+    }
+
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
+        let effects = <Self as Component>::update(self, msg);
+        Cmd::from(effects)
+    }
+
+    fn view(&self) -> Node<Msg> {
+        <Self as Component>::view(self)
+    }
+
+    fn stylesheet() -> Vec<String> {
+        <Self as Component>::stylesheet()
+    }
+
+    fn style(&self) -> Vec<String> {
+        <Self as Component>::style(self)
+    }
+}
+
 impl StatefulComponent for Button {
     fn attribute_changed(
         &mut self,

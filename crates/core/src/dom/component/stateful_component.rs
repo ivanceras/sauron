@@ -149,11 +149,12 @@ pub fn stateful_component<COMP, MSG, MSG2>(
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG>
 where
-    COMP: Component<MSG = MSG2, XMSG = ()> + StatefulComponent + 'static,
+    COMP: Component<MSG = MSG2, XMSG = ()> 
+        + StatefulComponent  
+        + Application<MSG=MSG2> + 'static,
     MSG: Default + 'static,
     MSG2: 'static,
 {
-/*
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
 
@@ -173,8 +174,6 @@ where
         attrs: attrs.into_iter().chain([mount_event]).collect(),
         children: children.into_iter().collect(),
     }))
-*/
-    todo!()
 }
 
 impl Into<DomAttrValue> for JsValue {
