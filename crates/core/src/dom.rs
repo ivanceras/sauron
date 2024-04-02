@@ -34,6 +34,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     use crate::dom::events::MountEvent;
     pub use window::Window;
     pub use dom_node::DomNode;
+    pub use document::Document;
 
     mod application;
     pub mod dispatch;
@@ -47,6 +48,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     mod raf;
     mod ric;
     mod window;
+    mod document;
     mod timeout;
 
 

@@ -99,6 +99,72 @@ impl Window {
         Cmd::sub(rx, mousemove_cb)
     }
 
+    ///
+    pub fn on_click<F, MSG>(mut cb: F) -> Cmd<MSG>
+    where
+        F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
+        MSG: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        let mousemove_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let mouse_event: MouseEvent = event.dyn_into().expect("must be mouse event");
+                let msg = cb(mouse_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("click"),
+                mousemove_cb.as_ref().unchecked_ref(),
+            )
+            .expect("add event callback");
+        Cmd::sub(rx, mousemove_cb)
+    }
+
+    ///
+    pub fn on_keyup<F, MSG>(mut cb: F) -> Cmd<MSG>
+    where
+        F: FnMut(web_sys::KeyboardEvent) -> MSG + Clone + 'static,
+        MSG: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        let closure_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let key_event: web_sys::KeyboardEvent = event.dyn_into().expect("must be key event");
+                let msg = cb(key_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("keyup"),
+                closure_cb.as_ref().unchecked_ref(),
+            )
+            .expect("add event callback");
+        Cmd::sub(rx, closure_cb)
+    }
+
+    ///
+    pub fn on_keydown<F, MSG>(mut cb: F) -> Cmd<MSG>
+    where
+        F: FnMut(web_sys::KeyboardEvent) -> MSG + Clone + 'static,
+        MSG: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        let closure_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let key_event: web_sys::KeyboardEvent = event.dyn_into().expect("must be key event");
+                let msg = cb(key_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("keydown"),
+                closure_cb.as_ref().unchecked_ref(),
+            )
+            .expect("add event callback");
+        Cmd::sub(rx, closure_cb)
+    }
+
     /// do this task at every `ms` interval
     pub fn every_interval<F, MSG>(interval_ms: i32, cb: F) -> Cmd<MSG>
     where
