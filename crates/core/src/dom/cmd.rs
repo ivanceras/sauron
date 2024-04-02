@@ -146,7 +146,6 @@ where
 
     /// return the next value
     pub async fn next(&mut self) -> Option<MSG> {
-        log::info!("Calling on next..");
         match self {
             Self::Action(task) => task.next().await,
             Self::Sub(task) => task.next().await,
@@ -195,7 +194,6 @@ where
 
     /// get the next value
     async fn next(&mut self) -> Option<MSG> {
-        log::info!("it is in Action");
         // return None is already done since awaiting it again is an error
         if self.done {
             None
@@ -230,7 +228,6 @@ where
     MSG: 'static,
 {
     async fn next(&mut self) -> Option<MSG> {
-        log::info!("It is in Sub..");
         self.receiver.next().await
     }
 
