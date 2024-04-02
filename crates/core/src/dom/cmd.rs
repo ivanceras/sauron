@@ -8,6 +8,13 @@ use crate::dom::Effects;
 use crate::dom::Modifier;
 use wasm_bindgen::closure::Closure;
 
+/// Cnd is a way to tell the Runtime that something needs to be executed
+pub struct Cmd<MSG>{
+    /// commands
+    pub(crate) commands: Vec<Command<MSG>>,
+    pub(crate) modifier: Modifier,
+}
+
 /// encapsulate anything a component can do
 pub enum Command<MSG> {
     /// A task with one single resulting MSG
@@ -16,12 +23,6 @@ pub enum Command<MSG> {
     Sub(Sub<MSG>),
 }
 
-/// 
-pub struct Cmd<MSG>{
-    /// commands
-    pub(crate) commands: Vec<Command<MSG>>,
-    pub(crate) modifier: Modifier,
-}
 
 impl<MSG> Cmd<MSG>
 where
@@ -83,24 +84,6 @@ where
 
 }
 
-/*
-impl<MSG> From<Effects<MSG, MSG>> for Cmd<MSG>
-    where MSG: 'static
-{
-    /// Convert Effects that has only follow ups
-    fn from(effects: Effects<MSG, MSG>) -> Self {
-        // we can safely ignore the effects here
-        // as there is no content on it.
-        let Effects {
-            local,
-            external,
-            modifier:_,
-        } = effects;
-
-        Cmd::batch(local.into_iter().chain(external.into_iter()).map(Cmd::from))
-    }
-}
-*/
 
 impl<MSG> From<Effects<MSG, ()>> for Cmd<MSG>
     where MSG: 'static
