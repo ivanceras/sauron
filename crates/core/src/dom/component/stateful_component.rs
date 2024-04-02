@@ -112,23 +112,22 @@ impl<MSG> PartialEq for StatefulModel<MSG> {
     }
 }
 
-/*
 impl<COMP> Application for COMP
 where
     COMP: Component<XMSG = ()> + StatefulComponent + 'static,
 {
     type MSG = COMP::MSG;
 
-    fn init(&mut self) -> Cmd<Self> {
+    fn init(&mut self) -> Cmd<Self::MSG> {
         Cmd::from(<Self as Component>::init(self))
     }
 
-    fn update(&mut self, msg: COMP::MSG) -> Cmd<Self> {
+    fn update(&mut self, msg: COMP::MSG) -> Cmd<Self::MSG> {
         let effects = <Self as Component>::update(self, msg);
         Cmd::from(effects)
     }
 
-    fn view(&self) -> Node<COMP::MSG> {
+    fn view(&self) -> Node<Self::MSG> {
         <Self as Component>::view(self)
     }
 
@@ -140,7 +139,6 @@ where
         <Self as Component>::style(self)
     }
 }
-*/
 
 /// create a stateful component node
 pub fn stateful_component<COMP, MSG, MSG2>(
