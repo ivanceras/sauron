@@ -52,7 +52,7 @@ pub mod prelude {
         pub use crate::dom::{Application, SkipDiff, skip_if, events, Program, document, Document, now, window, Window, Dispatch,
             AnimationFrameHandle, Component, StatefulComponent, Effects, Measurements, MountAction,
             MountTarget, Cmd, TimeoutCallbackHandle, DomAttrValue,
-            stateful_component,
+            stateful_component, Time,
         };
         #[cfg(feature = "custom_element")]
         pub use crate::dom::WebComponent;

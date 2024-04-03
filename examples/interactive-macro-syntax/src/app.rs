@@ -37,7 +37,7 @@ impl Application for App {
     type MSG = Msg;
 
     fn init(&mut self) -> Cmd<Msg> {
-        Window::every_interval(1_000, || Msg::Clock)
+        Time::every(1_000, || Msg::Clock)
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Msg> {

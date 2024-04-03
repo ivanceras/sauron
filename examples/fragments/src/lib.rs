@@ -23,7 +23,7 @@ impl Application for App {
     type MSG = Msg;
 
     fn init(&mut self) -> Cmd<Msg> {
-        Window::every_interval(1000, ||Msg::AddItem)
+        Time::every(1000, ||Msg::AddItem)
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Msg>

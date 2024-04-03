@@ -22,7 +22,7 @@ impl Application for App {
                 log::info!("This will trigger only once.. {w}x{h}");
                 Msg::WindowResized(w, h)
             }),
-            Window::every_interval(1_000, || Msg::TickTock),
+            Time::every(1_000, || Msg::TickTock),
         ])
     }
 

@@ -35,6 +35,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use window::Window;
     pub use dom_node::DomNode;
     pub use document::Document;
+    pub use time::Time;
 
     mod application;
     pub mod dispatch;
@@ -49,6 +50,7 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     mod ric;
     mod window;
     mod document;
+    mod time;
     mod timeout;
 
 

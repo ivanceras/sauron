@@ -165,28 +165,6 @@ impl Window {
         Cmd::recurring(rx, closure_cb)
     }
 
-    /// do this task at every `ms` interval
-    pub fn every_interval<F, MSG>(interval_ms: i32, cb: F) -> Cmd<MSG>
-    where
-        F: Fn() -> MSG + 'static,
-        MSG: 'static,
-    {
-        let (mut tx, rx) = mpsc::unbounded();
-        //The web_sys::Event here is undefined, it is just used here to make storing the closure
-        //uniform
-        let closure_cb: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_event| {
-            log::info!("event: {:?}", _event);
-            let msg = cb();
-            tx.start_send(msg).unwrap();
-        });
-        window()
-            .set_interval_with_callback_and_timeout_and_arguments_0(
-                closure_cb.as_ref().unchecked_ref(),
-                interval_ms,
-            )
-            .expect("Unable to start interval");
-        Cmd::recurring(rx, closure_cb)
-    }
 
     /// scroll the window to the top of the document
     pub fn scroll_to_top<MSG>(msg: MSG) -> Cmd<MSG>
