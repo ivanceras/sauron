@@ -1,7 +1,6 @@
 use crate::dom::Modifier;
-use crate::dom::Task;
+use crate::dom::Cmd;
 use std::future::ready;
-use std::future::Future;
 
 /// Effects is a convenient way to group Msg for component to execute subsequent updates based on certain conditions.
 /// This can be used for doing animation and incremental changes to the view to provide an effect
@@ -12,10 +11,10 @@ use std::future::Future;
 /// that are sent to the parent Component in response to an event that has been triggerred.
 pub struct Effects<MSG, XMSG> {
     /// Messages that will be executed locally in the Component
-    pub local: Vec<Task<MSG>>,
+    pub local: Vec<Cmd<MSG>>,
     /// effects that will be executed on the parent Component which instantiate
     /// this component
-    pub external: Vec<Task<XMSG>>,
+    pub external: Vec<Cmd<XMSG>>,
     pub(crate) modifier: Modifier,
 }
 
@@ -32,54 +31,25 @@ where
         XMSG: 'static,
     {
         Self {
-            local: local.into_iter().map(|l| Task::single(ready(l))).collect(),
+            local: local.into_iter().map(|l| Cmd::once(ready(l))).collect(),
             external: external
                 .into_iter()
-                .map(|x| Task::single(ready(x)))
+                .map(|x| Cmd::once(ready(x)))
                 .collect(),
             modifier: Modifier::default(),
         }
     }
 
-    /// Create a new Effects with local and external futures that can resolve to MSG and XMSG
-    /// respectively
-    pub fn with_async<F, FX>(
-        local: impl IntoIterator<Item = F>,
-        external: impl IntoIterator<Item = FX>,
-    ) -> Self
-    where
-        F: Future<Output = MSG> + 'static,
-        FX: Future<Output = XMSG> + 'static,
-        XMSG: 'static,
-    {
-        Self {
-            local: local.into_iter().map(Task::single).collect(),
-            external: external.into_iter().map(Task::single).collect(),
-            modifier: Modifier::default(),
-        }
-    }
 
     /// Create an Effects with  local messages that will be executed on the next update loop on this Component
     pub fn with_local(local: impl IntoIterator<Item = MSG>) -> Self {
         Self {
-            local: local.into_iter().map(|l| Task::single(ready(l))).collect(),
+            local: local.into_iter().map(|l| Cmd::once(ready(l))).collect(),
             external: vec![],
             modifier: Modifier::default(),
         }
     }
 
-    /// Create an Effects with local message that will can resolved into MSG, it will be executed
-    /// on the next update loop on the component it is being returned
-    pub fn with_local_async<F>(local: impl IntoIterator<Item = F>) -> Self
-    where
-        F: Future<Output = MSG> + 'static,
-    {
-        Self {
-            local: local.into_iter().map(Task::single).collect(),
-            external: vec![],
-            modifier: Modifier::default(),
-        }
-    }
 
     /// Create an Effects with extern messages that will be executed on the parent Component
     pub fn with_external(external: impl IntoIterator<Item = XMSG>) -> Self
@@ -90,25 +60,12 @@ where
             local: vec![],
             external: external
                 .into_iter()
-                .map(|x| Task::single(ready(x)))
+                .map(|x| Cmd::once(ready(x)))
                 .collect(),
             modifier: Modifier::default(),
         }
     }
 
-    /// Create an Effects with external messages that will can be resolved into an XMSG, this will
-    /// be dispatch in the next Component update
-    pub fn with_external_async<F>(external: impl IntoIterator<Item = F>) -> Self
-    where
-        F: Future<Output = XMSG> + 'static,
-        XMSG: 'static,
-    {
-        Self {
-            local: vec![],
-            external: external.into_iter().map(Task::single).collect(),
-            modifier: Modifier::default(),
-        }
-    }
 
     /// Create and empty Effects
     pub fn none() -> Self {
@@ -189,7 +146,7 @@ where
     /// Append this msgs to the local effects
     pub fn append_local(mut self, local: impl IntoIterator<Item = MSG>) -> Self {
         self.local
-            .extend(local.into_iter().map(|l| Task::single(ready(l))));
+            .extend(local.into_iter().map(|l| Cmd::once(ready(l))));
         self
     }
 
@@ -238,15 +195,15 @@ where
         XMSG: 'static,
     {
         self.local
-            .extend(local.into_iter().map(|l| Task::single(ready(l))));
+            .extend(local.into_iter().map(|l| Cmd::once(ready(l))));
         self.external
-            .extend(external.into_iter().map(|x| Task::single(ready(x))));
+            .extend(external.into_iter().map(|x| Cmd::once(ready(x))));
         self
     }
 }
 
-impl<MSG, XMSG> From<Task<MSG>> for Effects<MSG, XMSG> {
-    fn from(task: Task<MSG>) -> Effects<MSG, XMSG> {
+impl<MSG, XMSG> From<Cmd<MSG>> for Effects<MSG, XMSG> {
+    fn from(task: Cmd<MSG>) -> Effects<MSG, XMSG> {
         Effects {
             local: vec![task],
             external: vec![],

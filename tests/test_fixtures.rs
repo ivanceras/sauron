@@ -14,7 +14,7 @@ pub struct SimpleComponent;
 impl Application for SimpleComponent {
     type MSG = ();
 
-    fn update(&mut self, _msg: ()) -> Cmd<Self> {
+    fn update(&mut self, _msg: ()) -> Cmd<Self::MSG> {
         trace!("updating in SimpleComponent");
         Cmd::none()
     }

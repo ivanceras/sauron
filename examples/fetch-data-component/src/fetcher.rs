@@ -48,8 +48,9 @@ impl Fetcher {
 
     fn fetch_page(&self) -> Effects<Msg, ()> {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
+        log::info!("url: {}", url);
 
-        Effects::with_local_async([async move {
+        Effects::from(Cmd::new(async move {
             match Http::fetch_text(&url).await {
                 Ok(v) => match serde_json::from_str(&v) {
                     Ok(data1) => Msg::ReceivedData(data1),
@@ -57,7 +58,7 @@ impl Fetcher {
                 },
                 Err(e) => Msg::RequestError(e),
             }
-        }])
+        }))
     }
 }
 
@@ -81,10 +82,13 @@ impl Component for Fetcher {
                                      Msg::PrevPage
                                  }
                          />
-                         {text(format!("Page: {}", self.page))}
+                         {text(format!("Page: {}, total_page: {}", self.page, self.data.total_pages))}
                          <input class="next_page" type="button"
-                                 disabled={self.page >= self.data.total_pages}
+                                // disabled={self.page >= self.data.total_pages}
                                  value="Next Page >>"
+                                 data = self.data.total_pages
+                                 data_page = self.page
+                                 should_disable = {self.page >= self.data.total_pages}
                                  on_click=|_|{
                                      trace!("Button is clicked");
                                      Msg::NextPage
@@ -134,6 +138,7 @@ impl Component for Fetcher {
                 self.fetch_page()
             }
             Msg::ReceivedData(data1) => {
+                log::info!("got data: {:#?}", data1);
                 self.data = data1;
                 Effects::none()
             }

@@ -4,12 +4,12 @@
 pub use component::Component;
 pub use effects::Effects;
 pub use modifier::Modifier;
-pub use task::Task;
+pub use cmd::Cmd;
 
 mod component;
 mod effects;
 mod modifier;
-mod task;
+mod cmd;
 
 use cfg_if::cfg_if;
 
@@ -17,7 +17,8 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use application::{Application, Measurements, SkipDiff, skip_if, skip_diff, SkipPath};
     #[cfg(feature = "custom_element")]
     pub use component::{register_web_component, WebComponent, WebComponentWrapper};
-    pub use component::{component, stateful_component, StatefulComponent, StatefulModel, StatelessModel};
+    pub use component::{stateful_component, StatefulComponent, StatefulModel, StatelessModel};
+    pub use component::component;
     pub use dom_patch::{DomPatch, PatchVariant};
     pub use dom_attr::{DomAttr, DomAttrValue, GroupedDomAttrValues};
     pub use http::Http;
@@ -29,13 +30,15 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use raf::{request_animation_frame, AnimationFrameHandle};
     pub use ric::{request_idle_callback, IdleCallbackHandle, IdleDeadline};
     pub use timeout::{delay, request_timeout_callback, TimeoutCallbackHandle};
-    pub use cmd::Cmd;
+    pub use dispatch::Dispatch;
     use crate::dom::events::MountEvent;
     pub use window::Window;
     pub use dom_node::DomNode;
+    pub use document::Document;
+    pub use time::Time;
 
     mod application;
-    pub mod cmd;
+    pub mod dispatch;
     mod dom_node;
     mod dom_patch;
     mod dom_attr;
@@ -46,6 +49,8 @@ cfg_if! {if #[cfg(feature = "with-dom")] {
     mod raf;
     mod ric;
     mod window;
+    mod document;
+    mod time;
     mod timeout;
 
 

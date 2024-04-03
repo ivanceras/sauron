@@ -1,5 +1,6 @@
 use sauron::{
-    html::text, html::units::px, jss, node, wasm_bindgen, Application, Cmd, Node, Program,
+    html::text, html::units::px, jss, node, wasm_bindgen, Application, Node, Program,
+    Cmd,
 };
 
 enum Msg {
@@ -41,7 +42,7 @@ impl Application for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,

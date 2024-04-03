@@ -13,6 +13,7 @@ use std::rc::Rc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use wasm_bindgen_futures::spawn_local;
+use futures::channel::mpsc;
 
 pub enum Msg {
     Click,
@@ -24,33 +25,6 @@ pub enum Msg {
 pub struct App {
     current_handle: Rc<RefCell<Option<TimeoutCallbackHandle>>>,
     executed: Rc<AtomicBool>,
-}
-
-impl App {
-    fn execute_delayed(
-        mut program: Program<Self>,
-        current_handle: Rc<RefCell<Option<TimeoutCallbackHandle>>>,
-        executed: Rc<AtomicBool>,
-    ) {
-        log::info!("in execute delayed...");
-        if let Some(current_handle) = current_handle.borrow_mut().take() {
-            log::info!("We cancelled {:?}", current_handle);
-            drop(current_handle);
-        }
-
-        let handle = sauron::dom::request_timeout_callback(
-            move || {
-                log::info!("I'm executing after 5 seconds");
-                executed.store(true, Ordering::Relaxed);
-                // have to dispatch something in order to update the view
-                program.dispatch(Msg::NoOp);
-            },
-            5000,
-        )
-        .expect("must have a handle");
-
-        *current_handle.borrow_mut() = Some(handle);
-    }
 }
 
 impl Application for App {
@@ -94,7 +68,7 @@ impl Application for App {
         )
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::Click => {
                 spawn_local(some_async_function());
@@ -103,7 +77,27 @@ impl Application for App {
             Msg::CancelPrevious => {
                 let current_handle = Rc::clone(&self.current_handle);
                 let executed = Rc::clone(&self.executed);
-                Cmd::new(|program| Self::execute_delayed(program, current_handle, executed))
+                //Cmd::new(|program| Self::execute_delayed(program, current_handle, executed))
+                log::info!("in execute delayed...");
+                if let Some(current_handle) = current_handle.borrow_mut().take() {
+                    log::info!("We cancelled {:?}", current_handle);
+                    drop(current_handle);
+                }
+                let (mut tx, rx) = mpsc::unbounded();
+                let handle = sauron::dom::request_timeout_callback(
+                    move || {
+                        log::info!("I'm executing after 5 seconds");
+                        executed.store(true, Ordering::Relaxed);
+                        tx.start_send(Msg::NoOp).unwrap();
+                    },
+                    5000,
+                )
+                .expect("must have a handle");
+
+                *current_handle.borrow_mut() = Some(handle);
+                Cmd::recurring(rx, sauron::Closure::new(|_:sauron::web_sys::Event|{
+                    panic!("This is not called!");
+                }))
             }
             Msg::NoOp => Cmd::none(),
         }

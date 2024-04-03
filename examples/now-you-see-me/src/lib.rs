@@ -20,12 +20,12 @@ struct App {
 impl Application for App {
     type MSG = Msg;
 
-    fn init(&mut self) -> Cmd<Self> {
-        Cmd::new(|mut program| {
-            program.dispatch(Msg::ToggleShow);
+    fn init(&mut self) -> Cmd<Msg> {
+        Cmd::new( async move{
+            Msg::ToggleShow
         })
     }
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::ToggleShow => {
                 self.show = !self.show;
@@ -34,12 +34,12 @@ impl Application for App {
                 } else {
                     document().set_title("Now, you don't!");
                 }
-                Cmd::new(|mut program| {
-                    spawn_local(async move {
+                Cmd::new(
+                    async move {
                         delay(2000).await;
-                        program.dispatch(Msg::ToggleShow);
-                    })
-                })
+                        Msg::ToggleShow
+                    }
+                )
             }
         }
     }

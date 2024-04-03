@@ -278,8 +278,8 @@
     }
     ```
 - [X] Maybe disable the template usage for now
-- [ ] Make `Cmd` to be used internally as it needs reference to the `Program<APP>`
-    - [ ] Use `Task` for returning from `Application` init and `update`.
+- [X] Make `Cmd` to be used internally as it needs reference to the `Program<APP>`
+    - [X] Use `Task` for returning from `Application` init and `update`.
     - The `Recurring Task` is actually just a Sub in elm
         - Issue with recurring task, how to store the closures which has different multiple types for the in arguments
         - Store the closures with `Closure<dyn Fn(IN)->MSG>`
@@ -287,7 +287,23 @@
     - The `SingleTask` is a Cmd in sauron
     - Rename `Cmd` to `Command` alternative: `Action`, `Operation`, `Instruction`, `Effects`, `Dispatch`
         - This is effects in elm
+    - [X] Rename `Cmd` to `Dispatch`
+    - [X] Rename `SingleTask` to `Action`
+    - [X] Rename `RecurringTask` to `Sub`
+    - [X] enum Command{Cmd,Sub} into one unified type.
+    - [X] Cmd is a vec of Command
     - Sauron just consilidate them into one enum struct for simplicity
+- [ ] Remove `Modifier` and `measurements`
+    - [ ] Have a measurement in the Application trait
+    - [ ] Remove StatefulComponent as it is now the same as Application and serve the same purpose
+        - add methods for Application: 
+            - attribute_changed
+            - remove_attribute 
+            - append_child 
+            - remove_child
+            - connected_callback
+            - disconnected_callback
+            - adopted_callback
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
@@ -401,7 +417,7 @@
     - [X] This should work very simply `classes_flag([("todo", true), ("editor", is_editing)])`
 
 ## Limitations
-- In rust, no two closures, even if identical, have the same type. Therefore closure can not be check for equality.
+- ~~In rust, no two closures, even if identical, have the same type. Therefore closure can not be check for equality.~~ Solved by using the original type_id of the function callback
     - In sauron node are matched and reused aggressively, except when the keys are different then the node is discarded.
     - If we don't reuse nodes with event listeners aggressively, then we would have a performance penalty, since every recreation of the node with event listener will have to discard and create a new one for it, even if it is matching itself.
     - Adding `key` attribute provides a good trade off.

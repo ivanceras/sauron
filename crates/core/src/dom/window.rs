@@ -1,5 +1,4 @@
-use crate::dom::task::RecurringTask;
-use crate::dom::{dom_node::intern, util, window, Task};
+use crate::dom::{dom_node::intern, util, window, Cmd};
 use futures::channel::mpsc;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::MouseEvent;
@@ -9,9 +8,9 @@ use web_sys::MouseEvent;
 pub struct Window;
 
 impl Window {
-    /// Create a recurring Task which will be triggered
+    /// Create a recurring Cmd which will be triggered
     /// everytime the window is resized
-    pub fn on_resize<F, MSG>(mut cb: F) -> Task<MSG>
+    pub fn on_resize<F, MSG>(mut cb: F) -> Cmd<MSG>
     where
         F: FnMut(i32, i32) -> MSG + Clone + 'static,
         MSG: 'static,
@@ -31,14 +30,11 @@ impl Window {
             )
             .expect("add event callback");
 
-        Task::Recurring(RecurringTask {
-            receiver: rx,
-            event_closures: vec![resize_callback],
-        })
+        Cmd::recurring(rx, resize_callback)
     }
 
     ///
-    pub fn on_mousemove<F, MSG>(mut cb: F) -> Task<MSG>
+    pub fn on_mousemove<F, MSG>(mut cb: F) -> Cmd<MSG>
     where
         F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
         MSG: 'static,
@@ -56,14 +52,11 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::Recurring(RecurringTask {
-            receiver: rx,
-            event_closures: vec![mousemove_cb],
-        })
+        Cmd::recurring(rx, mousemove_cb)
     }
 
     ///
-    pub fn on_mouseup<F, MSG>(mut cb: F) -> Task<MSG>
+    pub fn on_mouseup<F, MSG>(mut cb: F) -> Cmd<MSG>
     where
         F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
         MSG: 'static,
@@ -81,52 +74,112 @@ impl Window {
                 mousemove_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::Recurring(RecurringTask {
-            receiver: rx,
-            event_closures: vec![mousemove_cb],
-        })
+        Cmd::recurring(rx, mousemove_cb)
     }
 
-    /// do this task at every `ms` interval
-    pub fn every_interval<F, MSG>(interval_ms: i32, mut cb: F) -> Task<MSG>
+    ///
+    pub fn on_mousedown<F, MSG>(mut cb: F) -> Cmd<MSG>
     where
-        F: FnMut() -> MSG + 'static,
+        F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
         MSG: 'static,
     {
         let (mut tx, rx) = mpsc::unbounded();
-        //The web_sys::Event here is undefined, it is just used here to make storing the closure
-        //uniform
-        let closure_cb: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_event| {
-            log::info!("event: {:?}", _event);
-            let msg = cb();
-            tx.start_send(msg).unwrap();
-        });
+        let mousemove_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let mouse_event: MouseEvent = event.dyn_into().expect("must be mouse event");
+                let msg = cb(mouse_event);
+                tx.start_send(msg).expect("send");
+            });
         window()
-            .set_interval_with_callback_and_timeout_and_arguments_0(
-                closure_cb.as_ref().unchecked_ref(),
-                interval_ms,
+            .add_event_listener_with_callback(
+                intern("mousedown"),
+                mousemove_cb.as_ref().unchecked_ref(),
             )
-            .expect("Unable to start interval");
-        Task::Recurring(RecurringTask {
-            receiver: rx,
-            event_closures: vec![closure_cb],
-        })
+            .expect("add event callback");
+        Cmd::recurring(rx, mousemove_cb)
     }
 
+    ///
+    pub fn on_click<F, MSG>(mut cb: F) -> Cmd<MSG>
+    where
+        F: FnMut(web_sys::MouseEvent) -> MSG + Clone + 'static,
+        MSG: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        let mousemove_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let mouse_event: MouseEvent = event.dyn_into().expect("must be mouse event");
+                let msg = cb(mouse_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("click"),
+                mousemove_cb.as_ref().unchecked_ref(),
+            )
+            .expect("add event callback");
+        Cmd::recurring(rx, mousemove_cb)
+    }
+
+    ///
+    pub fn on_keyup<F, MSG>(mut cb: F) -> Cmd<MSG>
+    where
+        F: FnMut(web_sys::KeyboardEvent) -> MSG + Clone + 'static,
+        MSG: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        let closure_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let key_event: web_sys::KeyboardEvent = event.dyn_into().expect("must be key event");
+                let msg = cb(key_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("keyup"),
+                closure_cb.as_ref().unchecked_ref(),
+            )
+            .expect("add event callback");
+        Cmd::recurring(rx, closure_cb)
+    }
+
+    ///
+    pub fn on_keydown<F, MSG>(mut cb: F) -> Cmd<MSG>
+    where
+        F: FnMut(web_sys::KeyboardEvent) -> MSG + Clone + 'static,
+        MSG: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        let closure_cb: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                let key_event: web_sys::KeyboardEvent = event.dyn_into().expect("must be key event");
+                let msg = cb(key_event);
+                tx.start_send(msg).expect("send");
+            });
+        window()
+            .add_event_listener_with_callback(
+                intern("keydown"),
+                closure_cb.as_ref().unchecked_ref(),
+            )
+            .expect("add event callback");
+        Cmd::recurring(rx, closure_cb)
+    }
+
+
     /// scroll the window to the top of the document
-    pub fn scroll_to_top<MSG>(msg: MSG) -> Task<MSG>
+    pub fn scroll_to_top<MSG>(msg: MSG) -> Cmd<MSG>
     where
         MSG: 'static,
     {
         use std::future::ready;
-        Task::single(ready({
+        Cmd::once(ready({
             util::scroll_window_to_top();
             msg
         }))
     }
 
     ///
-    pub fn on_popstate<F, MSG>(mut cb: F) -> Task<MSG>
+    pub fn on_popstate<F, MSG>(mut cb: F) -> Cmd<MSG>
     where
         F: FnMut(web_sys::PopStateEvent) -> MSG + 'static,
         MSG: 'static,
@@ -145,9 +198,6 @@ impl Window {
                 closure_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
-        Task::Recurring(RecurringTask {
-            receiver: rx,
-            event_closures: vec![closure_cb],
-        })
+        Cmd::recurring(rx, closure_cb)
     }
 }

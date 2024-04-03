@@ -49,10 +49,10 @@ pub mod prelude {
         pub use wasm_bindgen::prelude::*;
         pub use serde_wasm_bindgen;
         pub use crate::html::events::*;
-        pub use crate::dom::{Application, SkipDiff, skip_if, events, Program, document, now, window, Window, Cmd,
+        pub use crate::dom::{Application, SkipDiff, skip_if, events, Program, document, Document, now, window, Window, Dispatch,
             AnimationFrameHandle, Component, StatefulComponent, Effects, Measurements, MountAction,
-            MountTarget, Task, TimeoutCallbackHandle, DomAttrValue,
-            stateful_component,
+            MountTarget, Cmd, TimeoutCallbackHandle, DomAttrValue,
+            stateful_component, Time,
         };
         #[cfg(feature = "custom_element")]
         pub use crate::dom::WebComponent;

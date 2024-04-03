@@ -4,6 +4,7 @@ use sauron::{html::*, *};
 
 pub enum Msg {
     WindowResized(i32, i32),
+    TickTock,
 }
 
 #[derive(Default)]
@@ -15,11 +16,14 @@ pub struct App {
 impl Application for App {
     type MSG = Msg;
 
-    fn init(&mut self) -> Cmd<Self> {
-        Cmd::from(Window::on_resize(|w, h| {
-            log::info!("This will trigger only once.. {w}x{h}");
-            Msg::WindowResized(w, h)
-        }))
+    fn init(&mut self) -> Cmd<Msg> {
+        Cmd::batch([
+            Window::on_resize(|w, h| {
+                log::info!("This will trigger only once.. {w}x{h}");
+                Msg::WindowResized(w, h)
+            }),
+            Time::every(1_000, || Msg::TickTock),
+        ])
     }
 
     fn view(&self) -> Node<Msg> {
@@ -46,12 +50,16 @@ impl Application for App {
         )
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::WindowResized(w, h) => {
                 log::info!("Setting the App's width: {w} and height: {h}");
                 self.width = Some(w);
                 self.height = Some(h);
+                Cmd::none()
+            }
+            Msg::TickTock => {
+                log::info!("tick tock!");
                 Cmd::none()
             }
         }

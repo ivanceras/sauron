@@ -46,11 +46,11 @@ impl App {
 impl Application for App {
     type MSG = Msg;
 
-    fn init(&mut self) -> Cmd<Self> {
-        Cmd::from(Window::every_interval(5_000, || Msg::Clock))
+    fn init(&mut self) -> Cmd<Msg> {
+        Cmd::from(Time::every(5_000, || Msg::Clock))
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::Click => {
                 self.click_count += 1;
@@ -168,7 +168,7 @@ impl Application for App {
                 //{stateful_component(Button::default(), [], [text!("External child of btn stateful_component: {}", self.click_count)])}
             </div>
             <div>
-                //{stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
+                {stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
             </div>
         </div>
     }

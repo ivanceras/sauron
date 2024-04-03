@@ -1,135 +1,108 @@
-//! provides functionalities for commands to be executed by the system, such as
-//! when the application starts or after the application updates.
-//!
-use crate::dom::Program;
-use crate::dom::{Application, Effects, Modifier, Task};
-use wasm_bindgen_futures::spawn_local;
+use crate::dom::spawn_local;
+use futures::channel::mpsc;
+use futures::channel::mpsc::UnboundedReceiver;
+use futures::StreamExt;
+use std::future::Future;
+use std::pin::Pin;
+use crate::dom::Effects;
+use crate::dom::Modifier;
+use wasm_bindgen::closure::Closure;
 
-/// Cmd is a command to be executed by the system.
-/// This is returned at the init function of a component and is executed right
-/// after instantiation of that component.
-/// Cmd required a DSP object which is the Program as an argument
-/// The emit function is called with the program argument.
-/// The callback is supplied with the program an is then executed/emitted.
-pub struct Cmd<APP>
-where
-    APP: Application,
-{
-    /// the functions that would be executed when this Cmd is emited
-    #[allow(clippy::type_complexity)]
-    pub(crate) commands: Vec<Box<dyn FnOnce(Program<APP>)>>,
+/// Cnd is a way to tell the Runtime that something needs to be executed
+pub struct Cmd<MSG>{
+    /// commands
+    pub(crate) commands: Vec<Command<MSG>>,
     pub(crate) modifier: Modifier,
 }
 
-impl<APP> Cmd<APP>
+/// encapsulate anything a component can do
+pub enum Command<MSG> {
+    /// A task with one single resulting MSG
+    Action(Action<MSG>),
+    /// A task with recurring resulting MSG
+    Sub(Sub<MSG>),
+}
+
+
+impl<MSG> Cmd<MSG>
 where
-    APP: Application,
+    MSG: 'static,
 {
-    /// creates a new Cmd from a function
+    /// maps to a once future
     pub fn new<F>(f: F) -> Self
     where
-        F: FnOnce(Program<APP>) + 'static,
+        F: Future<Output = MSG> + 'static,
     {
-        Self {
-            commands: vec![Box::new(f)],
+        Self::once(f)
+    }
+
+    /// Creates a Cmd which expects to be polled only once
+    pub fn once<F>(f: F) -> Self
+    where
+        F: Future<Output = MSG> + 'static,
+    {
+        Self{
+            commands: vec![Command::single(f)],
+            modifier: Default::default(),
+        }
+    }
+    /// Creates a Cmd which will be polled multiple times
+    pub fn recurring(rx: UnboundedReceiver<MSG>, event_closure: Closure<dyn FnMut(web_sys::Event)>) -> Self {
+        Self{
+            commands: vec![Command::sub(rx, event_closure)],
             modifier: Default::default(),
         }
     }
 
-    /// When you need the runtime to perform couple of commands, you can batch
-    /// then together.
-    pub fn batch(cmds: impl IntoIterator<Item = Self>) -> Self {
+    /// map the msg of this Cmd such that Cmd<MSG> becomes Cmd<MSG2>.
+    pub fn map_msg<F, MSG2>(self, f: F) -> Cmd<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + 'static + Clone,
+        MSG2: 'static,
+    {
+        Cmd{
+            commands: self.commands.into_iter().map(|t|t.map_msg(f.clone())).collect(),
+            modifier: Default::default(),
+        }
+    }
+
+    /// batch together multiple Cmd into one task
+    pub fn batch(tasks: impl IntoIterator<Item = Self>) -> Self {
         let mut commands = vec![];
-        let mut modifier = Modifier::default();
-        for cmd in cmds {
-            modifier.coalesce(&cmd.modifier);
-            commands.extend(cmd.commands);
+        for task in tasks.into_iter(){
+            commands.extend(task.commands);
         }
-        Self { commands, modifier }
-    }
-
-    /// Add a cmd
-    pub fn push(&mut self, cmd: Self) {
-        self.append([cmd])
-    }
-
-    /// Append more cmd into this cmd and return self
-    pub fn append(&mut self, cmds: impl IntoIterator<Item = Self>) {
-        for cmd in cmds {
-            self.modifier.coalesce(&cmd.modifier);
-            self.commands.extend(cmd.commands);
-        }
-    }
-
-    /// Tell the runtime that there are no commands.
-    pub fn none() -> Self {
-        Cmd {
-            commands: vec![],
+        Self {commands,
             modifier: Default::default(),
         }
     }
 
-    /// returns true if commands is empty
-    pub fn is_empty(&self) -> bool {
-        self.commands.is_empty()
+    ///
+    pub fn none() -> Self {
+        Self{commands: vec![],
+            modifier: Default::default(),
+        }
     }
 
-    /// Modify the Cmd such that whether or not it will update the view set by `should_update_view`
-    /// when the cmd is executed in the program
-    pub fn should_update_view(mut self, should_update_view: bool) -> Self {
-        self.modifier.should_update_view = should_update_view;
-        self
-    }
-
-    /// Modify the command such that it will not do an update on the view when it is executed.
+    ///
     pub fn no_render(mut self) -> Self {
         self.modifier.should_update_view = false;
         self
     }
 
-    /// Modify the command such that it will log measurement when it is executed
-    pub fn measure(mut self) -> Self {
-        self.modifier.log_measurements = true;
-        self
-    }
-
-    /// Modify the Cmd such that it will log a measuregment when it is executed
-    /// The `measurement_name` is set to distinguish the measurements from each other.
-    pub fn measure_with_name(mut self, name: &str) -> Self {
-        self.modifier.measurement_name = name.to_string();
-        self.measure()
-    }
-
-    /// Executes the Cmd
-    pub(crate) fn emit(self, program: Program<APP>) {
-        for cb in self.commands {
-            let program_clone = program.clone();
-            cb(program_clone);
-        }
-    }
-
-    /// Tell the runtime to execute subsequent update of the App with the message list.
-    /// A single call to update the view is then executed thereafter.
-    ///
-    pub fn batch_msg(msg_list: impl IntoIterator<Item = APP::MSG>) -> Self {
-        let msg_list: Vec<APP::MSG> = msg_list.into_iter().collect();
-        Cmd::new(move |mut program| {
-            program.dispatch_multiple(msg_list);
-        })
-    }
 }
 
-impl<APP> From<Effects<APP::MSG, ()>> for Cmd<APP>
-where
-    APP: Application,
+
+impl<MSG> From<Effects<MSG, ()>> for Cmd<MSG>
+    where MSG: 'static
 {
     /// Convert Effects that has only follow ups
-    fn from(effects: Effects<APP::MSG, ()>) -> Self {
+    fn from(effects: Effects<MSG, ()>) -> Self {
         // we can safely ignore the effects here
         // as there is no content on it.
         let Effects {
             local,
-            external: _,
+            external:_,
             modifier,
         } = effects;
 
@@ -139,27 +112,144 @@ where
     }
 }
 
-impl<APP, IN> From<IN> for Cmd<APP>
+
+impl<MSG> Command<MSG>
 where
-    APP: Application,
-    IN: IntoIterator<Item = Effects<APP::MSG, ()>>,
+    MSG: 'static,
 {
-    fn from(effects: IN) -> Self {
-        Cmd::batch(effects.into_iter().map(Cmd::from))
+    ///
+    pub fn single<F>(f: F) -> Self
+    where
+        F: Future<Output = MSG> + 'static,
+    {
+        Self::Action(Action::new(f))
+    }
+    /// 
+    pub fn sub(rx: UnboundedReceiver<MSG>, event_closure: Closure<dyn FnMut(web_sys::Event)>) -> Self {
+        Self::Sub(Sub{
+            receiver: rx,
+            event_closure,
+        })
+    }
+
+    /// apply a function to the msg to create a different task which has a different msg
+    pub fn map_msg<F, MSG2>(self, f: F) -> Command<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + 'static,
+        MSG2: 'static,
+    {
+        match self {
+            Self::Action(task) => Command::Action(task.map_msg(f)),
+            Self::Sub(task) => Command::Sub(task.map_msg(f)),
+        }
+    }
+
+    /// return the next value
+    pub async fn next(&mut self) -> Option<MSG> {
+        match self {
+            Self::Action(task) => task.next().await,
+            Self::Sub(task) => task.next().await,
+        }
+    }
+
+}
+
+/// Action is used to do asynchronous operations
+pub struct Action<MSG> {
+    task: Pin<Box<dyn Future<Output = MSG>>>,
+    /// a marker to indicate if the value of the future is awaited.
+    /// any attempt to await it again will error,
+    /// saying that the async function is resumed after completion.
+    done: bool,
+}
+
+impl<MSG> Action<MSG>
+where
+    MSG: 'static,
+{
+    /// create a new task from a function which returns a future
+    fn new<F>(f: F) -> Self
+    where
+        F: Future<Output = MSG> + 'static,
+    {
+        Self {
+            task: Box::pin(f),
+            done: false,
+        }
+    }
+
+
+    /// apply a function to the msg to create a different task which has a different msg
+    fn map_msg<F, MSG2>(self, f: F) -> Action<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + 'static,
+        MSG2: 'static,
+    {
+        let task = self.task;
+        Action::new(async move {
+            let msg = task.await;
+            f(msg)
+        })
+    }
+
+    /// get the next value
+    async fn next(&mut self) -> Option<MSG> {
+        // return None is already done since awaiting it again is an error
+        if self.done {
+            None
+        } else {
+            let msg = self.task.as_mut().await;
+            // mark as done
+            self.done = true;
+            Some(msg)
+        }
     }
 }
 
-impl<APP> From<Task<APP::MSG>> for Cmd<APP>
+impl<F, MSG> From<F> for Action<MSG>
 where
-    APP: Application,
+    F: Future<Output = MSG> + 'static,
+    MSG: 'static,
 {
-    fn from(mut task: Task<APP::MSG>) -> Self {
-        Cmd::new(move |mut program| {
-            spawn_local(async move {
-                while let Some(msg) = task.next().await {
-                    program.dispatch(msg)
-                }
-            });
-        })
+    fn from(f: F) -> Self {
+        Action::new(f)
+    }
+}
+
+/// Sub is a recurring operation
+pub struct Sub<MSG> {
+    pub(crate) receiver: UnboundedReceiver<MSG>,
+    /// store the associated closures so it is not dropped before being event executed
+    pub(crate) event_closure: Closure<dyn FnMut(web_sys::Event)>,
+}
+
+impl<MSG> Sub<MSG>
+where
+    MSG: 'static,
+{
+    async fn next(&mut self) -> Option<MSG> {
+        self.receiver.next().await
+    }
+
+    /// apply a function to the msg to create a different task which has a different msg
+    fn map_msg<F, MSG2>(self, f: F) -> Sub<MSG2>
+    where
+        F: Fn(MSG) -> MSG2 + 'static,
+        MSG2: 'static,
+    {
+        let (mut tx, rx) = mpsc::unbounded();
+        let Sub {
+            mut receiver,
+            event_closure,
+        } = self;
+        spawn_local(async move {
+            while let Some(msg) = receiver.next().await {
+                tx.start_send(f(msg)).expect("must send");
+            }
+        });
+        Sub {
+            receiver: rx,
+            event_closure,
+        }
     }
 }

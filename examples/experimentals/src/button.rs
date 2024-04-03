@@ -47,6 +47,7 @@ impl Component for Button {
     }
 }
 
+
 impl StatefulComponent for Button {
     fn attribute_changed(
         &mut self,

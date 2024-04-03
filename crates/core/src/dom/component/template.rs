@@ -356,7 +356,6 @@ where
                 let _new_template_node = self
                     .apply_dom_patches(dom_patches)
                     .expect("template patching");
-                //Self::dispatch_mount_event_to_children(&dom_template, 2, 0);
                 dom_template
             }
             _ => unreachable!("must have a template and skip_diff"),

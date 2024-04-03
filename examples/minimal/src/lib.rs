@@ -54,7 +54,7 @@ impl Application for App {
         )
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::Click => self.click_count += 1,
             Msg::NoOp => (),

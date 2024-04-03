@@ -37,7 +37,7 @@ impl Application for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::Clicked => {
                 log::info!("Button has been clicked...");

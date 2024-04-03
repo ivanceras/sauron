@@ -10,12 +10,13 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = { path = "../../" }
+sauron = { path = "../../", features = ["log-patches"] }
 console_error_panic_hook = { version = "0.1" }
 serde = { version = "1.0", features = ["serde_derive"]}
 serde_json = "1.0"
 log = "0.4"
 console_log = {version="0.2", features = ["color"]}
 wasm-bindgen-futures = "0.4.32"
+reqwest = "0.12"
 
 

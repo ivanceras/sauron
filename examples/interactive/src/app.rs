@@ -1,6 +1,7 @@
 #![deny(warnings)]
 use js_sys::Date;
 use sauron::{html::attributes::*, html::events::*, html::*, jss, web_sys::MouseEvent, *};
+use futures::channel::mpsc;
 
 pub enum Msg {
     Click,
@@ -36,22 +37,21 @@ impl App {
 impl Application for App {
     type MSG = Msg;
 
-    fn init(&mut self) -> Cmd<Self> {
-        Cmd::new(|mut program| {
-            let clock: Closure<dyn FnMut()> = Closure::new(move || {
-                program.dispatch(Msg::Clock);
-            });
-            window()
-                .set_interval_with_callback_and_timeout_and_arguments_0(
-                    clock.as_ref().unchecked_ref(),
-                    1000,
-                )
-                .expect("Unable to start interval");
-            clock.forget();
-        })
+    fn init(&mut self) -> Cmd<Msg> {
+        let (mut tx, rx) = mpsc::unbounded();
+        let clock_cb: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |_| {
+            tx.start_send(Msg::Clock).expect("send");
+        });
+        window()
+            .set_interval_with_callback_and_timeout_and_arguments_0(
+                clock_cb.as_ref().unchecked_ref(),
+                1000,
+            )
+            .expect("Unable to start interval");
+        Cmd::recurring(rx, clock_cb)
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::Click => {
                 self.click_count += 1;

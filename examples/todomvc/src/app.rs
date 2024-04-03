@@ -45,7 +45,7 @@ pub enum Msg {
 impl Application for Model {
     type MSG = Msg;
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::Add => {
                 self.entries.push(Entry::new(&self.value, self.uid));

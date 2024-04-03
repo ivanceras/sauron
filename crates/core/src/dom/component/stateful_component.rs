@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::dom::events::on_mount;
 use crate::dom::program::MountProcedure;
 use crate::dom::Application;
@@ -117,16 +118,16 @@ where
 {
     type MSG = COMP::MSG;
 
-    fn init(&mut self) -> Cmd<Self> {
+    fn init(&mut self) -> Cmd<Self::MSG> {
         Cmd::from(<Self as Component>::init(self))
     }
 
-    fn update(&mut self, msg: COMP::MSG) -> Cmd<Self> {
+    fn update(&mut self, msg: COMP::MSG) -> Cmd<Self::MSG> {
         let effects = <Self as Component>::update(self, msg);
         Cmd::from(effects)
     }
 
-    fn view(&self) -> Node<COMP::MSG> {
+    fn view(&self) -> Node<Self::MSG> {
         <Self as Component>::view(self)
     }
 
@@ -146,7 +147,9 @@ pub fn stateful_component<COMP, MSG, MSG2>(
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG>
 where
-    COMP: Component<MSG = MSG2, XMSG = ()> + StatefulComponent + 'static,
+    COMP: Component<MSG = MSG2, XMSG = ()> 
+        + StatefulComponent  
+        + Application<MSG=MSG2> + 'static,
     MSG: Default + 'static,
     MSG2: 'static,
 {

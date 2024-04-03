@@ -183,7 +183,7 @@ where
                 app,
                 current_vdom: Rc::new(RefCell::new(app_view)),
                 pending_msgs: Rc::new(RefCell::new(VecDeque::new())),
-                pending_cmds: Rc::new(RefCell::new(VecDeque::new())),
+                pending_dispatches: Rc::new(RefCell::new(VecDeque::new())),
             },
             root_node: Rc::new(RefCell::new(None)),
             mount_node: Rc::new(RefCell::new(None)),
@@ -435,6 +435,7 @@ where
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
     pub fn update_dom(&mut self, modifier: &Modifier) -> Result<(), JsValue> {
+        log::info!("updating the dom...");
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app_context.view();
@@ -684,6 +685,8 @@ where
 
         if cmd.modifier.should_update_view {
             self.update_dom(&cmd.modifier).expect("must update dom");
+        }else{
+            log::warn!("not updating dom...");
         }
 
         // Ensure all pending patches are applied before emiting the Cmd from update
@@ -705,7 +708,7 @@ where
             );
         }
 
-        // execute this `cmd` batched pending_cmds that may have resulted from updating the app
+        // execute this `cmd` batched pending_dispatches that may have resulted from updating the app
         cmd.emit(self.clone());
     }
 

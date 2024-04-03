@@ -23,7 +23,7 @@ impl App {
 impl Application for App {
     type MSG = Msg;
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,
