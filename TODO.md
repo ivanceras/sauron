@@ -405,6 +405,7 @@
 - [X] Runtime errors when using fragments
 - [X] usage of `classes_flag` seems to be broken with complext trait requirement.
     - [X] This should work very simply `classes_flag([("todo", true), ("editor", is_editing)])`
+- [ ] Organize the generated docs, such that the most commonly used structs and enums are displayed on the first page of docs.rs/sauron instead of under prelude module
 
 ## Limitations
 - ~~In rust, no two closures, even if identical, have the same type. Therefore closure can not be check for equality.~~ Solved by using the original type_id of the function callback
