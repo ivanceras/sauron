@@ -1,4 +1,3 @@
-use crate::dom::Modifier;
 use crate::dom::Cmd;
 use std::future::ready;
 
@@ -15,7 +14,6 @@ pub struct Effects<MSG, XMSG> {
     /// effects that will be executed on the parent Component which instantiate
     /// this component
     pub external: Vec<Cmd<XMSG>>,
-    pub(crate) modifier: Modifier,
 }
 
 impl<MSG, XMSG> Effects<MSG, XMSG>
@@ -36,7 +34,6 @@ where
                 .into_iter()
                 .map(|x| Cmd::once(ready(x)))
                 .collect(),
-            modifier: Modifier::default(),
         }
     }
 
@@ -46,7 +43,6 @@ where
         Self {
             local: local.into_iter().map(|l| Cmd::once(ready(l))).collect(),
             external: vec![],
-            modifier: Modifier::default(),
         }
     }
 
@@ -62,7 +58,6 @@ where
                 .into_iter()
                 .map(|x| Cmd::once(ready(x)))
                 .collect(),
-            modifier: Modifier::default(),
         }
     }
 
@@ -72,7 +67,6 @@ where
         Self {
             local: vec![],
             external: vec![],
-            modifier: Modifier::default(),
         }
     }
 
@@ -88,12 +82,10 @@ where
         let Effects {
             local,
             external,
-            modifier,
         } = self;
         Effects {
             local: local.into_iter().map(|l| l.map_msg(f.clone())).collect(),
             external,
-            modifier,
         }
     }
 
@@ -108,12 +100,10 @@ where
         let Effects {
             local,
             external,
-            modifier,
         } = self;
         Effects {
             local,
             external: external.into_iter().map(|l| l.map_msg(f.clone())).collect(),
-            modifier,
         }
     }
 
@@ -130,7 +120,6 @@ where
         let Effects {
             local,
             external,
-            modifier,
         } = self;
 
         Effects {
@@ -139,7 +128,6 @@ where
                 .chain(local.into_iter().map(|x| x.map_msg(f.clone())))
                 .collect(),
             external: vec![],
-            modifier,
         }
     }
 
@@ -150,38 +138,19 @@ where
         self
     }
 
-    /// Modify the Effect such that it will not do an update on the view when it is executed
-    pub fn no_render(mut self) -> Self {
-        self.modifier.should_update_view = false;
-        self
-    }
 
-    /// Modify the Effect such that it will log measurement when it is executed
-    pub fn measure(mut self) -> Self {
-        self.modifier.log_measurements = true;
-        self
-    }
-
-    /// Modify the Effect such that it will log measurement tag with the name supplied
-    pub fn measure_with_name(mut self, name: &str) -> Self {
-        self.modifier.measurement_name = name.to_string();
-        self.measure()
-    }
 
     /// Merge all the internal objects of this Vec of Effects to produce only one.
     pub fn batch(all_effects: impl IntoIterator<Item = Self>) -> Self {
         let mut local = vec![];
         let mut external = vec![];
-        let mut modifier = Modifier::default();
         for effect in all_effects {
             local.extend(effect.local);
             external.extend(effect.external);
-            modifier.coalesce(&effect.modifier);
         }
         Effects {
             local,
             external,
-            modifier,
         }
     }
 
@@ -207,7 +176,6 @@ impl<MSG, XMSG> From<Cmd<MSG>> for Effects<MSG, XMSG> {
         Effects {
             local: vec![task],
             external: vec![],
-            modifier: Modifier::default(),
         }
     }
 }
@@ -221,13 +189,11 @@ where
         let Effects {
             local,
             external,
-            modifier,
         } = self;
 
         Effects {
             local: local.into_iter().chain(external.into_iter()).collect(),
             external: vec![],
-            modifier,
         }
     }
 }

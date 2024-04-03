@@ -40,19 +40,14 @@ pub trait Application: Sized + 'static {
     /// This is for diagnostic and performance measurement purposes.
     ///
     /// Warning: DO NOT use for anything else other than the intended purpose
-    fn measurements(&self, measurements: Measurements) -> Cmd<Self::MSG> {
-        log::debug!("Measurements: {:#?}", measurements);
-        Cmd::none().no_render()
+    fn measurements(&mut self, _measurements: Measurements){
     }
 }
 
 /// Contains the time it took for the last app update call for the component
 /// TODO: Maybe rename to Diagnostics
-#[derive(Clone, Debug, PartialEq, Default)]
+#[derive(Clone, Copy, Debug, PartialEq, Default)]
 pub struct Measurements {
-    /// The application can name this measurement to determine where this measurement is coming
-    /// from.
-    pub name: String,
     /// The number of DOM nodes in this Component
     pub node_count: usize,
     /// Time it took for the Component to build it's view

@@ -294,7 +294,6 @@
     - [X] Cmd is a vec of Command
     - Sauron just consilidate them into one enum struct for simplicity
 - [ ] Remove `Modifier` and `measurements`
-    - [ ] Have a measurement in the Application trait
     - [ ] Remove StatefulComponent as it is now the same as Application and serve the same purpose
         - add methods for Application: 
             - attribute_changed

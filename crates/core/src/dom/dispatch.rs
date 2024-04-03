@@ -2,7 +2,7 @@
 //! when the application starts or after the application updates.
 //!
 use crate::dom::Program;
-use crate::dom::{Application, Effects, Modifier, Cmd};
+use crate::dom::{Application, Effects, Cmd};
 use wasm_bindgen_futures::spawn_local;
 
 /// Dispatch is a command to be executed by the system.
@@ -18,7 +18,6 @@ where
     /// the functions that would be executed when this Dispatch is emited
     #[allow(clippy::type_complexity)]
     pub(crate) commands: Vec<Box<dyn FnOnce(Program<APP>)>>,
-    pub(crate) modifier: Modifier,
 }
 
 impl<APP> Dispatch<APP>
@@ -32,7 +31,6 @@ where
     {
         Self {
             commands: vec![Box::new(f)],
-            modifier: Default::default(),
         }
     }
 
@@ -40,12 +38,10 @@ where
     /// then together.
     pub fn batch(cmds: impl IntoIterator<Item = Self>) -> Self {
         let mut commands = vec![];
-        let mut modifier = Modifier::default();
         for cmd in cmds {
-            modifier.coalesce(&cmd.modifier);
             commands.extend(cmd.commands);
         }
-        Self { commands, modifier }
+        Self { commands }
     }
 
     /// Add a cmd
@@ -56,7 +52,6 @@ where
     /// Append more cmd into this cmd and return self
     pub fn append(&mut self, cmds: impl IntoIterator<Item = Self>) {
         for cmd in cmds {
-            self.modifier.coalesce(&cmd.modifier);
             self.commands.extend(cmd.commands);
         }
     }
@@ -65,7 +60,6 @@ where
     pub fn none() -> Self {
         Dispatch {
             commands: vec![],
-            modifier: Default::default(),
         }
     }
 
@@ -74,31 +68,6 @@ where
         self.commands.is_empty()
     }
 
-    /// Modify the Dispatch such that whether or not it will update the view set by `should_update_view`
-    /// when the cmd is executed in the program
-    pub fn should_update_view(mut self, should_update_view: bool) -> Self {
-        self.modifier.should_update_view = should_update_view;
-        self
-    }
-
-    /// Modify the command such that it will not do an update on the view when it is executed.
-    pub fn no_render(mut self) -> Self {
-        self.modifier.should_update_view = false;
-        self
-    }
-
-    /// Modify the command such that it will log measurement when it is executed
-    pub fn measure(mut self) -> Self {
-        self.modifier.log_measurements = true;
-        self
-    }
-
-    /// Modify the Dispatch such that it will log a measuregment when it is executed
-    /// The `measurement_name` is set to distinguish the measurements from each other.
-    pub fn measure_with_name(mut self, name: &str) -> Self {
-        self.modifier.measurement_name = name.to_string();
-        self.measure()
-    }
 
     /// Executes the Dispatch
     pub(crate) fn emit(self, program: Program<APP>) {
@@ -130,12 +99,9 @@ where
         let Effects {
             local,
             external: _,
-            modifier,
         } = effects;
 
-        let mut cmd = Dispatch::batch(local.into_iter().map(Dispatch::from));
-        cmd.modifier = modifier;
-        cmd
+        Dispatch::batch(local.into_iter().map(Dispatch::from))
     }
 }
 

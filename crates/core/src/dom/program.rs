@@ -6,7 +6,7 @@ use crate::dom::request_idle_callback;
 use crate::dom::DomNode;
 use crate::dom::SkipDiff;
 use crate::dom::SkipPath;
-use crate::dom::{document, now, IdleDeadline, Measurements, Modifier};
+use crate::dom::{document, now, IdleDeadline, Measurements};
 use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
 use crate::html::{self, attributes::class, text};
 use crate::vdom;
@@ -434,7 +434,7 @@ where
     }
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
-    pub fn update_dom(&mut self, modifier: &Modifier) -> Result<(), JsValue> {
+    pub fn update_dom(&mut self) -> Result<(), JsValue> {
         log::info!("updating the dom...");
         let t1 = now();
         // a new view is created due to the app update
@@ -478,7 +478,6 @@ where
         let strong_count = self.app_context.strong_count();
         let weak_count = self.app_context.weak_count();
         let measurements = Measurements {
-            name: modifier.measurement_name.to_string(),
             node_count,
             build_view_took: t2 - t1,
             total_patches,
@@ -510,17 +509,13 @@ where
             let time_delta = t3 - last_update;
             let _remaining = frame_time - time_delta;
             if time_delta < frame_time {
-                //log::warn!("update is {remaining} too soon!... time_delta: {time_delta}, frame_time: {frame_time}");
-                // TODO: maybe return early here, but do a dispatch_multiple([])
+                log::warn!("update is {_remaining} too soon!... time_delta: {time_delta}, frame_time: {frame_time}");
             }
         }
 
         // tell the app about the performance measurement and only if there was patches applied
         #[cfg(feature = "with-measure")]
-        if modifier.log_measurements && measurements.total_patches > 0 {
-            let cmd_measurement = self.app_context.measurements(measurements);
-            cmd_measurement.emit(self.clone());
-        }
+        self.app_context.measurements(measurements);
 
         *self.last_update.borrow_mut() = Some(t3);
         Ok(())
@@ -683,11 +678,7 @@ where
             );
         }
 
-        if cmd.modifier.should_update_view {
-            self.update_dom(&cmd.modifier).expect("must update dom");
-        }else{
-            log::warn!("not updating dom...");
-        }
+        self.update_dom().expect("must update dom");
 
         // Ensure all pending patches are applied before emiting the Cmd from update
         #[cfg(feature = "ensure-check")]
