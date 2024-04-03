@@ -27,6 +27,7 @@ pub enum Leaf<MSG> {
     /// A document fragment node, will be created using fragment node and attached to the dom
     Fragment(Vec<Node<MSG>>),
     /// Stateful Component leaf
+    #[cfg(feature = "with-dom")]
     StatefulComponent(StatefulModel<MSG>),
     /// Stateless Component leaf
     StatelessComponent(StatelessModel<MSG>),
@@ -43,6 +44,7 @@ impl<MSG> PartialEq for Leaf<MSG> {
             (Self::DocType(v), Self::DocType(o)) => v == o,
             (Self::NodeList(v), Self::NodeList(o)) => v == o,
             (Self::Fragment(v), Self::Fragment(o)) => v == o,
+            #[cfg(feature = "with-dom")]
             (Self::StatefulComponent(v), Self::StatefulComponent(o)) => v == o,
             (Self::StatelessComponent(v), Self::StatelessComponent(o)) => v == o,
             _ => false,

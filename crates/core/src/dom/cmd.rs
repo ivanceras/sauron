@@ -1,4 +1,3 @@
-use crate::dom::spawn_local;
 use futures::channel::mpsc;
 use futures::channel::mpsc::UnboundedReceiver;
 use futures::StreamExt;
@@ -235,11 +234,13 @@ where
             mut receiver,
             event_closure,
         } = self;
-        spawn_local(async move {
+
+        crate::dom::spawn_local(async move {
             while let Some(msg) = receiver.next().await {
                 tx.start_send(f(msg)).expect("must send");
             }
         });
+
         Sub {
             receiver: rx,
             event_closure,
