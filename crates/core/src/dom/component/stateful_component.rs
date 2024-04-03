@@ -1,4 +1,3 @@
-#![allow(unused)]
 use crate::dom::events::on_mount;
 use crate::dom::program::MountProcedure;
 use crate::dom::Application;
@@ -15,7 +14,6 @@ use std::any::TypeId;
 use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
-use wasm_bindgen::JsValue;
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
@@ -174,7 +172,8 @@ where
     }))
 }
 
-impl Into<DomAttrValue> for JsValue {
+#[cfg(feature = "with-dom")]
+impl Into<DomAttrValue> for wasm_bindgen::JsValue {
     fn into(self) -> DomAttrValue {
         if let Some(v) = self.as_bool() {
             DomAttrValue::Simple(v.into())

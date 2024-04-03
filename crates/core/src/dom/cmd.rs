@@ -5,6 +5,7 @@ use futures::StreamExt;
 use std::future::Future;
 use std::pin::Pin;
 use crate::dom::Effects;
+#[cfg(feature = "with-dom")]
 use wasm_bindgen::closure::Closure;
 
 /// Cnd is a way to tell the Runtime that something needs to be executed
