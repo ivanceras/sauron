@@ -293,16 +293,7 @@
     - [X] enum Command{Cmd,Sub} into one unified type.
     - [X] Cmd is a vec of Command
     - Sauron just consilidate them into one enum struct for simplicity
-- [ ] Remove `Modifier` and `measurements`
-    - [ ] Remove StatefulComponent as it is now the same as Application and serve the same purpose
-        - add methods for Application: 
-            - attribute_changed
-            - remove_attribute 
-            - append_child 
-            - remove_child
-            - connected_callback
-            - disconnected_callback
-            - adopted_callback
+- [X] Remove `Modifier` and `measurements`
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
