@@ -17,6 +17,7 @@ pub struct Cmd<MSG>{
 pub enum Command<MSG> {
     /// A task with one single resulting MSG
     Action(Action<MSG>),
+    #[cfg(feature = "with-dom")]
     /// A task with recurring resulting MSG
     Sub(Sub<MSG>),
 }
@@ -109,7 +110,9 @@ where
     {
         Self::Action(Action::new(f))
     }
+
     /// 
+    #[cfg(feature = "with-dom")]
     pub fn sub(rx: UnboundedReceiver<MSG>, event_closure: Closure<dyn FnMut(web_sys::Event)>) -> Self {
         Self::Sub(Sub{
             receiver: rx,
@@ -125,6 +128,7 @@ where
     {
         match self {
             Self::Action(task) => Command::Action(task.map_msg(f)),
+            #[cfg(feature = "with-dom")]
             Self::Sub(task) => Command::Sub(task.map_msg(f)),
         }
     }
@@ -133,6 +137,7 @@ where
     pub async fn next(&mut self) -> Option<MSG> {
         match self {
             Self::Action(task) => task.next().await,
+            #[cfg(feature = "with-dom")]
             Self::Sub(task) => task.next().await,
         }
     }
@@ -201,6 +206,7 @@ where
     }
 }
 
+#[cfg(feature = "with-dom")]
 /// Sub is a recurring operation
 pub struct Sub<MSG> {
     pub(crate) receiver: UnboundedReceiver<MSG>,
@@ -208,6 +214,7 @@ pub struct Sub<MSG> {
     pub(crate) event_closure: Closure<dyn FnMut(web_sys::Event)>,
 }
 
+#[cfg(feature = "with-dom")]
 impl<MSG> Sub<MSG>
 where
     MSG: 'static,
