@@ -487,7 +487,7 @@ where
             weak_count,
         };
 
-        #[cfg(all(feature = "with-debug",feature = "use-template"))]
+        #[cfg(all(feature = "with-debug", feature = "use-template"))]
         {
             let total = crate::dom::component::template::total_time_spent();
             log::info!("total: {:#?}", total);

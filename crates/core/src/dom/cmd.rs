@@ -1,14 +1,14 @@
+use crate::dom::Effects;
 use futures::channel::mpsc;
 use futures::channel::mpsc::UnboundedReceiver;
 use futures::StreamExt;
 use std::future::Future;
 use std::pin::Pin;
-use crate::dom::Effects;
 #[cfg(feature = "with-dom")]
 use wasm_bindgen::closure::Closure;
 
 /// Cnd is a way to tell the Runtime that something needs to be executed
-pub struct Cmd<MSG>{
+pub struct Cmd<MSG> {
     /// commands
     pub(crate) commands: Vec<Command<MSG>>,
 }
@@ -21,7 +21,6 @@ pub enum Command<MSG> {
     /// A task with recurring resulting MSG
     Sub(Sub<MSG>),
 }
-
 
 impl<MSG> Cmd<MSG>
 where
@@ -40,13 +39,16 @@ where
     where
         F: Future<Output = MSG> + 'static,
     {
-        Self{
+        Self {
             commands: vec![Command::single(f)],
         }
     }
     /// Creates a Cmd which will be polled multiple times
-    pub fn recurring(rx: UnboundedReceiver<MSG>, event_closure: Closure<dyn FnMut(web_sys::Event)>) -> Self {
-        Self{
+    pub fn recurring(
+        rx: UnboundedReceiver<MSG>,
+        event_closure: Closure<dyn FnMut(web_sys::Event)>,
+    ) -> Self {
+        Self {
             commands: vec![Command::sub(rx, event_closure)],
         }
     }
@@ -57,47 +59,43 @@ where
         F: Fn(MSG) -> MSG2 + 'static + Clone,
         MSG2: 'static,
     {
-        Cmd{
-            commands: self.commands.into_iter().map(|t|t.map_msg(f.clone())).collect(),
+        Cmd {
+            commands: self
+                .commands
+                .into_iter()
+                .map(|t| t.map_msg(f.clone()))
+                .collect(),
         }
     }
 
     /// batch together multiple Cmd into one task
     pub fn batch(tasks: impl IntoIterator<Item = Self>) -> Self {
         let mut commands = vec![];
-        for task in tasks.into_iter(){
+        for task in tasks.into_iter() {
             commands.extend(task.commands);
         }
-        Self {commands,
-        }
+        Self { commands }
     }
 
     ///
     pub fn none() -> Self {
-        Self{commands: vec![],
-        }
+        Self { commands: vec![] }
     }
-
-
 }
 
-
 impl<MSG> From<Effects<MSG, ()>> for Cmd<MSG>
-    where MSG: 'static
+where
+    MSG: 'static,
 {
     /// Convert Effects that has only follow ups
     fn from(effects: Effects<MSG, ()>) -> Self {
         // we can safely ignore the effects here
         // as there is no content on it.
-        let Effects {
-            local,
-            external:_,
-        } = effects;
+        let Effects { local, external: _ } = effects;
 
         Cmd::batch(local.into_iter().map(Cmd::from))
     }
 }
-
 
 impl<MSG> Command<MSG>
 where
@@ -111,10 +109,13 @@ where
         Self::Action(Action::new(f))
     }
 
-    /// 
+    ///
     #[cfg(feature = "with-dom")]
-    pub fn sub(rx: UnboundedReceiver<MSG>, event_closure: Closure<dyn FnMut(web_sys::Event)>) -> Self {
-        Self::Sub(Sub{
+    pub fn sub(
+        rx: UnboundedReceiver<MSG>,
+        event_closure: Closure<dyn FnMut(web_sys::Event)>,
+    ) -> Self {
+        Self::Sub(Sub {
             receiver: rx,
             event_closure,
         })
@@ -141,7 +142,6 @@ where
             Self::Sub(task) => task.next().await,
         }
     }
-
 }
 
 /// Action is used to do asynchronous operations
@@ -167,7 +167,6 @@ where
             done: false,
         }
     }
-
 
     /// apply a function to the msg to create a different task which has a different msg
     fn map_msg<F, MSG2>(self, f: F) -> Action<MSG2>

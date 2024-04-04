@@ -145,9 +145,7 @@ pub fn stateful_component<COMP, MSG, MSG2>(
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG>
 where
-    COMP: Component<MSG = MSG2, XMSG = ()> 
-        + StatefulComponent  
-        + Application<MSG=MSG2> + 'static,
+    COMP: Component<MSG = MSG2, XMSG = ()> + StatefulComponent + Application<MSG = MSG2> + 'static,
     MSG: Default + 'static,
     MSG2: 'static,
 {

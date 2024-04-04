@@ -136,7 +136,7 @@ where
     }
 
     #[cfg(feature = "with-measure")]
-    pub fn measurements(&mut self, measurements: Measurements)  {
+    pub fn measurements(&mut self, measurements: Measurements) {
         self.app.borrow_mut().measurements(measurements)
     }
 

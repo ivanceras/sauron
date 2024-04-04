@@ -130,15 +130,13 @@ impl Window {
         let (mut tx, rx) = mpsc::unbounded();
         let closure_cb: Closure<dyn FnMut(web_sys::Event)> =
             Closure::new(move |event: web_sys::Event| {
-                let key_event: web_sys::KeyboardEvent = event.dyn_into().expect("must be key event");
+                let key_event: web_sys::KeyboardEvent =
+                    event.dyn_into().expect("must be key event");
                 let msg = cb(key_event);
                 tx.start_send(msg).expect("send");
             });
         window()
-            .add_event_listener_with_callback(
-                intern("keyup"),
-                closure_cb.as_ref().unchecked_ref(),
-            )
+            .add_event_listener_with_callback(intern("keyup"), closure_cb.as_ref().unchecked_ref())
             .expect("add event callback");
         Cmd::recurring(rx, closure_cb)
     }
@@ -152,7 +150,8 @@ impl Window {
         let (mut tx, rx) = mpsc::unbounded();
         let closure_cb: Closure<dyn FnMut(web_sys::Event)> =
             Closure::new(move |event: web_sys::Event| {
-                let key_event: web_sys::KeyboardEvent = event.dyn_into().expect("must be key event");
+                let key_event: web_sys::KeyboardEvent =
+                    event.dyn_into().expect("must be key event");
                 let msg = cb(key_event);
                 tx.start_send(msg).expect("send");
             });
@@ -164,7 +163,6 @@ impl Window {
             .expect("add event callback");
         Cmd::recurring(rx, closure_cb)
     }
-
 
     /// scroll the window to the top of the document
     pub fn scroll_to_top<MSG>(msg: MSG) -> Cmd<MSG>

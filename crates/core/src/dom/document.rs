@@ -1,14 +1,13 @@
-use crate::dom::{dom_node::intern,Cmd};
+use crate::dom::document;
+use crate::dom::{dom_node::intern, Cmd};
 use futures::channel::mpsc;
 use wasm_bindgen::{prelude::*, JsCast};
-use crate::dom::document;
 
 /// Provides function for document related functions
 #[derive(Clone, Copy)]
 pub struct Document;
 
 impl Document {
-
     ///
     pub fn on_selectionchange<F, MSG>(mut cb: F) -> Cmd<MSG>
     where

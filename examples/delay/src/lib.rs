@@ -1,5 +1,6 @@
 #![deny(warnings)]
 #![deny(clippy::all)]
+use futures::channel::mpsc;
 use log::trace;
 use sauron::{
     dom::{delay, TimeoutCallbackHandle},
@@ -13,7 +14,6 @@ use std::rc::Rc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use wasm_bindgen_futures::spawn_local;
-use futures::channel::mpsc;
 
 pub enum Msg {
     Click,
@@ -95,9 +95,12 @@ impl Application for App {
                 .expect("must have a handle");
 
                 *current_handle.borrow_mut() = Some(handle);
-                Cmd::recurring(rx, sauron::Closure::new(|_:sauron::web_sys::Event|{
-                    panic!("This is not called!");
-                }))
+                Cmd::recurring(
+                    rx,
+                    sauron::Closure::new(|_: sauron::web_sys::Event| {
+                        panic!("This is not called!");
+                    }),
+                )
             }
             Msg::NoOp => Cmd::none(),
         }

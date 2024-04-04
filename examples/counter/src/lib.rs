@@ -1,6 +1,5 @@
 use sauron::{
-    html::text, html::units::px, jss, node, wasm_bindgen, Application, Node, Program,
-    Cmd,
+    html::text, html::units::px, jss, node, wasm_bindgen, Application, Cmd, Node, Program,
 };
 
 enum Msg {

@@ -55,12 +55,8 @@ impl Application for ResizeWrapper {
     /// not being triggered
     fn init(&mut self) -> Cmd<Msg> {
         Cmd::batch([
-            Window::on_mouseup(|event| {
-                Msg::EndResize(event.client_x(), event.client_y())
-            }),
-            Window::on_mousemove(|event| {
-                Msg::MouseMove(event.client_x(), event.client_y())
-            }),
+            Window::on_mouseup(|event| Msg::EndResize(event.client_x(), event.client_y())),
+            Window::on_mousemove(|event| Msg::MouseMove(event.client_x(), event.client_y())),
             Cmd::from(self.data_view.init().map_msg(Msg::DataViewMsg)),
         ])
     }

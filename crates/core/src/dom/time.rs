@@ -7,7 +7,6 @@ use wasm_bindgen::{prelude::*, JsCast};
 pub struct Time;
 
 impl Time {
-
     /// do this task at every `ms` interval
     pub fn every<F, MSG>(interval_ms: i32, cb: F) -> Cmd<MSG>
     where

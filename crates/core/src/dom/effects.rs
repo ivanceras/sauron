@@ -30,13 +30,9 @@ where
     {
         Self {
             local: local.into_iter().map(|l| Cmd::once(ready(l))).collect(),
-            external: external
-                .into_iter()
-                .map(|x| Cmd::once(ready(x)))
-                .collect(),
+            external: external.into_iter().map(|x| Cmd::once(ready(x))).collect(),
         }
     }
-
 
     /// Create an Effects with  local messages that will be executed on the next update loop on this Component
     pub fn with_local(local: impl IntoIterator<Item = MSG>) -> Self {
@@ -46,7 +42,6 @@ where
         }
     }
 
-
     /// Create an Effects with extern messages that will be executed on the parent Component
     pub fn with_external(external: impl IntoIterator<Item = XMSG>) -> Self
     where
@@ -54,13 +49,9 @@ where
     {
         Self {
             local: vec![],
-            external: external
-                .into_iter()
-                .map(|x| Cmd::once(ready(x)))
-                .collect(),
+            external: external.into_iter().map(|x| Cmd::once(ready(x))).collect(),
         }
     }
-
 
     /// Create and empty Effects
     pub fn none() -> Self {
@@ -79,10 +70,7 @@ where
         F: Fn(MSG) -> MSG2 + Clone + 'static,
         MSG2: 'static,
     {
-        let Effects {
-            local,
-            external,
-        } = self;
+        let Effects { local, external } = self;
         Effects {
             local: local.into_iter().map(|l| l.map_msg(f.clone())).collect(),
             external,
@@ -97,10 +85,7 @@ where
         XMSG: 'static,
         XMSG2: 'static,
     {
-        let Effects {
-            local,
-            external,
-        } = self;
+        let Effects { local, external } = self;
         Effects {
             local,
             external: external.into_iter().map(|l| l.map_msg(f.clone())).collect(),
@@ -117,10 +102,7 @@ where
         XMSG: 'static,
         XMSG2: 'static,
     {
-        let Effects {
-            local,
-            external,
-        } = self;
+        let Effects { local, external } = self;
 
         Effects {
             local: external
@@ -138,8 +120,6 @@ where
         self
     }
 
-
-
     /// Merge all the internal objects of this Vec of Effects to produce only one.
     pub fn batch(all_effects: impl IntoIterator<Item = Self>) -> Self {
         let mut local = vec![];
@@ -148,10 +128,7 @@ where
             local.extend(effect.local);
             external.extend(effect.external);
         }
-        Effects {
-            local,
-            external,
-        }
+        Effects { local, external }
     }
 
     /// Extern the local and external MSG of this Effect
@@ -186,10 +163,7 @@ where
 {
     /// merge external msg into local msg, if they are of the same type
     pub fn merge(self) -> Effects<MSG, ()> {
-        let Effects {
-            local,
-            external,
-        } = self;
+        let Effects { local, external } = self;
 
         Effects {
             local: local.into_iter().chain(external.into_iter()).collect(),

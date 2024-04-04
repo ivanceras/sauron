@@ -51,18 +51,16 @@ impl App {
 
     fn fetch_page(&self) -> Cmd<Msg> {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
-        Cmd::new(
-            async move {
-                let msg = match Http::fetch_text(&url).await {
-                    Ok(v) => match serde_json::from_str(&v) {
-                        Ok(data1) => Msg::ReceivedData(data1),
-                        Err(err) => Msg::JsonError(err),
-                    },
-                    Err(e) => Msg::RequestError(e),
-                };
-                msg
-            }
-        )
+        Cmd::new(async move {
+            let msg = match Http::fetch_text(&url).await {
+                Ok(v) => match serde_json::from_str(&v) {
+                    Ok(data1) => Msg::ReceivedData(data1),
+                    Err(err) => Msg::JsonError(err),
+                },
+                Err(e) => Msg::RequestError(e),
+            };
+            msg
+        })
     }
 }
 
@@ -75,7 +73,7 @@ impl Application for App {
     }
 
     fn view(&self) -> Node<Msg> {
-        log::info!("disabled: {}", {self.page <= 1});
+        log::info!("disabled: {}", { self.page <= 1 });
         node! {
             <div>
                  <div class="some-class" id="some-id" {attr("data-id", 1)}>

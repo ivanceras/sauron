@@ -2,9 +2,9 @@
 use sauron::dom::DomNode;
 use sauron::parse_html;
 use sauron::*;
+use std::rc::Rc;
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;
-use std::rc::Rc;
 
 mod test_fixtures;
 

@@ -29,7 +29,7 @@ impl Application for Clock {
     // we wire the window set_interval api to trigger an Msg::Tick
     // by dispatching it from the program, through the Cmd interface
     fn init(&mut self) -> Cmd<Msg> {
-        Time::every(17, ||Msg::Tick)
+        Time::every(17, || Msg::Tick)
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Msg> {

@@ -1,7 +1,7 @@
+use crate::html::node_list;
+use futures::channel::mpsc;
 use sauron::dom::{delay, spawn_local};
 use sauron::{html::fragment, *};
-use futures::channel::mpsc;
-use crate::html::node_list;
 
 #[wasm_bindgen(start)]
 pub fn start() {
@@ -23,7 +23,7 @@ impl Application for App {
     type MSG = Msg;
 
     fn init(&mut self) -> Cmd<Msg> {
-        Time::every(1000, ||Msg::AddItem)
+        Time::every(1000, || Msg::AddItem)
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Msg>
