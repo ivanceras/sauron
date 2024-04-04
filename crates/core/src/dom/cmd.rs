@@ -1,24 +1,23 @@
-use crate::dom::spawn_local;
 use futures::channel::mpsc;
 use futures::channel::mpsc::UnboundedReceiver;
 use futures::StreamExt;
 use std::future::Future;
 use std::pin::Pin;
 use crate::dom::Effects;
-use crate::dom::Modifier;
+#[cfg(feature = "with-dom")]
 use wasm_bindgen::closure::Closure;
 
 /// Cnd is a way to tell the Runtime that something needs to be executed
 pub struct Cmd<MSG>{
     /// commands
     pub(crate) commands: Vec<Command<MSG>>,
-    pub(crate) modifier: Modifier,
 }
 
 /// encapsulate anything a component can do
 pub enum Command<MSG> {
     /// A task with one single resulting MSG
     Action(Action<MSG>),
+    #[cfg(feature = "with-dom")]
     /// A task with recurring resulting MSG
     Sub(Sub<MSG>),
 }
@@ -43,14 +42,12 @@ where
     {
         Self{
             commands: vec![Command::single(f)],
-            modifier: Default::default(),
         }
     }
     /// Creates a Cmd which will be polled multiple times
     pub fn recurring(rx: UnboundedReceiver<MSG>, event_closure: Closure<dyn FnMut(web_sys::Event)>) -> Self {
         Self{
             commands: vec![Command::sub(rx, event_closure)],
-            modifier: Default::default(),
         }
     }
 
@@ -62,7 +59,6 @@ where
     {
         Cmd{
             commands: self.commands.into_iter().map(|t|t.map_msg(f.clone())).collect(),
-            modifier: Default::default(),
         }
     }
 
@@ -73,22 +69,15 @@ where
             commands.extend(task.commands);
         }
         Self {commands,
-            modifier: Default::default(),
         }
     }
 
     ///
     pub fn none() -> Self {
         Self{commands: vec![],
-            modifier: Default::default(),
         }
     }
 
-    ///
-    pub fn no_render(mut self) -> Self {
-        self.modifier.should_update_view = false;
-        self
-    }
 
 }
 
@@ -103,12 +92,9 @@ impl<MSG> From<Effects<MSG, ()>> for Cmd<MSG>
         let Effects {
             local,
             external:_,
-            modifier,
         } = effects;
 
-        let mut cmd = Cmd::batch(local.into_iter().map(Cmd::from));
-        cmd.modifier = modifier;
-        cmd
+        Cmd::batch(local.into_iter().map(Cmd::from))
     }
 }
 
@@ -124,7 +110,9 @@ where
     {
         Self::Action(Action::new(f))
     }
+
     /// 
+    #[cfg(feature = "with-dom")]
     pub fn sub(rx: UnboundedReceiver<MSG>, event_closure: Closure<dyn FnMut(web_sys::Event)>) -> Self {
         Self::Sub(Sub{
             receiver: rx,
@@ -140,6 +128,7 @@ where
     {
         match self {
             Self::Action(task) => Command::Action(task.map_msg(f)),
+            #[cfg(feature = "with-dom")]
             Self::Sub(task) => Command::Sub(task.map_msg(f)),
         }
     }
@@ -148,6 +137,7 @@ where
     pub async fn next(&mut self) -> Option<MSG> {
         match self {
             Self::Action(task) => task.next().await,
+            #[cfg(feature = "with-dom")]
             Self::Sub(task) => task.next().await,
         }
     }
@@ -216,6 +206,7 @@ where
     }
 }
 
+#[cfg(feature = "with-dom")]
 /// Sub is a recurring operation
 pub struct Sub<MSG> {
     pub(crate) receiver: UnboundedReceiver<MSG>,
@@ -223,6 +214,7 @@ pub struct Sub<MSG> {
     pub(crate) event_closure: Closure<dyn FnMut(web_sys::Event)>,
 }
 
+#[cfg(feature = "with-dom")]
 impl<MSG> Sub<MSG>
 where
     MSG: 'static,
@@ -242,11 +234,13 @@ where
             mut receiver,
             event_closure,
         } = self;
-        spawn_local(async move {
+
+        crate::dom::spawn_local(async move {
             while let Some(msg) = receiver.next().await {
                 tx.start_send(f(msg)).expect("must send");
             }
         });
+
         Sub {
             receiver: rx,
             event_closure,

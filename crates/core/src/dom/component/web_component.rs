@@ -1,5 +1,5 @@
 use crate::dom::program::MountProcedure;
-use crate::dom::{Application, Modifier, Program};
+use crate::dom::{Application, Program};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
@@ -177,7 +177,7 @@ where
             .borrow_mut()
             .connected_callback();
         self.program
-            .update_dom(&Modifier::default())
+            .update_dom()
             .expect("must update dom");
     }
 

@@ -3,12 +3,10 @@
 
 pub use component::Component;
 pub use effects::Effects;
-pub use modifier::Modifier;
 pub use cmd::Cmd;
 
 mod component;
 mod effects;
-mod modifier;
 mod cmd;
 
 use cfg_if::cfg_if;

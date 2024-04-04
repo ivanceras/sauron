@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.61.0
+- add template system, skip_diff
+- web_sys::Node is now wrapped with DomNode, the event listeners
+  is now managed from its containing DomNode, instead of from the Program.
+  when a DomNode is removed and goes out of scope, so does its associated event closures are dropped
+- `Cmd<Msg>` can now be mapped into `Effects<Msg,..>` and vice versa
+- The `mt-dom` crate is now part of `core` in the `vdom` module. This change is necessary
+   to improve code coherence and simplicity, lesser number of generic types has to be passed arround.
+- remove `inner_html` as a function to set html via html attributes.
+    - This cause breakage in tracking the DOMTree as new nodes could be inserted dynamically without the runtime knowing it.
+- Rename `safe_html` to `symbol` as its usage is intended for html entities such as `&nbsp;` `&quote;` etc.
+- A `safe_html` function is added and use `html-parser` to parse dynamic html and convert it into a safe dom-tree.
+
+
 ## 0.60.7
 - feat: add selectionchange event and document_event_listener
 

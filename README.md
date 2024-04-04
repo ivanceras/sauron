@@ -61,7 +61,10 @@ impl App {
     }
 }
 
-impl Application<Msg> for App {
+impl Application for App {
+
+    type MSG = Msg;
+
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
@@ -82,7 +85,7 @@ impl Application<Msg> for App {
         }
     }
 
-    fn update(&mut self, msg: Msg) -> Cmd<Self, Msg> {
+    fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
             Msg::Increment => self.count += 1,
             Msg::Decrement => self.count -= 1,
@@ -147,7 +150,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-sauron = "0.60.0"
+sauron = "0.61.0"
 ```
 
 #### Prerequisite:
