@@ -18,6 +18,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
+use std::collections::hash_map::Entry;
 
 thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, DomNode>> = RefCell::new(HashMap::new());
@@ -33,7 +34,7 @@ pub fn register_template<MSG>(
     if let Some(template) = lookup_template(type_id) {
         template
     } else {
-        let template = create_dom_node_no_listeners(parent_node, &vdom_template);
+        let template = create_dom_node_no_listeners(parent_node, vdom_template);
         add_template(type_id, &template);
         template
     }
@@ -41,10 +42,10 @@ pub fn register_template<MSG>(
 
 pub fn add_template(type_id: TypeId, template: &DomNode) {
     TEMPLATE_LOOKUP.with_borrow_mut(|map| {
-        if map.contains_key(&type_id) {
-            // already added
-        } else {
-            map.insert(type_id, template.deep_clone());
+        if let Entry::Vacant(e) = map.entry(type_id){
+            e.insert(template.deep_clone());
+        }else{
+            //already added
         }
     })
 }
@@ -52,12 +53,7 @@ pub fn add_template(type_id: TypeId, template: &DomNode) {
 /// lookup for the template
 pub fn lookup_template(type_id: TypeId) -> Option<DomNode> {
     TEMPLATE_LOOKUP.with_borrow(|map| {
-        if let Some(existing) = map.get(&type_id) {
-            // TODO: have to traverse the real children and convert each into DomNode
-            Some(existing.deep_clone())
-        } else {
-            None
-        }
+        map.get(&type_id).map(|existing|existing.deep_clone())
     })
 }
 
@@ -101,7 +97,7 @@ impl Section {
 }
 
 #[cfg(feature = "with-debug")]
-thread_local!(pub static TIME_SPENT: RefCell<Vec<Section>> = RefCell::new(vec![]));
+thread_local!(pub static TIME_SPENT: RefCell<Vec<Section>> = const {RefCell::new(vec![])});
 
 #[cfg(feature = "with-debug")]
 pub fn add_time_trace(section: Section) {
@@ -164,8 +160,8 @@ fn create_fragment_node_no_listeners<MSG>(
     };
     let dom_node_rc = Rc::new(Some(dom_node.clone()));
     let children = nodes
-        .into_iter()
-        .map(|node| create_dom_node_no_listeners(Rc::clone(&dom_node_rc), &node))
+        .iter()
+        .map(|node| create_dom_node_no_listeners(Rc::clone(&dom_node_rc), node))
         .collect();
     dom_node.append_children(children);
     dom_node
@@ -315,7 +311,7 @@ where
                 #[cfg(feature = "with-debug")]
                 let t2 = now();
                 let patches =
-                    self.create_patches_with_skip_diff(&vdom_template, &real_comp_view, &skip_diff);
+                    self.create_patches_with_skip_diff(&vdom_template, real_comp_view, &skip_diff);
                 #[cfg(feature = "with-debug")]
                 let t3 = now();
                 let dom_patches = self
@@ -356,7 +352,7 @@ where
                 let dom_patches = self
                     .convert_patches(&dom_template, &patches)
                     .expect("convert patches");
-                let _new_template_node = self
+                self
                     .apply_dom_patches(dom_patches)
                     .expect("template patching");
                 dom_template
