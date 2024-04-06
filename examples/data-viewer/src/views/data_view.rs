@@ -406,10 +406,6 @@ impl DataView {
         self.scrollbar_to_bottom() <= scroll_bottom_allowance
     }
 
-    #[allow(unused)]
-    fn is_scrolled_bottom(&self) -> bool {
-        self.scrollbar_to_bottom() <= 0
-    }
 
     /// These are values in a row that is under the frozen columns
     /// Can move up and down

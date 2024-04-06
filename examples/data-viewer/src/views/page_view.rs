@@ -168,15 +168,6 @@ impl PageView {
             })
     }
 
-    #[allow(unused)]
-    fn frozen_row_height(&self) -> i32 {
-        self.frozen_rows.len() as i32 * RowView::row_height() //use the actual row height
-    }
-
-    #[allow(unused)]
-    fn frozen_column_width(&self) -> i32 {
-        self.frozen_columns.len() as i32 * 200 //use the actual column sizes for each frozen columns
-    }
 
     /// Keep updating which columns are frozen
     /// call these when new rows are set or added
