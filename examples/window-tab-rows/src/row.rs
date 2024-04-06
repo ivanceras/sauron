@@ -23,10 +23,9 @@ impl Row {
             field_clicks: 0,
             field_change: 0,
             fields: (0..8)
-                .into_iter()
                 .map(|index| {
                     let mut field = Field::new(format!("Field {}", index));
-                    field.add_interaction_listener(Box::new(|action| Msg::FieldInteracted(action)));
+                    field.add_interaction_listener(Box::new(Msg::FieldInteracted));
                     field
                 })
                 .collect(),

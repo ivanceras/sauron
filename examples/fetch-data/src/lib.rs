@@ -58,14 +58,13 @@ impl App {
     fn fetch_page(&self) -> Cmd<Msg> {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
         Cmd::new(async move {
-            let msg = match Http::fetch_text(&url).await {
+            match Http::fetch_text(&url).await {
                 Ok(v) => match serde_json::from_str(&v) {
                     Ok(data1) => Msg::ReceivedData(data1),
                     Err(err) => Msg::JsonError(err),
                 },
                 Err(e) => Msg::RequestError(e),
-            };
-            msg
+            }
         })
     }
 }
@@ -118,7 +117,7 @@ impl Application for App {
                     ul(
                         [],
                         [
-                            li([], [text(&user.id)]),
+                            li([], [text(user.id)]),
                             li([], [text(&user.email)]),
                             li([], [text(&user.first_name)]),
                             li([], [img([src(&user.avatar)], [])]),

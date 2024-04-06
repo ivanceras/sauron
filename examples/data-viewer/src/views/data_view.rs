@@ -198,12 +198,12 @@ impl DataView {
         let mut first_line = vec![];
         let _header_len = bufread
             .read_until(b'\n', &mut first_line)
-            .map_err(|e| Error::HeaderIoError(e))?;
+            .map_err(Error::HeaderIoError)?;
 
         let header_input = bytes_to_chars(&first_line);
         let table_def = table_def()
             .parse(&header_input)
-            .map_err(|e| Error::HeaderParseError(e))?;
+            .map_err(Error::HeaderParseError)?;
 
         let column_defs = table_def.columns.clone();
         trace!("bufread len: {}", bufread.buffer().len());
@@ -300,7 +300,9 @@ impl DataView {
     /// call these when new rows are set or added
     pub fn update_freeze_columns(&mut self) {
         for fc in self.frozen_columns.iter() {
-            self.column_views.get_mut(*fc).map(|fc| fc.is_frozen = true);
+            if let Some(fc) = self.column_views.get_mut(*fc){
+                fc.is_frozen = true;
+            }
         }
 
         let frozen_columns = self.frozen_columns.clone();
@@ -552,7 +554,7 @@ impl DataView {
 
     fn update_visible_pages(&mut self) {
         let visible_page = self.visible_page();
-        let visible_pages = vec![visible_page - 1, visible_page, visible_page + 1];
+        let visible_pages = [visible_page - 1, visible_page, visible_page + 1];
         self.page_views
             .iter_mut()
             .enumerate()

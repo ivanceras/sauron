@@ -25,7 +25,7 @@ impl RowView {
         RowView {
             index,
             fields: data_rows
-                .into_iter()
+                .iter()
                 .zip(data_columns.iter())
                 .map(|(value, column)| Rc::new(RefCell::new(FieldView::new(value, column))))
                 .collect(),

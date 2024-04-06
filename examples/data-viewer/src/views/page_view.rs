@@ -125,7 +125,7 @@ impl PageView {
         total_rows: usize,
     ) {
         self.row_views = data_row
-            .into_iter()
+            .iter()
             .enumerate()
             .map(|(index, row)| RowView::new(index, row, &self.data_columns))
             .collect();
@@ -135,8 +135,8 @@ impl PageView {
         self.page_height = self.height();
     }
 
-    pub fn freeze_rows(&mut self, rows: &Vec<usize>) {
-        self.frozen_rows = rows.clone();
+    pub fn freeze_rows(&mut self, rows: &[usize]) {
+        self.frozen_rows = rows.to_vec();
         self.update_frozen_rows();
     }
 
@@ -176,8 +176,8 @@ impl PageView {
             .for_each(|row_view| row_view.freeze_columns(frozen_columns.clone()))
     }
 
-    pub fn freeze_columns(&mut self, columns: &Vec<usize>) {
-        self.frozen_columns = columns.clone();
+    pub fn freeze_columns(&mut self, columns: &[usize]) {
+        self.frozen_columns = columns.to_vec();
         self.update_freeze_columns();
     }
 
