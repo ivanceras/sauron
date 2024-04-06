@@ -435,7 +435,6 @@ where
 
     /// execute DOM changes in order to reflect the APP's view into the browser representation
     pub fn update_dom(&mut self) -> Result<(), JsValue> {
-        log::info!("updating the dom...");
         let t1 = now();
         // a new view is created due to the app update
         let view = self.app_context.view();
