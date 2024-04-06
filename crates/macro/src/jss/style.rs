@@ -157,10 +157,7 @@ impl Parse for PropertyName {
         } else {
             Err(syn::Error::new(
                 input.span(),
-                format!(
-                    "Expecting a property name, found: \n\t{}",
-                    input
-                ),
+                format!("Expecting a property name, found: \n\t{}", input),
             ))
         }
     }

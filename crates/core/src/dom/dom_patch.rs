@@ -333,7 +333,7 @@ where
                                 else {
                                     unreachable!("must be an element");
                                 };
-                                if let Some(listener) = listeners.borrow_mut().as_mut(){
+                                if let Some(listener) = listeners.borrow_mut().as_mut() {
                                     listener.retain(|event, _| *event != attr.name);
                                 }
                             }
@@ -358,9 +358,9 @@ where
                     let mount_node = mount_node.as_ref().expect("must have a mount node");
                     Rc::new(Some(mount_node.clone()))
                 } else if let Some(parent_target) = target_element.parent.as_ref() {
-                        Rc::new(Some(parent_target.clone()))
+                    Rc::new(Some(parent_target.clone()))
                 } else {
-                        unreachable!("target element should have a parent");
+                    unreachable!("target element should have a parent");
                 };
 
                 first_node.parent = Rc::clone(&parent_node);

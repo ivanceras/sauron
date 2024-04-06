@@ -1,7 +1,6 @@
 use crate::dom::skip_diff::SkipAttrs;
 use sauron::*;
 
-
 #[test]
 fn skip_if_all_attribute_values_are_static() {
     let skip = extract_skip_diff! {<ul class="some-list" id="some-id"></ul>};
