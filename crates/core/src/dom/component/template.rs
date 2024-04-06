@@ -15,10 +15,10 @@ use crate::vdom::AttributeValue;
 use crate::vdom::Leaf;
 use std::any::TypeId;
 use std::cell::RefCell;
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
-use std::collections::hash_map::Entry;
 
 thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, DomNode>> = RefCell::new(HashMap::new());
@@ -42,9 +42,9 @@ pub fn register_template<MSG>(
 
 pub fn add_template(type_id: TypeId, template: &DomNode) {
     TEMPLATE_LOOKUP.with_borrow_mut(|map| {
-        if let Entry::Vacant(e) = map.entry(type_id){
+        if let Entry::Vacant(e) = map.entry(type_id) {
             e.insert(template.deep_clone());
-        }else{
+        } else {
             //already added
         }
     })
@@ -52,9 +52,7 @@ pub fn add_template(type_id: TypeId, template: &DomNode) {
 
 /// lookup for the template
 pub fn lookup_template(type_id: TypeId) -> Option<DomNode> {
-    TEMPLATE_LOOKUP.with_borrow(|map| {
-        map.get(&type_id).map(|existing|existing.deep_clone())
-    })
+    TEMPLATE_LOOKUP.with_borrow(|map| map.get(&type_id).map(|existing| existing.deep_clone()))
 }
 
 #[cfg(feature = "with-debug")]
@@ -352,8 +350,7 @@ where
                 let dom_patches = self
                     .convert_patches(&dom_template, &patches)
                     .expect("convert patches");
-                self
-                    .apply_dom_patches(dom_patches)
+                self.apply_dom_patches(dom_patches)
                     .expect("template patching");
                 dom_template
             }

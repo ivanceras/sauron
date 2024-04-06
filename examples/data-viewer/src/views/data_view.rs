@@ -300,7 +300,7 @@ impl DataView {
     /// call these when new rows are set or added
     pub fn update_freeze_columns(&mut self) {
         for fc in self.frozen_columns.iter() {
-            if let Some(fc) = self.column_views.get_mut(*fc){
+            if let Some(fc) = self.column_views.get_mut(*fc) {
                 fc.is_frozen = true;
             }
         }
