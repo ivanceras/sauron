@@ -87,7 +87,6 @@ impl Component for DataView {
                 Effects::none()
             }
             Msg::MouseMove(client_x, _client_y) => {
-                debug!("debug in column view from the window..");
                 if let Some((column_index, active_resize)) = self.active_resize.clone() {
                     match active_resize {
                         Grip::Left => {}
