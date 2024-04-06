@@ -2,11 +2,12 @@ use crate::widgets::*;
 use restq::{ast::Value, data_value::cast_data_value, ColumnDef, DataType, DataValue};
 use sauron::{
     html::{
-        attributes::{class, classes_flag, r#type, styles},
+        attributes::{class, classes_flag, r#type},
         events::*,
         units::px,
         *,
     },
+    style,
     Attribute, Component, Effects, Node,
 };
 
@@ -132,19 +133,22 @@ impl FieldView {
     }
 
     fn css_size(&self) -> Attribute<Msg> {
-        styles([("width", px(self.width)), ("height", px(self.height))])
+        style!{
+            width: px(self.width), 
+            height: px(self.height)
+        }
     }
 
     fn css_padding(&self) -> Attribute<Msg> {
-        styles([(
-            "padding",
+        style!{
+            padding:
             [
                 px(Self::padding_top()),
                 px(Self::side_padding()),
                 px(Self::padding_bottom()),
                 px(Self::side_padding()),
             ],
-        )])
+        }
     }
 
     fn view_value_as_primary(&self) -> Node<Msg> {

@@ -6,12 +6,12 @@ use crate::{
 use restq::{bytes_to_chars, table_def, CsvRows, TableName};
 use sauron::{
     html::{
-        attributes::{class, key, styles},
+        attributes::{class, key},
         events::*,
         units::*,
         *,
     },
-    Component, Effects, Node,
+    Component, Effects, Node, style
 };
 use std::{
     cell::RefCell,
@@ -117,10 +117,10 @@ impl Component for DataView {
         main(
             [
                 class("data_view grid"),
-                styles([
-                    ("width", px(self.allocated_width - 40)),
-                    ("min-width", px(self.calculate_min_width())),
-                ]),
+                style!{
+                    width: px(self.allocated_width - 40),
+                    min_width: px(self.calculate_min_width()),
+                },
                 // to ensure no reusing of table view when replaced with
                 // another table
                 key(format!("data_view_{}", self.table_name.name)),
@@ -153,15 +153,17 @@ impl Component for DataView {
                 section(
                     [
                         class("data_view__normal_column_names__frozen_rows"),
-                        styles([
-                            ("width", px(self.calculate_normal_rows_width())),
-                            ("overflow-x", "hidden".to_string()),
-                        ]),
+                        style!{
+                            width: px(self.calculate_normal_rows_width()),
+                            overflow_x: "hidden",
+                        },
                     ],
                     [section(
                         [
                             class("normal_column_names__frozen_rows"),
-                            styles([("margin-left", px(-self.scroll_left))]),
+                            style!{
+                                margin_left: px(-self.scroll_left)
+                            }
                         ],
                         [
                             // can move left and right
@@ -175,10 +177,10 @@ impl Component for DataView {
                 section(
                     [
                         class("data_view__frozen_columns_container"),
-                        styles([
-                            ("height", px(self.calculate_normal_rows_height())),
-                            ("overflow-y", "hidden".to_string()),
-                        ]),
+                        style!{
+                            height: px(self.calculate_normal_rows_height()),
+                            overflow_y: "hidden",
+                        },
                     ],
                     [self.view_frozen_columns()],
                 ),
@@ -416,7 +418,9 @@ impl DataView {
         ol(
             [
                 class("data_view__frozen_columns"),
-                styles([("margin-top", px(-self.scroll_top))]),
+                style!{
+                    margin_top: px(-self.scroll_top),
+                }
             ],
             self.page_views
                 .iter()
@@ -470,7 +474,9 @@ impl DataView {
                 div(
                     [
                         class("column_view__grip column_view__grip--right"),
-                        styles([("width", px(ColumnView::grip_width()))]),
+                        style!{
+                            width: px(ColumnView::grip_width()),
+                        },
                         on_mousedown(move |event| {
                             Msg::ColumnStartResize(
                                 index,
@@ -527,10 +533,10 @@ impl DataView {
         div(
             [
                 class("data_view__normal_rows flex-column"),
-                styles([
-                    ("width", px(self.calculate_normal_rows_width())),
-                    ("height", px(self.calculate_normal_rows_height())),
-                ]),
+                style!{
+                    width: px(self.calculate_normal_rows_width()),
+                    height: px(self.calculate_normal_rows_height()),
+                },
                 on_scroll(Msg::Scrolled),
             ],
             self.page_views

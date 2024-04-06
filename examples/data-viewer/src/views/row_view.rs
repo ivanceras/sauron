@@ -2,7 +2,7 @@ use crate::views::{field_view, FieldView};
 use restq::{ColumnDef, DataValue};
 use sauron::{
     html::{attributes::*, events::*, units::*, *},
-    Component, Effects, Node,
+    Component, Effects, Node, style
 };
 use std::{cell::RefCell, rc::Rc};
 
@@ -99,7 +99,7 @@ impl RowView {
                     ("row_view--frozen_row", self.is_frozen),
                     ("row_view--modified", self.is_changed()),
                 ]),
-                styles([("height", px(Self::row_height()))]),
+                style!{height: px(Self::row_height())},
                 on_click(|_| Msg::Click),
                 on_dblclick(|_| Msg::DoubleClick),
             ],

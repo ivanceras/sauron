@@ -1,6 +1,6 @@
 use sauron::{
     html::{attributes::*, units::px, *},
-    Attribute, Node,
+    Attribute, Node, style
 };
 use search_widget::SearchWidget;
 
@@ -69,7 +69,7 @@ pub(crate) fn selector_box<MSG>(
             [
                 r#type("checkbox"),
                 class("selector_box__checkbox"),
-                styles([("width", px(30))]),
+                style!{width: px(30)},
             ],
             [],
         )
