@@ -491,7 +491,7 @@ impl DataView {
     /// Therefore can not move in any direction
     /// These are records that has its rows and columns both frozen
     fn view_immovable_rows(&self) -> Node<Msg> {
-        ol(
+        div(
             [class("data_view__immovable_frozen_columns")],
             self.page_views
                 .iter()
@@ -508,7 +508,7 @@ impl DataView {
     /// These are the pinned columns
     fn view_frozen_rows(&self) -> Node<Msg> {
         // can move left and right, but not up and down
-        ol(
+        div(
             [class("data_view__frozen_rows flex-column")],
             self.page_views
                 .iter()
@@ -525,7 +525,7 @@ impl DataView {
     /// The rest of the columns and move in any direction
     fn view_normal_rows(&self) -> Node<Msg> {
         // can move: left, right, up, down
-        ol(
+        div(
             [
                 class("data_view__normal_rows flex-column"),
                 styles([
