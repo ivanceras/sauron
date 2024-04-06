@@ -27,7 +27,7 @@ impl CustomElementParts {
         assert_eq!(msg_types.len(), 1);
         let msg_type = msg_types[0].clone();
         let self_types = extract_idents_from_type_path(&item_impl.self_ty);
-        let self_type_has_empty_tuple_generics = contains_empty_tuple(&path);
+        let self_type_has_empty_tuple_generics = contains_empty_tuple(path);
         assert_eq!(self_types.len(), 1);
         let self_type = self_types[0].clone();
         let struct_name = self_types

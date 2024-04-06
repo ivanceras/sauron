@@ -83,7 +83,7 @@ fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> 
     }
     let replace = |_old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
         let explicit_replace_attr = new_node
-            .first_value(&REPLACE)
+            .first_value(REPLACE)
             .and_then(|v| v.as_bool())
             .unwrap_or(false);
 
@@ -125,13 +125,13 @@ pub fn diff_recursive<'a, MSG>(
     }
 
     let skip = |old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
-        let new_skip_criteria = new_node.attribute_value(&SKIP_CRITERIA);
-        let old_skip_criteria = old_node.attribute_value(&SKIP_CRITERIA);
+        let new_skip_criteria = new_node.attribute_value(SKIP_CRITERIA);
+        let old_skip_criteria = old_node.attribute_value(SKIP_CRITERIA);
         // if old and new skip_criteria didn't change skip diffing this nodes
         match (new_skip_criteria, old_skip_criteria) {
             (Some(new), Some(old)) => new == old,
             _ => new_node
-                .first_value(&SKIP)
+                .first_value(SKIP)
                 .and_then(|v| v.as_bool())
                 .unwrap_or(false),
         }
@@ -196,7 +196,7 @@ pub fn diff_recursive<'a, MSG>(
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(old_comp), Leaf::StatefulComponent(new_comp)) => {
-                    let patch = diff_nodes(None, &old_comp.children, &new_comp.children, &path);
+                    let patch = diff_nodes(None, &old_comp.children, &new_comp.children, path);
                     patches.extend(patch);
                 }
                 (Leaf::TemplatedView(_old_view), _) => {
@@ -226,8 +226,8 @@ pub fn diff_recursive<'a, MSG>(
 
             let more_patches = diff_nodes(
                 Some(old_element.tag()),
-                &old_element.children(),
-                &new_element.children(),
+                old_element.children(),
+                new_element.children(),
                 path,
             );
 
@@ -325,6 +325,7 @@ fn diff_non_keyed_nodes<'a, MSG>(
 /// Note: The performance bottlenecks
 ///     - allocating new vec
 ///     - merging attributes of the same name
+#[allow(clippy::type_complexity)]
 fn create_attribute_patches<'a, MSG>(
     old_element: &'a Element<MSG>,
     new_element: &'a Element<MSG>,
@@ -387,11 +388,9 @@ fn create_attribute_patches<'a, MSG>(
                 old_indexed_attr_values.into_iter().unzip();
             if USE_SKIP_DIFF && has_skip_indices && is_subset_of(&old_indices, &skip_indices) {
                 //
-            } else {
-                if old_attr_values != new_attr_values {
-                    for (_i, new_att) in new_attrs {
-                        add_attributes.push(new_att);
-                    }
+            } else if old_attr_values != new_attr_values {
+                for (_i, new_att) in new_attrs {
+                    add_attributes.push(new_att);
                 }
             }
         } else {
@@ -408,10 +407,8 @@ fn create_attribute_patches<'a, MSG>(
             old_indexed_attrs.into_iter().unzip();
         if USE_SKIP_DIFF && has_skip_indices && is_subset_of(&old_indices, &skip_indices) {
             //
-        } else {
-            if !new_attributes_grouped.contains_key(old_attr_name) {
-                remove_attributes.extend(old_attrs.clone());
-            }
+        } else if !new_attributes_grouped.contains_key(old_attr_name) {
+            remove_attributes.extend(old_attrs.clone());
         }
     }
 

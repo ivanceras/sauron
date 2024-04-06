@@ -39,7 +39,7 @@ impl SkipDiff {
     pub fn in_path(&self, path: &TreePath) -> Option<&Self> {
         let mut path = path.clone();
         if path.is_empty() {
-            Some(&self)
+            Some(self)
         } else {
             let idx = path.remove_first();
             if let Some(child) = self.children.get(idx) {

@@ -159,7 +159,7 @@ impl Parse for PropertyName {
                 input.span(),
                 format!(
                     "Expecting a property name, found: \n\t{}",
-                    input.to_string()
+                    input
                 ),
             ))
         }

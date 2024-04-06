@@ -27,8 +27,8 @@ impl<MSG> fmt::Debug for TemplatedView<MSG> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("TemplatedView")
             .field("view", &self.view)
-            .field("template", &(&self.template)())
-            .field("skip_diff", &(&self.skip_diff)())
+            .field("template", &(self.template)())
+            .field("skip_diff", &(self.skip_diff)())
             .finish()
     }
 }

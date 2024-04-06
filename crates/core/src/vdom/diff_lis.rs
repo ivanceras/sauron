@@ -12,7 +12,7 @@ pub fn diff_keyed_nodes<'a, MSG>(
     new_children: &'a [Node<MSG>],
     path: &SkipPath,
 ) -> Vec<Patch<'a, MSG>> {
-    if old_children.len() > 0 && new_children.len() == 0 {
+    if !old_children.is_empty() && new_children.is_empty() {
         return vec![Patch::clear_children(old_tag, path.path.clone())];
     }
 

@@ -166,7 +166,7 @@ where
         let Effects { local, external } = self;
 
         Effects {
-            local: local.into_iter().chain(external.into_iter()).collect(),
+            local: local.into_iter().chain(external).collect(),
             external: vec![],
         }
     }
