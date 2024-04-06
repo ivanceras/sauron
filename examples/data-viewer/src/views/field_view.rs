@@ -310,15 +310,6 @@ impl FieldView {
                     on_change(|input| Msg::TextChange(input.value())),
                 ],
             ),
-            DataValue::Local(v) => datebox(
-                v.format("%Y-%m-%d").to_string(),
-                [
-                    classes,
-                    size,
-                    padding,
-                    on_change(|input| Msg::TextChange(input.value())),
-                ],
-            ),
             _ => {
                 trace!("todo for: {:?}", self.value);
                 text("unknown")
