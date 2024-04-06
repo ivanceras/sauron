@@ -1,6 +1,6 @@
 use crate::dom::skip_diff::SkipAttrs;
 use sauron::*;
-use sauron_macro::*;
+
 
 #[test]
 fn skip_if_all_attribute_values_are_static() {

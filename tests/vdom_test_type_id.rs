@@ -44,8 +44,8 @@ fn test_type_ids() {
     assert_ne!(cb2, cb3);
     //assert_eq!(cb1, other_cb); //can not compare this one since they have different types
 
-    let map_cb2 = cb2.clone().map_msg(|msg| HigherMsg::Msg(msg));
-    let alt_map_cb2 = cb2.map_msg(|msg| HigherMsg::Msg(msg));
+    let map_cb2 = cb2.clone().map_msg(HigherMsg::Msg);
+    let alt_map_cb2 = cb2.map_msg(HigherMsg::Msg);
 
     assert_eq!(map_cb2, alt_map_cb2);
 }
