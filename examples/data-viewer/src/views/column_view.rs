@@ -1,8 +1,7 @@
 use crate::{assets, widgets::search_widget, ColumnDef};
 use sauron::{
     html::{attributes::*, events::*, units::*, *},
-    Component, Effects, Node,
-    style
+    style, Component, Effects, Node,
 };
 
 #[derive(Debug, PartialEq)]
@@ -88,16 +87,16 @@ impl ColumnView {
             [
                 class("column_view__controls flex-column"),
                 classes_flag([("column_view__controls--frozen", self.is_frozen)]),
-                style!{
-                    height: px(self.height), 
+                style! {
+                    height: px(self.height),
                     width: px(controls_width),
-                }
+                },
             ],
             [
                 div(
                     [
                         class("column_controls flex-row"),
-                        style!{
+                        style! {
                             width: px(self_width),
                             padding_left: px(Self::side_padding_width()),
                             padding_right: px(Self::side_padding_width()),

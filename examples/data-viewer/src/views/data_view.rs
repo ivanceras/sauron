@@ -11,7 +11,7 @@ use sauron::{
         units::*,
         *,
     },
-    Component, Effects, Node, style
+    style, Component, Effects, Node,
 };
 use std::{
     cell::RefCell,
@@ -117,7 +117,7 @@ impl Component for DataView {
         main(
             [
                 class("data_view grid"),
-                style!{
+                style! {
                     width: px(self.allocated_width - 40),
                     min_width: px(self.calculate_min_width()),
                 },
@@ -153,7 +153,7 @@ impl Component for DataView {
                 section(
                     [
                         class("data_view__normal_column_names__frozen_rows"),
-                        style!{
+                        style! {
                             width: px(self.calculate_normal_rows_width()),
                             overflow_x: "hidden",
                         },
@@ -161,9 +161,9 @@ impl Component for DataView {
                     [section(
                         [
                             class("normal_column_names__frozen_rows"),
-                            style!{
+                            style! {
                                 margin_left: px(-self.scroll_left)
-                            }
+                            },
                         ],
                         [
                             // can move left and right
@@ -177,7 +177,7 @@ impl Component for DataView {
                 section(
                     [
                         class("data_view__frozen_columns_container"),
-                        style!{
+                        style! {
                             height: px(self.calculate_normal_rows_height()),
                             overflow_y: "hidden",
                         },
@@ -406,7 +406,6 @@ impl DataView {
         self.scrollbar_to_bottom() <= scroll_bottom_allowance
     }
 
-
     /// These are values in a row that is under the frozen columns
     /// Can move up and down
     fn view_frozen_columns(&self) -> Node<Msg> {
@@ -414,9 +413,9 @@ impl DataView {
         ol(
             [
                 class("data_view__frozen_columns"),
-                style!{
+                style! {
                     margin_top: px(-self.scroll_top),
-                }
+                },
             ],
             self.page_views
                 .iter()
@@ -470,7 +469,7 @@ impl DataView {
                 div(
                     [
                         class("column_view__grip column_view__grip--right"),
-                        style!{
+                        style! {
                             width: px(ColumnView::grip_width()),
                         },
                         on_mousedown(move |event| {
@@ -529,7 +528,7 @@ impl DataView {
         div(
             [
                 class("data_view__normal_rows flex-column"),
-                style!{
+                style! {
                     width: px(self.calculate_normal_rows_width()),
                     height: px(self.calculate_normal_rows_height()),
                 },

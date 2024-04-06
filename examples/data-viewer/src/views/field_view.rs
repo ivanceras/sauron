@@ -7,8 +7,7 @@ use sauron::{
         units::px,
         *,
     },
-    style,
-    Attribute, Component, Effects, Node,
+    style, Attribute, Component, Effects, Node,
 };
 
 #[derive(Debug, PartialEq)]
@@ -133,14 +132,14 @@ impl FieldView {
     }
 
     fn css_size(&self) -> Attribute<Msg> {
-        style!{
-            width: px(self.width), 
+        style! {
+            width: px(self.width),
             height: px(self.height)
         }
     }
 
     fn css_padding(&self) -> Attribute<Msg> {
-        style!{
+        style! {
             padding:
             [
                 px(Self::padding_top()),

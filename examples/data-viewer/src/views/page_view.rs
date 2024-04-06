@@ -9,8 +9,7 @@ use sauron::{
         units::*,
         *,
     },
-    Component, Effects, Node,
-    style
+    style, Component, Effects, Node,
 };
 
 #[derive(Debug, PartialEq)]
@@ -91,7 +90,7 @@ impl Component for PageView {
             div(
                 [
                     class("page_view__page_holder"),
-                    style!{height: px(self.height())},
+                    style! {height: px(self.height())},
                 ],
                 [],
             )
@@ -168,7 +167,6 @@ impl PageView {
             })
     }
 
-
     /// Keep updating which columns are frozen
     /// call these when new rows are set or added
     pub fn update_freeze_columns(&mut self) {
@@ -214,7 +212,7 @@ impl PageView {
                             "page_view__frozen_columns__selector__frozen_column_rows flex-row",
                         )],
                         [
-                            selector_box(false, [], [style!{width: px(30)}]),
+                            selector_box(false, [], [style! {width: px(30)}]),
                             row_view
                                 .view_frozen_columns()
                                 .map_msg(move |row_msg| Msg::RowMsg(index, row_msg)),
@@ -240,7 +238,7 @@ impl PageView {
                             selector_box(
                                 false,
                                 [class("immovable_rows__selector_box")],
-                                [style!{width: px(30)}],
+                                [style! {width: px(30)}],
                             ),
                             row_view
                                 .view_immovable_fields()

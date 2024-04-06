@@ -1,20 +1,19 @@
 #![deny(warnings)]
+pub use app::App;
 pub use error::Error;
 use log::Level;
 pub use restq::{ast::ddl::DataTypeDef, ColumnDef, DataType, DataValue};
 use sauron::*;
 use views::DataView;
-pub use app::App;
 
 #[macro_use]
 extern crate log;
 
+pub(crate) mod app;
 pub(crate) mod assets;
 mod error;
 mod views;
 pub(crate) mod widgets;
-pub(crate) mod app;
-
 
 #[wasm_bindgen]
 pub fn initialize(initial_state: &str) {
