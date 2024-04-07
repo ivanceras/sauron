@@ -51,6 +51,7 @@ wasm-bindgen-futures = "0.4.31"
 regex = "1"
 sauron-html-parser = { path = "crates/html-parser" }
 sauron = { path = ".", features = ["test-fixtures", "html-parser", "log-patches"] }
+doc-comment = "0.3.3"
 
 [dev-dependencies.web-sys]
 version = "0.3"

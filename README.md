@@ -123,6 +123,7 @@ pub fn start() {
 ```
 
 `index.html`
+
 ```html
 <!doctype html>
 <html>
@@ -166,7 +167,7 @@ Build using
 wasm-pack build --target web --release
 ```
 Serve using
-```
+```sh
 basic-http-server -a 0.0.0.0:4000
 ```
 Then navigate to http://localhost:4000
