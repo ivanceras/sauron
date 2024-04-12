@@ -1,19 +1,12 @@
-use crate::dom::events::on_mount;
-use crate::dom::program::MountProcedure;
-use crate::dom::Application;
-use crate::dom::Cmd;
-use crate::dom::Component;
-use crate::dom::DomAttrValue;
-use crate::dom::DomNode;
-use crate::dom::Program;
-use crate::vdom::Attribute;
-use crate::vdom::AttributeName;
-use crate::vdom::Leaf;
-use crate::vdom::Node;
-use std::any::TypeId;
-use std::cell::RefCell;
-use std::fmt;
-use std::rc::Rc;
+use std::{any::TypeId, cell::RefCell, fmt, rc::Rc};
+
+use crate::{
+    dom::{
+        events::on_mount, program::MountProcedure, Application, Cmd, Component, DomAttrValue,
+        DomNode, Program,
+    },
+    vdom::{Attribute, AttributeName, Leaf, Node},
+};
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
@@ -172,16 +165,13 @@ where
 
 #[cfg(feature = "with-dom")]
 impl From<wasm_bindgen::JsValue> for DomAttrValue {
-    fn from(val: wasm_bindgen::JsValue) -> DomAttrValue {
+    fn from(val: wasm_bindgen::JsValue) -> Self {
         if let Some(v) = val.as_bool() {
             DomAttrValue::Simple(v.into())
         } else if let Some(v) = val.as_f64() {
             DomAttrValue::Simple(v.into())
         } else if let Some(v) = val.as_string() {
             DomAttrValue::Simple(v.into())
-        } else if val.is_null() {
-            log::info!("it is a null value");
-            DomAttrValue::Empty
         } else {
             todo!("handle other conversion, other than bool, f64, strings, nulls ")
         }

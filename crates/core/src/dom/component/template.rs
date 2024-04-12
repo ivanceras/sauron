@@ -1,24 +1,14 @@
-use crate::dom::document;
-use crate::dom::dom_node::intern;
-use crate::dom::dom_node::DomInner;
-use crate::dom::now;
-use crate::dom::Application;
-use crate::dom::DomAttr;
-use crate::dom::DomAttrValue;
-use crate::dom::DomNode;
-use crate::dom::GroupedDomAttrValues;
-use crate::dom::Program;
-use crate::dom::StatelessModel;
-use crate::vdom;
-use crate::vdom::Attribute;
-use crate::vdom::AttributeValue;
-use crate::vdom::Leaf;
-use std::any::TypeId;
-use std::cell::RefCell;
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
-use std::rc::Rc;
+use std::{any::TypeId, cell::RefCell, collections::hash_map, collections::HashMap, rc::Rc};
+
 use wasm_bindgen::JsCast;
+
+use crate::{
+    dom::{
+        document, dom_node::intern, dom_node::DomInner, now, Application, DomAttr, DomAttrValue,
+        DomNode, GroupedDomAttrValues, Program, StatelessModel,
+    },
+    vdom::{self, Attribute, AttributeValue, Leaf},
+};
 
 thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, DomNode>> = RefCell::new(HashMap::new());
@@ -42,10 +32,10 @@ pub fn register_template<MSG>(
 
 pub fn add_template(type_id: TypeId, template: &DomNode) {
     TEMPLATE_LOOKUP.with_borrow_mut(|map| {
-        if let Entry::Vacant(e) = map.entry(type_id) {
+        if let hash_map::Entry::Vacant(e) = map.entry(type_id) {
             e.insert(template.deep_clone());
         } else {
-            //already added
+            // already added
         }
     })
 }
@@ -95,7 +85,7 @@ impl Section {
 }
 
 #[cfg(feature = "with-debug")]
-thread_local!(pub static TIME_SPENT: RefCell<Vec<Section>> = const {RefCell::new(vec![])});
+thread_local!(pub static TIME_SPENT: RefCell<Vec<Section>> = const { RefCell::new(vec![]) });
 
 #[cfg(feature = "with-debug")]
 pub fn add_time_trace(section: Section) {

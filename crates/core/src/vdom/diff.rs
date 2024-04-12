@@ -363,21 +363,19 @@ fn create_attribute_patches<'a, MSG>(
     // or the values differ
     // add it to the AddAttribute patches
     for (new_attr_name, new_attrs) in new_attributes_grouped.iter() {
-        let old_indexed_attr_values: Option<Vec<(usize, &Vec<AttributeValue<MSG>>)>> =
-            old_attributes_grouped.get(new_attr_name).map(|attrs| {
-                attrs
-                    .iter()
-                    .map(|(i, attr)| (*i, &attr.value))
-                    .collect::<Vec<_>>()
-            });
+        let old_indexed_attr_values = old_attributes_grouped.get(new_attr_name).map(|attrs| {
+            attrs
+                .iter()
+                .map(|(i, attr)| (*i, &attr.value))
+                .collect::<Vec<_>>()
+        });
 
-        let new_indexed_attr_values: Option<Vec<(usize, &Vec<AttributeValue<MSG>>)>> =
-            new_attributes_grouped.get(new_attr_name).map(|attrs| {
-                attrs
-                    .iter()
-                    .map(|(i, attr)| (*i, &attr.value))
-                    .collect::<Vec<_>>()
-            });
+        let new_indexed_attr_values = new_attributes_grouped.get(new_attr_name).map(|attrs| {
+            attrs
+                .iter()
+                .map(|(i, attr)| (*i, &attr.value))
+                .collect::<Vec<_>>()
+        });
 
         if let Some(old_indexed_attr_values) = old_indexed_attr_values {
             let new_indexed_attr_values =
@@ -388,7 +386,8 @@ fn create_attribute_patches<'a, MSG>(
                 old_indexed_attr_values.into_iter().unzip();
             if USE_SKIP_DIFF && has_skip_indices && is_subset_of(&old_indices, &skip_indices) {
                 //
-            } else if old_attr_values != new_attr_values {
+            }
+            if old_attr_values != new_attr_values {
                 for (_i, new_att) in new_attrs {
                     add_attributes.push(new_att);
                 }

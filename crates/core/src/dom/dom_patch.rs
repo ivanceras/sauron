@@ -141,7 +141,7 @@ where
             let patch_tag = patch.tag();
             if let Some(target_node) = nodes_lookup.get(patch_path) {
                 let target_tag = target_node.tag();
-                if let (Some(patch_tag), Some(target_tag)) =(patch_tag, target_tag) {
+                if let (Some(patch_tag), Some(target_tag)) = (patch_tag, target_tag) {
                     if **patch_tag != target_tag{
                         panic!(
                             "expecting a tag: {patch_tag:?}, but found: {target_tag:?}"
@@ -334,7 +334,7 @@ where
                                     unreachable!("must be an element");
                                 };
                                 if let Some(listener) = listeners.borrow_mut().as_mut() {
-                                    listener.retain(|event, _| *event != attr.name);
+                                    listener.retain(|event, _| *event != attr.name)
                                 }
                             }
                             DomAttrValue::Style(_) => {

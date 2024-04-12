@@ -7,7 +7,7 @@ use std::pin::Pin;
 #[cfg(feature = "with-dom")]
 use wasm_bindgen::closure::Closure;
 
-/// Cnd is a way to tell the Runtime that something needs to be executed
+/// Cmd is a way to tell the Runtime that something needs to be executed
 pub struct Cmd<MSG> {
     /// commands
     pub(crate) commands: Vec<Command<MSG>>,
