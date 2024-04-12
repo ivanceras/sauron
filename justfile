@@ -1,6 +1,7 @@
 
 test:
     cargo test --all --no-fail-fast
+    cargo test --all --all-features
 check:
     cargo check --all
 

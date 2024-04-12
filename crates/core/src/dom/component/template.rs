@@ -285,7 +285,7 @@ where
         comp: &StatelessModel<APP::MSG>,
     ) -> DomNode {
         #[cfg(feature = "with-trace")]
-        let t1 = crate::now();
+        let t1 = crate::dom::now();
         let comp_view = &comp.view;
         let vdom_template = comp_view.template();
         let skip_diff = comp_view.skip_diff();
@@ -297,19 +297,19 @@ where
                 let template = register_template(comp.type_id, parent_node, &vdom_template);
                 let real_comp_view = comp_view.unwrap_template_ref();
                 #[cfg(feature = "with-trace")]
-                let t2 = crate::now();
+                let t2 = crate::dom::now();
                 let patches =
                     self.create_patches_with_skip_diff(&vdom_template, real_comp_view, &skip_diff);
                 #[cfg(feature = "with-trace")]
-                let t3 = crate::now();
+                let t3 = crate::dom::now();
                 let dom_patches = self
                     .convert_patches(&template, &patches)
                     .expect("convert patches");
                 #[cfg(feature = "with-trace")]
-                let t4 = crate::now();
+                let t4 = crate::dom::now();
                 self.apply_dom_patches(dom_patches).expect("patch template");
                 #[cfg(feature = "with-trace")]
-                let t5 = crate::now();
+                let t5 = crate::dom::now();
 
                 #[cfg(feature = "with-trace")]
                 add_time_trace(Section {
