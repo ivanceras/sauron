@@ -330,7 +330,7 @@ where
     fn create_initial_view(&self) -> DomNode {
         let current_view = self.app_context.current_vdom();
         let real_view = current_view.unwrap_template_ref();
-        self.create_dom_node(Rc::new(None), &real_view)
+        self.create_dom_node(Rc::new(None), real_view)
     }
 
     /// each element and it's descendant in the vdom is created into
@@ -449,7 +449,7 @@ where
             let real_current_vdom = current_vdom.unwrap_template_ref();
             let real_view = view.unwrap_template_ref();
             let patches =
-                self.create_patches_with_skip_diff(&real_current_vdom, &real_view, &skip_diff);
+                self.create_patches_with_skip_diff(real_current_vdom, real_view, &skip_diff);
             #[cfg(all(feature = "with-debug", feature = "log-patches"))]
             {
                 log::info!("There are {} patches", patches.len());
@@ -487,7 +487,7 @@ where
             weak_count,
         };
 
-        #[cfg(all(feature = "with-debug",feature = "use-template"))]
+        #[cfg(all(feature = "with-debug", feature = "use-template"))]
         {
             let total = crate::dom::component::template::total_time_spent();
             log::info!("total: {:#?}", total);
@@ -546,8 +546,8 @@ where
         assert!(!old_vdom.is_template(), "old vdom should not be a template");
         assert!(!new_vdom.is_template(), "new vdom should not be a template");
         diff_recursive(
-            &old_vdom,
-            &new_vdom,
+            old_vdom,
+            new_vdom,
             &SkipPath::new(TreePath::root(), skip_diff.clone()),
         )
     }

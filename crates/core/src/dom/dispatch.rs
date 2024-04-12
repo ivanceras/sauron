@@ -2,7 +2,7 @@
 //! when the application starts or after the application updates.
 //!
 use crate::dom::Program;
-use crate::dom::{Application, Effects, Cmd};
+use crate::dom::{Application, Cmd, Effects};
 use wasm_bindgen_futures::spawn_local;
 
 /// Dispatch is a command to be executed by the system.
@@ -58,16 +58,13 @@ where
 
     /// Tell the runtime that there are no commands.
     pub fn none() -> Self {
-        Dispatch {
-            commands: vec![],
-        }
+        Dispatch { commands: vec![] }
     }
 
     /// returns true if commands is empty
     pub fn is_empty(&self) -> bool {
         self.commands.is_empty()
     }
-
 
     /// Executes the Dispatch
     pub(crate) fn emit(self, program: Program<APP>) {
@@ -96,15 +93,11 @@ where
     fn from(effects: Effects<APP::MSG, ()>) -> Self {
         // we can safely ignore the effects here
         // as there is no content on it.
-        let Effects {
-            local,
-            external: _,
-        } = effects;
+        let Effects { local, external: _ } = effects;
 
         Dispatch::batch(local.into_iter().map(Dispatch::from))
     }
 }
-
 
 impl<APP, IN> From<IN> for Dispatch<APP>
 where
@@ -122,7 +115,7 @@ where
 {
     fn from(task: Cmd<APP::MSG>) -> Self {
         Dispatch::new(move |program| {
-            for mut command in task.commands.into_iter(){
+            for mut command in task.commands.into_iter() {
                 let program = program.downgrade();
                 spawn_local(async move {
                     let mut program = program.upgrade().expect("upgrade");

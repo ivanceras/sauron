@@ -6,7 +6,7 @@ fn simple() {
     let skip = skip_if(false, []);
     let path = TreePath::new([]);
 
-    assert_eq!(skip.in_path(&path).unwrap().shall_skip_attributes(), false);
+    assert!(!skip.in_path(&path).unwrap().shall_skip_attributes());
 }
 
 #[test]
@@ -14,7 +14,7 @@ fn simple_skip() {
     let skip = skip_if(true, []);
     let path = TreePath::new([]);
 
-    assert_eq!(skip.in_path(&path).unwrap().shall_skip_attributes(), true);
+    assert!(skip.in_path(&path).unwrap().shall_skip_attributes());
 }
 
 #[test]
@@ -22,7 +22,7 @@ fn skip_level1() {
     let skip = skip_if(false, [skip_if(true, [])]);
     let path = TreePath::new([0]);
 
-    assert_eq!(skip.in_path(&path).unwrap().shall_skip_attributes(), true);
+    assert!(skip.in_path(&path).unwrap().shall_skip_attributes());
 }
 
 #[test]
@@ -36,7 +36,7 @@ fn dont_collapsed_with_templates() {
     );
     let path = TreePath::new([0]);
 
-    assert_eq!(skip.in_path(&path).unwrap().shall_skip_attributes(), false);
+    assert!(!skip.in_path(&path).unwrap().shall_skip_attributes());
 }
 
 #[test]
@@ -50,5 +50,5 @@ fn dont_skip_if_path_has_a_sibling_that_cant_be_skipped() {
     );
     let path = TreePath::new([0]);
 
-    assert_eq!(skip.in_path(&path).unwrap().shall_skip_attributes(), false);
+    assert!(!skip.in_path(&path).unwrap().shall_skip_attributes());
 }

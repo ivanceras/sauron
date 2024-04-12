@@ -426,8 +426,7 @@ impl DomNode {
             parent.replace_child(self, replacement);
         } else {
             //NOTE: This must be replacing a mount node
-            self
-                .as_element()
+            self.as_element()
                 .replace_with_with_node_1(&replacement.as_node())
                 .expect("must replace child");
         }
@@ -457,7 +456,7 @@ impl DomNode {
                     styles,
                 } = attr.group_values();
 
-                Self::add_event_dom_listeners(&element, attr_name, &event_callbacks)
+                Self::add_event_dom_listeners(element, attr_name, &event_callbacks)
                     .expect("event listeners");
                 let is_none = listeners.borrow().is_none();
                 if is_none {
@@ -472,9 +471,9 @@ impl DomNode {
                     }
                 }
 
-                DomAttr::set_element_style(&element, attr_name, styles);
+                DomAttr::set_element_style(element, attr_name, styles);
                 DomAttr::set_element_simple_values(
-                    &element,
+                    element,
                     attr_name,
                     attr_namespace,
                     plain_values,
@@ -489,7 +488,7 @@ impl DomNode {
         let DomInner::Element { element, .. } = &self.inner else {
             unreachable!("expecting an element");
         };
-        DomAttr::remove_element_dom_attr(&element, attr)
+        DomAttr::remove_element_dom_attr(element, attr)
     }
 
     /// attach and event listener to an event target
@@ -498,8 +497,8 @@ impl DomNode {
         attr_name: &'static str,
         event_listeners: &[EventClosure],
     ) -> Result<(), JsValue> {
-        for event_cb in event_listeners.into_iter() {
-            Self::add_event_listener(target, attr_name, &event_cb)?;
+        for event_cb in event_listeners.iter() {
+            Self::add_event_listener(target, attr_name, event_cb)?;
         }
         Ok(())
     }
@@ -517,9 +516,11 @@ impl DomNode {
         Ok(())
     }
 
-    fn dispatch_mount_event(&self){
-        let event_target:web_sys::EventTarget = self.as_element().unchecked_into();
-        event_target.dispatch_event(&MountEvent::create_web_event()).expect("must be ok");
+    fn dispatch_mount_event(&self) {
+        let event_target: web_sys::EventTarget = self.as_element().unchecked_into();
+        event_target
+            .dispatch_event(&MountEvent::create_web_event())
+            .expect("must be ok");
     }
 
     /// render this DomNode into an html string represenation
@@ -706,7 +707,7 @@ where
         let dom_node_rc = Rc::new(Some(dom_node.clone()));
         let children = nodes
             .into_iter()
-            .map(|node| self.create_dom_node(Rc::clone(&dom_node_rc), &node))
+            .map(|node| self.create_dom_node(Rc::clone(&dom_node_rc), node))
             .collect();
         dom_node.append_children(children);
         dom_node
@@ -741,7 +742,7 @@ where
             &crate::html::div(
                 [crate::html::attributes::class("component")]
                     .into_iter()
-                    .chain(comp.attrs.clone().into_iter()),
+                    .chain(comp.attrs.clone()),
                 [],
             ),
         );
@@ -751,7 +752,7 @@ where
         let created_children = comp
             .children
             .iter()
-            .map(|child| self.create_dom_node(Rc::clone(&parent_node), &child))
+            .map(|child| self.create_dom_node(Rc::clone(&parent_node), child))
             .collect();
         comp.comp.borrow_mut().append_children(created_children);
         comp_node
@@ -765,9 +766,8 @@ where
     ) -> DomNode {
         let comp_view = &comp.view;
         let real_comp_view = comp_view.unwrap_template_ref();
-        self.create_dom_node(parent_node, &real_comp_view)
+        self.create_dom_node(parent_node, real_comp_view)
     }
-
 
     /// set element with the dom attrs
     pub(crate) fn set_element_dom_attrs(
@@ -844,7 +844,7 @@ pub(crate) fn find_node(target_node: &DomNode, path: &mut TreePath) -> Option<Do
         let idx = path.remove_first();
         let children = target_node.children()?;
         if let Some(child) = children.get(idx) {
-            find_node(&child, path)
+            find_node(child, path)
         } else {
             None
         }

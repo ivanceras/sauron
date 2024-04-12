@@ -21,9 +21,7 @@ impl Application for App {
     type MSG = Msg;
 
     fn init(&mut self) -> Cmd<Msg> {
-        Cmd::new( async move{
-            Msg::ToggleShow
-        })
+        Cmd::new(async move { Msg::ToggleShow })
     }
     fn update(&mut self, msg: Msg) -> Cmd<Msg> {
         match msg {
@@ -34,12 +32,10 @@ impl Application for App {
                 } else {
                     document().set_title("Now, you don't!");
                 }
-                Cmd::new(
-                    async move {
-                        delay(2000).await;
-                        Msg::ToggleShow
-                    }
-                )
+                Cmd::new(async move {
+                    delay(2000).await;
+                    Msg::ToggleShow
+                })
             }
         }
     }

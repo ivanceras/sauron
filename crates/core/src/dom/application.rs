@@ -1,6 +1,6 @@
+use crate::dom::Cmd;
 use crate::vdom::Node;
 pub use skip_diff::{skip_if, SkipDiff, SkipPath};
-use crate::dom::Cmd;
 
 ///
 pub mod skip_diff;
@@ -40,8 +40,7 @@ pub trait Application: Sized + 'static {
     /// This is for diagnostic and performance measurement purposes.
     ///
     /// Warning: DO NOT use for anything else other than the intended purpose
-    fn measurements(&mut self, _measurements: Measurements){
-    }
+    fn measurements(&mut self, _measurements: Measurements) {}
 }
 
 /// Contains the time it took for the last app update call for the component

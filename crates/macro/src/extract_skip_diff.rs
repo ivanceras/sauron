@@ -10,7 +10,7 @@ pub fn to_token_stream(input: proc_macro::TokenStream) -> TokenStream {
 }
 
 fn do_extract(nodes: &[Node]) -> TokenStream {
-    let skip_tree = from_multiple_nodes(&nodes);
+    let skip_tree = from_multiple_nodes(nodes);
     quote! {
         #skip_tree.collapse_children()
     }
@@ -24,7 +24,7 @@ fn from_multiple_nodes(nodes: &[Node]) -> TokenStream {
             #node_tokens
         }
     } else {
-        let children_tokens = nodes_to_tokens(&nodes);
+        let children_tokens = nodes_to_tokens(nodes);
         quote! {
             sauron::skip_if(false,  [#children_tokens])
         }
