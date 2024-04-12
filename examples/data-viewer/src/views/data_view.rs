@@ -6,12 +6,12 @@ use crate::{
 use restq::{bytes_to_chars, table_def, CsvRows, TableName};
 use sauron::{
     html::{
-        attributes::{class, key, styles},
+        attributes::{class, key},
         events::*,
         units::*,
         *,
     },
-    Component, Effects, Node,
+    style, Component, Effects, Node,
 };
 use std::{
     cell::RefCell,
@@ -87,7 +87,6 @@ impl Component for DataView {
                 Effects::none()
             }
             Msg::MouseMove(client_x, _client_y) => {
-                debug!("debug in column view from the window..");
                 if let Some((column_index, active_resize)) = self.active_resize.clone() {
                     match active_resize {
                         Grip::Left => {}
@@ -118,10 +117,10 @@ impl Component for DataView {
         main(
             [
                 class("data_view grid"),
-                styles([
-                    ("width", px(self.allocated_width - 40)),
-                    ("min-width", px(self.calculate_min_width())),
-                ]),
+                style! {
+                    width: px(self.allocated_width - 40),
+                    min_width: px(self.calculate_min_width()),
+                },
                 // to ensure no reusing of table view when replaced with
                 // another table
                 key(format!("data_view_{}", self.table_name.name)),
@@ -154,15 +153,17 @@ impl Component for DataView {
                 section(
                     [
                         class("data_view__normal_column_names__frozen_rows"),
-                        styles([
-                            ("width", px(self.calculate_normal_rows_width())),
-                            ("overflow-x", "hidden".to_string()),
-                        ]),
+                        style! {
+                            width: px(self.calculate_normal_rows_width()),
+                            overflow_x: "hidden",
+                        },
                     ],
                     [section(
                         [
                             class("normal_column_names__frozen_rows"),
-                            styles([("margin-left", px(-self.scroll_left))]),
+                            style! {
+                                margin_left: px(-self.scroll_left)
+                            },
                         ],
                         [
                             // can move left and right
@@ -176,10 +177,10 @@ impl Component for DataView {
                 section(
                     [
                         class("data_view__frozen_columns_container"),
-                        styles([
-                            ("height", px(self.calculate_normal_rows_height())),
-                            ("overflow-y", "hidden".to_string()),
-                        ]),
+                        style! {
+                            height: px(self.calculate_normal_rows_height()),
+                            overflow_y: "hidden",
+                        },
                     ],
                     [self.view_frozen_columns()],
                 ),
@@ -197,12 +198,12 @@ impl DataView {
         let mut first_line = vec![];
         let _header_len = bufread
             .read_until(b'\n', &mut first_line)
-            .map_err(|e| Error::HeaderIoError(e))?;
+            .map_err(Error::HeaderIoError)?;
 
         let header_input = bytes_to_chars(&first_line);
         let table_def = table_def()
             .parse(&header_input)
-            .map_err(|e| Error::HeaderParseError(e))?;
+            .map_err(Error::HeaderParseError)?;
 
         let column_defs = table_def.columns.clone();
         trace!("bufread len: {}", bufread.buffer().len());
@@ -299,7 +300,9 @@ impl DataView {
     /// call these when new rows are set or added
     pub fn update_freeze_columns(&mut self) {
         for fc in self.frozen_columns.iter() {
-            self.column_views.get_mut(*fc).map(|fc| fc.is_frozen = true);
+            if let Some(fc) = self.column_views.get_mut(*fc) {
+                fc.is_frozen = true;
+            }
         }
 
         let frozen_columns = self.frozen_columns.clone();
@@ -405,11 +408,6 @@ impl DataView {
         self.scrollbar_to_bottom() <= scroll_bottom_allowance
     }
 
-    #[allow(unused)]
-    fn is_scrolled_bottom(&self) -> bool {
-        self.scrollbar_to_bottom() <= 0
-    }
-
     /// These are values in a row that is under the frozen columns
     /// Can move up and down
     fn view_frozen_columns(&self) -> Node<Msg> {
@@ -417,7 +415,9 @@ impl DataView {
         ol(
             [
                 class("data_view__frozen_columns"),
-                styles([("margin-top", px(-self.scroll_top))]),
+                style! {
+                    margin_top: px(-self.scroll_top),
+                },
             ],
             self.page_views
                 .iter()
@@ -471,7 +471,9 @@ impl DataView {
                 div(
                     [
                         class("column_view__grip column_view__grip--right"),
-                        styles([("width", px(ColumnView::grip_width()))]),
+                        style! {
+                            width: px(ColumnView::grip_width()),
+                        },
                         on_mousedown(move |event| {
                             Msg::ColumnStartResize(
                                 index,
@@ -491,7 +493,7 @@ impl DataView {
     /// Therefore can not move in any direction
     /// These are records that has its rows and columns both frozen
     fn view_immovable_rows(&self) -> Node<Msg> {
-        ol(
+        div(
             [class("data_view__immovable_frozen_columns")],
             self.page_views
                 .iter()
@@ -508,7 +510,7 @@ impl DataView {
     /// These are the pinned columns
     fn view_frozen_rows(&self) -> Node<Msg> {
         // can move left and right, but not up and down
-        ol(
+        div(
             [class("data_view__frozen_rows flex-column")],
             self.page_views
                 .iter()
@@ -525,13 +527,13 @@ impl DataView {
     /// The rest of the columns and move in any direction
     fn view_normal_rows(&self) -> Node<Msg> {
         // can move: left, right, up, down
-        ol(
+        div(
             [
                 class("data_view__normal_rows flex-column"),
-                styles([
-                    ("width", px(self.calculate_normal_rows_width())),
-                    ("height", px(self.calculate_normal_rows_height())),
-                ]),
+                style! {
+                    width: px(self.calculate_normal_rows_width()),
+                    height: px(self.calculate_normal_rows_height()),
+                },
                 on_scroll(Msg::Scrolled),
             ],
             self.page_views
@@ -552,7 +554,7 @@ impl DataView {
 
     fn update_visible_pages(&mut self) {
         let visible_page = self.visible_page();
-        let visible_pages = vec![visible_page - 1, visible_page, visible_page + 1];
+        let visible_pages = [visible_page - 1, visible_page, visible_page + 1];
         self.page_views
             .iter_mut()
             .enumerate()

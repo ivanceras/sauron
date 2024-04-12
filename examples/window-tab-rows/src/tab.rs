@@ -23,7 +23,6 @@ impl Tab {
         Tab {
             tab_clicks: 0,
             rows: (0..10)
-                .into_iter()
                 .map(|index| Row::new(format!("Row {}", index)))
                 .collect(),
             is_active: false,

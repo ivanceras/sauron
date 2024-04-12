@@ -22,18 +22,21 @@ cargo install wasm-pack
 ```
 
 We also use `basic-http-server` to easily serve static files locally.
+
 ```sh
 cargo install basic-http-server
 ```
 
 ## Creating a new project
 We will create a new project called `hello`.
-```
+
+```sh
 cargo new --lib hello
 ```
 This will create a new folder `hello` with set of files necessary to be compiled as a rust project.
 Try to compile this project to test if we installed rust correctly.
-```
+
+```sh
 cd hello
 cargo build
 ```
@@ -91,7 +94,9 @@ use sauron::{node, wasm_bindgen, Application, Cmd, Node, Program};
 
 struct App;
 
-impl Application<()> for App {
+impl Application for App {
+    type MSG = ();
+
     fn view(&self) -> Node<()> {
         node! {
             <p>
@@ -100,7 +105,7 @@ impl Application<()> for App {
         }
     }
 
-    fn update(&mut self, _msg: ()) -> Cmd<Self, ()> {
+    fn update(&mut self, _msg: ()) -> Cmd<()> {
         Cmd::none()
     }
 }
@@ -114,15 +119,18 @@ Take notice of the `view` method. Here we are using `node!` macro which takes ht
 We implement the `Application` trait for our `App` so that we can implement the required methods necessary to tell sauron how out app behaves.
 
 To compile, we issue the command:
-```shell
+
+```sh
 wasm-pack build --release --target=web
 ```
+
 As mentioned earlier,`wasm-pack` helps us simplify the process of compiling rust for targetting web applications.
 A folder `./pkg` is then created inside our project. This will contain the resulting compiled files.
 We only pay attention to the 2 files, named derived from the given package name `<package_name>.js` and `<package_name>_bg.wasm`.
 In our case, it will be `hello.js` and `hello_bg.wasm`.
 
 We need to reference this file in our page. Let's create `index.html` in our project.
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -138,20 +146,24 @@ We need to reference this file in our page. Let's create `index.html` in our pro
   </body>
 </html>
 ```
+
 Take note, that we are using `<script type=module>`.
 Another thing to take note is that we referencing `./pkg/hello.js` from the `./pkg` folder.
 If you changed the package name of the crate, you will also need to change the filename here.
 Behind the scene, `./pkg/hello.js` will take care of loading `./pkg/hello_bg.wasm` in the background.
 
 Recompile our webapp, issue this command everytime you have changes to the rust code.
-```shell
+
+```sh
 wasm-pack build --release --target=web
 ```
 
 Finally, we serve the files using `basic-http-server`
-```shell
+
+```sh
 basic-http-server
 ```
+
 By default, it serves the page in port `4000`
 Navigate to http://127.0.0.1:4000 to see the 'hello' message.
 There you have it, you've built the bare minimum web application using sauron.

@@ -141,7 +141,6 @@ where
             let patch_tag = patch.tag();
             if let Some(target_node) = nodes_lookup.get(patch_path) {
                 let target_tag = target_node.tag();
-
                 if let (Some(patch_tag), Some(target_tag)) = (patch_tag, target_tag) {
                     if **patch_tag != target_tag{
                         panic!(

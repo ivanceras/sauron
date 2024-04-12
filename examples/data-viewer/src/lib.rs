@@ -1,20 +1,19 @@
 #![deny(warnings)]
+pub use app::App;
 pub use error::Error;
 use log::Level;
 pub use restq::{ast::ddl::DataTypeDef, ColumnDef, DataType, DataValue};
 use sauron::*;
-use views::{resize_wrapper, DataView, ResizeWrapper};
+use views::DataView;
 
 #[macro_use]
 extern crate log;
 
+pub(crate) mod app;
 pub(crate) mod assets;
 mod error;
 mod views;
 pub(crate) mod widgets;
-
-pub type App = ResizeWrapper;
-pub type AppMsg = resize_wrapper::Msg;
 
 #[wasm_bindgen]
 pub fn initialize(initial_state: &str) {
@@ -26,14 +25,11 @@ pub fn initialize(initial_state: &str) {
     trace!("initial state: {}", initial_state);
     trace!("mounting..");
 
-    Program::mount_to_body(create_resize_wrapper());
-}
-
-fn create_resize_wrapper() -> ResizeWrapper {
     let data_view = create_data_view();
     let width = data_view.allocated_width;
     let height = data_view.allocated_height;
-    ResizeWrapper::new(data_view, width, height)
+    let app = App::new(data_view, width, height);
+    Program::mount_to_body(app);
 }
 
 fn create_data_view() -> DataView {

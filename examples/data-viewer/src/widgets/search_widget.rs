@@ -2,7 +2,7 @@ use crate::assets;
 
 use sauron::{
     html::{attributes::*, units::px, *},
-    Attribute, Node,
+    style, Attribute, Node,
 };
 
 pub struct SearchWidget {}
@@ -26,7 +26,7 @@ impl SearchWidget {
                     [
                         r#type("text"),
                         class("search_widget__column_filter"),
-                        styles([("width", px(input_width))]),
+                        style! {width: px(input_width)},
                     ],
                     [],
                 )

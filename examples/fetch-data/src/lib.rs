@@ -118,7 +118,7 @@ impl Application for App {
                     ul(
                         [],
                         [
-                            li([], [text(&user.id)]),
+                            li([], [text(user.id)]),
                             li([], [text(&user.email)]),
                             li([], [text(&user.first_name)]),
                             li([], [img([src(&user.avatar)], [])]),

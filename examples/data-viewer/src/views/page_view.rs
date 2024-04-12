@@ -5,11 +5,11 @@ use crate::{
 use restq::{ColumnDef, DataValue};
 use sauron::{
     html::{
-        attributes::{class, key, styles},
+        attributes::{class, key},
         units::*,
         *,
     },
-    Component, Effects, Node,
+    style, Component, Effects, Node,
 };
 
 #[derive(Debug, PartialEq)]
@@ -90,7 +90,7 @@ impl Component for PageView {
             div(
                 [
                     class("page_view__page_holder"),
-                    styles([("height", px(self.height()))]),
+                    style! {height: px(self.height())},
                 ],
                 [],
             )
@@ -125,7 +125,7 @@ impl PageView {
         total_rows: usize,
     ) {
         self.row_views = data_row
-            .into_iter()
+            .iter()
             .enumerate()
             .map(|(index, row)| RowView::new(index, row, &self.data_columns))
             .collect();
@@ -135,8 +135,8 @@ impl PageView {
         self.page_height = self.height();
     }
 
-    pub fn freeze_rows(&mut self, rows: &Vec<usize>) {
-        self.frozen_rows = rows.clone();
+    pub fn freeze_rows(&mut self, rows: &[usize]) {
+        self.frozen_rows = rows.to_vec();
         self.update_frozen_rows();
     }
 
@@ -167,16 +167,6 @@ impl PageView {
             })
     }
 
-    #[allow(unused)]
-    fn frozen_row_height(&self) -> i32 {
-        self.frozen_rows.len() as i32 * RowView::row_height() //use the actual row height
-    }
-
-    #[allow(unused)]
-    fn frozen_column_width(&self) -> i32 {
-        self.frozen_columns.len() as i32 * 200 //use the actual column sizes for each frozen columns
-    }
-
     /// Keep updating which columns are frozen
     /// call these when new rows are set or added
     pub fn update_freeze_columns(&mut self) {
@@ -186,8 +176,8 @@ impl PageView {
             .for_each(|row_view| row_view.freeze_columns(frozen_columns.clone()))
     }
 
-    pub fn freeze_columns(&mut self, columns: &Vec<usize>) {
-        self.frozen_columns = columns.clone();
+    pub fn freeze_columns(&mut self, columns: &[usize]) {
+        self.frozen_columns = columns.to_vec();
         self.update_freeze_columns();
     }
 
@@ -222,7 +212,7 @@ impl PageView {
                             "page_view__frozen_columns__selector__frozen_column_rows flex-row",
                         )],
                         [
-                            selector_box(false, [], [styles([("width", px(30))])]),
+                            selector_box(false, [], [style! {width: px(30)}]),
                             row_view
                                 .view_frozen_columns()
                                 .map_msg(move |row_msg| Msg::RowMsg(index, row_msg)),
@@ -248,7 +238,7 @@ impl PageView {
                             selector_box(
                                 false,
                                 [class("immovable_rows__selector_box")],
-                                [styles([("width", px(30))])],
+                                [style! {width: px(30)}],
                             ),
                             row_view
                                 .view_immovable_fields()

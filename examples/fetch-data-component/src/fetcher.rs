@@ -100,7 +100,7 @@ impl Component for Fetcher {
                          for user in self.data.data.iter(){
                              node!{
                                  <ul>
-                                     <li>{text(&user.id)}</li>
+                                     <li>{text(user.id)}</li>
                                      <li>{text(&user.email)}</li>
                                      <li>{text(&user.first_name)}</li>
                                      <li><img src=&user.avatar/></li>

@@ -325,6 +325,7 @@ fn diff_non_keyed_nodes<'a, MSG>(
 /// Note: The performance bottlenecks
 ///     - allocating new vec
 ///     - merging attributes of the same name
+#[allow(clippy::type_complexity)]
 fn create_attribute_patches<'a, MSG>(
     old_element: &'a Element<MSG>,
     new_element: &'a Element<MSG>,

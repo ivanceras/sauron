@@ -20,6 +20,14 @@
 #[doc(inline)]
 pub use prelude::*;
 
+// NOTE: This test the code written in the README file
+#[cfg(doctest)]
+doc_comment::doctest!("../README.md");
+//#[cfg(doctest)]
+//doc_comment::doctest!("../docs/getting-started.md");
+//#[cfg(doctest)]
+//doc_comment::doctest!("../docs/intermediate-example.md");
+
 /// prelude
 pub mod prelude {
     pub use sauron_core::prelude::*;

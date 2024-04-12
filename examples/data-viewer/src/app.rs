@@ -14,7 +14,7 @@ pub enum Msg {
 }
 
 /// provides a resizable wrapper for the DataView
-pub struct ResizeWrapper {
+pub struct App {
     data_view: DataView,
     active_resize: Option<Grip>,
     width: i32,
@@ -30,9 +30,9 @@ pub enum Grip {
     BottomRight,
 }
 
-impl ResizeWrapper {
+impl App {
     pub fn new(data_view: DataView, width: i32, height: i32) -> Self {
-        ResizeWrapper {
+        App {
             data_view,
             active_resize: None,
             width,
@@ -43,7 +43,7 @@ impl ResizeWrapper {
     }
 }
 
-impl Application for ResizeWrapper {
+impl Application for App {
     type MSG = Msg;
 
     /// Setup the resize wrapper to listen to the mouseup
