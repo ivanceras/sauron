@@ -89,7 +89,7 @@ pub trait Component {
     where
         Self: Sized,
     {
-        let class_names: Vec<&str> = class_name.split(" ").collect();
+        let class_names: Vec<&str> = class_name.split(' ').collect();
         let prefixed_classes = class_names
             .iter()
             .map(|c| Self::prefix_class(c))
@@ -194,7 +194,7 @@ impl<MSG> Clone for StatelessModel<MSG> {
     fn clone(&self) -> Self {
         Self {
             view: self.view.clone(),
-            type_id: self.type_id.clone(),
+            type_id: self.type_id,
         }
     }
 }

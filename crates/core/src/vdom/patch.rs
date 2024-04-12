@@ -157,7 +157,7 @@ impl<'a, MSG> Patch<'a, MSG> {
             tag,
             patch_path,
             patch_type: PatchType::InsertBeforeNode {
-                nodes: nodes.into_iter().map(|n| Cow::Borrowed(n)).collect(),
+                nodes: nodes.into_iter().map(Cow::Borrowed).collect(),
             },
         }
     }

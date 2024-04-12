@@ -1,23 +1,14 @@
-use crate::dom::document;
-use crate::dom::dom_node::intern;
-use crate::dom::dom_node::DomInner;
-use crate::dom::now;
-use crate::dom::Application;
-use crate::dom::DomAttr;
-use crate::dom::DomAttrValue;
-use crate::dom::DomNode;
-use crate::dom::GroupedDomAttrValues;
-use crate::dom::Program;
-use crate::dom::StatelessModel;
-use crate::vdom;
-use crate::vdom::Attribute;
-use crate::vdom::AttributeValue;
-use crate::vdom::Leaf;
-use std::any::TypeId;
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::rc::Rc;
+use std::{any::TypeId, cell::RefCell, collections::hash_map, collections::HashMap, rc::Rc};
+
 use wasm_bindgen::JsCast;
+
+use crate::{
+    dom::{
+        document, dom_node::intern, dom_node::DomInner, now, Application, DomAttr, DomAttrValue,
+        DomNode, GroupedDomAttrValues, Program, StatelessModel,
+    },
+    vdom::{self, Attribute, AttributeValue, Leaf},
+};
 
 thread_local! {
     static TEMPLATE_LOOKUP: RefCell<HashMap<TypeId, DomNode>> = RefCell::new(HashMap::new());
@@ -33,7 +24,7 @@ pub fn register_template<MSG>(
     if let Some(template) = lookup_template(type_id) {
         template
     } else {
-        let template = create_dom_node_no_listeners(parent_node, &vdom_template);
+        let template = create_dom_node_no_listeners(parent_node, vdom_template);
         add_template(type_id, &template);
         template
     }
@@ -41,24 +32,17 @@ pub fn register_template<MSG>(
 
 pub fn add_template(type_id: TypeId, template: &DomNode) {
     TEMPLATE_LOOKUP.with_borrow_mut(|map| {
-        if map.contains_key(&type_id) {
-            // already added
+        if let hash_map::Entry::Vacant(e) = map.entry(type_id) {
+            e.insert(template.deep_clone());
         } else {
-            map.insert(type_id, template.deep_clone());
+            // already added
         }
     })
 }
 
 /// lookup for the template
 pub fn lookup_template(type_id: TypeId) -> Option<DomNode> {
-    TEMPLATE_LOOKUP.with_borrow(|map| {
-        if let Some(existing) = map.get(&type_id) {
-            // TODO: have to traverse the real children and convert each into DomNode
-            Some(existing.deep_clone())
-        } else {
-            None
-        }
-    })
+    TEMPLATE_LOOKUP.with_borrow(|map| map.get(&type_id).map(|existing| existing.deep_clone()))
 }
 
 #[cfg(feature = "with-debug")]
@@ -101,7 +85,7 @@ impl Section {
 }
 
 #[cfg(feature = "with-debug")]
-thread_local!(pub static TIME_SPENT: RefCell<Vec<Section>> = RefCell::new(vec![]));
+thread_local!(pub static TIME_SPENT: RefCell<Vec<Section>> = const { RefCell::new(vec![]) });
 
 #[cfg(feature = "with-debug")]
 pub fn add_time_trace(section: Section) {
@@ -164,8 +148,8 @@ fn create_fragment_node_no_listeners<MSG>(
     };
     let dom_node_rc = Rc::new(Some(dom_node.clone()));
     let children = nodes
-        .into_iter()
-        .map(|node| create_dom_node_no_listeners(Rc::clone(&dom_node_rc), &node))
+        .iter()
+        .map(|node| create_dom_node_no_listeners(Rc::clone(&dom_node_rc), node))
         .collect();
     dom_node.append_children(children);
     dom_node
@@ -315,7 +299,7 @@ where
                 #[cfg(feature = "with-debug")]
                 let t2 = now();
                 let patches =
-                    self.create_patches_with_skip_diff(&vdom_template, &real_comp_view, &skip_diff);
+                    self.create_patches_with_skip_diff(&vdom_template, real_comp_view, &skip_diff);
                 #[cfg(feature = "with-debug")]
                 let t3 = now();
                 let dom_patches = self
@@ -356,8 +340,7 @@ where
                 let dom_patches = self
                     .convert_patches(&dom_template, &patches)
                     .expect("convert patches");
-                let _new_template_node = self
-                    .apply_dom_patches(dom_patches)
+                self.apply_dom_patches(dom_patches)
                     .expect("template patching");
                 dom_template
             }

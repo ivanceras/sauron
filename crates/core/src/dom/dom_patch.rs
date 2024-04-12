@@ -141,15 +141,13 @@ where
             let patch_tag = patch.tag();
             if let Some(target_node) = nodes_lookup.get(patch_path) {
                 let target_tag = target_node.tag();
-                match (patch_tag, target_tag){
-                    (Some(patch_tag), Some(target_tag)) => {
-                        if **patch_tag != target_tag{
-                            panic!(
-                                "expecting a tag: {patch_tag:?}, but found: {target_tag:?}"
-                            );
-                        }
+
+                if let (Some(patch_tag), Some(target_tag)) = (patch_tag, target_tag) {
+                    if **patch_tag != target_tag{
+                        panic!(
+                            "expecting a tag: {patch_tag:?}, but found: {target_tag:?}"
+                        );
                     }
-                    _ => (),
                 }
                 self.convert_patch(&nodes_lookup, target_node, patch)
             } else {
@@ -201,7 +199,7 @@ where
 
             PatchType::AddAttributes { attrs } => {
                 // we merge the attributes here prior to conversion
-                let attrs = Attribute::merge_attributes_of_same_name(attrs.iter().map(|a| *a));
+                let attrs = Attribute::merge_attributes_of_same_name(attrs.iter().copied());
                 DomPatch {
                     patch_path,
                     target_element,
@@ -336,9 +334,9 @@ where
                                 else {
                                     unreachable!("must be an element");
                                 };
-                                listeners.borrow_mut().as_mut().map(|listener| {
+                                if let Some(listener) = listeners.borrow_mut().as_mut() {
                                     listener.retain(|event, _| *event != attr.name)
-                                });
+                                }
                             }
                             DomAttrValue::Style(_) => {
                                 target_element.remove_dom_attr(attr)?;
@@ -360,12 +358,10 @@ where
                     let mount_node = self.mount_node.borrow();
                     let mount_node = mount_node.as_ref().expect("must have a mount node");
                     Rc::new(Some(mount_node.clone()))
+                } else if let Some(parent_target) = target_element.parent.as_ref() {
+                    Rc::new(Some(parent_target.clone()))
                 } else {
-                    if let Some(parent_target) = target_element.parent.as_ref() {
-                        Rc::new(Some(parent_target.clone()))
-                    } else {
-                        unreachable!("target element should have a parent");
-                    }
+                    unreachable!("target element should have a parent");
                 };
 
                 first_node.parent = Rc::clone(&parent_node);
