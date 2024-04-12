@@ -327,7 +327,7 @@ where
     #[allow(unused)]
     /// create initial dom node generated
     /// from template and patched by the difference of vdom_template and current app view.
-    fn create_initial_view(&self) -> DomNode {
+    pub(crate) fn create_initial_view(&self) -> DomNode {
         let current_view = self.app_context.current_vdom();
         let real_view = current_view.unwrap_template_ref();
         self.create_dom_node(Rc::new(None), real_view)
@@ -486,7 +486,7 @@ where
             weak_count,
         };
 
-        #[cfg(all(feature = "with-debug", feature = "use-template"))]
+        #[cfg(all(feature = "with-trace", feature = "use-template"))]
         {
             let total = crate::dom::component::template::total_time_spent();
             log::info!("total: {:#?}", total);

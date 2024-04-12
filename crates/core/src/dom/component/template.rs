@@ -4,7 +4,7 @@ use wasm_bindgen::JsCast;
 
 use crate::{
     dom::{
-        document, dom_node::intern, dom_node::DomInner, now, Application, DomAttr, DomAttrValue,
+        document, dom_node::intern, dom_node::DomInner,  Application, DomAttr, DomAttrValue,
         DomNode, GroupedDomAttrValues, Program, StatelessModel,
     },
     vdom::{self, Attribute, AttributeValue, Leaf},
@@ -84,10 +84,10 @@ impl Section {
     }
 }
 
-#[cfg(feature = "with-debug")]
+#[cfg(feature = "with-trace")]
 thread_local!(pub static TIME_SPENT: RefCell<Vec<Section>> = const { RefCell::new(vec![]) });
 
-#[cfg(feature = "with-debug")]
+#[cfg(feature = "with-trace")]
 pub fn add_time_trace(section: Section) {
     TIME_SPENT.with_borrow_mut(|v| {
         v.push(section);
@@ -111,13 +111,13 @@ fn total(values: &[Section]) -> Section {
 }
 
 #[allow(unused)]
-#[cfg(feature = "with-debug")]
+#[cfg(feature = "with-trace")]
 pub fn total_time_spent() -> Section {
     TIME_SPENT.with_borrow(|values| total(values))
 }
 
 #[allow(unused)]
-#[cfg(feature = "with-debug")]
+#[cfg(feature = "with-trace")]
 pub fn clear_time_spent() {
     TIME_SPENT.with_borrow_mut(|values| values.clear())
 }
@@ -284,8 +284,8 @@ where
         parent_node: Rc<Option<DomNode>>,
         comp: &StatelessModel<APP::MSG>,
     ) -> DomNode {
-        #[cfg(feature = "with-debug")]
-        let t1 = now();
+        #[cfg(feature = "with-trace")]
+        let t1 = crate::now();
         let comp_view = &comp.view;
         let vdom_template = comp_view.template();
         let skip_diff = comp_view.skip_diff();
@@ -296,22 +296,22 @@ where
                 // disabling template for stateless component for now
                 let template = register_template(comp.type_id, parent_node, &vdom_template);
                 let real_comp_view = comp_view.unwrap_template_ref();
-                #[cfg(feature = "with-debug")]
-                let t2 = now();
+                #[cfg(feature = "with-trace")]
+                let t2 = crate::now();
                 let patches =
                     self.create_patches_with_skip_diff(&vdom_template, real_comp_view, &skip_diff);
-                #[cfg(feature = "with-debug")]
-                let t3 = now();
+                #[cfg(feature = "with-trace")]
+                let t3 = crate::now();
                 let dom_patches = self
                     .convert_patches(&template, &patches)
                     .expect("convert patches");
-                #[cfg(feature = "with-debug")]
-                let t4 = now();
+                #[cfg(feature = "with-trace")]
+                let t4 = crate::now();
                 self.apply_dom_patches(dom_patches).expect("patch template");
-                #[cfg(feature = "with-debug")]
-                let t5 = now();
+                #[cfg(feature = "with-trace")]
+                let t5 = crate::now();
 
-                #[cfg(feature = "with-debug")]
+                #[cfg(feature = "with-trace")]
                 add_time_trace(Section {
                     lookup: t2 - t1,
                     diffing: t3 - t2,
@@ -322,7 +322,10 @@ where
                 });
                 template
             }
-            _ => unreachable!("should have template and skip_diff"),
+            _ => {
+                log::warn!("template and skip_diff is not found, fallback to no template and skip_diff");
+                self.create_stateless_component(parent_node, comp)
+            }
         }
     }
 
@@ -344,7 +347,10 @@ where
                     .expect("template patching");
                 dom_template
             }
-            _ => unreachable!("must have a template and skip_diff"),
+            _ => {
+                log::warn!("template and skip_diff is not found, fallback to no template and skip_diff");
+                self.create_initial_view()
+            }
         }
     }
 }

@@ -759,7 +759,7 @@ where
     }
 
     #[allow(unused)]
-    fn create_stateless_component(
+    pub(crate) fn create_stateless_component(
         &self,
         parent_node: Rc<Option<DomNode>>,
         comp: &StatelessModel<APP::MSG>,
