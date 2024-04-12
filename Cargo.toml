@@ -33,6 +33,7 @@ with-measure = ["sauron-core/with-measure"]
 with-debug = ["sauron-core/with-debug"]
 log-patches = ["with-debug", "sauron-core/log-patches"]
 test-fixtures = ["sauron-core/test-fixtures"] #include the test-fixtures for updating the program with the supplied vdom
+with-trace = ["sauron-core/with-trace"]
 
 # lets you use node! macro to write html like code in the view
 with-node-macro = ["sauron-macro"]
