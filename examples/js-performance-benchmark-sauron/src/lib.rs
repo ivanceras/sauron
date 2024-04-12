@@ -1,8 +1,8 @@
 #![deny(warnings)]
 use rand::prelude::*;
-use sauron::dom::component;
 use sauron::*;
 use std::cmp::min;
+use sauron::dom::component;
 
 static ADJECTIVES: &[&str] = &[
     "pretty",
@@ -174,8 +174,25 @@ impl Application for App {
         Cmd::none()
     }
 
-    view! {
+    view!{
         <div class="container">
+            {self.view_jumbotron()}
+            <table class="table table-hover table-striped test-data">
+                <tbody id="tbody">
+                    {for row in self.rows.iter() {
+                        component(row)
+                    }}
+                </tbody>
+            </table>
+            <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </div>
+    }
+}
+
+
+impl App{
+    fn view_jumbotron(&self) -> Node<Msg>{
+        node!{
              <div class="jumbotron">
                  <div class="row">
                      <div class="col-md-6">
@@ -242,15 +259,7 @@ impl Application for App {
                      </div>
                  </div>
              </div>
-            <table class="table table-hover table-striped test-data">
-                <tbody id="tbody">
-                    {for row in self.rows.iter() {
-                        component(row)
-                    }}
-                </tbody>
-            </table>
-            <span class="preloadicon glyphicon glyphicon-remove" aria-hidden="true"></span>
-        </div>
+        }
     }
 }
 
