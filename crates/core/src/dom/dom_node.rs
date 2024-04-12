@@ -426,8 +426,7 @@ impl DomNode {
             parent.replace_child(self, replacement);
         } else {
             //NOTE: This must be replacing a mount node
-            self
-                .as_element()
+            self.as_element()
                 .replace_with_with_node_1(&replacement.as_node())
                 .expect("must replace child");
         }
@@ -517,9 +516,11 @@ impl DomNode {
         Ok(())
     }
 
-    fn dispatch_mount_event(&self){
-        let event_target:web_sys::EventTarget = self.as_element().unchecked_into();
-        event_target.dispatch_event(&MountEvent::create_web_event()).expect("must be ok");
+    fn dispatch_mount_event(&self) {
+        let event_target: web_sys::EventTarget = self.as_element().unchecked_into();
+        event_target
+            .dispatch_event(&MountEvent::create_web_event())
+            .expect("must be ok");
     }
 
     /// render this DomNode into an html string represenation
@@ -767,7 +768,6 @@ where
         let real_comp_view = comp_view.unwrap_template_ref();
         self.create_dom_node(parent_node, &real_comp_view)
     }
-
 
     /// set element with the dom attrs
     pub(crate) fn set_element_dom_attrs(

@@ -1,7 +1,7 @@
 #![deny(warnings)]
+use futures::channel::mpsc;
 use js_sys::Date;
 use sauron::{html::attributes::*, html::events::*, html::*, jss, web_sys::MouseEvent, *};
-use futures::channel::mpsc;
 
 pub enum Msg {
     Click,

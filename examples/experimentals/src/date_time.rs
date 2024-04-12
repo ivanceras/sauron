@@ -180,7 +180,6 @@ where
     }
 }
 
-
 impl StatefulComponent for DateTimeWidget<()> {
     /// this is called when the attributes in the mount is changed
     fn attribute_changed(
@@ -272,9 +271,7 @@ impl DateTimeCustomElement {
             <DateTimeWidget<()> as Application>::style(&self.program.app()).join("");
         self.program.inject_style_to_mount(&dynamic_style);
 
-        self.program
-            .update_dom()
-            .expect("must update dom");
+        self.program.update_dom().expect("must update dom");
     }
 
     #[wasm_bindgen(method, js_name = disconnectedCallback)]

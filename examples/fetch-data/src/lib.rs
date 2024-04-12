@@ -4,7 +4,7 @@ use sauron::html::attributes::*;
 use sauron::html::events::*;
 use sauron::html::*;
 use sauron::js_sys::TypeError;
-use sauron::{jss, text, wasm_bindgen, Application, Node, Program, Cmd};
+use sauron::{jss, text, wasm_bindgen, Application, Cmd, Node, Program};
 use serde::Deserialize;
 
 #[macro_use]
@@ -57,18 +57,16 @@ impl App {
 
     fn fetch_page(&self) -> Cmd<Msg> {
         let url = format!("{}?page={}&per_page={}", DATA_URL, self.page, PER_PAGE);
-        Cmd::new(
-            async move {
-                let msg = match Http::fetch_text(&url).await {
-                    Ok(v) => match serde_json::from_str(&v) {
-                        Ok(data1) => Msg::ReceivedData(data1),
-                        Err(err) => Msg::JsonError(err),
-                    },
-                    Err(e) => Msg::RequestError(e),
-                };
-                msg
-            }
-        )
+        Cmd::new(async move {
+            let msg = match Http::fetch_text(&url).await {
+                Ok(v) => match serde_json::from_str(&v) {
+                    Ok(data1) => Msg::ReceivedData(data1),
+                    Err(err) => Msg::JsonError(err),
+                },
+                Err(e) => Msg::RequestError(e),
+            };
+            msg
+        })
     }
 }
 

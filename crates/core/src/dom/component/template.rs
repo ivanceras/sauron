@@ -171,7 +171,10 @@ fn create_fragment_node_no_listeners<MSG>(
     dom_node
 }
 
-fn create_leaf_node_no_listeners<MSG>(parent_node: Rc<Option<DomNode>>, leaf: &Leaf<MSG>) -> DomNode {
+fn create_leaf_node_no_listeners<MSG>(
+    parent_node: Rc<Option<DomNode>>,
+    leaf: &Leaf<MSG>,
+) -> DomNode {
     match leaf {
         Leaf::Text(txt) => DomNode {
             inner: DomInner::Text(document().create_text_node(txt)),

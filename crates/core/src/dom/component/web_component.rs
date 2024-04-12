@@ -176,9 +176,7 @@ where
             .app
             .borrow_mut()
             .connected_callback();
-        self.program
-            .update_dom()
-            .expect("must update dom");
+        self.program.update_dom().expect("must update dom");
     }
 
     /// called when the web component is removed

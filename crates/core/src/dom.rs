@@ -1,13 +1,13 @@
 //! This module provides functionalities for
 //! manipulating the actual Document Object Model in the browser
 
+pub use cmd::Cmd;
 pub use component::Component;
 pub use effects::Effects;
-pub use cmd::Cmd;
 
+mod cmd;
 mod component;
 mod effects;
-mod cmd;
 
 use cfg_if::cfg_if;
 
