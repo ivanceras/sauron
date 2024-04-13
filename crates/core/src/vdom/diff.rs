@@ -77,8 +77,6 @@ fn is_keyed_node<MSG>(node: &Node<MSG>) -> bool {
 fn should_replace<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> bool {
     // replace if they have different enum variants
     if mem::discriminant(old_node) != mem::discriminant(new_node) {
-        log::warn!("different discriminant: old_node: {:#?}", old_node);
-        log::warn!("different discriminant: new_node: {:#?}", new_node);
         return true;
     }
     let replace = |_old_node: &'a Node<MSG>, new_node: &'a Node<MSG>| {
