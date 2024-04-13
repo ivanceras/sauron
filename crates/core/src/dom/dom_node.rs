@@ -157,6 +157,7 @@ impl DomNode {
         match &self.inner {
             DomInner::Element { children, .. } => Some(children.borrow()),
             DomInner::Fragment { children, .. } => Some(children.borrow()),
+            DomInner::StatefulComponent(_comp) => todo!("children of stateful component.."),
             _ => None,
         }
     }
@@ -737,6 +738,9 @@ where
         parent_node: Rc<Option<DomNode>>,
         comp: &StatefulModel<APP::MSG>,
     ) -> DomNode {
+        log::info!("Creating stateful component... without template..");
+        log::info!("comp is: {:#?}", comp);
+        log::info!("comp child container: {:?}", comp.child_container());
         let comp_node = self.create_dom_node(
             Rc::clone(&parent_node),
             &crate::html::div(
@@ -838,6 +842,7 @@ where
 }
 
 pub(crate) fn find_node(target_node: &DomNode, path: &mut TreePath) -> Option<DomNode> {
+    log::info!("finding from target node: {:?}", target_node);
     if path.is_empty() {
         Some(target_node.clone())
     } else {

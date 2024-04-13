@@ -25,6 +25,9 @@ pub trait StatefulComponent {
     /// remove the attribute with this name
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
 
+    /// return the DomNode which contains the children DomNode
+    fn child_container(&self) -> Option<DomNode>;
+
     /// append a child into this component
     fn append_children(&mut self, _children: Vec<DomNode>) {}
 
@@ -54,7 +57,11 @@ pub struct StatefulModel<MSG> {
 
 impl<MSG> fmt::Debug for StatefulModel<MSG> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "StatefuleMode")
+        f.debug_struct("StatefulModel")
+            .field("type_id", &self.type_id)
+            .field("attrs", &self.attrs)
+            .field("children", &self.children)
+            .finish()
     }
 }
 
@@ -80,6 +87,11 @@ impl<MSG> StatefulModel<MSG> {
                 .map(|c| c.map_msg(cb.clone()))
                 .collect(),
         }
+    }
+
+    /// return the stateful component child container
+    pub fn child_container(&self) -> Option<DomNode> {
+        self.comp.borrow().child_container()
     }
 }
 
@@ -151,7 +163,6 @@ where
     let children: Vec<Node<MSG>> = children.into_iter().collect();
     let mount_event = on_mount(move |me| {
         let mut program = program.clone();
-        log::info!("stateful component is now mounted...");
         program.mount(&me.target_node.as_node(), MountProcedure::append());
         MSG::default()
     });

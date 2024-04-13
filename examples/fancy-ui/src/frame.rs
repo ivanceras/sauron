@@ -211,6 +211,7 @@ where
     type XMSG = XMSG;
 
     fn init(&mut self) -> Effects<Msg<XMSG>, XMSG> {
+        log::info!("init is called..");
         Effects::none()
     }
 
@@ -238,6 +239,7 @@ where
             }
             Msg::External(xmsg) => Effects::with_external([xmsg]),
             Msg::ContentTargetMounted(me) => {
+                log::info!("frame child container is now mounted...");
                 let mount_event = me.clone();
                 let target_node = me.target_node;
                 target_node.append_children(self.children.drain(..).collect());
@@ -332,6 +334,7 @@ where
     fn observed_attributes() -> Vec<&'static str> {
         vec!["theme-primary", "theme-background", "feature", "status"]
     }
+
 }
 
 impl<XMSG> Frame<XMSG>
@@ -627,6 +630,15 @@ impl<XMSG> StatefulComponent for Frame<XMSG> {
                 }
             }
             _ => (),
+        }
+    }
+
+    fn child_container(&self) -> Option<DomNode>{
+        if let Some(content_target_node) = self.content_target_node.as_ref(){
+            Some(content_target_node.clone())
+        }else{
+            log::warn!("There is no content target node...");
+            None
         }
     }
 

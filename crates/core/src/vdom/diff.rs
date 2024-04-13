@@ -1,6 +1,7 @@
 //! provides diffing algorithm which returns patches
 use super::{diff_lis, Attribute, Element, Node, Patch, TreePath};
 use super::{Tag, KEY, REPLACE, SKIP, SKIP_CRITERIA};
+use crate::dom::skip_diff::PatchTarget;
 use crate::dom::skip_diff::SkipAttrs;
 use crate::dom::SkipPath;
 use crate::vdom::AttributeValue;
@@ -55,7 +56,10 @@ pub fn diff<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> Vec<Pa
         old_node,
         new_node,
         &SkipPath {
-            path: TreePath::root(),
+            target: PatchTarget {
+                path: TreePath::root(),
+                target_node: None,
+            },
             skip_diff: None,
         },
     )
@@ -143,7 +147,7 @@ pub fn diff_recursive<'a, MSG>(
     if should_replace(old_node, new_node) {
         return vec![Patch::replace_node(
             old_node.tag(),
-            path.path.clone(),
+            path.path(),
             vec![new_node],
         )];
     }
@@ -160,7 +164,7 @@ pub fn diff_recursive<'a, MSG>(
                 | (Leaf::Comment(_), Leaf::Comment(_))
                 | (Leaf::DocType(_), Leaf::DocType(_)) => {
                     if old_leaf != new_leaf {
-                        let patch = Patch::replace_node(None, path.path.clone(), vec![new_node]);
+                        let patch = Patch::replace_node(None, path.path(), vec![new_node]);
                         patches.push(patch);
                     }
                 }
@@ -175,7 +179,10 @@ pub fn diff_recursive<'a, MSG>(
                 }
                 (Leaf::StatelessComponent(old_comp), Leaf::StatelessComponent(new_comp)) => {
                     let new_path = SkipPath {
-                        path: path.path.clone(),
+                        target: PatchTarget {
+                            path: path.path(),
+                            target_node: None,
+                        },
                         skip_diff: old_comp.view.skip_diff(),
                     };
 
@@ -194,7 +201,16 @@ pub fn diff_recursive<'a, MSG>(
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(old_comp), Leaf::StatefulComponent(new_comp)) => {
-                    let patch = diff_nodes(None, &old_comp.children, &new_comp.children, path);
+                    let target_node = old_comp.child_container();
+                    let new_path = SkipPath {
+                        target: PatchTarget{
+                            path: path.path(),
+                            target_node,
+                        },
+                        skip_diff: None,
+                    };
+                    log::info!("new_path: {:#?}", new_path);
+                    let patch = diff_nodes(None, &old_comp.children, &new_comp.children, &new_path);
                     patches.extend(patch);
                 }
                 (Leaf::TemplatedView(_old_view), _) => {
@@ -204,7 +220,7 @@ pub fn diff_recursive<'a, MSG>(
                     unreachable!("templated view should not be diffed..")
                 }
                 _ => {
-                    let patch = Patch::replace_node(None, path.path.clone(), vec![new_node]);
+                    let patch = Patch::replace_node(None, path.path(), vec![new_node]);
                     patches.push(patch);
                 }
             }
@@ -278,7 +294,7 @@ fn diff_non_keyed_nodes<'a, MSG>(
 
     // if there is no new children, then clear the children of this element
     if old_child_count > 0 && new_child_count == 0 {
-        return vec![Patch::clear_children(old_element_tag, path.path.clone())];
+        return vec![Patch::clear_children(old_element_tag, path.path())];
     }
 
     let min_count = cmp::min(old_child_count, new_child_count);
@@ -298,7 +314,7 @@ fn diff_non_keyed_nodes<'a, MSG>(
     if new_child_count > old_child_count {
         patches.push(Patch::append_children(
             old_element_tag,
-            path.path.clone(),
+            path.path(),
             new_children.iter().skip(old_child_count).collect(),
         ));
     }
@@ -309,7 +325,7 @@ fn diff_non_keyed_nodes<'a, MSG>(
             .skip(new_child_count)
             .enumerate()
             .map(|(i, old_child)| {
-                Patch::remove_node(old_child.tag(), path.traverse(new_child_count + i).path)
+                Patch::remove_node(old_child.tag(), path.traverse(new_child_count + i).path())
             })
             .collect::<Vec<_>>();
 
@@ -412,14 +428,14 @@ fn create_attribute_patches<'a, MSG>(
     if !add_attributes.is_empty() {
         patches.push(Patch::add_attributes(
             &old_element.tag,
-            path.path.clone(),
+            path.path(),
             add_attributes,
         ));
     }
     if !remove_attributes.is_empty() {
         patches.push(Patch::remove_attributes(
             &old_element.tag,
-            path.path.clone(),
+            path.path(),
             remove_attributes,
         ));
     }

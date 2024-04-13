@@ -1,3 +1,4 @@
+use crate::dom::DomNode;
 use crate::vdom::TreePath;
 
 /// specifies how attributes will be skipped
@@ -101,24 +102,55 @@ pub fn skip_if(shall: bool, children: impl IntoIterator<Item = SkipDiff>) -> Ski
     }
 }
 
+/// target to apply the patch
+#[derive(Debug)]
+pub struct PatchTarget {
+    pub(crate) path: TreePath,
+    /// a provided target node, in the case for stateful component
+    pub(crate) target_node: Option<DomNode>,
+}
+
+impl PatchTarget {
+    pub(crate) fn traverse(&self, idx: usize) -> Self {
+        Self {
+            path: self.path.traverse(idx),
+            target_node: self.target_node.clone(),
+        }
+    }
+
+    pub(crate) fn backtrack(&self) -> Self {
+        Self {
+            path: self.path.backtrack(),
+            target_node: self.target_node.clone(),
+        }
+    }
+}
+
 /// combination of TreePath and SkipDiff
 #[derive(Debug)]
 pub struct SkipPath {
-    pub(crate) path: TreePath,
+    pub(crate) target: PatchTarget,
     pub(crate) skip_diff: Option<SkipDiff>,
 }
 
 impl SkipPath {
     pub(crate) fn new(path: TreePath, skip_diff: SkipDiff) -> Self {
         Self {
-            path,
+            target: PatchTarget {
+                path,
+                target_node: None,
+            },
             skip_diff: Some(skip_diff),
         }
     }
 
+    pub(crate) fn path(&self) -> TreePath {
+        self.target.path.clone()
+    }
+
     pub(crate) fn traverse(&self, idx: usize) -> Self {
         Self {
-            path: self.path.traverse(idx),
+            target: self.target.traverse(idx),
             skip_diff: if let Some(skip_diff) = self.skip_diff.as_ref() {
                 skip_diff.traverse(idx).cloned()
             } else {
@@ -129,7 +161,7 @@ impl SkipPath {
 
     pub(crate) fn backtrack(&self) -> Self {
         Self {
-            path: self.path.backtrack(),
+            target: self.target.backtrack(),
             //TODO: here the skip_diff can not back track as we lose that info already
             skip_diff: None,
         }
