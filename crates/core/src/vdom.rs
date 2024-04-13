@@ -7,7 +7,7 @@
 //!
 use crate::dom::Event;
 pub use attribute::Attribute;
-pub use attribute::Callback;
+pub use attribute::{Callback, MountCallback};
 pub use attribute::GroupedAttributeValues;
 pub use element::Element;
 pub use leaf::Leaf;

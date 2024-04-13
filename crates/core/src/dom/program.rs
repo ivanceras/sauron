@@ -760,3 +760,11 @@ where
         Ok(total_patches)
     }
 }
+
+impl<APP> Drop for Program<APP>
+where APP: Application{
+
+    fn drop(&mut self){
+        log::info!("dropping program...");
+    }
+}

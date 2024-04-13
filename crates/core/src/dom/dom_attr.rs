@@ -38,6 +38,8 @@ pub enum DomAttrValue {
     Style(Vec<Style>),
     /// event listeners
     EventListener(Closure<dyn FnMut(web_sys::Event)>),
+    /// mount callbacks
+    MountCallback(Closure<dyn FnMut(web_sys::Event)>),
     /// an empty value, can also represents null values from JsValue
     Empty,
 }
@@ -68,6 +70,9 @@ impl DomAttr {
                     styles.extend(s);
                 }
                 DomAttrValue::EventListener(cb) => {
+                    listeners.push(cb);
+                }
+                DomAttrValue::MountCallback(cb) => {
                     listeners.push(cb);
                 }
                 DomAttrValue::Empty => (),

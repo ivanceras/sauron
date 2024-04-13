@@ -211,7 +211,6 @@ where
     type XMSG = XMSG;
 
     fn init(&mut self) -> Effects<Msg<XMSG>, XMSG> {
-        log::info!("init is called..");
         Effects::none()
     }
 

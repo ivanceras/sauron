@@ -5,7 +5,7 @@ use indexmap::IndexMap;
 
 use crate::vdom::EventCallback;
 pub use attribute_value::AttributeValue;
-pub use callback::Callback;
+pub use callback::{Callback, MountCallback};
 pub use style::Style;
 pub use value::Value;
 
@@ -42,6 +42,8 @@ pub struct Attribute<MSG> {
 pub struct GroupedAttributeValues<'a, MSG> {
     /// the listeners of the event listeners
     pub listeners: Vec<&'a EventCallback<MSG>>,
+    /// mount callbacks,
+    pub mount_callbacks: Vec<&'a MountCallback<crate::dom::Event>>,
     /// plain attribute values
     pub plain_values: Vec<&'a Value>,
     /// style attribute values
@@ -101,6 +103,7 @@ impl<MSG> Attribute<MSG> {
     /// grouped values into plain, function calls, styles and event listeners
     pub(crate) fn group_values(attr: &Attribute<MSG>) -> GroupedAttributeValues<MSG> {
         let mut listeners = vec![];
+        let mut mount_callbacks = vec![];
         let mut plain_values = vec![];
         let mut styles = vec![];
         for av in attr.value() {
@@ -114,11 +117,15 @@ impl<MSG> Attribute<MSG> {
                 AttributeValue::EventListener(cb) => {
                     listeners.push(cb);
                 }
+                AttributeValue::MountCallback(cb) => {
+                    mount_callbacks.push(cb);
+                }
                 AttributeValue::Empty => (),
             }
         }
         GroupedAttributeValues {
             listeners,
+            mount_callbacks,
             plain_values,
             styles,
         }

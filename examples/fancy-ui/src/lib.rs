@@ -7,10 +7,8 @@ mod frame;
 mod status;
 mod theme;
 
-#[derive(Default)]
 enum Msg {
     Clicked,
-    #[default]
     NoOp,
 }
 

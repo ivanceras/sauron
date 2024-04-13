@@ -136,6 +136,11 @@ impl MountEvent {
     pub fn create_web_event() -> web_sys::Event {
         web_sys::Event::new("mount").expect("as event")
     }
+
+    ///
+    pub fn create_component_mount_event() -> web_sys::Event{
+        web_sys::Event::new("component_mount").expect("component mount event")
+    }
 }
 
 /// custom mount event
@@ -153,6 +158,32 @@ where
         };
         f(me)
     })
+}
+
+
+/// component mount event
+pub fn on_component_mount<F, MSG>(mut f: F) -> Attribute<MSG>
+where
+    F: FnMut(MountEvent)  + 'static,
+    MSG: 'static,
+{
+    use crate::vdom::MountCallback;
+
+    let cb = move|event: Event| {
+        log::info!("called here..");
+        let web_event = event.as_web().expect("must be a web event");
+        let event_target = web_event.target().expect("must have a target");
+        let target_node: web_sys::Node = event_target.unchecked_into();
+        let me = MountEvent {
+            target_node: DomNode::from(target_node),
+        };
+        f(me);
+    };
+
+    vdom::attr(
+        "component_mount",
+        AttributeValue::MountCallback(MountCallback::from(cb)),
+    )
 }
 
 macro_rules! declare_events {

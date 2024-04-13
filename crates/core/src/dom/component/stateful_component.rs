@@ -1,12 +1,12 @@
 use std::{any::TypeId, cell::RefCell, fmt, rc::Rc};
-
 use crate::{
     dom::{
-        events::on_mount, program::MountProcedure, Application, Cmd, Component, DomAttrValue,
+        program::MountProcedure, Application, Cmd, Component, DomAttrValue,
         DomNode, Program,
     },
     vdom::{Attribute, AttributeName, Leaf, Node},
 };
+use crate::dom::events::on_component_mount;
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
@@ -144,6 +144,11 @@ where
 }
 
 /// create a stateful component node
+/// TODO: find out whats causing 2 distinct
+/// stateful component when cloning the program
+/// and used in the on_mount,
+/// otherwise using on_component_mount where it uses FnMut,
+/// the stateful component is pointing to the same component
 pub fn stateful_component<COMP, MSG, MSG2>(
     app: COMP,
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
@@ -151,21 +156,23 @@ pub fn stateful_component<COMP, MSG, MSG2>(
 ) -> Node<MSG>
 where
     COMP: Component<MSG = MSG2, XMSG = ()> + StatefulComponent + Application<MSG = MSG2> + 'static,
-    MSG: Default + 'static,
+    MSG: 'static,
     MSG2: 'static,
 {
+
     let type_id = TypeId::of::<COMP>();
     let attrs = attrs.into_iter().collect::<Vec<_>>();
+    let children: Vec<Node<MSG>> = children.into_iter().collect();
 
     let app = Rc::new(RefCell::new(app));
 
-    let program = Program::from_rc_app(Rc::clone(&app));
-    let children: Vec<Node<MSG>> = children.into_iter().collect();
-    let mount_event = on_mount(move |me| {
-        let mut program = program.clone();
+
+    let mut program = Program::from_rc_app(Rc::clone(&app));
+    let mount_event = on_component_mount(move |me| {
+        log::info!("componment mount event..");
         program.mount(&me.target_node.as_node(), MountProcedure::append());
-        MSG::default()
     });
+
     Node::Leaf(Leaf::StatefulComponent(StatefulModel {
         comp: app,
         type_id,

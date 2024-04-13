@@ -1,6 +1,7 @@
 //! Callbacks contains function that can be called at a later time.
 //! This is used in containing an event listener attached to an DOM element.
 use std::{any::TypeId, fmt, rc::Rc};
+use std::cell::RefCell;
 
 /// A generic sized representation of a function that can be
 /// attached to a Node. The callback will essentially be owned by the element
@@ -129,5 +130,63 @@ impl<IN, OUT> PartialEq for Callback<IN, OUT> {
         self.event_type_id == other.event_type_id
             && self.msg_type_id == other.msg_type_id
             && self.func_type_id == other.func_type_id
+    }
+}
+
+///
+pub struct MountCallback<IN> {
+    /// the function to be executed
+    func: Rc<RefCell<dyn FnMut(IN)>>,
+    /// the type_id of the function
+    func_type_id: TypeId,
+}
+
+impl<IN, F> From<F> for MountCallback<IN>
+where
+    F: FnMut(IN)  + 'static,
+    IN: 'static,
+{
+    fn from(func: F) -> Self {
+        Self {
+            func: Rc::new(RefCell::new(func)),
+            func_type_id: TypeId::of::<F>(),
+        }
+    }
+}
+
+impl<IN> fmt::Debug for MountCallback<IN> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "func: {:?}",
+            self.func_type_id
+        )
+    }
+}
+
+impl<IN> MountCallback<IN>
+where
+    IN: 'static,
+{
+    ///
+    pub fn emit(&self, input: IN) {
+        log::info!("emitting mount callback..");
+        (self.func.borrow_mut())(input)
+    }
+
+}
+
+impl<IN> Clone for MountCallback<IN> {
+    fn clone(&self) -> Self {
+        Self {
+            func: Rc::clone(&self.func),
+            func_type_id: self.func_type_id,
+        }
+    }
+}
+
+impl<IN> PartialEq for MountCallback<IN> {
+    fn eq(&self, other: &Self) -> bool {
+            self.func_type_id == other.func_type_id
     }
 }

@@ -180,9 +180,9 @@ impl<MSG> Attribute<MSG> {
     /// render attributes
     fn render(&self, buffer: &mut dyn fmt::Write) -> fmt::Result {
         let GroupedAttributeValues {
-            listeners: _,
             plain_values,
             styles,
+            ..
         } = Attribute::group_values(self);
 
         // These are attribute values which specifies the state of the element

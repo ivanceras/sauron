@@ -8,6 +8,7 @@ use crate::dom::{Application, Program};
 use crate::vdom::EventCallback;
 use crate::vdom::TreePath;
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
+use crate::vdom::MountCallback;
 use indexmap::IndexMap;
 use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
@@ -99,6 +100,9 @@ where
             AttributeValue::EventListener(v) => {
                 Some(DomAttrValue::EventListener(self.convert_event_listener(v)))
             }
+            AttributeValue::MountCallback(v) => {
+                Some(DomAttrValue::MountCallback(self.convert_mount_callback(v)))
+            }
             AttributeValue::Empty => None,
         }
     }
@@ -117,6 +121,21 @@ where
             });
         closure
     }
+
+    fn convert_mount_callback(
+        &self,
+        event_listener: &MountCallback<dom::Event>,
+    ) -> Closure<dyn FnMut(web_sys::Event)> {
+        log::info!("converting mount callback..");
+        let event_listener = event_listener.clone();
+        let closure: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                log::info!("calling mount callback...");
+                event_listener.emit(dom::Event::from(event));
+            });
+        closure
+    }
+
     /// get the real DOM target node and make a DomPatch object for each of the Patch
     pub(crate) fn convert_patches(
         &self,
@@ -341,6 +360,7 @@ where
                                 target_element.remove_dom_attr(attr)?;
                             }
                             DomAttrValue::Empty => (),
+                            DomAttrValue::MountCallback(_) => todo!(),
                         }
                     }
                 }

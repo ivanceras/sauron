@@ -1,6 +1,7 @@
 use crate::{html::attributes::Style, vdom::EventCallback, vdom::Value};
-
 use derive_where::derive_where;
+use crate::vdom::attribute::callback::MountCallback;
+use crate::vdom::Event;
 
 /// Values of an attribute can be in these variants
 #[derive_where(Clone, Debug)]
@@ -11,6 +12,8 @@ pub enum AttributeValue<MSG> {
     Style(Vec<Style>),
     /// Event EventCallback
     EventListener(EventCallback<MSG>),
+    /// Mount callback
+    MountCallback(MountCallback<Event>),
     /// no value
     Empty,
 }

@@ -459,6 +459,7 @@ impl DomNode {
 
                 Self::add_event_dom_listeners(element, attr_name, &event_callbacks)
                     .expect("event listeners");
+
                 let is_none = listeners.borrow().is_none();
                 if is_none {
                     let listener_closures: IndexMap<
@@ -521,6 +522,13 @@ impl DomNode {
         let event_target: web_sys::EventTarget = self.as_element().unchecked_into();
         event_target
             .dispatch_event(&MountEvent::create_web_event())
+            .expect("must be ok");
+    }
+
+    fn dispatch_component_mount(&self) {
+        let event_target: web_sys::EventTarget = self.as_element().unchecked_into();
+        event_target
+            .dispatch_event(&MountEvent::create_component_mount_event())
             .expect("must be ok");
     }
 
@@ -750,6 +758,8 @@ where
                 [],
             ),
         );
+        
+        comp_node.dispatch_component_mount();
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
         // listener and removing the generics msg
@@ -804,12 +814,13 @@ where
         DomAttr::set_element_simple_values(element, attr_name, attr_namespace, plain_values);
         self.add_event_listeners(element, attr_name, &listeners)
             .unwrap();
-        if !listeners.is_empty() {
+
+        if listeners.is_empty() {
+            None
+        } else {
             let event_closures =
                 IndexMap::from_iter(listeners.into_iter().map(|cb| (attr_name, cb)));
             Some(event_closures)
-        } else {
-            None
         }
     }
 
