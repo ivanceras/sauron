@@ -331,7 +331,16 @@
 - [ ] Implement the `StatefulComponent`
     - [ ] attributes and attribute value (key)
     - [ ] removing children and setting attributes
+    - [ ] Change Patch to use PatchTarget, where TargetNode 
+        will be specified for StatefulComponents
+        - This is necessary since StatefulComponents child container is
+        not necessarily the root node.
+        - Alternative way is to convert child_container to TreePath by searching
+        for it from the root node
 - [ ] Make the fancy-ui example work
+- [ ] Rename local variables to their descriptive name
+    - batch_pending_cmds -> batch_pending_dispatch
+    - init_cmd -> init_dispatch;
 
 
 ## Performance
@@ -366,7 +375,7 @@
         - [X] Make a DomPatch which a DOM version of the patch with the target node and created node
 - [ ] Find a way to break up building the view into multiple frames, since view can take a long time to build
 - [ ] Find a way to break up diffing the current vdom and the new vdom as they can also take a bit of long time as well.
-- [ ] Add benchmark function for using CACHE_ELEMENT and not
+- [X] Add benchmark function for using CACHE_ELEMENT and not
 - [ ] Make dispatch pending patches break when the animation frame timeouts, same way as dispatching pending msgs
 - [X] Check the last time the dom is updated, if it is less than 17ms, delay the dom update until 17ms has elapsed since the last update.
 - [ ] Make use of [talc](https://github.com/SFBdragon/talc) allocator for faster and leaner memory
