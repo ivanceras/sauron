@@ -389,7 +389,7 @@ impl DomInner {
             Self::Symbol(_) => todo!(),
             Self::Comment(_) => todo!(),
             Self::Fragment { .. } => todo!(),
-            Self::StatefulComponent(_) => unreachable!("can not deep clone stateful component"),
+            Self::StatefulComponent{..} => unreachable!("can not deep clone stateful component"),
         }
     }
 }
