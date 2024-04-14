@@ -338,7 +338,7 @@
         - Alternative way is to convert child_container to TreePath by searching
         for it from the root node
 - [ ] Make the fancy-ui example work
-- [ ] Rename local variables to their descriptive name
+- [X] Rename local variables to their descriptive name
     - batch_pending_cmds -> batch_pending_dispatch
     - init_cmd -> init_dispatch;
 
