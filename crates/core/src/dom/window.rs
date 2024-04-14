@@ -17,7 +17,7 @@ impl Window {
     {
         let (mut tx, rx) = mpsc::unbounded();
         let resize_callback: Closure<dyn FnMut(web_sys::Event)> =
-            Closure::new(move |e: web_sys::Event| {
+            Closure::new(move |_e: web_sys::Event| {
                 let (w, h) = util::get_window_size();
                 let msg = cb(w, h);
                 tx.start_send(msg).expect("send");
