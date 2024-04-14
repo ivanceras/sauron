@@ -12,6 +12,7 @@ use indexmap::IndexMap;
 use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
+use crate::vdom::ComponentEventCallback;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -99,6 +100,9 @@ where
             AttributeValue::EventListener(v) => {
                 Some(DomAttrValue::EventListener(self.convert_event_listener(v)))
             }
+            AttributeValue::ComponentEventListener(v) => {
+                Some(DomAttrValue::EventListener(self.convert_component_event_listener(v)))
+            }
             AttributeValue::Empty => None,
         }
     }
@@ -114,6 +118,18 @@ where
                 let msg = event_listener.emit(dom::Event::from(event));
                 let mut program = program.upgrade().expect("must upgrade");
                 program.dispatch(msg);
+            });
+        closure
+    }
+
+    fn convert_component_event_listener(
+        &self,
+        component_callback: &ComponentEventCallback,
+    ) -> Closure<dyn FnMut(web_sys::Event)> {
+        let component_callback = component_callback.clone();
+        let closure: Closure<dyn FnMut(web_sys::Event)> =
+            Closure::new(move |event: web_sys::Event| {
+                component_callback.emit(dom::Event::from(event));
             });
         closure
     }

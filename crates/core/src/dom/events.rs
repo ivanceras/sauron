@@ -16,6 +16,7 @@ use web_sys::{
     EventTarget, HtmlDetailsElement, HtmlElement, HtmlInputElement, HtmlSelectElement,
     HtmlTextAreaElement,
 };
+use crate::vdom::ComponentEventCallback;
 
 #[derive(Clone, Copy)]
 #[repr(i16)]
@@ -83,7 +84,7 @@ impl From<web_sys::MouseEvent> for Event {
 /// an event builder
 pub fn on<F, MSG>(event_name: &'static str, f: F) -> Attribute<MSG>
 where
-    F: Fn(Event) -> MSG + 'static,
+    F: FnMut(Event) -> MSG + 'static,
     MSG: 'static,
 {
     vdom::attr(
@@ -93,18 +94,18 @@ where
 }
 
 /// on click event
-pub fn on_click<F, MSG>(f: F) -> Attribute<MSG>
+pub fn on_click<F, MSG>(mut f: F) -> Attribute<MSG>
 where
-    F: Fn(MouseEvent) -> MSG + 'static,
+    F: FnMut(MouseEvent) -> MSG + 'static,
     MSG: 'static,
 {
     on("click", move |event: Event| f(to_mouse_event(event)))
 }
 
 /// attach callback to the scroll event
-pub fn on_scroll<F, MSG>(f: F) -> Attribute<MSG>
+pub fn on_scroll<F, MSG>(mut f: F) -> Attribute<MSG>
 where
-    F: Fn((i32, i32)) -> MSG + 'static,
+    F: FnMut((i32, i32)) -> MSG + 'static,
     MSG: 'static,
 {
     on("scroll", move |event: Event| {
@@ -139,9 +140,9 @@ impl MountEvent {
 }
 
 /// custom mount event
-pub fn on_mount<F, MSG>(f: F) -> Attribute<MSG>
+pub fn on_mount<F, MSG>(mut f: F) -> Attribute<MSG>
 where
-    F: Fn(MountEvent) -> MSG + 'static,
+    F: FnMut(MountEvent) -> MSG + 'static,
     MSG: 'static,
 {
     on("mount", move |event: Event| {
@@ -155,6 +156,28 @@ where
     })
 }
 
+/// custom mount event
+pub fn on_component_mount<F, MSG>(mut f: F) -> Attribute<MSG>
+where
+    F: FnMut(MountEvent) + 'static,
+    MSG: 'static,
+{
+    let cb = move |event: Event| {
+        let web_event = event.as_web().expect("must be a web event");
+        let event_target = web_event.target().expect("must have a target");
+        let target_node: web_sys::Node = event_target.unchecked_into();
+        let me = MountEvent {
+            target_node: DomNode::from(target_node),
+        };
+        f(me);
+    };
+    vdom::attr(
+        "mount",
+        AttributeValue::ComponentEventListener(ComponentEventCallback::from(cb)),
+    )
+}
+
+
 macro_rules! declare_events {
 
     ( $(
@@ -167,8 +190,8 @@ macro_rules! declare_events {
                 concat!("attach an [",stringify!($name),"](https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/",stringify!($name),") event to the html element"),
                 $(#[$attr])*
                 #[inline]
-                pub fn $name<CB, MSG>(cb: CB) -> crate::vdom::Attribute<MSG>
-                    where CB: Fn($ret) -> MSG + 'static,
+                pub fn $name<CB, MSG>(mut cb: CB) -> crate::vdom::Attribute<MSG>
+                    where CB: FnMut($ret) -> MSG + 'static,
                           MSG: 'static,
                     {
                         on(stringify!($event), move|event:Event|{
