@@ -197,13 +197,13 @@ where
     /// executed after the program has been mounted
     fn after_mounted(&mut self) {
         // call the init of the component
-        let init_cmd = self.app_context.init_app();
+        let init_dispatch = self.app_context.init_app();
 
         // this call may or may not trigger dispatch
         // as the initi app of Application
         // may just return Cmd::none which doesn't trigger
         // dispatching / redraw
-        init_cmd.emit(self.clone());
+        init_dispatch.emit(self.clone());
 
         // inject the app's dynamic style after the emitting the init function and it's effects
         self.inject_dynamic_style();
@@ -669,7 +669,7 @@ where
             panic!("Can not proceed until previous pending msgs are dispatched..");
         }
 
-        let cmd = self.app_context.batch_pending_cmds();
+        let dispatch = self.app_context.batch_pending_dispatches();
 
         if !self.pending_patches.borrow().is_empty() {
             log::error!(
@@ -694,13 +694,13 @@ where
                 self.pending_patches.borrow().len()
             );
             panic!(
-                "There are still pending patches.. can not emit cmd, if all pending patches
+                "There are still pending patches.. can not emit dispatch, if all pending patches
             has not been applied yet!"
             );
         }
 
-        // execute this `cmd` batched pending_dispatches that may have resulted from updating the app
-        cmd.emit(self.clone());
+        // execute this `dispatch` batched pending_dispatches that may have resulted from updating the app
+        dispatch.emit(self.clone());
     }
 
     /// Inject a style to the global document

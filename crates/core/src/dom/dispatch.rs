@@ -36,23 +36,23 @@ where
 
     /// When you need the runtime to perform couple of commands, you can batch
     /// then together.
-    pub fn batch(cmds: impl IntoIterator<Item = Self>) -> Self {
+    pub fn batch(dispatches: impl IntoIterator<Item = Self>) -> Self {
         let mut commands = vec![];
-        for cmd in cmds {
-            commands.extend(cmd.commands);
+        for dispatch in dispatches {
+            commands.extend(dispatch.commands);
         }
         Self { commands }
     }
 
-    /// Add a cmd
-    pub fn push(&mut self, cmd: Self) {
-        self.append([cmd])
+    /// Add a dispatch
+    pub fn push(&mut self, dispatch: Self) {
+        self.append([dispatch])
     }
 
-    /// Append more cmd into this cmd and return self
-    pub fn append(&mut self, cmds: impl IntoIterator<Item = Self>) {
-        for cmd in cmds {
-            self.commands.extend(cmd.commands);
+    /// Append more dispatch into this dispatch and return self
+    pub fn append(&mut self, dispatches: impl IntoIterator<Item = Self>) {
+        for dispatch in dispatches {
+            self.commands.extend(dispatch.commands);
         }
     }
 

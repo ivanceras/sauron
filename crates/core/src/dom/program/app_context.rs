@@ -28,7 +28,7 @@ where
     /// since the APP's state may be affected by the previous MSG
     pub(crate) pending_msgs: Rc<RefCell<VecDeque<APP::MSG>>>,
 
-    /// pending cmds that hasn't been emited yet
+    /// pending dispatches that hasn't been emited yet
     pub(crate) pending_dispatches: Rc<RefCell<VecDeque<Dispatch<APP>>>>,
 }
 
@@ -163,25 +163,25 @@ where
     /// false if there is no more pending msg
     pub fn dispatch_pending_msg(&mut self) -> bool {
         let pending_msg = self.pending_msgs.borrow_mut().pop_front();
-        let cmd = if let Some(pending_msg) = pending_msg {
+        let dispatch = if let Some(pending_msg) = pending_msg {
             // Note: each MSG needs to be executed one by one in the same order
             // as APP's state can be affected by the previous MSG
-            let cmd = self.update_app(pending_msg);
-            Some(cmd)
+            let dispatch = self.update_app(pending_msg);
+            Some(dispatch)
         } else {
             None
         };
 
-        if let Some(cmd) = cmd {
-            // we put the cmd in the pending_cmd queue
-            self.pending_dispatches.borrow_mut().push_back(cmd);
+        if let Some(dispatch) = dispatch {
+            // we put the dispatch in the pending_dispatch queue
+            self.pending_dispatches.borrow_mut().push_back(dispatch);
             true
         } else {
             false
         }
     }
 
-    pub fn batch_pending_cmds(&mut self) -> Dispatch<APP> {
+    pub fn batch_pending_dispatches(&mut self) -> Dispatch<APP> {
         Dispatch::batch(self.pending_dispatches.borrow_mut().drain(..))
     }
 }
