@@ -271,6 +271,7 @@ fn convert_attr_value_except_listener<MSG>(
         AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
         AttributeValue::Style(v) => Some(DomAttrValue::Style(v.clone())),
         AttributeValue::EventListener(_v) => None,
+        AttributeValue::MountCallback(_v) => None,
         AttributeValue::Empty => None,
     }
 }

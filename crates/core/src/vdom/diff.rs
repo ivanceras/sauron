@@ -201,10 +201,13 @@ pub fn diff_recursive<'a, MSG>(
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(old_comp), Leaf::StatefulComponent(new_comp)) => {
+                    let container_path = old_comp.comp.borrow().traverse_child_container().expect("must found the container");
+                    log::info!("this path: {:?}", path.path());
+                    log::info!("container path: {:?}", container_path);
                     let target_node = old_comp.child_container();
                     let new_path = SkipPath {
                         target: PatchTarget{
-                            path: path.path(),
+                            path: path.path().extend(&container_path),
                             target_node,
                         },
                         skip_diff: None,

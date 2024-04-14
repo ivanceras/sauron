@@ -87,6 +87,13 @@ impl TreePath {
         self.path.push(node_idx)
     }
 
+    /// extend this path with another path
+    pub fn extend(&self, path: &Self) -> Self {
+        let mut new_path = self.clone();
+        new_path.path.extend_from_slice(&path.path);
+        new_path
+    }
+
     /// create a new TreePath with an added node_index
     /// This is used for traversing into child elements
     pub fn traverse(&self, node_idx: usize) -> Self {

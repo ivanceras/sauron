@@ -7,6 +7,7 @@ use crate::{
     vdom::{Attribute, AttributeName, Leaf, Node},
 };
 use crate::dom::events::on_component_mount;
+use crate::vdom::TreePath;
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
@@ -25,8 +26,18 @@ pub trait StatefulComponent {
     /// remove the attribute with this name
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
 
+    /// return the root node of this stateful component
+    fn root_node(&self) -> Option<DomNode>;
+
     /// return the DomNode which contains the children DomNode
     fn child_container(&self) -> Option<DomNode>;
+
+    /// return the TreePath to be able to traverse from root node to child container
+    fn traverse_child_container(&self) -> Option<TreePath>{
+       let root_node = self.root_node()?; 
+       let child_container = self.child_container()?;
+       root_node.find_child(&child_container, TreePath::new([])) 
+    }
 
     /// append a child into this component
     fn append_children(&mut self, _children: Vec<DomNode>) {}

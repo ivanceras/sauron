@@ -852,6 +852,23 @@ where
     }
 }
 
+impl DomNode{
+    pub(crate) fn find_child(&self, target_child: &DomNode, path: TreePath) -> Option<TreePath>{
+        if self == target_child {
+            Some(path)
+        }else{
+            let children = self.children()?;
+            for (i,child) in children.iter().enumerate(){
+                let child_path = path.traverse(i);
+                if let Some(child_path) = child.find_child(target_child, child_path){
+                    return Some(child_path);
+                }
+            }
+            None
+        }
+    }
+}
+
 pub(crate) fn find_node(target_node: &DomNode, path: &mut TreePath) -> Option<DomNode> {
     log::info!("finding from target node: {:?}", target_node);
     if path.is_empty() {
