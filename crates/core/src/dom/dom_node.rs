@@ -4,7 +4,6 @@ use crate::dom::GroupedDomAttrValues;
 use crate::dom::StatefulComponent;
 use crate::dom::StatefulModel;
 use crate::html::lookup;
-use crate::vdom::TreePath;
 use crate::{
     dom::document,
     dom::events::MountEvent,
@@ -153,7 +152,7 @@ impl PartialEq for DomNode {
 }
 
 impl DomNode {
-    fn children(&self) -> Option<Ref<'_, Vec<DomNode>>> {
+    pub(crate) fn children(&self) -> Option<Ref<'_, Vec<DomNode>>> {
         match &self.inner {
             DomInner::Element { children, .. } => Some(children.borrow()),
             DomInner::Fragment { children, .. } => Some(children.borrow()),
@@ -837,38 +836,3 @@ where
     }
 }
 
-pub(crate) fn find_node(target_node: &DomNode, path: &mut TreePath) -> Option<DomNode> {
-    if path.is_empty() {
-        Some(target_node.clone())
-    } else {
-        let idx = path.remove_first();
-        let children = target_node.children()?;
-        if let Some(child) = children.get(idx) {
-            find_node(child, path)
-        } else {
-            None
-        }
-    }
-}
-
-pub(crate) fn find_all_nodes(
-    target_node: &DomNode,
-    nodes_to_find: &[(&TreePath, Option<&&'static str>)],
-) -> IndexMap<TreePath, DomNode> {
-    let mut nodes_to_patch: IndexMap<TreePath, DomNode> =
-        IndexMap::with_capacity(nodes_to_find.len());
-    for (path, tag) in nodes_to_find {
-        let mut traverse_path: TreePath = (*path).clone();
-        if let Some(found) = find_node(target_node, &mut traverse_path) {
-            nodes_to_patch.insert((*path).clone(), found);
-        } else {
-            log::warn!(
-                "can not find: {:?} {:?} target_node: {:?}",
-                path,
-                tag,
-                target_node
-            );
-        }
-    }
-    nodes_to_patch
-}

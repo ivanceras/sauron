@@ -1,5 +1,4 @@
 use crate::dom;
-use crate::dom::dom_node::find_all_nodes;
 use crate::dom::dom_node::DomInner;
 use crate::dom::DomAttr;
 use crate::dom::DomAttrValue;
@@ -77,6 +76,46 @@ pub enum PatchVariant {
     },
 }
 
+impl DomNode{
+
+    pub(crate) fn find_node(&self, path: &mut TreePath) -> Option<DomNode> {
+        if path.is_empty() {
+            Some(self.clone())
+        } else {
+            let idx = path.remove_first();
+            let children = self.children()?;
+            if let Some(child) = children.get(idx) {
+                child.find_node(path)
+            } else {
+                None
+            }
+        }
+    }
+
+    pub(crate) fn find_all_nodes(
+        &self,
+        nodes_to_find: &[(&TreePath, Option<&&'static str>)],
+    ) -> IndexMap<TreePath, DomNode> {
+        let mut nodes_to_patch: IndexMap<TreePath, DomNode> =
+            IndexMap::with_capacity(nodes_to_find.len());
+        for (path, tag) in nodes_to_find {
+            let mut traverse_path: TreePath = (*path).clone();
+            if let Some(found) = self.find_node(&mut traverse_path) {
+                nodes_to_patch.insert((*path).clone(), found);
+            } else {
+                log::warn!(
+                    "can not find: {:?} {:?} target_node: {:?}",
+                    path,
+                    tag,
+                    &self
+                );
+            }
+        }
+        nodes_to_patch
+    }
+}
+
+
 impl<APP> Program<APP>
 where
     APP: Application + 'static,
@@ -150,7 +189,7 @@ where
             )
             .collect();
 
-        let nodes_lookup = find_all_nodes(target_node, &nodes_to_find);
+        let nodes_lookup = target_node.find_all_nodes(&nodes_to_find);
 
         let dom_patches:Vec<DomPatch> = patches.iter().map(|patch|{
             let patch_path = patch.path();
