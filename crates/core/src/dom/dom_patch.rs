@@ -12,6 +12,7 @@ use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 use crate::vdom::ComponentEventCallback;
+use crate::dom::dom_node;
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -79,15 +80,31 @@ pub enum PatchVariant {
 impl DomNode{
 
     pub(crate) fn find_node(&self, path: &mut TreePath) -> Option<DomNode> {
-        if path.is_empty() {
-            Some(self.clone())
-        } else {
-            let idx = path.remove_first();
-            let children = self.children()?;
-            if let Some(child) = children.get(idx) {
-                child.find_node(path)
-            } else {
-                None
+        match &self.inner{
+            DomInner::StatefulComponent{comp,..} => {
+                log::info!("This is a stateful component, should return the element
+                inside relative to the child container at this path: {:?}", path);
+                let child_container = comp.borrow().child_container().expect("stateful component should provide the child container");
+                child_container.find_node(path)
+            }
+            _ => {
+                if path.is_empty() {
+                    Some(self.clone())
+                } else {
+                    let idx = path.remove_first();
+                    if let Some(children) = self.children(){
+                        log::info!("has children..");
+                        if let Some(child) = children.get(idx) {
+                            child.find_node(path)
+                        } else {
+                            log::info!("There is no child at index: {idx}");
+                            None
+                        }
+                    }else{
+                        log::warn!("Traversing to a childless node..");
+                        None
+                    }
+                }
             }
         }
     }
@@ -109,6 +126,8 @@ impl DomNode{
                     tag,
                     &self
                 );
+                log::info!("real entire dom: {:#?}", dom_node::render_real_dom_to_string(&self.as_node()));
+                log::warn!("entire dom: {}", self.render_to_string());
             }
         }
         nodes_to_patch

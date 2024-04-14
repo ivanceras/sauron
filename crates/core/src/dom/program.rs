@@ -330,6 +330,7 @@ where
     pub(crate) fn create_initial_view(&self) -> DomNode {
         let current_view = self.app_context.current_vdom();
         let real_view = current_view.unwrap_template_ref();
+        log::info!("initial view: {}", real_view.render_to_string());
         self.create_dom_node(Rc::new(None), real_view)
     }
 

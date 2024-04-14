@@ -196,6 +196,7 @@ impl<MSG> Node<MSG> {
     pub fn children(&self) -> &[Node<MSG>] {
         match self {
             Self::Element(elm) => elm.children(),
+            Self::Leaf(Leaf::StatefulComponent(comp)) => &comp.children,
             _ => &[],
         }
     }

@@ -70,4 +70,6 @@ impl StatefulComponent for Button {
             self.children.extend(children);
         }
     }
+    fn root_node(&self) -> Option<DomNode> { todo!() }
+    fn child_container(&self) -> Option<DomNode> { todo!()}
 }

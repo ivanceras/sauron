@@ -78,3 +78,4 @@ pub fn start() {
     console_error_panic_hook::set_once();
     Program::mount_to_body(App::new());
 }
+

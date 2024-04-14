@@ -194,7 +194,11 @@ pub fn diff_recursive<'a, MSG>(
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(old_comp), Leaf::StatefulComponent(new_comp)) => {
+                    log::info!("old container: {:#?}", old_comp.comp.borrow().child_container());
+                    log::info!("new container: {:#?}", new_comp.comp.borrow().child_container());
+                    log::info!("path to child container: {:#?}", old_comp.comp.borrow().traverse_child_container());
                     let patch = diff_nodes(None, &old_comp.children, &new_comp.children, path);
+                    log::info!("component patch: {:#?}", patch);
                     patches.extend(patch);
                 }
                 (Leaf::TemplatedView(_old_view), _) => {

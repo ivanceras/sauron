@@ -1,4 +1,5 @@
 use std::{any::TypeId, cell::RefCell, fmt, rc::Rc};
+use crate::vdom::TreePath;
 
 use crate::{
     dom::{
@@ -24,6 +25,20 @@ pub trait StatefulComponent {
 
     /// remove the attribute with this name
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
+
+
+    /// return the root node of this stateful component
+    fn root_node(&self) -> Option<DomNode>;
+
+    /// return the DomNode which contains the children DomNode
+    fn child_container(&self) -> Option<DomNode>;
+
+    /// return the TreePath to be able to traverse from root node to child container
+    fn traverse_child_container(&self) -> Option<TreePath>{
+       let root_node = self.root_node()?; 
+       let child_container = self.child_container()?;
+       root_node.find_child(&child_container, TreePath::root()) 
+    }
 
     /// append a child into this component
     fn append_children(&mut self, _children: Vec<DomNode>) {}
@@ -153,12 +168,15 @@ where
         log::info!("stateful component is now mounted...");
         program.mount(&me.target_node.as_node(), MountProcedure::append());
     });
-    Node::Leaf(Leaf::StatefulComponent(StatefulModel {
+    let node = Node::Leaf(Leaf::StatefulComponent(StatefulModel {
         comp: app,
         type_id,
         attrs: attrs.into_iter().chain([mount_event]).collect(),
         children: children.into_iter().collect(),
-    }))
+    }));
+    log::info!("stateful component node: {}", node.render_to_string());
+    log::info!("stateful component node: {:#?}", node);
+    node
 }
 
 #[cfg(feature = "with-dom")]

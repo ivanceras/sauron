@@ -23,6 +23,7 @@ pub enum Msg<XMSG> {
     HoverOut,
     HighlightEnd,
     External(XMSG),
+    ComponentMounted(MountEvent),
     ContentTargetMounted(MountEvent),
 }
 
@@ -40,6 +41,7 @@ pub struct Frame<XMSG> {
     /// the status of the button which changes the color pallet of the button
     status: Option<Status>,
     children: Vec<DomNode>,
+    root_node: Option<DomNode>,
     content_target_node: Option<DomNode>,
     dimension: Dimension,
 }
@@ -121,6 +123,7 @@ impl<XMSG> Default for Frame<XMSG> {
             theme: Theme::default(),
             status: None,
             children: vec![],
+            root_node: None,
             content_target_node: None,
             dimension: Dimension::default(),
         }
@@ -237,7 +240,13 @@ where
                 Effects::none()
             }
             Msg::External(xmsg) => Effects::with_external([xmsg]),
+            Msg::ComponentMounted(me) => {
+                log::info!("component mounted...");
+                self.root_node = Some(me.target_node);
+                Effects::none()
+            }
             Msg::ContentTargetMounted(me) => {
+                log::info!("content target mounted..");
                 let mount_event = me.clone();
                 let target_node = me.target_node;
                 target_node.append_children(self.children.drain(..).collect());
@@ -267,6 +276,7 @@ where
                 } else {
                     empty_attr()
                 },
+                on_mount(Msg::ComponentMounted),
                 // normally click should be attached to the actual button element
                 on_click(Msg::Click),
                 // the mouseover events are attached here since the hover element z-index is
@@ -286,7 +296,7 @@ where
                     div(
                         [
                             class("content_wrap"),
-                            on_mount(|me| Msg::ContentTargetMounted(me)),
+                            on_mount(Msg::ContentTargetMounted),
                         ],
                         [],
                     ),
@@ -631,10 +641,31 @@ impl<XMSG> StatefulComponent for Frame<XMSG> {
     }
 
     fn append_children(&mut self, children: Vec<DomNode>) {
+        log::info!("adding children in stateful component..");
         self.children.extend(children);
     }
+
+    fn root_node(&self) -> Option<DomNode>{
+        if let Some(root_node) = self.root_node.as_ref(){
+            Some(root_node.clone())
+        }else{
+            log::warn!("Root node is not set");
+            None
+        }
+    }
+
+    fn child_container(&self) -> Option<DomNode>{
+        if let Some(content_target_node) = self.content_target_node.as_ref(){
+            Some(content_target_node.clone())
+        }else{
+            log::warn!("There is no content target node...");
+            None
+        }
+    }
+
 
     fn connected_callback(&mut self) {}
     fn disconnected_callback(&mut self) {}
     fn adopted_callback(&mut self) {}
 }
+
