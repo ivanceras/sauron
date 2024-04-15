@@ -155,6 +155,7 @@ where
     let children: Vec<Node<MSG>> = children.into_iter().collect();
     let mount_event = on_component_mount(move |me| {
         program.mount(&me.target_node.as_node(), MountProcedure::append());
+        program.update_dom().expect("update dom");
     });
     Node::Leaf(Leaf::StatefulComponent(StatefulModel {
         comp: app,
