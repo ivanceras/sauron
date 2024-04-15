@@ -2,8 +2,9 @@
 
 use derive_where::derive_where;
 use indexmap::IndexMap;
-
+use crate::vdom::ComponentEventCallback;
 use crate::vdom::EventCallback;
+
 pub use attribute_value::AttributeValue;
 pub use callback::Callback;
 pub use style::Style;
@@ -40,8 +41,10 @@ pub struct Attribute<MSG> {
 
 /// The Attributes partition into 4 different types
 pub struct GroupedAttributeValues<'a, MSG> {
-    /// the listeners of the event listeners
+    /// the event listeners
     pub listeners: Vec<&'a EventCallback<MSG>>,
+    /// the component event listeners
+    pub component_callbacks: Vec<&'a ComponentEventCallback>,
     /// plain attribute values
     pub plain_values: Vec<&'a Value>,
     /// style attribute values
@@ -101,6 +104,7 @@ impl<MSG> Attribute<MSG> {
     /// grouped values into plain, function calls, styles and event listeners
     pub(crate) fn group_values(attr: &Attribute<MSG>) -> GroupedAttributeValues<MSG> {
         let mut listeners = vec![];
+        let mut component_callbacks = vec![];
         let mut plain_values = vec![];
         let mut styles = vec![];
         for av in attr.value() {
@@ -114,11 +118,15 @@ impl<MSG> Attribute<MSG> {
                 AttributeValue::EventListener(cb) => {
                     listeners.push(cb);
                 }
+                AttributeValue::ComponentEventListener(cb) => {
+                    component_callbacks.push(cb);
+                }
                 AttributeValue::Empty => (),
             }
         }
         GroupedAttributeValues {
             listeners,
+            component_callbacks,
             plain_values,
             styles,
         }

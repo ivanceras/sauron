@@ -70,4 +70,7 @@ impl StatefulComponent for Button {
             self.children.extend(children);
         }
     }
+    fn child_container(&self) -> Option<DomNode> { 
+        self.external_children_node.clone()
+    }
 }

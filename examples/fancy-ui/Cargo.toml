@@ -15,3 +15,8 @@ console_log = "0.2"
 console_error_panic_hook = "0.1"
 css-colors = "1" # for using lighten, and darken when calculating theme colors
 css-color = "0.1.1" #for parsing hex color into rgb, don't get mix with css-colors with a `s`
+
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+wasm-bindgen-futures = "0.4.31"

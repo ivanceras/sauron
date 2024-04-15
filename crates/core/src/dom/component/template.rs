@@ -271,6 +271,7 @@ fn convert_attr_value_except_listener<MSG>(
         AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
         AttributeValue::Style(v) => Some(DomAttrValue::Style(v.clone())),
         AttributeValue::EventListener(_v) => None,
+        AttributeValue::ComponentEventListener(_v) => None,
         AttributeValue::Empty => None,
     }
 }
@@ -388,7 +389,7 @@ impl DomInner {
             Self::Symbol(_) => todo!(),
             Self::Comment(_) => todo!(),
             Self::Fragment { .. } => todo!(),
-            Self::StatefulComponent(_) => unreachable!("can not deep clone stateful component"),
+            Self::StatefulComponent{..} => unreachable!("can not deep clone stateful component"),
         }
     }
 }

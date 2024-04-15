@@ -1,8 +1,7 @@
 use std::{any::TypeId, cell::RefCell, fmt, rc::Rc};
-
 use crate::{
     dom::{
-        events::on_mount, program::MountProcedure, Application, Cmd, Component, DomAttrValue,
+        events::on_component_mount, program::MountProcedure, Application, Cmd, Component, DomAttrValue,
         DomNode, Program,
     },
     vdom::{Attribute, AttributeName, Leaf, Node},
@@ -24,6 +23,11 @@ pub trait StatefulComponent {
 
     /// remove the attribute with this name
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
+
+
+
+    /// return the DomNode which contains the children DomNode
+    fn child_container(&self) -> Option<DomNode>;
 
     /// append a child into this component
     fn append_children(&mut self, _children: Vec<DomNode>) {}
@@ -139,7 +143,7 @@ pub fn stateful_component<COMP, MSG, MSG2>(
 ) -> Node<MSG>
 where
     COMP: Component<MSG = MSG2, XMSG = ()> + StatefulComponent + Application<MSG = MSG2> + 'static,
-    MSG: Default + 'static,
+    MSG: 'static,
     MSG2: 'static,
 {
     let type_id = TypeId::of::<COMP>();
@@ -147,13 +151,10 @@ where
 
     let app = Rc::new(RefCell::new(app));
 
-    let program = Program::from_rc_app(Rc::clone(&app));
+    let mut program = Program::from_rc_app(Rc::clone(&app));
     let children: Vec<Node<MSG>> = children.into_iter().collect();
-    let mount_event = on_mount(move |me| {
-        let mut program = program.clone();
-        log::info!("stateful component is now mounted...");
+    let mount_event = on_component_mount(move |me| {
         program.mount(&me.target_node.as_node(), MountProcedure::append());
-        MSG::default()
     });
     Node::Leaf(Leaf::StatefulComponent(StatefulModel {
         comp: app,

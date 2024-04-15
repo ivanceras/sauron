@@ -80,6 +80,7 @@ impl<MSG> AttributeValue<MSG> {
             AttributeValue::Simple(this) => AttributeValue::Simple(this),
             AttributeValue::Style(this) => AttributeValue::Style(this),
             AttributeValue::EventListener(this) => AttributeValue::EventListener(this.map_msg(cb)),
+            AttributeValue::ComponentEventListener(this) => AttributeValue::ComponentEventListener(this),
             AttributeValue::Empty => AttributeValue::Empty,
         }
     }

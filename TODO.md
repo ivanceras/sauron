@@ -332,7 +332,16 @@
     - [ ] attributes and attribute value (key)
     - [ ] removing children and setting attributes
 - [ ] Make the fancy-ui example work
-
+    - [ ] Change Patch to use PatchTarget, where TargetNode 
+        will be specified for StatefulComponents
+        - This is necessary since StatefulComponents child container is
+        not necessarily the root node.
+        - Alternative way is to convert child_container to TreePath by searching
+        for it from the root node
+- [ ] Make the fancy-ui example work
+- [ ] Rename local variables to their descriptive name
+    - batch_pending_cmds -> batch_pending_dispatch
+    - init_cmd -> init_dispatch;
 
 ## Performance
 - [X] Fix the reported issues with benchmarks

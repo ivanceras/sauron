@@ -222,6 +222,7 @@ impl StatefulComponent for DateTimeWidget<()> {
             self.children.extend(children);
         }
     }
+    fn child_container(&self) -> Option<DomNode> { todo!()}
 }
 
 #[wasm_bindgen]

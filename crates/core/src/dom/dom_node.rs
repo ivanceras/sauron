@@ -4,7 +4,6 @@ use crate::dom::GroupedDomAttrValues;
 use crate::dom::StatefulComponent;
 use crate::dom::StatefulModel;
 use crate::html::lookup;
-use crate::vdom::TreePath;
 use crate::{
     dom::document,
     dom::events::MountEvent,
@@ -20,6 +19,7 @@ use std::fmt;
 use std::rc::Rc;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Element, Node};
+use crate::vdom::TreePath;
 
 pub(crate) type EventClosure = Closure<dyn FnMut(web_sys::Event)>;
 pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
@@ -60,8 +60,10 @@ pub enum DomInner {
         children: Rc<RefCell<Vec<DomNode>>>,
     },
     /// StatefulComponent
-    #[allow(unused)]
-    StatefulComponent(Rc<RefCell<dyn StatefulComponent>>),
+    StatefulComponent{
+        comp: Rc<RefCell<dyn StatefulComponent>>,
+        dom_node: Rc<DomNode>,
+    },
 }
 
 impl fmt::Debug for DomInner {
@@ -90,7 +92,7 @@ impl fmt::Debug for DomInner {
             Self::Symbol(symbol) => f.debug_tuple("Symbol").field(&symbol).finish(),
             Self::Comment(_) => write!(f, "Comment"),
             Self::Fragment { .. } => write!(f, "Fragment"),
-            Self::StatefulComponent(_) => write!(f, "StatefulComponent"),
+            Self::StatefulComponent{..} => write!(f, "StatefulComponent"),
         }
     }
 }
@@ -146,14 +148,14 @@ impl PartialEq for DomNode {
             (DomInner::Text(v), DomInner::Text(o)) => v == o,
             (DomInner::Symbol(v), DomInner::Symbol(o)) => v == o,
             (DomInner::Comment(v), DomInner::Comment(o)) => v == o,
-            (DomInner::StatefulComponent(_v), DomInner::StatefulComponent(_o)) => todo!(),
+            (DomInner::StatefulComponent{..}, DomInner::StatefulComponent{..}) => todo!(),
             _ => false,
         }
     }
 }
 
 impl DomNode {
-    fn children(&self) -> Option<Ref<'_, Vec<DomNode>>> {
+    pub(crate) fn children(&self) -> Option<Ref<'_, Vec<DomNode>>> {
         match &self.inner {
             DomInner::Element { children, .. } => Some(children.borrow()),
             DomInner::Fragment { children, .. } => Some(children.borrow()),
@@ -163,6 +165,11 @@ impl DomNode {
 
     pub(crate) fn is_fragment(&self) -> bool {
         matches!(&self.inner, DomInner::Fragment { .. })
+    }
+
+    #[allow(unused)]
+    pub(crate) fn is_stateful_component(&self) -> bool {
+        matches!(&self.inner, DomInner::StatefulComponent{..})
     }
 
     pub(crate) fn tag(&self) -> Option<String> {
@@ -180,7 +187,9 @@ impl DomNode {
             DomInner::Text(text_node) => text_node.clone().unchecked_into(),
             DomInner::Symbol(_) => panic!("don't know how to deal with symbol"),
             DomInner::Comment(comment_node) => comment_node.clone().unchecked_into(),
-            DomInner::StatefulComponent(_) => todo!("for stateful component.."),
+            DomInner::StatefulComponent{dom_node,..} => {
+                dom_node.as_node()
+            }
         }
     }
 
@@ -196,7 +205,7 @@ impl DomNode {
             DomInner::Text(text_node) => text_node.clone().unchecked_into(),
             DomInner::Symbol(_) => panic!("don't know how to deal with symbol"),
             DomInner::Comment(comment_node) => comment_node.clone().unchecked_into(),
-            DomInner::StatefulComponent(_) => todo!("for stateful component.."),
+            DomInner::StatefulComponent{dom_node,..} => dom_node.as_element(),
         }
     }
 
@@ -523,6 +532,23 @@ impl DomNode {
             .expect("must be ok");
     }
 
+    #[allow(unused)]
+    pub(crate) fn find_child(&self, target_child: &DomNode, path: TreePath) -> Option<TreePath>{
+        if self == target_child {
+            Some(path)
+        }else{
+            let children = self.children()?;
+            for (i,child) in children.iter().enumerate(){
+                let child_path = path.traverse(i);
+                let found = child.find_child(target_child, child_path);
+                if found.is_some(){
+                    return found;
+                }
+            }
+            None
+        }
+    }
+
     /// render this DomNode into an html string represenation
     pub fn render_to_string(&self) -> String {
         let mut buffer = String::new();
@@ -573,9 +599,14 @@ impl DomNode {
                 }
                 Ok(())
             }
+            DomInner::StatefulComponent{comp: _, dom_node} => {
+                dom_node.render(buffer)?;
+                Ok(())
+            }
             _ => todo!("for other else"),
         }
     }
+
 }
 
 #[cfg(feature = "with-interning")]
@@ -673,7 +704,16 @@ where
             // since node_list as children will be unrolled into as child_elements of the parent
             // We need to wrap this node_list into doc_fragment since root_node is only 1 element
             Leaf::NodeList(nodes) => self.create_fragment_node(parent_node, nodes),
-            Leaf::StatefulComponent(comp) => self.create_stateful_component(parent_node, comp),
+            Leaf::StatefulComponent(comp) => {
+                //TODO: also put the children and attributes here
+                DomNode{
+                    inner: DomInner::StatefulComponent{
+                        comp: Rc::clone(&comp.comp),
+                        dom_node: Rc::new(self.create_stateful_component(Rc::clone(&parent_node), comp)),
+                    },
+                    parent: parent_node,
+                }
+            }
             Leaf::StatelessComponent(comp) => {
                 #[cfg(feature = "use-template")]
                 {
@@ -837,38 +877,56 @@ where
     }
 }
 
-pub(crate) fn find_node(target_node: &DomNode, path: &mut TreePath) -> Option<DomNode> {
-    if path.is_empty() {
-        Some(target_node.clone())
-    } else {
-        let idx = path.remove_first();
-        let children = target_node.children()?;
-        if let Some(child) = children.get(idx) {
-            find_node(child, path)
-        } else {
-            None
-        }
-    }
+
+/// render the underlying real dom node into string
+pub fn render_real_dom_to_string(node: &web_sys::Node) -> String {
+    let mut f = String::new();
+    render_real_dom(node, &mut f).expect("must not error");
+    f
 }
 
-pub(crate) fn find_all_nodes(
-    target_node: &DomNode,
-    nodes_to_find: &[(&TreePath, Option<&&'static str>)],
-) -> IndexMap<TreePath, DomNode> {
-    let mut nodes_to_patch: IndexMap<TreePath, DomNode> =
-        IndexMap::with_capacity(nodes_to_find.len());
-    for (path, tag) in nodes_to_find {
-        let mut traverse_path: TreePath = (*path).clone();
-        if let Some(found) = find_node(target_node, &mut traverse_path) {
-            nodes_to_patch.insert((*path).clone(), found);
-        } else {
-            log::warn!(
-                "can not find: {:?} {:?} target_node: {:?}",
-                path,
-                tag,
-                target_node
-            );
+/// render the underlying real dom structure
+pub fn render_real_dom(node: &web_sys::Node, buffer: &mut dyn fmt::Write) -> fmt::Result {
+    match node.node_type() {
+        Node::TEXT_NODE => {
+            let text_node: &web_sys::Text = node.unchecked_ref();
+            let text = text_node.whole_text().expect("whole text");
+            write!(buffer, "{text}")?;
+            Ok(())
         }
+        Node::COMMENT_NODE => {
+            let comment: &web_sys::Comment = node.unchecked_ref();
+            write!(buffer, "<!--{}-->", comment.data())
+        }
+        Node::ELEMENT_NODE => {
+            let element: &web_sys::Element = node.unchecked_ref();
+            let tag = element.tag_name().to_lowercase();
+            let is_self_closing = lookup::is_self_closing(&tag);
+
+            write!(buffer, "<{tag}")?;
+            let attrs = element.attributes();
+            let attrs_len = attrs.length();
+            for i in 0..attrs_len {
+                let attr = attrs.item(i).expect("attr");
+                write!(buffer, " {}=\"{}\"", attr.local_name(), attr.value())?;
+            }
+            if is_self_closing {
+                write!(buffer, "/>")?;
+            } else {
+                write!(buffer, ">")?;
+            }
+
+            let child_nodes = element.child_nodes();
+            let child_count = child_nodes.length();
+            for i in 0..child_count{
+                let child = child_nodes.get(i).unwrap();
+                render_real_dom(&child, buffer)?;
+            }
+            if !is_self_closing {
+                write!(buffer, "</{tag}>")?;
+            }
+            Ok(())
+        }
+        _ => todo!("for other else"),
     }
-    nodes_to_patch
 }

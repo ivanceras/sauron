@@ -1,6 +1,6 @@
 //! Callbacks contains function that can be called at a later time.
 //! This is used in containing an event listener attached to an DOM element.
-use std::{any::TypeId, fmt, rc::Rc};
+use std::{any::TypeId, fmt, rc::Rc, cell::RefCell};
 
 /// A generic sized representation of a function that can be
 /// attached to a Node. The callback will essentially be owned by the element
@@ -25,7 +25,7 @@ use std::{any::TypeId, fmt, rc::Rc};
 ///
 pub struct Callback<IN, OUT> {
     /// the function to be executed
-    func: Rc<dyn Fn(IN) -> OUT>,
+    func: Rc<RefCell<dyn FnMut(IN) -> OUT>>,
     /// the type_id of the function
     func_type_id: TypeId,
     /// the type type_id of the event this callback will be attached to
@@ -36,13 +36,13 @@ pub struct Callback<IN, OUT> {
 
 impl<IN, F, OUT> From<F> for Callback<IN, OUT>
 where
-    F: Fn(IN) -> OUT + 'static,
+    F: FnMut(IN) -> OUT + 'static,
     OUT: 'static,
     IN: 'static,
 {
     fn from(func: F) -> Self {
         Self {
-            func: Rc::new(func),
+            func: Rc::new(RefCell::new(func)),
             func_type_id: TypeId::of::<F>(),
             event_type_id: TypeId::of::<IN>(),
             msg_type_id: TypeId::of::<OUT>(),
@@ -72,7 +72,7 @@ where
 {
     /// This method calls the actual callback.
     pub fn emit(&self, input: IN) -> OUT {
-        (self.func)(input)
+        (self.func.borrow_mut())(input)
     }
 
     /// map this Callback msg such that `Callback<IN, OUT>` becomes `Callback<IN, MSG2>`
@@ -88,7 +88,7 @@ where
             cb2(out)
         };
         Callback {
-            func: Rc::new(cb),
+            func: Rc::new(RefCell::new(cb)),
             func_type_id: source_func_type_id,
             event_type_id: TypeId::of::<IN>(),
             msg_type_id: TypeId::of::<OUT>(),
