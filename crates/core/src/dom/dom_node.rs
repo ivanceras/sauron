@@ -532,6 +532,7 @@ impl DomNode {
             .expect("must be ok");
     }
 
+    #[allow(unused)]
     pub(crate) fn find_child(&self, target_child: &DomNode, path: TreePath) -> Option<TreePath>{
         if self == target_child {
             Some(path)

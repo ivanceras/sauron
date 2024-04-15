@@ -165,7 +165,7 @@ impl Application for App {
                 {component(&self.btn).map_msg(Msg::BtnMsg)}
             </div>
             <div>
-                //{stateful_component(Button::default(), [], [text!("External child of btn stateful_component: {}", self.click_count)])}
+                {stateful_component(Button::default(), [], [text!("External child of btn stateful_component: {}", self.click_count)])}
             </div>
             <div>
                 {stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}

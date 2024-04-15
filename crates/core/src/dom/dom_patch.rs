@@ -93,11 +93,10 @@ impl DomNode{
                 } else {
                     let idx = path.remove_first();
                     if let Some(children) = self.children(){
-                        log::info!("has children..");
                         if let Some(child) = children.get(idx) {
                             child.find_node(path)
                         } else {
-                            log::info!("There is no child at index: {idx}");
+                            log::warn!("There is no child at index: {idx}");
                             None
                         }
                     }else{

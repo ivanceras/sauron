@@ -645,15 +645,6 @@ impl<XMSG> StatefulComponent for Frame<XMSG> {
         self.children.extend(children);
     }
 
-    fn root_node(&self) -> Option<DomNode>{
-        if let Some(root_node) = self.root_node.as_ref(){
-            Some(root_node.clone())
-        }else{
-            log::warn!("Root node is not set");
-            None
-        }
-    }
-
     fn child_container(&self) -> Option<DomNode>{
         if let Some(content_target_node) = self.content_target_node.as_ref(){
             Some(content_target_node.clone())
