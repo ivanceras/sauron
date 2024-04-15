@@ -1,3 +1,4 @@
+use frame::frame;
 use frame::Frame;
 use sauron::*;
 use status::Status;
@@ -30,7 +31,7 @@ impl Application for App {
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
-            {stateful_component(Frame::default(), [], [
+            {frame([], [
                 button([on_click(|_|Msg::Clicked)],[text!("Button has been clicked {} times", self.count)])
             ])}
             </main>
@@ -78,4 +79,3 @@ pub fn start() {
     console_error_panic_hook::set_once();
     Program::mount_to_body(App::new());
 }
-

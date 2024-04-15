@@ -294,10 +294,7 @@ where
                     // corners
                     self.view_corners(),
                     div(
-                        [
-                            class("content_wrap"),
-                            on_mount(Msg::ContentTargetMounted),
-                        ],
+                        [class("content_wrap"), on_mount(Msg::ContentTargetMounted)],
                         [],
                     ),
                 ],
@@ -645,18 +642,23 @@ impl<XMSG> StatefulComponent for Frame<XMSG> {
         self.children.extend(children);
     }
 
-    fn child_container(&self) -> Option<DomNode>{
-        if let Some(content_target_node) = self.content_target_node.as_ref(){
+    fn child_container(&self) -> Option<DomNode> {
+        if let Some(content_target_node) = self.content_target_node.as_ref() {
             Some(content_target_node.clone())
-        }else{
+        } else {
             log::warn!("There is no content target node...");
             None
         }
     }
-
 
     fn connected_callback(&mut self) {}
     fn disconnected_callback(&mut self) {}
     fn adopted_callback(&mut self) {}
 }
 
+pub fn frame<MSG: 'static>(
+    attrs: impl IntoIterator<Item = Attribute<MSG>>,
+    children: impl IntoIterator<Item = Node<MSG>>,
+) -> Node<MSG> {
+    stateful_component(Frame::default(), attrs, children)
+}
