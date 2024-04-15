@@ -4,6 +4,7 @@
 use crate::dom::DomNode;
 use crate::dom::{document, window, Event};
 use crate::vdom;
+use crate::vdom::ComponentEventCallback;
 use crate::vdom::{Attribute, AttributeValue, EventCallback};
 use wasm_bindgen::JsCast;
 #[cfg(web_sys_unstable_apis)]
@@ -16,7 +17,6 @@ use web_sys::{
     EventTarget, HtmlDetailsElement, HtmlElement, HtmlInputElement, HtmlSelectElement,
     HtmlTextAreaElement,
 };
-use crate::vdom::ComponentEventCallback;
 
 #[derive(Clone, Copy)]
 #[repr(i16)]
@@ -176,7 +176,6 @@ where
         AttributeValue::ComponentEventListener(ComponentEventCallback::from(cb)),
     )
 }
-
 
 macro_rules! declare_events {
 

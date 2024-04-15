@@ -1,11 +1,11 @@
-use std::{any::TypeId, cell::RefCell, fmt, rc::Rc};
 use crate::{
     dom::{
-        events::on_component_mount, program::MountProcedure, Application, Cmd, Component, DomAttrValue,
-        DomNode, Program,
+        events::on_component_mount, program::MountProcedure, Application, Cmd, Component,
+        DomAttrValue, DomNode, Program,
     },
     vdom::{Attribute, AttributeName, Leaf, Node},
 };
+use std::{any::TypeId, cell::RefCell, fmt, rc::Rc};
 
 /// A component that can be used directly in the view without mapping
 pub trait StatefulComponent {
@@ -23,8 +23,6 @@ pub trait StatefulComponent {
 
     /// remove the attribute with this name
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
-
-
 
     /// return the DomNode which contains the children DomNode
     fn child_container(&self) -> Option<DomNode>;

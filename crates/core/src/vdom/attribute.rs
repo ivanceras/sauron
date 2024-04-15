@@ -1,9 +1,9 @@
 #![allow(clippy::type_complexity)]
 
-use derive_where::derive_where;
-use indexmap::IndexMap;
 use crate::vdom::ComponentEventCallback;
 use crate::vdom::EventCallback;
+use derive_where::derive_where;
+use indexmap::IndexMap;
 
 pub use attribute_value::AttributeValue;
 pub use callback::Callback;

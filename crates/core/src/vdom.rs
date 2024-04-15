@@ -39,7 +39,6 @@ pub mod patch;
 /// for Components
 pub type EventCallback<MSG> = Callback<Event, MSG>;
 
-
 /// Mount callback is used for mounting the component into the DOM
 /// This requires no MSG to be emitted
 pub type ComponentEventCallback = Callback<Event, ()>;

@@ -4,7 +4,7 @@ use wasm_bindgen::JsCast;
 
 use crate::{
     dom::{
-        document, dom_node::intern, dom_node::DomInner,  Application, DomAttr, DomAttrValue,
+        document, dom_node::intern, dom_node::DomInner, Application, DomAttr, DomAttrValue,
         DomNode, GroupedDomAttrValues, Program, StatelessModel,
     },
     vdom::{self, Attribute, AttributeValue, Leaf},
@@ -324,7 +324,9 @@ where
                 template
             }
             _ => {
-                log::warn!("template and skip_diff is not found, fallback to no template and skip_diff");
+                log::warn!(
+                    "template and skip_diff is not found, fallback to no template and skip_diff"
+                );
                 self.create_stateless_component(parent_node, comp)
             }
         }
@@ -349,7 +351,9 @@ where
                 dom_template
             }
             _ => {
-                log::warn!("template and skip_diff is not found, fallback to no template and skip_diff");
+                log::warn!(
+                    "template and skip_diff is not found, fallback to no template and skip_diff"
+                );
                 self.create_initial_view()
             }
         }
@@ -389,7 +393,7 @@ impl DomInner {
             Self::Symbol(_) => todo!(),
             Self::Comment(_) => todo!(),
             Self::Fragment { .. } => todo!(),
-            Self::StatefulComponent{..} => unreachable!("can not deep clone stateful component"),
+            Self::StatefulComponent { .. } => unreachable!("can not deep clone stateful component"),
         }
     }
 }
