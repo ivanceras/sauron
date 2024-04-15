@@ -328,17 +328,16 @@
     - Right now, it is triggered when the virtual Node is created into a real Node.
 - [X] Maybe rename `#[web_component]` macro to `#[custom_element]`
     - Also `WebComponent` to `CustomElementWrapper`
-- [ ] Implement the `StatefulComponent`
-    - [ ] attributes and attribute value (key)
-    - [ ] removing children and setting attributes
-- [ ] Make the fancy-ui example work
-    - [ ] Change Patch to use PatchTarget, where TargetNode 
-        will be specified for StatefulComponents
-        - This is necessary since StatefulComponents child container is
-        not necessarily the root node.
+- [X] Implement the `StatefulComponent`
+    - [X] attributes and attribute value (key)
+    - [X] removing children and setting attributes
+- [X] Make the fancy-ui example work
+    - ~~[X] Change Patch to use PatchTarget, where TargetNode 
+        will be specified for StatefulComponents~~
+        - ~~This is necessary since StatefulComponents child container is
+        not necessarily the root node.~~
         - Alternative way is to convert child_container to TreePath by searching
         for it from the root node
-- [ ] Make the fancy-ui example work
 - [ ] Rename local variables to their descriptive name
     - batch_pending_cmds -> batch_pending_dispatch
     - init_cmd -> init_dispatch;
