@@ -79,7 +79,7 @@ impl fmt::Debug for DomInner {
                         &children
                             .borrow()
                             .iter()
-                            .map(|c| c.as_element().tag_name().to_lowercase())
+                            .map(|c| c.tag())
                             .collect::<Vec<_>>(),
                     )
                     .finish()?;
@@ -167,6 +167,18 @@ impl DomNode {
         matches!(&self.inner, DomInner::Fragment { .. })
     }
 
+    pub(crate) fn is_text_node(&self) -> bool {
+        matches!(&self.inner, DomInner::Text(_))
+    }
+
+    pub(crate) fn is_comment(&self) -> bool {
+        matches!(&self.inner, DomInner::Comment(_))
+    }
+
+    pub(crate) fn is_symbol(&self) -> bool {
+        matches!(&self.inner, DomInner::Symbol(_))
+    }
+
     #[allow(unused)]
     pub(crate) fn is_stateful_component(&self) -> bool {
         matches!(&self.inner, DomInner::StatefulComponent { .. })
@@ -185,7 +197,7 @@ impl DomNode {
             DomInner::Element { element, .. } => element.clone().unchecked_into(),
             DomInner::Fragment { fragment, .. } => fragment.clone().unchecked_into(),
             DomInner::Text(text_node) => text_node.clone().unchecked_into(),
-            DomInner::Symbol(_) => panic!("don't know how to deal with symbol"),
+            DomInner::Symbol(_) => unreachable!("symbol should be handled separately"),
             DomInner::Comment(comment_node) => comment_node.clone().unchecked_into(),
             DomInner::StatefulComponent { dom_node, .. } => dom_node.as_node(),
         }
@@ -197,20 +209,19 @@ impl DomNode {
             DomInner::Element { element, .. } => element.clone(),
             DomInner::Fragment { fragment, .. } => {
                 let fragment: web_sys::Element = fragment.clone().unchecked_into();
-                assert!(fragment.is_object());
-                fragment
+               fragment
             }
             DomInner::Text(text_node) => text_node.clone().unchecked_into(),
-            DomInner::Symbol(_) => panic!("don't know how to deal with symbol"),
+            DomInner::Symbol(_) => unreachable!("symbol should be handled separately"),
             DomInner::Comment(comment_node) => comment_node.clone().unchecked_into(),
             DomInner::StatefulComponent { dom_node, .. } => dom_node.as_element(),
         }
     }
 
     /// return the string content of this symbol
-    pub fn as_symbol(&self) -> Option<String> {
+    pub fn as_symbol(&self) -> Option<&str> {
         match &self.inner {
-            DomInner::Symbol(symbol) => Some(symbol.as_ref().to_string()),
+            DomInner::Symbol(symbol) => Some(symbol),
             _ => None,
         }
     }
@@ -523,11 +534,15 @@ impl DomNode {
         Ok(())
     }
 
+    //TODO: check if the element has a dispatch mount event
+    //otherwise dont dispatch the mount event
     fn dispatch_mount_event(&self) {
-        let event_target: web_sys::EventTarget = self.as_element().unchecked_into();
-        event_target
-            .dispatch_event(&MountEvent::create_web_event())
-            .expect("must be ok");
+        if !self.is_text_node() && !self.is_comment() && !self.is_symbol(){
+            let event_target: web_sys::EventTarget = self.as_element().unchecked_into();
+            event_target
+                .dispatch_event(&MountEvent::create_web_event())
+                .expect("must be ok");
+        }
     }
 
     #[allow(unused)]
