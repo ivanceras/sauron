@@ -163,24 +163,33 @@ impl DomNode {
         }
     }
 
-    pub(crate) fn is_fragment(&self) -> bool {
+    /// returns true if this an element node
+    pub fn is_element(&self) -> bool {
+        matches!(&self.inner, DomInner::Element{..})
+    }
+
+    /// returns true if this a fragment node
+    pub fn is_fragment(&self) -> bool {
         matches!(&self.inner, DomInner::Fragment { .. })
     }
 
-    pub(crate) fn is_text_node(&self) -> bool {
+    /// returns true if this a text node
+    pub fn is_text_node(&self) -> bool {
         matches!(&self.inner, DomInner::Text(_))
     }
 
-    pub(crate) fn is_comment(&self) -> bool {
+    /// returns true if this Comment node
+    pub fn is_comment(&self) -> bool {
         matches!(&self.inner, DomInner::Comment(_))
     }
 
-    pub(crate) fn is_symbol(&self) -> bool {
+    /// returns true if this DomNode is a html entity symbol
+    pub fn is_symbol(&self) -> bool {
         matches!(&self.inner, DomInner::Symbol(_))
     }
 
-    #[allow(unused)]
-    pub(crate) fn is_stateful_component(&self) -> bool {
+    /// returns true if this is a stateful component
+    pub fn is_stateful_component(&self) -> bool {
         matches!(&self.inner, DomInner::StatefulComponent { .. })
     }
 
@@ -204,6 +213,7 @@ impl DomNode {
     }
 
     /// exposed the underlying wrapped node as `web_sys::Element`
+    #[track_caller]
     pub fn as_element(&self) -> web_sys::Element {
         match &self.inner {
             DomInner::Element { element, .. } => element.clone(),
@@ -537,7 +547,7 @@ impl DomNode {
     //TODO: check if the element has a dispatch mount event
     //otherwise dont dispatch the mount event
     fn dispatch_mount_event(&self) {
-        if !self.is_text_node() && !self.is_comment() && !self.is_symbol(){
+        if self.is_element() || self.is_stateful_component(){
             let event_target: web_sys::EventTarget = self.as_element().unchecked_into();
             event_target
                 .dispatch_event(&MountEvent::create_web_event())
