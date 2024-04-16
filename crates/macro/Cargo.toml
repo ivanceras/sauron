@@ -1,6 +1,6 @@
 [package]
 name = "sauron-macro"
-version = "0.61.4"
+version = "0.61.5"
 authors = ["John-John Tedro <udoprog@tedro.se>", "Jovansonlee Cesar <ivanceras@gmail.com>"]
 license = "MIT"
 description = "An html library for building client side webapps"
