@@ -41,6 +41,7 @@ pub enum DomInner {
     Element {
         /// the reference to the actual element
         element: web_sys::Element,
+        // TODO: put all DomAttr here
         /// the listeners of this element, which we will drop when this element is removed
         listeners: Rc<RefCell<Option<NamedEventClosures>>>,
         /// keeps track of the children nodes
@@ -601,6 +602,9 @@ impl DomNode {
             DomInner::Comment(comment) => {
                 write!(buffer, "<!--{}-->", comment.data())
             }
+            DomInner::Symbol(symbol) => {
+                write!(buffer, "{symbol}")
+            }
             DomInner::Element {
                 element, children, ..
             } => {
@@ -638,7 +642,6 @@ impl DomNode {
                 dom_node.render(buffer)?;
                 Ok(())
             }
-            _ => todo!("for other else"),
         }
     }
 }

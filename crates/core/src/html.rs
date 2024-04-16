@@ -152,8 +152,7 @@ pub fn node_list<MSG>(nodes: impl IntoIterator<Item = Node<MSG>>) -> Node<MSG> {
 }
 
 /// Create html entities such as `&nbsp;` `&gt`
-pub fn symbol<MSG>(s: impl Into<Cow<'static, str>>) -> Node<MSG> {
-    let s = s.into();
+pub fn symbol<MSG>(s: &str) -> Node<MSG> {
     let s = escape_html_text(&s);
     Node::Leaf(Leaf::Symbol(s.into()))
 }

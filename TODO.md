@@ -341,6 +341,7 @@
 - [ ] Rename local variables to their descriptive name
     - batch_pending_cmds -> batch_pending_dispatch
     - init_cmd -> init_dispatch;
+- [ ] dispatch `attribute_change` for all attributes in stateful component
 
 ## Performance
 - [X] Fix the reported issues with benchmarks

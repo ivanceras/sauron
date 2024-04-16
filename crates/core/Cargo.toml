@@ -45,7 +45,6 @@ futures = "=0.3.30"
 indexmap = "2.2.5"
 longest-increasing-subsequence = "0.1.0"
 derive-where = "1.2.7"
-micromap = "0.0.15"
 
 
 [dependencies.wasm-bindgen]

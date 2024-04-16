@@ -31,8 +31,10 @@ pub enum ParseError {
 }
 
 /// parse the html string and build a node tree
-pub fn safe_html<MSG>(html: &str) -> Node<MSG> {
-    parse_html(html)
+pub fn raw_html<MSG>(html: &str) -> Node<MSG> {
+    // decode html entitiesd back since it will be safely converted into text
+    let html = html_escape::decode_html_entities(html);
+    parse_html(&html)
         .expect("must be ok")
         .expect("must have a node")
 }
