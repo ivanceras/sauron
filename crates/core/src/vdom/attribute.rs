@@ -139,6 +139,10 @@ impl<MSG> Attribute<MSG> {
             .unwrap_or(false)
     }
 
+    pub(crate) fn is_mount_callback(&self) -> bool {
+        self.name == "mount"
+    }
+
     /// merge the values of attributes with the same name
     /// also exclude the empty attribute
     pub fn merge_attributes_of_same_name<'a>(

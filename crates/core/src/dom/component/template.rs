@@ -224,6 +224,7 @@ fn create_element_node_no_listeners<MSG>(
             element,
             listeners: Rc::new(RefCell::new(None)),
             children: Rc::new(RefCell::new(vec![])),
+            has_mount_callback: elm.has_mount_callback(),
         },
         parent: parent_node,
     };
@@ -387,6 +388,7 @@ impl DomInner {
                     element,
                     listeners: Rc::new(RefCell::new(None)),
                     children: Rc::new(RefCell::new(children)),
+                    has_mount_callback: false,
                 }
             }
             Self::Text(_) => todo!(),

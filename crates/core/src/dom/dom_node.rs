@@ -46,6 +46,8 @@ pub enum DomInner {
         /// keeps track of the children nodes
         /// this needs to be synced with the actual element children
         children: Rc<RefCell<Vec<DomNode>>>,
+        /// determine if this element needs to dispatch a mount event
+        has_mount_callback: bool,
     },
     /// text node
     Text(web_sys::Text),
@@ -115,6 +117,7 @@ impl From<web_sys::Node> for DomNode {
                         element,
                         listeners: Rc::new(RefCell::new(None)),
                         children: Rc::new(RefCell::new(children)),
+                        has_mount_callback: false,
                     },
                     parent: Rc::new(None),
                 }
@@ -545,10 +548,18 @@ impl DomNode {
         Ok(())
     }
 
-    //TODO: check if the element has a dispatch mount event
-    //otherwise dont dispatch the mount event
+    /// always dispatch the mount event on stateful component
+    /// dispatch mount event to element that has on_mount callback set.
+    fn should_dispatch_mount_event(&self) -> bool{
+        match self.inner{
+            DomInner::Element{has_mount_callback,..} => has_mount_callback,
+            DomInner::StatefulComponent{..} => true,
+            _ => false,
+        }
+    }
+
     fn dispatch_mount_event(&self) {
-        if self.is_element() || self.is_stateful_component(){
+        if self.should_dispatch_mount_event(){
             let event_target: web_sys::EventTarget = self.as_element().unchecked_into();
             event_target
                 .dispatch_event(&MountEvent::create_web_event())
@@ -691,6 +702,7 @@ where
                 element,
                 listeners: Rc::new(RefCell::new(listeners)),
                 children: Rc::new(RefCell::new(vec![])),
+                has_mount_callback: elm.has_mount_callback(),
             },
             parent: parent_node,
         };
