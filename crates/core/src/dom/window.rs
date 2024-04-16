@@ -191,7 +191,7 @@ impl Window {
             });
         window()
             .add_event_listener_with_callback(
-                intern("mouseup"),
+                intern("popstate"),
                 closure_cb.as_ref().unchecked_ref(),
             )
             .expect("add event callback");
