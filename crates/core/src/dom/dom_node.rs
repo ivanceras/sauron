@@ -382,6 +382,7 @@ impl DomNode {
                     replacement.dispatch_mount_event();
                     children.borrow_mut().insert(child_index, replacement);
                 } else {
+                    log::warn!("unable to find target_child: {target_child:#?} with a replacement: {:?}", replacement);
                     // if can not find the child, then must be the root node
                     unreachable!("must find the child...");
                 }

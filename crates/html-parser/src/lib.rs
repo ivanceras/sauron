@@ -71,6 +71,7 @@ fn process_node<MSG>(node: &rphtml::parser::Node) -> Result<Option<Node<MSG>>, P
     } else {
         vec![]
     };
+    
 
     match node.node_type {
         NodeType::Tag => {
@@ -123,7 +124,7 @@ fn process_node<MSG>(node: &rphtml::parser::Node) -> Result<Option<Node<MSG>>, P
         NodeType::AbstractRoot => {
             let child_nodes_len = child_nodes.len();
             match child_nodes_len {
-                0 => Ok(None),
+                0 => Ok(Some(node_list([]))),
                 1 => Ok(Some(child_nodes.remove(0))),
                 _ => Ok(Some(node_list(child_nodes))),
             }
