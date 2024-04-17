@@ -826,6 +826,11 @@ where
                 [],
             ),
         );
+
+        let dom_attrs:Vec<DomAttr> = comp.attrs.iter().map(|a|self.convert_attr(a)).collect();
+        for dom_attr in dom_attrs.into_iter(){
+            comp.comp.borrow_mut().attribute_changed(dom_attr.name, dom_attr.value);
+        }
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
         // listener and removing the generics msg

@@ -609,27 +609,27 @@ impl<XMSG> StatefulComponent for Frame<XMSG> {
     fn attribute_changed(
         &mut self,
         attr_name: &str,
-        _old_value: DomAttrValue,
-        new_value: DomAttrValue,
+        new_value: Vec<DomAttrValue>,
     ) {
+        log::info!("attribuite changed: {attr_name}: {new_value:?}");
         match attr_name {
             "theme-primary" => {
-                if let Some(primary) = new_value.get_string() {
-                    //let background = &app.theme.background_color;
-                    //app.theme =
-                    //    Theme::from_str(&primary, background).expect("must be a valid theme");
+                if let Some(primary) = new_value[0].as_string() {
+                    let background = &self.theme.background_color;
+                    self.theme =
+                        Theme::from_str(&primary, background).expect("must be a valid theme");
                 }
             }
             "theme-background" => {
-                if let Some(background) = new_value.get_string() {
-                    //let primary = &app.theme.primary_color;
-                    //app.theme =
-                    //    Theme::from_str(primary, &background).expect("must be a valid theme");
+                if let Some(background) = new_value[0].as_string() {
+                    let primary = &self.theme.primary_color;
+                    self.theme =
+                        Theme::from_str(primary, &background).expect("must be a valid theme");
                 }
             }
             "status" => {
-                if let Some(v) = new_value.get_string() {
-                    //app.status = Status::from_str(&v).ok();
+                if let Some(v) = new_value[0].as_string() {
+                    self.status = Status::from_str(&v).ok();
                 }
             }
             _ => (),

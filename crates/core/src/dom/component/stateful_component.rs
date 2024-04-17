@@ -16,11 +16,8 @@ pub trait StatefulComponent {
     fn attribute_changed(
         &mut self,
         attr_name: &str,
-        old_value: DomAttrValue,
-        new_value: DomAttrValue,
-    ) where
-        Self: Sized;
-
+        new_value: Vec<DomAttrValue>,
+    ); 
     /// remove the attribute with this name
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
 

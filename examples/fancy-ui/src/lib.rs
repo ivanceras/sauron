@@ -31,7 +31,7 @@ impl Application for App {
     fn view(&self) -> Node<Msg> {
         node! {
             <main>
-            {frame([], [
+            {frame([attr("theme-primary", "red"), attr("theme-background", "black"), attr("status", "error")], [
                 button([on_click(|_|Msg::Clicked)],[text!("Button has been clicked {} times", self.count)])
             ])}
             </main>

@@ -317,7 +317,7 @@ impl DomAttr {
 
 impl DomAttrValue {
     /// return the value if it is a Simple variant
-    pub fn get_simple(&self) -> Option<&Value> {
+    pub fn as_simple(&self) -> Option<&Value> {
         match self {
             Self::Simple(v) => Some(v),
             _ => None,
@@ -325,8 +325,8 @@ impl DomAttrValue {
     }
 
     /// make a string representation of this value if it is a simple value
-    pub fn get_string(&self) -> Option<String> {
-        let simple = self.get_simple()?;
+    pub fn as_string(&self) -> Option<String> {
+        let simple = self.as_simple()?;
         Some(simple.to_string())
     }
 }
