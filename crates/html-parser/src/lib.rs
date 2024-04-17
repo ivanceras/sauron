@@ -87,7 +87,7 @@ fn process_node<MSG>(node: &rphtml::parser::Node) -> Result<Option<Node<MSG>>, P
                     .filter_map(|attr| {
                         attr.key
                             .as_ref()
-                            .map(|key| {
+                            .and_then(|key| {
                                 let key = String::from_iter(key.content.iter());
                                 if let Some(attr_key) = lookup::match_attribute(&key) {
                                     let value = if let Some(value) = &attr.value {
@@ -102,7 +102,6 @@ fn process_node<MSG>(node: &rphtml::parser::Node) -> Result<Option<Node<MSG>>, P
                                     None
                                 }
                             })
-                            .flatten()
                     })
                     .collect();
 
