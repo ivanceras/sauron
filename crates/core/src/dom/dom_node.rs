@@ -257,7 +257,7 @@ impl DomNode {
                 for mut child in for_append.into_iter() {
                     if let Some(symbol) = child.as_symbol() {
                         element
-                            .insert_adjacent_html(intern("beforeend"), &symbol)
+                            .insert_adjacent_html(intern("beforeend"), symbol)
                             .expect("must not error");
                     } else {
                         element
