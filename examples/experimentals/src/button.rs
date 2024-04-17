@@ -51,10 +51,8 @@ impl StatefulComponent for Button {
     fn attribute_changed(
         &mut self,
         attr_name: &str,
-        old_value: DomAttrValue,
-        new_value: DomAttrValue,
-    ) where
-        Self: Sized,
+        new_value: Vec<DomAttrValue>,
+    ) 
     {
     }
 

@@ -185,24 +185,22 @@ impl StatefulComponent for DateTimeWidget<()> {
     fn attribute_changed(
         &mut self,
         attr_name: &str,
-        old_value: DomAttrValue,
-        new_value: DomAttrValue,
-    ) where
-        Self: Sized,
+        new_value: Vec<DomAttrValue>,
+    )
     {
         match &*attr_name {
             "time" => {
-                if let Some(new_value) = new_value.get_string() {
+                if let Some(new_value) = new_value[0].as_string() {
                     Component::update(self, Msg::TimeChange(new_value));
                 }
             }
             "date" => {
-                if let Some(new_value) = new_value.get_string() {
+                if let Some(new_value) = new_value[0].as_string() {
                     Component::update(self, Msg::DateChange(new_value));
                 }
             }
             "interval" => {
-                if let Some(new_value) = new_value.get_string() {
+                if let Some(new_value) = new_value[0].as_string() {
                     let new_value: f64 = str::parse(&new_value).expect("must parse to f64");
                     Component::update(self, Msg::IntervalChange(new_value));
                 }

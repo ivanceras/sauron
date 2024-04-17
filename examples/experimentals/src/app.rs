@@ -1,6 +1,6 @@
 //#![deny(warnings)]
 use crate::button::{self, Button};
-use crate::date_time::{self, DateTimeWidget};
+use crate::date_time::{self, DateTimeWidget, date, time};
 use js_sys::Date;
 use sauron::dom::component;
 use sauron::dom::stateful_component;
@@ -168,7 +168,7 @@ impl Application for App {
                 {stateful_component(Button::default(), [], [text!("External child of btn stateful_component: {}", self.click_count)])}
             </div>
             <div>
-                {stateful_component(DateTimeWidget::default(), [],[text("External child of date widget")])}
+                {stateful_component(DateTimeWidget::default(), [date("2022-07-07"), time("07:07")],[text("External child of date widget")])}
             </div>
         </div>
     }
