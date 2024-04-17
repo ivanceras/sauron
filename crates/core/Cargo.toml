@@ -23,7 +23,6 @@ log-patches = [] # use in combination to with-debug to log the debug patches
 with-ric = [] # use of request_idle_callback in javascript
 with-raf = [] # use of request_animation_frame in javascript
 with-interning = [] # use caching of strings when crossing rust to js, for faster transfer
-custom_element = [] # use of register_custom_element, adding this will add the js snippets
 ensure-check = [] #do checking if pending msgs, patches, cmds,  has been processed accordingly to ensure proper order and synchronized dom state
 ensure-attr-set = [] #ensure attributes is reflected into the element by explicitly calling the element corresponding methods aside fro just setting its attribute by name
 test-fixtures = [] #include the test-fixtures for updating the program with the supplied vdom

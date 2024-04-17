@@ -3,7 +3,6 @@ use crate::Theme;
 use css_colors::Color;
 use sauron::dom::DomNode;
 use sauron::{
-    dom::WebComponent,
     html::{attributes::*, events::*, *},
     vdom::Callback,
     *,

@@ -13,8 +13,6 @@ use cfg_if::cfg_if;
 
 cfg_if! {if #[cfg(feature = "with-dom")] {
     pub use application::{Application, Measurements, SkipDiff, skip_if, skip_diff, SkipPath};
-    #[cfg(feature = "custom_element")]
-    pub use component::{register_web_component, WebComponent, WebComponentWrapper};
     pub use component::{stateful_component, StatefulComponent, StatefulModel, StatelessModel};
     pub use component::component;
     pub use dom_patch::{DomPatch, PatchVariant};

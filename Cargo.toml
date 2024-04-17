@@ -19,7 +19,7 @@ sauron-macro = { version = "0.61", path = "crates/macro", optional = true }
 sauron-html-parser = { version = "0.61", path = "crates/html-parser", optional = true }
 
 [features]
-default = ["with-dom", "with-node-macro", "custom_element", "with-interning", "with-jss"]
+default = ["with-dom", "with-node-macro", "with-interning", "with-jss"]
 with-dom = ["sauron-core/with-dom"]
 with-lookup = ["sauron-core/with-lookup"]
 with-ric = ["sauron-core/with-ric"]
@@ -37,7 +37,6 @@ with-trace = ["sauron-core/with-trace"]
 
 # lets you use node! macro to write html like code in the view
 with-node-macro = ["sauron-macro"]
-custom_element = ["sauron-macro","sauron-core/custom_element"]
 html-parser = ["sauron-html-parser"]
 use-template = ["sauron-core/use-template"]
 use-skipdiff = ["sauron-core/use-skipdiff"]

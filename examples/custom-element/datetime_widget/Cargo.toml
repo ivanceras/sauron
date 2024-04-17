@@ -5,7 +5,7 @@ authors = ["Jovansonlee Cesar <ivanceras@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-sauron = { path = "../../../", features = ["custom_element"] }
+sauron = { path = "../../../" }
 log = "0.4"
 console_log = "0.2"
 console_error_panic_hook = "0.1"

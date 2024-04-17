@@ -6,8 +6,8 @@ use sauron::dom::StatefulComponent;
 use sauron::vdom::AttributeName;
 use sauron::wasm_bindgen::JsCast;
 use sauron::{
-    custom_element, html::attributes::*, html::events::*, html::*, jss, vdom::Callback,
-    wasm_bindgen, web_sys, Attribute, Effects, JsValue, Node, WebComponent, *,
+    html::attributes::*, html::events::*, html::*, jss, vdom::Callback,
+    wasm_bindgen, web_sys, Attribute, Effects, JsValue, Node, *,
 };
 use std::fmt::Debug;
 
@@ -227,80 +227,6 @@ impl StatefulComponent for DateTimeWidget<()> {
     }
 }
 
-#[wasm_bindgen]
-pub struct DateTimeCustomElement {
-    program: Program<DateTimeWidget<()>>,
-    mount_node: web_sys::Node,
-}
-
-#[wasm_bindgen]
-impl DateTimeCustomElement {
-    #[wasm_bindgen(constructor)]
-    pub fn new(node: JsValue) -> Self {
-        let mount_node: web_sys::Node = node.unchecked_into();
-        Self {
-            program: Program::new(DateTimeWidget::<()>::default()),
-            mount_node,
-        }
-    }
-
-    #[allow(unused_variables)]
-    #[wasm_bindgen(getter, static_method_of = Self, js_name = observedAttributes)]
-    pub fn observed_attributes() -> JsValue {
-        let attributes = DateTimeWidget::<()>::observed_attributes();
-        serde_wasm_bindgen::to_value(&attributes).expect("convert to value")
-    }
-
-    #[wasm_bindgen(method, js_name = attributeChangedCallback)]
-    pub fn attribute_changed_callback(
-        &self,
-        attr_name: &str,
-        old_value: JsValue,
-        new_value: JsValue,
-    ) {
-        self.program
-            .app_mut()
-            .attribute_changed(attr_name, old_value.into(), new_value.into());
-    }
-
-    #[wasm_bindgen(method, js_name = connectedCallback)]
-    pub fn connected_callback(&mut self) {
-        self.program
-            .mount(&self.mount_node, MountProcedure::append_to_shadow());
-
-        let static_style = <DateTimeWidget<()> as Application>::stylesheet().join("");
-        self.program.inject_style_to_mount(&static_style);
-        let dynamic_style =
-            <DateTimeWidget<()> as Application>::style(&self.program.app()).join("");
-        self.program.inject_style_to_mount(&dynamic_style);
-
-        self.program.update_dom().expect("must update dom");
-    }
-
-    #[wasm_bindgen(method, js_name = disconnectedCallback)]
-    pub fn disconnected_callback(&mut self) {}
-
-    #[wasm_bindgen(method, js_name = adoptedCallback)]
-    pub fn adopted_callback(&mut self) {}
-
-    pub fn register() {
-        let constructor: Closure<dyn FnMut(JsValue)> = Closure::new(|node: JsValue| {
-            let new: Closure<dyn FnMut(JsValue) -> Self> =
-                Closure::new(|node: JsValue| Self::new(node));
-            js_sys::Reflect::set(&node, &JsValue::from_str("new"), &new.into_js_value())
-                .unwrap_throw();
-        });
-        sauron::dom::register_web_component(
-            "date-time",
-            constructor.into_js_value(),
-            Self::observed_attributes(),
-        );
-    }
-}
-pub fn register() {
-    DateTimeCustomElement::register();
-}
-
 pub fn date<MSG, V: Into<Value>>(v: V) -> Attribute<MSG> {
     attr("date", v)
 }
@@ -309,10 +235,9 @@ pub fn time<MSG, V: Into<Value>>(v: V) -> Attribute<MSG> {
     attr("time", v)
 }
 
-pub fn date_time<MSG>(
+pub fn date_time<MSG:'static>(
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG> {
-    register();
-    html_element(None, "date-time", attrs, children, true)
+    stateful_component(DateTimeWidget::default(), attrs, children)
 }

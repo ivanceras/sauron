@@ -166,14 +166,17 @@ where
 #[cfg(feature = "with-dom")]
 impl From<wasm_bindgen::JsValue> for DomAttrValue {
     fn from(val: wasm_bindgen::JsValue) -> Self {
-        if let Some(v) = val.as_bool() {
+        if val.is_null(){
+            DomAttrValue::Empty
+        }
+        else if let Some(v) = val.as_bool() {
             DomAttrValue::Simple(v.into())
         } else if let Some(v) = val.as_f64() {
             DomAttrValue::Simple(v.into())
         } else if let Some(v) = val.as_string() {
             DomAttrValue::Simple(v.into())
         } else {
-            todo!("handle other conversion, other than bool, f64, strings, nulls ")
+            todo!("for: {:?}", val)
         }
     }
 }

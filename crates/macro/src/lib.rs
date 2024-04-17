@@ -13,7 +13,6 @@
 //! for building view of web app components
 use quote::ToTokens;
 
-mod custom_element;
 mod extract_skip_diff;
 mod extract_template;
 mod jss;
@@ -229,18 +228,6 @@ pub fn extract_skip_diff(input: proc_macro::TokenStream) -> proc_macro::TokenStr
 #[proc_macro]
 pub fn extract_template(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     extract_template::to_token_stream(input).into()
-}
-
-/// derive code for a certain CustomElement implementation to have the necessary types and glue
-/// code which register itself into the the DOM customElementRegistry.
-/// This also adds the register function into the module it is called in, so make sure you only
-/// use this in each module, multiple web_components should be in different modules
-#[proc_macro_attribute]
-pub fn custom_element(
-    attr: proc_macro::TokenStream,
-    input: proc_macro::TokenStream,
-) -> proc_macro::TokenStream {
-    custom_element::to_token_stream(attr, input)
 }
 
 /// build a css string

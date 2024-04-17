@@ -2,13 +2,16 @@
 use datetime_widget::date_time::{date, date_time, time};
 use sauron::*;
 
-enum AppMsg {}
+pub enum AppMsg {}
 
 #[derive(Default)]
 pub struct App {}
 
-impl Application<AppMsg> for App {
-    fn update(&mut self, _msg: AppMsg) -> Cmd<Self, AppMsg> {
+impl Application for App {
+
+    type MSG = AppMsg;
+
+    fn update(&mut self, _msg: AppMsg) -> Cmd<AppMsg> {
         Cmd::none()
     }
 

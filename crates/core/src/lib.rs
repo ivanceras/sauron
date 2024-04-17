@@ -54,10 +54,6 @@ pub mod prelude {
             MountTarget, Cmd, TimeoutCallbackHandle, DomAttrValue,
             stateful_component, Time,
         };
-        #[cfg(feature = "custom_element")]
-        pub use crate::dom::WebComponent;
-        #[cfg(feature = "custom_element")]
-        pub use crate::dom::WebComponentWrapper;
     }}
 }
 

@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+- remove support for `custom_element` as its functionality is superseeded with `stateful_component`
+
+## 0.61.5
+- rename `safe_html` to `raw_html`
+    - decode html entities before parsing and converting into node
+- optimize dispatching of mount event only to element that has attached event listener to on_mount
+- make `stateful_component` patches work on its own dom tree
+
+## 0.61.4
+- make `use-template` and `use-skipdiff` fail safe if the template and skipdiff is not used in the view
+- feat: feature gate `with-trace` for determining how much time is spent in section of making stateful component
+
+## 0.61.3 
+- more clippy lint fixes
+- improvements on the examples
+
+## 0.61.2
+- use `with-lookup` feature by default
+
 ## 0.61.0
 - add template system, skip_diff
 - web_sys::Node is now wrapped with DomNode, the event listeners

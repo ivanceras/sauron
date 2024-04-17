@@ -9,15 +9,10 @@ use std::any::TypeId;
 #[cfg(feature = "with-dom")]
 pub use stateful_component::{stateful_component, StatefulComponent, StatefulModel};
 
-#[cfg(feature = "custom_element")]
-pub use web_component::{register_web_component, WebComponent, WebComponentWrapper};
-
 #[cfg(feature = "with-dom")]
 mod stateful_component;
 #[cfg(feature = "use-template")]
 pub(crate) mod template;
-#[cfg(feature = "custom_element")]
-mod web_component;
 
 /// A component has a view and can update itself.
 ///
