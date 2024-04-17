@@ -48,13 +48,7 @@ impl Component for Button {
 }
 
 impl StatefulComponent for Button {
-    fn attribute_changed(
-        &mut self,
-        attr_name: &str,
-        new_value: Vec<DomAttrValue>,
-    ) 
-    {
-    }
+    fn attribute_changed(&mut self, attr_name: &str, new_value: Vec<DomAttrValue>) {}
 
     /// append a child into this component
     fn append_children(&mut self, children: Vec<DomNode>) {

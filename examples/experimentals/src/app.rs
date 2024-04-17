@@ -1,6 +1,6 @@
 //#![deny(warnings)]
 use crate::button::{self, Button};
-use crate::date_time::{self, DateTimeWidget, date, time};
+use crate::date_time::{self, date, time, DateTimeWidget};
 use js_sys::Date;
 use sauron::dom::component;
 use sauron::dom::stateful_component;

@@ -85,23 +85,21 @@ fn process_node<MSG>(node: &rphtml::parser::Node) -> Result<Option<Node<MSG>>, P
                     .attrs
                     .iter()
                     .filter_map(|attr| {
-                        attr.key
-                            .as_ref()
-                            .and_then(|key| {
-                                let key = String::from_iter(key.content.iter());
-                                if let Some(attr_key) = lookup::match_attribute(&key) {
-                                    let value = if let Some(value) = &attr.value {
-                                        let value = String::from_iter(value.content.iter());
-                                        AttributeValue::Simple(Value::from(value))
-                                    } else {
-                                        AttributeValue::Empty
-                                    };
-                                    Some(Attribute::new(None, attr_key, value))
+                        attr.key.as_ref().and_then(|key| {
+                            let key = String::from_iter(key.content.iter());
+                            if let Some(attr_key) = lookup::match_attribute(&key) {
+                                let value = if let Some(value) = &attr.value {
+                                    let value = String::from_iter(value.content.iter());
+                                    AttributeValue::Simple(Value::from(value))
                                 } else {
-                                    log::warn!("Not a standard html attribute: {}", key);
-                                    None
-                                }
-                            })
+                                    AttributeValue::Empty
+                                };
+                                Some(Attribute::new(None, attr_key, value))
+                            } else {
+                                log::warn!("Not a standard html attribute: {}", key);
+                                None
+                            }
+                        })
                     })
                     .collect();
 

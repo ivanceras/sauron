@@ -182,12 +182,7 @@ where
 
 impl StatefulComponent for DateTimeWidget<()> {
     /// this is called when the attributes in the mount is changed
-    fn attribute_changed(
-        &mut self,
-        attr_name: &str,
-        new_value: Vec<DomAttrValue>,
-    )
-    {
+    fn attribute_changed(&mut self, attr_name: &str, new_value: Vec<DomAttrValue>) {
         match &*attr_name {
             "time" => {
                 if let Some(new_value) = new_value[0].as_string() {
