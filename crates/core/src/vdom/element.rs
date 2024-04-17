@@ -207,6 +207,6 @@ impl<MSG> Element<MSG> {
 
     /// return true if this element has a mount callback
     pub fn has_mount_callback(&self) -> bool {
-        self.attributes().iter().any(|a|a.is_mount_callback())
+        self.attributes().iter().any(|a| a.is_mount_callback())
     }
 }

@@ -73,7 +73,6 @@ fn process_node<MSG>(node: &rphtml::parser::Node) -> Result<Option<Node<MSG>>, P
     } else {
         vec![]
     };
-    
 
     match node.node_type {
         NodeType::Tag => {

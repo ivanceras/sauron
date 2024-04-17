@@ -13,11 +13,7 @@ pub trait StatefulComponent {
     /// and the attributes of the custom-element has been modified
     ///
     /// if the listed attributes in the observed attributes are modified
-    fn attribute_changed(
-        &mut self,
-        attr_name: &str,
-        new_value: Vec<DomAttrValue>,
-    ); 
+    fn attribute_changed(&mut self, attr_name: &str, new_value: Vec<DomAttrValue>);
     /// remove the attribute with this name
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
 
@@ -163,10 +159,9 @@ where
 #[cfg(feature = "with-dom")]
 impl From<wasm_bindgen::JsValue> for DomAttrValue {
     fn from(val: wasm_bindgen::JsValue) -> Self {
-        if val.is_null(){
+        if val.is_null() {
             DomAttrValue::Empty
-        }
-        else if let Some(v) = val.as_bool() {
+        } else if let Some(v) = val.as_bool() {
             DomAttrValue::Simple(v.into())
         } else if let Some(v) = val.as_f64() {
             DomAttrValue::Simple(v.into())

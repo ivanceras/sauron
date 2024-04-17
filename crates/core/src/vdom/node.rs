@@ -336,7 +336,6 @@ impl<MSG> Node<MSG> {
     pub fn is_template(&self) -> bool {
         matches!(self, Self::Leaf(Leaf::TemplatedView(_)))
     }
-
 }
 
 /// create a virtual node with tag, attrs and children

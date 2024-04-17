@@ -169,7 +169,7 @@ impl DomNode {
 
     /// returns true if this an element node
     pub fn is_element(&self) -> bool {
-        matches!(&self.inner, DomInner::Element{..})
+        matches!(&self.inner, DomInner::Element { .. })
     }
 
     /// returns true if this a fragment node
@@ -223,7 +223,7 @@ impl DomNode {
             DomInner::Element { element, .. } => element.clone(),
             DomInner::Fragment { fragment, .. } => {
                 let fragment: web_sys::Element = fragment.clone().unchecked_into();
-               fragment
+                fragment
             }
             DomInner::Text(text_node) => text_node.clone().unchecked_into(),
             DomInner::Symbol(_) => unreachable!("symbol should be handled separately"),
@@ -386,7 +386,10 @@ impl DomNode {
                     replacement.dispatch_mount_event();
                     children.borrow_mut().insert(child_index, replacement);
                 } else {
-                    log::warn!("unable to find target_child: {target_child:#?} with a replacement: {:?}", replacement);
+                    log::warn!(
+                        "unable to find target_child: {target_child:#?} with a replacement: {:?}",
+                        replacement
+                    );
                     // if can not find the child, then must be the root node
                     unreachable!("must find the child...");
                 }
@@ -551,16 +554,18 @@ impl DomNode {
 
     /// always dispatch the mount event on stateful component
     /// dispatch mount event to element that has on_mount callback set.
-    fn should_dispatch_mount_event(&self) -> bool{
-        match self.inner{
-            DomInner::Element{has_mount_callback,..} => has_mount_callback,
-            DomInner::StatefulComponent{..} => true,
+    fn should_dispatch_mount_event(&self) -> bool {
+        match self.inner {
+            DomInner::Element {
+                has_mount_callback, ..
+            } => has_mount_callback,
+            DomInner::StatefulComponent { .. } => true,
             _ => false,
         }
     }
 
     fn dispatch_mount_event(&self) {
-        if self.should_dispatch_mount_event(){
+        if self.should_dispatch_mount_event() {
             let event_target: web_sys::EventTarget = self.as_element().unchecked_into();
             event_target
                 .dispatch_event(&MountEvent::create_web_event())
@@ -827,9 +832,11 @@ where
             ),
         );
 
-        let dom_attrs:Vec<DomAttr> = comp.attrs.iter().map(|a|self.convert_attr(a)).collect();
-        for dom_attr in dom_attrs.into_iter(){
-            comp.comp.borrow_mut().attribute_changed(dom_attr.name, dom_attr.value);
+        let dom_attrs: Vec<DomAttr> = comp.attrs.iter().map(|a| self.convert_attr(a)).collect();
+        for dom_attr in dom_attrs.into_iter() {
+            comp.comp
+                .borrow_mut()
+                .attribute_changed(dom_attr.name, dom_attr.value);
         }
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event

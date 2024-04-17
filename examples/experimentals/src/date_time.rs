@@ -6,8 +6,8 @@ use sauron::dom::StatefulComponent;
 use sauron::vdom::AttributeName;
 use sauron::wasm_bindgen::JsCast;
 use sauron::{
-    html::attributes::*, html::events::*, html::*, jss, vdom::Callback,
-    wasm_bindgen, web_sys, Attribute, Effects, JsValue, Node, *,
+    html::attributes::*, html::events::*, html::*, jss, vdom::Callback, wasm_bindgen, web_sys,
+    Attribute, Effects, JsValue, Node, *,
 };
 use std::fmt::Debug;
 
@@ -235,7 +235,7 @@ pub fn time<MSG, V: Into<Value>>(v: V) -> Attribute<MSG> {
     attr("time", v)
 }
 
-pub fn date_time<MSG:'static>(
+pub fn date_time<MSG: 'static>(
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG> {

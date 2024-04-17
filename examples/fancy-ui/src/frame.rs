@@ -606,11 +606,7 @@ impl Feature {
 
 impl<XMSG> StatefulComponent for Frame<XMSG> {
     /// called when any of the attributes in observed_attributes is changed
-    fn attribute_changed(
-        &mut self,
-        attr_name: &str,
-        new_value: Vec<DomAttrValue>,
-    ) {
+    fn attribute_changed(&mut self, attr_name: &str, new_value: Vec<DomAttrValue>) {
         log::info!("attribuite changed: {attr_name}: {new_value:?}");
         match attr_name {
             "theme-primary" => {
