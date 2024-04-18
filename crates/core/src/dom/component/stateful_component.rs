@@ -114,7 +114,7 @@ where
     }
 
     fn view(&self) -> Node<Self::MSG> {
-        <Self as Component>::view(self)
+        Component::view(self)
     }
 
     fn stylesheet() -> Vec<String> {
@@ -145,7 +145,11 @@ where
     let mut program = Program::from_rc_app(Rc::clone(&app));
     let children: Vec<Node<MSG>> = children.into_iter().collect();
     let mount_event = on_component_mount(move |me| {
-        program.mount(&me.target_node.as_node(), MountProcedure::append());
+        program.mount(&me.target_node.as_node(), MountProcedure::append_to_shadow());
+        let stylesheet = <COMP as Component>::stylesheet().join("\n");
+        log::info!("stylesheet: {}", stylesheet);
+        program.inject_style_to_mount(&stylesheet);
+        program.inject_style_to_mount(&program.app_context.dynamic_style());
         program.update_dom().expect("update dom");
     });
     Node::Leaf(Leaf::StatefulComponent(StatefulModel {

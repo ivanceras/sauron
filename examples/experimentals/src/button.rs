@@ -45,6 +45,20 @@ impl Component for Button {
             <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)></div>
         </button>
     }
+
+    fn stylesheet() -> Vec<String> {
+        vec![jss! {
+            "button": {
+              background: "#EE88E5",
+              color: "light blue",
+              padding: "10px 10px",
+              margin: "10px 10px",
+              border: 0,
+              font_size: "1.5rem",
+              border_radius: "5px",
+            }
+        }]
+    }
 }
 
 impl StatefulComponent for Button {

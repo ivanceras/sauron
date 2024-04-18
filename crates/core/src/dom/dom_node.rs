@@ -137,6 +137,16 @@ impl From<web_sys::Node> for DomNode {
                     parent: Rc::new(None),
                 }
             }
+            Node::DOCUMENT_FRAGMENT_NODE => {
+                let fragment: web_sys::DocumentFragment = node.unchecked_into();
+                DomNode {
+                    inner: DomInner::Fragment {
+                        fragment,
+                        children: Rc::new(RefCell::new(vec![])),
+                    },
+                    parent: Rc::new(None),
+                }
+            }
             _node_type => todo!("for: {_node_type:?}"),
         }
     }
@@ -838,6 +848,7 @@ where
                 .borrow_mut()
                 .attribute_changed(dom_attr.name, dom_attr.value);
         }
+
         // the component children is manually appended to the StatefulComponent
         // here to allow the conversion of dom nodes with its event
         // listener and removing the generics msg

@@ -157,6 +157,10 @@ where
         }]
     }
 
+    fn style(&self) -> Vec<String>{
+        vec![".just{some:dynamc_style}".to_string()]
+    }
+
     fn observed_attributes() -> Vec<AttributeName> {
         vec!["date", "time", "interval"]
     }

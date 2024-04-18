@@ -353,27 +353,25 @@ where
                 .expect("mount node")
                 .clone(),
             MountTarget::ShadowRoot => {
-                /*
                 let mount_element: web_sys::Element = self
                     .mount_node
                     .borrow()
                     .as_ref()
                     .expect("mount node")
-                    .clone()
-                    .unchecked_into();
+                    .as_element();
+
                 mount_element
                     .attach_shadow(&web_sys::ShadowRootInit::new(web_sys::ShadowRootMode::Open))
                     .expect("unable to attached shadow");
                 let mount_shadow = mount_element.shadow_root().expect("must have a shadow");
+                let shadow_node: web_sys::Node = mount_shadow.unchecked_into();
 
-                *self.mount_node.borrow_mut() = Some(mount_shadow.unchecked_into());
+                *self.mount_node.borrow_mut() = Some(DomNode::from(shadow_node));
                 self.mount_node
                     .borrow()
                     .as_ref()
                     .expect("mount_node")
                     .clone()
-                */
-                todo!("shadow onhold!..")
             }
         };
 
