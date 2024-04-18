@@ -66,7 +66,8 @@ impl Application for App {
                 font_size: px(40),
                 padding: px(30),
                 margin: px(30),
-            }
+            },
+
         }];
 
         main

@@ -329,6 +329,13 @@ where
             ".hidden" : {
                 visibility: "hidden",
             },
+
+            "button": {
+                white_space: "nowrap",
+                clip_path: "polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)",
+                width: px(400),
+                height: px(40),
+            },
         };
 
         vec![main, Self::border_style(), Self::corner_style()]
