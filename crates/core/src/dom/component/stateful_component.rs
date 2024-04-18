@@ -145,7 +145,10 @@ where
     let mut program = Program::from_rc_app(Rc::clone(&app));
     let children: Vec<Node<MSG>> = children.into_iter().collect();
     let mount_event = on_component_mount(move |me| {
-        program.mount(&me.target_node.as_node(), MountProcedure::append_to_shadow());
+        program.mount(
+            &me.target_node.as_node(),
+            MountProcedure::append_to_shadow(),
+        );
         let stylesheet = <COMP as Component>::stylesheet().join("\n");
         log::info!("stylesheet: {}", stylesheet);
         program.inject_style_to_mount(&stylesheet);
