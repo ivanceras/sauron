@@ -1,5 +1,5 @@
-//#![deny(warnings)]
-//#![deny(clippy::all)]
+#![deny(warnings)]
+#![deny(clippy::all)]
 use app::App;
 use sauron::*;
 
@@ -8,7 +8,7 @@ extern crate log;
 
 mod app;
 mod button;
-mod date_time;
+mod datebox;
 
 #[wasm_bindgen(start)]
 pub fn start() {

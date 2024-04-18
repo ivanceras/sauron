@@ -1,10 +1,8 @@
-use crate::dom::DomAttr;
 use crate::dom::DomAttrValue;
 use sauron::dom::Component;
 use sauron::dom::DomNode;
 use sauron::dom::StatefulComponent;
 use sauron::prelude::*;
-use sauron::vdom::AttributeName;
 
 #[derive(Default)]
 pub enum Msg {
@@ -62,7 +60,9 @@ impl Component for Button {
 }
 
 impl StatefulComponent for Button {
-    fn attribute_changed(&mut self, attr_name: &str, new_value: Vec<DomAttrValue>) {}
+    fn attribute_changed(&mut self, attr_name: &str, new_value: Vec<DomAttrValue>) {
+        log::info!("attribute changed: {attr_name}: {new_value:?}");
+    }
 
     /// append a child into this component
     fn append_children(&mut self, children: Vec<DomNode>) {

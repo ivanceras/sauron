@@ -1,14 +1,6 @@
-use sauron::dom::DomAttr;
-use sauron::dom::DomAttrValue;
 use sauron::dom::DomNode;
-use sauron::dom::MountProcedure;
-use sauron::dom::StatefulComponent;
-use sauron::vdom::AttributeName;
-use sauron::wasm_bindgen::JsCast;
-use sauron::{
-    html::attributes::*, html::events::*, html::*, jss, vdom::Callback, wasm_bindgen, web_sys,
-    Attribute, Effects, JsValue, Node, *,
-};
+use sauron::vdom::Callback;
+use sauron::*;
 use std::fmt::Debug;
 
 #[derive(Debug, Clone)]
@@ -16,48 +8,38 @@ pub enum Msg {
     DateChange(String),
     TimeChange(String),
     TimeOrDateModified(String),
-    IntervalChange(f64),
     Mounted(MountEvent),
-    ExternContMounted(DomNode),
-    BtnClick,
-    NoOp,
 }
 
 #[derive(Debug, Clone)]
-pub struct DateTimeWidget<XMSG> {
+pub struct DateBox<XMSG> {
     /// the host element the web editor is mounted to, when mounted as a custom web component
     host_element: Option<DomNode>,
     date: String,
     time: String,
-    cnt: i32,
     time_change_listener: Vec<Callback<String, XMSG>>,
-    children: Vec<DomNode>,
-    external_children_node: Option<DomNode>,
 }
 
-impl<XMSG> Default for DateTimeWidget<XMSG> {
+impl<XMSG> Default for DateBox<XMSG> {
     fn default() -> Self {
         Self {
             host_element: None,
             date: String::new(),
             time: String::new(),
-            cnt: 0,
             time_change_listener: vec![],
-            children: vec![],
-            external_children_node: None,
         }
     }
 }
 
-impl<XMSG> DateTimeWidget<XMSG>
+impl<XMSG> DateBox<XMSG>
 where
     XMSG: 'static,
 {
+    #[allow(unused)]
     pub fn new(date: &str, time: &str) -> Self {
-        DateTimeWidget {
+        DateBox {
             date: date.to_string(),
             time: time.to_string(),
-            cnt: 0,
             ..Default::default()
         }
     }
@@ -66,6 +48,7 @@ where
         format!("{} {}", self.date, self.time)
     }
 
+    #[allow(unused)]
     pub fn on_date_time_change<F>(mut self, f: F) -> Self
     where
         F: Fn(String) -> XMSG + 'static,
@@ -75,7 +58,7 @@ where
     }
 }
 
-impl<XMSG> sauron::Component for DateTimeWidget<XMSG>
+impl<XMSG> sauron::Component for DateBox<XMSG>
 where
     XMSG: 'static,
 {
@@ -102,14 +85,14 @@ where
                     parent_msg.push(pmsg);
                 }
                 if let Some(host_element) = self.host_element.as_ref() {
-                    /*
                     host_element
+                        .as_element()
                         .set_attribute("date_time", &date_time)
                         .expect("change attribute");
                     host_element
+                        .as_element()
                         .dispatch_event(&InputEvent::create_web_event_composed())
                         .expect("must dispatch event");
-                    */
                 } else {
                     log::debug!("There is no host_element");
                 }
@@ -121,48 +104,7 @@ where
                 self.host_element = Some(mount_element);
                 Effects::none()
             }
-            Msg::ExternContMounted(target_node) => {
-                log::warn!("-->>> Container for children is now mounted..!");
-                target_node.append_children(self.children.drain(..).collect());
-                self.external_children_node = Some(target_node);
-                Effects::none()
-            }
-            Msg::BtnClick => {
-                log::trace!("btn is clicked..");
-                self.cnt += 1;
-                Effects::none()
-            }
-            Msg::IntervalChange(interval) => {
-                log::trace!("There is an interval: {}", interval);
-                Effects::none()
-            }
-            Msg::NoOp => Effects::none(),
         }
-    }
-
-    fn stylesheet() -> Vec<String> {
-        vec![jss! {
-            ".datetimebox":{
-                border: "1px solid green",
-            },
-            "button": {
-              background: "#1E88E5",
-              color: "white",
-              padding: "10px 10px",
-              margin: "10px 10px",
-              border: 0,
-              font_size: "1.5rem",
-              border_radius: "5px",
-            }
-        }]
-    }
-
-    fn style(&self) -> Vec<String> {
-        vec![".just{some:dynamc_style}".to_string()]
-    }
-
-    fn observed_attributes() -> Vec<AttributeName> {
-        vec!["date", "time", "interval"]
     }
 
     view! {
@@ -177,17 +119,14 @@ where
                     class="datetimebox__time"
                     on_change=|input|Msg::TimeChange(input.value())
                     value=&self.time/>
-            <input type="text" value=self.cnt/>
-            <button on_click=move |_| Msg::BtnClick on_mount=|me|{log::info!("button is mounted...");Msg::NoOp}>Do something</button>
-            <div class="external_children" on_mount=|me|Msg::ExternContMounted(me.target_node)>Here is something!</div>
         </div>
     }
 }
 
-impl StatefulComponent for DateTimeWidget<()> {
+impl StatefulComponent for DateBox<()> {
     /// this is called when the attributes in the mount is changed
     fn attribute_changed(&mut self, attr_name: &str, new_value: Vec<DomAttrValue>) {
-        match &*attr_name {
+        match attr_name {
             "time" => {
                 if let Some(new_value) = new_value[0].as_string() {
                     Component::update(self, Msg::TimeChange(new_value));
@@ -198,29 +137,12 @@ impl StatefulComponent for DateTimeWidget<()> {
                     Component::update(self, Msg::DateChange(new_value));
                 }
             }
-            "interval" => {
-                if let Some(new_value) = new_value[0].as_string() {
-                    let new_value: f64 = str::parse(&new_value).expect("must parse to f64");
-                    Component::update(self, Msg::IntervalChange(new_value));
-                }
-            }
             _ => log::warn!("unknown attr_name: {attr_name:?}"),
         }
     }
 
-    fn append_children(&mut self, children: Vec<DomNode>) {
-        if let Some(external_children_node) = self.external_children_node.as_ref() {
-            log::info!("DateTime: ok appending..");
-            external_children_node.append_children(children);
-        } else {
-            log::debug!(
-                "DateTime: Just pushing to children since the external holder is not yet mounted"
-            );
-            self.children.extend(children);
-        }
-    }
     fn child_container(&self) -> Option<DomNode> {
-        todo!()
+        None
     }
 }
 
@@ -232,9 +154,9 @@ pub fn time<MSG, V: Into<Value>>(v: V) -> Attribute<MSG> {
     attr("time", v)
 }
 
-pub fn date_time<MSG: 'static>(
+pub fn datebox<MSG: 'static>(
     attrs: impl IntoIterator<Item = Attribute<MSG>>,
     children: impl IntoIterator<Item = Node<MSG>>,
 ) -> Node<MSG> {
-    stateful_component(DateTimeWidget::default(), attrs, children)
+    stateful_component(DateBox::default(), attrs, children)
 }

@@ -1,6 +1,6 @@
 //#![deny(warnings)]
 use crate::button::{self, Button};
-use crate::date_time::{self, date, time, DateTimeWidget};
+use crate::datebox::{date, datebox, time};
 use js_sys::Date;
 use sauron::dom::component;
 use sauron::dom::stateful_component;
@@ -47,7 +47,7 @@ impl Application for App {
     type MSG = Msg;
 
     fn init(&mut self) -> Cmd<Msg> {
-        Cmd::from(Time::every(5_000, || Msg::Clock))
+        Time::every(5_000, || Msg::Clock)
     }
 
     fn update(&mut self, msg: Msg) -> Cmd<Msg> {
@@ -168,7 +168,7 @@ impl Application for App {
                 {stateful_component(Button::default(), [], [text!("External child of btn stateful_component: {}", self.click_count)])}
             </div>
             <div>
-                {stateful_component(DateTimeWidget::default(), [date("2022-07-07"), time("07:07")],[text("External child of date widget")])}
+                {datebox([date("2022-07-07"), time("07:07")],[text("External child of date widget")])}
             </div>
         </div>
     }
