@@ -1,4 +1,4 @@
-use crate::dom::DomAttrValue;
+use crate::dom::DomAttr;
 use sauron::dom::Component;
 use sauron::dom::DomNode;
 use sauron::dom::StatefulComponent;
@@ -60,8 +60,8 @@ impl Component for Button {
 }
 
 impl StatefulComponent for Button {
-    fn attribute_changed(&mut self, attr_name: &str, new_value: Vec<DomAttrValue>) {
-        log::info!("attribute changed: {attr_name}: {new_value:?}");
+    fn attribute_changed(&mut self, attr: DomAttr) {
+        log::info!("attribute changed: {attr:?}");
     }
 
     /// append a child into this component

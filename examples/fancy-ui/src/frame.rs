@@ -5,6 +5,7 @@ use sauron::dom::DomNode;
 use sauron::{
     html::{attributes::*, events::*, *},
     vdom::Callback,
+    dom::DomAttr,
     *,
 };
 use std::collections::BTreeMap;
@@ -613,25 +614,25 @@ impl Feature {
 
 impl<XMSG> StatefulComponent for Frame<XMSG> {
     /// called when any of the attributes in observed_attributes is changed
-    fn attribute_changed(&mut self, attr_name: &str, new_value: Vec<DomAttrValue>) {
-        log::info!("attribuite changed: {attr_name}: {new_value:?}");
-        match attr_name {
+    fn attribute_changed(&mut self, attr: DomAttr) {
+        log::info!("attribuite changed: {attr:?}");
+        match attr.name {
             "theme-primary" => {
-                if let Some(primary) = new_value[0].as_string() {
+                if let Some(primary) = attr.value[0].as_string() {
                     let background = &self.theme.background_color;
                     self.theme =
                         Theme::from_str(&primary, background).expect("must be a valid theme");
                 }
             }
             "theme-background" => {
-                if let Some(background) = new_value[0].as_string() {
+                if let Some(background) = attr.value[0].as_string() {
                     let primary = &self.theme.primary_color;
                     self.theme =
                         Theme::from_str(primary, &background).expect("must be a valid theme");
                 }
             }
             "status" => {
-                if let Some(v) = new_value[0].as_string() {
+                if let Some(v) = attr.value[0].as_string() {
                     self.status = Status::from_str(&v).ok();
                 }
             }

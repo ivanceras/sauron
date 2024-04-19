@@ -478,7 +478,8 @@ impl DomNode {
         }
     }
 
-    pub(crate) fn set_dom_attrs(
+    /// set the attributes of the dom element
+    pub fn set_dom_attrs(
         &self,
         attrs: impl IntoIterator<Item = DomAttr>,
     ) -> Result<(), JsValue> {
@@ -488,7 +489,8 @@ impl DomNode {
         Ok(())
     }
 
-    fn set_dom_attr(&self, attr: DomAttr) -> Result<(), JsValue> {
+    /// set the attribute of the dom element
+    pub fn set_dom_attr(&self, attr: DomAttr) -> Result<(), JsValue> {
         match &self.inner {
             DomInner::Element {
                 element, listeners, ..
@@ -844,9 +846,10 @@ where
 
         let dom_attrs: Vec<DomAttr> = comp.attrs.iter().map(|a| self.convert_attr(a)).collect();
         for dom_attr in dom_attrs.into_iter() {
+            log::info!("calling attribute changed..");
             comp.comp
                 .borrow_mut()
-                .attribute_changed(dom_attr.name, dom_attr.value);
+                .attribute_changed(dom_attr);
         }
 
         // the component children is manually appended to the StatefulComponent

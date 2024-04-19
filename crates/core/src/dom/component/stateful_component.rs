@@ -2,6 +2,7 @@ use crate::{
     dom::{
         events::on_component_mount, program::MountProcedure, Application, Cmd, Component,
         DomAttrValue, DomNode, Program,
+        DomAttr,
     },
     vdom::{Attribute, AttributeName, Leaf, Node},
 };
@@ -13,7 +14,7 @@ pub trait StatefulComponent {
     /// and the attributes of the custom-element has been modified
     ///
     /// if the listed attributes in the observed attributes are modified
-    fn attribute_changed(&mut self, attr_name: &str, new_value: Vec<DomAttrValue>);
+    fn attribute_changed(&mut self, attr: DomAttr);
     /// remove the attribute with this name
     fn remove_attribute(&mut self, _attr_name: AttributeName) {}
 

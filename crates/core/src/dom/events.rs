@@ -285,6 +285,16 @@ impl InputEvent {
         InputEvent { event }
     }
 
+    /// call prevent default on the underlying event
+    pub fn prevent_default(&self){
+        self.event.prevent_default()
+    }
+
+    /// call stop_propagation on the underlying event
+    pub fn stop_propagation(&self){
+        self.event.stop_propagation()
+    }
+
     /// the input value
     /// TODO: this should be optional since there will be custom component
     /// aside from `input`, `textarea`, `select`
@@ -297,7 +307,19 @@ impl InputEvent {
         } else if let Some(select) = target.dyn_ref::<HtmlSelectElement>() {
             select.value()
         } else if let Some(html_elm) = target.dyn_ref::<HtmlElement>() {
-            html_elm.get_attribute("content").expect("get content")
+            if let Some(value) = html_elm.get_attribute("value"){
+                log::info!("got value: {}", value);
+                value
+            }else{
+                log::info!("no value..");
+                if let Some(content) = html_elm.get_attribute("content"){
+                    log::info!("got content: {}", content);
+                    content
+                }else{
+                    log::info!("no content either..");
+                    "".to_string()
+                }
+            }
         } else {
             panic!("fail in mapping event into input event");
         }

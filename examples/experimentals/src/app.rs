@@ -1,4 +1,3 @@
-//#![deny(warnings)]
 use crate::button::{self, Button};
 use crate::datebox::{date, datebox, time};
 use js_sys::Date;
@@ -15,6 +14,7 @@ pub enum Msg {
     ChangeBiography(String),
     ChangeThought(String),
     BtnMsg(button::Msg),
+    DateChanged(String),
     #[default]
     NoOp,
 }
@@ -27,6 +27,7 @@ pub struct App {
     biography: String,
     thought: Option<String>,
     btn: Button,
+    selected_date: Option<String>,
 }
 
 impl App {
@@ -39,6 +40,7 @@ impl App {
             biography: String::new(),
             thought: None,
             btn: Button::default(),
+            selected_date: None,
         }
     }
 }
@@ -84,6 +86,11 @@ impl Application for App {
             Msg::BtnMsg(bmsg) => {
                 let effects = Component::update(&mut self.btn, bmsg);
                 effects.map_msg(Msg::BtnMsg).into()
+            }
+            Msg::DateChanged(date_time) => {
+                log::info!("IN APP.RS the DATE is now changed...: {date_time}");
+                self.selected_date = Some(date_time);
+                Cmd::none()
             }
             Msg::NoOp => Cmd::none(),
         }
@@ -168,7 +175,22 @@ impl Application for App {
                 {stateful_component(Button::default(), [], [text!("External child of btn stateful_component: {}", self.click_count)])}
             </div>
             <div>
-                {datebox([date("2022-07-07"), time("07:07")],[text("External child of date widget")])}
+                {datebox([date("2022-07-07"), time("07:07"), 
+                    on_input(|ie|{
+                        log::info!("on_input is triggered...");
+                        Msg::DateChanged(ie.value())
+                    }),
+                    on_change(|ie|{
+                        log::info!("on_change is triggered...");
+                        Msg::DateChanged(ie.value())
+                    })],[])}
+                {
+                    if let Some(selected_date) = self.selected_date.as_ref(){
+                        text!("You've selected date: {}", selected_date)
+                    }else{
+                        text!("You haven't selected a date")
+                    }
+                }
             </div>
         </div>
     }
