@@ -1,4 +1,3 @@
-#![allow(unused)]
 use crate::dom::component::StatelessModel;
 use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
@@ -259,7 +258,7 @@ impl DomNode {
             DomInner::Element {
                 element, children, ..
             } => {
-                for mut child in for_append.into_iter() {
+                for child in for_append.into_iter() {
                     if let Some(symbol) = child.as_symbol() {
                         element
                             .insert_adjacent_html(intern("beforeend"), symbol)
@@ -276,7 +275,7 @@ impl DomNode {
             DomInner::Fragment {
                 fragment, children, ..
             } => {
-                for mut child in for_append.into_iter() {
+                for child in for_append.into_iter() {
                     fragment
                         .append_child(&child.as_node())
                         .expect("append child");
@@ -353,7 +352,7 @@ impl DomNode {
     }
 
     /// Replace the child `child` DomNode with a replacement DomNode `replacement`
-    pub(crate) fn replace_child(&self, target_child: &DomNode, mut replacement: DomNode) {
+    pub(crate) fn replace_child(&self, target_child: &DomNode, replacement: DomNode) {
         match &self.inner {
             DomInner::Element { children, .. } => {
                 let mut child_index = None;
@@ -648,22 +647,14 @@ where
     APP: Application + 'static,
 {
     /// Create a dom node
-    pub fn create_dom_node(
-        &self,
-        parent_node: Rc<Option<DomNode>>,
-        node: &vdom::Node<APP::MSG>,
-    ) -> DomNode {
+    pub fn create_dom_node(&self, node: &vdom::Node<APP::MSG>) -> DomNode {
         match node {
-            vdom::Node::Element(elm) => self.create_element_node(parent_node, elm),
-            vdom::Node::Leaf(leaf) => self.create_leaf_node(parent_node, leaf),
+            vdom::Node::Element(elm) => self.create_element_node(elm),
+            vdom::Node::Leaf(leaf) => self.create_leaf_node(leaf),
         }
     }
 
-    fn create_element_node(
-        &self,
-        parent_node: Rc<Option<DomNode>>,
-        elm: &vdom::Element<APP::MSG>,
-    ) -> DomNode {
+    fn create_element_node(&self, elm: &vdom::Element<APP::MSG>) -> DomNode {
         let document = document();
         let element = if let Some(namespace) = elm.namespace() {
             document
@@ -688,21 +679,16 @@ where
         };
         let dom_attrs = attrs.iter().map(|a| self.convert_attr(a));
         dom_node.set_dom_attrs(dom_attrs).expect("set dom attrs");
-        let dom_node_rc = Rc::new(Some(dom_node.clone()));
         let children: Vec<DomNode> = elm
             .children()
             .iter()
-            .map(|child| self.create_dom_node(Rc::clone(&dom_node_rc), child))
+            .map(|child| self.create_dom_node(child))
             .collect();
         dom_node.append_children(children);
         dom_node
     }
 
-    fn create_leaf_node(
-        &self,
-        parent_node: Rc<Option<DomNode>>,
-        leaf: &vdom::Leaf<APP::MSG>,
-    ) -> DomNode {
+    fn create_leaf_node(&self, leaf: &vdom::Leaf<APP::MSG>) -> DomNode {
         match leaf {
             Leaf::Text(txt) => DomNode {
                 inner: DomInner::Text(document().create_text_node(txt)),
@@ -713,30 +699,28 @@ where
             Leaf::Comment(comment) => DomNode {
                 inner: DomInner::Comment(document().create_comment(comment)),
             },
-            Leaf::Fragment(nodes) => self.create_fragment_node(parent_node, nodes),
+            Leaf::Fragment(nodes) => self.create_fragment_node(nodes),
             // NodeList that goes here is only possible when it is the root_node,
             // since node_list as children will be unrolled into as child_elements of the parent
             // We need to wrap this node_list into doc_fragment since root_node is only 1 element
-            Leaf::NodeList(nodes) => self.create_fragment_node(parent_node, nodes),
+            Leaf::NodeList(nodes) => self.create_fragment_node(nodes),
             Leaf::StatefulComponent(comp) => {
                 //TODO: also put the children and attributes here
                 DomNode {
                     inner: DomInner::StatefulComponent {
                         comp: Rc::clone(&comp.comp),
-                        dom_node: Rc::new(
-                            self.create_stateful_component(Rc::clone(&parent_node), comp),
-                        ),
+                        dom_node: Rc::new(self.create_stateful_component(comp)),
                     },
                 }
             }
             Leaf::StatelessComponent(comp) => {
                 #[cfg(feature = "use-template")]
                 {
-                    self.create_stateless_component_with_template(parent_node, comp)
+                    self.create_stateless_component_with_template(comp)
                 }
                 #[cfg(not(feature = "use-template"))]
                 {
-                    self.create_stateless_component(parent_node, comp)
+                    self.create_stateless_component(comp)
                 }
             }
             Leaf::TemplatedView(view) => {
@@ -748,7 +732,6 @@ where
 
     fn create_fragment_node<'a>(
         &self,
-        parent_node: Rc<Option<DomNode>>,
         nodes: impl IntoIterator<Item = &'a vdom::Node<APP::MSG>>,
     ) -> DomNode {
         let fragment = document().create_document_fragment();
@@ -758,10 +741,9 @@ where
                 children: Rc::new(RefCell::new(vec![])),
             },
         };
-        let dom_node_rc = Rc::new(Some(dom_node.clone()));
         let children = nodes
             .into_iter()
-            .map(|node| self.create_dom_node(Rc::clone(&dom_node_rc), node))
+            .map(|node| self.create_dom_node(node))
             .collect();
         dom_node.append_children(children);
         dom_node
@@ -786,20 +768,13 @@ where
     /// The attributes affects the Stateful component state.
     /// The attributes can be diff and send the patches to the StatefulComponent
     ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
-    fn create_stateful_component(
-        &self,
-        parent_node: Rc<Option<DomNode>>,
-        comp: &StatefulModel<APP::MSG>,
-    ) -> DomNode {
-        let comp_node = self.create_dom_node(
-            Rc::clone(&parent_node),
-            &crate::html::div(
-                [crate::html::attributes::class("component")]
-                    .into_iter()
-                    .chain(comp.attrs.clone()),
-                [],
-            ),
-        );
+    fn create_stateful_component(&self, comp: &StatefulModel<APP::MSG>) -> DomNode {
+        let comp_node = self.create_dom_node(&crate::html::div(
+            [crate::html::attributes::class("component")]
+                .into_iter()
+                .chain(comp.attrs.clone()),
+            [],
+        ));
 
         let dom_attrs: Vec<DomAttr> = comp.attrs.iter().map(|a| self.convert_attr(a)).collect();
         for dom_attr in dom_attrs.into_iter() {
@@ -813,21 +788,17 @@ where
         let created_children = comp
             .children
             .iter()
-            .map(|child| self.create_dom_node(Rc::clone(&parent_node), child))
+            .map(|child| self.create_dom_node(child))
             .collect();
         comp.comp.borrow_mut().append_children(created_children);
         comp_node
     }
 
     #[allow(unused)]
-    pub(crate) fn create_stateless_component(
-        &self,
-        parent_node: Rc<Option<DomNode>>,
-        comp: &StatelessModel<APP::MSG>,
-    ) -> DomNode {
+    pub(crate) fn create_stateless_component(&self, comp: &StatelessModel<APP::MSG>) -> DomNode {
         let comp_view = &comp.view;
         let real_comp_view = comp_view.unwrap_template_ref();
-        self.create_dom_node(parent_node, real_comp_view)
+        self.create_dom_node(real_comp_view)
     }
 }
 

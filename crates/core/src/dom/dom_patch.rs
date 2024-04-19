@@ -10,7 +10,6 @@ use crate::vdom::EventCallback;
 use crate::vdom::TreePath;
 use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
 use indexmap::IndexMap;
-use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
@@ -260,7 +259,7 @@ where
             PatchType::InsertBeforeNode { nodes } => {
                 let nodes = nodes
                     .iter()
-                    .map(|for_insert| self.create_dom_node(Rc::new(None), for_insert))
+                    .map(|for_insert| self.create_dom_node(for_insert))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -272,7 +271,7 @@ where
             PatchType::InsertAfterNode { nodes } => {
                 let nodes = nodes
                     .iter()
-                    .map(|for_insert| self.create_dom_node(Rc::new(None), for_insert))
+                    .map(|for_insert| self.create_dom_node(for_insert))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -306,7 +305,7 @@ where
             PatchType::ReplaceNode { replacement } => {
                 let replacement = replacement
                     .iter()
-                    .map(|node| self.create_dom_node(Rc::new(None), node))
+                    .map(|node| self.create_dom_node(node))
                     .collect();
                 DomPatch {
                     patch_path,
@@ -360,7 +359,7 @@ where
             PatchType::AppendChildren { children } => {
                 let children = children
                     .iter()
-                    .map(|for_insert| self.create_dom_node(Rc::new(None), for_insert))
+                    .map(|for_insert| self.create_dom_node(for_insert))
                     .collect();
 
                 DomPatch {

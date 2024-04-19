@@ -1,4 +1,3 @@
-#![allow(unused)]
 use std::{any::TypeId, cell::RefCell, collections::hash_map, collections::HashMap, rc::Rc};
 
 use wasm_bindgen::JsCast;
@@ -17,15 +16,11 @@ thread_local! {
 
 /// if the template is already registered, return the dom template
 /// if not, create the dom template and add it
-pub fn register_template<MSG>(
-    type_id: TypeId,
-    parent_node: Rc<Option<DomNode>>,
-    vdom_template: &vdom::Node<MSG>,
-) -> DomNode {
+pub fn register_template<MSG>(type_id: TypeId, vdom_template: &vdom::Node<MSG>) -> DomNode {
     if let Some(template) = lookup_template(type_id) {
         template
     } else {
-        let template = create_dom_node_no_listeners(parent_node, vdom_template);
+        let template = create_dom_node_no_listeners(vdom_template);
         add_template(type_id, &template);
         template
     }
@@ -123,22 +118,14 @@ pub fn clear_time_spent() {
     TIME_SPENT.with_borrow_mut(|values| values.clear())
 }
 
-pub(crate) fn create_dom_node_no_listeners<MSG>(
-    parent_node: Rc<Option<DomNode>>,
-    vnode: &vdom::Node<MSG>,
-) -> DomNode {
+pub(crate) fn create_dom_node_no_listeners<MSG>(vnode: &vdom::Node<MSG>) -> DomNode {
     match vnode {
-        vdom::Node::Element(element_node) => {
-            create_element_node_no_listeners(parent_node, element_node)
-        }
-        vdom::Node::Leaf(leaf_node) => create_leaf_node_no_listeners(parent_node, leaf_node),
+        vdom::Node::Element(element_node) => create_element_node_no_listeners(element_node),
+        vdom::Node::Leaf(leaf_node) => create_leaf_node_no_listeners(leaf_node),
     }
 }
 
-fn create_fragment_node_no_listeners<MSG>(
-    parent_node: Rc<Option<DomNode>>,
-    nodes: &[vdom::Node<MSG>],
-) -> DomNode {
+fn create_fragment_node_no_listeners<MSG>(nodes: &[vdom::Node<MSG>]) -> DomNode {
     let fragment = document().create_document_fragment();
     let dom_node = DomNode {
         inner: DomInner::Fragment {
@@ -146,19 +133,15 @@ fn create_fragment_node_no_listeners<MSG>(
             children: Rc::new(RefCell::new(vec![])),
         },
     };
-    let dom_node_rc = Rc::new(Some(dom_node.clone()));
     let children = nodes
         .iter()
-        .map(|node| create_dom_node_no_listeners(Rc::clone(&dom_node_rc), node))
+        .map(|node| create_dom_node_no_listeners(node))
         .collect();
     dom_node.append_children(children);
     dom_node
 }
 
-fn create_leaf_node_no_listeners<MSG>(
-    parent_node: Rc<Option<DomNode>>,
-    leaf: &Leaf<MSG>,
-) -> DomNode {
+fn create_leaf_node_no_listeners<MSG>(leaf: &Leaf<MSG>) -> DomNode {
     match leaf {
         Leaf::Text(txt) => DomNode {
             inner: DomInner::Text(document().create_text_node(txt)),
@@ -175,11 +158,11 @@ fn create_leaf_node_no_listeners<MSG>(
                     doctype is only used in rendering"
             );
         }
-        Leaf::Fragment(nodes) => create_fragment_node_no_listeners(parent_node, nodes),
+        Leaf::Fragment(nodes) => create_fragment_node_no_listeners(nodes),
         // NodeList that goes here is only possible when it is the root_node,
         // since node_list as children will be unrolled into as child_elements of the parent
         // We need to wrap this node_list into doc_fragment since root_node is only 1 element
-        Leaf::NodeList(node_list) => create_fragment_node_no_listeners(parent_node, node_list),
+        Leaf::NodeList(node_list) => create_fragment_node_no_listeners(node_list),
         Leaf::StatefulComponent(_lc) => {
             unreachable!("Component should not be created here")
         }
@@ -190,10 +173,7 @@ fn create_leaf_node_no_listeners<MSG>(
     }
 }
 
-fn create_element_node_no_listeners<MSG>(
-    parent_node: Rc<Option<DomNode>>,
-    elm: &vdom::Element<MSG>,
-) -> DomNode {
+fn create_element_node_no_listeners<MSG>(elm: &vdom::Element<MSG>) -> DomNode {
     let document = document();
     let element = if let Some(namespace) = elm.namespace() {
         document
@@ -224,11 +204,10 @@ fn create_element_node_no_listeners<MSG>(
             has_mount_callback: elm.has_mount_callback(),
         },
     };
-    let dom_node_rc = Rc::new(Some(dom_node.clone()));
     let children = elm
         .children()
         .iter()
-        .map(|child| create_dom_node_no_listeners(Rc::clone(&dom_node_rc), child))
+        .map(|child| create_dom_node_no_listeners(child))
         .collect();
     dom_node.append_children(children);
     dom_node
@@ -279,7 +258,6 @@ where
 {
     pub(crate) fn create_stateless_component_with_template(
         &self,
-        parent_node: Rc<Option<DomNode>>,
         comp: &StatelessModel<APP::MSG>,
     ) -> DomNode {
         #[cfg(feature = "with-trace")]
@@ -292,7 +270,7 @@ where
                 //TODO: something is wrong with the chain of elements here
                 //from base node to it's children
                 // disabling template for stateless component for now
-                let template = register_template(comp.type_id, parent_node, &vdom_template);
+                let template = register_template(comp.type_id, &vdom_template);
                 let real_comp_view = comp_view.unwrap_template_ref();
                 #[cfg(feature = "with-trace")]
                 let t2 = crate::dom::now();
@@ -324,7 +302,7 @@ where
                 log::warn!(
                     "template and skip_diff is not found, fallback to no template and skip_diff"
                 );
-                self.create_stateless_component(parent_node, comp)
+                self.create_stateless_component(comp)
             }
         }
     }
@@ -339,7 +317,7 @@ where
                 let patches =
                     self.create_patches_with_skip_diff(&vdom_template, &real_view, &skip_diff);
                 let type_id = TypeId::of::<APP>();
-                let dom_template = register_template(type_id, Rc::new(None), &vdom_template);
+                let dom_template = register_template(type_id, &vdom_template);
                 let dom_patches = self
                     .convert_patches(&dom_template, &patches)
                     .expect("convert patches");

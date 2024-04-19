@@ -330,7 +330,7 @@ where
     pub(crate) fn create_initial_view(&self) -> DomNode {
         let current_view = self.app_context.current_vdom();
         let real_view = current_view.unwrap_template_ref();
-        self.create_dom_node(Rc::new(None), real_view)
+        self.create_dom_node(real_view)
     }
 
     /// each element and it's descendant in the vdom is created into
@@ -703,7 +703,7 @@ where
     /// Inject a style to the global document
     fn inject_style(&mut self, class_names: String, style: &str) {
         let style_node = html::tags::style([class(class_names)], [text(style)]);
-        let created_node = self.create_dom_node(Rc::new(None), &style_node);
+        let created_node = self.create_dom_node(&style_node);
 
         let head = document().head().expect("must have a head");
         let head_node: web_sys::Node = head.unchecked_into();
@@ -714,7 +714,7 @@ where
     /// inject style element to the mount node
     pub fn inject_style_to_mount(&mut self, style: &str) {
         let style_node = html::tags::style([], [text(style)]);
-        let created_node = self.create_dom_node(Rc::new(None), &style_node);
+        let created_node = self.create_dom_node(&style_node);
 
         self.mount_node
             .borrow_mut()
