@@ -227,14 +227,14 @@
     add these events:
     - `on_interval(|i32|{})` for attaching interval in the Window
     Http can be done with task
-- [ ] Make Http functions return a Task
-- [ ] Make `Sub` as counterpart to `Cmd`
+- [X] Make Http functions return a Task
+- [X] Make `Sub` as counterpart to `Cmd`
     - We can use `Sub` in the `Component`
     ```rust
      fn on_resize(&self) -> Sub<Msg>{
      }
     ```
-- [ ] Bring back CreatedNode maybe with a different name: `DomNode` which wraps the `Node` or `Element` along with it's closures from event listener
+- [X] Bring back CreatedNode maybe with a different name: `DomNode` which wraps the `Node` or `Element` along with it's closures from event listener
     - These are then saved into the `Program` where when removed or dropped, it will also drop the associated closures with them, thereby simplifying the code.
     - Right now, we are attaching a `vdom-data` attribute for nodes that have listeners
 - [X] Make use of `Arc<RwLock>` to check if can solve copying the `APP` via `transmute_copy`. ~~it didn't solve it~~
@@ -292,8 +292,14 @@
     - [X] Rename `RecurringTask` to `Sub`
     - [X] enum Command{Cmd,Sub} into one unified type.
     - [X] Cmd is a vec of Command
-    - Sauron just consilidate them into one enum struct for simplicity
+    - Sauron just consolidate them into one enum struct for simplicity
 - [X] Remove `Modifier` and `measurements`
+- [ ] Unify `vdom::Node` and `dom::DomNode`
+    - pro: This way stateful component can also be rendered server-side
+    - pro: The node can be patch in the server-side
+    - con: usage of `Rc` and `RefCell` on the components
+        - Need to have a reference to Parent to apply `replace_node`
+        
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
