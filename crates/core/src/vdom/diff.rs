@@ -393,12 +393,13 @@ fn create_attribute_patches<'a, MSG>(
             if USE_SKIP_DIFF && has_skip_indices && is_subset_of(&old_indices, &skip_indices) {
                 //
             }
-            if old_attr_values != new_attr_values {
+            else if old_attr_values != new_attr_values {
                 for (_i, new_att) in new_attrs {
                     add_attributes.push(new_att);
                 }
             }
         } else {
+            // these are new attributes
             for (_i, new_att) in new_attrs {
                 add_attributes.push(new_att);
             }
