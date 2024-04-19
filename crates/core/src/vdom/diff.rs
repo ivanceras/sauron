@@ -195,13 +195,18 @@ pub fn diff_recursive<'a, MSG>(
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(old_comp), Leaf::StatefulComponent(new_comp)) => {
-                    let attr_patches = create_attribute_patches(&"component", &old_comp.attrs, &new_comp.attrs, path);
-                    if !attr_patches.is_empty(){
+                    let attr_patches = create_attribute_patches(
+                        &"component",
+                        &old_comp.attrs,
+                        &new_comp.attrs,
+                        path,
+                    );
+                    if !attr_patches.is_empty() {
                         log::info!("stateful component attr_patches: {attr_patches:#?}");
                     }
                     patches.extend(attr_patches);
                     let patch = diff_nodes(None, &old_comp.children, &new_comp.children, path);
-                    if !patch.is_empty(){
+                    if !patch.is_empty() {
                         log::info!("stateful component patch: {patch:#?}");
                     }
                     patches.extend(patch);
@@ -227,7 +232,12 @@ pub fn diff_recursive<'a, MSG>(
             };
 
             if !skip_attributes {
-                let attr_patches = create_attribute_patches(old_element.tag(), old_element.attributes(), new_element.attributes(), path);
+                let attr_patches = create_attribute_patches(
+                    old_element.tag(),
+                    old_element.attributes(),
+                    new_element.attributes(),
+                    path,
+                );
                 patches.extend(attr_patches);
             }
 
@@ -351,7 +361,6 @@ fn create_attribute_patches<'a, MSG>(
 
     let has_skip_indices = !skip_indices.is_empty();
 
-
     let mut patches = vec![];
 
     // return early if both attributes are empty
@@ -392,8 +401,7 @@ fn create_attribute_patches<'a, MSG>(
                 old_indexed_attr_values.into_iter().unzip();
             if USE_SKIP_DIFF && has_skip_indices && is_subset_of(&old_indices, &skip_indices) {
                 //
-            }
-            else if old_attr_values != new_attr_values {
+            } else if old_attr_values != new_attr_values {
                 for (_i, new_att) in new_attrs {
                     add_attributes.push(new_att);
                 }
