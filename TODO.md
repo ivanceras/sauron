@@ -299,7 +299,14 @@
     - pro: The node can be patch in the server-side
     - con: usage of `Rc` and `RefCell` on the components
         - Need to have a reference to Parent to apply `replace_node`
-        
+- [ ] Issue with attribute in stateful component
+    - `attribute_changed` method is not changing the view as it has no access to the program
+        to dispatch some commands.
+    - Maybe stateful_component need to have access to its program
+    - Maybe Application will also need to have access to its program
+        create its own program and mount itself with `App::new().mount_to_body()`
+- [ ] Remove `use-teamplate` as the `DomNode` is now a wrapper, this defeats
+    the purpose of making a faster dom via template as deep clone has to also wrap the children nodes
 
 ## Features
 - [X] Storage service (May not be needed since the user can directly use web-sys)
