@@ -299,6 +299,7 @@
     - pro: The node can be patch in the server-side
     - con: usage of `Rc` and `RefCell` on the components
         - Need to have a reference to Parent to apply `replace_node`
+        - The Patch patch can get a reference to the parent via backtrack()
 - [ ] Issue with attribute in stateful component
     - `attribute_changed` method is not changing the view as it has no access to the program
         to dispatch some commands.
