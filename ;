@@ -82,7 +82,7 @@ pub enum PatchVariant {
 impl DomNode {
     pub(crate) fn find_node(&self, path: &mut TreePath) -> Option<DomNode> {
         match &self.inner {
-            DomInner::StatefulComponent { .. } => {
+            DomInner::StatefulComponent {.. } => {
                 log::info!(
                     "This is a stateful component, should return the element
                 inside relative to the child container at this path: {:?}",
@@ -116,14 +116,13 @@ impl DomNode {
         &self,
         nodes_to_find: &[(&TreePath, Option<&&'static str>)],
     ) -> IndexMap<TreePath, (DomNode, DomNode)> {
-        let mut nodes_to_patch = IndexMap::with_capacity(nodes_to_find.len());
+        let mut nodes_to_patch =
+            IndexMap::with_capacity(nodes_to_find.len());
         for (path, tag) in nodes_to_find {
             let mut traverse_path: TreePath = (*path).clone();
             if let Some(found) = self.find_node(&mut traverse_path) {
                 let mut parent_path = path.backtrack();
-                let target_parent = self
-                    .find_node(&mut parent_path)
-                    .expect("must find the parent");
+                let target_parent = self.find_node(&mut parent_path).expect("must find the parent");
                 nodes_to_patch.insert((*path).clone(), (found, target_parent));
             } else {
                 log::warn!(
@@ -297,7 +296,7 @@ where
             PatchType::RemoveAttributes { attrs } => DomPatch {
                 patch_path,
                 target_element,
-                target_parent,
+                    target_parent,
                 patch_variant: PatchVariant::RemoveAttributes {
                     attrs: attrs.iter().map(|a| self.convert_attr(a)).collect(),
                 },
@@ -318,21 +317,22 @@ where
             PatchType::RemoveNode => DomPatch {
                 patch_path,
                 target_element,
-                target_parent,
+                    target_parent,
                 patch_variant: PatchVariant::RemoveNode,
             },
             PatchType::ClearChildren => DomPatch {
                 patch_path,
                 target_element,
-                target_parent,
+                    target_parent,
                 patch_variant: PatchVariant::ClearChildren,
             },
             PatchType::MoveBeforeNode { nodes_path } => {
                 let for_moving = nodes_path
                     .iter()
                     .map(|path| {
-                        let (node, _) = nodes_lookup.get(path).expect("must have found the node");
-                        node.clone()
+                        let (node,_) = nodes_lookup
+                            .get(path).expect("must have found the node");
+                            node.clone()
                     })
                     .collect();
                 DomPatch {
@@ -346,8 +346,10 @@ where
                 let for_moving = nodes_path
                     .iter()
                     .map(|path| {
-                        let (node, _) = nodes_lookup.get(path).expect("must have found the node");
-                        node.clone()
+                        let (node,_) = nodes_lookup
+                            .get(path)
+                            .expect("must have found the node");
+                            node.clone()
                     })
                     .collect();
                 DomPatch {
@@ -398,11 +400,11 @@ where
 
         match patch_variant {
             PatchVariant::InsertBeforeNode { nodes } => {
-                target_parent.insert_before(&target_element, nodes);
+                target_element.insert_before(nodes);
             }
 
             PatchVariant::InsertAfterNode { nodes } => {
-                target_parent.insert_after(&target_element, nodes);
+                target_element.insert_after(nodes);
             }
             PatchVariant::AppendChildren { children } => {
                 target_element.append_children(children);
@@ -442,7 +444,22 @@ where
             // before it is actully replaced in the DOM
             // TODO: make root node a Vec
             PatchVariant::ReplaceNode { mut replacement } => {
-                let first_node = replacement.remove(0);
+                let mut first_node = replacement.remove(0);
+
+                let parent_node = if patch_path.path.is_empty() {
+                    let mount_node = self.mount_node.borrow();
+                    let mount_node = mount_node.as_ref().expect("must have a mount node");
+                    Rc::new(Some(mount_node.clone()))
+                } else if let Some(parent_target) = target_element.parent.as_ref() {
+                    Rc::new(Some(parent_target.clone()))
+                } else {
+                    unreachable!("target element should have a parent");
+                };
+
+                first_node.parent = Rc::clone(&parent_node);
+                for replace_node in replacement.iter_mut() {
+                    replace_node.parent = Rc::clone(&parent_node);
+                }
 
                 if target_element.is_fragment() {
                     assert!(
@@ -459,29 +476,37 @@ where
                         let mount_node = mount_node.as_mut().expect("must have a mount node");
                         mount_node.replace_child(&target_element, first_node.clone());
                     } else {
-                        target_parent.replace_child(&target_element, first_node.clone());
+                        target_element.replace_node(first_node.clone());
                     }
                     //insert the rest
-                    target_parent.insert_after(&first_node, replacement);
+                    first_node.insert_after(replacement);
                 }
                 if patch_path.path.is_empty() {
                     *self.root_node.borrow_mut() = Some(first_node);
                 }
             }
             PatchVariant::RemoveNode => {
-                target_parent.remove_children(&[&target_element]);
+                target_element.remove_node();
             }
             PatchVariant::ClearChildren => {
                 target_element.clear_children();
             }
             PatchVariant::MoveBeforeNode { for_moving } => {
-                target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
-                target_parent.insert_before(&target_element, for_moving);
+                //if let Some(target_parent) = target_element.parent.as_ref() {
+                    target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
+                    target_element.insert_before(for_moving);
+                /*
+                } else {
+                    panic!("unable to get the parent node of the target element");
+                }
+                */
             }
 
             PatchVariant::MoveAfterNode { for_moving } => {
-                target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
-                target_parent.insert_after(&target_element, for_moving);
+                //if let Some(target_parent) = target_element.parent.as_ref() {
+                    target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
+                    target_element.insert_after(for_moving);
+                //}
             }
         }
         Ok(())

@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::dom::component::StatelessModel;
 use crate::dom::DomAttr;
 use crate::dom::GroupedDomAttrValues;
@@ -32,8 +33,6 @@ pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
 #[derive(Clone, Debug)]
 pub struct DomNode {
     pub(crate) inner: DomInner,
-    //TODO: parent needs to be a weak reference
-    pub(crate) parent: Rc<Option<DomNode>>,
 }
 #[derive(Clone)]
 pub enum DomInner {
@@ -120,21 +119,18 @@ impl From<web_sys::Node> for DomNode {
                         children: Rc::new(RefCell::new(children)),
                         has_mount_callback: false,
                     },
-                    parent: Rc::new(None),
                 }
             }
             Node::TEXT_NODE => {
                 let text_node: web_sys::Text = node.unchecked_into();
                 DomNode {
                     inner: DomInner::Text(text_node),
-                    parent: Rc::new(None),
                 }
             }
             Node::COMMENT_NODE => {
                 let comment: web_sys::Comment = node.unchecked_into();
                 DomNode {
                     inner: DomInner::Comment(comment),
-                    parent: Rc::new(None),
                 }
             }
             Node::DOCUMENT_FRAGMENT_NODE => {
@@ -144,7 +140,6 @@ impl From<web_sys::Node> for DomNode {
                         fragment,
                         children: Rc::new(RefCell::new(vec![])),
                     },
-                    parent: Rc::new(None),
                 }
             }
             _node_type => todo!("for: {_node_type:?}"),
@@ -275,7 +270,6 @@ impl DomNode {
                             .expect("append child");
                         child.dispatch_mount_event();
                     }
-                    child.parent = Rc::new(Some(self.clone()));
                     children.borrow_mut().push(child);
                 }
             }
@@ -287,7 +281,6 @@ impl DomNode {
                         .append_child(&child.as_node())
                         .expect("append child");
                     child.dispatch_mount_event();
-                    child.parent = Rc::new(Some(self.clone()));
                     children.borrow_mut().push(child);
                 }
             }
@@ -299,30 +292,23 @@ impl DomNode {
     }
 
     /// Insert the DomNode `for_insert` before `self` DomNode
-    pub(crate) fn insert_before(&self, mut for_insert: Vec<DomNode>) {
-        let parent_target = self.parent.as_ref().as_ref().expect("must have a parent");
-        let DomInner::Element {
-            children: parent_children,
-            ..
-        } = &parent_target.inner
-        else {
+    pub(crate) fn insert_before(&self, target_element: &DomNode, for_insert: Vec<DomNode>) {
+        let DomInner::Element { children, .. } = &self.inner else {
             unreachable!("parent must be an element");
         };
 
-        let mut self_index = None;
-        for (i, child) in parent_children.borrow().iter().enumerate() {
-            if self == child {
-                self_index = Some(i);
+        let mut target_index = None;
+        for (i, child) in children.borrow().iter().enumerate() {
+            if target_element == child {
+                target_index = Some(i);
                 break;
             }
-        }
-        for insert_node in for_insert.iter_mut() {
-            insert_node.parent = Rc::clone(&self.parent);
         }
         // NOTE: This is not reverse since inserting the last insert_node will always be next
         // before the target element
         for insert_node in for_insert.iter() {
-            self.as_element()
+            target_element
+                .as_element()
                 .insert_adjacent_element(intern("beforebegin"), &insert_node.as_element())
                 .expect("must insert before this element");
             insert_node.dispatch_mount_event();
@@ -331,8 +317,8 @@ impl DomNode {
         // NOTE: It is important that we reverse the insertion to the wrapper DomNode since it is
         // just a Vec where inserting from the last will preserve the index to insert into
         for insert_node in for_insert.into_iter().rev() {
-            if let Some(self_index) = self_index {
-                parent_children.borrow_mut().insert(self_index, insert_node);
+            if let Some(target_index) = target_index {
+                children.borrow_mut().insert(target_index, insert_node);
             } else {
                 unreachable!("should have a self index");
             }
@@ -340,35 +326,26 @@ impl DomNode {
     }
 
     /// Insert the DomNode `for_insert` after `self` DomNode
-    pub(crate) fn insert_after(&self, mut for_insert: Vec<DomNode>) {
-        let parent_target = self.parent.as_ref().as_ref().expect("must have a parent");
-        let DomInner::Element {
-            children: parent_children,
-            ..
-        } = &parent_target.inner
-        else {
+    pub(crate) fn insert_after(&self, target_element: &DomNode, for_insert: Vec<DomNode>) {
+        let DomInner::Element { children, .. } = &self.inner else {
             unreachable!("parent must be an element");
         };
-        let mut self_index = None;
-        for (i, child) in parent_children.borrow().iter().enumerate() {
-            if self == child {
-                self_index = Some(i);
+        let mut target_index = None;
+        for (i, child) in children.borrow().iter().enumerate() {
+            if target_element == child {
+                target_index = Some(i);
                 break;
             }
         }
-        for insert_node in for_insert.iter_mut() {
-            insert_node.parent = Rc::clone(&self.parent);
-        }
         for insert_node in for_insert.into_iter().rev() {
-            self.as_element()
+            target_element
+                .as_element()
                 .insert_adjacent_element(intern("afterend"), &insert_node.as_element())
                 .expect("must insert after this element");
             insert_node.dispatch_mount_event();
 
-            if let Some(self_index) = self_index {
-                parent_children
-                    .borrow_mut()
-                    .insert(self_index + 1, insert_node);
+            if let Some(target_index) = target_index {
+                children.borrow_mut().insert(target_index + 1, insert_node);
             } else {
                 unreachable!("should have a self index");
             }
@@ -386,7 +363,6 @@ impl DomNode {
                         break;
                     }
                 }
-                replacement.parent = Rc::new(Some(self.clone()));
                 if let Some(child_index) = child_index {
                     children.borrow_mut().remove(child_index);
                     target_child
@@ -459,23 +435,11 @@ impl DomNode {
         }
     }
 
-    pub(crate) fn remove_node(&self) {
-        if let Some(parent) = self.parent.as_ref() {
-            parent.remove_children(&[self]);
-        } else {
-            unreachable!("this has no parent node");
-        }
-    }
-
     pub(crate) fn replace_node(&self, replacement: DomNode) {
-        if let Some(parent) = self.parent.as_ref() {
-            parent.replace_child(self, replacement);
-        } else {
-            //NOTE: This must be replacing a mount node
-            self.as_element()
-                .replace_with_with_node_1(&replacement.as_node())
-                .expect("must replace child");
-        }
+        //NOTE: This must be replacing a mount node
+        self.as_element()
+            .replace_with_with_node_1(&replacement.as_node())
+            .expect("must replace child");
     }
 
     /// set the attributes of the dom element
@@ -524,7 +488,7 @@ impl DomNode {
                     plain_values,
                 );
             }
-            DomInner::StatefulComponent{comp,.. } => {
+            DomInner::StatefulComponent { comp, .. } => {
                 log::info!("applying attribute change for stateful component...{attr:?}");
                 comp.borrow_mut().attribute_changed(attr);
             }
@@ -721,9 +685,8 @@ where
                 children: Rc::new(RefCell::new(vec![])),
                 has_mount_callback: elm.has_mount_callback(),
             },
-            parent: parent_node,
         };
-        let dom_attrs = attrs.iter().map(|a|self.convert_attr(a));
+        let dom_attrs = attrs.iter().map(|a| self.convert_attr(a));
         dom_node.set_dom_attrs(dom_attrs).expect("set dom attrs");
         let dom_node_rc = Rc::new(Some(dom_node.clone()));
         let children: Vec<DomNode> = elm
@@ -743,15 +706,12 @@ where
         match leaf {
             Leaf::Text(txt) => DomNode {
                 inner: DomInner::Text(document().create_text_node(txt)),
-                parent: parent_node,
             },
             Leaf::Symbol(symbol) => DomNode {
                 inner: DomInner::Symbol(symbol.clone()),
-                parent: parent_node,
             },
             Leaf::Comment(comment) => DomNode {
                 inner: DomInner::Comment(document().create_comment(comment)),
-                parent: parent_node,
             },
             Leaf::Fragment(nodes) => self.create_fragment_node(parent_node, nodes),
             // NodeList that goes here is only possible when it is the root_node,
@@ -767,7 +727,6 @@ where
                             self.create_stateful_component(Rc::clone(&parent_node), comp),
                         ),
                     },
-                    parent: parent_node,
                 }
             }
             Leaf::StatelessComponent(comp) => {
@@ -798,7 +757,6 @@ where
                 fragment,
                 children: Rc::new(RefCell::new(vec![])),
             },
-            parent: parent_node,
         };
         let dom_node_rc = Rc::new(Some(dom_node.clone()));
         let children = nodes
@@ -871,7 +829,6 @@ where
         let real_comp_view = comp_view.unwrap_template_ref();
         self.create_dom_node(parent_node, real_comp_view)
     }
-
 }
 
 /// render the underlying real dom node into string

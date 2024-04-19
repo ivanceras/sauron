@@ -1,3 +1,4 @@
+#![allow(unused)]
 use std::{any::TypeId, cell::RefCell, collections::hash_map, collections::HashMap, rc::Rc};
 
 use wasm_bindgen::JsCast;
@@ -144,7 +145,6 @@ fn create_fragment_node_no_listeners<MSG>(
             fragment,
             children: Rc::new(RefCell::new(vec![])),
         },
-        parent: parent_node,
     };
     let dom_node_rc = Rc::new(Some(dom_node.clone()));
     let children = nodes
@@ -162,15 +162,12 @@ fn create_leaf_node_no_listeners<MSG>(
     match leaf {
         Leaf::Text(txt) => DomNode {
             inner: DomInner::Text(document().create_text_node(txt)),
-            parent: parent_node,
         },
         Leaf::Symbol(symbol) => DomNode {
             inner: DomInner::Symbol(symbol.clone()),
-            parent: parent_node,
         },
         Leaf::Comment(comment) => DomNode {
             inner: DomInner::Comment(document().create_comment(comment)),
-            parent: parent_node,
         },
         Leaf::DocType(_doctype) => {
             panic!(
@@ -226,7 +223,6 @@ fn create_element_node_no_listeners<MSG>(
             children: Rc::new(RefCell::new(vec![])),
             has_mount_callback: elm.has_mount_callback(),
         },
-        parent: parent_node,
     };
     let dom_node_rc = Rc::new(Some(dom_node.clone()));
     let children = elm
@@ -365,7 +361,6 @@ impl DomNode {
     pub(crate) fn deep_clone(&self) -> DomNode {
         DomNode {
             inner: self.inner.deep_clone(),
-            parent: self.parent.clone(),
         }
     }
 }
