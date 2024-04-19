@@ -1,7 +1,7 @@
+use sauron::dom::DomAttr;
 use sauron::dom::DomNode;
 use sauron::*;
 use std::fmt::Debug;
-use sauron::dom::DomAttr;
 
 #[derive(Debug, Clone)]
 pub enum Msg {
@@ -32,17 +32,13 @@ impl Default for DateBox {
     }
 }
 
-impl DateBox
-{
-
+impl DateBox {
     fn date_time(&self) -> String {
         format!("{} {}", self.date, self.time)
     }
-
 }
 
-impl sauron::Component for DateBox
-{
+impl sauron::Component for DateBox {
     type MSG = Msg;
     type XMSG = ();
 
@@ -76,7 +72,9 @@ impl sauron::Component for DateBox
             Msg::Mounted(mount_event) => {
                 log::info!("==> Ok the DateTime widget is now mounted for real..");
                 let mount_element = mount_event.target_node;
-                mount_element.set_dom_attrs(self.dom_attrs.drain(..)).unwrap();
+                mount_element
+                    .set_dom_attrs(self.dom_attrs.drain(..))
+                    .unwrap();
                 self.host_element = Some(mount_element);
                 Effects::none()
             }

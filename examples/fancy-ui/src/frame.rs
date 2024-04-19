@@ -3,9 +3,9 @@ use crate::Theme;
 use css_colors::Color;
 use sauron::dom::DomNode;
 use sauron::{
+    dom::DomAttr,
     html::{attributes::*, events::*, *},
     vdom::Callback,
-    dom::DomAttr,
     *,
 };
 use std::collections::BTreeMap;

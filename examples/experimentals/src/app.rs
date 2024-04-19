@@ -175,7 +175,7 @@ impl Application for App {
                 {stateful_component(Button::default(), [], [text!("External child of btn stateful_component: {}", self.click_count)])}
             </div>
             <div>
-                {datebox([date("2022-07-07"), time("07:07"), 
+                {datebox([date("2022-07-07"), time("07:07"),
                     on_input(|ie|{
                         log::info!("on_input is triggered...");
                         Msg::DateChanged(ie.value())

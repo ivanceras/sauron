@@ -1,8 +1,7 @@
 use crate::{
     dom::{
-        events::on_component_mount, program::MountProcedure, Application, Cmd, Component,
+        events::on_component_mount, program::MountProcedure, Application, Cmd, Component, DomAttr,
         DomAttrValue, DomNode, Program,
-        DomAttr,
     },
     vdom::{Attribute, AttributeName, Leaf, Node},
 };

@@ -286,12 +286,12 @@ impl InputEvent {
     }
 
     /// call prevent default on the underlying event
-    pub fn prevent_default(&self){
+    pub fn prevent_default(&self) {
         self.event.prevent_default()
     }
 
     /// call stop_propagation on the underlying event
-    pub fn stop_propagation(&self){
+    pub fn stop_propagation(&self) {
         self.event.stop_propagation()
     }
 
@@ -307,15 +307,15 @@ impl InputEvent {
         } else if let Some(select) = target.dyn_ref::<HtmlSelectElement>() {
             select.value()
         } else if let Some(html_elm) = target.dyn_ref::<HtmlElement>() {
-            if let Some(value) = html_elm.get_attribute("value"){
+            if let Some(value) = html_elm.get_attribute("value") {
                 log::info!("got value: {}", value);
                 value
-            }else{
+            } else {
                 log::info!("no value..");
-                if let Some(content) = html_elm.get_attribute("content"){
+                if let Some(content) = html_elm.get_attribute("content") {
                     log::info!("got content: {}", content);
                     content
-                }else{
+                } else {
                     log::info!("no content either..");
                     "".to_string()
                 }
