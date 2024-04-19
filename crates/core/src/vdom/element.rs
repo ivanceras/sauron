@@ -191,11 +191,11 @@ impl<MSG> Element<MSG> {
     /// grouped the attributes, but retain the index of the attribute
     /// relative to its location in the element
     pub fn group_indexed_attributes_per_name<'a>(
-        &'a self,
+        attrs: &'a [Attribute<MSG>],
     ) -> IndexMap<&'a AttributeName, Vec<(usize, &'a Attribute<MSG>)>> {
         let mut grouped: IndexMap<&'a AttributeName, Vec<(usize, &'a Attribute<MSG>)>> =
             IndexMap::new();
-        for (i, attr) in self.attributes().iter().enumerate() {
+        for (i, attr) in attrs.iter().enumerate() {
             if let Some(existing) = grouped.get_mut(&attr.name) {
                 existing.push((i, attr));
             } else {

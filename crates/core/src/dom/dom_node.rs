@@ -19,7 +19,7 @@ use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
-use web_sys::{self, Element, Node};
+use web_sys::{self, Node};
 
 pub(crate) type EventClosure = Closure<dyn FnMut(web_sys::Event)>;
 pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
@@ -524,7 +524,14 @@ impl DomNode {
                     plain_values,
                 );
             }
-            _ => unreachable!("should only be called for element"),
+            DomInner::StatefulComponent{comp,.. } => {
+                log::info!("applying attribute change for stateful component...{attr:?}");
+                comp.borrow_mut().attribute_changed(attr);
+            }
+            _ => {
+                log::info!("set the dom attr for {self:?}, with dom_attr: {attr:?}");
+                unreachable!("should only be called for element");
+            }
         }
         Ok(())
     }
@@ -707,22 +714,17 @@ where
         // the root node
         let attrs = Attribute::merge_attributes_of_same_name(elm.attributes().iter());
 
-        let listeners = self.set_element_dom_attrs(
-            &element,
-            attrs
-                .iter()
-                .map(|a| self.convert_attr(a))
-                .collect::<Vec<_>>(),
-        );
         let dom_node = DomNode {
             inner: DomInner::Element {
                 element,
-                listeners: Rc::new(RefCell::new(listeners)),
+                listeners: Rc::new(RefCell::new(None)),
                 children: Rc::new(RefCell::new(vec![])),
                 has_mount_callback: elm.has_mount_callback(),
             },
             parent: parent_node,
         };
+        let dom_attrs = attrs.iter().map(|a|self.convert_attr(a));
+        dom_node.set_dom_attrs(dom_attrs).expect("set dom attrs");
         let dom_node_rc = Rc::new(Some(dom_node.clone()));
         let children: Vec<DomNode> = elm
             .children()
@@ -870,72 +872,6 @@ where
         self.create_dom_node(parent_node, real_comp_view)
     }
 
-    /// set element with the dom attrs
-    pub(crate) fn set_element_dom_attrs(
-        &self,
-        element: &Element,
-        attrs: Vec<DomAttr>,
-    ) -> Option<NamedEventClosures> {
-        attrs
-            .into_iter()
-            .filter_map(|att| self.set_element_dom_attr(element, att))
-            .reduce(|mut acc, e| {
-                e.into_iter().for_each(|(k, v)| {
-                    acc.insert(k, v);
-                });
-                acc
-            })
-    }
-
-    fn set_element_dom_attr(&self, element: &Element, attr: DomAttr) -> Option<NamedEventClosures> {
-        let attr_name = intern(attr.name);
-        let attr_namespace = attr.namespace;
-
-        let GroupedDomAttrValues {
-            listeners,
-            plain_values,
-            styles,
-        } = attr.group_values();
-
-        DomAttr::set_element_style(element, attr_name, styles);
-        DomAttr::set_element_simple_values(element, attr_name, attr_namespace, plain_values);
-        self.add_event_listeners(element, attr_name, &listeners)
-            .unwrap();
-        if !listeners.is_empty() {
-            let event_closures =
-                IndexMap::from_iter(listeners.into_iter().map(|cb| (attr_name, cb)));
-            Some(event_closures)
-        } else {
-            None
-        }
-    }
-
-    pub(crate) fn add_event_listeners(
-        &self,
-        event_target: &web_sys::EventTarget,
-        event_name: &str,
-        listeners: &[EventClosure],
-    ) -> Result<(), JsValue> {
-        for listener in listeners.iter() {
-            self.add_event_listener(event_target, event_name, listener)
-                .unwrap();
-        }
-        Ok(())
-    }
-
-    /// add a event listener to a target element
-    pub(crate) fn add_event_listener(
-        &self,
-        event_target: &web_sys::EventTarget,
-        event_name: &str,
-        listener: &Closure<dyn FnMut(web_sys::Event)>,
-    ) -> Result<(), JsValue> {
-        event_target.add_event_listener_with_callback(
-            intern(event_name),
-            listener.as_ref().unchecked_ref(),
-        )?;
-        Ok(())
-    }
 }
 
 /// render the underlying real dom node into string

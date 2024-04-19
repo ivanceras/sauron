@@ -28,6 +28,9 @@ impl<MSG> PartialEq for AttributeValue<MSG> {
             (AttributeValue::EventListener(this), AttributeValue::EventListener(other)) => {
                 this == other
             }
+            (AttributeValue::ComponentEventListener(this), AttributeValue::ComponentEventListener(other)) => {
+                this == other
+            }
             (AttributeValue::Empty, AttributeValue::Empty) => true,
             (_, _) => false,
         }

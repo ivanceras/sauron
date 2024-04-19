@@ -113,19 +113,10 @@ impl<IN, OUT> Clone for Callback<IN, OUT> {
     }
 }
 
-/// This is the best approximation of comparison whether 2 callbacks are equal.
-///
-/// There is no 100% guarante that this is true since we can not compare 2 closures event if they
-/// have the same logic.
-///
-/// This is done by comparing the type_id of the input and type_id of the output.
-///
+/// Compare if the callbacks are equal
+/// Note, we are only comparing the type_id of the function, the input and the output
 impl<IN, OUT> PartialEq for Callback<IN, OUT> {
     fn eq(&self, other: &Self) -> bool {
-        // NOTE: We are not comparing the func field since it will always
-        // be false when closures are generated from the view.
-        // We want the callback comparison to return true as much as possible
-        // so as to not keep adding the callback to the event listeners
         self.event_type_id == other.event_type_id
             && self.msg_type_id == other.msg_type_id
             && self.func_type_id == other.func_type_id

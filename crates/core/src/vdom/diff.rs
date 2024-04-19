@@ -195,7 +195,15 @@ pub fn diff_recursive<'a, MSG>(
                     patches.extend(patch);
                 }
                 (Leaf::StatefulComponent(old_comp), Leaf::StatefulComponent(new_comp)) => {
+                    let attr_patches = create_attribute_patches(&"component", &old_comp.attrs, &new_comp.attrs, path);
+                    if !attr_patches.is_empty(){
+                        log::info!("stateful component attr_patches: {attr_patches:#?}");
+                    }
+                    patches.extend(attr_patches);
                     let patch = diff_nodes(None, &old_comp.children, &new_comp.children, path);
+                    if !patch.is_empty(){
+                        log::info!("stateful component patch: {patch:#?}");
+                    }
                     patches.extend(patch);
                 }
                 (Leaf::TemplatedView(_old_view), _) => {
@@ -219,7 +227,7 @@ pub fn diff_recursive<'a, MSG>(
             };
 
             if !skip_attributes {
-                let attr_patches = create_attribute_patches(old_element, new_element, path);
+                let attr_patches = create_attribute_patches(old_element.tag(), old_element.attributes(), new_element.attributes(), path);
                 patches.extend(attr_patches);
             }
 
@@ -326,8 +334,9 @@ fn diff_non_keyed_nodes<'a, MSG>(
 ///     - merging attributes of the same name
 #[allow(clippy::type_complexity)]
 fn create_attribute_patches<'a, MSG>(
-    old_element: &'a Element<MSG>,
-    new_element: &'a Element<MSG>,
+    old_tag: &'a Tag,
+    old_attributes: &'a [Attribute<MSG>],
+    new_attributes: &'a [Attribute<MSG>],
     path: &SkipPath,
 ) -> Vec<Patch<'a, MSG>> {
     let skip_indices = if let Some(skip_diff) = &path.skip_diff {
@@ -342,8 +351,6 @@ fn create_attribute_patches<'a, MSG>(
 
     let has_skip_indices = !skip_indices.is_empty();
 
-    let new_attributes = new_element.attributes();
-    let old_attributes = old_element.attributes();
 
     let mut patches = vec![];
 
@@ -355,8 +362,8 @@ fn create_attribute_patches<'a, MSG>(
     let mut add_attributes: Vec<&Attribute<MSG>> = vec![];
     let mut remove_attributes: Vec<&Attribute<MSG>> = vec![];
 
-    let new_attributes_grouped = new_element.group_indexed_attributes_per_name();
-    let old_attributes_grouped = old_element.group_indexed_attributes_per_name();
+    let new_attributes_grouped = Element::group_indexed_attributes_per_name(new_attributes);
+    let old_attributes_grouped = Element::group_indexed_attributes_per_name(old_attributes);
 
     // for all new elements that doesn't exist in the old elements
     // or the values differ
@@ -412,14 +419,14 @@ fn create_attribute_patches<'a, MSG>(
 
     if !add_attributes.is_empty() {
         patches.push(Patch::add_attributes(
-            &old_element.tag,
+            old_tag,
             path.path.clone(),
             add_attributes,
         ));
     }
     if !remove_attributes.is_empty() {
         patches.push(Patch::remove_attributes(
-            &old_element.tag,
+            old_tag,
             path.path.clone(),
             remove_attributes,
         ));

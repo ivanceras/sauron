@@ -80,17 +80,14 @@ pub enum PatchVariant {
 impl DomNode {
     pub(crate) fn find_node(&self, path: &mut TreePath) -> Option<DomNode> {
         match &self.inner {
-            DomInner::StatefulComponent { comp, .. } => {
+            DomInner::StatefulComponent {.. } => {
                 log::info!(
                     "This is a stateful component, should return the element
                 inside relative to the child container at this path: {:?}",
                     path
                 );
-                let child_container = comp
-                    .borrow()
-                    .child_container()
-                    .expect("stateful component should provide the child container");
-                child_container.find_node(path)
+                // just return self and handle its own patches
+                Some(self.clone())
             }
             _ => {
                 if path.is_empty() {
