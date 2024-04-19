@@ -147,7 +147,8 @@ where
     let mount_event = on_component_mount(move |me| {
         program.mount(
             &me.target_node.as_node(),
-            MountProcedure::append_to_shadow(),
+            //MountProcedure::append_to_shadow(),
+            MountProcedure::append(),
         );
         let stylesheet = <COMP as Component>::stylesheet().join("\n");
         log::info!("stylesheet: {}", stylesheet);

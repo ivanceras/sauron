@@ -62,6 +62,29 @@ impl Value {
         }
     }
 
+    /// converts to f32 if the variants are numerical representation
+    pub fn as_f32(&self) -> Option<f32> {
+        match self {
+            Self::Bool(_) => None,
+            Self::Cow(_v) => None,
+            Self::Vec(_v) => None,
+            Self::U8(v) => Some(f32::from(*v)),
+            Self::U16(v) => Some(f32::from(*v)),
+            Self::U32(v) => Some(*v as f32),
+            Self::U64(v) => Some(*v as f32),
+            Self::U128(v) => Some(*v as f32),
+            Self::Usize(v) => Some(*v as f32),
+            Self::I8(v) => Some(f32::from(*v)),
+            Self::I16(v) => Some(f32::from(*v)),
+            Self::I32(v) => Some(*v as f32),
+            Self::I64(v) => Some(*v as f32),
+            Self::I128(v) => Some(*v as f32),
+            Self::Isize(v) => Some(*v as f32),
+            Self::F32(v) => Some(*v),
+            Self::F64(v) => Some(*v as f32),
+        }
+    }
+
     /// converts to f64 if the variants are numerical representation
     pub fn as_f64(&self) -> Option<f64> {
         match self {
@@ -105,6 +128,29 @@ impl Value {
             Self::Isize(v) => Some(*v as i32),
             Self::F32(v) => Some(*v as i32),
             Self::F64(v) => Some(*v as i32),
+        }
+    }
+
+    /// converts to i64 if the variants are numerical representation
+    pub fn as_i64(&self) -> Option<i64> {
+        match self {
+            Self::Bool(_) => None,
+            Self::Cow(_v) => None,
+            Self::Vec(_v) => None,
+            Self::U8(v) => Some(i64::from(*v)),
+            Self::U16(v) => Some(i64::from(*v)),
+            Self::U32(v) => Some(*v as i64),
+            Self::U64(v) => Some(*v as i64),
+            Self::U128(v) => Some(*v as i64),
+            Self::Usize(v) => Some(*v as i64),
+            Self::I8(v) => Some(i64::from(*v)),
+            Self::I16(v) => Some(i64::from(*v)),
+            Self::I32(v) => Some(*v as i64),
+            Self::I64(v) => Some(*v),
+            Self::I128(v) => Some(*v as i64),
+            Self::Isize(v) => Some(*v as i64),
+            Self::F32(v) => Some(*v as i64),
+            Self::F64(v) => Some(*v as i64),
         }
     }
 

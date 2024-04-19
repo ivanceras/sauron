@@ -329,4 +329,28 @@ impl DomAttrValue {
         let simple = self.as_simple()?;
         Some(simple.to_string())
     }
+
+    /// return i32 if it can be converted as such
+    pub fn as_i32(&self) -> Option<i32> {
+        let simple = self.as_simple()?;
+        simple.as_i32()
+    }
+
+    /// return i64 if it can be converted as such
+    pub fn as_i64(&self) -> Option<i64> {
+        let simple = self.as_simple()?;
+        simple.as_i64()
+    }
+
+    /// return i32 if it can be converted as such
+    pub fn as_f32(&self) -> Option<f32> {
+        let simple = self.as_simple()?;
+        simple.as_f32()
+    }
+
+    /// return i64 if it can be converted as such
+    pub fn as_f64(&self) -> Option<f64> {
+        let simple = self.as_simple()?;
+        simple.as_f64()
+    }
 }
