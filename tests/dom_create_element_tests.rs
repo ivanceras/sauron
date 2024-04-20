@@ -13,7 +13,7 @@ wasm_bindgen_test_configure!(run_in_browser);
 fn nested_divs() {
     let vdiv: Node<()> = div(vec![], vec![div(vec![], vec![div(vec![], vec![])])]); // <div> <div> <div></div> </div> </div>
     let program = simple_program();
-    let created_node = program.create_dom_node(Rc::new(None), &vdiv);
+    let created_node = program.create_dom_node(&vdiv);
 
     assert_eq!(
         &vdiv.render_to_string(),
@@ -31,7 +31,7 @@ fn svg_element() {
             vec![circle(vec![cx("50"), cy("50"), r("50")], vec![])],
         )],
     );
-    let created_node = simple_program().create_dom_node(Rc::new(None), &vdiv);
+    let created_node = simple_program().create_dom_node(&vdiv);
 
     assert_eq!(
         &vdiv.render_to_string(),
