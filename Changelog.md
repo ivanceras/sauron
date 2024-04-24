@@ -1,7 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.61.7
 - remove support for `custom_element` as its functionality is superseeded with `stateful_component`
+- remove parent in DomNode as to simplify code
+
+## 0.61.6
+- remove template and use-template feature gate as it is not adding performance enhancements
 
 ## 0.61.5
 - rename `safe_html` to `raw_html`
