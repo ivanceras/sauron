@@ -301,14 +301,6 @@ impl<MSG> Node<MSG> {
             .and_then(|att_values| att_values.first().and_then(|v| v.get_simple()))
     }
 
-    /// return the template view if this node has one
-    pub fn template(&self) -> Option<Node<MSG>> {
-        match self {
-            Self::Leaf(Leaf::TemplatedView(view)) => Some((view.template)()),
-            _ => None,
-        }
-    }
-
     /// return the skip diff if this node has one
     pub fn skip_diff(&self) -> Option<SkipDiff> {
         match self {

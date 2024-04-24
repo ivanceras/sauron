@@ -29,6 +29,16 @@ use web_sys;
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
 
+
+
+thread_local! {
+    static CANCEL_CNT: RefCell<i32> = RefCell::new(0);
+}
+
+thread_local! {
+    static UPDATE_CNT: RefCell<i32> = RefCell::new(0);
+}
+
 mod app_context;
 mod mount_procedure;
 
@@ -340,9 +350,6 @@ where
         *self.mount_node.borrow_mut() = Some(mount_node);
         self.pre_mount();
 
-        #[cfg(feature = "use-template")]
-        let created_node = self.create_initial_view_with_template();
-        #[cfg(not(feature = "use-template"))]
         let created_node = self.create_initial_view();
 
         let mount_node: DomNode = match mount_procedure.target {
@@ -434,6 +441,27 @@ where
     /// execute DOM changes in order to reflect the APP's view into the browser representation
     pub fn update_dom(&mut self) -> Result<(), JsValue> {
         let t1 = now();
+        //#[cfg(all(feature = "with-measure", feature = "with-debug"))]
+        if let Some(last_update) = self.last_update.borrow().as_ref() {
+            let frame_time = (1000_f64 / 60_f64).floor(); // 1s in 60 frames
+            let time_delta = t1 - last_update;
+            let remaining = frame_time - time_delta;
+            if time_delta < frame_time {
+                log::warn!("update is {remaining} too soon!... time_delta: {time_delta}, frame_time: {frame_time}");
+                let mut program = self.clone();
+                //#[cfg(feature = "with-debounce")]
+                crate::dom::request_timeout_callback(
+                    move||{
+                        program.update_dom().unwrap();
+                    }, remaining.round() as i32).unwrap();
+                log::info!("update is cancelled..");
+                CANCEL_CNT.with_borrow_mut(|c|*c += 1);
+                return Ok(())
+            }
+        }
+        log::info!("Doing and update...");
+        UPDATE_CNT.with_borrow_mut(|c|*c += 1);
+        log::info!("ratio(cancelled/update): {}/{}", CANCEL_CNT.with_borrow(|c|*c), UPDATE_CNT.with_borrow(|c|*c));
         // a new view is created due to the app update
         let view = self.app_context.view();
         let t2 = now();
@@ -484,15 +512,6 @@ where
             weak_count,
         };
 
-        #[cfg(all(feature = "with-trace", feature = "use-template"))]
-        {
-            let total = crate::dom::component::template::total_time_spent();
-            log::info!("total: {:#?}", total);
-            log::info!("average: {:#?}", total.average());
-            log::info!("percentile: {:#?}", total.percentile());
-            crate::dom::component::template::clear_time_spent();
-        }
-
         if measurements.total_time > 16.0 {
             #[cfg(all(feature = "with-measure", feature = "with-debug"))]
             {
@@ -500,15 +519,6 @@ where
             }
         }
 
-        #[cfg(all(feature = "with-measure", feature = "with-debug"))]
-        if let Some(last_update) = self.last_update.borrow().as_ref() {
-            let frame_time = (1000_f64 / 60_f64).floor(); // 1s in 60 frames
-            let time_delta = t3 - last_update;
-            let _remaining = frame_time - time_delta;
-            if time_delta < frame_time {
-                log::warn!("update is {_remaining} too soon!... time_delta: {time_delta}, frame_time: {frame_time}");
-            }
-        }
 
         // tell the app about the performance measurement and only if there was patches applied
         #[cfg(feature = "with-measure")]

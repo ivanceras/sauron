@@ -714,14 +714,7 @@ where
                 }
             }
             Leaf::StatelessComponent(comp) => {
-                #[cfg(feature = "use-template")]
-                {
-                    self.create_stateless_component_with_template(comp)
-                }
-                #[cfg(not(feature = "use-template"))]
-                {
                     self.create_stateless_component(comp)
-                }
             }
             Leaf::TemplatedView(view) => {
                 unreachable!("template view should not be created: {:#?}", view)

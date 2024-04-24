@@ -38,7 +38,6 @@ with-trace = ["sauron-core/with-trace"]
 # lets you use node! macro to write html like code in the view
 with-node-macro = ["sauron-macro"]
 html-parser = ["sauron-html-parser"]
-use-template = ["sauron-core/use-template"]
 use-skipdiff = ["sauron-core/use-skipdiff"]
 
 

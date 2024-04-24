@@ -14,7 +14,6 @@
 use quote::ToTokens;
 
 mod extract_skip_diff;
-mod extract_template;
 mod jss;
 mod node;
 mod view;
@@ -210,25 +209,6 @@ pub fn extract_skip_diff(input: proc_macro::TokenStream) -> proc_macro::TokenStr
     extract_skip_diff::to_token_stream(input).into()
 }
 
-/// extract template by including only attributes and elements that is static str
-/// ```rust
-/// use sauron_macro::extract_template;
-/// use sauron::*;
-///
-/// let template: Node<()> = extract_template!{<ul class="some-list"></ul>};
-/// assert_eq!(template, node!{<ul class="some-list"></ul>}, "same template as the view");
-///
-/// let template: Node<()> = extract_template!{<h1>Hello world!</h1>};
-/// assert_eq!(template, node!{<h1>Hello world!</h1>}, "raw texts");
-///
-/// let name = "bob";
-/// let template: Node<()> = extract_template!{<h1>{text(format!("Hello {}!", name))}</h1>};
-/// assert_eq!(template, node!{<h1></h1>}, "formated text");
-/// ```
-#[proc_macro]
-pub fn extract_template(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    extract_template::to_token_stream(input).into()
-}
 
 /// build a css string
 ///

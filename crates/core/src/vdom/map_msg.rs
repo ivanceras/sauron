@@ -4,7 +4,6 @@ use crate::vdom::Element;
 use crate::vdom::Leaf;
 use crate::vdom::Node;
 use crate::vdom::TemplatedView;
-use std::rc::Rc;
 
 impl<MSG> Node<MSG> {
     /// map the msg of this node such that Node<MSG> becomes Node<MSG2>
@@ -130,7 +129,6 @@ impl<MSG> TemplatedView<MSG> {
     {
         TemplatedView {
             view: Box::new(self.view.map_msg(cb.clone())),
-            template: Rc::new(move || (self.template)().map_msg(cb.clone())),
             skip_diff: self.skip_diff,
         }
     }

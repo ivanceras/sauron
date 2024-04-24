@@ -11,8 +11,6 @@ pub use stateful_component::{stateful_component, StatefulComponent, StatefulMode
 
 #[cfg(feature = "with-dom")]
 mod stateful_component;
-#[cfg(feature = "use-template")]
-pub(crate) mod template;
 
 /// A component has a view and can update itself.
 ///
