@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.61.8
+- Fix: setting values in common html attributes should be enable by default
+
 ## 0.61.7
 - remove support for `custom_element` as its functionality is superseeded with `stateful_component`
 - remove parent in DomNode as to simplify code
