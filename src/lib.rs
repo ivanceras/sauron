@@ -33,7 +33,9 @@ pub mod prelude {
     pub use sauron_core::prelude::*;
     pub use sauron_core::*;
 
+    #[cfg(feature = "sauron-macro")]
     pub use sauron_macro::extract_skip_diff;
+    #[cfg(feature = "sauron-macro")]
     pub use sauron_macro::view;
 
     #[cfg(feature = "with-node-macro")]
