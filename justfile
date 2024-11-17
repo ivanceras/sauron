@@ -13,10 +13,10 @@ test-with-dom:
 
 
 wasm-test:
-    wasm-pack test --firefox --headless
+   RUSTFLAGS=--cfg=web_sys_unstable_apis wasm-pack test --firefox --headless
 
 wasm-test-with-features:
-    wasm-pack test --firefox --headless -- --no-default-features --features "with-dom with-node-macro custom_element" 
+   RUSTFLAGS=--cfg=web_sys_unstable_apis wasm-pack test --firefox --headless -- --no-default-features --features "with-dom with-node-macro custom_element"
 
 
 test-all: test wasm-test

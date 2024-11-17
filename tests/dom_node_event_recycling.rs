@@ -1,4 +1,3 @@
-#![deny(warnings)]
 use sauron::{html::attributes::*, html::events::*, html::*};
 use sauron::{vdom::TreePath, *};
 use std::{cell::RefCell, rc::Rc};

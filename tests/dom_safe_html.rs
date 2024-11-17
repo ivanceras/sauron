@@ -1,4 +1,3 @@
-#![allow(unused)]
 use sauron::dom::DomNode;
 use sauron::parse_html;
 use sauron::*;

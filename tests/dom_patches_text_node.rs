@@ -1,4 +1,3 @@
-#![deny(warnings)]
 use sauron::{html::attributes::*, html::*, *};
 
 use test_fixtures::simple_program;

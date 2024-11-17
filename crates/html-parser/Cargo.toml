@@ -1,6 +1,6 @@
 [package]
 name = "sauron-html-parser"
-version = "0.61.8"
+version = "0.61.9"
 edition = "2021"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"

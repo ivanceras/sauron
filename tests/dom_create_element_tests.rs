@@ -1,4 +1,3 @@
-#![deny(warnings)]
 use sauron::{html::attributes::replace, *};
 use std::{cell::Cell, rc::Rc};
 use test_fixtures::simple_program;

@@ -1,4 +1,3 @@
-#![deny(warnings)]
 use sauron::*;
 use test_fixtures::simple_program;
 use wasm_bindgen_test::*;

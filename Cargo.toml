@@ -1,6 +1,6 @@
 [package]
 name = "sauron"
-version = "0.61.8"
+version = "0.61.9"
 authors = [ "Jovansonlee Cesar <ivanceras@gmail.com>" ]
 license = "MIT"
 description = "A versatile web framework and library for building client-side and/or server-side web applications"
@@ -101,4 +101,3 @@ harness = false
 [[bench]]
 name = "bench_view_performance"
 harness = false
-

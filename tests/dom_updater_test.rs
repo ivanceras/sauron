@@ -1,4 +1,3 @@
-#![deny(warnings)]
 use sauron::prelude::*;
 use std::{cell::RefCell, rc::Rc};
 use test_fixtures::simple_program;

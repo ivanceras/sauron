@@ -7,7 +7,6 @@ use crate::vdom;
 use crate::vdom::ComponentEventCallback;
 use crate::vdom::{Attribute, AttributeValue, EventCallback};
 use wasm_bindgen::JsCast;
-#[cfg(web_sys_unstable_apis)]
 pub use web_sys::ClipboardEvent;
 pub use web_sys::{
     AnimationEvent, FocusEvent, HashChangeEvent, KeyboardEvent, MouseEvent, Selection, TouchEvent,
@@ -332,8 +331,8 @@ impl InputEvent {
 
     /// create a native web event, with composed set to true
     pub fn create_web_event_composed() -> web_sys::Event {
-        let mut event_init = web_sys::EventInit::new();
-        event_init.composed(true);
+        let event_init = web_sys::EventInit::new();
+        event_init.set_composed(true);
         web_sys::Event::new_with_event_init_dict("input", &event_init).expect("event init")
     }
 }
@@ -366,7 +365,6 @@ fn to_open(event: Event) -> bool {
 /// Note: paste event happens before the data is inserted into the target element
 /// therefore trying to access the data on the target element triggered from paste will get an
 /// empty text
-#[cfg(web_sys_unstable_apis)]
 fn to_clipboard_event(event: Event) -> ClipboardEvent {
     event
         .as_web()
@@ -416,9 +414,7 @@ declare_html_events! {
     on_submit => submit => to_webevent => web_sys::Event;
     on_input => input => to_input_event => InputEvent;
     on_checked => input => to_checked => bool;
-    #[cfg(web_sys_unstable_apis)]
     on_paste => paste => to_clipboard_event => ClipboardEvent;
-    #[cfg(web_sys_unstable_apis)]
     on_copy => copy => to_clipboard_event => ClipboardEvent;
     on_change => change => to_input_event => InputEvent;
     on_broadcast => broadcast => to_input_event => InputEvent;

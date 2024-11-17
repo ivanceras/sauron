@@ -55,9 +55,9 @@ pub fn now() -> f64 {
 
 /// scroll the browser to the top of the document
 pub fn scroll_window_to_top() {
-    let mut options = ScrollToOptions::new();
-    options.top(0.0);
-    options.left(0.0);
+    let options = ScrollToOptions::new();
+    options.set_top(0.0);
+    options.set_left(0.0);
     window().scroll_to_with_scroll_to_options(&options);
 }
 

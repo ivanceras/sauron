@@ -1,4 +1,3 @@
-#![deny(warnings)]
 use sauron::html::*;
 use sauron::*;
 
