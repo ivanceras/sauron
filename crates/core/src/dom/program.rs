@@ -1,33 +1,30 @@
-use crate::dom::program::app_context::WeakContext;
-#[cfg(feature = "with-raf")]
-use crate::dom::request_animation_frame;
-#[cfg(feature = "with-ric")]
-use crate::dom::request_idle_callback;
-use crate::dom::DomNode;
-use crate::dom::SkipDiff;
-use crate::dom::SkipPath;
-use crate::dom::{document, now, IdleDeadline, Measurements};
-use crate::dom::{util::body, AnimationFrameHandle, Application, DomPatch, IdleCallbackHandle};
-use crate::html::{self, attributes::class, text};
-use crate::vdom;
-use crate::vdom::diff;
-use crate::vdom::diff_recursive;
-use crate::vdom::Patch;
-use std::collections::hash_map::DefaultHasher;
-use std::collections::VecDeque;
-use std::hash::{Hash, Hasher};
-use std::mem::ManuallyDrop;
 use std::{
     any::TypeId,
     cell::{Ref, RefCell, RefMut},
+    collections::{hash_map::DefaultHasher, VecDeque},
+    hash::{Hash, Hasher},
+    mem::ManuallyDrop,
     rc::Rc,
     rc::Weak,
 };
-use wasm_bindgen::{JsCast, JsValue};
-use web_sys;
 
-pub(crate) use app_context::AppContext;
-pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
+use wasm_bindgen::{JsCast, JsValue};
+
+use crate::{
+    dom::{
+        document, dom_patch, now, program::app_context::WeakContext, util::body,
+        AnimationFrameHandle, Application, DomNode, DomPatch, IdleCallbackHandle, IdleDeadline,
+        Measurements, SkipDiff, SkipPath,
+    },
+    html::{self, attributes::class, text},
+    vdom::{self, diff, diff_recursive, Patch},
+};
+
+#[cfg(feature = "with-raf")]
+use crate::dom::request_animation_frame;
+
+#[cfg(feature = "with-ric")]
+use crate::dom::request_idle_callback;
 
 thread_local! {
     static CANCEL_CNT: RefCell<i32> = RefCell::new(0);
@@ -38,7 +35,10 @@ thread_local! {
 }
 
 mod app_context;
+use self::app_context::AppContext;
+
 mod mount_procedure;
+pub use self::mount_procedure::{MountAction, MountProcedure, MountTarget};
 
 /// Program handle the lifecycle of the APP
 pub struct Program<APP>
@@ -494,7 +494,13 @@ where
             )
             .expect("must convert patches")
         } else {
-            self.create_dom_patch(&view)
+            let current_vdom = self.app_context.current_vdom();
+            create_dom_patch(
+                &self.root_node,
+                &current_vdom,
+                &view,
+                self.create_ev_callback(),
+            )
         };
 
         let total_patches = dom_patches.len();
@@ -563,26 +569,6 @@ where
         )
     }
 
-    fn create_dom_patch(&self, new_vdom: &vdom::Node<APP::MSG>) -> Vec<DomPatch> {
-        let current_vdom = self.app_context.current_vdom();
-        let patches = diff(&current_vdom, new_vdom);
-
-        #[cfg(all(feature = "with-debug", feature = "log-patches"))]
-        {
-            log::debug!("There are {} patches", patches.len());
-            log::debug!("patches: {patches:#?}");
-        }
-
-        self.convert_patches(
-            self.root_node
-                .borrow()
-                .as_ref()
-                .expect("must have a root node"),
-            &patches,
-        )
-        .expect("must convert patches")
-    }
-
     #[cfg(feature = "with-raf")]
     fn apply_pending_patches_with_raf(&mut self) -> Result<(), JsValue> {
         let program = Program::downgrade(&self);
@@ -601,7 +587,11 @@ where
             return Ok(());
         }
         let dom_patches: Vec<DomPatch> = self.pending_patches.borrow_mut().drain(..).collect();
-        self.apply_dom_patches(dom_patches)?;
+        dom_patch::apply_dom_patches(
+            Rc::clone(&self.root_node),
+            Rc::clone(&self.mount_node),
+            dom_patches,
+        )?;
 
         Ok(())
     }
@@ -749,6 +739,32 @@ where
     }
 }
 
+fn create_dom_patch<Msg, F>(
+    root_node: &Rc<RefCell<Option<DomNode>>>,
+    current_vdom: &vdom::Node<Msg>,
+    new_vdom: &vdom::Node<Msg>,
+    ev_callback: F,
+) -> Vec<DomPatch>
+where
+    Msg: 'static,
+    F: Fn(Msg) + 'static + Clone,
+{
+    let patches = diff(&current_vdom, new_vdom);
+
+    #[cfg(all(feature = "with-debug", feature = "log-patches"))]
+    {
+        log::debug!("There are {} patches", patches.len());
+        log::debug!("patches: {patches:#?}");
+    }
+
+    dom_patch::convert_patches(
+        root_node.borrow().as_ref().expect("must have a root node"),
+        &patches,
+        ev_callback,
+    )
+    .expect("must convert patches")
+}
+
 impl<APP> Program<APP>
 where
     APP: Application,
@@ -761,7 +777,11 @@ where
         &mut self,
         new_vdom: vdom::Node<APP::MSG>,
     ) -> Result<usize, JsValue> {
-        let dom_patches = self.create_dom_patch(&new_vdom);
+        let dom_patches = {
+            let current_vdom = self.app_context.current_vdom();
+            let ev_callback = self.create_ev_callback();
+            create_dom_patch(&self.root_node, &current_vdom, &new_vdom, ev_callback)
+        };
         let total_patches = dom_patches.len();
         self.pending_patches.borrow_mut().extend(dom_patches);
 

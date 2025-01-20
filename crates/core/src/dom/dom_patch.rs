@@ -1,17 +1,18 @@
-use crate::dom;
-use crate::dom::dom_node;
-use crate::dom::dom_node::DomInner;
-use crate::dom::DomAttr;
-use crate::dom::DomAttrValue;
-use crate::dom::DomNode;
-use crate::dom::{Application, Program};
-use crate::vdom::ComponentEventCallback;
-use crate::vdom::EventCallback;
-use crate::vdom::TreePath;
-use crate::vdom::{Attribute, AttributeValue, Patch, PatchType};
+use std::{cell::RefCell, rc::Rc};
+
 use indexmap::IndexMap;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
+
+use crate::{
+    dom::{
+        self, dom_node, dom_node::DomInner, Application, DomAttr, DomAttrValue, DomNode, Program,
+    },
+    vdom::{
+        Attribute, AttributeValue, ComponentEventCallback, EventCallback, Patch, PatchType,
+        TreePath,
+    },
+};
 
 /// a Patch where the virtual nodes are all created in the document.
 /// This is necessary since the created Node  doesn't contain references
@@ -146,97 +147,15 @@ impl<APP> Program<APP>
 where
     APP: Application + 'static,
 {
-    pub(crate) fn convert_attr(&self, attr: &Attribute<APP::MSG>) -> DomAttr {
-        DomAttr {
-            namespace: attr.namespace,
-            name: attr.name,
-            value: attr
-                .value
-                .iter()
-                .filter_map(|v| self.convert_attr_value(v))
-                .collect(),
-        }
-    }
-
-    fn convert_attr_value(&self, attr_value: &AttributeValue<APP::MSG>) -> Option<DomAttrValue> {
-        match attr_value {
-            AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
-            AttributeValue::Style(v) => Some(DomAttrValue::Style(v.clone())),
-            AttributeValue::EventListener(v) => {
-                Some(DomAttrValue::EventListener(self.convert_event_listener(v)))
-            }
-            AttributeValue::ComponentEventListener(v) => Some(DomAttrValue::EventListener(
-                self.convert_component_event_listener(v),
-            )),
-            AttributeValue::Empty => None,
-        }
-    }
-
-    fn convert_event_listener(
-        &self,
-        event_listener: &EventCallback<APP::MSG>,
-    ) -> Closure<dyn FnMut(web_sys::Event)> {
-        let program = self.downgrade();
-        let event_listener = event_listener.clone();
-        let closure: Closure<dyn FnMut(web_sys::Event)> =
-            Closure::new(move |event: web_sys::Event| {
-                let msg = event_listener.emit(dom::Event::from(event));
-                let mut program = program.upgrade().expect("must upgrade");
-                program.dispatch(msg);
-            });
-        closure
-    }
-
-    fn convert_component_event_listener(
-        &self,
-        component_callback: &ComponentEventCallback,
-    ) -> Closure<dyn FnMut(web_sys::Event)> {
-        let component_callback = component_callback.clone();
-        let closure: Closure<dyn FnMut(web_sys::Event)> =
-            Closure::new(move |event: web_sys::Event| {
-                component_callback.emit(dom::Event::from(event));
-            });
-        closure
-    }
     /// get the real DOM target node and make a DomPatch object for each of the Patch
     pub(crate) fn convert_patches(
         &self,
         target_node: &DomNode,
         patches: &[Patch<APP::MSG>],
     ) -> Result<Vec<DomPatch>, JsValue> {
-        let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
-            .iter()
-            .map(|patch| (patch.path(), patch.tag()))
-            .chain(
-                patches
-                    .iter()
-                    .flat_map(|patch| patch.node_paths())
-                    .map(|path| (path, None)),
-            )
-            .collect();
-
-        let nodes_lookup = target_node.find_all_nodes(&nodes_to_find);
-
-        let dom_patches:Vec<DomPatch> = patches.iter().map(|patch|{
-            let patch_path = patch.path();
-            let patch_tag = patch.tag();
-            if let Some((target_node, target_parent)) = nodes_lookup.get(patch_path) {
-                let target_tag = target_node.tag();
-                if let (Some(patch_tag), Some(target_tag)) = (patch_tag, target_tag) {
-                    if **patch_tag != target_tag{
-                        panic!(
-                            "expecting a tag: {patch_tag:?}, but found: {target_tag:?}"
-                        );
-                    }
-                }
-                self.convert_patch(&nodes_lookup, target_node, target_parent, patch)
-            } else {
-                unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
-            }
-        }).collect();
-
-        Ok(dom_patches)
+        convert_patches(target_node, patches, self.create_ev_callback())
     }
+
     /// convert a virtual DOM Patch into a created DOM node Patch
     pub fn convert_patch(
         &self,
@@ -245,244 +164,382 @@ where
         target_parent: &DomNode,
         patch: &Patch<APP::MSG>,
     ) -> DomPatch {
-        let target_element = target_element.clone();
-        let target_parent = target_parent.clone();
-        let Patch {
-            patch_path,
-            patch_type,
-            ..
-        } = patch;
+        convert_patch(
+            nodes_lookup,
+            target_element,
+            target_parent,
+            patch,
+            self.create_ev_callback(),
+        )
+    }
+}
 
-        let patch_path = patch_path.clone();
+/// get the real DOM target node and make a DomPatch object for each of the Patch
+pub fn convert_patches<Msg, F>(
+    target_node: &DomNode,
+    patches: &[Patch<Msg>],
+    ev_callback: F,
+) -> Result<Vec<DomPatch>, JsValue>
+where
+    Msg: 'static,
+    F: Fn(Msg) + 'static + Clone,
+{
+    let nodes_to_find: Vec<(&TreePath, Option<&&'static str>)> = patches
+        .iter()
+        .map(|patch| (patch.path(), patch.tag()))
+        .chain(
+            patches
+                .iter()
+                .flat_map(|patch| patch.node_paths())
+                .map(|path| (path, None)),
+        )
+        .collect();
 
-        match patch_type {
-            PatchType::InsertBeforeNode { nodes } => {
-                let nodes = nodes
-                    .iter()
-                    .map(|for_insert| self.create_dom_node(for_insert))
-                    .collect();
-                DomPatch {
-                    patch_path,
-                    target_element,
-                    target_parent,
-                    patch_variant: PatchVariant::InsertBeforeNode { nodes },
+    let nodes_lookup = target_node.find_all_nodes(&nodes_to_find);
+
+    let dom_patches:Vec<DomPatch> = patches.iter().map(|patch|{
+        let patch_path = patch.path();
+        let patch_tag = patch.tag();
+        if let Some((target_node, target_parent)) = nodes_lookup.get(patch_path) {
+            let target_tag = target_node.tag();
+            if let (Some(patch_tag), Some(target_tag)) = (patch_tag, target_tag) {
+                if **patch_tag != target_tag{
+                    panic!(
+                        "expecting a tag: {patch_tag:?}, but found: {target_tag:?}"
+                    );
                 }
             }
-            PatchType::InsertAfterNode { nodes } => {
-                let nodes = nodes
-                    .iter()
-                    .map(|for_insert| self.create_dom_node(for_insert))
-                    .collect();
-                DomPatch {
-                    patch_path,
-                    target_element,
-                    target_parent,
-                    patch_variant: PatchVariant::InsertAfterNode { nodes },
-                }
-            }
+            convert_patch(&nodes_lookup, target_node, target_parent, patch, ev_callback.clone())
+        } else {
+            unreachable!("Getting here means we didn't find the element of next node that we are supposed to patch, patch_path: {:?}, with tag: {:?}", patch_path, patch_tag);
+        }
+    }).collect();
 
-            PatchType::AddAttributes { attrs } => {
-                // we merge the attributes here prior to conversion
-                let attrs = Attribute::merge_attributes_of_same_name(attrs.iter().copied());
-                DomPatch {
-                    patch_path,
-                    target_element,
-                    target_parent,
-                    patch_variant: PatchVariant::AddAttributes {
-                        attrs: attrs.iter().map(|a| self.convert_attr(a)).collect(),
-                    },
-                }
-            }
-            PatchType::RemoveAttributes { attrs } => DomPatch {
+    Ok(dom_patches)
+}
+
+/// convert a virtual DOM Patch into a created DOM node Patch
+pub fn convert_patch<Msg, F>(
+    nodes_lookup: &IndexMap<TreePath, (DomNode, DomNode)>,
+    target_element: &DomNode,
+    target_parent: &DomNode,
+    patch: &Patch<Msg>,
+    ev_callback: F,
+) -> DomPatch
+where
+    Msg: 'static,
+    F: Fn(Msg) + 'static + Clone,
+{
+    let target_element = target_element.clone();
+    let target_parent = target_parent.clone();
+    let Patch {
+        patch_path,
+        patch_type,
+        ..
+    } = patch;
+
+    let patch_path = patch_path.clone();
+
+    match patch_type {
+        PatchType::InsertBeforeNode { nodes } => {
+            let nodes = nodes
+                .iter()
+                .map(|for_insert| dom::create_dom_node(for_insert, ev_callback.clone()))
+                .collect();
+            DomPatch {
                 patch_path,
                 target_element,
                 target_parent,
-                patch_variant: PatchVariant::RemoveAttributes {
-                    attrs: attrs.iter().map(|a| self.convert_attr(a)).collect(),
+                patch_variant: PatchVariant::InsertBeforeNode { nodes },
+            }
+        }
+        PatchType::InsertAfterNode { nodes } => {
+            let nodes = nodes
+                .iter()
+                .map(|for_insert| dom::create_dom_node(for_insert, ev_callback.clone()))
+                .collect();
+            DomPatch {
+                patch_path,
+                target_element,
+                target_parent,
+                patch_variant: PatchVariant::InsertAfterNode { nodes },
+            }
+        }
+
+        PatchType::AddAttributes { attrs } => {
+            // we merge the attributes here prior to conversion
+            let attrs = Attribute::merge_attributes_of_same_name(attrs.iter().copied());
+            DomPatch {
+                patch_path,
+                target_element,
+                target_parent,
+                patch_variant: PatchVariant::AddAttributes {
+                    attrs: attrs
+                        .iter()
+                        .map(|a| convert_attr(a, ev_callback.clone()))
+                        .collect(),
                 },
-            },
-
-            PatchType::ReplaceNode { replacement } => {
-                let replacement = replacement
-                    .iter()
-                    .map(|node| self.create_dom_node(node))
-                    .collect();
-                DomPatch {
-                    patch_path,
-                    target_element,
-                    target_parent,
-                    patch_variant: PatchVariant::ReplaceNode { replacement },
-                }
-            }
-            PatchType::RemoveNode => DomPatch {
-                patch_path,
-                target_element,
-                target_parent,
-                patch_variant: PatchVariant::RemoveNode,
-            },
-            PatchType::ClearChildren => DomPatch {
-                patch_path,
-                target_element,
-                target_parent,
-                patch_variant: PatchVariant::ClearChildren,
-            },
-            PatchType::MoveBeforeNode { nodes_path } => {
-                let for_moving = nodes_path
-                    .iter()
-                    .map(|path| {
-                        let (node, _) = nodes_lookup.get(path).expect("must have found the node");
-                        node.clone()
-                    })
-                    .collect();
-                DomPatch {
-                    patch_path,
-                    target_element,
-                    target_parent,
-                    patch_variant: PatchVariant::MoveBeforeNode { for_moving },
-                }
-            }
-            PatchType::MoveAfterNode { nodes_path } => {
-                let for_moving = nodes_path
-                    .iter()
-                    .map(|path| {
-                        let (node, _) = nodes_lookup.get(path).expect("must have found the node");
-                        node.clone()
-                    })
-                    .collect();
-                DomPatch {
-                    patch_path,
-                    target_element,
-                    target_parent,
-                    patch_variant: PatchVariant::MoveAfterNode { for_moving },
-                }
-            }
-            PatchType::AppendChildren { children } => {
-                let children = children
-                    .iter()
-                    .map(|for_insert| self.create_dom_node(for_insert))
-                    .collect();
-
-                DomPatch {
-                    patch_path,
-                    target_element,
-                    target_parent,
-                    patch_variant: PatchVariant::AppendChildren { children },
-                }
             }
         }
-    }
-
-    /// TODO: this should not have access to root_node, so it can generically
-    /// apply patch to any dom node
-    pub(crate) fn apply_dom_patches(
-        &self,
-        dom_patches: impl IntoIterator<Item = DomPatch>,
-    ) -> Result<(), JsValue> {
-        for dom_patch in dom_patches {
-            self.apply_dom_patch(dom_patch)?;
-        }
-        Ok(())
-    }
-
-    /// apply a dom patch to this root node,
-    /// return a new root_node if it would replace the original root_node
-    /// TODO: this should have no access to root_node, so it can be used in general sense
-    pub(crate) fn apply_dom_patch(&self, dom_patch: DomPatch) -> Result<(), JsValue> {
-        let DomPatch {
+        PatchType::RemoveAttributes { attrs } => DomPatch {
             patch_path,
             target_element,
             target_parent,
-            patch_variant,
-        } = dom_patch;
+            patch_variant: PatchVariant::RemoveAttributes {
+                attrs: attrs
+                    .iter()
+                    .map(|a| convert_attr(a, ev_callback.clone()))
+                    .collect(),
+            },
+        },
 
-        match patch_variant {
-            PatchVariant::InsertBeforeNode { nodes } => {
-                target_parent.insert_before(&target_element, nodes);
-            }
-
-            PatchVariant::InsertAfterNode { nodes } => {
-                target_parent.insert_after(&target_element, nodes);
-            }
-            PatchVariant::AppendChildren { children } => {
-                target_element.append_children(children);
-            }
-
-            PatchVariant::AddAttributes { attrs } => {
-                target_element.set_dom_attrs(attrs).unwrap();
-            }
-            PatchVariant::RemoveAttributes { attrs } => {
-                for attr in attrs.iter() {
-                    for att_value in attr.value.iter() {
-                        match att_value {
-                            DomAttrValue::Simple(_) => {
-                                target_element.remove_dom_attr(attr)?;
-                            }
-                            // it is an event listener
-                            DomAttrValue::EventListener(_) => {
-                                let DomInner::Element { listeners, .. } = &target_element.inner
-                                else {
-                                    unreachable!("must be an element");
-                                };
-                                if let Some(listener) = listeners.borrow_mut().as_mut() {
-                                    listener.retain(|event, _| *event != attr.name)
-                                }
-                            }
-                            DomAttrValue::Style(_) => {
-                                target_element.remove_dom_attr(attr)?;
-                            }
-                            DomAttrValue::Empty => (),
-                        }
-                    }
-                }
-            }
-
-            // This also removes the associated closures and event listeners to the node being replaced
-            // including the associated closures of the descendant of replaced node
-            // before it is actully replaced in the DOM
-            // TODO: make root node a Vec
-            PatchVariant::ReplaceNode { mut replacement } => {
-                let first_node = replacement.remove(0);
-
-                if target_element.is_fragment() {
-                    assert!(
-                        patch_path.is_empty(),
-                        "this should only happen to root node"
-                    );
-                    let mut mount_node = self.mount_node.borrow_mut();
-                    let mount_node = mount_node.as_mut().expect("must have a mount node");
-                    mount_node.append_children(vec![first_node.clone()]);
-                    mount_node.append_children(replacement);
-                } else {
-                    if patch_path.path.is_empty() {
-                        let mut mount_node = self.mount_node.borrow_mut();
-                        let mount_node = mount_node.as_mut().expect("must have a mount node");
-                        mount_node.replace_child(&target_element, first_node.clone());
-                    } else {
-                        target_parent.replace_child(&target_element, first_node.clone());
-                    }
-                    //insert the rest
-                    target_parent.insert_after(&first_node, replacement);
-                }
-                if patch_path.path.is_empty() {
-                    *self.root_node.borrow_mut() = Some(first_node);
-                }
-            }
-            PatchVariant::RemoveNode => {
-                target_parent.remove_children(&[&target_element]);
-            }
-            PatchVariant::ClearChildren => {
-                target_element.clear_children();
-            }
-            PatchVariant::MoveBeforeNode { for_moving } => {
-                target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
-                target_parent.insert_before(&target_element, for_moving);
-            }
-
-            PatchVariant::MoveAfterNode { for_moving } => {
-                target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
-                target_parent.insert_after(&target_element, for_moving);
+        PatchType::ReplaceNode { replacement } => {
+            let replacement = replacement
+                .iter()
+                .map(|node| dom::create_dom_node(node, ev_callback.clone()))
+                .collect();
+            DomPatch {
+                patch_path,
+                target_element,
+                target_parent,
+                patch_variant: PatchVariant::ReplaceNode { replacement },
             }
         }
-        Ok(())
+        PatchType::RemoveNode => DomPatch {
+            patch_path,
+            target_element,
+            target_parent,
+            patch_variant: PatchVariant::RemoveNode,
+        },
+        PatchType::ClearChildren => DomPatch {
+            patch_path,
+            target_element,
+            target_parent,
+            patch_variant: PatchVariant::ClearChildren,
+        },
+        PatchType::MoveBeforeNode { nodes_path } => {
+            let for_moving = nodes_path
+                .iter()
+                .map(|path| {
+                    let (node, _) = nodes_lookup.get(path).expect("must have found the node");
+                    node.clone()
+                })
+                .collect();
+            DomPatch {
+                patch_path,
+                target_element,
+                target_parent,
+                patch_variant: PatchVariant::MoveBeforeNode { for_moving },
+            }
+        }
+        PatchType::MoveAfterNode { nodes_path } => {
+            let for_moving = nodes_path
+                .iter()
+                .map(|path| {
+                    let (node, _) = nodes_lookup.get(path).expect("must have found the node");
+                    node.clone()
+                })
+                .collect();
+            DomPatch {
+                patch_path,
+                target_element,
+                target_parent,
+                patch_variant: PatchVariant::MoveAfterNode { for_moving },
+            }
+        }
+        PatchType::AppendChildren { children } => {
+            let children = children
+                .iter()
+                .map(|for_insert| dom::create_dom_node(for_insert, ev_callback.clone()))
+                .collect();
+
+            DomPatch {
+                patch_path,
+                target_element,
+                target_parent,
+                patch_variant: PatchVariant::AppendChildren { children },
+            }
+        }
     }
+}
+
+pub(crate) fn convert_attr<Msg, F>(attr: &Attribute<Msg>, ev_callback: F) -> DomAttr
+where
+    Msg: 'static,
+    F: Fn(Msg) + 'static + Clone,
+{
+    DomAttr {
+        namespace: attr.namespace,
+        name: attr.name,
+        value: attr
+            .value
+            .iter()
+            .filter_map(|v| convert_attr_value(v, ev_callback.clone()))
+            .collect(),
+    }
+}
+
+fn convert_attr_value<Msg, F>(
+    attr_value: &AttributeValue<Msg>,
+    ev_callback: F,
+) -> Option<DomAttrValue>
+where
+    Msg: 'static,
+    F: Fn(Msg) + 'static,
+{
+    match attr_value {
+        AttributeValue::Simple(v) => Some(DomAttrValue::Simple(v.clone())),
+        AttributeValue::Style(v) => Some(DomAttrValue::Style(v.clone())),
+        AttributeValue::EventListener(v) => Some(DomAttrValue::EventListener(
+            convert_event_listener(v, ev_callback),
+        )),
+        AttributeValue::ComponentEventListener(v) => Some(DomAttrValue::EventListener(
+            convert_component_event_listener(v),
+        )),
+        AttributeValue::Empty => None,
+    }
+}
+
+fn convert_event_listener<F, Msg>(
+    event_listener: &EventCallback<Msg>,
+    callback: F,
+) -> Closure<dyn FnMut(web_sys::Event)>
+where
+    Msg: 'static,
+    F: Fn(Msg) + 'static,
+{
+    let event_listener = event_listener.clone();
+    let closure: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |event: web_sys::Event| {
+        let msg = event_listener.emit(dom::Event::from(event));
+        callback(msg);
+    });
+    closure
+}
+
+/// TODO: this should not have access to root_node, so it can generically
+/// apply patch to any dom node
+pub fn apply_dom_patches(
+    root_node: Rc<RefCell<Option<DomNode>>>,
+    mount_node: Rc<RefCell<Option<DomNode>>>,
+    dom_patches: impl IntoIterator<Item = DomPatch>,
+) -> Result<(), JsValue> {
+    for dom_patch in dom_patches {
+        apply_dom_patch(Rc::clone(&root_node), Rc::clone(&mount_node), dom_patch)?;
+    }
+    Ok(())
+}
+
+/// apply a dom patch to this root node,
+/// return a new root_node if it would replace the original root_node
+/// TODO: this should have no access to root_node, so it can be used in general sense
+pub(crate) fn apply_dom_patch(
+    root_node: Rc<RefCell<Option<DomNode>>>,
+    mount_node: Rc<RefCell<Option<DomNode>>>,
+    dom_patch: DomPatch,
+) -> Result<(), JsValue> {
+    let DomPatch {
+        patch_path,
+        target_element,
+        target_parent,
+        patch_variant,
+    } = dom_patch;
+
+    match patch_variant {
+        PatchVariant::InsertBeforeNode { nodes } => {
+            target_parent.insert_before(&target_element, nodes);
+        }
+
+        PatchVariant::InsertAfterNode { nodes } => {
+            target_parent.insert_after(&target_element, nodes);
+        }
+        PatchVariant::AppendChildren { children } => {
+            target_element.append_children(children);
+        }
+
+        PatchVariant::AddAttributes { attrs } => {
+            target_element.set_dom_attrs(attrs).unwrap();
+        }
+        PatchVariant::RemoveAttributes { attrs } => {
+            for attr in attrs.iter() {
+                for att_value in attr.value.iter() {
+                    match att_value {
+                        DomAttrValue::Simple(_) => {
+                            target_element.remove_dom_attr(attr)?;
+                        }
+                        // it is an event listener
+                        DomAttrValue::EventListener(_) => {
+                            let DomInner::Element { listeners, .. } = &target_element.inner else {
+                                unreachable!("must be an element");
+                            };
+                            if let Some(listener) = listeners.borrow_mut().as_mut() {
+                                listener.retain(|event, _| *event != attr.name)
+                            }
+                        }
+                        DomAttrValue::Style(_) => {
+                            target_element.remove_dom_attr(attr)?;
+                        }
+                        DomAttrValue::Empty => (),
+                    }
+                }
+            }
+        }
+
+        // This also removes the associated closures and event listeners to the node being replaced
+        // including the associated closures of the descendant of replaced node
+        // before it is actully replaced in the DOM
+        // TODO: make root node a Vec
+        PatchVariant::ReplaceNode { mut replacement } => {
+            let first_node = replacement.remove(0);
+
+            if target_element.is_fragment() {
+                assert!(
+                    patch_path.is_empty(),
+                    "this should only happen to root node"
+                );
+                let mut mount_node = mount_node.borrow_mut();
+                let mount_node = mount_node.as_mut().expect("must have a mount node");
+                mount_node.append_children(vec![first_node.clone()]);
+                mount_node.append_children(replacement);
+            } else {
+                if patch_path.path.is_empty() {
+                    let mut mount_node = mount_node.borrow_mut();
+                    let mount_node = mount_node.as_mut().expect("must have a mount node");
+                    mount_node.replace_child(&target_element, first_node.clone());
+                } else {
+                    target_parent.replace_child(&target_element, first_node.clone());
+                }
+                //insert the rest
+                target_parent.insert_after(&first_node, replacement);
+            }
+            if patch_path.path.is_empty() {
+                *root_node.borrow_mut() = Some(first_node);
+            }
+        }
+        PatchVariant::RemoveNode => {
+            target_parent.remove_children(&[&target_element]);
+        }
+        PatchVariant::ClearChildren => {
+            target_element.clear_children();
+        }
+        PatchVariant::MoveBeforeNode { for_moving } => {
+            target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
+            target_parent.insert_before(&target_element, for_moving);
+        }
+
+        PatchVariant::MoveAfterNode { for_moving } => {
+            target_parent.remove_children(&for_moving.iter().collect::<Vec<_>>());
+            target_parent.insert_after(&target_element, for_moving);
+        }
+    }
+    Ok(())
+}
+
+fn convert_component_event_listener(
+    component_callback: &ComponentEventCallback,
+) -> Closure<dyn FnMut(web_sys::Event)> {
+    let component_callback = component_callback.clone();
+    let closure: Closure<dyn FnMut(web_sys::Event)> = Closure::new(move |event: web_sys::Event| {
+        component_callback.emit(dom::Event::from(event));
+    });
+    closure
 }

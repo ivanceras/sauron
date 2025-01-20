@@ -23,6 +23,8 @@ Sauron is inspired by elm-lang and is following The Elm Architecture.
 - html syntax for writing views
 - elegant macro to write styles
 - batteries included
+- standalone DOM/VirtualDOM patcher
+  (see [`examples/patch_dom_node`](https://github.com/ivanceras/sauron/tree/master/examples/patch_dom_node))
 
 ### Devoid of unnecessary framework complexities
 - **no** framework specific cli needed
