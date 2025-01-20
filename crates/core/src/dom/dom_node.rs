@@ -713,9 +713,7 @@ where
                     },
                 }
             }
-            Leaf::StatelessComponent(comp) => {
-                    self.create_stateless_component(comp)
-            }
+            Leaf::StatelessComponent(comp) => self.create_stateless_component(comp),
             Leaf::TemplatedView(view) => {
                 unreachable!("template view should not be created: {:#?}", view)
             }

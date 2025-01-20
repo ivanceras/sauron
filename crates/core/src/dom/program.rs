@@ -29,8 +29,6 @@ use web_sys;
 pub(crate) use app_context::AppContext;
 pub use mount_procedure::{MountAction, MountProcedure, MountTarget};
 
-
-
 thread_local! {
     static CANCEL_CNT: RefCell<i32> = RefCell::new(0);
 }
@@ -451,17 +449,24 @@ where
                 let mut program = self.clone();
                 //#[cfg(feature = "with-debounce")]
                 crate::dom::request_timeout_callback(
-                    move||{
+                    move || {
                         program.update_dom().unwrap();
-                    }, remaining.round() as i32).unwrap();
+                    },
+                    remaining.round() as i32,
+                )
+                .unwrap();
                 log::info!("update is cancelled..");
-                CANCEL_CNT.with_borrow_mut(|c|*c += 1);
-                return Ok(())
+                CANCEL_CNT.with_borrow_mut(|c| *c += 1);
+                return Ok(());
             }
         }
         log::info!("Doing and update...");
-        UPDATE_CNT.with_borrow_mut(|c|*c += 1);
-        log::info!("ratio(cancelled/update): {}/{}", CANCEL_CNT.with_borrow(|c|*c), UPDATE_CNT.with_borrow(|c|*c));
+        UPDATE_CNT.with_borrow_mut(|c| *c += 1);
+        log::info!(
+            "ratio(cancelled/update): {}/{}",
+            CANCEL_CNT.with_borrow(|c| *c),
+            UPDATE_CNT.with_borrow(|c| *c)
+        );
         // a new view is created due to the app update
         let view = self.app_context.view();
         let t2 = now();
@@ -518,7 +523,6 @@ where
                 log::warn!("dispatch took {}ms", measurements.total_time.round());
             }
         }
-
 
         // tell the app about the performance measurement and only if there was patches applied
         #[cfg(feature = "with-measure")]

@@ -209,7 +209,6 @@ pub fn extract_skip_diff(input: proc_macro::TokenStream) -> proc_macro::TokenStr
     extract_skip_diff::to_token_stream(input).into()
 }
 
-
 /// build a css string
 ///
 /// # Example:
