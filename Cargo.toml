@@ -40,7 +40,6 @@ with-node-macro = ["sauron-macro"]
 html-parser = ["sauron-html-parser"]
 use-skipdiff = ["sauron-core/use-skipdiff"]
 
-
 [dev-dependencies]
 console_error_panic_hook = "0.1.7"
 console_log = "1.0"
@@ -62,8 +61,13 @@ features = [
     "InputEvent",
     "console",
     "Performance",
+    "Element",
+    "Window",
 ]
 
+[dev-dependencies.criterion]
+version = "0.5.1"
+default-features = false
 
 [workspace]
 members = [
@@ -76,18 +80,6 @@ exclude = [
     "examples/custom-element",
     "examples/progressive-rendering",
 ]
-
-
-
-[patch.crates-io]
-#mt-dom = { git = "https://github.com/ivanceras/mt-dom.git", branch = "master" }
-#mt-dom = { path = "../mt-dom" }
-#jss = { git = "https://github.com/ivanceras/jss.git", branch = "master" }
-#jss = { path = "../jss" }
-
-[dev-dependencies.criterion]
-version = "0.5.1"
-default-features = false
 
 [package.metadata.docs.rs]
 all-features = true
