@@ -40,7 +40,7 @@ fn failing_reordered_keys() {
     // The patch was:
     //  append key1, item1
     //  remove nodeidx: 2, [0,0,0]
-    let patches = diff(&old, &update1);
+    let patches = diff(&old, &update1).unwrap();
     log::debug!("patches: {:#?}", patches);
 
     let mut old_html = String::new();

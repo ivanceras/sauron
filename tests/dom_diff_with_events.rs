@@ -21,7 +21,7 @@ fn nodes_with_event_should_not_recycle() {
         vec![div(vec![class("child")], vec![])],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     log::info!("{:#?}", diff);
     assert_eq!(
         diff,

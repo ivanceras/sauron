@@ -7,7 +7,7 @@ fn must_skip_diff() {
     let old: Node<()> = div([skip_criteria("line1")], [text("old here")]);
     let new: Node<()> = div([skip_criteria("line1")], [text("new here")]);
 
-    let patch = diff(&old, &new);
+    let patch = diff(&old, &new).unwrap();
     dbg!(&patch);
     assert_eq!(patch, vec![]);
 }
@@ -17,7 +17,7 @@ fn must_skip_diff_2() {
     let old: Node<()> = div([skip_criteria(1000)], [text("Regardless of")]);
     let new: Node<()> = div([skip_criteria(1000)], [text("the difference here")]);
 
-    let patch = diff(&old, &new);
+    let patch = diff(&old, &new).unwrap();
     dbg!(&patch);
     assert_eq!(patch, vec![]);
 }
@@ -27,7 +27,7 @@ fn must_diff() {
     let old: Node<()> = div([skip_criteria(1000)], [text("Regardless of")]);
     let new: Node<()> = div([skip_criteria(1001)], [text("the difference here")]);
 
-    let patch = diff(&old, &new);
+    let patch = diff(&old, &new).unwrap();
     dbg!(&patch);
     assert_eq!(
         patch,

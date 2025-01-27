@@ -98,7 +98,7 @@ fn test1() {
      </div>
     );
 
-    let patch = diff(&current_dom, &target_dom);
+    let patch = diff(&current_dom, &target_dom).unwrap();
 
     log::trace!("test update here..");
     log::debug!("patches: {:#?}", patch);

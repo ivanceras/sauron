@@ -47,7 +47,7 @@ fn swap_rows_non_keyed() {
         )],
     );
 
-    let patches = diff(&old, &update1);
+    let patches = diff(&old, &update1).unwrap();
     log::debug!("patches: {:#?}", patches);
 
     let mut old_html = String::new();
@@ -108,7 +108,7 @@ fn swap_rows_keyed() {
         )],
     );
 
-    let patches = diff(&old, &update1);
+    let patches = diff(&old, &update1).unwrap();
     log::debug!("patches: {:#?}", patches);
 
     let mut old_html = String::new();
@@ -179,7 +179,7 @@ fn swap_1_and_8() {
         )],
     );
 
-    let patches = diff(&old, &update1);
+    let patches = diff(&old, &update1).unwrap();
     log::debug!("patches: {:#?}", patches);
 
     let mut old_html = String::new();

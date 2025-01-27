@@ -16,34 +16,14 @@ fn insert_multiple_before_nodes() {
 
     let document = web_sys::window().unwrap().document().unwrap();
 
-    let old: Node<()> = main(
-        vec![class("before_nodes_test1")],
-        vec![ul(
-            vec![class("todo")],
-            vec![
-                li(vec![key(1)], vec![text("item1")]),
-                li(vec![key(2)], vec![text("item2")]),
-                li(vec![key(3)], vec![text("item3")]),
-            ],
-        )],
-    );
+    let old: Node<()> = raw_html::<()>("<div id=\"there\"></div>");
 
-    let update1: Node<()> = main(
-        vec![class("before_nodes_test1")],
-        vec![ul(
-            vec![class("todo")],
-            vec![
-                li(vec![], vec![text("itemA")]),
-                li(vec![], vec![text("itemB")]),
-                li(vec![], vec![text("itemC")]),
-                li(vec![key(1)], vec![text("item1")]),
-                li(vec![key(2)], vec![text("item2")]),
-                li(vec![key(3)], vec![text("item3")]),
-            ],
-        )],
-    );
+    let update1: Node<()> =
+        raw_html::<()>("<div id=\"there\"><div><div><div><div></div></div></div></div></div>");
 
-    let patches = diff(&old, &update1);
+    let update2: Node<()> = raw_html::<()>("<div id=\"there\"><b>foo</b></div>");
+
+    let patches = diff(&old, &update1).unwrap();
     log::debug!("patches: {:#?}", patches);
 
     let mut old_html = String::new();
@@ -55,26 +35,43 @@ fn insert_multiple_before_nodes() {
         .update_dom_with_vdom(old)
         .expect("must update dom");
 
-    let container = document
-        .query_selector(".before_nodes_test1")
-        .expect("must not error")
-        .expect("must exist");
+    // let container = document
+    //     .query_selector(".before_nodes_test1")
+    //     .expect("must not error")
+    //     .expect("must exist");
 
-    let expected = "<main class=\"before_nodes_test1\"><ul class=\"todo\"><li key=\"1\">item1</li><li key=\"2\">item2</li><li key=\"3\">item3</li></ul></main>";
-    assert_eq!(expected, container.outer_html());
+    // let expected = "<main class=\"before_nodes_test1\"><ul class=\"todo\"><li key=\"1\">item1</li><li key=\"2\">item2</li><li key=\"3\">item3</li></ul></main>";
+    // assert_eq!(expected, container.outer_html());
 
     simple_program
         .update_dom_with_vdom(update1)
         .expect("must not error");
 
-    let container = document
-        .query_selector(".before_nodes_test1")
-        .expect("must not error")
-        .expect("must exist");
+    // let container = document
+    //     .query_selector(".before_nodes_test1")
+    //     .expect("must not error")
+    //     .expect("must exist");
 
-    let expected1 = "<main class=\"before_nodes_test1\"><ul class=\"todo\"><li>itemA</li><li>itemB</li><li>itemC</li><li key=\"1\">item1</li><li key=\"2\">item2</li><li key=\"3\">item3</li></ul></main>";
+    // let expected1 = "<main class=\"before_nodes_test1\"><ul class=\"todo\"><li>itemA</li><li>itemB</li><li>itemC</li><li key=\"1\">item1</li><li key=\"2\">item2</li><li key=\"3\">item3</li></ul></main>";
+
+    // assert_eq!(expected1, container.outer_html());
+
+    simple_program
+        .update_dom_with_vdom(update2)
+        .expect("must not error");
+
+    //let container = document.body().expect("must not error");
+    let container = document.get_element_by_id("there").unwrap();
+
+    // let container = document
+    //     .query_selector(".before_nodes_test1")
+    //     .expect("must not error")
+    //     .expect("must exist");
+
+    let expected1 = "<div id=\"there\"><b>foo</b></div>";
 
     assert_eq!(expected1, container.outer_html());
+    assert_eq!(1, 2);
 }
 
 #[wasm_bindgen_test]
@@ -111,7 +108,7 @@ fn insert_multiple_after_nodes() {
         )],
     );
 
-    let patches = diff(&old, &update1);
+    let patches = diff(&old, &update1).unwrap();
     log::debug!("patches: {:#?}", patches);
 
     let mut old_html = String::new();
@@ -179,7 +176,7 @@ fn insert_multiple_in_the_middle() {
         )],
     );
 
-    let patches = diff(&old, &update1);
+    let patches = diff(&old, &update1).unwrap();
     log::debug!("patching old to update1: {:#?}", patches);
 
     let mut old_html = String::new();

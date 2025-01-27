@@ -21,7 +21,7 @@ fn insert_on_deep_level_keyed() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 
@@ -70,7 +70,7 @@ fn insert_on_deep_multi_level_level_keyed() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 
@@ -119,7 +119,7 @@ fn insert_on_deep_multi_level_keyed_non_keyed_keyed() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 
@@ -154,7 +154,7 @@ fn insert_on_deep_level_non_keyed_container() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 

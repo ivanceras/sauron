@@ -135,7 +135,7 @@ fn remove_event() {
         ],
         vec![],
     );
-    let patch = diff(&old, &new);
+    let patch = diff(&old, &new).unwrap();
     log::debug!("patch: {:?}", patch);
 
     let input_event = web_sys::InputEvent::new("input").unwrap();

@@ -111,7 +111,7 @@ fn subsequent_updates() {
         ],
     );
 
-    let patches1 = diff(&old, &update1);
+    let patches1 = diff(&old, &update1).unwrap();
 
     log::trace!("patches1: {:#?} at line: {}", patches1, line!());
 
@@ -276,7 +276,7 @@ fn subsequent_updates() {
         let root_node_html = root_node.as_ref().unwrap().outer_html();
         log::trace!("current root node: {}", root_node_html);
     }
-    let patches2 = diff(&update1, &update2);
+    let patches2 = diff(&update1, &update2).unwrap();
     log::trace!("-->patches2: {:#?}", patches2);
 
     log::info!("Updating dom with update2");
@@ -381,7 +381,7 @@ fn subsequent_updates() {
         ],
     );
 
-    let patches3 = diff(&update2, &update3);
+    let patches3 = diff(&update2, &update3).unwrap();
     log::trace!("\n---->patches3: {:#?}", patches3);
 
     simple_program

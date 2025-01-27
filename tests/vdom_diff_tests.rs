@@ -6,7 +6,7 @@ fn test_replace_node() {
     let old: Node<()> = element("div", vec![], vec![]);
     let new = element("span", vec![], vec![]);
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::replace_node(
@@ -22,7 +22,7 @@ fn test_replace_text_node() {
     let old: Node<()> = leaf("hello");
     let new = element("span", vec![], vec![]);
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::replace_node(None, TreePath::new(vec![]), vec![&new])],
@@ -34,7 +34,7 @@ fn test_replace_node_in_child() {
     let old: Node<()> = element("main", vec![], vec![element("div", vec![], vec![])]);
     let new = element("main", vec![], vec![element("span", vec![], vec![])]);
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::replace_node(
@@ -71,7 +71,7 @@ fn test_205() {
         ],
     ); //{ <div> <b> <i></i> </b> <i></i> </div>},
     assert_eq!(
-        dbg!(diff(&old, &new)),
+        dbg!(diff(&old, &new).unwrap()),
         vec![
             Patch::remove_node(Some(&"i"), TreePath::new(vec![0, 1]),),
             Patch::replace_node(
@@ -97,7 +97,7 @@ fn test_no_changed() {
         vec![],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(diff, vec![])
 }
 
@@ -115,7 +115,7 @@ fn test_attribute_order_changed() {
         vec![],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(diff, vec![])
 }
 
@@ -133,7 +133,7 @@ fn test_class_changed() {
         vec![],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::add_attributes(
@@ -158,7 +158,7 @@ fn leaf_node_changed() {
         vec![leaf("text2")],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     dbg!(&diff);
     assert_eq!(
         diff,
@@ -180,7 +180,7 @@ fn test_class_will_not_be_merged_on_different_calls() {
         vec![],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_ne!(
         diff,
         vec![Patch::add_attributes(
@@ -205,7 +205,7 @@ fn test_class_removed() {
 
     let new = element("div", vec![attr("id", "some-id")], vec![]);
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::remove_attributes(
@@ -236,7 +236,7 @@ fn test_multiple_calls_to_style() {
         vec![],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::add_attributes(
@@ -256,7 +256,7 @@ fn inner_html_func_calls() {
 
     let new: Node<()> = element("div", vec![attr("inner_html", "<h1>Hello</h2>")], vec![]);
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::add_attributes(
@@ -284,7 +284,7 @@ fn test_append() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::append_children(
@@ -313,7 +313,7 @@ fn test_append_more() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::append_children(
@@ -353,7 +353,7 @@ fn test_append_at_sub_level() {
         )],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     dbg!(&diff);
     assert_eq!(
         diff,

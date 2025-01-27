@@ -34,7 +34,7 @@ fn reordered_keys2() {
         )],
     );
 
-    let patches = diff(&old, &update1);
+    let patches = diff(&old, &update1).unwrap();
     log::debug!("patches: {:#?}", patches);
 
     let mut old_html = String::new();
@@ -92,7 +92,7 @@ fn reordered_keys3() {
         )],
     );
 
-    let patches = diff(&old, &update1);
+    let patches = diff(&old, &update1).unwrap();
     log::debug!("patches: {:#?}", patches);
 
     let mut old_html = String::new();

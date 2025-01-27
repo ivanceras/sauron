@@ -13,7 +13,7 @@ fn style_calcd_changed() {
         vec![],
     );
 
-    let patches: Vec<Patch<&'static str>> = diff(&old, &new);
+    let patches: Vec<Patch<&'static str>> = diff(&old, &new).unwrap();
     let styl = style! {width: format!("calc(50% + {}", px(200))};
     let expected: Vec<Patch<&'static str>> =
         vec![Patch::add_attributes(&"div", TreePath::new([]), [&styl])];
@@ -36,7 +36,7 @@ fn style_calcd_changed_with_event() {
         vec![],
     );
 
-    let patches: Vec<Patch<()>> = diff(&old, &new);
+    let patches: Vec<Patch<()>> = diff(&old, &new).unwrap();
     let styl = style! {width: format!("calc(50% + {}", px(200))};
     let expected: Vec<Patch<()>> = vec![Patch::add_attributes(&"div", TreePath::new([]), [&styl])];
     assert_eq!(expected, patches);
@@ -91,7 +91,7 @@ fn app_editor_width_allocation_bug() {
         ],
     );
 
-    let patches: Vec<Patch<()>> = diff(&old, &new);
+    let patches: Vec<Patch<()>> = diff(&old, &new).unwrap();
     let styl_1 = style! {width: format!("calc(50% + {}", px(200))};
     let styl_2 = style! {width: format!("calc(50% - {}", px(200))};
     let expected: Vec<Patch<()>> = vec![
