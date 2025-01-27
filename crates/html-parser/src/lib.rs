@@ -1,17 +1,17 @@
 #![deny(warnings)]
-use rphtml::config::ParseOptions;
-use rphtml::parser::Doc;
-use rphtml::parser::NodeType;
-use rphtml::types::BoxDynError;
+
+use std::{fmt, io, ops::Deref};
+
+use rphtml::{
+    config::ParseOptions,
+    parser::{Doc, NodeType},
+    types::BoxDynError,
+};
+
 use sauron_core::{
     html::{attributes::*, lookup, *},
-    vdom::AttributeValue,
-    vdom::Node,
-    vdom::Value,
+    vdom::{AttributeValue, Node, Value},
 };
-use std::fmt;
-use std::io;
-use std::ops::Deref;
 
 /// all the possible error when parsing html string
 #[derive(Debug, thiserror::Error)]
@@ -30,7 +30,8 @@ pub enum ParseError {
     InvalidTag(String),
 }
 
-/// parse the html string and build a node tree
+/// Parse escaped html strings like `"Hello&#x20;world&#x21;"`
+/// into `"Hello world!"` and then into a node tree.
 pub fn raw_html<MSG>(html: &str) -> Node<MSG> {
     // decode html entitiesd back since it will be safely converted into text
     let html = html_escape::decode_html_entities(html);
@@ -39,7 +40,8 @@ pub fn raw_html<MSG>(html: &str) -> Node<MSG> {
         .expect("must have a node")
 }
 
-/// the document is not wrapped with html
+/// Parse none-escaped html strings like `"Hello world!"`
+/// into a node tree (see also [raw_html]).
 pub fn parse_html<MSG>(html: &str) -> Result<Option<Node<MSG>>, ParseError> {
     let doc = Doc::parse(
         html,

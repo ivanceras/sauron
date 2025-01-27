@@ -1,25 +1,22 @@
-use crate::dom::component::StatelessModel;
-use crate::dom::DomAttr;
-use crate::dom::GroupedDomAttrValues;
-use crate::dom::StatefulComponent;
-use crate::dom::StatefulModel;
-use crate::html::lookup;
-use crate::vdom::TreePath;
-use crate::{
-    dom::document,
-    dom::events::MountEvent,
-    dom::{Application, Program},
-    vdom,
-    vdom::{Attribute, Leaf},
+use std::{
+    borrow::Cow,
+    cell::{Ref, RefCell},
+    fmt,
+    rc::Rc,
 };
+
 use indexmap::IndexMap;
-use std::borrow::Cow;
-use std::cell::Ref;
-use std::cell::RefCell;
-use std::fmt;
-use std::rc::Rc;
 use wasm_bindgen::{closure::Closure, JsCast, JsValue};
 use web_sys::{self, Node};
+
+use crate::{
+    dom::{
+        component::StatelessModel, document, dom_patch, events::MountEvent, Application, DomAttr,
+        GroupedDomAttrValues, Program, StatefulComponent, StatefulModel,
+    },
+    html::lookup,
+    vdom::{self, Attribute, Leaf, TreePath},
+};
 
 pub(crate) type EventClosure = Closure<dyn FnMut(web_sys::Event)>;
 pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
@@ -33,6 +30,7 @@ pub type NamedEventClosures = IndexMap<&'static str, EventClosure>;
 pub struct DomNode {
     pub(crate) inner: DomInner,
 }
+
 #[derive(Clone)]
 pub enum DomInner {
     /// a reference to an element node
@@ -648,151 +646,133 @@ where
 {
     /// Create a dom node
     pub fn create_dom_node(&self, node: &vdom::Node<APP::MSG>) -> DomNode {
-        match node {
-            vdom::Node::Element(elm) => self.create_element_node(elm),
-            vdom::Node::Leaf(leaf) => self.create_leaf_node(leaf),
-        }
+        let ev_callback = self.create_ev_callback();
+        create_dom_node(node, ev_callback)
     }
 
-    fn create_element_node(&self, elm: &vdom::Element<APP::MSG>) -> DomNode {
-        let document = document();
-        let element = if let Some(namespace) = elm.namespace() {
-            document
-                .create_element_ns(Some(intern(namespace)), intern(elm.tag()))
-                .expect("Unable to create element")
-        } else {
-            document
-                .create_element(intern(elm.tag()))
-                .expect("create element")
+    pub(crate) fn create_ev_callback(&self) -> impl Fn(APP::MSG) + Clone {
+        let program = self.downgrade();
+        let ev_callback = move |msg| {
+            let mut program = program.upgrade().expect("must upgrade");
+            program.dispatch(msg);
         };
-        // TODO: dispatch the mount event recursively after the dom node is mounted into
-        // the root node
-        let attrs = Attribute::merge_attributes_of_same_name(elm.attributes().iter());
-
-        let dom_node = DomNode {
-            inner: DomInner::Element {
-                element,
-                listeners: Rc::new(RefCell::new(None)),
-                children: Rc::new(RefCell::new(vec![])),
-                has_mount_callback: elm.has_mount_callback(),
-            },
-        };
-        let dom_attrs = attrs.iter().map(|a| self.convert_attr(a));
-        dom_node.set_dom_attrs(dom_attrs).expect("set dom attrs");
-        let children: Vec<DomNode> = elm
-            .children()
-            .iter()
-            .map(|child| self.create_dom_node(child))
-            .collect();
-        dom_node.append_children(children);
-        dom_node
-    }
-
-    fn create_leaf_node(&self, leaf: &vdom::Leaf<APP::MSG>) -> DomNode {
-        match leaf {
-            Leaf::Text(txt) => DomNode {
-                inner: DomInner::Text(document().create_text_node(txt)),
-            },
-            Leaf::Symbol(symbol) => DomNode {
-                inner: DomInner::Symbol(symbol.clone()),
-            },
-            Leaf::Comment(comment) => DomNode {
-                inner: DomInner::Comment(document().create_comment(comment)),
-            },
-            Leaf::Fragment(nodes) => self.create_fragment_node(nodes),
-            // NodeList that goes here is only possible when it is the root_node,
-            // since node_list as children will be unrolled into as child_elements of the parent
-            // We need to wrap this node_list into doc_fragment since root_node is only 1 element
-            Leaf::NodeList(nodes) => self.create_fragment_node(nodes),
-            Leaf::StatefulComponent(comp) => {
-                //TODO: also put the children and attributes here
-                DomNode {
-                    inner: DomInner::StatefulComponent {
-                        comp: Rc::clone(&comp.comp),
-                        dom_node: Rc::new(self.create_stateful_component(comp)),
-                    },
-                }
-            }
-            Leaf::StatelessComponent(comp) => {
-                    self.create_stateless_component(comp)
-            }
-            Leaf::TemplatedView(view) => {
-                unreachable!("template view should not be created: {:#?}", view)
-            }
-            Leaf::DocType(_) => unreachable!("doc type is never converted"),
-        }
-    }
-
-    fn create_fragment_node<'a>(
-        &self,
-        nodes: impl IntoIterator<Item = &'a vdom::Node<APP::MSG>>,
-    ) -> DomNode {
-        let fragment = document().create_document_fragment();
-        let dom_node = DomNode {
-            inner: DomInner::Fragment {
-                fragment,
-                children: Rc::new(RefCell::new(vec![])),
-            },
-        };
-        let children = nodes
-            .into_iter()
-            .map(|node| self.create_dom_node(node))
-            .collect();
-        dom_node.append_children(children);
-        dom_node
+        ev_callback
     }
 }
 
-/// A node along with all of the closures that were created for that
-/// node's events and all of it's child node's events.
-impl<APP> Program<APP>
+/// Create a dom node
+pub fn create_dom_node<Msg, F>(node: &vdom::Node<Msg>, ev_callback: F) -> DomNode
 where
-    APP: Application,
+    Msg: 'static,
+    F: Fn(Msg) + 'static + Clone,
 {
-    /// TODO: register the template if not yet
-    /// pass a program to leaf component and mount itself and its view to the program
-    /// There are 2 types of children components of Stateful Component
-    /// - Internal children
-    /// - External children
-    /// Internal children is managed by the Stateful Component
-    /// while external children are managed by the top level program.
-    /// The external children can be diffed, and send the patches to the StatefulComponent
-    ///   - The TreePath of the children starts at the external children location
-    /// The attributes affects the Stateful component state.
-    /// The attributes can be diff and send the patches to the StatefulComponent
-    ///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
-    fn create_stateful_component(&self, comp: &StatefulModel<APP::MSG>) -> DomNode {
-        let comp_node = self.create_dom_node(&crate::html::div(
-            [crate::html::attributes::class("component")]
-                .into_iter()
-                .chain(comp.attrs.clone()),
-            [],
-        ));
+    match node {
+        vdom::Node::Element(elm) => create_element_node(elm, ev_callback),
+        vdom::Node::Leaf(leaf) => create_leaf_node(leaf, ev_callback),
+    }
+}
 
-        let dom_attrs: Vec<DomAttr> = comp.attrs.iter().map(|a| self.convert_attr(a)).collect();
-        for dom_attr in dom_attrs.into_iter() {
-            log::info!("calling attribute changed..");
-            comp.comp.borrow_mut().attribute_changed(dom_attr);
+fn create_element_node<Msg, F>(elm: &vdom::Element<Msg>, ev_callback: F) -> DomNode
+where
+    Msg: 'static,
+    F: Fn(Msg) + 'static + Clone,
+{
+    let document = document();
+    let element = if let Some(namespace) = elm.namespace() {
+        document
+            .create_element_ns(Some(intern(namespace)), intern(elm.tag()))
+            .expect("Unable to create element")
+    } else {
+        document
+            .create_element(intern(elm.tag()))
+            .expect("create element")
+    };
+    // TODO: dispatch the mount event recursively after the dom node is mounted into
+    // the root node
+    let attrs = Attribute::merge_attributes_of_same_name(elm.attributes().iter());
+
+    let dom_node = DomNode {
+        inner: DomInner::Element {
+            element,
+            listeners: Rc::new(RefCell::new(None)),
+            children: Rc::new(RefCell::new(vec![])),
+            has_mount_callback: elm.has_mount_callback(),
+        },
+    };
+    let dom_attrs = attrs
+        .iter()
+        .map(|a| dom_patch::convert_attr(a, ev_callback.clone()));
+    dom_node.set_dom_attrs(dom_attrs).expect("set dom attrs");
+    let children: Vec<DomNode> = elm
+        .children()
+        .iter()
+        .map(|child| create_dom_node(child, ev_callback.clone()))
+        .collect();
+    dom_node.append_children(children);
+    dom_node
+}
+
+fn create_leaf_node<Msg, F>(leaf: &vdom::Leaf<Msg>, ev_callback: F) -> DomNode
+where
+    Msg: 'static,
+    F: Fn(Msg) + 'static + Clone,
+{
+    match leaf {
+        Leaf::Text(txt) => DomNode {
+            inner: DomInner::Text(document().create_text_node(txt)),
+        },
+        Leaf::Symbol(symbol) => DomNode {
+            inner: DomInner::Symbol(symbol.clone()),
+        },
+        Leaf::Comment(comment) => DomNode {
+            inner: DomInner::Comment(document().create_comment(comment)),
+        },
+        Leaf::Fragment(nodes) => create_fragment_node(nodes, ev_callback),
+
+        // NodeList that goes here is only possible when it is the root_node,
+        // since node_list as children will be unrolled into as child_elements of the parent
+        // We need to wrap this node_list into doc_fragment since root_node is only 1 element
+        Leaf::NodeList(nodes) => create_fragment_node(nodes, ev_callback),
+
+        Leaf::StatefulComponent(comp) => {
+            //TODO: also put the children and attributes here
+            DomNode {
+                inner: DomInner::StatefulComponent {
+                    comp: Rc::clone(&comp.comp),
+                    dom_node: Rc::new(create_stateful_component(comp, ev_callback)),
+                },
+            }
         }
+        Leaf::StatelessComponent(comp) => create_stateless_component(comp, ev_callback),
 
-        // the component children is manually appended to the StatefulComponent
-        // here to allow the conversion of dom nodes with its event
-        // listener and removing the generics msg
-        let created_children = comp
-            .children
-            .iter()
-            .map(|child| self.create_dom_node(child))
-            .collect();
-        comp.comp.borrow_mut().append_children(created_children);
-        comp_node
+        Leaf::TemplatedView(view) => {
+            unreachable!("template view should not be created: {:#?}", view)
+        }
+        Leaf::DocType(_) => unreachable!("doc type is never converted"),
     }
+}
 
-    #[allow(unused)]
-    pub(crate) fn create_stateless_component(&self, comp: &StatelessModel<APP::MSG>) -> DomNode {
-        let comp_view = &comp.view;
-        let real_comp_view = comp_view.unwrap_template_ref();
-        self.create_dom_node(real_comp_view)
-    }
+fn create_fragment_node<'a, Msg, F>(
+    nodes: impl IntoIterator<Item = &'a vdom::Node<Msg>>,
+    ev_callback: F,
+) -> DomNode
+where
+    Msg: 'static,
+    F: Fn(Msg) + 'static + Clone,
+{
+    let fragment = document().create_document_fragment();
+    let dom_node = DomNode {
+        inner: DomInner::Fragment {
+            fragment,
+            children: Rc::new(RefCell::new(vec![])),
+        },
+    };
+    let children = nodes
+        .into_iter()
+        .map(|node| create_dom_node(node, ev_callback.clone()))
+        .collect();
+    dom_node.append_children(children);
+    dom_node
 }
 
 /// render the underlying real dom node into string
@@ -846,4 +826,68 @@ pub fn render_real_dom(node: &web_sys::Node, buffer: &mut dyn fmt::Write) -> fmt
         }
         _ => todo!("for other else"),
     }
+}
+
+#[allow(unused)]
+pub(crate) fn create_stateless_component<Msg, F>(
+    comp: &StatelessModel<Msg>,
+    ev_callback: F,
+) -> DomNode
+where
+    Msg: 'static,
+    F: Fn(Msg) + 'static + Clone,
+{
+    let comp_view = &comp.view;
+    let real_comp_view = comp_view.unwrap_template_ref();
+    create_dom_node(real_comp_view, ev_callback)
+}
+
+/// TODO: register the template if not yet
+/// pass a program to leaf component and mount itself and its view to the program
+/// There are 2 types of children components of Stateful Component
+/// - Internal children
+/// - External children
+/// Internal children is managed by the Stateful Component
+/// while external children are managed by the top level program.
+/// The external children can be diffed, and send the patches to the StatefulComponent
+///   - The TreePath of the children starts at the external children location
+/// The attributes affects the Stateful component state.
+/// The attributes can be diff and send the patches to the StatefulComponent
+///  - Changes to the attributes will call on attribute_changed of the StatefulComponent
+fn create_stateful_component<Msg, F>(comp: &StatefulModel<Msg>, ev_callback: F) -> DomNode
+where
+    Msg: 'static,
+    F: Fn(Msg) + 'static + Clone,
+{
+    let comp_node = create_dom_node(
+        &crate::html::div(
+            [crate::html::attributes::class("component")]
+                .into_iter()
+                .chain(comp.attrs.clone()),
+            [],
+        ),
+        ev_callback.clone(),
+    );
+
+    let dom_attrs: Vec<DomAttr> = comp
+        .attrs
+        .iter()
+        .map(|a| dom_patch::convert_attr(a, ev_callback.clone()))
+        .collect();
+
+    for dom_attr in dom_attrs.into_iter() {
+        log::info!("calling attribute changed..");
+        comp.comp.borrow_mut().attribute_changed(dom_attr);
+    }
+
+    // the component children is manually appended to the StatefulComponent
+    // here to allow the conversion of dom nodes with its event
+    // listener and removing the generics msg
+    let created_children = comp
+        .children
+        .iter()
+        .map(|child| create_dom_node(child, ev_callback.clone()))
+        .collect();
+    comp.comp.borrow_mut().append_children(created_children);
+    comp_node
 }

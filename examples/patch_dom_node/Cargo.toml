@@ -1,0 +1,12 @@
+[package]
+name = "patch_dom_node"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+console_error_panic_hook = "0.1.7"
+console_log = { version = "1.0.0", features = ["color"] }
+log = "0.4.25"
+sauron-core = { version = "0.61.9", path = "../../crates/core" }
+sauron-html-parser = { version = "0.61.9", path = "../../crates/html-parser" }
+web-sys = "0.3.77"
