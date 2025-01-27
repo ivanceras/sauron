@@ -13,6 +13,20 @@ static USE_SKIP_DIFF: bool = true;
 #[cfg(not(feature = "use-skipdiff"))]
 static USE_SKIP_DIFF: bool = false;
 
+/// all the possible error when diffing Node(s)
+#[derive(Debug, thiserror::Error, Clone, Copy)]
+pub enum DiffError {
+    /// Node list must have already unrolled when creating an element
+    #[error("Node list must have already unrolled when creating an element")]
+    UnrollError,
+    /// Skip diff error
+    #[error("Skip diff error")]
+    SkipDiffError,
+    /// Invalid root node count of: {0}
+    #[error("Invalid root node count of: {0}")]
+    InvalidRootNodeCount(usize),
+}
+
 /// Return the patches needed for `old_node` to have the same DOM as `new_node`
 ///
 /// # Agruments
@@ -40,7 +54,7 @@ static USE_SKIP_DIFF: bool = false;
 ///     vec![element("div", vec![attr("key", "2")], vec![])],
 /// );
 ///
-/// let diff = diff(&old, &new);
+/// let diff = diff(&old, &new).unwrap();
 /// assert_eq!(
 ///     diff,
 ///     vec![Patch::remove_node(
@@ -50,7 +64,10 @@ static USE_SKIP_DIFF: bool = false;
 ///     ]
 /// );
 /// ```
-pub fn diff<'a, MSG>(old_node: &'a Node<MSG>, new_node: &'a Node<MSG>) -> Vec<Patch<'a, MSG>> {
+pub fn diff<'a, MSG>(
+    old_node: &'a Node<MSG>,
+    new_node: &'a Node<MSG>,
+) -> Result<Vec<Patch<'a, MSG>>, DiffError> {
     diff_recursive(
         old_node,
         new_node,
@@ -115,10 +132,10 @@ pub fn diff_recursive<'a, MSG>(
     old_node: &'a Node<MSG>,
     new_node: &'a Node<MSG>,
     path: &SkipPath,
-) -> Vec<Patch<'a, MSG>> {
+) -> Result<Vec<Patch<'a, MSG>>, DiffError> {
     if let Some(skip_diff) = path.skip_diff.as_ref() {
         if USE_SKIP_DIFF && skip_diff.shall_skip_node() {
-            return vec![];
+            return Err(DiffError::SkipDiffError);
         }
     }
 
@@ -136,16 +153,31 @@ pub fn diff_recursive<'a, MSG>(
     };
     // skip diffing if the function evaluates to true
     if skip(old_node, new_node) {
-        return vec![];
+        return Ok(vec![]);
+    }
+
+    // multiple root nodes are not supported. this would be two root nodes "<div></div><div></div>"
+    // the diff will work but the result is wrong, so instead we bail out here
+    match new_node {
+        Node::Leaf(leaf) => match leaf {
+            Leaf::NodeList(list) => {
+                if list.len() > 1 {
+                    log::error!("invalid root node cound: input needs exactly one root node and childs, not several root nodes");
+                    return Err(DiffError::InvalidRootNodeCount(list.len()));
+                }
+            }
+            _ => {}
+        },
+        Node::Element(_) => {}
     }
 
     // replace node and return early
     if should_replace(old_node, new_node) {
-        return vec![Patch::replace_node(
+        return Ok(vec![Patch::replace_node(
             old_node.tag(),
             path.path.clone(),
             vec![new_node],
-        )];
+        )]);
     }
 
     let mut patches = vec![];
@@ -169,10 +201,13 @@ pub fn diff_recursive<'a, MSG>(
                     // we back track since Fragment is not a real node, but it would still
                     // be traversed from the prior call
                     let patch = diff_nodes(None, old_nodes, new_nodes, &path.backtrack());
-                    patches.extend(patch);
+                    match patch {
+                        Ok(patch) => patches.extend(patch),
+                        Err(e) => return Err(e),
+                    };
                 }
                 (Leaf::NodeList(_old_elements), Leaf::NodeList(_new_elements)) => {
-                    panic!("Node list must have already unrolled when creating an element");
+                    return Err(DiffError::UnrollError)
                 }
                 (Leaf::StatelessComponent(old_comp), Leaf::StatelessComponent(new_comp)) => {
                     let new_path = SkipPath {
@@ -192,7 +227,10 @@ pub fn diff_recursive<'a, MSG>(
                         "new comp view should not be a template"
                     );
                     let patch = diff_recursive(old_real_view, new_real_view, &new_path);
-                    patches.extend(patch);
+                    match patch {
+                        Ok(patch) => patches.extend(patch),
+                        Err(e) => return Err(e),
+                    }
                 }
                 (Leaf::StatefulComponent(old_comp), Leaf::StatefulComponent(new_comp)) => {
                     let attr_patches = create_attribute_patches(
@@ -201,15 +239,26 @@ pub fn diff_recursive<'a, MSG>(
                         &new_comp.attrs,
                         path,
                     );
-                    if !attr_patches.is_empty() {
-                        log::info!("stateful component attr_patches: {attr_patches:#?}");
+                    match attr_patches {
+                        Ok(attr_patches) => {
+                            if !attr_patches.is_empty() {
+                                log::info!("stateful component attr_patches: {attr_patches:#?}");
+                            }
+                            patches.extend(attr_patches);
+                            let patch =
+                                diff_nodes(None, &old_comp.children, &new_comp.children, path);
+                            match patch {
+                                Ok(patch) => {
+                                    if !patch.is_empty() {
+                                        log::info!("stateful component patch: {patch:#?}");
+                                    }
+                                    patches.extend(patch);
+                                }
+                                Err(e) => return Err(e),
+                            }
+                        }
+                        Err(e) => return Err(e),
                     }
-                    patches.extend(attr_patches);
-                    let patch = diff_nodes(None, &old_comp.children, &new_comp.children, path);
-                    if !patch.is_empty() {
-                        log::info!("stateful component patch: {patch:#?}");
-                    }
-                    patches.extend(patch);
                 }
                 (Leaf::TemplatedView(_old_view), _) => {
                     unreachable!("templated view should not be diffed..")
@@ -238,7 +287,10 @@ pub fn diff_recursive<'a, MSG>(
                     new_element.attributes(),
                     path,
                 );
-                patches.extend(attr_patches);
+                match attr_patches {
+                    Ok(attr_patches) => patches.extend(attr_patches),
+                    Err(e) => return Err(e),
+                };
             }
 
             let more_patches = diff_nodes(
@@ -247,15 +299,17 @@ pub fn diff_recursive<'a, MSG>(
                 new_element.children(),
                 path,
             );
-
-            patches.extend(more_patches);
+            match more_patches {
+                Ok(more_patches) => patches.extend(more_patches),
+                Err(e) => return Err(e),
+            };
         }
         _ => {
             unreachable!("Unequal variant discriminants should already have been handled");
         }
     };
 
-    patches
+    Ok(patches)
 }
 
 fn diff_nodes<'a, MSG>(
@@ -263,12 +317,12 @@ fn diff_nodes<'a, MSG>(
     old_children: &'a [Node<MSG>],
     new_children: &'a [Node<MSG>],
     path: &SkipPath,
-) -> Vec<Patch<'a, MSG>> {
+) -> Result<Vec<Patch<'a, MSG>>, DiffError> {
     let diff_as_keyed = is_any_keyed(old_children) || is_any_keyed(new_children);
 
     if diff_as_keyed {
         let keyed_patches = diff_lis::diff_keyed_nodes(old_tag, old_children, new_children, path);
-        keyed_patches
+        Ok(keyed_patches)
     } else {
         let non_keyed_patches = diff_non_keyed_nodes(old_tag, old_children, new_children, path);
         non_keyed_patches
@@ -290,14 +344,17 @@ fn diff_non_keyed_nodes<'a, MSG>(
     old_children: &'a [Node<MSG>],
     new_children: &'a [Node<MSG>],
     path: &SkipPath,
-) -> Vec<Patch<'a, MSG>> {
-    let mut patches = vec![];
+) -> Result<Vec<Patch<'a, MSG>>, DiffError> {
+    let mut patches: Vec<Patch<'a, MSG>> = vec![];
     let old_child_count = old_children.len();
     let new_child_count = new_children.len();
 
     // if there is no new children, then clear the children of this element
     if old_child_count > 0 && new_child_count == 0 {
-        return vec![Patch::clear_children(old_element_tag, path.path.clone())];
+        return Ok(vec![Patch::clear_children(
+            old_element_tag,
+            path.path.clone(),
+        )]);
     }
 
     let min_count = cmp::min(old_child_count, new_child_count);
@@ -309,7 +366,10 @@ fn diff_non_keyed_nodes<'a, MSG>(
         let new_child = &new_children.get(index).expect("No new child node");
 
         let more_patches = diff_recursive(old_child, new_child, &child_path);
-        patches.extend(more_patches);
+        match more_patches {
+            Ok(more_patches) => patches.extend(more_patches),
+            Err(e) => return Err(e),
+        }
     }
 
     // If there are more new child than old_node child, we make a patch to append the excess element
@@ -335,7 +395,7 @@ fn diff_non_keyed_nodes<'a, MSG>(
         patches.extend(remove_node_patches);
     }
 
-    patches
+    Ok(patches)
 }
 
 ///
@@ -348,7 +408,7 @@ fn create_attribute_patches<'a, MSG>(
     old_attributes: &'a [Attribute<MSG>],
     new_attributes: &'a [Attribute<MSG>],
     path: &SkipPath,
-) -> Vec<Patch<'a, MSG>> {
+) -> Result<Vec<Patch<'a, MSG>>, DiffError> {
     let skip_indices = if let Some(skip_diff) = &path.skip_diff {
         if let SkipAttrs::Indices(skip_indices) = &skip_diff.skip_attrs {
             skip_indices.clone()
@@ -365,7 +425,7 @@ fn create_attribute_patches<'a, MSG>(
 
     // return early if both attributes are empty
     if old_attributes.is_empty() && new_attributes.is_empty() {
-        return vec![];
+        return Ok(vec![]);
     }
 
     let mut add_attributes: Vec<&Attribute<MSG>> = vec![];
@@ -440,7 +500,7 @@ fn create_attribute_patches<'a, MSG>(
             remove_attributes,
         ));
     }
-    patches
+    Ok(patches)
 }
 
 /// returns true if all the elements in subset is in big_set

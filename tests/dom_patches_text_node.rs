@@ -30,7 +30,7 @@ fn patches_text() {
         )],
     );
 
-    let patches = diff(&old, &update1);
+    let patches = diff(&old, &update1).unwrap();
     log::debug!("patches: {:#?}", patches);
 
     let mut old_html = String::new();

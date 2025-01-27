@@ -10,7 +10,7 @@ fn force_replace() {
         vec![],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::replace_node(
@@ -30,7 +30,7 @@ fn force_skip() {
         vec![],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(diff, vec![],);
 }
 
@@ -43,7 +43,7 @@ fn skip_in_attribute() {
         vec![],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(diff, vec![],);
 }
 
@@ -56,7 +56,7 @@ fn replace_true_in_attribute_must_replace_old_node_regardless() {
         vec![],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::replace_node(
@@ -165,7 +165,7 @@ fn replace_and_skip_in_sub_nodes() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::replace_node(

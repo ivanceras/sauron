@@ -40,7 +40,7 @@ fn elements_with_different_event_should_not_be_recycle() {
     log::info!("cb2: {:#?}", cb2);
     let new = input(vec![id(elem_id), cb2.clone()], vec![]);
 
-    let patches: Vec<Patch<()>> = diff(&old, &new);
+    let patches: Vec<Patch<()>> = diff(&old, &new).unwrap();
     // FIXME: this should replace the old node with a new one since the even essentially is a new
     // one. But we have no way of knowing the closure will produce the same result of not
     log::trace!("patches: {:#?}", patches);

@@ -23,7 +23,7 @@ fn mixed_key_and_no_key_with_no_change() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     dbg!(&diff);
     assert_eq!(diff, vec![]);
 }
@@ -52,7 +52,7 @@ fn mixed_key_and_no_key_with_2_matched() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     dbg!(&diff);
     assert_eq!(
         diff,
@@ -87,7 +87,7 @@ fn mixed_key_and_no_key_with_misordered_2_matched() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     dbg!(&diff);
 
     assert_eq!(

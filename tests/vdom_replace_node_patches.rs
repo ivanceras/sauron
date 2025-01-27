@@ -31,7 +31,7 @@ fn test_multiple_replace() {
         )],
     );
 
-    let patches = diff(&old, &update1);
+    let patches = diff(&old, &update1).unwrap();
 
     dbg!(&patches);
 

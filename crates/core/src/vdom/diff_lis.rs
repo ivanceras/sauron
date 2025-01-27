@@ -112,7 +112,7 @@ fn diff_keyed_ends<'a, MSG>(
         }
         let child_path = path.traverse(index);
         // diff the children and add to patches
-        let patches = diff_recursive(old, new, &child_path);
+        let patches = diff_recursive(old, new, &child_path).unwrap();
         all_patches.extend(patches);
         old_index_matched.push(index);
         left_offset += 1;
@@ -158,7 +158,7 @@ fn diff_keyed_ends<'a, MSG>(
             break;
         }
         let child_path = path.traverse(old_index);
-        let patches = diff_recursive(old, new, &child_path);
+        let patches: Vec<Patch<'a, MSG>> = diff_recursive(old, new, &child_path).unwrap();
         all_patches.extend(patches);
         right_offset += 1;
     }
@@ -281,11 +281,12 @@ fn diff_keyed_middle<'a, MSG>(
     }
 
     for idx in lis_sequence.iter() {
-        let patches = diff_recursive(
+        let patches: Vec<Patch<'a, MSG>> = diff_recursive(
             &old_children[new_index_to_old_index[*idx]],
             &new_children[*idx],
             path,
-        );
+        )
+        .unwrap();
         all_patches.extend(patches);
     }
 
@@ -301,7 +302,8 @@ fn diff_keyed_middle<'a, MSG>(
             if old_index == u32::MAX as usize {
                 new_nodes.push(new_node);
             } else {
-                let patches = diff_recursive(&old_children[old_index], new_node, path);
+                let patches: Vec<Patch<'a, MSG>> =
+                    diff_recursive(&old_children[old_index], new_node, path).unwrap();
                 all_patches.extend(patches);
 
                 node_paths.push(path.traverse(left_offset + old_index).path);
@@ -339,7 +341,8 @@ fn diff_keyed_middle<'a, MSG>(
             if old_index == u32::MAX as usize {
                 new_nodes.push(new_node)
             } else {
-                let patches = diff_recursive(&old_children[old_index], new_node, path);
+                let patches: Vec<Patch<'a, MSG>> =
+                    diff_recursive(&old_children[old_index], new_node, path).unwrap();
                 all_patches.extend(patches);
             }
         }
@@ -363,7 +366,8 @@ fn diff_keyed_middle<'a, MSG>(
             if old_index == u32::MAX as usize {
                 new_nodes.push(new_node);
             } else {
-                let patches = diff_recursive(&old_children[old_index], new_node, path);
+                let patches: Vec<Patch<'a, MSG>> =
+                    diff_recursive(&old_children[old_index], new_node, path).unwrap();
                 all_patches.extend(patches);
                 node_paths.push(path.traverse(left_offset + old_index).path);
             }

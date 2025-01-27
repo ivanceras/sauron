@@ -105,7 +105,7 @@ fn multiple_match_on_keyed_elements() {
     </div>
     );
 
-    let patches = diff(&current_dom, &target_dom);
+    let patches = diff(&current_dom, &target_dom).unwrap();
     log::trace!("patches: {:#?}", patches);
 
     log::trace!("current_dom: {}", current_dom.render_to_string());

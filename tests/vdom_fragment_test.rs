@@ -27,7 +27,7 @@ fn using_fragments() {
         element("div", vec![attr("key", "9")], vec![leaf("line9")]),
     ]);
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     assert_eq!(
         diff,
         vec![Patch::insert_before_node(

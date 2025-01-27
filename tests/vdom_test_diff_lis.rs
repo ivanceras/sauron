@@ -40,7 +40,7 @@ fn key_lis_1_to_9() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 

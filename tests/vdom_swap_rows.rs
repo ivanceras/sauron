@@ -29,7 +29,7 @@ fn swap_999() {
         }),
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 
@@ -68,7 +68,7 @@ fn swap_rows_non_keyed() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 
@@ -117,7 +117,7 @@ fn move_key_2_to_after_node_index_6() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 
@@ -165,7 +165,7 @@ fn move_key_7_to_before_node_index_1() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 
@@ -213,7 +213,7 @@ fn swap_rows_keyed() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 
@@ -254,7 +254,7 @@ fn swap_rows_keyed_6_items() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 
@@ -293,7 +293,7 @@ fn swap_rows_keyed_5_items() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
 
     dbg!(&diff);
 

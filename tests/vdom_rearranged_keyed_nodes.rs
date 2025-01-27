@@ -22,7 +22,7 @@ fn text_changed_keyed() {
         ],
     );
 
-    let diff = diff(&old, &new);
+    let diff = diff(&old, &new).unwrap();
     dbg!(&diff);
 
     assert_eq!(

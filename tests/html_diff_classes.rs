@@ -7,7 +7,7 @@ fn class_with_bool_value() {
 
     let new = div(vec![class(true)], vec![]);
     assert_eq!(
-        diff(&old, &new),
+        diff(&old, &new).unwrap(),
         vec![Patch::add_attributes(
             &"div",
             TreePath::new(vec![]),
@@ -37,7 +37,7 @@ fn parent_of_matching_keyed_are_ignored() {
         ],
     );
     assert_eq!(
-        diff(&old, &new),
+        diff(&old, &new).unwrap(),
         vec![Patch::add_attributes(
             &"ul",
             TreePath::new(vec![]),

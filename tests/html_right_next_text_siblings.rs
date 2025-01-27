@@ -11,7 +11,7 @@ fn comments_next_to_each_other() {
     );
     let new: Node<()> = div(vec![], vec![comment("hello"), comment("world")]);
 
-    let patch = diff(&old, &new);
+    let patch = diff(&old, &new).unwrap();
     println!("patch: {:#?}", patch);
     assert_eq!(
         patch,

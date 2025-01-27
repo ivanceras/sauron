@@ -32,7 +32,7 @@ fn main() {
     let root = dom::create_dom_node(&old_node, ev_callback);
     let root_node = Rc::new(RefCell::new(Some(root)));
 
-    let vdom_patches = vdom::diff(&old_node, &new_node);
+    let vdom_patches = vdom::diff(&old_node, &new_node).unwrap();
     log::info!("Created {} VDOM patch(es)", vdom_patches.len());
     log::debug!("VDOM patch(es): {vdom_patches:?}");
 
